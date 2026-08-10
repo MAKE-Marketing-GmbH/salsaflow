@@ -1,0 +1,21 @@
+const { chromium } = require('playwright-core');
+const OUT = '.marathon/e10-shots';
+(async () => {
+  const b = await chromium.launch({ headless: true, channel: 'chrome' });
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+  const p = await ctx.newPage();
+  await p.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+  await p.waitForTimeout(700);
+  const el = p.locator('#community'); await el.scrollIntoViewIfNeeded(); await p.waitForTimeout(300);
+  await el.screenshot({ path: `${OUT}/recheck-community.png` });
+  const closing = p.locator('section', { hasText: 'geht auf uns' }).last();
+  await closing.scrollIntoViewIfNeeded(); await p.waitForTimeout(300);
+  await closing.screenshot({ path: `${OUT}/recheck-closing.png` });
+  const srcs = await p.evaluate(() => Array.from(document.querySelectorAll('img')).map(i=>i.getAttribute('src')).filter(s=>s&&s.includes('/photos/')));
+  const counts = {}; srcs.forEach(s=>counts[s]=(counts[s]||0)+1);
+  const dups = Object.entries(counts).filter(([,n])=>n>1);
+  console.log('PHOTO imgs:', srcs.length, '| unique:', Object.keys(counts).length);
+  console.log('DUPLICATE photos:', dups.length? JSON.stringify(dups) : 'NONE');
+  await b.close();
+  process.exit(dups.length?1:0);
+})();

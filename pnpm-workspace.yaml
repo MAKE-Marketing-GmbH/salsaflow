@@ -1,0 +1,3 @@
+# Lokaler Workspace-Anker. Neutralisiert den globalen ~/pnpm-workspace.yaml-Fang
+# (Memory: pnpm-Home-Workspace-Falle), falls hier je pnpm statt npm genutzt wird.
+packages: []

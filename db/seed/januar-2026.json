@@ -1,0 +1,862 @@
+{
+  "term": {
+    "name": "Staffel Januar 2026",
+    "start_date": "2026-01-05",
+    "end_date": "2026-03-06",
+    "week_count": 8
+  },
+  "courses": [
+    {
+      "sheet": "Mo_Salsa Intermediate Stufe 11",
+      "style": "Salsa",
+      "level_raw": "Intermediate Stufe 11",
+      "weekday": "Montag",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Viviana",
+        "Sebastian"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-05",
+      "term_end_date": "2026-03-02",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mo_Salsa Intermediate Stufe 8",
+      "style": "Salsa",
+      "level_raw": "Intermediate 8",
+      "weekday": "Montag",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Claudia",
+        "Maarten"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-05",
+      "term_end_date": "2026-03-02",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mo_Salsa Beginner Stufe 3",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 3",
+      "weekday": "Montag",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "John"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-05",
+      "term_end_date": "2026-03-02",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mo_Salsa Advanced Stufe 17",
+      "style": "Salsa",
+      "level_raw": "Advanced Stufe 17",
+      "weekday": "Montag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Viviana",
+        "Sebastian"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-05",
+      "term_end_date": "2026-03-02",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mo_Salsa Intermediate Flow",
+      "style": "Salsa",
+      "level_raw": "Intermediate Flow",
+      "weekday": "Montag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Claudia",
+        "Maarten"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-05",
+      "term_end_date": "2026-03-02",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mo_Salsa Beginner Stufe 2",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 2",
+      "weekday": "Montag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "John"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-05",
+      "term_end_date": "2026-03-02",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mo_Salsa Advanced 15",
+      "style": "Salsa",
+      "level_raw": "Advanced Stufe 15",
+      "weekday": "Montag",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Viviana",
+        "Sebastian"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-05",
+      "term_end_date": "2026-03-02",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mo_Salsa Intermediate Stufe 10",
+      "style": "Salsa",
+      "level_raw": "Intermediate Stufe 10",
+      "weekday": "Montag",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Claudia",
+        "Maarten"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-05",
+      "term_end_date": "2026-03-02",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mo_Salsa Beginner Stufe 1",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 1",
+      "weekday": "Montag",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "John"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-05",
+      "term_end_date": "2026-03-02",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Di_Salsa Beginner Stufe 2",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 2",
+      "weekday": "Dienstag",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Jenny",
+        "Mihai"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-06",
+      "term_end_date": "2026-03-03",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Di_Salsa Intermediate Stufe 9",
+      "style": "Salsa",
+      "level_raw": "Intermediate Stufe 9",
+      "weekday": "Dienstag",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Rena",
+        "Fabio"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-06",
+      "term_end_date": "2026-03-03",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Di_Basics & Fundamentals",
+      "style": "Basics & Fundamentals",
+      "level_raw": null,
+      "weekday": "Dienstag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Mihai"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-06",
+      "term_end_date": "2026-03-03",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Di_Salsa Advanced Stufe 16",
+      "style": "Salsa",
+      "level_raw": "Advanced Stufe 16",
+      "weekday": "Dienstag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Rena",
+        "Fabio"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-06",
+      "term_end_date": "2026-03-03",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Di_Salsa Beginner Stufe 3",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 3",
+      "weekday": "Dienstag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Jelena",
+        "Yannick"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-06",
+      "term_end_date": "2026-03-03",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Di_Cha cha cha",
+      "style": "Cha cha cha",
+      "level_raw": null,
+      "weekday": "Dienstag",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Mihai"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-06",
+      "term_end_date": "2026-03-03",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Di_Salsa Advanced Stufe 13",
+      "style": "Salsa",
+      "level_raw": "Advanced Stufe 13",
+      "weekday": "Dienstag",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Rena",
+        "Fabio"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-06",
+      "term_end_date": "2026-03-03",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Di_Salsa Beginner Stufe 1",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 1",
+      "weekday": "Dienstag",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Jelena",
+        "Yannick"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-06",
+      "term_end_date": "2026-03-03",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mi_Salsa Beginner Stufe 1",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 1",
+      "weekday": "Mittwoch",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Jenny",
+        "Sebastian"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-07",
+      "term_end_date": "2026-03-04",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mi_Bodymovement & Ladystyle",
+      "style": "Bodymovement & Ladystyle",
+      "level_raw": null,
+      "weekday": "Mittwoch",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Claudia"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-07",
+      "term_end_date": "2026-03-04",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mi_Bachata Beginner Stufe 4",
+      "style": "Bachata",
+      "level_raw": "Beginner Stufe 4",
+      "weekday": "Mittwoch",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Rena",
+        "Dan"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-07",
+      "term_end_date": "2026-03-04",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mi_Salsa Advanced On2 Flow",
+      "style": "Salsa",
+      "level_raw": "Advanced On2 Flow",
+      "weekday": "Mittwoch",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Vanessa",
+        "Sebastian"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": "on2",
+      "term_start_date": "2026-01-07",
+      "term_end_date": "2026-03-04",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mi_Bachata Beginner Stufe 1",
+      "style": "Bachata",
+      "level_raw": "Beginner Stufe 1",
+      "weekday": "Mittwoch",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Rena",
+        "Dan"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-07",
+      "term_end_date": "2026-03-04",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mi_Salsa Beginner Stufe 5",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 5",
+      "weekday": "Mittwoch",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Jenny",
+        "Sebastian"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-07",
+      "term_end_date": "2026-03-04",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Mi_Salsa Intermediate Stufe 8",
+      "style": "Salsa",
+      "level_raw": "Intermediate Stufe 8",
+      "weekday": "Mittwoch",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Vanessa",
+        "Maarten"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-07",
+      "term_end_date": "2026-03-04",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Do_Heels Class Intermediate",
+      "style": "Heels Class",
+      "level_raw": "Intermediate",
+      "weekday": "Donnerstag",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Jasmine"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-08",
+      "term_end_date": "2026-03-05",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Do_Salsa Advanced Stufe 16",
+      "style": "Salsa",
+      "level_raw": "Advanced Stufe 16",
+      "weekday": "Donnerstag",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Claudia",
+        "Fabio"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-08",
+      "term_end_date": "2026-03-05",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Do_Bachata Beginner Stufe 5",
+      "style": "Bachata",
+      "level_raw": "Beginner Stufe 5",
+      "weekday": "Donnerstag",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Jenny",
+        "Dan"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-08",
+      "term_end_date": "2026-03-05",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Do_Heels Class Beginner",
+      "style": "Heels Class",
+      "level_raw": "Beginner",
+      "weekday": "Donnerstag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Jasmine"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-08",
+      "term_end_date": "2026-03-05",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Do_Salsa Advanced On2 Flow",
+      "style": "Salsa",
+      "level_raw": "Advanced On2 Flow",
+      "weekday": "Donnerstag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Claudia",
+        "Fabio"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": "on2",
+      "term_start_date": "2026-01-08",
+      "term_end_date": "2026-03-05",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Do_Bachata Beginner Stufe 2",
+      "style": "Bachata",
+      "level_raw": "Beginner Stufe 2",
+      "weekday": "Donnerstag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Jenny",
+        "Dan"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-08",
+      "term_end_date": "2026-03-05",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Do_Bodymovement & Ladystyle Int",
+      "style": "Bodymovement & Ladystyle",
+      "level_raw": "Int",
+      "weekday": "Donnerstag",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Claudia"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-08",
+      "term_end_date": "2026-03-05",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Do_Salsa Beginner Stufe 3",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 3",
+      "weekday": "Donnerstag",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Rabea",
+        "Fabio"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-08",
+      "term_end_date": "2026-03-05",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Do_Contemporary",
+      "style": "Contemporary",
+      "level_raw": null,
+      "weekday": "Donnerstag",
+      "start_time": "20:30",
+      "end_time": "21:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Davide"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-08",
+      "term_end_date": "2026-03-05",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "20.10. Workshop",
+      "style": "Salsa",
+      "level_raw": "Bodymovement",
+      "weekday": "Freitag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Marilena"
+      ],
+      "price_normal": 25,
+      "price_reduced": 20,
+      "on_variant": null,
+      "term_start_date": null,
+      "term_end_date": null,
+      "is_workshop": true,
+      "raw_notes": "Einzeltermin-Workshop (nicht Teil der 8-Wochen-Staffel) | Datum 2023 = altes kopiertes Sheet, Datum unsicher"
+    },
+    {
+      "sheet": "Fr_Salsa Beginner Stufe 1",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 1",
+      "weekday": "Freitag",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Jo",
+        "Sebas"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-09",
+      "term_end_date": "2026-03-06",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Fr_Salsa Beginner Flow",
+      "style": "Salsa",
+      "level_raw": "Beginner Flow",
+      "weekday": "Freitag",
+      "start_time": "18:30",
+      "end_time": "19:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Aleks",
+        "Tobi"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-09",
+      "term_end_date": "2026-03-06",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "Fr_Salsa Beginner Stufe 5",
+      "style": "Salsa",
+      "level_raw": "Beginner Stufe 5",
+      "weekday": "Freitag",
+      "start_time": "19:30",
+      "end_time": "20:30",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Aleks",
+        "Tobi"
+      ],
+      "price_normal": 190,
+      "price_reduced": 160,
+      "on_variant": null,
+      "term_start_date": "2026-01-09",
+      "term_end_date": "2026-03-06",
+      "is_workshop": false,
+      "raw_notes": null
+    },
+    {
+      "sheet": "16.01. Workshop",
+      "style": "Shines & Partnerwork",
+      "level_raw": "ON 1",
+      "weekday": "Freitag",
+      "start_time": "20:00",
+      "end_time": "21:00",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Aldo"
+      ],
+      "price_normal": 30,
+      "price_reduced": 25,
+      "on_variant": "on1",
+      "term_start_date": null,
+      "term_end_date": null,
+      "is_workshop": true,
+      "raw_notes": "Einzeltermin-Workshop (nicht Teil der 8-Wochen-Staffel)"
+    },
+    {
+      "sheet": "06.02. Workshop",
+      "style": "Heels",
+      "level_raw": null,
+      "weekday": "Freitag",
+      "start_time": "20:00",
+      "end_time": "21:00",
+      "room": "Elisabtehenstrasse 7, 4051 Basel",
+      "teachers": [
+        "Jasmine"
+      ],
+      "price_normal": 30,
+      "price_reduced": 25,
+      "on_variant": null,
+      "term_start_date": null,
+      "term_end_date": null,
+      "is_workshop": true,
+      "raw_notes": "Einzeltermin-Workshop (nicht Teil der 8-Wochen-Staffel)"
+    },
+    {
+      "sheet": "20.02. Workshop",
+      "style": "Partnerwork",
+      "level_raw": "On2",
+      "weekday": "Freitag",
+      "start_time": "20:00",
+      "end_time": "21:00",
+      "room": "Elisabtehenstrasse 7, 4051 Basel",
+      "teachers": [
+        "Kelly",
+        "John"
+      ],
+      "price_normal": 30,
+      "price_reduced": 25,
+      "on_variant": "on2",
+      "term_start_date": null,
+      "term_end_date": null,
+      "is_workshop": true,
+      "raw_notes": "Einzeltermin-Workshop (nicht Teil der 8-Wochen-Staffel)"
+    },
+    {
+      "sheet": "Sa_SFIT",
+      "style": "SFIT",
+      "level_raw": null,
+      "weekday": "Samstag",
+      "start_time": "11:00",
+      "end_time": "13:00",
+      "room": "Elisabethenanlage 7",
+      "teachers": [
+        "Salsaflow Team"
+      ],
+      "price_normal": 240,
+      "price_reduced": 120,
+      "on_variant": null,
+      "term_start_date": null,
+      "term_end_date": null,
+      "is_workshop": false,
+      "raw_notes": null
+    }
+  ],
+  "skipped_sheets": [
+    "Master Data",
+    "Einnahmen Kurse"
+  ],
+  "distinct_styles": [
+    "Salsa",
+    "Basics & Fundamentals",
+    "Cha cha cha",
+    "Bodymovement & Ladystyle",
+    "Bachata",
+    "Heels Class",
+    "Contemporary",
+    "Shines & Partnerwork",
+    "Heels",
+    "Partnerwork",
+    "SFIT"
+  ],
+  "distinct_levels": [
+    "Intermediate Stufe 11",
+    "Intermediate 8",
+    "Beginner Stufe 3",
+    "Advanced Stufe 17",
+    "Intermediate Flow",
+    "Beginner Stufe 2",
+    "Advanced Stufe 15",
+    "Intermediate Stufe 10",
+    "Beginner Stufe 1",
+    "Intermediate Stufe 9",
+    "Advanced Stufe 16",
+    "Advanced Stufe 13",
+    "Beginner Stufe 4",
+    "Advanced On2 Flow",
+    "Beginner Stufe 5",
+    "Intermediate Stufe 8",
+    "Intermediate",
+    "Beginner",
+    "Int",
+    "Bodymovement",
+    "Beginner Flow",
+    "ON 1",
+    "On2"
+  ],
+  "distinct_rooms": [
+    "Elisabethenanlage 7",
+    "Elisabtehenstrasse 7, 4051 Basel"
+  ]
+}

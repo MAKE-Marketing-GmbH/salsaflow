@@ -1,0 +1,27 @@
+node_modules
+dist
+.data
+.env
+.env.local
+*.log
+.DS_State
+.DS_Store
+.vite
+.vercel
+*.orig
+*.jsonl
+
+# Screenshot-/Sweep-Artefakte (nie committen)
+_screenshots-*/
+_vision-screenshots-*/
+_verify-*/
+qa/
+scratch/
+
+# Agent-/Tool-Workspace-State
+.agentic/
+.ai-bridge/
+.omo/
+.orca/
+.marathon/
+.taste-check-report.txt

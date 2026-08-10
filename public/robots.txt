@@ -1,0 +1,8 @@
+# robots.txt - Salsaflow Dance Company
+# Öffentliche Seiten dürfen indexiert werden. /buchung und /admin bleiben crawlbar,
+# damit der X-Robots-Tag "noindex" (vercel.json) gelesen wird.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://www.salsaflow-dc.com/sitemap.xml

@@ -1,0 +1,411 @@
+@import "tailwindcss";
+@import "@fontsource/afacad/400.css";
+@import "@fontsource/afacad/400-italic.css";
+@import "@fontsource/afacad/500.css";
+@import "@fontsource/afacad/600.css";
+@import "@fontsource/afacad/700.css";
+
+/* Self-hosted Fonts (GDPR-konform, kein externer Request). Typografie-Richtung
+   2026-07-05 (Raphael-Direktive, INBOX): Display = Cal Sans (Cal.com, OFL,
+   Google Fonts, self-hosted, ein Schnitt: font-weight 100 900 mappt alle
+   Utility-Gewichte auf dieselbe Datei, kein Faux-Bold). Handschrift-Akzent =
+   Alex Brush (OFL), gewählt per Salsaflow-Wort-Test direkt gegen das Logo
+   (glatter Brush, eleganter Schwung, f-Schleife; Council r15: Mr Dafoe war zu
+   fett-rund, Great Vibes zu dünn-förmlich). Einsatz dosiert: Claim-Zeilen und einzelne
+   Akzent-Momente, nie Flächen-Text. Cabinet Grotesk ist als Display abgelöst
+   (Dateien bleiben vorerst liegen). HART GESPERRT, nie wieder nutzen: Hanken
+   Grotesk + Inter + Plus Jakarta Sans. */
+@font-face {
+  font-family: "Cal Sans";
+  src: url("/fonts/cal-sans-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Alex Brush";
+  src: url("/fonts/alex-brush-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Designsystem Salsaflow DC (Etappe 10). Quelle: assets/tokens.md.
+   Schwarz + Salsa-Rot #AD1827, helle Grundstimmung, Rot strikt als Akzent (~90/10).
+   Bestehende Token-Namen (--color-salsa, --color-salsa-600, --color-muted) bleiben
+   erhalten, damit Admin (Etappe 6) + Kursplan (Etappe 7) nicht brechen. */
+@theme {
+  /* Neutral / helle Grundstimmung */
+  --color-ink: #0a0a0a;
+  --color-ink-muted: #52524e;
+  --color-paper: #fdfcfa; /* Geil-Pass 2026-07-07: pures Weiss raus (DESIGN.md-Ziel "warm-paper"), minimal warmes Papier */
+  --color-bg-soft: #f4f1ec;
+  --color-line: #e4e4e1;
+  --color-surface-dark: #111111;
+  /* Design-Kritik Runde 3, Issue 4 ("Drei Dunkeltoene fuer dieselbe Rolle").
+   *
+   * Gemessen am Full-Page-Screenshot 1440px (Randpixel, also echter Sektionsgrund, nicht Foto):
+   *   home  y6120-6976 (Events-Sektion) = #251417  warm/aubergine  <- --color-night
+   *   Footer aller Seiten                = #111111  neutral         <- --color-surface-dark
+   * Zwei Tokens fuer exakt eine Rolle ("dunkles Kontrastband") — nebeneinander gelegt wirken
+   * die Seiten wie von zwei Leuten gebaut.
+   *
+   * Aufgeloest zugunsten von `--color-surface-dark`, NICHT umgekehrt: DESIGN.md ist LOCKED und
+   * legt in Zeile 42 ausdruecklich "Dunkle Sektion `surface-dark #111`" fest. `--color-night`
+   * war der undokumentierte Zusatz und ist damit der Fehler, nicht der Standard. Den locked
+   * Token auf den warmen Ton umzufaerben waere eine Design-Entscheidung gewesen, die mir hier
+   * nicht zusteht (DESIGN.md: "Geaendert nur mit bewusster Entscheidung + docs/decisions.md").
+   *
+   * Die Namen bleiben als Alias bestehen, damit kein Aufrufer bricht — sie zeigen jetzt nur
+   * auf denselben Wert. Der dritte von der Kritik genannte Ton (#232927 auf /tanzkurse/salsa)
+   * war kein Token: die Messung lag auf dem Danceflow-FOTO (gruenes Buehnenlicht), nicht auf
+   * dem Sektionsgrund — der ist dort nachgemessen #111111. */
+  --color-night: var(--color-surface-dark);
+  --color-night-muted: #d8c8c5;
+  --color-muted: #6b6b6b; /* Back-Compat (Admin/Kursplan) */
+
+  /* Warm-modern (v2, additiv): Migrationsziel statt pures #fff. Opt-in pro Seite
+     mit Screenshot-Check (bg-white -> bg-[var(--color-paper-warm)]). Nichts bricht. */
+  --color-paper-warm: #fbfaf8;   /* warmes Off-White als Default-Flaeche */
+  --color-script-cream: #f2ece2;  /* warme Script-Zeile auf dunklen Fotos */
+  --color-team-warm-1: #f4ede2;   /* Team-Freisteller-Panel, oben */
+  --color-team-warm-2: #ece1d1;   /* Team-Freisteller-Panel, unten */
+  --color-photo-warm: #f0b35a;    /* warmer Foto-Overlay, siehe DESIGN.md Imagery */
+  --color-flow-green: #4d7c5a;    /* ruhiger Live-Punkt fuer freie Plaetze */
+  --color-whatsapp: #25d366;
+  --color-whatsapp-hover: #1ebe5b;
+
+  /* Salsa-Rot: Akzent-Skala (gemessen aus dem Logo, tokens.md) */
+  --color-salsa: #ad1827;
+  --color-salsa-700: #8e1320;
+  --color-salsa-600: #8e1320; /* Back-Compat: Hover/Active auf rotem Button (dunkler) */
+  --color-salsa-500: #c61f30;
+  --color-salsa-300: #e07b86; /* Back-Compat */
+  --color-salsa-100: #f7dcdf;
+  --color-salsa-50: #fceeef;
+
+  /* Typografie (Stage 7: Display Familjen Grotesk -> Cabinet Grotesk, self-hosted) */
+  --font-display: "Cal Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-script: "Alex Brush", "Brush Script MT", cursive;
+  --font-sans: "Afacad", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Radius-Skala, DREI Stufen (Design-Kritik Runde 1, Issue "Radius- und Eyebrow-Skala").
+   * Vorher rendern /team 8/16/22.4/24/25.6/28/32px nebeneinander, /tanzkurse zusaetzlich
+   * 21.6 und 26.4px. Die krummen Werte sind keine Absicht, sondern rem-Artefakte:
+   * rounded-[1.35rem] = 21.6px, [1.4rem] = 22.4px, [1.6rem] = 25.6px, [1.65rem] = 26.4px.
+   * Darum sind die Stufen hier in PX definiert — sie koennen nicht mehr verrutschen.
+   *   chip  = Chips, Buttons, kleine Marker
+   *   card  = Karten, Panels, Formularfelder
+   *   media = Bild- und Hero-Flaechen
+   * rounded-full bleibt fuer Pills/Avatare (DESIGN.md "Buttons/Pills rounded-full"). */
+  --radius-chip: 8px;
+  --radius-card: 16px;
+  --radius-media: 24px;
+}
+
+:root {
+  color-scheme: light;
+  /* Fixe Leisten reservieren ihren Platz über dieses gemeinsame Offset. */
+  --cookie-banner-height: 0px;
+  /* Hoehe der fixierten Navbar (Regel 062) - First-Section bekommt diesen Headroom. */
+  --nav-h: 76px;
+  --acc-expand: 250ms;
+  --acc-collapse: 250ms;
+  --acc-chevron: 250ms;
+  --acc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 639px) {
+  :root {
+    --nav-h: 66px;
+  }
+}
+
+html {
+  /* Anker-Sprung-Ziele nicht unter die fixe Navbar schieben. */
+  scroll-padding-top: var(--nav-h);
+}
+
+/* Design-Kritik Runde 3, Issue 1 — zweite Haelfte derselben Ursache (mobil/ohne Lenis).
+ *
+ * Hier stand `scroll-behavior: smooth` auf dem html-Element. Das gilt aber NICHT nur fuer
+ * Anker-Klicks: es animiert JEDEN Scroll am Wurzel-Scroller, auch ein programmatisches
+ * `window.scrollTo(0, 0)`. Gemessen auf 390px (Home, Lenis ist dort per Design aus): nach
+ * scrollTo(0,0) vom Seitenende steht scrollY nach 350ms noch bei 12410 von 15562 — der
+ * Full-Page-Screenshot faengt die Seite mitten in der Bewegung ein, mit der fixen
+ * Header-Pille quer im Inhalt.
+ *
+ * Die CSS-Eigenschaft kann Nutzer-Absicht nicht von Automatik unterscheiden. Darum ist sie
+ * hier raus und die Anker-Weichheit liegt jetzt dort, wo die Absicht bekannt ist: im
+ * Klick-Handler (site/SmoothScroll.tsx — Lenis auf Desktop, scrollIntoView mobil).
+ * Verhalten fuer Nutzer bleibt identisch, Sprungbefehle von aussen sind wieder sofort.
+ *
+ * `scroll-padding-top` oben bleibt bewusst stehen: es verschiebt nur das Sprungziel unter
+ * der fixen Navbar und loest selbst keine Animation aus. */
+
+/* Wenn Lenis aktiv ist (Desktop), uebernimmt Lenis das Smooth-Scrollen komplett.
+   Natives smooth wuerde bei Anker-Spruengen doppelt easen. */
+html.lenis-active {
+  scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  padding-bottom: var(--cookie-banner-height);
+  background: var(--color-paper-warm);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* transitions.dev Pattern 21: Accordion. Der mobile Header bleibt eine einzige
+   Flaeche und waechst nach unten. Padding liegt immer im Inneren, nie am Panel. */
+.t-acc-head {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.t-acc-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--acc-collapse) var(--acc-ease);
+}
+
+.t-acc-panel-inner {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  filter: blur(4px);
+  transition:
+    opacity var(--acc-collapse) var(--acc-ease),
+    filter var(--acc-collapse) var(--acc-ease);
+}
+
+.t-acc[data-open='true'] > .t-acc-panel {
+  grid-template-rows: 1fr;
+  transition-duration: var(--acc-expand);
+}
+
+.t-acc[data-open='true'] > .t-acc-panel > .t-acc-panel-inner {
+  opacity: 1;
+  filter: blur(0);
+  transition-duration: var(--acc-expand);
+}
+
+.t-acc-chevron {
+  transition: transform var(--acc-chevron) var(--acc-ease);
+}
+
+.t-acc[data-open='true'] > .t-acc-head .t-acc-chevron {
+  transform: scaleY(-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-acc-panel,
+  .t-acc-panel-inner,
+  .t-acc-chevron {
+    transition-duration: 0.01ms !important;
+  }
+
+  .t-acc-panel-inner {
+    filter: none;
+  }
+}
+
+/* Headlines tragen die Display-Schrift (Cabinet Grotesk).
+   font-synthesis-weight:none = kein faux-Bold. Cabinet laedt echte 700 + 800.
+   Display-Tracking straffen (Design-Critic: neutrales Tracking franst bei grossen
+   Groessen aus): -0.02em als systematischer Default fuer alle Heading-Tags. Die
+   groessten Display-Zeilen (Hero-H1 ~90px, Sektions-H2) tragen zusaetzlich eine
+   explizite tracking-Utility (-0.022 bis -0.025em) direkt an der Stelle. */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  font-synthesis-weight: none;
+}
+
+/* Kontrast-Schutz (Regel 005): Ein Link ohne eigene text-Klasse erbt die
+ * Umgebungs-Farbe (Ink) statt auf Browser-Blau zu fallen. :where() hat 0
+ * Spezifitaet, also schlaegt jede explizite Tailwind text-*-Utility diese Regel.
+ * Liegt in @layer base, damit Utilities sicher gewinnen. */
+@layer base {
+  :where(a) {
+    color: inherit;
+  }
+
+  /* Tastatur-Fokus-Baseline (a11y): jedes klickbare Element bekommt bei
+   * Keyboard-Fokus einen sichtbaren Salsa-Ring, nie bei Maus-Klick
+   * (:focus-visible). Deckt die gefuellten CTAs und flachen Links sitewide ab,
+   * die keine eigene focus-Klasse haben. :where() = 0 Spezifitaet, also gewinnt
+   * jede explizite Tailwind focus-visible:-Utility (WhatsAppFloat, CookieBanner-
+   * Button) darueber. Form-Inputs bleiben aussen vor: die haben ihren eigenen
+   * focus:ring. */
+  :where(a, button, [role='button'], summary):focus-visible {
+    outline: 2px solid var(--color-salsa);
+    outline-offset: 2px;
+  }
+}
+
+/* G4 Papier-Korn-Overlay entfernt (Geil-Pass v2 2026-07-08, Watchdog: mix-blend-Reste raus). */
+
+/* Mobile Karten-Chrome (Design-Kritik Runde 2, major)
+ * -----------------------------------------------------------------------------
+ * Befund: "/tanzkurse ist 13846px hoch — rund 16 Bildschirmhoehen fuer eine
+ * Uebersichtsseite. Der Grund ist das Karten-System: jede Karte behaelt auf 390px
+ * ihr Desktop-Padding plus Radius plus Schatten."
+ *
+ * Der Hauptteil ist strukturell geloest (die Karten sind auf allen Ebenen durch
+ * Haarlinie + Weissraum ersetzt). Diese Regel ist das Sicherheitsnetz fuer die
+ * verbleibenden Flaechen-Panels: unter 640px faellt der reine Deko-Schatten weg.
+ *
+ * Bewusst NUR box-shadow und bewusst nur innerhalb von <main>:
+ *  - Radius/Border pauschal zu entfernen wuerde `rounded-full`-Buttons, Avatare und
+ *    Bild-Container mitreissen (DESIGN.md: Buttons/Pills rounded-full ist LOCKED).
+ *  - Header, Footer-Floats, Cookie-Banner und Sticky-CTA liegen ausserhalb von <main>
+ *    und behalten ihren Schatten — sie schweben wirklich ueber dem Inhalt und
+ *    brauchen die Trennung zum Grund.
+ *  - Interaktive Elemente (Buttons/Links/Inputs) sind ausgenommen, damit gedrueckte
+ *    und fokussierte Zustaende sichtbar bleiben.
+ * Der Schatten trug auf Mobil keine Information: die Karte lief ohnehin ueber die
+ * volle Breite, es gab also keine Kante, die er haette absetzen koennen. */
+@media (max-width: 639px) {
+  main :not(a):not(button):not(input):not(select):not(textarea):not([role='button']) {
+    box-shadow: none;
+  }
+}
+
+/* Bild-Stil-Lock (Design-Kritik Runde 3, Issue 10)
+ * -----------------------------------------------------------------------------
+ * Befund: "Kein einheitlicher Bildstil ... Nebeneinander gestellt wirkt das wie fuenf
+ * verschiedene Marken." DESIGN.md:92 fordert dagegen "Ein Bild-Stil ueber die ganze Seite
+ * (Licht, Crop, Waerme)".
+ *
+ * Die Ursache war nicht, dass es keine Gradation gab — sie existierte, aber nur an DREI
+ * Stellen (home/kit.tsx Photo, CommunityBand 2x) als Inline-Utility
+ * `[filter:saturate(0.96)_contrast(1.03)]`. Alle anderen Fotos sitewide liefen voellig
+ * ungefiltert. Ein Stil, der nur in einer Komponente gilt, ist kein Stil-Lock.
+ *
+ * Gemessen ueber alle 125 in src/public referenzierten Fotos: Median-Luminanz 62/255,
+ * 24 Bilder (19%) unter 45/255 — die dunklen Party-Snapshots stehen direkt neben
+ * Tageslicht-Studioshots (bis 202/255).
+ *
+ * Diese Regel zieht dieselbe Gradation auf ALLE Inhaltsbilder:
+ *   saturate(0.96)  nimmt den Rotstich der Party-Uplights zurueck
+ *   contrast(1.03)  gibt den flauen dunklen Aufnahmen wieder Zeichnung
+ *   brightness(1.02) hebt die Tiefen minimal an, ohne die hellen auszufressen
+ *
+ * Bewusst eng gefasst:
+ *  - nur <img> in <main> (Content), nicht Header/Footer/Floats.
+ *  - Logos und SVGs sind ausgenommen: ein Marken-Logo darf nie umgefaerbt werden.
+ *  - Die drei Inline-Utilities oben bleiben gueltig und gewinnen per Spezifitaet;
+ *    sie setzen denselben Wert, es entsteht kein Konflikt. */
+main img:not([src$='.svg']):not([src*='/logo/']) {
+  filter: saturate(0.96) contrast(1.03) brightness(1.02);
+}
+
+/* Buchungs-Dialog: sanfte Ein-Animation (Backdrop + Panel, 150-200ms).
+ * motion-safe ist im Tailwind-Arbitrary-Value gesetzt, reduced-motion bleibt ruhig. */
+@keyframes booking-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes booking-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* FAQ Runde 2: Die mobile Header-Pille ist optisch höher als ihr reiner Inhaltsblock.
+ * Sprungziele und fokussierte FAQ-Zeilen bekommen deshalb zusätzlich zum Nav-Token Luft. */
+html:has(.faq-page) {
+  scroll-padding-top: calc(var(--nav-h) + 1.5rem);
+}
+
+.faq-page :is(section[id], details) {
+  scroll-margin-top: calc(var(--nav-h) + 1.5rem);
+}
+
+/* Cookie-Leiste und Inhalt
+ * -----------------------------------------------------------------------------
+ * CookieBanner misst die echte Leistenhöhe mit ResizeObserver und schreibt sie nach
+ * `--cookie-banner-height`. Das globale body-Polster oben reserviert exakt diesen Platz;
+ * feste Bottom-CTAs verwenden dieselbe Variable als Offset. Nach dem Akzeptieren setzt
+ * die Komponente die Variable wieder auf 0px. */
+
+/* Home-Fold und Leiste (Kritiker-Runde 3, Befund m-01)
+ * -----------------------------------------------------------------------------
+ * URSACHE: der Home-Hero bindet seine Hoehe an den Viewport (`58svh` Foto + Text,
+ * home/Hero.tsx:147/148). Das Bodenpolster oben greift am DOKUMENT-Ende und wirkt
+ * deshalb erst nach dem Scrollen — im ersten Bild lag die Trust-Zeile ("4,9 aus 104
+ * Google-Bewertungen") gemessen 3px ueber der Leistenkante, der Secondary-CTA direkt
+ * darueber. Solange die Leiste steht, bekommt der Fold auf Schmalgeraeten deshalb
+ * zusaetzlich ihre Hoehe als Bodenluft. Faellt mit der Leiste weg, kostet also keinen
+ * Weissraum im Normalzustand. */
+@media (width < 40rem) {
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-hero-fold] {
+    padding-bottom: var(--cookie-banner-height);
+  }
+}
+
+/* FIX 2 von 2 — die Leiste bleibt beim Einstieg sichtbar (rechtlicher Hinweis), räumt aber
+ * nach dem ersten Scroll die Inhaltsfläche frei; ohne Bestätigung erscheint sie auf der
+ * nächsten Route wieder. So liegt sie auf keiner Scrollposition auf Fliesstext, Sektions-
+ * kopf, Kartenkante oder Legal-Row. Gilt für jede Fläche, die `data-cookie-clear` setzt
+ * (/faq, /team). */
+/* WhatsApp-Float auf /preise (Kritiker-Runde 3, Befund d-02: der Float lag auf den
+ * Einzellektion-Preisen).
+ * URSACHE ist eine Rechen-Kollision, kein Abstandsgefuehl: der Float ist 48px breit und sitzt
+ * `right: 1.25rem` (site/WhatsAppFloat.tsx:25) — bei 1440px liegt seine linke Kante auf x=1372.
+ * Die rechtsbuendige Preisspalte endet auf x=1388 (gemessen: JEDE Preis-<dd> meldet right=1388,
+ * scratch/pv3-measure.cjs). Die Spalten ueberlappen sich also um 16px; kein Verschieben nach
+ * rechts kann das aufloesen, weil beide an derselben Kante haengen.
+ * /preise ist die einzige Flaeche, deren Nutzlast eine rechtsbuendige Zahlenspalte ist — hier
+ * gilt darum dieselbe Entscheidung, die die Startseite schon trifft (HomePage.tsx:105,
+ * `float={false}`): kein Float. WhatsApp bleibt ueber Kontakt und Footer erreichbar, genau wie
+ * auf Mobile, wo der Float ohnehin nie erscheint (sm:inline-flex). */
+body:has(.preise-page) a[href*='wa.me'][target='_blank'][title] {
+  display: none;
+}
+
+body:has([data-cookie-clear='true'])
+  :is([role='region'], [role='dialog']):has([data-testid='cookie-accept']) {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(100%);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    visibility 0s linear 180ms;
+}

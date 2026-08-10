@@ -1,0 +1,609 @@
+// Content der drei Stilseiten (/tanzkurse/salsa|bachata|heels) aus dem V3-Copyplan
+// (pages/03-05). EINE Datei, EIN Seiten-Template (StylePage.tsx). Copy 1:1 aus dem Plan,
+// zweisprachig (de = Plan-Wortlaut, en = treu uebersetzt). Echte Umlaute, CH-ss.
+//
+// Bilder: echte Salsaflow-Fotos (public/photos). KI nur laut 03_KI_BILD_LUECKEN (Heels).
+// Interne Links zeigen auf die echten Routen dieser Seite.
+
+import type { Lang } from '@/lib/i18n';
+import type { SeoKey } from '@/lib/seo';
+import type { Faq, Crumb } from '@/public/subpage/kit';
+
+export type StyleKey = 'salsa' | 'bachata';
+
+type Cta = { label: string; href: string };
+type Img = { src: string; alt: string; position?: string; mobileSrc?: string };
+
+export type StyleContent = {
+  seo: SeoKey;
+  crumb: Crumb; // Breadcrumb-Endpunkt (label + href dieser Seite)
+  hero: {
+    eyebrow: string;
+    title: string;
+    titleAccent?: string;
+    lead: string;
+    bullets: string[];
+    primary: Cta;
+    secondary: Cta;
+    microcopy: string;
+    image: Img;
+    /** Full-bleed Charakter-Band unter dem Typo-Hero (21:9 Polished-Hero, Foto-Pipeline 2026-08-06). */
+    band: Img;
+    cardLabel: string;
+    cardText: string;
+  };
+  why: {
+    eyebrow: string;
+    title: string;
+    titleAccent?: string;
+    body: string;
+    blocks: { title: string; text: string }[];
+    image: Img;
+  };
+  fit: {
+    title: string;
+    titleAccent?: string;
+    intro: string;
+    yesTitle: string;
+    yes: string[];
+    maybeTitle: string;
+    maybe: string[];
+    cta: Cta;
+  };
+  beginner: {
+    eyebrow: string;
+    title: string;
+    titleAccent?: string;
+    body: string;
+    phases: { tag: string; title: string; text: string }[];
+    cta: Cta;
+    image: Img;
+  };
+  levels: {
+    title: string;
+    titleAccent?: string;
+    body: string;
+    rungs: { name: string; text: string }[];
+    cta: Cta;
+    /** Optionaler Charakter-Hinweis ueber der Leiter (Salsa: On1/On2). */
+    timingNote?: { title: string; text: string };
+  };
+  social: {
+    title: string;
+    titleAccent?: string;
+    body: string;
+    bullets: string[];
+    cta: Cta;
+    image: Img;
+  };
+  closing: {
+    title: string;
+    titleAccent?: string;
+    body: string;
+    primary: Cta;
+    secondary: Cta;
+    microcopy: string;
+  };
+  faqEyebrow: string;
+  faqTitle: string;
+  faq: Faq[];
+};
+
+/* Interne Ziel-Routen (echte App-Routen dieser Seite). */
+const R = {
+  salsaPlan: '/kursplan?stil=salsa',
+  bachataPlan: '/kursplan?stil=bachata',
+  heelsPlan: '/kursplan?stil=heels',
+  kursaufbau: '/kursaufbau',
+  danceflow: '/events-workshops/danceflow-night',
+  tanzschuhe: '/mehr/tanzschuhe',
+  salsaPage: '/tanzkurse/salsa',
+  bachataPage: '/tanzkurse/bachata',
+  heelsPage: '/tanzkurse/heels',
+  schnupper: '/kontakt#schnupperstunde',
+};
+
+/* ============================================================= SALSA (Muster, 1:1 pages/03) */
+const salsa: Record<Lang, StyleContent> = {
+  de: {
+    seo: 'salsa',
+    crumb: { label: 'Salsa', href: R.salsaPage },
+    hero: {
+      eyebrow: 'Salsa Kurse in Basel',
+      title: 'Lerne Salsa so, dass du dich auf der Tanzfläche sicher fühlst.',
+      lead: 'Bei Salsaflow lernst du Rhythmus, Grundschritte, Führung, Folgen und erste Kombinationen in klar aufgebauten Kursen, auch wenn du ganz neu startest und ohne Tanzpartner kommst.',
+      bullets: [
+        'Salsa Beginner bis Advanced',
+        'Gratis Schnupperstunde möglich',
+        'Ohne Tanzpartner möglich',
+        'Direkt am Bahnhof Basel SBB',
+        'Danceflow Night zum Üben im echten Social',
+      ],
+      primary: { label: 'Salsa Schnupperstunde buchen', href: R.schnupper },
+      secondary: { label: 'Salsa Kursplan ansehen', href: R.salsaPlan },
+      microcopy: 'Kostenlos · unverbindlich · wir helfen dir beim passenden Level.',
+      image: { src: '/photos/premium/offer-salsa-1200.webp', alt: 'Lachendes Salsa-Paar in Bewegung im hellen Salsaflow Studio' },
+      band: { src: '/photos/premium/offer-salsa-hero-2100.webp', alt: 'Salsa-Paar im Unterricht, Nähe und Energie im Salsaflow Studio', position: 'center 0%' },
+      cardLabel: 'Dein Einstieg',
+      cardText: 'Rhythmus, Grundschritt, erste Drehung. In Ruhe.',
+    },
+    why: {
+      eyebrow: 'Warum Salsa',
+      title: 'Salsa ist Energie, Führung und Musik in',
+      titleAccent: 'Bewegung',
+      body: 'Salsa gibt dir schnell das Gefühl, wirklich zu tanzen. Du lernst nicht nur Schritte auswendig, sondern verstehst Rhythmus, Verbindung und einfache Signale zwischen Leader und Follower.',
+      blocks: [
+        { title: 'Rhythmus', text: 'Du lernst, Musik nicht nur zu hören, sondern mit dem Körper zu zählen und zu fühlen.' },
+        { title: 'Partnerwork', text: 'Du verstehst, wie Führung und Folgen funktionieren, ohne dass es verkrampft oder kompliziert wirkt.' },
+        { title: 'Social Dance', text: 'Salsa bleibt nicht im Kursraum. Du kannst das Gelernte auf Danceflow Nights und Socials direkt ausprobieren.' },
+      ],
+      image: { src: '/photos/gallery/kurse/02.jpg', alt: 'Salsa-Paar beim Partnerwork im Unterricht' },
+    },
+    fit: {
+      title: 'Salsa passt zu dir, wenn du Energie suchst, nicht Perfektion',
+      intro: 'Du musst kein Rhythmus-Profi sein. Hilfreich ist nur, dass du offen bist, regelmässig zu üben und dich auf Partnerwork einzulassen.',
+      yesTitle: 'Passt zu dir, wenn',
+      yes: [
+        'du einen lebendigen Paartanz lernen willst',
+        'du Musik, Rhythmus und Bewegung verbinden möchtest',
+        'du gern auch auf Socials und Partys tanzen willst',
+        'du klare Struktur statt chaotische Figuren-Sammlung suchst',
+      ],
+      maybeTitle: 'Vielleicht erst mit Schnupperstunde starten, wenn',
+      maybe: [
+        'du dein Level nicht einschätzen kannst',
+        'du zwischen Salsa und Bachata schwankst',
+        'du schon einmal Salsa gelernt hast, aber lange pausiert hast',
+      ],
+      cta: { label: 'Level im Kursplan prüfen', href: R.salsaPlan },
+    },
+    beginner: {
+      eyebrow: 'Deine ersten Wochen',
+      title: 'Von den ersten Basics zu fliessenden Kombinationen',
+      body: 'Ein guter Salsa-Kurs beginnt nicht mit komplizierten Figuren. Er beginnt mit Rhythmus, Grundschritten und klaren Signalen, damit du dich sicher fühlst.',
+      phases: [
+        { tag: 'Phase 1', title: 'Rhythmus & Grundschritt', text: 'Du lernst den Grundrhythmus, einfache Gewichtswechsel und wie du zur Musik startest.' },
+        { tag: 'Phase 2', title: 'Führung & Folgen', text: 'Du verstehst, wie Hände, Körperrichtung und Timing zusammenwirken.' },
+        { tag: 'Phase 3', title: 'Erste Drehungen', text: 'Du lernst einfache Drehungen und Kombinationen, die du wirklich auf der Tanzfläche nutzen kannst.' },
+        { tag: 'Phase 4', title: 'Social-Dance-Gefühl', text: 'Du übst, mit wechselnden Partner:innen ruhig, klar und freundlich zu tanzen.' },
+      ],
+      cta: { label: 'Salsa Beginner ansehen', href: R.salsaPlan },
+      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Salsa-Grundschritt im Unterricht, Lehrperson zeigt vor' },
+    },
+    levels: {
+      title: 'Salsa wächst mit',
+      titleAccent: 'dir',
+      body: 'Wenn du bereits getanzt hast, helfen wir dir bei der Wahl des Levels. So übst du weder zu weit voraus noch unter deinen Möglichkeiten.',
+      rungs: [
+        { name: 'Beginner Stufe 1 bis 6', text: 'Grundlagen Schritt für Schritt aufbauen.' },
+        { name: 'Beginner Flow', text: 'Beginner-Inhalte verbinden und festigen.' },
+        { name: 'Intermediate Stufe 7 bis 12', text: 'Technik, Musikalität und Repertoire erweitern.' },
+        { name: 'Intermediate Flow', text: 'Intermediate-Inhalte flexibel anwenden.' },
+        { name: 'Advanced ab Stufe 13', text: 'Details, Dynamik und eigenen Ausdruck vertiefen.' },
+      ],
+      cta: { label: 'Kursaufbau ansehen', href: R.kursaufbau },
+      timingNote: {
+        title: 'On1 oder On2?',
+        text: 'Wir unterrichten beide Taktarten. On1 ist der klassische Einstieg, On2 der nächste Schritt für deinen eigenen Stil. Du musst dich nicht vorher entscheiden.',
+      },
+    },
+    social: {
+      title: 'Du lernst nicht für den Spiegel. Du lernst für echte Tanzabende',
+      body: 'Die Danceflow Night ist der Ort, an dem du merkst, was im Kurs angekommen ist. Du tanzt mit Menschen aus der Community, übst in entspannter Atmosphäre und bleibst leichter dran.',
+      bullets: [
+        'Salsa und Bachata Socials',
+        'Workshops vor ausgewählten Abenden',
+        'ideal zum Üben nach dem Kurs',
+        'auch für Gäste offen',
+      ],
+      cta: { label: 'Danceflow Night ansehen', href: R.danceflow },
+      image: { src: '/photos/gallery/danceflow/03.jpg', alt: 'Volle Tanzfläche bei einer Danceflow Night' },
+    },
+    closing: {
+      title: 'Bereit für deine erste',
+      titleAccent: 'Salsa-Stunde?',
+      body: 'Buche eine Gratis Schnupperstunde oder öffne direkt den Kursplan. Du musst nicht wissen, ob Salsa dein ganzes Leben wird. Es reicht, wenn du den ersten Abend testest.',
+      primary: { label: 'Salsa Schnupperstunde buchen', href: R.schnupper },
+      secondary: { label: 'Salsa Kursplan ansehen', href: R.salsaPlan },
+      microcopy: 'Kostenlos · unverbindlich · auch ohne Tanzpartner möglich.',
+    },
+    faqEyebrow: 'Salsa FAQ',
+    faqTitle: 'Häufige Fragen zu Salsa',
+    faq: [
+      {
+        q: 'Kann ich ohne Vorkenntnisse Salsa lernen?',
+        a: 'Ja. Die Beginner-Kurse sind genau dafür gedacht. Du lernst Grundschritte, Rhythmus, einfache Drehungen und die wichtigsten Signale im Paartanz.',
+      },
+      {
+        q: 'Brauche ich einen Tanzpartner?',
+        a: 'Nein. Du kannst dich auch alleine anmelden. Im Kurs wird auf eine gute Balance geachtet und du lernst mit wechselnden Partner:innen.',
+      },
+      {
+        q: 'Welche Schuhe brauche ich für Salsa?',
+        a: 'Für den Einstieg reichen saubere, bequeme Schuhe, mit denen du dich sicher bewegen kannst. Später sind Tanzschuhe sinnvoll, weil Drehungen leichter und kontrollierter werden.',
+      },
+      {
+        q: 'Was ist besser: Salsa oder Bachata?',
+        a: 'Salsa ist meist energiegeladener und rhythmischer, Bachata weicher und stärker auf Connection fokussiert. Wenn du unsicher bist, schau dir beide Stilseiten an und komm zur Schnupperstunde.',
+      },
+    ],
+  },
+  en: {
+    seo: 'salsa',
+    crumb: { label: 'Salsa', href: R.salsaPage },
+    hero: {
+      eyebrow: 'Salsa classes in Basel',
+      title: 'Learn Salsa with confidence on the dance floor.',
+      lead: 'At Salsaflow you learn rhythm, basic steps, leading, following and your first combinations in clearly structured courses, even if you start from scratch and come without a dance partner.',
+      bullets: [
+        'Salsa beginner to advanced',
+        'Free trial class possible',
+        'Works without a dance partner',
+        'Right by Basel SBB station',
+        'Danceflow Night to practise in a real social',
+      ],
+      primary: { label: 'Book a Salsa trial class', href: R.schnupper },
+      secondary: { label: 'See the Salsa schedule', href: R.salsaPlan },
+      microcopy: 'Free · without obligation · we help you find the right level.',
+      image: { src: '/photos/premium/offer-salsa-1200.webp', alt: 'Smiling Salsa couple dancing in the bright Salsaflow studio' },
+      band: { src: '/photos/premium/offer-salsa-hero-2100.webp', alt: 'Salsa couple in class, closeness and energy in the Salsaflow studio', position: 'center 0%' },
+      cardLabel: 'Your start',
+      cardText: 'Rhythm, basic step, first turn. Calmly.',
+    },
+    why: {
+      eyebrow: 'Why Salsa',
+      title: 'Salsa is energy, leading and music in',
+      titleAccent: 'motion',
+      body: 'Salsa quickly gives you the feeling of really dancing. You do not just memorise steps, you understand rhythm, connection and the simple signals between leader and follower.',
+      blocks: [
+        { title: 'Rhythm', text: 'You learn to not only hear the music but to count and feel it with your body.' },
+        { title: 'Partner work', text: 'You understand how leading and following work, without it feeling tense or complicated.' },
+        { title: 'Social dance', text: 'Salsa does not stay in the classroom. You can try what you learned right away at Danceflow Nights and socials.' },
+      ],
+      image: { src: '/photos/gallery/kurse/02.jpg', alt: 'Salsa couple doing partner work in class' },
+    },
+    fit: {
+      title: 'Salsa suits you if you are after energy, not perfection',
+      intro: 'You do not need to be a rhythm pro. It only helps that you are open, practise regularly and are willing to engage with partner work.',
+      yesTitle: 'It suits you if',
+      yes: [
+        'you want to learn a lively partner dance',
+        'you want to connect music, rhythm and movement',
+        'you also like to dance at socials and parties',
+        'you want clear structure instead of a chaotic pile of figures',
+      ],
+      maybeTitle: 'Maybe start with a trial class if',
+      maybe: [
+        'you cannot judge your own level',
+        'you are torn between Salsa and Bachata',
+        'you have danced Salsa before but paused for a long time',
+      ],
+      cta: { label: 'Check your level in the schedule', href: R.salsaPlan },
+    },
+    beginner: {
+      eyebrow: 'Your first weeks',
+      title: 'From the first basics to flowing combinations',
+      body: 'A good Salsa course does not begin with complicated figures. It begins with rhythm, basic steps and clear signals so you feel safe.',
+      phases: [
+        { tag: 'Phase 1', title: 'Rhythm & basic step', text: 'You learn the basic rhythm, simple weight changes and how to start with the music.' },
+        { tag: 'Phase 2', title: 'Leading & following', text: 'You understand how hands, body direction and timing work together.' },
+        { tag: 'Phase 3', title: 'First turns', text: 'You learn simple turns and combinations you can really use on the dance floor.' },
+        { tag: 'Phase 4', title: 'Social-dance feeling', text: 'You practise dancing with changing partners calmly, clearly and kindly.' },
+      ],
+      cta: { label: 'See Salsa beginner courses', href: R.salsaPlan },
+      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Salsa basic step in class, teacher demonstrating' },
+    },
+    levels: {
+      title: 'Salsa grows with',
+      titleAccent: 'you',
+      body: 'If you have danced before, we can help you choose the right stage. That way the class is challenging without skipping essential foundations.',
+      rungs: [
+        { name: 'Beginner stages 1 to 6', text: 'Build your foundations step by step.' },
+        { name: 'Beginner Flow', text: 'Connect and consolidate the beginner material.' },
+        { name: 'Intermediate stages 7 to 12', text: 'Expand your technique, musicality and repertoire.' },
+        { name: 'Intermediate Flow', text: 'Use the intermediate material more flexibly.' },
+        { name: 'Advanced from stage 13', text: 'Refine detail, dynamics and individual expression.' },
+      ],
+      cta: { label: 'See the course structure', href: R.kursaufbau },
+      timingNote: {
+        title: 'On1 or On2?',
+        text: 'We teach both timings. On1 is the classic start, On2 the next step for your own style. You do not have to decide beforehand.',
+      },
+    },
+    social: {
+      title: 'You do not learn for the mirror. You learn for real dance nights',
+      body: 'The Danceflow Night is where you notice what stuck from class. You dance with people from the community, practise in a relaxed atmosphere and stay with it more easily.',
+      bullets: [
+        'Salsa and Bachata socials',
+        'Workshops before selected nights',
+        'ideal for practising after class',
+        'open to guests too',
+      ],
+      cta: { label: 'See the Danceflow Night', href: R.danceflow },
+      image: { src: '/photos/gallery/danceflow/03.jpg', alt: 'Full dance floor at a Danceflow Night' },
+    },
+    closing: {
+      title: 'Ready for your first',
+      titleAccent: 'Salsa class?',
+      body: 'Book a free trial class or open the schedule right away. You do not have to know whether Salsa will become your whole life. It is enough to test the first evening.',
+      primary: { label: 'Book a Salsa trial class', href: R.schnupper },
+      secondary: { label: 'See the Salsa schedule', href: R.salsaPlan },
+      microcopy: 'Free · without obligation · no dance partner needed.',
+    },
+    faqEyebrow: 'Salsa FAQ',
+    faqTitle: 'Common questions about Salsa',
+    faq: [
+      {
+        q: 'Can I learn Salsa without any experience?',
+        a: 'Yes. The beginner courses are made exactly for that. You learn basic steps, rhythm, simple turns and the most important signals in partner dancing.',
+      },
+      {
+        q: 'Do I need a dance partner?',
+        a: 'No. You can sign up on your own. The course keeps a good balance and you learn with changing partners.',
+      },
+      {
+        q: 'Which shoes do I need for Salsa?',
+        a: 'To start, clean, comfortable shoes you can move safely in are enough. Later, dance shoes make sense because turns become easier and more controlled.',
+      },
+      {
+        q: 'Which is better: Salsa or Bachata?',
+        a: 'Salsa is usually more energetic and rhythmic, Bachata is softer and more focused on connection. If you are unsure, look at both style pages and come to a trial class.',
+      },
+    ],
+  },
+};
+
+/* ============================================================= BACHATA (1:1 pages/04) */
+const bachata: Record<Lang, StyleContent> = {
+  de: {
+    seo: 'bachata',
+    crumb: { label: 'Bachata', href: R.bachataPage },
+    hero: {
+      eyebrow: 'Bachata Kurse in Basel',
+      title: 'Lerne Bachata mit Verbindung, Technik und Flow.',
+      lead: 'Bachata verbindet weiche Bewegungen, Musikalität und Körpergefühl. Bei Salsaflow lernst du die Basics Schritt für Schritt, mit klarer Technik und einem Einstieg, der auch ohne Vorkenntnisse funktioniert.',
+      bullets: [
+        'Bachata Beginner bis Fortgeschrittene je nach Kursplan',
+        'Technik, Musikalität und Connection',
+        'Gratis Schnupperstunde möglich',
+        'Ohne Tanzpartner möglich',
+        'Social-Dance-Anbindung über Danceflow Night',
+      ],
+      primary: { label: 'Bachata Schnupperstunde buchen', href: R.schnupper },
+      secondary: { label: 'Bachata Kursplan ansehen', href: R.bachataPlan },
+      microcopy: 'Wir helfen dir, sicher und passend einzusteigen.',
+      image: { src: '/photos/premium/offer-bachata-1200.webp', alt: 'Bachata-Paar mit ruhiger, warmer Verbindung im Salsaflow Studio' },
+      band: { src: '/photos/premium/offer-bachata-hero-2100.webp', alt: 'Bachata-Paar in warmer Nähe, ruhige Verbindung im Studio' },
+      cardLabel: 'Dein Einstieg',
+      cardText: 'Timing, Connection, Körpergefühl. Ohne Druck.',
+    },
+    why: {
+      eyebrow: 'Warum Bachata',
+      title: 'Bachata wirkt weich. Gute Bachata ist',
+      titleAccent: 'präzise',
+      body: 'Von aussen sieht Bachata oft nach Nähe und Flow aus. Im Kurs lernst du, was dahinter steckt: Timing, Körperspannung, klare Signale, Kontrolle und Respekt im Paartanz.',
+      // Runde 1 (Kritik 10.08.2026): mit nur zwei Bloecken endete die 1.15fr-Spalte im
+      // 0.85/1.15-Grid der WhySection weit vor der linken Spalte — grosse Leerflaeche
+      // (Beleg: tanzkurse__bachata-desktop-02-y750.png). Dritter Block wie bei Salsa,
+      // inhaltlich nur aus body/FAQ dieser Seite zusammengezogen, keine neue Zusage.
+      blocks: [
+        { title: 'Was man sieht', text: 'Nähe, weiche Bewegungen, Musikgefühl.' },
+        { title: 'Was du lernst', text: 'Basics, Gewicht, Führung und Folgen, Körperkontrolle, sichere Bewegungsqualität.' },
+        { title: 'Was sich ändert', text: 'Deine Bewegungen sehen weich aus, weil sie kontrolliert sind: Das Timing sitzt, Signale sind klar, Nähe bleibt respektvoll.' },
+      ],
+      // Runde 3, Issue 3: war /photos/gallery/kurse/03.jpg (dasselbe Foto wie Home-Hero,
+      // /kontakt, Team, Bachata-Kachel, Galerie). Der wide-Crop desselben Bachata-Moments
+      // zeigt hier den ganzen Raum, waehrend der Hero-Crop oben nah am Paar bleibt —
+      // "klar anderer Einsatz" im Sinne von DESIGN.md:93.
+      image: { src: '/photos/premium/offer-bachata-wide-v2.webp', alt: 'Bachata-Paar in ruhiger Haltung im Unterricht' },
+    },
+    fit: {
+      title: 'Bachata passt, wenn du Flow suchst, aber trotzdem Struktur brauchst',
+      intro: '',
+      yesTitle: 'Passt zu dir, wenn',
+      yes: [
+        'du weiche Bewegungen und Paartanz mit Gefühl lernen willst',
+        'du Musikalität und Connection spannend findest',
+        'du lieber ruhig und kontrolliert aufbaust statt nur schnell Figuren zu sammeln',
+        'du auf Socials tanzen möchtest, aber dich sicher fühlen willst',
+      ],
+      maybeTitle: 'Salsa könnte besser passen, wenn',
+      maybe: [
+        'du mehr Energie, schnelle Drehungen und rhythmische Dynamik suchst',
+        'du lieber lebendig und etwas explosiver tanzt',
+      ],
+      cta: { label: 'Salsa und Bachata vergleichen', href: R.salsaPage },
+    },
+    beginner: {
+      eyebrow: 'Kursinhalte',
+      title: 'Das lernst du im Bachata-Kurs',
+      body: 'Der Kurs soll nicht nur Figuren liefern. Er soll dir ein Gefühl geben, wie Bachata sicher, musikalisch und angenehm getanzt wird.',
+      phases: [
+        { tag: 'Modul 1', title: 'Grundschritte & Timing', text: 'Du lernst die Basis, damit du nicht bei jeder neuen Figur den Rhythmus verlierst.' },
+        { tag: 'Modul 2', title: 'Connection', text: 'Du lernst, wie Führung und Folgen ruhig und klar funktionieren, damit Paartanz nicht zur Kraftfrage wird.' },
+        { tag: 'Modul 3', title: 'Körpergefühl', text: 'Du baust Kontrolle in Oberkörper, Hüfte und Gewicht auf, damit Bewegungen weich aussehen, ohne unsicher zu werden.' },
+        { tag: 'Modul 4', title: 'Musikalität', text: 'Du verstehst, wie du auf Musik reagierst, damit sich Bachata weniger gezählt und mehr getanzt anfühlt.' },
+      ],
+      cta: { label: 'Bachata Kurse ansehen', href: R.bachataPlan },
+      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Bachata-Grundschritt im Unterricht' },
+    },
+    levels: {
+      title: 'Wir finden den Bachata-Kurs, der zu deinem',
+      titleAccent: 'Level passt',
+      body: 'Wenn Bachata zu schnell zu fortgeschrittenen Bewegungen springt, fühlt es sich unsicher an. Darum braucht es eine klare Level-Logik: Erst Basics, dann Connection, dann komplexere Bewegungen.',
+      rungs: [
+        { name: 'Beginner Stufe 1 bis 6', text: 'Grundschritte, einfache Drehungen und Körperhaltung.' },
+        { name: 'Beginner Flow', text: 'Grundlagen verbinden und mit mehr Sicherheit tanzen.' },
+        { name: 'Intermediate Stufe 7 bis 12', text: 'Technik, Musikalität und komplexere Kombinationen.' },
+        { name: 'Intermediate Flow', text: 'Intermediate-Inhalte variieren und verfeinern.' },
+        { name: 'Advanced ab Stufe 13', text: 'Details, Styling und anspruchsvolle Kombinationen.' },
+      ],
+      cta: { label: 'Level klären', href: R.kursaufbau },
+    },
+    social: {
+      title: 'Bachata lernst du im Kurs. Sicher wirst du beim Tanzen',
+      body: 'Auf der Danceflow Night kannst du das Gelernte in entspannter Atmosphäre ausprobieren. Genau dort wird aus Technik Vertrauen: Du tanzt mit unterschiedlichen Menschen, hörst unterschiedliche Songs und merkst, was wirklich sitzt.',
+      bullets: [
+        'Salsa und Bachata Socials',
+        'Workshops vor ausgewählten Abenden',
+        'ideal zum Üben nach dem Kurs',
+        'auch für Gäste offen',
+      ],
+      cta: { label: 'Danceflow Night ansehen', href: R.danceflow },
+      image: { src: '/photos/gallery/danceflow/05.jpg', alt: 'Paar tanzt Bachata bei einer Danceflow Night' },
+    },
+    closing: {
+      title: 'Probiere Bachata in einer',
+      titleAccent: 'Gratis-Schnupperstunde',
+      body: 'Starte mit einer Schnupperstunde oder öffne direkt den Kursplan. Wenn du unsicher bist, welcher Kurs passt, frag uns kurz. Lieber richtig starten als lange überlegen.',
+      primary: { label: 'Bachata Schnupperstunde buchen', href: R.schnupper },
+      secondary: { label: 'Bachata Kursplan ansehen', href: R.bachataPlan },
+      microcopy: 'Kostenlos · unverbindlich · auch ohne Tanzpartner möglich.',
+    },
+    faqEyebrow: 'Bachata FAQ',
+    faqTitle: 'Häufige Fragen zu Bachata',
+    faq: [
+      {
+        q: 'Ist Bachata auch für Anfänger geeignet?',
+        a: 'Ja. Im Beginner-Kurs lernst du Grundschritte, einfache Drehungen, Haltung und wie du dich im Paartanz sicher fühlst.',
+      },
+      {
+        q: 'Ist Bachata Sensual zu schwierig für den Anfang?',
+        a: 'Nicht, wenn es sauber aufgebaut wird. Gute Kurse starten mit Basics und Technik, bevor komplexere Körperbewegungen dazukommen.',
+      },
+      {
+        q: 'Muss ich als Paar kommen?',
+        a: 'Nein. Du kannst dich auch alleine anmelden.',
+      },
+      {
+        q: 'Ist Bachata sehr körpernah?',
+        a: 'Bachata kann nah getanzt werden, aber gute Technik und respektvolle Kommunikation sind zentral. Im Kurs wird klar, wie Connection angenehm und sicher funktioniert.',
+      },
+    ],
+  },
+  en: {
+    seo: 'bachata',
+    crumb: { label: 'Bachata', href: R.bachataPage },
+    hero: {
+      eyebrow: 'Bachata classes in Basel',
+      title: 'Learn Bachata with connection, technique and flow.',
+      lead: 'Bachata combines soft movement, musicality and body awareness. At Salsaflow you learn the basics step by step, with clear technique and a course structure designed for complete beginners.',
+      bullets: [
+        'Bachata beginner to advanced, depending on the schedule',
+        'Technique, musicality and connection',
+        'Free trial class possible',
+        'Works without a dance partner',
+        'Social-dance link through the Danceflow Night',
+      ],
+      primary: { label: 'Book a Bachata trial class', href: R.schnupper },
+      secondary: { label: 'See the Bachata schedule', href: R.bachataPlan },
+      microcopy: 'We help you get in safely and at the right level.',
+      image: { src: '/photos/premium/offer-bachata-1200.webp', alt: 'Bachata couple with a calm, warm connection in the Salsaflow studio' },
+      band: { src: '/photos/premium/offer-bachata-hero-2100.webp', alt: 'Bachata couple in warm closeness, calm connection in the studio' },
+      cardLabel: 'Your start',
+      cardText: 'Timing, connection and body awareness. Without pressure.',
+    },
+    why: {
+      eyebrow: 'Why Bachata',
+      title: 'Bachata looks soft. Good Bachata is',
+      titleAccent: 'precise',
+      body: 'From the outside Bachata often looks like closeness and flow. In class you learn what is behind it: timing, body tension, clear signals, control and respect in partner dancing.',
+      // Round 1 (critique 2026-08-10): third block mirrors the DE fix — two blocks left a
+      // large empty area in the 0.85/1.15 why grid.
+      blocks: [
+        { title: 'What you see', text: 'Closeness, soft movement, a feel for the music.' },
+        { title: 'What you learn', text: 'Basics, weight transfer, leading and following, body control and safe technique.' },
+        { title: 'What changes', text: 'Your movement looks soft because it is controlled: the timing sits, signals are clear, closeness stays respectful.' },
+      ],
+      image: { src: '/photos/premium/offer-bachata-wide-v2.webp', alt: 'Bachata couple in a calm posture during class' },
+    },
+    fit: {
+      title: 'Bachata suits you if you want flow, but still need structure',
+      intro: '',
+      yesTitle: 'It suits you if',
+      yes: [
+        'you want to learn soft movement and partner dancing with feeling',
+        'you find musicality and connection exciting',
+        'you would rather build up calmly and controlled than just collect figures fast',
+        'you want to dance at socials but want to feel safe',
+      ],
+      maybeTitle: 'Salsa might suit you better if',
+      maybe: [
+        'you are after more energy, fast turns and rhythmic drive',
+        'you enjoy faster movement and a more energetic style',
+      ],
+      cta: { label: 'Compare Salsa and Bachata', href: R.salsaPage },
+    },
+    beginner: {
+      eyebrow: 'Course content',
+      title: 'What you learn in a Bachata class',
+      body: 'The class teaches more than combinations. You develop safe technique, musicality and a comfortable connection with your partner.',
+      phases: [
+        { tag: 'Module 1', title: 'Basic steps & timing', text: 'You learn the base so you do not lose the rhythm with every new figure.' },
+        { tag: 'Module 2', title: 'Connection', text: 'You learn how leading and following work calmly and clearly, so partner dancing does not become a question of strength.' },
+        { tag: 'Module 3', title: 'Body awareness', text: 'You build control in the upper body, hips and weight, so movements look soft without becoming unsteady.' },
+        { tag: 'Module 4', title: 'Musicality', text: 'You understand how to react to the music, so Bachata feels less counted and more danced.' },
+      ],
+      cta: { label: 'See Bachata courses', href: R.bachataPlan },
+      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Bachata basic step in class' },
+    },
+    levels: {
+      title: 'We help you find the Bachata class for your',
+      titleAccent: 'level',
+      body: 'When Bachata jumps to advanced movements too fast, it feels unsafe. That is why it needs a clear level logic: first basics, then connection, then more complex movement.',
+      rungs: [
+        { name: 'Beginner stages 1 to 6', text: 'Basic steps, simple turns and posture.' },
+        { name: 'Beginner Flow', text: 'Connect the foundations and dance with more confidence.' },
+        { name: 'Intermediate stages 7 to 12', text: 'Technique, musicality and more complex combinations.' },
+        { name: 'Intermediate Flow', text: 'Vary and refine the intermediate material.' },
+        { name: 'Advanced from stage 13', text: 'Detail, styling and demanding combinations.' },
+      ],
+      cta: { label: 'Clarify your level', href: R.kursaufbau },
+    },
+    social: {
+      title: 'You learn Bachata in class. You get confident while dancing',
+      body: 'At the Danceflow Night you can try what you learned in a relaxed atmosphere. That is where technique turns into trust: you dance with different people, hear different songs and notice what really sticks.',
+      bullets: [
+        'Salsa and Bachata socials',
+        'Workshops before selected nights',
+        'ideal for practising after class',
+        'open to guests too',
+      ],
+      cta: { label: 'See the Danceflow Night', href: R.danceflow },
+      image: { src: '/photos/gallery/danceflow/05.jpg', alt: 'Couple dancing Bachata at a Danceflow Night' },
+    },
+    closing: {
+      title: 'Try Bachata in a free',
+      titleAccent: 'trial class',
+      body: 'Start with a trial class or open the schedule. If you are unsure which class fits, send us a quick message and we will help you choose.',
+      primary: { label: 'Book a Bachata trial class', href: R.schnupper },
+      secondary: { label: 'See the Bachata schedule', href: R.bachataPlan },
+      microcopy: 'Free · without obligation · no dance partner needed.',
+    },
+    faqEyebrow: 'Bachata FAQ',
+    faqTitle: 'Common questions about Bachata',
+    faq: [
+      {
+        q: 'Is Bachata suitable for beginners?',
+        a: 'Yes. In the beginner course you learn basic steps, simple turns, posture and how to feel safe in partner dancing.',
+      },
+      {
+        q: 'Is Bachata Sensual too hard for the start?',
+        a: 'Not if it is built up cleanly. Good courses start with basics and technique before more complex body movement comes in.',
+      },
+      {
+        q: 'Do I have to come as a couple?',
+        a: 'No. You can sign up on your own.',
+      },
+      {
+        q: 'Is Bachata very close?',
+        a: 'Bachata can be danced close, but good technique and respectful communication are essential. In class you learn how to create a comfortable, safe connection.',
+      },
+    ],
+  },
+};
+
+export const STYLE_CONTENT: Record<StyleKey, Record<Lang, StyleContent>> = {
+  salsa,
+  bachata,
+};
