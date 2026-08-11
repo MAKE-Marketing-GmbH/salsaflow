@@ -1,8 +1,3 @@
-// EIN Template fuer die drei Stilseiten (Salsa, Bachata, Heels). Nimmt einen StyleContent
-// (styles/content.ts) und rendert den Plan-Rhythmus: Hero -> Warum -> Fuer wen -> Erste
-// Wochen -> Level -> Vom Kurs zur Danceflow Night -> Final CTA -> FAQ. Design-System strikt
-// (hell im Wechsel paper-warm/bg-soft, Rot sparsam, Reveal-Takt wie Startseite). Nur die
-// Danceflow-Band darf dunkler wirken (Plan: "dunklerer Bildstreifen").
 
 import { motion } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
@@ -73,20 +68,7 @@ export function StylePage({ data }: { data: Record<'de' | 'en', StyleContent> })
 }
 
 /* -------------------------------------------------------------------- Hero */
-/* Design-Kritik Runde 2, Issue 1: die Stilseiten (Salsa, Bachata) waren zwei weitere Kopien
-   der Einheits-Bauform. Jetzt HeroFrame mit Achse 'left' — linksbuendig gestapelt.
-   Runde 1 (2026-08): jede Stil-Seite bekommt ihr eigenes Charakter-Foto als full-bleed Band
-   UNTER dem Typo-Block (hero.band) — Salsa Energie, Bachata Waerme/Naehe. Das Band traegt
-   keine Schrift (Hierarchie Home > Unterseite bleibt) und nutzt die 21:9 Polished-Heros
-   aus der Foto-Pipeline 2026-08-06. Die Chip-Reihe bleibt unter dem CTA. */
-/* Meta-Kritik 2026-08-07 (Einheits-Einstieg): Salsa und Bachata liefen BEIDE auf Achse 'left'
-   mit exakt derselben Abfolge — Breadcrumb, H1, Lead, zwei CTAs, Microcopy, fuenf Check-Chips,
-   Band. Nebeneinander gelegt sind /tmp/eyebrow-shots/salsa.png und bachata.png dieselbe
-   Silhouette; nur die Woerter wechseln. Der Charakter des Stils war nirgends sichtbar.
-   Fix ohne neue Deko: die Achse haengt jetzt am Stil. Salsa = Energie, Aufzaehlung, Takt ->
-   'left' mit der Chip-Reihe (die Reihe IST der Rhythmus). Bachata = Verbindung, Ruhe, Naehe ->
-   'split': die H1 steht allein links, alles Erklaerende sammelt sich in der rechten Schiene,
-   und das warme Naehe-Band folgt frueher. Gleiche Bausteine, andere Ordnung. */
+
 function StyleHero({ c }: { c: StyleContent }) {
   const h = c.hero;
   return (
@@ -126,9 +108,7 @@ function WhySection({ c }: { c: StyleContent }) {
       <Shell>
         <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
           <Reveal className="max-w-md">
-            {/* MEASURE_L auf der H2 statt max-w-md auf dem Wrapper: der Wrapper begrenzte auch
-                Bild und Absatz, waehrend die H2 darin trotzdem in ein Waisenwort lief
-                (/tanzkurse/salsa: "Salsa waechst mit / dir", gemessen 2026-08-06). */}
+
             <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
               {w.title} {w.titleAccent ? <TitleAccent>{w.titleAccent}</TitleAccent> : null}
             </motion.h2>
@@ -137,15 +117,21 @@ function WhySection({ c }: { c: StyleContent }) {
             </motion.p>
             {!isSalsa ? (
               <motion.div variants={item} className="mt-8 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]">
-                <img src={w.image.src} alt={w.image.alt} className="aspect-[4/3] w-full object-cover object-[center_42%]" width={1200} height={900} loading="lazy" />
+                <img
+                  src={w.image.src}
+                  alt={w.image.alt}
+                  className={cn(
+                    'aspect-[4/3] w-full object-cover object-[center_42%]',
+                    c.seo === 'bachata' ? 'photo-grade-bachata' : undefined,
+                  )}
+                  width={1200}
+                  height={900}
+                  loading="lazy"
+                />
               </motion.div>
             ) : null}
           </Reveal>
-          {/* Runde 3, Issue 9: das war der ERSTE von drei Karten-Bloecken in Folge
-              (hier 01-03, dann Phase 1-4, dann die Level-Leiter) — dreimal dieselbe weisse
-              Karte mit Schatten. Alle drei sind jetzt auf verschiedene Bauformen verteilt:
-              hier eine nummerierte Liste mit Haarlinien, dort die Leiter.
-              DESIGN.md:78: "Karten meist nur feine line-Border. Tiefe ueber Spacing." */}
+
           <Reveal className="grid content-start border-t border-[var(--color-line)]" stagger={0.08}>
             {w.blocks.map((b, i) => (
               <motion.div
@@ -188,9 +174,7 @@ function FitSection({ c }: { c: StyleContent }) {
         </Reveal>
         <Reveal className="mt-12 grid items-stretch gap-5 lg:grid-cols-2" stagger={0.08}>
           <motion.div variants={item} className="flex h-full flex-col rounded-[var(--radius-media)] border border-[var(--color-salsa)]/25 bg-white p-7 shadow-[0_18px_50px_rgba(17,17,17,0.05)] sm:p-8">
-            {/* Runde 3, Issue 8: der Takt-Marker gehoert an Kapitelgrenzen, nicht auf zwei
-                Karten-Koepfe innerhalb EINER Sektion. Das Rot traegt die Auszeichnung hier
-                allein. */}
+
             <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
               {f.yesTitle}
             </p>
@@ -249,11 +233,7 @@ function BeginnerSection({ c }: { c: StyleContent }) {
             <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
               {b.body}
             </motion.p>
-            {/* Runde 3, Issue 9: das war der zweite von drei Karten-Bloecken in Folge —
-                vier weisse Kaesten mit Border und Fuellfarbe fuer eine reine Aufzaehlung.
-                Jetzt eine nummerierte Liste mit Trennlinien, dieselbe Bauform wie
-                "Der erste Schritt darf leicht sein" auf der Startseite (die laut Kritik
-                funktioniert). Die rote Nummer bleibt der Anker. */}
+
             <motion.ol variants={item} className="mt-8 border-t border-[var(--color-line)]">
               {b.phases.map((p, i) => (
                 <li
@@ -296,20 +276,7 @@ function LevelsSection({ c }: { c: StyleContent }) {
         <Reveal className="max-w-2xl">
           <SectionHead title={l.title} titleAccent={l.titleAccent} lead={l.body} />
         </Reveal>
-        {/* Design-Kritik Runde 3, Issue 9 ("Card-Soup" + "Waisenkarte"):
-            Die Leiter hat FUENF Stufen und lief in einem 4-Spalten-Raster — Karte 05 stand
-            allein in Reihe zwei, daneben drei leere Zellen. Zusaetzlich war es der dritte
-            Karten-Block der Seite in Folge (01-03 Rhythmus/Partnerwork/Social, dann
-            Phase 1-4, dann diese Leiter), und DESIGN.md:78 verlangt ausdruecklich
-            "Karten meist nur feine line-Border. Tiefe ueber Spacing, nicht ueber
-            Schatten-Schwemme".
 
-            Jetzt eine echte Stufenleiter statt eines Rasters: EINE durchgehende Reihe mit
-            so vielen Spalten, wie es Stufen gibt (grid-cols-5 via CSS-Variable — damit
-            entsteht nie wieder eine Waise, egal ob die Leiter 4, 5 oder 6 Stufen hat).
-            Karten, Fuellfarbe und Schatten sind raus; es bleiben eine durchgehende Oberkante
-            und senkrechte Haarlinien. Der rote Fortschrittsbalken ueber der Reihe zeigt, was
-            das Raster nie zeigen konnte: dass die Stufen aufeinander folgen. */}
         <Reveal className="mt-12" stagger={0.07}>
           <div className="border-t border-[var(--color-line)]">
             <ol

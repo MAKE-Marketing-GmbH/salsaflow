@@ -57,14 +57,14 @@ function StyleRow({ card, index }: { card: OfferCard; index: number }) {
       aria-label={`${card.title}: ${card.hint}`}
       className="group grid min-h-[10rem] grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-4 border-b border-[var(--color-line)] py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:gap-6"
     >
-      {/* 5.5rem statt 7rem auf Mobil: bei 390px blieben der H3 sonst nur 186px, der Titel
-          brach auf drei Zeilen (gemessen 2026-08-06). */}
+
       <div className="h-24 overflow-hidden rounded-[1.25rem] bg-[var(--color-bg-soft)] transition-transform duration-300 ease-out motion-safe:group-hover:-translate-y-0.5 sm:h-32 sm:rounded-[1.5rem]">
         <img
           src={card.photo}
           alt={card.alt}
           className={cn(
             'h-full w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.035]',
+            card.key === 'bachata' ? 'photo-grade-bachata' : card.key === 'privat' ? 'photo-grade-private' : undefined,
             index === 1 ? 'object-[center_36%]' : index === 2 ? 'object-[center_20%]' : 'object-[center_46%]',
           )}
           width={card.key === 'privat' ? 1800 : card.key === 'bachata' ? 2752 : 1200}
@@ -94,12 +94,6 @@ export function Offer() {
   const { item } = useReveal({ stagger: 0.07 });
 
   return (
-    // Flaeche bg-soft statt paper-warm (Runde 1, 2026-08-07). Durch die neue Reihenfolge in
-    // HomePage.tsx standen Hero, Angebot und Kursplan drei Sektionen lang auf demselben Ton
-    // (gemessen rgb(251,250,248) dreimal hintereinander) — es gab keine sichtbare
-    // Kapitelgrenze mehr zwischen "welcher Tanz" und "wann laeuft er". Der Wechsel
-    // paper-warm -> bg-soft -> paper-warm ist derselbe Zweiklang, den die Seite ohnehin
-    // fuehrt; hier wird nur seine Reihenfolge wiederhergestellt. Kein neuer Ton.
     <section id="angebot" className={cn('relative scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}>
       <Shell>
         <Reveal className="grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end lg:gap-16">
@@ -128,21 +122,7 @@ export function Offer() {
           </motion.div>
         </Reveal>
 
-        {/* Runde 1 (2026-08-07): die Startseite hatte KEINEN Link auf die Kurs-Uebersicht
-            /tanzkurse. Nachgezaehlt an den gerenderten Links (Beleg: grep href in
-            src/public/home/*.tsx) zeigten die vier Karten nur auf die vier Detailseiten
-            (/tanzkurse/salsa, /bachata, /heels, /privatstunden). Wer sich noch nicht
-            entschieden hat, hatte im Hauptinhalt keinen Weg auf die Uebersicht — der einzige
-            Zugang war die Navigation. Genau dieser eine Weg fehlte laut Auftrag
-            ("klare Conversion-Pfade zu /kursplan und /tanzkurse").
-            Bewusst als Textlink, nicht als zweiter roter Pill: DESIGN.md erlaubt "max ein
-            Primary pro Sektion", und der Primary dieser Sektion ist die grosse Salsa-Karte.
 
-            Hier stand vorher ein zweispaltiges Extras-Band (Geschenkgutschein +
-            Shows/Animationen) mit eigenen H3, eigenem Icon-Vokabular und zwei weiteren CTAs.
-            Beides sind Nebenwege - sie stehen jetzt im Footer unter "Entdecken"
-            (src/public/site/SiteFooter.tsx). Die Copy bleibt in content.ts (`offer.extras`)
-            fuer die Unterseiten erhalten. */}
         <Reveal className="mt-10 lg:mt-12">
           <motion.a
             variants={item}

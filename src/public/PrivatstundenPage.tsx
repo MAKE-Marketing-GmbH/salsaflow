@@ -1,8 +1,3 @@
-// Privatstunden-Seite (/privatstunden) aus dem V3-Copyplan (pages/06). Baut den Plan-Rhythmus:
-// Hero -> Wann sinnvoll (6 Faelle) -> Ablauf (3 Schritte) -> Formate (3 Karten) -> Preise & Pakete
-// -> Fuer wen nicht -> Final CTA -> FAQ. Design-System strikt: hell im Wechsel paper-warm/bg-soft,
-// Rot #AD1827 sparsam (CTA, Marker, ein Script-Akzentwort pro Headline), Reveal-Takt wie Startseite.
-// Copy 1:1 aus content.ts, zweisprachig. Bilder echt (Hero-Offer + Unterrichtsfoto, je einmal).
 
 import { type ReactNode } from 'react';
 import { motion } from 'framer-motion';
@@ -89,7 +84,7 @@ function PrivatHero({ c }: { c: PrivatContent }) {
           <motion.div variants={item} className="mb-6">
             <Breadcrumb trail={[c.crumb]} />
           </motion.div>
-          {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
+
           <motion.h1
             variants={item}
             className="mt-5 font-display text-[2.4rem] font-extrabold leading-[1.02] tracking-[-0.022em] text-balance sm:text-[3rem] lg:text-[3.4rem]"
@@ -230,9 +225,9 @@ function FlowSection({ c }: { c: PrivatContent }) {
               <img
                 src={f.image.src}
                 alt={f.image.alt}
-                className="aspect-[4/5] w-full object-cover object-[center_40%]"
-                width={1200}
-                height={1500}
+                className="photo-grade-private aspect-[3/2] w-full object-cover object-[center_40%]"
+                width={1800}
+                height={1200}
                 loading="lazy"
               />
             </motion.div>
@@ -354,8 +349,6 @@ function NotForSection({ c }: { c: PrivatContent }) {
 /* ------------------------------------------------------------------- Final CTA */
 function FinalCta({ c }: { c: PrivatContent }) {
   const cl = c.closing;
-  // Runde 2, Issue 9: EIN Schluss-CTA sitewide -> ClosingInvite (src/public/subpage/kit.tsx).
-  // Der rote Akzent sitzt hier mitten im Satz, deshalb `titleNode` statt `titleAccent`.
   return (
     <ClosingInvite
       titleNode={<Accented text={cl.title} accent={cl.titleAccent} />}

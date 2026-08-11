@@ -1,13 +1,3 @@
-// Startseiten-Inhalt (Etappe 10), zweisprachig DE/EN. Quelle: wiki.md (Single-Source),
-// konzept-1-die-persoenliche-welle.md, DECISIONS.md.
-// Copy-Regeln (003/069/085): simpel, du-Form, echte Umlaute, CH-ss, keine Em-Dashes,
-// ~50 Woerter pro Sektion. KEINE Preise/CHF-Zahlen (Dauerregel "keine Preise auf Website").
-// KEINE erfundenen Zitate/Sterne-Zahlen - Community-Beweis laeuft ueber echte Fotos + Google-Link.
-//
-// Etappe 15 (Zweisprachigkeit sitewide) zieht den LangProvider auf die App-Wurzel und
-// ergaenzt SEO/Meta/Recht. Der DE/EN-Inhalt der Home liegt schon hier vollstaendig vor,
-// damit der Sprachschalter nicht halb-tot ist.
-
 export type OfferCard = {
   key: string;
   title: string;
@@ -80,8 +70,6 @@ export type HomeStrings = {
   };
   events: { eyebrow: string; title: string; body: string; cta: string };
   community: { eyebrow: string; title: string; body: string; google: string };
-  // Standort-Band (Home-Redesign 2026-07): heller Atem zwischen den zwei dunklen Fullbleeds
-  // (Danceflow-Nacht + Schluss-CTA). Trennt die beiden Dunkel-Flaechen (Design-Vertrag 3.3).
   location: {
     eyebrow: string;
     title: string;
@@ -108,17 +96,7 @@ export type HomeStrings = {
   };
 };
 
-// Premium-Serie 2026-07-03 (warm gegradet, ein Look). Offer.tsx baut daraus das srcset
-// (800w/1200w) ueber den Dateinamen. Ein Bild pro Tanzstil, passend zum Subject.
 const offerPhotos = {
-  // Kritiker final-2, Issue 4 (home-1440): die grosse Karte "Salsa tanzen in Basel" zeigte nur
-  // einen Hinterkopf. Beleg an der Datei geprueft: offer-salsa-1200.webp (1200x1600) ist ein
-  // Rueckenportraet — die Frau im Vordergrund fuellt die halbe Bildhoehe mit Haaren, ihr Gesicht
-  // ist abgewandt, das einzige sichtbare Gesicht (Mann im roten Shirt) liegt unscharf dahinter.
-  // Auf der wichtigsten Angebotskarte der Startseite verkauft das niemanden.
-  // Neu: kurs-01.jpg — Salsa-Paar mitten in der Drehung, BEIDE Gesichter sichtbar und zugewandt,
-  // Studio erkennbar. Hatte bisher 1 Platzierung (nur im Foto-Archiv), bleibt mit dieser
-  // zweiten also im Limit von verify-image-reuse.cjs.
   salsa: '/photos/kurse/kurs-01.jpg',
   bachata: '/photos/premium/offer-bachata-wide-v2.webp',
   heels: '/photos/premium/offer-heels-1200.webp',

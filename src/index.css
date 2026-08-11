@@ -5,16 +5,7 @@
 @import "@fontsource/afacad/600.css";
 @import "@fontsource/afacad/700.css";
 
-/* Self-hosted Fonts (GDPR-konform, kein externer Request). Typografie-Richtung
-   2026-07-05 (Raphael-Direktive, INBOX): Display = Cal Sans (Cal.com, OFL,
-   Google Fonts, self-hosted, ein Schnitt: font-weight 100 900 mappt alle
-   Utility-Gewichte auf dieselbe Datei, kein Faux-Bold). Handschrift-Akzent =
-   Alex Brush (OFL), gewählt per Salsaflow-Wort-Test direkt gegen das Logo
-   (glatter Brush, eleganter Schwung, f-Schleife; Council r15: Mr Dafoe war zu
-   fett-rund, Great Vibes zu dünn-förmlich). Einsatz dosiert: Claim-Zeilen und einzelne
-   Akzent-Momente, nie Flächen-Text. Cabinet Grotesk ist als Display abgelöst
-   (Dateien bleiben vorerst liegen). HART GESPERRT, nie wieder nutzen: Hanken
-   Grotesk + Inter + Plus Jakarta Sans. */
+/* Self-hosted Fonts (GDPR-konform, keine externen Requests). */
 @font-face {
   font-family: "Cal Sans";
   src: url("/fonts/cal-sans-latin.woff2") format("woff2");
@@ -30,36 +21,16 @@
   font-display: swap;
 }
 
-/* Designsystem Salsaflow DC (Etappe 10). Quelle: assets/tokens.md.
-   Schwarz + Salsa-Rot #AD1827, helle Grundstimmung, Rot strikt als Akzent (~90/10).
-   Bestehende Token-Namen (--color-salsa, --color-salsa-600, --color-muted) bleiben
-   erhalten, damit Admin (Etappe 6) + Kursplan (Etappe 7) nicht brechen. */
+/* Salsaflow-Designsystem: warmer heller Grund, Salsa-Rot als sparsamer Akzent. */
 @theme {
   /* Neutral / helle Grundstimmung */
   --color-ink: #0a0a0a;
   --color-ink-muted: #52524e;
-  --color-paper: #fdfcfa; /* Geil-Pass 2026-07-07: pures Weiss raus (DESIGN.md-Ziel "warm-paper"), minimal warmes Papier */
+  --color-paper: #fdfcfa;
   --color-bg-soft: #f4f1ec;
   --color-line: #e4e4e1;
   --color-surface-dark: #111111;
-  /* Design-Kritik Runde 3, Issue 4 ("Drei Dunkeltoene fuer dieselbe Rolle").
-   *
-   * Gemessen am Full-Page-Screenshot 1440px (Randpixel, also echter Sektionsgrund, nicht Foto):
-   *   home  y6120-6976 (Events-Sektion) = #251417  warm/aubergine  <- --color-night
-   *   Footer aller Seiten                = #111111  neutral         <- --color-surface-dark
-   * Zwei Tokens fuer exakt eine Rolle ("dunkles Kontrastband") — nebeneinander gelegt wirken
-   * die Seiten wie von zwei Leuten gebaut.
-   *
-   * Aufgeloest zugunsten von `--color-surface-dark`, NICHT umgekehrt: DESIGN.md ist LOCKED und
-   * legt in Zeile 42 ausdruecklich "Dunkle Sektion `surface-dark #111`" fest. `--color-night`
-   * war der undokumentierte Zusatz und ist damit der Fehler, nicht der Standard. Den locked
-   * Token auf den warmen Ton umzufaerben waere eine Design-Entscheidung gewesen, die mir hier
-   * nicht zusteht (DESIGN.md: "Geaendert nur mit bewusster Entscheidung + docs/decisions.md").
-   *
-   * Die Namen bleiben als Alias bestehen, damit kein Aufrufer bricht — sie zeigen jetzt nur
-   * auf denselben Wert. Der dritte von der Kritik genannte Ton (#232927 auf /tanzkurse/salsa)
-   * war kein Token: die Messung lag auf dem Danceflow-FOTO (gruenes Buehnenlicht), nicht auf
-   * dem Sektionsgrund — der ist dort nachgemessen #111111. */
+
   --color-night: var(--color-surface-dark);
   --color-night-muted: #d8c8c5;
   --color-muted: #6b6b6b; /* Back-Compat (Admin/Kursplan) */
@@ -75,7 +46,7 @@
   --color-whatsapp: #25d366;
   --color-whatsapp-hover: #1ebe5b;
 
-  /* Salsa-Rot: Akzent-Skala (gemessen aus dem Logo, tokens.md) */
+
   --color-salsa: #ad1827;
   --color-salsa-700: #8e1320;
   --color-salsa-600: #8e1320; /* Back-Compat: Hover/Active auf rotem Button (dunkler) */
@@ -89,15 +60,7 @@
   --font-script: "Alex Brush", "Brush Script MT", cursive;
   --font-sans: "Afacad", ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  /* Radius-Skala, DREI Stufen (Design-Kritik Runde 1, Issue "Radius- und Eyebrow-Skala").
-   * Vorher rendern /team 8/16/22.4/24/25.6/28/32px nebeneinander, /tanzkurse zusaetzlich
-   * 21.6 und 26.4px. Die krummen Werte sind keine Absicht, sondern rem-Artefakte:
-   * rounded-[1.35rem] = 21.6px, [1.4rem] = 22.4px, [1.6rem] = 25.6px, [1.65rem] = 26.4px.
-   * Darum sind die Stufen hier in PX definiert — sie koennen nicht mehr verrutschen.
-   *   chip  = Chips, Buttons, kleine Marker
-   *   card  = Karten, Panels, Formularfelder
-   *   media = Bild- und Hero-Flaechen
-   * rounded-full bleibt fuer Pills/Avatare (DESIGN.md "Buttons/Pills rounded-full"). */
+
   --radius-chip: 8px;
   --radius-card: 16px;
   --radius-media: 24px;
@@ -125,23 +88,6 @@ html {
   /* Anker-Sprung-Ziele nicht unter die fixe Navbar schieben. */
   scroll-padding-top: var(--nav-h);
 }
-
-/* Design-Kritik Runde 3, Issue 1 — zweite Haelfte derselben Ursache (mobil/ohne Lenis).
- *
- * Hier stand `scroll-behavior: smooth` auf dem html-Element. Das gilt aber NICHT nur fuer
- * Anker-Klicks: es animiert JEDEN Scroll am Wurzel-Scroller, auch ein programmatisches
- * `window.scrollTo(0, 0)`. Gemessen auf 390px (Home, Lenis ist dort per Design aus): nach
- * scrollTo(0,0) vom Seitenende steht scrollY nach 350ms noch bei 12410 von 15562 — der
- * Full-Page-Screenshot faengt die Seite mitten in der Bewegung ein, mit der fixen
- * Header-Pille quer im Inhalt.
- *
- * Die CSS-Eigenschaft kann Nutzer-Absicht nicht von Automatik unterscheiden. Darum ist sie
- * hier raus und die Anker-Weichheit liegt jetzt dort, wo die Absicht bekannt ist: im
- * Klick-Handler (site/SmoothScroll.tsx — Lenis auf Desktop, scrollIntoView mobil).
- * Verhalten fuer Nutzer bleibt identisch, Sprungbefehle von aussen sind wieder sofort.
- *
- * `scroll-padding-top` oben bleibt bewusst stehen: es verschiebt nur das Sprungziel unter
- * der fixen Navbar und loest selbst keine Animation aus. */
 
 /* Wenn Lenis aktiv ist (Desktop), uebernimmt Lenis das Smooth-Scrollen komplett.
    Natives smooth wuerde bei Anker-Spruengen doppelt easen. */
@@ -267,61 +213,24 @@ h4 {
   }
 }
 
-/* G4 Papier-Korn-Overlay entfernt (Geil-Pass v2 2026-07-08, Watchdog: mix-blend-Reste raus). */
-
-/* Mobile Karten-Chrome (Design-Kritik Runde 2, major)
- * -----------------------------------------------------------------------------
- * Befund: "/tanzkurse ist 13846px hoch — rund 16 Bildschirmhoehen fuer eine
- * Uebersichtsseite. Der Grund ist das Karten-System: jede Karte behaelt auf 390px
- * ihr Desktop-Padding plus Radius plus Schatten."
- *
- * Der Hauptteil ist strukturell geloest (die Karten sind auf allen Ebenen durch
- * Haarlinie + Weissraum ersetzt). Diese Regel ist das Sicherheitsnetz fuer die
- * verbleibenden Flaechen-Panels: unter 640px faellt der reine Deko-Schatten weg.
- *
- * Bewusst NUR box-shadow und bewusst nur innerhalb von <main>:
- *  - Radius/Border pauschal zu entfernen wuerde `rounded-full`-Buttons, Avatare und
- *    Bild-Container mitreissen (DESIGN.md: Buttons/Pills rounded-full ist LOCKED).
- *  - Header, Footer-Floats, Cookie-Banner und Sticky-CTA liegen ausserhalb von <main>
- *    und behalten ihren Schatten — sie schweben wirklich ueber dem Inhalt und
- *    brauchen die Trennung zum Grund.
- *  - Interaktive Elemente (Buttons/Links/Inputs) sind ausgenommen, damit gedrueckte
- *    und fokussierte Zustaende sichtbar bleiben.
- * Der Schatten trug auf Mobil keine Information: die Karte lief ohnehin ueber die
- * volle Breite, es gab also keine Kante, die er haette absetzen koennen. */
 @media (max-width: 639px) {
   main :not(a):not(button):not(input):not(select):not(textarea):not([role='button']) {
     box-shadow: none;
   }
 }
 
-/* Bild-Stil-Lock (Design-Kritik Runde 3, Issue 10)
- * -----------------------------------------------------------------------------
- * Befund: "Kein einheitlicher Bildstil ... Nebeneinander gestellt wirkt das wie fuenf
- * verschiedene Marken." DESIGN.md:92 fordert dagegen "Ein Bild-Stil ueber die ganze Seite
- * (Licht, Crop, Waerme)".
- *
- * Die Ursache war nicht, dass es keine Gradation gab — sie existierte, aber nur an DREI
- * Stellen (home/kit.tsx Photo, CommunityBand 2x) als Inline-Utility
- * `[filter:saturate(0.96)_contrast(1.03)]`. Alle anderen Fotos sitewide liefen voellig
- * ungefiltert. Ein Stil, der nur in einer Komponente gilt, ist kein Stil-Lock.
- *
- * Gemessen ueber alle 125 in src/public referenzierten Fotos: Median-Luminanz 62/255,
- * 24 Bilder (19%) unter 45/255 — die dunklen Party-Snapshots stehen direkt neben
- * Tageslicht-Studioshots (bis 202/255).
- *
- * Diese Regel zieht dieselbe Gradation auf ALLE Inhaltsbilder:
- *   saturate(0.96)  nimmt den Rotstich der Party-Uplights zurueck
- *   contrast(1.03)  gibt den flauen dunklen Aufnahmen wieder Zeichnung
- *   brightness(1.02) hebt die Tiefen minimal an, ohne die hellen auszufressen
- *
- * Bewusst eng gefasst:
- *  - nur <img> in <main> (Content), nicht Header/Footer/Floats.
- *  - Logos und SVGs sind ausgenommen: ein Marken-Logo darf nie umgefaerbt werden.
- *  - Die drei Inline-Utilities oben bleiben gueltig und gewinnen per Spezifitaet;
- *    sie setzen denselben Wert, es entsteht kein Konflikt. */
 main img:not([src$='.svg']):not([src*='/logo/']) {
   filter: saturate(0.96) contrast(1.03) brightness(1.02);
+}
+
+/* Nur die zwei belegten Belichtungs-Ausreisser erhalten eine staerkere Gradation.
+ * Die Werte ersetzen den allgemeinen Bild-Stil-Lock, statt sich mit ihm zu stapeln. */
+main img.photo-grade-bachata {
+  filter: saturate(0.82) contrast(1.14) brightness(1.1) !important;
+}
+
+main img.photo-grade-private {
+  filter: saturate(0.9) contrast(1.14) brightness(1.08) !important;
 }
 
 /* Buchungs-Dialog: sanfte Ein-Animation (Backdrop + Panel, 150-200ms).
@@ -346,8 +255,6 @@ main img:not([src$='.svg']):not([src*='/logo/']) {
   }
 }
 
-/* FAQ Runde 2: Die mobile Header-Pille ist optisch höher als ihr reiner Inhaltsblock.
- * Sprungziele und fokussierte FAQ-Zeilen bekommen deshalb zusätzlich zum Nav-Token Luft. */
 html:has(.faq-page) {
   scroll-padding-top: calc(var(--nav-h) + 1.5rem);
 }
@@ -363,37 +270,12 @@ html:has(.faq-page) {
  * feste Bottom-CTAs verwenden dieselbe Variable als Offset. Nach dem Akzeptieren setzt
  * die Komponente die Variable wieder auf 0px. */
 
-/* Home-Fold und Leiste (Kritiker-Runde 3, Befund m-01)
- * -----------------------------------------------------------------------------
- * URSACHE: der Home-Hero bindet seine Hoehe an den Viewport (`58svh` Foto + Text,
- * home/Hero.tsx:147/148). Das Bodenpolster oben greift am DOKUMENT-Ende und wirkt
- * deshalb erst nach dem Scrollen — im ersten Bild lag die Trust-Zeile ("4,9 aus 104
- * Google-Bewertungen") gemessen 3px ueber der Leistenkante, der Secondary-CTA direkt
- * darueber. Solange die Leiste steht, bekommt der Fold auf Schmalgeraeten deshalb
- * zusaetzlich ihre Hoehe als Bodenluft. Faellt mit der Leiste weg, kostet also keinen
- * Weissraum im Normalzustand. */
 @media (width < 40rem) {
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-hero-fold] {
     padding-bottom: var(--cookie-banner-height);
   }
 }
 
-/* FIX 2 von 2 — die Leiste bleibt beim Einstieg sichtbar (rechtlicher Hinweis), räumt aber
- * nach dem ersten Scroll die Inhaltsfläche frei; ohne Bestätigung erscheint sie auf der
- * nächsten Route wieder. So liegt sie auf keiner Scrollposition auf Fliesstext, Sektions-
- * kopf, Kartenkante oder Legal-Row. Gilt für jede Fläche, die `data-cookie-clear` setzt
- * (/faq, /team). */
-/* WhatsApp-Float auf /preise (Kritiker-Runde 3, Befund d-02: der Float lag auf den
- * Einzellektion-Preisen).
- * URSACHE ist eine Rechen-Kollision, kein Abstandsgefuehl: der Float ist 48px breit und sitzt
- * `right: 1.25rem` (site/WhatsAppFloat.tsx:25) — bei 1440px liegt seine linke Kante auf x=1372.
- * Die rechtsbuendige Preisspalte endet auf x=1388 (gemessen: JEDE Preis-<dd> meldet right=1388,
- * scratch/pv3-measure.cjs). Die Spalten ueberlappen sich also um 16px; kein Verschieben nach
- * rechts kann das aufloesen, weil beide an derselben Kante haengen.
- * /preise ist die einzige Flaeche, deren Nutzlast eine rechtsbuendige Zahlenspalte ist — hier
- * gilt darum dieselbe Entscheidung, die die Startseite schon trifft (HomePage.tsx:105,
- * `float={false}`): kein Float. WhatsApp bleibt ueber Kontakt und Footer erreichbar, genau wie
- * auf Mobile, wo der Float ohnehin nie erscheint (sm:inline-flex). */
 body:has(.preise-page) a[href*='wa.me'][target='_blank'][title] {
   display: none;
 }
