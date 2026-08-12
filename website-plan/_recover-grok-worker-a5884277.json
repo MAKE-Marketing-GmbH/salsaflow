@@ -1,0 +1,12 @@
+{
+  "summary": "Growth-Critic fertig: SEO killt Conversion nicht, solange 1 Intent/1 CTA und ehrliche Claims gelten; sitewide „Gratis Schnupperstunde“ und leerer Vercel-Hero schon. CTA-Matrix route-spezifisch (C1–C5), P0-Fixes und Abnahmekriterien in 04c-growth-critic.md.",
+  "paths_written": [
+    "/root/clients/salsaflow-dc/website-plan/04c-growth-critic.md"
+  ],
+  "open_questions": [
+    "OQ-07: sitewide Schnupper vs. route-Primary freigeben",
+    "S-02: Schnupper wirklich gratis?",
+    "GBP Inhaber/Place-ID für Local Conversion",
+    "S-08: Analytics-Tool für Funnel-Events"
+  ]
+}

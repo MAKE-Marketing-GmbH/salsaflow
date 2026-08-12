@@ -1,0 +1,13 @@
+{
+  "summary": "Online-Präsenz-Audit (Reach/Social/GBP/Maps) abgeschlossen und in 01b-online-praesenz.md geschrieben. Kernbefunde, alle belegt: (1) Instagram @salsaflowdc ist der einzige echte Social-Kanal — im Repo sauber verlinkt (Footer + sameAs im LocalBusiness-Schema), auf der Live-Jimdo-Site dagegen komplett unverlinkt. (2) WhatsApp (wa.me/41764788411) ist als Conversion-Kanal sitewide verdrahtet. (3) Facebook, TikTok, YouTube, LinkedIn: nicht vorhanden bzw. nicht belegbar — als „nicht vorhanden\" dokumentiert, mit Empfehlung, keine halbtoten Profile anzulegen. (4) Grösste Lücke: Google Business Profile existiert (Maps-Treffer „Salsaflow Dance Company Basel\" belegt), aber Sterne/Rezensionen/Inhaberschaft sind nicht belegt (bewusst keine Zahlen erfunden) und das Repo verlinkt nur eine generische Maps-Such-URL statt eines echten Place-/Review-Links. (5) Live-Site läuft mit aktivem Facebook-Pixel ohne LocalBusiness-Schema — Relaunch soll das nicht mitnehmen. (6) NAP ist im Repo zeichengleich Footer↔Schema, Citations (local.ch, search.ch, Bing, Apple) als UNGEPRÜFT mit Planungs-Einträgen. Massnahmenplan P1–P3 plus 5 offene Fragen für 11-open-questions.md sind im Dokument. Kein Production-Code geändert, nur Planungs-Datei geschrieben.",
+  "paths_written": [
+    "/root/clients/salsaflow-dc/website-plan/01b-online-praesenz.md"
+  ],
+  "open_questions": [
+    "Wer besitzt den Google-Business-Profile-Login (Inhaberschaft/Verifizierung des Maps-Eintrags)?",
+    "Ist @salsaflowdc ein Business-Account; Follower-Zahl und letzte Aktivität (nur via Raphaels Login belegbar)?",
+    "Soll Instagram bewusst der einzige Social-Kanal bleiben (Empfehlung ja) — Entscheid zu Facebook/TikTok/YouTube?",
+    "Echter Maps-Place-Link bzw. GBP-Review-Kurzlink als Ersatz für die generische Such-URL im Footer?",
+    "Bestehen bereits Einträge auf local.ch/search.ch — mit welchen NAP-Daten?"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "summary": "Die beiden geforderten Planungsdateien wurden unter `website-plan/` erstellt. Der Meta-Plan enthält Quellen, Deliverables, Phasen, Gates G-IA/G-DESIGN, Rollen-Wellen ohne feste Worker-Namen, DoD, `SCOPE=FULL` sowie bewusstes OUT-OF-SCOPE. Das Fragen-Skelett enthält 16 offene Fragen mit Beleg-, Besitzer-, Prioritäts-, Gate- und Folgeaktionsfeldern. Validierung: `wc -l` meldet 188 bzw. 268 Zeilen; `grep` bestätigt `SCOPE=FULL`, G-IA, G-DESIGN und OUT-OF-SCOPE; `grep` listet OQ-01 bis OQ-16; Git zeigt nur die beiden angeforderten neuen Dateien als untracked. Kein App- oder Production-Code wurde geändert.",
+  "paths_written": [
+    "/root/clients/salsaflow-dc/website-plan/00-meta-plan.md",
+    "/root/clients/salsaflow-dc/website-plan/11-open-questions.md"
+  ],
+  "open_questions": [
+    "Die aktuelle verbindliche Vercel-URL ist im Plan als offen markiert, weil sie im Auftrag nicht angegeben war.",
+    "Asset-Freigaben, Proof-Quellen, Sprachumfang, Payment-/Datenstandort, Storno-Policy und Mailprovider sind im Fragen-Skelett als offene Kundenentscheidungen erfasst."
+  ]
+}

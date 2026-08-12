@@ -1,0 +1,14 @@
+{
+  "summary": "IA-Entwurf A fertig: zwei echte Sitemap-Alternativen in /root/clients/salsaflow-dc/website-plan/05-ia-entwurf-a.md (289 Zeilen).\n\n**A1 „Flach & Handlungsorientiert\":** 6 Top-Level + CTA, `/mehr` radikal aufgelöst (partys→/events-Hub, tanzschuhe→Footer-Route, collabs→Footer), `/events-workshops/*`→`/events/*`, `/kontakt/standort-raumvermietung`→`/kontakt/raum-mieten`. Kürzester Buchungsweg (3 Klicks). Empfohlen.\n\n**A2 „Zwei-Säulen: Lernen & Erleben\":** 5 Top-Level mit Dropdowns, `/mehr`→`/community` mit echter Absicht, `/fotos`→`/community/fotos`, `/mehr/partys`→`/events/socials-partys`. Besseres mentales Modell, skaliert stärker, aber ein Klick mehr zu Kernseiten.\n\nBeide enthalten: Nav-Verhalten Desktop/Mobile, Footer-Struktur, Stärken/Schwächen, Vergleichstabelle mit Empfehlung (A1), Booking-Flow-Einbettung nach frozen ARCHITEKTUR (Stripe Checkout, kein Kunden-Login, Wartelisten-Logik serverseitig, Privatstunden als Anfrage-Formular), 5 neue IA-Open-Questions (IA-01 bis IA-05: Collabs-Verb, Schnupperstunde-Buchbarkeit, Hochzeitstanz-Route, EN-URL-Strategie, Socials-Eigenständigkeit). Keine erfundenen Claims; Empfehlung als SCHÄTZUNG markiert. Nächster Schritt: Raphael entscheidet A1 vs A2, dann Redirect-Map.",
+  "paths_written": [
+    "/root/clients/salsaflow-dc/website-plan/05-ia-entwurf-a.md"
+  ],
+  "open_questions": [
+    "IA-01: /mehr/collabs behalten (A2-Community) oder Footer-only (A1)?",
+    "IA-02: Schnupperstunde eigenes Buchungsformular oder Kontakt-Formular?",
+    "IA-03: Hochzeitstanz als Abschnitt auf /privatstunden oder eigene Route /hochzeitstanz?",
+    "IA-04: EN-Version als /en/ Prefix oder Subdomain — muss vor Redirect-Map festgelegt werden",
+    "IA-05: /events/socials-partys eigene Route oder Merge in /events-Hub?",
+    "Raphael-Entscheid: Alternative A1 (flach, empfohlen) vs A2 (Zwei-Säulen)"
+  ]
+}

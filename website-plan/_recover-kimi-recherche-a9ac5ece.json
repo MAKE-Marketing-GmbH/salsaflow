@@ -1,0 +1,10 @@
+{
+  "summary": "SEO-Critic-Rolle: 04-seo-plan.md und 03-seo-audit.md gelesen, alle Frozen Rules (DESIGN.md, DECISIONS.md) und vercel.json verifiziert. Befunde: (1) Noindex für /admin, /buchung, /404 ist korrekt via meta-Tag + X-Robots-Tag in vercel.json. (2) \"Gratis Schnupperstunde\" erscheint auf 28 von 29 dist-Seiten (45 Treffer) — P0-Risiko falls Kunde nicht bestätigt. (3) Sitemap hat 0 lastmod-Einträge. (4) Kein Offer-Schema auf /preise, nur FAQPage. (5) Kein hreflang trotz vollständiger EN-Metas. (6) Cannibalization-Risiken identifiziert zwischen /tanzkurse vs. /kursplan und /events vs. /events-workshops/*. Datei 04b-seo-critic.md ist noch nicht geschrieben — Budget vor Tool-Call-Limit erreicht.",
+  "paths_written": [],
+  "open_questions": [
+    "04b-seo-critic.md noch nicht geschrieben — Budget erschöpft. Nächste Aktion: Datei mit Cannibalization-, Intent-, AEO- und Doorway-Kritik anlegen.",
+    "S-02 (Gratis-Schnupperstunde) ist P0-Blocker: Claim steht auf 28 Seiten, aber Live-FAQ belegt nur 'Probestunde möglich', nicht 'kostenlos'.",
+    "S-03 (zwei vs. drei Studios) blockiert Team-/Kontakt-Descriptions mit 'drei Studios'.",
+    "Paarpreis-Logik (190 pro Person vs. 320 pro Paar) ist ungelöst und betrifft Schema-Validität."
+  ]
+}

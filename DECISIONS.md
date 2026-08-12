@@ -3,6 +3,18 @@
 Diese Datei ist der Loop-Zustand. Jeder 20-Min-Fire liest sie + den Plan + DESIGN.md
 und macht die nächste offene Welle.
 
+## Website-Plan FULL (Raphael/Session 2026-08-12) — GATES GESCHLOSSEN
+
+- **Plan-Ordner:** [`website-plan/`](website-plan/) — Skill `website-plan`, SCOPE=FULL, REPO_STAND=MITNUTZEN, **kein Production-Code** in dieser Welle.
+- **G-IA:** Kunden-Baseline aus Eingang `docs/bilder/redesign-2026-08/eingang/SFDC-NEW-WEBSITE-STRUKTUR.docx` — Nav TANZKURSE | EVENTS & WORKSHOPS | TEAM | FOTOS | KONTAKT | MEHR; A-artig stabile URLs. IA-B Funnel und IA-C Schule/Nights **verworfen**.
+- **G-DESIGN:** **A — Warme Bühne** (Bleed-Hero, roter Kant-Marker, warm links, `bg-soft` Editorial). B Club-Nacht und C Warmes Papier **verworfen**.
+- **Typo-Bindung Plan/Bau:** Display **Cal Sans** + Body **Afacad** laut aktuellem [`DESIGN.md`](DESIGN.md) (nicht historisches Bricolage aus älterer Loop-Zeile unten).
+- **Claims:** keine Fake-Reviews/#1; Header-CTA bis Proof: **„Probestunde anfragen“** (nicht „Gratis …“ ohne Beleg).
+- **Hosting-Fakt:** `www.salsaflow-dc.com` = **Jimdo** live; Neu = `https://salsaflow-dc.vercel.app/`. DNS-Cutover + 301-Matrix vor SEO-Go-Live.
+- **Ship-Blocker (Critic FAIL, noch offen):** (1) **„Kein Supabase“** (diese Datei, Zeile Stack) vs **ARCHITEKTUR.md Supabase-first** — Bau darf nicht beide erfüllen, bis Raphael einmal entscheidet. (2) Ausführbare Redirect-Matrix-Datei fehlt. (3) Dual-Specs in `06-seiten/` — kanonisch nur nummerierte `0N-*.md`.
+- **Run-IDs:** `wf_c3729fb9-2f4` → `wf_bc3d758d-083` → `wf_29643fc6-3fa` (COMPLETE).
+- **Nächster Auftrag:** Blocker schließen **oder** „Bau“ mit Worktree von `main` nach Plan.
+
 ## Feste Entscheidungen (Raphael, 2026-06-30)
 - Schluss mit Lovable (Tool). Lovable-Setup lokal auf diesem Stack nachgebaut.
 - Schriften GESPERRT für immer: Hanken Grotesk, Inter, Plus Jakarta Sans und die aktive Ban-Liste aus `DESIGN.md`.
