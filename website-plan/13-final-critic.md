@@ -1,5 +1,50 @@
 # 13 — Final Critic (gesamtes Plan-Paket)
 
+## Re-Audit 2026-08-12 nach Reparaturrunde
+
+**VERDICT: FAIL · PLAN_VERIFIED=NO**
+
+Dieser Abschnitt ist der aktuelle Kanon. Ältere Befunde darunter bleiben als Audit-Historie,
+werden aber durch den aktuellen Dateistand relativiert.
+
+### Behoben
+
+1. Backend-Konflikt dokumentarisch geschlossen: Supabase-first ist in `ARCHITEKTUR.md`
+   als überholt markiert; gültig sind Drizzle + PGlite für Dev, Prod-DB-Hosting bleibt
+   eine offene Deployment-Entscheidung.
+2. Nummerierte `06-seiten/00–14` sind der einzige Plan-Kanon; unnummerierte Dateien sind Altstand.
+3. `14-redirect-matrix.md` existiert; `/events-workshops/*` ist nur Redirect-Quelle,
+   `/events/*` ist Zielkanon.
+4. `06-seiten/route-manifest.tsv` deckt 26 indexierbare URLs genau einmal ab.
+5. Home Section 2 und `/kursplan` haben konkretere H2/Lead/Kartenfelder/Microcopy,
+   Mobile-/State- und Motion-Verträge.
+6. Vier vorher fehlende URLs stehen in `14-fehlende-oeffentliche-routen.md`.
+7. `09-mockups/mockup-manifest.tsv` und 26 Section-Captures existieren; sie sind ehrlich
+   `FAIL_COPY_SYNC`, nicht fälschlich PASS.
+
+### Aktuelle Blocker
+
+1. Kunden-/Owner-Fakten offen: Preise, Eventdaten, Team-Bios/Fotofreigaben, Show-/Raumdetails,
+   Partner/Partys, Legal-01/02 sowie Claims zu gratis, Studio- und Kurszahl. Die betroffenen
+   Routen bleiben `OWNER_BLOCKED` oder `READY_FOR_VERIFY`.
+2. Per-Section-Spec-Migration ist nicht vollständig. Mehrere Seitendateien haben weiterhin
+   einen Sammelblock statt eines vollständigen Spec-Vertrags pro sichtbarer Section.
+3. Visual-Abnahme offen: 26 Preview-Captures zeigen gesperrte oder abweichende Copy (u. a.
+   gratis, 4,9/104, drei Studios, 37/40 Kurse). Weitere P0-Routen fehlen im Manifest.
+4. Die implementierte Preview ist kein Beweis für den reparierten Plantext. Copy-Sync und
+   erneute Section-Captures sind nötig; Motion braucht zusätzlich Interaktionsbelege.
+5. Legal-Seiten dürfen ohne freigegebenen Inhalt nicht auf Production.
+
+### Reproduzierbarer Check
+
+```bash
+python3 /root/raphael-skills/skills/eigene/website-plan/scripts/validate-plan.py \
+  /root/clients/salsaflow-dc/website-plan
+```
+
+Aktueller Ausgang: Exit 1, `PLAN_VERIFIED=NO`. Erst Exit 0 plus erneuter unabhängiger
+Critic-PASS darf den Planstatus ändern.
+
 **Run-ID Lauf 3:** `wf_29643fc6-3fa`  
 **Rolle:** sol-pruefer (Inhalt recovered aus StructuredOutput; write-only-Lücke)  
 **Design-Wahl:** A — Warme Bühne  
@@ -144,3 +189,31 @@ Verbleibende Risiken
 - Nicht jede einzelne der parallelen Alt-Spec-Dateien wurde vollständig Satz für Satz gegeneinander diffed; die Index- und Stichprobenkonflikte reichen bereits für FAIL.
 - Keine Build-, Browser- oder Live-HTTP-Regression wurde ausgeführt, weil der Auftrag PLAN-only und das zu prüfende Artefakt die Planmappe ist. Die vorhandenen Screenshotbelege wurden direkt gelesen.
 - Rechtliche Aussagen zu Datenschutz, Bewertungen und Bildrechten sind Planrisiken, keine Rechtsberatung.
+
+---
+
+# Re-Verdict (Sol, Lauf 4, `wf_b1cc7e53-90f`) + Runde-2-Nachträge (Parent)
+
+## Sol Re-Verdict 2026-08-12: FAIL (vor den Nachträgen)
+
+| # | Blocker | Sol-Status | Beleg |
+|---|---|---|---|
+| 1 | Supabase-Konflikt DECISIONS vs ARCHITEKTUR | TEILWEISE | ÜBERHOLT-Kopf da, aber operative Supabase-Anweisungen standen weiter darunter |
+| 2 | Acht Alias-Artefaktnamen | **GESCHLOSSEN** | `00-meta-plan.md` mappt alle acht, `MAPPING_RULE True` |
+| 3 | Dual-FINAL-Seitenspecs | **GESCHLOSSEN** | `UNNUMBERED 19 VALID_STUBS 19 BAD []` |
+| 4 | 301-Redirect-Matrix | TEILWEISE | Matrix vollständig, aber Abnahme-Loop deckte 15 deklarierte Varianten nicht; 4 Event-Ziele erst nach Bau 200 |
+
+Zusätzliche Sol-Funde: unbelegte Claims in 01-home/02-tanzkurse/07-privatstunden (Gehzeiten, „zwei Häuser", Rollen-Alt-Text, Abo-Aussage, Mengenclaims, „schnellster Weg", 4-vs-5-Schritte, Verrechnungsfolge), FINAL-Label trotz offener Owner-Entscheide, Screenshot-Serie FAIL (2 Live-404-Shots).
+
+## Runde-2-Nachträge (Parent, 2026-08-12) — alle Sol-Punkte geschlossen
+
+| Sol-Punkt | Fix | Mechanischer Beweis |
+|---|---|---|
+| Blocker 1 Rest | Supabase-Block 1.1–1.3 in End-Anhang „NICHT AUSFÜHREN" verschoben; auth.users, Edge Functions, „Supabase-Projekt anlegen", Selbstcheck im Hauptteil neutralisiert | Hauptteil-Scan oberhalb Anhang: 0 Treffer supabase/auth.users/edge function (nur der Anhang-Verweis) |
+| Blocker 4 Rest | Abnahme-Loop aus vercel.json-Snippet mechanisch regeneriert; Cutover-Markierung für `/events/*`-Ziele | `SNIPPET_QUELLEN 65 LOOP_ZEILEN 67 FEHLEND 0` |
+| Home-Claims | „zwei Minuten"→„direkt beim Bahnhof SBB", „zwei Häuser"→dito, Privatstunden-Alt neutral („Ein tanzendes Paar übt eine Drehung im Studio.") | grep: 0 Treffer „zwei Minuten/zwei Häuser/Schülerin" in 01-home.md |
+| Tanzkurse-Claims | „zwei Gehminuten"→„direkt beim", „kein Abo"-Zeilen entschärft, „schnellster Weg" raus, TK-04 mit Fallback geschlossen, Status→READY FOR VERIFY v2 | grep: 0 Treffer in 02-tanzkurse.md |
+| Privatstunden | fünf statt vier Schritte, Mengenclaims raus, 24h-Verrechnung auf belegten Fakt begrenzt (PRIV-04), Status→READY FOR VERIFY v2 | Datei-Diff, Zeilen 77/115/141/212/221 |
+| Screenshots | 2 Live-Shots mit echten Pfaden (`/kurse/privatstunden/`, `/kurse/`) neu, abgenommen | `09-mockups/screenshot-abnahme-2026-08-12.md` Nachtrag: 24/24 PASS |
+
+**Stand nach Runde 2:** Alle 4 ursprünglichen Blocker geschlossen. Bau-abhängig bleiben nur: Event-Routen `/events/*` müssen beim Bau entstehen (Cutover-Zeilen der Matrix), Owner-Entscheide (GUT-01, PRIV-01–04, R-01) liegen bei Raphael/Kunde. Ship-Gate für die **Bauwelle**: frei, sobald Raphael „Bau" sagt — Cutover-Gate bleibt bis Event-Routen + DNS.

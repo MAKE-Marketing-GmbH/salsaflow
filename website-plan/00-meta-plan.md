@@ -14,7 +14,7 @@ Dieses Dokument steuert die vollständige Planungs- und Audit-Welle für die Web
 - Live-Site und aktuelle Vercel-Site anhand reproduzierbarer Browser-/CDP-Screenshots kritisch verglichen sind.
 - Alle im öffentlichen Website-Content verwendeten Bilder einen passenden Alt-Text oder eine begründete Kennzeichnung als dekorativ haben.
 - Live `/fotos-1/` als Bild-Quelle der Wahrheit gegen die Repo-Assets geprüft ist; Unterschiede, Qualität und Ersatzkandidaten sind dokumentiert.
-- Die Privatstunden-Bilder auf der Vercel-Repo-Seite als eigener Asset-Check behandelt sind; schlechte oder niedrig aufgelöste Kandidaten werden nur durch belegte Live-/Repo-Assets ersetzt.
+- Die Privatstunden-Bilder auf der Vercel-Repo-Seite als eigener Asset-Check behandelt sind; semantisch ungeeignete Kandidaten werden nur durch belegte Live-/Repo-Assets ersetzt (Auflösung ok).
 - Eine klare Informationsarchitektur (IA), SEO/AEO-Struktur und Layout-Logik vorliegt.
 - Der Backend-/Booking-/Payment-Flow als fachliche Planung beschrieben ist und die Frozen Rules aus [DECISIONS.md](/root/clients/salsaflow-dc/DECISIONS.md) sowie [ARCHITEKTUR.md](/root/clients/salsaflow-dc/ARCHITEKTUR.md) nicht bricht.
 - Für jede Welle ein Gate, ein überprüfbarer Output und ein Definition-of-Done vorliegen.
@@ -46,6 +46,21 @@ Dieses Dokument steuert die vollständige Planungs- und Audit-Welle für die Web
 - `find`, `file`, Bild-Dimensionen/Dateigrösse und Hash-Vergleich für Repo-Assets.
 - `grep`/AST- oder statischer Scan für `<img>`, Background-Images, `alt`, `aria-hidden`, SEO-Metadaten und JSON-LD.
 - HTTP-Status/Redirect-Check für Live-URLs.
+
+## Vertrags-Artefakt → tatsächliche Datei
+
+| Vertrags-Artefakt | Tatsächliche Datei |
+|---|---|
+| `01-live-critique` | [`01-firma-dossier.md`](/root/clients/salsaflow-dc/website-plan/01-firma-dossier.md) + Parent-Screenshot-Notizen |
+| `02-asset-audit` | [`02-asset-inventar.md`](/root/clients/salsaflow-dc/website-plan/02-asset-inventar.md) |
+| `03-alt-text-inventory` | [`02-asset-inventar.md`](/root/clients/salsaflow-dc/website-plan/02-asset-inventar.md), Alt-Spalte |
+| `04-ia-seo-aeo-plan` | [`04-seo-plan.md`](/root/clients/salsaflow-dc/website-plan/04-seo-plan.md) + [`05-sitemap-ia.md`](/root/clients/salsaflow-dc/website-plan/05-sitemap-ia.md) |
+| `05-layout-logic` | [`06-seiten/`](/root/clients/salsaflow-dc/website-plan/06-seiten/) — nummerierte Seiten-Specs |
+| `06-booking-backend-flow` | [`README-BACKEND.md`](/root/clients/salsaflow-dc/README-BACKEND.md) + [`ARCHITEKTUR.md`](/root/clients/salsaflow-dc/ARCHITEKTUR.md) |
+| `07-implementation-backlog` | [`10-roadmap.md`](/root/clients/salsaflow-dc/website-plan/10-roadmap.md) |
+| `08-qa-gates` | [`12-verbote-und-gates.md`](/root/clients/salsaflow-dc/website-plan/12-verbote-und-gates.md) + QA-Teil von [`07-design-system-plan.md`](/root/clients/salsaflow-dc/website-plan/07-design-system-plan.md) |
+
+Die folgenden Vertragsabschnitte verwenden diese tatsächlichen Dateinamen. Der DoD prüft die Artefakte über dieses Mapping, nicht über die überholten Vertragsnamen.
 
 ## 3. Deliverables
 
@@ -156,7 +171,7 @@ Rollen sind Fähigkeiten, keine festen Worker-Pflichtnamen. Die Zuweisung erfolg
 - Jedes verwendete informative Bild hat einen belegbaren Alt-Text; dekorative Bilder sind explizit als dekorativ markiert.
 - Live-Fotos und Repo-Assets sind mit überprüfbaren Pfaden/URLs, Dimensionen und Qualitätsentscheidungen verbunden.
 - Keine erfundenen Bewertungen, Stimmen, Zertifikate, Rankings, Namen, Zahlen oder Kundenbelege.
-- Backend-/Booking-/Payment-Plan stimmt mit ARCHITEKTUR.md überein: Supabase/RLS-Grenze, Drizzle, serverseitige Buchungsprüfung, Rollen-/Kapazitätslogik, Warteliste, Stripe Checkout, verifizierter Webhook.
+- Backend-/Booking-/Payment-Plan stimmt mit dem gültigen Stand überein: Drizzle + eingebettetes PGlite (dev), serverseitige Buchungsprüfung, Rollen-/Kapazitätslogik, Warteliste, Stripe Checkout, verifizierter Webhook; Prod-DB-Hosting ist bei Raphael offen.
 - G-IA und G-DESIGN sind als bestanden oder mit konkretem Blocker dokumentiert.
 - Keine Production-Datei wurde geändert; die Plan-Dateien sind die einzigen Outputs dieses Auftrags.
 

@@ -1,6 +1,6 @@
 # 06 — Seiten-Specs · Index und Humanizer-Vertrag
 
-**Status:** FINAL · Humanizer-Durchgang 2026-08-12
+**Status:** READY FOR VERIFY · Humanizer-Durchgang 2026-08-12 · Vollständigkeitsaudit offen
 **Rolle:** Humanizer (Copy final, entfloskelt)
 **Modus:** Planning only — kein Production-Code
 **Firma:** Salsaflow Dance Company (Salsa Flow Basel)
@@ -12,7 +12,7 @@
 
 Jede Datei in [`06-seiten/`](/root/clients/salsaflow-dc/website-plan/06-seiten/) beschreibt **eine** Seite: Job, Suchabsicht, Sections in Reihenfolge, fertige Copy, Bilder mit Alt-Text, interne Links, Zustände und — wo nötig — die Backend-Logik dahinter in Prosa.
 
-Die Copy in diesen Dateien ist **Endtext**, nicht Platzhalter-Prosa. Was hier steht, kann so gesetzt werden. Was nicht belegt ist, steht ausdrücklich als `PLACEHOLDER` da und ist damit ein sichtbarer offener Punkt, kein stiller Fehler.
+Die Copy in diesen Dateien ist der **Bauentwurf**. Bestätigte Blöcke können so gesetzt werden. Ein `OWNER-BLOCKER` darf dagegen weder veröffentlicht noch als `FINAL` gewertet werden; direkt daneben steht immer ein belegbarer Fallback, der ohne die offene Behauptung funktioniert.
 
 ## 2. Seitenmappe
 
@@ -31,6 +31,9 @@ Die Copy in diesen Dateien ist **Endtext**, nicht Platzhalter-Prosa. Was hier st
 | [`11-fotos.md`](/root/clients/salsaflow-dc/website-plan/06-seiten/11-fotos.md) | `/fotos` | P1 |
 | [`12-kontakt.md`](/root/clients/salsaflow-dc/website-plan/06-seiten/12-kontakt.md) | `/kontakt`, `/kontakt/standort-raumvermietung` | P0 |
 | [`13-mehr-faq.md`](/root/clients/salsaflow-dc/website-plan/06-seiten/13-mehr-faq.md) | `/mehr`, `/faq`, `/mehr/collabs` | P1 |
+| [`14-fehlende-oeffentliche-routen.md`](/root/clients/salsaflow-dc/website-plan/06-seiten/14-fehlende-oeffentliche-routen.md) | `/mehr/tanzschuhe`, `/mehr/partys`, `/impressum`, `/datenschutz` | P1/P0 Recht |
+
+**Route-Owner-Regel:** Jede indexierbare URL aus `05-sitemap-ia.md` steht genau einmal in dieser Tabelle. Gebündelte Dateien müssen für jede enthaltene URL eigene Meta-, H1-, H2-, Link- und Schema-Felder führen.
 
 ## 3. Humanizer-Vertrag
 
@@ -71,7 +74,7 @@ Diese Wendungen kommen in keiner Seite dieser Mappe vor und dürfen auch später
 
 ### 3.3 Belegregel
 
-Jede Zahl, jeder Preis, jeder Termin, jeder Name in dieser Mappe stammt aus dem Proof-Inventar in [`01-firma-dossier.md`](/root/clients/salsaflow-dc/website-plan/01-firma-dossier.md:180-215) (Abschnitt 8.1 `BELEGT`) oder aus dem Kunden-Eingang [`_kunden-sitemap-sfdc-struktur.md`](/root/clients/salsaflow-dc/website-plan/_kunden-sitemap-sfdc-struktur.md). Alles aus 8.2 (`LIVE-CLAIM`) und 8.3 (`UNGEPRÜFT`) ist entweder weggelassen oder als `PLACEHOLDER` markiert.
+Jede Zahl, jeder Preis, jeder Termin, jeder Name in dieser Mappe stammt aus dem Proof-Inventar in [`01-firma-dossier.md`](/root/clients/salsaflow-dc/website-plan/01-firma-dossier.md:180-215) (Abschnitt 8.1 `BELEGT`) oder aus dem Kunden-Eingang [`_kunden-sitemap-sfdc-struktur.md`](/root/clients/salsaflow-dc/website-plan/_kunden-sitemap-sfdc-struktur.md). Alles aus 8.2 (`LIVE-CLAIM`) und 8.3 (`UNGEPRÜFT`) ist entweder weggelassen oder als `OWNER-BLOCKER` markiert.
 
 Nicht verwendet, obwohl es auf der Live-Site steht:
 
@@ -82,7 +85,7 @@ Nicht verwendet, obwohl es auf der Live-Site steht:
 - „Erste Schnupperstunde gratis" — gesperrt bis Kundenfreigabe, siehe [`04-seo-plan.md`](/root/clients/salsaflow-dc/website-plan/04-seo-plan.md:201-215).
 - „rund 40 Kurse pro Woche", „drei Studios" — widersprüchlich bzw. ungeprüft.
 
-### 3.4 Offene Punkte, die in der Copy sichtbar bleiben
+### 3.4 Offene Punkte, die als OWNER-BLOCKER sichtbar bleiben
 
 | ID | Offen | Betroffene Seite |
 |---|---|---|
@@ -101,5 +104,7 @@ Nicht verwendet, obwohl es auf der Live-Site steht:
 - Jedes inhaltliche Bild hat einen bildgenauen Alt-Text.
 - Jede Geldseite verlinkt mindestens fünf Mal sinnvoll intern.
 - Backend-Logik ist in Prosa erklärt, nicht als Code.
+- Keine Datei trägt `FINAL`, solange `OWNER-BLOCKER`, `PLACEHOLDER`, `wie oben` oder ein roter Final Critic vorhanden ist.
+- Jede sichtbare Section führt ihren eigenen Copy-, Layout-, State-, Motion-, SEO- und Mockup-Vertrag; ein Sammelblock am Dateiende reicht nicht.
 
 **Ende des Humanizer-Vertrags.**

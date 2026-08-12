@@ -39,11 +39,13 @@
 
 ## G-DESIGN (2026-08-12) — ENTSCHIEDEN
 
+G-DESIGN_CHOICE: A
+
 | Feld | Wert |
 |---|---|
 | Run-ID Lauf 2 (Vorbereitung) | `wf_bc3d758d-083` |
 | Run-ID Lauf 3 (Close) | `wf_29643fc6-3fa` |
-| Status | **ENTSCHIEDEN: A — Warme Bühne** (Raphael 2026-08-12) |
+| Status | **RICHTUNG ENTSCHIEDEN: A — Warme Bühne; VISUELLE ABNAHME RE-OPENED** |
 | Empfehlung war | **A — Warme Bühne** |
 | Briefs | [`09-mockups/briefs.md`](/root/clients/salsaflow-dc/website-plan/09-mockups/briefs.md) |
 | Screenshots (Anti-/Ist-Belege) | [`screenshots/`](/root/clients/salsaflow-dc/website-plan/screenshots/) — v. a. `vercel-home.png` (leerer Hero), `live-home.png`, `vercel-privatstunden.png` |
@@ -57,14 +59,14 @@
 |---|---|---|---|
 | **A Warme Bühne** | Bleed-Hero, Marker, warm links, Editorial darunter; Premium + warm; starke Foto-Abhängigkeit | Braucht gutes Hero-Asset (vorhanden: `hero-paar-studiowand-01`) | **GEWÄHLT** |
 | B Club-Nacht | Dunkler Auftakt `surface-dark`, weisse Display-Zeile, heller Bildstreifen | Risiko Doppel-Dunkel; anderer Markenton | **VERWORFEN** |
-| C Warmes Papier | Community zuerst, rundes Hero + Crowd-Streifen, Karten-Insel Founder | Robust bei schwächeren Fotos; Risiko „zu lieb“; paper-warm-Token fehlt | **VERWORFEN** als Hauptrichtung |
+| C Warmes Papier | Community zuerst, rundes Hero + Crowd-Streifen, Karten-Insel Founder | Robust bei schwächeren Fotos; Risiko „zu lieb“; Token `--color-paper-warm` existiert in `src/index.css` | **VERWORFEN** als Hauptrichtung |
 
 ### Fallback-Hinweis (nur C, kein Default)
 
 **C — Warmes Papier** bleibt **kein** aktives Design und **kein** stiller Default.  
 Nur wenn die gewählte A-Umsetzung an **Foto-Qualität** scheitert (Hero-LCP unbrauchbar, Studio-Motive ungeeignet) und Raphael ausdrücklich umschaltet:
 
-1. Zuerst **paper-warm**-Token in [`DESIGN.md`](/root/clients/salsaflow-dc/DESIGN.md) eintragen (Token-Law) — nicht ad hoc in Komponenten.
+1. Das vorhandene **paper-warm**-Token `--color-paper-warm` in [`src/index.css`](/root/clients/salsaflow-dc/src/index.css) verwenden — nicht ad hoc neue Tokens in Komponenten anlegen.
 2. Dann Brief C aus [`09-mockups/briefs.md`](/root/clients/salsaflow-dc/website-plan/09-mockups/briefs.md) und Crowd-/Founder-Assets.
 3. Gate G-DESIGN hier mit Datum und neuer User-Antwort nachziehen.
 

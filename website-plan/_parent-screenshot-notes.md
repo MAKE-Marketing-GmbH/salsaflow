@@ -13,6 +13,15 @@
   - https://salsaflow-1cb9wgrkx-raphael-2645s-projects.vercel.app/
 - Plan muss DNS-Cutover + Redirect-Map Jimdo→Neue URLs behandeln.
 
+## DNS / Hosting-Fakt (kritisch)
+
+- `www.salsaflow-dc.com` antwortet mit **Jimdo** (`x-jimdo-wid`, Cloudflare).
+- Vercel-Deployment `salsaflow-1cb9wgrkx-…` listet Aliases inkl. `www.salsaflow-dc.com`, aber **Live-Traffic ist noch Jimdo**.
+- Neue Site erreichbar unter:
+  - https://salsaflow-dc.vercel.app/
+  - https://salsaflow-1cb9wgrkx-raphael-2645s-projects.vercel.app/
+- Plan muss DNS-Cutover + Redirect-Map Jimdo→Neue URLs behandeln.
+
 ## Live Jimdo (www) — Screenshot-Kritik
 
 ### Home (`live-home.png`)
@@ -77,3 +86,17 @@ Plan soll erklären: Schnupperstunde vs Kursbuchung vs Privatstunden-Anfrage vs 
 - `vercel-home.png` / `vercel-home-full.png`
 - `vercel-privatstunden.png` / `vercel-privat-full.png`
 - `vercel-fotos.png`
+
+## Neuer Satz 2026-08-12
+
+- **Methode:** Neue CDP-Seite, `reducedMotion: reduce` vor `goto`, `networkidle`, Cookie-Button-Versuch, langsamer Scroll bis unten und zurück, Bild-Complete-Prüfung bis 8 Sekunden, 800 ms Ruhe, danach PNG. Fullpage analog. Beleg: [`shoot.cjs`](/root/clients/salsaflow-dc/website-plan/screenshots/_tools/shoot.cjs).
+- **Vercel-Dateien:** 20 PNGs im Ordner [`2026-08-12/`](/root/clients/salsaflow-dc/website-plan/screenshots/2026-08-12/): Desktop Above-the-fold und Fullpage für home, tanzkurse, kursplan, events, team, fotos, kontakt, mehr; Mobile Above-the-fold für home, tanzkurse, kursplan, kontakt.
+- **Live-Dateien:** 4 Desktop-Fullpage-PNGs: [`live-home-desktop-full.png`](/root/clients/salsaflow-dc/website-plan/screenshots/2026-08-12/live-home-desktop-full.png), [`live-fotos-desktop-full.png`](/root/clients/salsaflow-dc/website-plan/screenshots/2026-08-12/live-fotos-desktop-full.png), [`live-privatstunden-desktop-full.png`](/root/clients/salsaflow-dc/website-plan/screenshots/2026-08-12/live-privatstunden-desktop-full.png), [`live-kurse-desktop-full.png`](/root/clients/salsaflow-dc/website-plan/screenshots/2026-08-12/live-kurse-desktop-full.png).
+- **Befund Vercel:** Alle 8 Desktop-Above-the-fold-Shots und 4 Mobile-Shots zeigen sichtbare Inhalte; Hero-Bild und Headline sind bei home vorhanden. `tanzkurse` zeigt Headline, Kennzahlen und Kursfoto mobil; `kursplan` zeigt Headline, Kursfoto und Tagesauswahl; `kontakt` zeigt Headline und Kontaktkarte. Beleg: visuelle Prüfung mit Read-Tool der 12 Dateien.
+- **Befund Live:** Alle vier geforderten Seiten wurden als Desktop-Fullpage erzeugt. Die Live-Navigation lieferte während des Laufs keinen sicheren Privatstunden-/Kursseiten-Link; deshalb wurden die kanonischen Fallbacks `/privatstunden/` und `/tanzkurse/` verwendet.
+- **Archiv:** Die 10 alten PNGs wurden per `mv` nach [`_alt/`](/root/clients/salsaflow-dc/website-plan/screenshots/_alt/) verschoben; neue PNGs liegen ausschliesslich im Datumsordner.
+
+## Nachtrag Runde 2 (2026-08-12)
+- `2026-08-12/live-privatstunden-desktop-full.png` neu: echter Pfad `/kurse/privatstunden/` (vorher 404-Shot). Zeigt Live-Preise 1P 100/5×450, 2P 130/5×600 — deckt sich mit Plan-Fakten.
+- `2026-08-12/live-kurse-desktop-full.png` neu: echter Pfad `/kurse/` (vorher 404-Shot). Titel „Reguläre Tanzkurzse" (Live-Tippfehler), 4730px Content.
+- Werkzeug: `screenshots/_tools/reshoot-live2-rawcdp.cjs` (Roh-CDP, weil Playwright-connectOverCDP an fremden Chrome-Targets hängt).

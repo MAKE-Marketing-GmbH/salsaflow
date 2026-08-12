@@ -1,6 +1,6 @@
 # 13 — Mehr, FAQ und Collabs `/mehr` · `/faq` · `/mehr/collabs`
 
-**Status:** FINAL (Copy humanisiert 2026-08-12)
+**Status:** READY FOR VERIFY (Copy humanisiert 2026-08-12)
 **Priorität:** P1 (FAQ ist faktisch P0 — sie beantwortet die Fragen vor der Buchung)
 **Nav-Label:** MEHR (Kunden-Baseline)
 
@@ -41,7 +41,16 @@ Collabs
   →  /mehr/collabs
 ```
 
-Weitere Kacheln kommen dazu, wenn die entsprechenden Seiten belegten Inhalt haben — `/mehr/tanzschuhe` und `/mehr/partys` bestehen im Repo, aber nur mit Inhalt gehören sie hierher ([`05-sitemap-ia.md`](/root/clients/salsaflow-dc/website-plan/05-sitemap-ia.md:76)).
+### A.4 `/mehr/partys` und `/mehr/tanzschuhe` — beide vorerst gestrichen
+
+Der SEO-Plan mappt beide Routen mit einem eigenen Hauptbegriff: `/mehr/partys` auf `salsa bachata partys basel`, `/mehr/tanzschuhe` auf `tanzschuhe basel` ([`04-seo-plan.md`](/root/clients/salsaflow-dc/website-plan/04-seo-plan.md):74-83). Für beide gibt es keinen belegten Inhalt:
+
+- **`/mehr/partys`** müsste fremde Veranstaltungen und Termine anderer Anbieter nennen. Nichts davon ist im Proof-Inventar belegt, und eine Terminliste über Dritte veraltet ohne Pflegeprozess innerhalb weniger Wochen.
+- **`/mehr/tanzschuhe`** wäre ein Ratgeber mit Kaufempfehlungen. Belegt ist nur die Kollektion bei 2332 Dancewear; eine Empfehlung darüber hinaus wäre erfunden.
+
+**Entscheidung:** Beide Routen entfallen bis auf Weiteres aus Seitenmappe, Navigation, Kachelliste und internem Verlinkungsplan. Sie werden von keiner Seite verlinkt — insbesondere nicht von `/events` ([`08-events.md`](/root/clients/salsaflow-dc/website-plan/06-seiten/08-events.md), Abschnitt 7). Die Suchabsicht „wo kann ich in Basel tanzen gehen" bedient bis dahin `/events/danceflow-night`.
+
+→ **Entscheidung MEHR-01.** Sobald die Schule Inhalt für eine der beiden Adressen freigibt, entsteht eine eigene nummerierte Seitenspezifikation und erst danach ein Link. Halbfertige Zielrouten werden nicht verlinkt ([`05-sitemap-ia.md`](/root/clients/salsaflow-dc/website-plan/05-sitemap-ia.md:76)).
 
 ---
 
@@ -59,7 +68,18 @@ Description: Wie lange dauert ein Kurs, was kostet er, brauche ich einen
              Partner? Die häufigsten Fragen kurz beantwortet.
 ```
 
-## B.3 Bauform jeder Antwort
+## B.3 Kopf
+
+```text
+H1:    Fragen zu Tanzkursen in Basel
+Lead:  Hier stehen die Antworten, die zwischen Interesse und Anmeldung stehen:
+       Kursdauer, Preis, Partner, Level und Einstieg. Wir unterrichten an der
+       Elisabethenanlage 7 in Basel, direkt beim Bahnhof SBB.
+```
+
+Genau eine H1 auf dieser Adresse, fünf Wörter, mit Hauptbegriff und Ort ([`05b-copy-style.md`](/root/clients/salsaflow-dc/website-plan/05b-copy-style.md):230-236). Alle einzelnen Fragen bleiben H2.
+
+## B.4 Bauform jeder Antwort
 
 Diese Form ist verbindlich:
 
@@ -74,7 +94,7 @@ Der erste Satz muss ohne die Frage funktionieren. Ein Assistent, der ihn zitiert
 
 Falsch: `Das kommt ganz darauf an!` — Richtig: `Ein Kursblock dauert 8 Wochen.`
 
-## B.4 Die Fragen
+## B.5 Die Fragen
 
 Alle neun Themen stammen aus der Live-FAQ (P09, [`01-firma-dossier.md`](/root/clients/salsaflow-dc/website-plan/01-firma-dossier.md:170-180)).
 
@@ -88,10 +108,13 @@ verlängert sich dann entsprechend.
 
 ```text
 H2:  Was kostet ein Kurs?
-Ein Kursblock kostet CHF 190, für Studierende CHF 160.
-Eine einzelne Lektion kostet CHF 30, für Studierende CHF 25.
+Ein Kursblock kostet CHF 190 pro Person und umfasst 8 Lektionen zu je 60 Minuten.
+Ob es einen Studierendentarif gibt und was eine einzelne Lektion kostet, sagen
+wir dir auf Anfrage — schreib uns kurz.
 →  Alle Preise ansehen  /preise
 ```
+
+Nur CHF 190 ist als Website-Zahl freigegeben ([`05b-copy-style.md`](/root/clients/salsaflow-dc/website-plan/05b-copy-style.md):391-401). Studierendentarif und Einzellektion stehen ohne Betrag, bis STUD-01 und EINZ-01 entschieden sind ([`05-preise.md`](/root/clients/salsaflow-dc/website-plan/06-seiten/05-preise.md):106-113).
 
 ```text
 H2:  Brauche ich einen Tanzpartner?
@@ -103,12 +126,33 @@ tanzen. Wenn ihr zu zweit kommt, geht das natürlich auch.
 
 ```text
 H2:  Ich habe noch nie getanzt. Kann ich trotzdem kommen?
-Ja, dafür ist Stufe 1 da — dort setzen wir nichts voraus.
+Ja, dafür ist Stufe 1 da. Dort setzen wir nichts voraus.
 Die meisten in einem Anfängerkurs haben vorher noch nie getanzt.
 →  Wie die Level aufgebaut sind  /kursaufbau
 ```
 
 Der zweite Satz braucht Bestätigung. → **Entscheidung FAQ-01.** Ohne Bestätigung entfällt er.
+
+```text
+H2:  Ich bin über 40 und komplett unsportlich. Passt das?
+Ja. Stufe 1 setzt weder Alter noch Kondition voraus.
+Eine Lektion dauert 60 Minuten, und Salsa und Bachata lernst du über Schritte
+und Timing, nicht über Kraft oder Beweglichkeit. Du bestimmst selbst, wie viel
+du gibst.
+→  Wie die Level aufgebaut sind  /kursaufbau
+```
+
+Die Antwort stützt sich nur auf Belegtes: Stufe 1 startet bei null ([`05b-copy-style.md`](/root/clients/salsaflow-dc/website-plan/05b-copy-style.md):122) und eine Lektion dauert 60 Minuten. Sie behauptet keine Altersstruktur der Gruppen und kein Fitness-Ergebnis. Die Frage ist im SEO-Plan ausdrücklich für `/faq` vorgesehen ([`04-seo-plan.md`](/root/clients/salsaflow-dc/website-plan/04-seo-plan.md):363).
+
+```text
+H2:  Kann ich als Frau die Führung lernen?
+Ja, du wählst bei uns die Rolle, nicht dein Geschlecht.
+Führen und Folgen sind zwei Techniken, die beide lernbar sind — in beide
+Richtungen. Sag uns bei der Anmeldung, welche Rolle du tanzen willst.
+→  Tanzkurse ansehen  /tanzkurse
+```
+
+Ob die Rollenwahl in jeder Gruppe frei möglich ist, hängt an der Zusammensetzung des Kurses. → **Entscheidung FAQ-03.** Ohne Bestätigung lautet der zweite Satz nur: `Führen und Folgen sind zwei Techniken, die beide lernbar sind. Schreib uns, welche Rolle du tanzen willst.` Die Frage ist im SEO-Plan ausdrücklich für `/faq` vorgesehen ([`04-seo-plan.md`](/root/clients/salsaflow-dc/website-plan/04-seo-plan.md):364).
 
 ```text
 H2:  Woher weiss ich, welches Level zu mir passt?
@@ -152,7 +196,7 @@ Die Schuhaussage braucht Bestätigung. → **Entscheidung FAQ-02.**
 ```text
 H2:  Ich habe kein Talent. Bringt das etwas?
 Ja. Tanzen ist eine Technik, keine Begabung.
-Am Anfang fühlt sich fast alles falsch an — nach ein paar Wochen nicht mehr.
+Am Anfang fühlt sich fast alles falsch an. Nach ein paar Wochen nicht mehr.
 Genau dafür ist ein Kurs über 8 Wochen da.
 ```
 
@@ -173,19 +217,19 @@ Einzellektion bis 24 Stunden vorher.
 
 Beide Fristen aus den Live-AGB belegt ([`01-firma-dossier.md`](/root/clients/salsaflow-dc/website-plan/01-firma-dossier.md:62-63)).
 
-## B.5 Strukturierte Daten
+## B.6 Strukturierte Daten
 
 Die FAQ bekommt eine maschinenlesbare Auszeichnung — aber nur für Fragen, deren Antwort vollständig sichtbar auf der Seite steht. Eine Auszeichnung für Inhalte, die man erst aufklappen muss oder die gar nicht dastehen, ist ein Fehler.
 
-Keine Auszeichnung für Fragen mit `PLACEHOLDER` oder offener Entscheidung.
+Keine Auszeichnung für Fragen mit `OWNER-BLOCKER` oder offener Entscheidung.
 
-## B.6 Aufklappen oder offen?
+## B.7 Aufklappen oder offen?
 
 Alle Antworten stehen **offen** auf der Seite, nicht hinter einem Klick. Begründung: Diese Seite hat wenige Fragen und wird gelesen, nicht überflogen. Aufklappbare Elemente helfen bei fünfzig Fragen, nicht bei zwölf — und verstecken den Text vor Leuten, die auf der Seite suchen.
 
 Gliederung stattdessen über Zwischenüberschriften: `Kurse` · `Preise und Anmeldung` · `Vor deinem ersten Mal` · `Ort`.
 
-## B.7 Interne Links
+## B.8 Interne Links
 
 Jede Antwort, die eine Seite betrifft, verlinkt sie: `/kursplan` (4×), `/preise`, `/tanzkurse`, `/kursaufbau`, `/kontakt`, `/kontakt#schnupperstunde`.
 
@@ -206,7 +250,7 @@ Description: Unsere Zusammenarbeit mit 2332 Dancewear.
 
 ```text
 H1:    Collabs
-Lead:  PLACEHOLDER — worin die Zusammenarbeit besteht.
+Lead:  OWNER-BLOCKER — worin die Zusammenarbeit besteht.
 ```
 
 Belegt ist nur der Link aus dem Kunden-Eingang: `https://www.2332dancewear.com/collections/salsaflow` ([`_kunden-sitemap-sfdc-struktur.md`](/root/clients/salsaflow-dc/website-plan/_kunden-sitemap-sfdc-struktur.md:43)). Dass es eine eigene Salsaflow-Kollektion gibt, geht aus der Adresse hervor.
@@ -225,9 +269,16 @@ Bis dahin bleibt die Seite kurz und ehrlich:
 H1:   Collabs
 Body: Mit 2332 Dancewear gibt es eine eigene Salsaflow-Kollektion.
 CTA:  Kollektion ansehen  →  2332dancewear.com/collections/salsaflow
+Zeile darunter: Was du für den Kursstart wirklich brauchst, steht in unseren
+      häufigen Fragen. Bequeme Kleidung und Schuhe mit glatter Sohle reichen
+      am Anfang.
+Link: Häufige Fragen ansehen  →  /faq
+Link: Alle Tanzkurse ansehen  →  /tanzkurse
 ```
 
 Der ausgehende Link öffnet in einem neuen Tab und ist als externer Link gekennzeichnet.
+
+Die beiden internen Links sind Pflicht: Sonst endet diese Adresse als externe Sackgasse und erfüllt das Kriterium „interne Links pro Seite" nicht ([`04-seo-plan.md`](/root/clients/salsaflow-dc/website-plan/04-seo-plan.md):231-237). Sie passen zum Seitenjob, weil jemand, der auf Tanzkleidung schaut, meistens vor dem ersten Kurs steht.
 
 ## C.3 Was hier nicht passiert
 
@@ -241,7 +292,11 @@ Keine Produktbilder ohne Nutzungsrecht. Keine Preise der Partnerseite — sie ä
 |---|---|---|
 | FAQ-01 | „Die meisten haben vorher nie getanzt" belegbar? | Satz entfällt |
 | FAQ-02 | Schuhempfehlung für den Anfang | Satz entfällt |
+| FAQ-03 | Rollenwahl in jeder Gruppe frei möglich? | Kurzfassung ohne Zusage, „schreib uns"-Satz |
 | COL-01 | Inhalt und Art der Collab | Kurzfassung mit Link |
+| MEHR-01 | Inhalt für `/mehr/partys` und `/mehr/tanzschuhe` | beide Routen entfallen, keine Verlinkung |
+| STUD-01 | Studierendentarif freigegeben? | kein Betrag in der FAQ, Verweis auf `/preise` |
+| EINZ-01 | Preis einer einzelnen Lektion? | kein Betrag in der FAQ, Verweis auf `/preise` |
 | S-02 | Probestunde gratis? | ohne Preisaussage |
 
 ## E — Abnahme
@@ -251,7 +306,10 @@ Keine Produktbilder ohne Nutzungsrecht. Keine Preise der Partnerseite — sie ä
 - Strukturierte Daten nur für sichtbare, bestätigte Antworten.
 - Antworten stehen offen, nicht hinter Klick.
 - `/mehr` bleibt eine schlanke Verteilerseite.
-- Collabs ohne unbelegte Rabatt- oder Partnerbehauptung.
+- Collabs ohne unbelegte Rabatt- oder Partnerbehauptung, mit mindestens zwei internen Links.
+- `/faq` hat genau eine H1; alle Fragen sind H2.
+- In der FAQ erscheint als Preiszahl ausschliesslich CHF 190.
+- Keine Verlinkung auf `/mehr/partys` oder `/mehr/tanzschuhe`, solange sie keine eigene Seitenspezifikation haben.
 
 ## 12. Section-Spec — Layout, Interaktion und Mockup-Brief
 
@@ -265,7 +323,7 @@ Keine Produktbilder ohne Nutzungsrecht. Keine Preise der Partnerseite — sie ä
 
 ### Motion und Zustände
 - Stagger-Fade-up für Kacheln und FAQ-Gruppen; Antworten bleiben offen und ohne Accordion-Abhängigkeit. Reduced Motion sofort.
-- PLACEHOLDER-Antworten erhalten sichtbaren offenen Status; keine strukturierte Auszeichnung für unvollständige Inhalte.
+- OWNER-BLOCKER-Antworten erhalten sichtbaren offenen Status; keine strukturierte Auszeichnung für unvollständige Inhalte.
 
 ### Assets und Alt
 - FAQ ohne Bild. Collab nur mit freigegebenen Partnerassets; keine Produktbilder oder Preise von der externen Seite kopieren.

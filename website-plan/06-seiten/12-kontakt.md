@@ -1,6 +1,6 @@
 # 12 — Kontakt `/kontakt` und `/kontakt/standort-raumvermietung`
 
-**Status:** FINAL (Copy humanisiert 2026-08-12)
+**Status:** READY FOR VERIFY (Copy humanisiert 2026-08-12)
 **Priorität:** P0
 **Job:** Der Landeplatz für alle Probestunden-CTAs der Website. Diese Seite muss die Anfrage entgegennehmen, nicht nur eine Adresse zeigen.
 **Nav-Label:** KONTAKT (Kunden-Baseline)
@@ -13,10 +13,14 @@
 ## A.1 Meta
 
 ```text
-Title:       Kontakt — Salsaflow Dance Company | Elisabethenanlage 7, Basel
+Title:       Tanzschule Basel — Kontakt und Anfahrt | Salsaflow
+             (54 Zeichen)
 Description: Schreib uns oder komm vorbei: Elisabethenanlage 7, 1. Stock,
              4051 Basel, beim Bahnhof SBB. Auch per WhatsApp erreichbar.
+             (128 Zeichen)
 ```
+
+Der Hauptbegriff `tanzschule basel kontakt` ([`04-seo-plan.md`](/root/clients/salsaflow-dc/website-plan/04-seo-plan.md):83) steht sinngemäss vorn im Title, in der H1 und im ersten Satz des Leads. Title 54 Zeichen, damit unter der Anzeigegrenze von 60.
 
 ## A.2 Sectionreihenfolge
 
@@ -31,19 +35,23 @@ Description: Schreib uns oder komm vorbei: Elisabethenanlage 7, 1. Stock,
 ## A.3 Kopf
 
 ```text
-H1:    Kontakt
-Lead:  Schreib uns, was du wissen willst. Wir antworten persönlich — und wenn
-       du dir unsicher bist, welcher Kurs passt, sag einfach, was du bisher
-       getanzt hast.
+H1:    Kontakt zur Tanzschule in Basel
+Lead:  Schreib uns, was du über unsere Tanzschule in Basel wissen willst. Wir
+       antworten persönlich. Wenn du dir unsicher bist, welcher Kurs passt, sag
+       einfach, was du bisher getanzt hast.
 Primary:   Nachricht senden   →  #anfrage
 Secondary: WhatsApp schreiben
 ```
+
+H1: fünf Wörter, mit Hauptbegriff und Ort ([`05b-copy-style.md`](/root/clients/salsaflow-dc/website-plan/05b-copy-style.md):230-236). Der Lead trägt den Hauptbegriff im ersten Satz und kommt ohne Gedankenstrich aus.
 
 ## A.4 Kontaktformular
 
 ### Der Anker
 
 Der Abschnitt trägt die Sprungmarke `#schnupperstunde`. Alle Probestunden-CTAs der Website landen hier ([`05-sitemap-ia.md`](/root/clients/salsaflow-dc/website-plan/05-sitemap-ia.md:148-150)).
+
+**Sitewide gilt genau dieser eine Anker.** `#probestunde` existiert nicht und wird nirgends verlinkt. Sichtbar bleibt das Label „Probestunde anfragen"; der technische Ankername ist `#schnupperstunde`, weil ihn die IA-Spec festlegt ([`05-sitemap-ia.md`](/root/clients/salsaflow-dc/website-plan/05-sitemap-ia.md):30).
 
 Wer über diesen Anker kommt, sieht das Anliegen-Feld auf **Probestunde** vorausgewählt und darüber:
 
@@ -147,7 +155,7 @@ Das schützt die Erreichbarkeit und ist trotzdem freundlich.
 ### Öffnungszeiten
 
 ```text
-PLACEHOLDER
+OWNER-BLOCKER
 ```
 
 Auf der Live-Kontaktseite gibt es keinen Öffnungszeiten-Block — das ist ausdrücklich als fehlend belegt ([`01-firma-dossier.md`](/root/clients/salsaflow-dc/website-plan/01-firma-dossier.md:38)). → **Entscheidung KON-01.**
@@ -211,8 +219,8 @@ Link: Standort und Raumvermietung  →  /kontakt/standort-raumvermietung
 
 ```text
 Title:       Studio mieten in Basel — Tanzraum stundenweise | Salsaflow
-Description: Tanzraum mieten an der Elisabethenanlage 7 in Basel:
-             CHF 50 pro Stunde bis 17 Uhr, danach CHF 60.
+Description: Tanzraum mieten an der Elisabethenanlage 7 in Basel: zwei gleich
+             grosse Räume mit Tageslicht, stundenweise. Preis auf Anfrage.
 ```
 
 Eigene Suchabsicht: „Tanzraum mieten Basel", „Proberaum Basel". Diese Seite darf nicht mit `/kontakt` verschmelzen ([`05-sitemap-ia.md`](/root/clients/salsaflow-dc/website-plan/05-sitemap-ia.md:166-168)).
@@ -234,17 +242,20 @@ Die Studio-Seite nennt zwei Räume, die Kurs-Seite drei ([`01-firma-dossier.md`]
 
 ## B.3 Preise
 
-| | CHF pro Stunde |
-|---|---:|
-| Montag bis Freitag, bis 17 Uhr | 50 |
-| Danach und am Wochenende | 60 |
+| | |
+|---|---|
+| Montag bis Freitag, bis 17 Uhr | Preis auf Anfrage |
+| Danach und am Wochenende | Preis auf Anfrage |
 
 ```text
-Zeile: Ausserhalb dieser Zeiten auf Anfrage.
+Zeile: Schreib uns, wann und wie lange du den Raum brauchst. Dann bekommst du
+       den Preis direkt von uns.
 Link:  Alle Preise  →  /preise
 ```
 
-Belegt (P16).
+Die Mietbeträge gehören nicht zu den fünf freigegebenen Zahlen ([`05b-copy-style.md`](/root/clients/salsaflow-dc/website-plan/05b-copy-style.md):391-401) und stehen deshalb nirgends im Text. Der Tarifaufbau — günstiger bis 17 Uhr, teurer danach und am Wochenende — bleibt sichtbar, weil er die Anfrage steuert, ohne eine Zahl zu behaupten. → **Entscheidung STU-01.**
+
+Sobald beide Beträge freigegeben sind, gibt es genau **eine** kanonische Quelle dafür: die Tabelle „Weitere Preise" auf `/preise` ([`05-preise.md`](/root/clients/salsaflow-dc/website-plan/06-seiten/05-preise.md):145-173). Diese Seite zeigt dann denselben Wert, nicht ihre eigene Version.
 
 ## B.4 Ausstattung
 
@@ -301,7 +312,9 @@ Es gibt **keinen** Verfügbarkeitskalender. Die Räume werden für Kurse gebrauc
 
 ## D — Abnahme
 
-- `#schnupperstunde` ist ein echter Anker mit vorausgewähltem Anliegen.
+- `#schnupperstunde` ist ein echter Anker mit vorausgewähltem Anliegen; sitewide existiert keine zweite Ankervariante.
+- Title höchstens 60 Zeichen; Hauptbegriff `tanzschule basel kontakt` sinngemäss in Title, H1 und erstem Lead-Satz.
+- Kein Mietbetrag im Text, solange er nicht freigegeben ist.
 - Adresse, E-Mail und beide Nummern stimmen mit dem Rest der Website überein.
 - Keine erfundenen Öffnungszeiten.
 - Karte lädt erst nach Klick.

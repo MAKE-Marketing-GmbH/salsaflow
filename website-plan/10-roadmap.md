@@ -66,7 +66,7 @@ Alles hier blockiert soft-launch oder schadet Conversion/Recht/Vertrauen spürba
 | **Zwischenlösung (sofort)** | Hero `/photos/2026/hero-paar-dreh-01-portrait.webp`; Ablauf `/photos/2026/hero-paar-studiowand-01.webp` |
 | **Echte Lösung** | Shooting 1 Lehrperson + 1 Paar (oder Einzel), 6–8 Motive |
 | **Belege** | [`02b-asset-gaps.md`](/root/clients/salsaflow-dc/website-plan/02b-asset-gaps.md) P-01; [`06-seiten/07-privatstunden.md`](/root/clients/salsaflow-dc/website-plan/06-seiten/07-privatstunden.md); Screenshots [`vercel-privatstunden.png`](/root/clients/salsaflow-dc/website-plan/screenshots/vercel-privatstunden.png) |
-| **Akzeptanz** | Seite verkauft 1:1 / Paar-Unterricht; Alt-Texte bildgenau; kein Low-Res-Altmotiv |
+| **Akzeptanz** | Seite verkauft 1:1 / Paar-Unterricht; Alt-Texte bildgenau; kein semantisch ungeeignetes Altmotiv (Auflösung ok) |
 | **Entscheidung** | Salsaflow: Freigabe Zwischenlösung **oder** Shooting-Termin (OQ-04) |
 
 ### P0-C — Geld-Routen + CTA-Modell

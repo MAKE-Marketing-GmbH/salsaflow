@@ -48,45 +48,14 @@ mehr und praezisiert zwei offene Punkte. Diese Befunde sind in Schema und Woerte
 8. **Leere/inaktive Kurse:** Mehrere Sheets enthalten `#N/A`-Platzhalter (noch nicht befuellt). -> Kurs
    kann mit 0 Buchungen und Status `draft`/`open` existieren. (Abschnitt 4)
 9. **Privatdaten:** Die Excel-Bloecke `Master Data` (3667 Zeilen) und Teilnehmer-Zeilen sind die
-   Vorlage fuer `participants` (CRM), kommen aber NIE oeffentlich auf die Site (RLS, Abschnitt 1.3 + 2).
+   Vorlage fuer `participants` (CRM), kommen aber NIE oeffentlich auf die Site (Zugriffs-Trennung, Abschnitt 2; historische RLS-Regel im Anhang).
 
 ---
 
-## 1. Backend, Datenbank, Hosting (Entscheid + Begruendung)
+## 1. Backend, Datenbank, Hosting
 
-### 1.1 Entscheid: Supabase (Managed Postgres + Auth + RLS + Edge Functions)
-
-| Baustein | Wahl | Warum |
-|---|---|---|
-| Datenbank | **PostgreSQL** (managed via Supabase) | Relationales Modell (Kurse/Buchungen/Zahlungen/Teilnehmer sind stark verknuepft), Transaktionen fuer Kapazitaet/Warteliste, JSONB fuer Roh-Webhook-Events. |
-| Auth (Admin-Login) | **Supabase Auth** (E-Mail + Passwort) | Loest Etappe-5-Kriterium "Admin-Login" ohne Eigenbau. Fabio/Claudia = wenige Admin-Accounts. |
-| Sicherheit | **Row Level Security (RLS)** | Erzwingt auf DB-Ebene: oeffentlich lesbar nur Kurs-/Staffel-Daten; Teilnehmer/Buchungen/Zahlungen nur fuer eingeloggte Admins. Deckt No-Go "private Schuelerdaten nie auf die Site". |
-| Server-Logik | **Supabase Edge Functions** (Deno) | Stripe-Webhook, Bestaetigungsmails, serverseitige Kapazitaets-/Wartelisten-Pruefung. Haelt Secrets (Stripe-Key) serverseitig. |
-| ORM/Migrations | **Drizzle ORM** (TypeScript) | Typsicheres Schema + versionierte Migrationen aus dem Vite/TS-Code. Schema ist Single-Source, Etappe-5 `npm run build` kann Typen pruefen. |
-| Mailversand | **Resend** (oder SMTP von info@) | Transaktionale Mails (Buchungsbestaetigung an Kunde + info@). Entscheid in Etappe 8, hier nur vorgesehen. |
-| Frontend | React + Vite + TypeScript + Tailwind + shadcn/ui | Vorgabe Regel 031. |
-| Hosting | **Vercel** (Frontend) + Supabase (DB/Auth/Functions) | Vorgabe. Supabase-Region **Frankfurt (eu-central-1)** wegen Datennaehe Schweiz/EU (Datenschutz). |
-
-### 1.2 Warum Supabase und nicht Eigenbau-Node-API
-
-- Kleines Team, Vollumfang bis August: Auth, RLS und Webhook-Runtime gibt es fertig statt selbst zu
-  bauen. Weniger Eigen-Code = weniger Fehlerquellen, schneller live.
-- Geringe Fixkosten (Kundenwunsch): Free-Tier deckt dieses Volumen (ein paar hundert Buchungen pro
-  Staffel) locker; Pro-Plan ca. 25 USD/Monat erst bei Bedarf.
-- Datenschutz: EU-Region waehlbar, RLS trennt oeffentliche Kursdaten sauber von privaten Schuelerdaten.
-- Portabel: Das Schema ist normales Postgres-DDL (Abschnitt 4), bei Bedarf auf Neon/RDS umziehbar.
-- **Alternative (Fallback), falls kein BaaS gewuenscht:** Vercel Serverless Functions (Node, Hono) +
-  Neon-Postgres + Drizzle + Auth.js. Gleiches Schema, mehr Eigen-Code. Nicht Erstwahl.
-
-### 1.3 Sichtbarkeits-Regel (RLS-Leitplanke)
-
-- **Oeffentlich (anon, nur lesen):** `terms`(published), `courses`(public), `styles`, `level_rungs`,
-  `locations`, `teachers`(oeffentliches Profil), `tariffs`, `course_prices`. Plus abgeleitete
-  Kapazitaets-Zahl (frei/belegt) ohne Personenbezug.
-- **Nur Admin (eingeloggt):** `participants`, `bookings`, `payments`, `payment_events`,
-  `notifications`, `admin_profiles`, `audit_log`.
-- **Schreiben:** alle Schreibzugriffe auf Buchung/Zahlung laufen ueber Edge Functions (Service-Role),
-  nie direkt vom Browser. Der oeffentliche Client darf nur lesen + eine Buchung anstossen.
+Dieser Abschnitt ist in den historischen Anhang verschoben. Gueltig ist: Drizzle + PGlite (dev), Prod-DB-Hosting offen (DECISIONS.md).
+Siehe [Anhang: historischer Supabase-Entwurf](#anhang-ueberholt-2026-08-12-nicht-ausfuehren-historischer-supabase-entwurf) — nicht ausfuehren.
 
 ---
 
@@ -99,11 +68,11 @@ Vier Datenbereiche sind klar getrennt: **A Admin/Auth, B Kurse, C Buchungen, D Z
 ### Bereich A - Admin / Auth
 
 ```sql
--- Supabase verwaltet die Login-Identitaeten in auth.users. Hier nur das Profil + Rolle.
+-- Login-Identitaeten verwaltet der Auth-Anbieter (offen, siehe DECISIONS). Hier nur Profil + Rolle.
 CREATE TYPE admin_role AS ENUM ('owner', 'admin', 'teacher_readonly');
 
 CREATE TABLE admin_profiles (
-  id           uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  id           uuid PRIMARY KEY,  -- FK auf die User-Tabelle des gewaehlten Auth-Anbieters (offen)
   display_name text NOT NULL,
   role         admin_role NOT NULL DEFAULT 'admin',
   created_at   timestamptz NOT NULL DEFAULT now()
@@ -664,12 +633,12 @@ Nicht das eingebettete Payment Element und kein Eigen-Formular. Grund: TWINT ist
 und Fehlerfaelle komplett. Ablauf (deckt Etappe 9):
 
 ```
-1. Frontend: "Kurs buchen" -> Edge Function legt bookings-Zeile (pending_payment) an,
+1. Frontend: "Kurs buchen" -> Server-Endpunkt (Runtime offen) legt bookings-Zeile (pending_payment) an,
    prueft Kapazitaet/Warteliste serverseitig in einer Transaktion.
-2. Edge Function erstellt Stripe Checkout Session (Betrag aus course_prices, Zahlarten TWINT+Karte,
+2. Server-Endpunkt erstellt Stripe Checkout Session (Betrag aus course_prices, Zahlarten TWINT+Karte,
    success_url, cancel_url, metadata.booking_id) -> gibt Session-URL zurueck.
 3. Frontend leitet auf die Stripe-Seite weiter. Stripe zeigt TWINT/Karte/Apple/Google Pay je Geraet.
-4. Stripe-Webhook 'checkout.session.completed' an Edge Function:
+4. Stripe-Webhook 'checkout.session.completed' an den Server-Endpunkt:
    - Signatur pruefen, Event-ID in payment_events (Idempotenz),
    - payment.status='succeeded', booking.status='confirmed', confirmed_at=now,
    - Bestaetigungsmail an Kunde + info@ (notifications).
@@ -697,7 +666,7 @@ und Fehlerfaelle komplett. Ablauf (deckt Etappe 9):
 | DB-Schema Kurse | Abschnitt 2 Bereich B (terms, courses, styles, level_rungs, locations, teachers, tariffs, course_prices) |
 | DB-Schema Buchungen | Abschnitt 2 Bereich C (participants, bookings) |
 | DB-Schema Zahlungen | Abschnitt 2 Bereich D (payments, payment_events, notifications) |
-| DB-Schema Admin | Abschnitt 2 Bereich A (admin_profiles, audit_log) + Supabase Auth |
+| DB-Schema Admin | Abschnitt 2 Bereich A (admin_profiles, audit_log) + Auth (Anbieter offen) |
 | Eindeutige Level-Aufstiegs-Regel | Abschnitt 3 (data-driven `ordinal + 1`, Algorithmus 3.4) |
 | DE/EN-Woerterbuch aller Levels/Stile | Abschnitt 4 (alle 10 Stile + alle Level + Tage + Tarife + Begriffe; Excel-Ground-Truth) |
 | Buchungs-Statusdiagramm | Abschnitt 6 |
@@ -708,8 +677,8 @@ und Fehlerfaelle komplett. Ablauf (deckt Etappe 9):
 ## 9. Was die naechsten Etappen aus dieser Architektur brauchen
 
 - **Etappe 3 (Assets):** keine Abhaengigkeit, laeuft parallel.
-- **Etappe 5 (Backend/DB/Auth):** Dieses Schema 1:1 als Drizzle-Migration umsetzen, Supabase-Projekt
-  (Region Frankfurt) anlegen, Auth fuer Admin, Seed = Staffel Januar 2026 (nur Header-Struktur, keine
+- **Etappe 5 (Backend/DB/Auth):** Dieses Schema 1:1 als Drizzle-Migration umsetzen (dev: PGlite;
+  Prod-DB-Hosting offen, DECISIONS), Auth fuer Admin (Anbieter offen), Seed = Staffel Januar 2026 (nur Header-Struktur, keine
   Schuelerdaten) plus die `styles`/`level_rungs`/`tariffs`-Stammdaten aus Abschnitt 3 und 4.
 - **Etappe 6 (Admin-UI):** Auto-Aufstieg = Algorithmus 3.4, mit Override-Vorschau. "Staffel duplizieren"
   kopiert Kurse + setzt `level_rung` per Regel hoch + `duplicated_from`/`created_from_course_id`.
@@ -720,5 +689,46 @@ und Fehlerfaelle komplett. Ablauf (deckt Etappe 9):
 - **Vor Bau zu klaeren (an Fabio):** Offene Fragen 6 (Preis 190/160 nun belegt - nur bestaetigen),
   14 (On1/On2 als Attribut ok?), 15 (Flow als Bruecken-Stufe + Kategorie-Grenzen 6/12 bestaetigen),
   8 (Stripe bestaetigen), 17 (Mailversand info@).
-```
 
+---
+
+## ANHANG (UEBERHOLT 2026-08-12 — NICHT AUSFUEHREN): historischer Supabase-Entwurf
+
+Dieser Anhang ist Historie. Keine Zeile hieraus ist eine Bauanweisung. Gueltig ist:
+Drizzle + PGlite (dev), Prod-DB-Hosting offen ([DECISIONS.md](DECISIONS.md) "Kein Supabase").
+Die Fachlogik (Schema-Struktur, Level-Regel, Buchungs-/Zahlungslogik) im Hauptteil bleibt gueltig —
+nur die Anbieter-Wahl (Supabase/Auth/RLS/Edge Functions) hier drin ist entwertet.
+
+### 1.1 Entscheid: Supabase (Managed Postgres + Auth + RLS + Edge Functions)
+
+| Baustein | Wahl | Warum |
+|---|---|---|
+| Datenbank | **PostgreSQL** (managed via Supabase) | Relationales Modell (Kurse/Buchungen/Zahlungen/Teilnehmer sind stark verknuepft), Transaktionen fuer Kapazitaet/Warteliste, JSONB fuer Roh-Webhook-Events. |
+| Auth (Admin-Login) | **Supabase Auth** (E-Mail + Passwort) | Loest Etappe-5-Kriterium "Admin-Login" ohne Eigenbau. Fabio/Claudia = wenige Admin-Accounts. |
+| Sicherheit | **Row Level Security (RLS)** | Erzwingt auf DB-Ebene: oeffentlich lesbar nur Kurs-/Staffel-Daten; Teilnehmer/Buchungen/Zahlungen nur fuer eingeloggte Admins. Deckt No-Go "private Schuelerdaten nie auf die Site". |
+| Server-Logik | **Supabase Edge Functions** (Deno) | Stripe-Webhook, Bestaetigungsmails, serverseitige Kapazitaets-/Wartelisten-Pruefung. Haelt Secrets (Stripe-Key) serverseitig. |
+| ORM/Migrations | **Drizzle ORM** (TypeScript) | Typsicheres Schema + versionierte Migrationen aus dem Vite/TS-Code. Schema ist Single-Source, Etappe-5 `npm run build` kann Typen pruefen. |
+| Mailversand | **Resend** (oder SMTP von info@) | Transaktionale Mails (Buchungsbestaetigung an Kunde + info@). Entscheid in Etappe 8, hier nur vorgesehen. |
+| Frontend | React + Vite + TypeScript + Tailwind + shadcn/ui | Vorgabe Regel 031. |
+| Hosting | **Vercel** (Frontend) + Supabase (DB/Auth/Functions) | Vorgabe. Supabase-Region **Frankfurt (eu-central-1)** wegen Datennaehe Schweiz/EU (Datenschutz). |
+
+### 1.2 Warum Supabase und nicht Eigenbau-Node-API
+
+- Kleines Team, Vollumfang bis August: Auth, RLS und Webhook-Runtime gibt es fertig statt selbst zu
+  bauen. Weniger Eigen-Code = weniger Fehlerquellen, schneller live.
+- Geringe Fixkosten (Kundenwunsch): Free-Tier deckt dieses Volumen (ein paar hundert Buchungen pro
+  Staffel) locker; Pro-Plan ca. 25 USD/Monat erst bei Bedarf.
+- Datenschutz: EU-Region waehlbar, RLS trennt oeffentliche Kursdaten sauber von privaten Schuelerdaten.
+- Portabel: Das Schema ist normales Postgres-DDL (Abschnitt 4), bei Bedarf auf Neon/RDS umziehbar.
+- **Alternative (Fallback), falls kein BaaS gewuenscht:** Vercel Serverless Functions (Node, Hono) +
+  Neon-Postgres + Drizzle + Auth.js. Gleiches Schema, mehr Eigen-Code. Nicht Erstwahl.
+
+### 1.3 Sichtbarkeits-Regel (RLS-Leitplanke)
+
+- **Oeffentlich (anon, nur lesen):** `terms`(published), `courses`(public), `styles`, `level_rungs`,
+  `locations`, `teachers`(oeffentliches Profil), `tariffs`, `course_prices`. Plus abgeleitete
+  Kapazitaets-Zahl (frei/belegt) ohne Personenbezug.
+- **Nur Admin (eingeloggt):** `participants`, `bookings`, `payments`, `payment_events`,
+  `notifications`, `admin_profiles`, `audit_log`.
+- **Schreiben:** alle Schreibzugriffe auf Buchung/Zahlung laufen ueber Edge Functions (Service-Role),
+  nie direkt vom Browser. Der oeffentliche Client darf nur lesen + eine Buchung anstossen.

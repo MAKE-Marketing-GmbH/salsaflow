@@ -65,20 +65,26 @@ oder Abschnitt auf `/privatstunden`? Empfehlung `SCHÄTZUNG`: erst als starker A
 
 | Adresse | Hauptbegriff | Absicht | Prio |
 |---|---|---|---|
-| `/events-workshops/danceflow-night` | salsa party basel | Abend finden | P0 |
-| `/mehr/partys` | salsa bachata partys basel | Szene-Überblick | P1 |
+| `/events/danceflow-night` | salsa party basel | Abend finden | P0 |
+| `/mehr/partys` | salsa bachata partys basel | bestätigte Szene-/Terminübersicht | P1 |
 | `/events` | tanz events basel | Übersicht | P1 |
-| `/events-workshops/floweekend` | salsa workshop weekend basel | Event-Marke | P2 |
-| `/events-workshops/anniversary-weekend` | (Marke) | Event-Marke | P2 |
-| `/events-workshops/eventkalender` | salsa termine basel | Terminliste | P2 |
+| `/events/floweekend` | salsa workshop weekend basel | Event-Marke | P2 |
+| `/events/anniversary-weekend` | (Marke) | Event-Marke | P2 |
+| `/events/kalender` | salsa termine basel | Terminliste | P2 |
 | `/team` | tanzlehrer basel | Vertrauen | P1 |
 | `/fotos` | (Marke, Bildersuche) | Atmosphäre prüfen | P2 |
 | `/kontakt` | tanzschule basel kontakt | Kontakt | P1 |
 | `/kontakt/standort-raumvermietung` | tanzraum mieten basel | eigener Umsatzstrom | P1 |
 | `/faq` | (Fragen, siehe AEO) | Zweifel klären | P0 |
 | `/shows-animationen` | tanzshow buchen basel | Firmen/Events | P1 |
-| `/mehr/tanzschuhe` | tanzschuhe salsa anfänger | Ratgeber-Einstieg | P2 |
+| `/mehr/tanzschuhe` | tanzschuhe basel | tanzschuhe salsa anfänger; Ratgeber-Einstieg | P2 |
 | `/mehr/collabs` | (Marke) | Partner | P2 |
+| `/impressum` | kein Zielkeyword | Recht/Anbieterangaben | P0 Recht |
+| `/datenschutz` | kein Zielkeyword | Datenschutz/Transparenz | P0 Recht |
+
+Alle Begriffe und Prioritäten in 2.1/2.2 sind **SCHÄTZUNG/UNKNOWN**, solange kein
+Keyword-, GSC- oder SERP-Export mit Datum vorliegt. Sie steuern die Seitenjobs,
+nicht behauptete Nachfrage oder Ranking-Chancen.
 
 ### 2.3 Nicht anpeilen
 
@@ -502,10 +508,12 @@ Diese Liste ist bindend. Ein Verstoss ist ein Fehler, keine Geschmacksfrage.
 - Keine unbelegte Aussage im Quelltext.
 
 **Nach 30 Tagen**
-- Alle 26 Seiten sind indexiert (Search Console).
-- Keine Fehler im Abdeckungsbericht.
-- Die Marke „Salsaflow" steht auf Position 1.
-- Erste Zahlen zu Suchbegriffen liegen vor — damit wird Abschnitt 2 mit echten Daten überschrieben.
+- Für alle 26 eingereichten Seiten ist der GSC-Status dokumentiert: indexiert, entdeckt,
+  gecrawlt/nicht indexiert oder Fehler. Google schuldet keine vollständige Indexierung.
+- Abdeckungsfehler sind je URL priorisiert; freiwillig nicht indexierte technische Routen
+  werden nicht als Fehler gezählt.
+- Markenposition und erste Suchanfragen werden als Baseline gemessen, nicht als Position-1-Versprechen.
+- Sobald belastbare Daten vorliegen, ersetzen sie die `SCHÄTZUNG/UNKNOWN`-Felder in Abschnitt 2.
 
 **Nach 90 Tagen**
 - Die P0-Geldseiten erscheinen für ihre Hauptbegriffe in den Suchergebnissen (Position `SCHÄTZUNG`, erst nach echten Daten festlegbar).

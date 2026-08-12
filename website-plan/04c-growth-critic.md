@@ -174,7 +174,7 @@ Quellen: [`vercel-home.png`](/root/clients/salsaflow-dc/website-plan/screenshots
 | G-V1 | **Above-the-fold Katastrophe:** weisser Leerraum, Headline hellgrau, kein Hero-Bild im Shot | Sofortiger Trust-/Energie-Verlust; C1 unsichtbar ausser Nav-Pill | **P0 CRO** |
 | G-V2 | Nav-CTA „**Gratis** Schnupperstunde“ sitewide | Claim-Risiko + falscher Job auf Nicht-Kurs-Seiten | P0 Claim/CTA |
 | G-V3 | Privatstunden: Primary im Body **„Ziel beschreiben →“** (blass, low contrast); Nav schreit Schnupper | C3 unterliegt C1-Lärm; Kaufimpulse (Hochzeit CHF 100+) verpuffen | P0 CTA |
-| G-V4 | Privat-Hero **weich/low-res** (offer-privat ~33 KB) | Premium-Preis, Discount-Optik | P0 Asset |
+| G-V4 | Privat-Hero **Motiv/Semantik ungeeignet, Auflösung ok** (offer-privat ~33 KB) | Premium-Preis, Discount-Optik | P0 Asset |
 | G-V5 | Cookie-Bar unten mit rotem „Akzeptieren“ | Zweiter Salsa-Button konkurriert mit Conversion-Farbsprache | P1 UX |
 | G-V6 | Tech-SEO stark (1 H1, JSON-LD, prerender) — **Messung 0** | Rankings unbewiesen; kein Funnel-Optimieren möglich | P0 Measure |
 | G-V7 | Interne Links fast nur Nav/Footer | SEO- und CRO-Pfad „Zweifel→Buchung“ ungenutzt | P1 |
@@ -246,7 +246,7 @@ Quellen: [`vercel-home.png`](/root/clients/salsaflow-dc/website-plan/screenshots
 
 - [ ] Jede Geld-Seite hat dokumentiert: Intent, Primary-Label, Secondary, Ziel-URL/Form, Event-Name.  
 - [ ] Home-Viewport-Screenshot: Bild + lesbare H1 + Primary sichtbar **ohne** Scroll (Desktop 1440, Mobile 390).  
-- [ ] `/privatstunden`: Primary = Anfrage Privat, nicht Schnupper; Asset nicht low-res.  
+- [ ] `/privatstunden`: Primary = Anfrage Privat, nicht Schnupper; Motiv/Semantik geeignet (Auflösung ok).  
 - [ ] Kein „gratis“ in UI/Meta ohne schriftliche Freigabe S-02.  
 - [ ] Mindestens die Events aus §3.4 feuern in Staging (manuell protokolliert).  
 - [ ] SEO-Plan P0-1…P0-3 erfüllt oder als Blocker in `11-open-questions.md` geführt.  

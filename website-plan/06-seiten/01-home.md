@@ -1,6 +1,6 @@
 # 01 — Home `/`
 
-**Status:** FINAL (Copy humanisiert 2026-08-12)
+**Status:** READY FOR VERIFY v2 (2026-08-12 · GUT-01 und Visual-Sync offen)
 **Priorität:** P0
 **Job:** In fünf Sekunden klarmachen, was Salsaflow ist, wo es ist und wie der erste Schritt aussieht — und danach die sieben Kundenblöcke in der bestellten Reihenfolge abarbeiten.
 **Suchabsicht:** Marke + „Tanzschule Basel" + „Salsa lernen Basel"
@@ -12,12 +12,14 @@
 ## 1. Meta
 
 ```text
-Title:       Salsaflow Dance Company — Tanzschule in Basel
+Title:       Tanzschule in Basel — Salsa, Bachata, Heels | Salsaflow
 Description: Salsa, Bachata und Heels lernen in Basel, direkt beim Bahnhof SBB.
-             Kurse in klaren Levels, Privatstunden und Danceflow Nights.
+             Kurse in klaren Levels ab CHF 190, ohne Partner. Probestunde anfragen.
 ```
 
-Beide bleiben unter der üblichen Anzeigelänge. Keine Zahl, kein Superlativ, keine Bewertung.
+Title 55 Zeichen, Description 137 Zeichen — beide unter der Anzeigegrenze (60 / 155).
+
+Der Hauptbegriff `tanzschule basel` steht vorn, die Marke hinten ([`04-seo-plan.md`](/root/clients/salsaflow-dc/website-plan/04-seo-plan.md:184)). Die Description trägt eine belegte Zahl (CHF 190), den Ort und den nächsten Schritt. Kein Superlativ, keine Bewertung, kein „gratis".
 
 ## 2. Sectionreihenfolge
 
@@ -43,15 +45,16 @@ Die Reihenfolge folgt dem Kunden-Eingang ([`_kunden-sitemap-sfdc-struktur.md`](/
 
 ```text
 Eyebrow (Script, Alex Brush):  Bailar es vivir.
-H1:       Tanzen lernen in Basel.
-Lead:     Salsa, Bachata und Heels — in klaren Levels, zwei Minuten vom Bahnhof SBB.
+H1:       Deine Tanzschule in Basel.
+Lead:     In unserer Tanzschule in Basel lernst du Salsa, Bachata und Heels —
+          in klaren Levels, direkt beim Bahnhof SBB.
 Primary:  Probestunde anfragen
 Secondary: Kursplan ansehen
 ```
 
-Warum diese H1: Sie enthält das, was Leute suchen (tanzen lernen, Basel), und behauptet nichts. „Willkommen bei Salsaflow" wäre eine verschenkte Zeile.
+Warum diese H1: Sie enthält den Hauptbegriff `tanzschule basel` ([`04-seo-plan.md`](/root/clients/salsaflow-dc/website-plan/04-seo-plan.md):49) und den Ort, bleibt bei vier Wörtern und behauptet nichts. Die Startseiten-H1 muss „Tanzschule Basel" tragen — das ist eine ausdrückliche Konkurrenzmassnahme ([`04d-seo-konkurrenz.md`](/root/clients/salsaflow-dc/website-plan/04d-seo-konkurrenz.md):113). „Willkommen bei Salsaflow" wäre eine verschenkte Zeile.
 
-Der Lead nennt drei Stile und einen Ortsbezug, der überprüfbar ist. Die Elisabethenanlage 7 liegt am Bahnhof Basel SBB — belegt in [`01-firma-dossier.md`](/root/clients/salsaflow-dc/website-plan/01-firma-dossier.md:110-120). „Zwei Minuten" ist eine Gehzeit-Aussage: Wenn sie nicht bestätigt wird, lautet der Lead stattdessen „direkt beim Bahnhof SBB". → **Entscheidung HOME-01**.
+Der Lead nennt den Hauptbegriff grammatikalisch notwendig im ersten Satz ([`05b-copy-style.md`](/root/clients/salsaflow-dc/website-plan/05b-copy-style.md):254-260), dazu drei Stile und einen Ortsbezug, der überprüfbar ist. Die Elisabethenanlage 7 liegt am Bahnhof Basel SBB — belegt in [`01-firma-dossier.md`](/root/clients/salsaflow-dc/website-plan/01-firma-dossier.md:110-120). „Zwei Minuten" ist eine Gehzeit-Aussage: Wenn sie nicht bestätigt wird, lautet der Lead stattdessen „direkt beim Bahnhof SBB". → **Entscheidung HOME-01**.
 
 ### Bild — Hero-Gate
 
@@ -74,15 +77,17 @@ Kein Autoplay-Video über den ganzen Bildschirm. Kein Text auf unruhigem Bildber
 
 ```text
 Eyebrow:  DAS SIND WIR
-H2:       Eine Schule, die man nach zwei Wochen kennt.
+H2:       Vier Gründer, die selbst unterrichten.
 Body:     Salsaflow gibt es seit 2018. Gegründet von Claudia, Fabio, Sebastian und
           Vanessa — alle vier unterrichten bis heute selbst.
-          Wir arbeiten an Technik, Führen und Folgen, Musikalität und daran,
-          dass du dich auf der Tanzfläche traust.
+          Wir arbeiten an Technik, Führen und Folgen. Und daran, dass du dich
+          auf der Tanzfläche traust.
 CTA:      Team kennenlernen  →  /team
 ```
 
-Die H2 sagt etwas Überprüfbares über die Grösse und die Nähe der Schule, ohne „familiär" als Adjektiv zu behaupten. Wer nach zwei Wochen die Namen kennt, hat verstanden, was gemeint ist.
+Die H2 sagt etwas Belegtes über die Nähe der Schule, ohne „familiär" als Adjektiv zu behaupten und ohne eine Zeitangabe zu versprechen. Dass die vier Gründerinnen und Gründer selbst unterrichten, ist belegt ([`01-firma-dossier.md`](/root/clients/salsaflow-dc/website-plan/01-firma-dossier.md):66-73). Die frühere Fassung „Eine Schule, die man nach zwei Wochen kennt" war eine messbare Wirkungsaussage ohne Nachweis und ist gestrichen.
+
+Der Body-Absatz reiht nur noch zwei tragende Dinge auf und stellt den Schlussgedanken als eigenen Satz daneben ([`05b-copy-style.md`](/root/clients/salsaflow-dc/website-plan/05b-copy-style.md):306).
 
 „Seit 2018" ist belegt (P06). Es steht bewusst nicht „seit über 20 Jahren" — das ist eine Aussage über die Tanzerfahrung des Teams, nicht über das Alter der Schule ([`04-seo-plan.md`](/root/clients/salsaflow-dc/website-plan/04-seo-plan.md:207-210)).
 
@@ -96,38 +101,62 @@ Die vier Namen sind belegt ([`01-firma-dossier.md`](/root/clients/salsaflow-dc/w
 
 ---
 
-## 5. Section 2 — Unser Angebot / Kurskalender
+## 5. Section 2 — Kursplan-Vorschau
 
 ### Copy
 
 ```text
-Eyebrow:  UNSER ANGEBOT
-H2:       Dein nächster Kurs.
-Lead:     Neue Kurse starten laufend. In viele bestehende Kurse kannst du auch
-          mitten im Block einsteigen — filtere nach Stil, Level und Wochentag.
-Primary:  Kursplan ansehen  →  /kursplan
+Eyebrow:  UNSER KURSPLAN
+H2:       Finde deinen Tanzkurs in Basel.
+Lead:     Sieh die nächsten Kurse nach Wochentag. Jede Karte zeigt dir Stil,
+          Level, Uhrzeit, Studio und ob ein Einstieg noch möglich ist.
+Primary:  Alle Kurse im Kursplan  →  /kursplan
+Secondary: Hilfe bei der Kurswahl  →  /kontakt#schnupperstunde
 ```
 
 Der Quereinstieg steht hier vorne, weil der Kunde ihn ausdrücklich als Bedürfnis genannt hat ([`_kunden-sitemap-sfdc-struktur.md`](/root/clients/salsaflow-dc/website-plan/_kunden-sitemap-sfdc-struktur.md:11)). Formulierung bewusst „in viele", nicht „in alle": Ob ein Kurs Quereinstieg erlaubt, entscheidet das Feld `allows_late_entry` pro Kurs ([`05b-copy-style.md`](/root/clients/salsaflow-dc/website-plan/05b-copy-style.md:242)).
 
 ### Inhalt
 
-Eine kompakte Vorschau des Kursplans: die nächsten startenden Kurse als Karten, höchstens sechs, danach der Link auf den vollen Plan.
+Die Vorschau zeigt zuerst sechs Kurse des gewählten Tages. Die Tagesleiste nennt Montag bis Samstag und die jeweilige Zahl verfügbarer Kurse. Ein Klick wechselt die Liste direkt unter der Leiste; der volle Kursplan öffnet zusätzliche Filter für Stil, Level und Quereinstieg.
 
-Pro Karte sichtbar: Stil, Level, Wochentag, Startdatum, Status.
+Pro Karte sichtbar, ohne weiteren Klick:
+
+```text
+Uhrzeit       18:30–19:30
+Stil          Salsa
+Level         Beginner · Stufe 1
+Lehrperson    nur bei bestätigter Freigabe
+Ort           bestätigte Studiobezeichnung aus dem Kursdatensatz
+Einstieg      Ideal zum Einsteigen | Quereinstieg möglich | Läuft bereits
+Status        Plätze frei | Ausgebucht
+CTA           Termine ansehen | Platz sichern | Quereinstieg anfragen
+```
+
+Unter der letzten Karte steht `Alle <n> Kurse an diesem Tag`, wenn mehr als sechs Kurse vorhanden sind. Es gibt keine erfundene Wochenzahl und keinen pauschalen Gratis-Claim.
 
 ### Zustände
 
 | Zustand | Sichtbarer Text |
 |---|---|
 | Lädt | `Kurse werden geladen …` |
-| Kurse vorhanden | Karten |
+| Kurse vorhanden | Tagesleiste, Trefferzahl und bis zu sechs vollständige Kurskarten |
 | Keine passenden Kurse | `Gerade startet kein neuer Kurs. Schreib uns auf WhatsApp — wir sagen dir, wann der nächste beginnt.` |
 | Fehler | `Der Kursplan lässt sich gerade nicht laden. Versuch es später noch einmal oder schreib uns auf WhatsApp.` |
 
 ### Backend-Logik in Worten
 
 Die Karten kommen aus dem Kursbestand des Servers, nicht aus einer gepflegten Textliste. Ein Kurs erscheint hier, wenn sein Startdatum in der Zukunft liegt oder er Quereinstieg erlaubt, und wenn er als öffentlich sichtbar markiert ist. Sortiert wird nach Startdatum, das nächste zuerst. Der Belegungsstatus („Plätze frei", „Ausgebucht") wird beim Laden aus der Zahl bestätigter Buchungen gegen die Kapazität berechnet — nicht aus einem Feld, das jemand von Hand pflegt. Steht kein Kurs zur Verfügung, wird die Leer-Zeile oben gezeigt statt die Section still auszublenden. Details: [`ARCHITEKTUR.md`](/root/clients/salsaflow-dc/ARCHITEKTUR.md:550-590).
+
+### Section-Spec H02
+
+- **Zweck/JTBD:** In höchstens 20 Sekunden erkennen, wann ein passender Kurs stattfindet und was als Nächstes zu tun ist.
+- **Desktop:** H2 und Lead über einer horizontalen Tagesleiste; darunter 2×3 Kartenraster, CTA-Zeile am Ende. Keine zweite H1.
+- **Mobile:** H2/Lead, horizontal scrollbarere Tagesleiste, Karten einspaltig; `Alle Kurse im Kursplan` nach den ersten drei Karten zusätzlich sticky am unteren Rand, solange die Section aktiv ist.
+- **States:** Loading-Skelett mit sichtbarem Text, Daten, leer, Filter leer, Fehler, ausgebucht und Quereinstieg. Status nie nur über Farbe vermitteln.
+- **Motion:** Tageswechsel aktualisiert ohne Out-Animation; neue Karten `opacity 0→1` und `translateY 14→0`, 450 ms, `cubic-bezier(0.22,1,0.36,1)`, Stagger 70 ms. Reduced Motion: sofortiger Endzustand.
+- **SEO/Links:** H2 enthält natürlich `Tanzkurs in Basel`; Links nach `/kursplan`, `/kursaufbau` und `/kontakt#schnupperstunde` mit beschreibenden Ankern.
+- **Mockup-Brief:** Frame `H02`, genau diese Section, Desktop 1440×900 und Mobile 390×844; Copy wortgleich aus diesem Block; normaler Datenzustand plus getrennte Empty-/Error-Frames; kein Rating, kein `gratis`, keine Studio- oder Kurszahl ohne Freigabe.
 
 ---
 
@@ -210,7 +239,7 @@ CTA:      Privatstunde anfragen  →  /privatstunden
 Das bestehende Privatstunden-Motiv wird **nicht** verwendet. Es zeigt vier Crops desselben Bildes mit einer jungen Frau und einem deutlich älteren Herrn in flachem Kunstlicht, ohne Bewegung — das verkauft das teuerste Produkt der Schule aktiv schlecht ([`02b-asset-gaps.md`](/root/clients/salsaflow-dc/website-plan/02b-asset-gaps.md:21-32)).
 
 - **Zwischenlösung, sofort einsetzbar:** `/photos/2026/hero-paar-dreh-01-portrait.webp`
-- **Alt:** `Eine Tanzlehrerin führt eine Drehung mit einer Schülerin, beide im Studio.` — Alt-Text erst final, wenn das gewählte Motiv feststeht; er muss beschreiben, was tatsächlich zu sehen ist.
+- **Alt:** `Ein tanzendes Paar übt eine Drehung im Studio.` — neutral halten: Das Fallback-Bild belegt keine Lehr-/Lernrollen; „Lehrperson/Schülerin" darf erst in den Alt-Text, wenn ein echtes Privatstunden-Foto vorliegt (P-01).
 - **Echte Lösung:** Shooting mit einer Lehrperson und einem Paar, 45 Minuten, Tageslicht.
 
 Solange keines von beiden vorliegt, läuft die Section **ohne Bild** als reine Textkarte. Ein falsches Bild ist schlechter als kein Bild.
@@ -251,7 +280,7 @@ Lead:     Ein Gutschein für einen Kurs oder eine Privatstunde. Schreib uns, fü
 CTA:      Gutschein anfragen  →  /kontakt?anliegen=gutschein
 ```
 
-### PLACEHOLDER — GUT-01
+### OWNER-BLOCKER — GUT-01
 
 Nicht bestätigt und deshalb **nicht** auf der Seite:
 
@@ -309,7 +338,7 @@ Einträge mit einem konkreten Datum werden gefiltert: Alles, was vorbei ist, ver
 
 ```text
 H2:       Komm einfach mal vorbei.
-Lead:     Elisabethenanlage 7, 1. Stock, 4051 Basel — zwei Häuser vom Bahnhof SBB.
+Lead:     Elisabethenanlage 7, 1. Stock, 4051 Basel — direkt beim Bahnhof SBB.
           Schreib uns, welcher Stil dich interessiert, und wir sagen dir, welcher
           Kurs gerade passt.
 Primary:  Probestunde anfragen  →  /kontakt#schnupperstunde

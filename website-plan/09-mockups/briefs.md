@@ -2,14 +2,14 @@
 
 **Run-ID Lauf 2:** `wf_bc3d758d-083`  
 **Run-ID Lauf 3:** `wf_29643fc6-3fa`  
-**Gate:** G-DESIGN — **ENTSCHIEDEN: A — Warme Bühne** (Raphael 2026-08-12)  
+**Gate:** Designrichtung **ENTSCHIEDEN: A — Warme Bühne** · visuelle Abnahme **RE-OPENED / FAIL** (2026-08-12)  
 **Empfehlung war / Wahl:** **A — Warme Bühne** · B verworfen · C nur Fallback-Hinweis in [`12-verbote-und-gates.md`](/root/clients/salsaflow-dc/website-plan/12-verbote-und-gates.md)
 
 ---
 
 ## Design-Richtungen Salsaflow — Lauf 2 G-DESIGN-Vorbereitung
 
-**Geliefert:** [briefs.md](/root/clients/salsaflow-dc/website-plan/09-mockups/briefs.md) — genau 3 Richtungen A/B/C mit je einem Mockup-Brief (Route `/`, Desktop 1440px, Hero + Section 1, exakte Copy, exakte Asset-Pfade, 1 Bild pro Sektion).
+**Geliefert:** drei Richtungsbeschreibungen. Die frühere Behauptung „je ein Mockup-Brief“ war falsch: Es gab weder ausgefüllte Section-Briefs noch Bilddateien. Die neue Preview-Capture-Runde liefert 26 Section-Bilder und ein Manifest; alle stehen wegen Copy-/Claim-Abweichungen auf `FAIL_COPY_SYNC`.
 
 ### Die drei Richtungen
 
@@ -45,4 +45,35 @@
 - Bei Wahl von C: paper-warm-Token zuerst in DESIGN.md eintragen (Token-Law).
 - Sektionen 2–8 folgen nach Richtungswahl im selben Dialekt.
 
-**Nächster Schritt:** Raphael wählt A, B oder C → danach Mockup-Produktion (Bild-Generierung/Screenshot-Loop) für die gewählte Richtung, dann Sektionen 2–8.
+## Preview-Capture-Audit 2026-08-12
+
+- Manifest: [`mockup-manifest.tsv`](./mockup-manifest.tsv)
+- Captures: [`generated/A/preview/`](./generated/A/preview/)
+- Umfang: Home 11 sichtbare Sections × Desktop/Mobile + Kursplan 2 Sections × Desktop/Mobile = 26 Bilder.
+- Aufnahmevertrag: Chrome, Preview `https://salsaflow-dc.vercel.app`, Reduced Motion `reduce`, Cookie-Banner geschlossen, Fonts/Bilder abgewartet, ein DOM-`section` pro Datei.
+- Ergebnis: **0 PASS / 26 FAIL_COPY_SYNC**. Die Captures sind Ist-Belege, keine freigegebenen Soll-Mockups.
+
+### Sichtbare P0-Abweichungen
+
+| Frame | Preview zeigt | Plan erlaubt | Folge |
+|---|---|---|---|
+| `home-H00-*` | „Drei Studios“, „erste Stunde kostet dich nichts“, 4,9/104 Reviews, rund 40 Kurse | sichere Fallbacks ohne Studio-/Kurszahl, Gratis- und Rating-Claim | Copy/Proof synchronisieren, dann neu aufnehmen |
+| `home-H02-*` | „Finde deinen nächsten Kurs …“, Gratis-CTA; Kursvorschau und Level-Treppe als langer gemeinsamer Capture | H2 `Finde deinen Tanzkurs in Basel.`, konkrete Kartenfelder; je ein Frame pro Section | Copy aktualisieren und H02/H03 getrennt capturen |
+| `kursplan-KP01-*` | `37 Kurse pro Woche`, `Gratis Schnupperstunde` | keine Wochenzahl/Preisbehauptung ohne Freigabe | sicheren Hinweistext aus `06-kursplan.md` setzen |
+| `kursplan-KP02-*` | 4,9/104 Reviews und Gratis-CTA im Abschluss | kein Rating/Fake-Proof; `Probestunde anfragen` | Abschlusscopy und Proof entfernen/ersetzen |
+
+### Motion-Vertrag für die Neuaufnahme
+
+| Trigger | Element | Initial → Final | Dauer | Easing | Stagger | Reduced Motion |
+|---|---|---|---:|---|---:|---|
+| Initial Paint | Hero-Bild | sichtbar → sichtbar | 0 ms | — | 0 | identisch |
+| Initial Paint | Hero-Copy/CTA | opacity 0, y 14 → opacity 1, y 0 | 450 ms | `cubic-bezier(0.22,1,0.36,1)` | 70 ms | sofort sichtbar, y 0 |
+| Viewport | `[data-reveal]` | opacity 0, y 14 → opacity 1, y 0 | 450 ms | gleiche Kurve | 70 ms | sofort sichtbar, kein Stagger |
+| Filter | Chip + Kursliste | ausgewählt; neue Liste direkt sichtbar | 160 ms Chip | `ease-out` | 0 | sofort |
+| Hover | Primary/Secondary | Farbe + max. 1 px Lift/3 px Pfeil | 200 ms | `ease-out` | 0 | Farbe, keine Translation |
+| Dialog | Backdrop/Panel | opacity 0, y 8, scale .98 → Endzustand | 180 ms | gleiche Kurve | 0 | sofort |
+
+**Re-Close-Kriterium:** Copy-/Proof-Sync umgesetzt, neue Section-Captures erzeugt,
+Manifest `review=PASS`, P0 Desktop 1440×900 + Mobile 390×844 vollständig und Final Critic PASS.
+
+**Nächster Schritt:** Richtung A bleibt. Erst Copy/Proof synchronisieren, dann denselben Capture-Loop erneut fahren und jedes Bild gegen Manifest und Plan-Copy prüfen.

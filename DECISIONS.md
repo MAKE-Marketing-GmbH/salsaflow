@@ -11,9 +11,10 @@ und macht die nächste offene Welle.
 - **Typo-Bindung Plan/Bau:** Display **Cal Sans** + Body **Afacad** laut aktuellem [`DESIGN.md`](DESIGN.md) (nicht historisches Bricolage aus älterer Loop-Zeile unten).
 - **Claims:** keine Fake-Reviews/#1; Header-CTA bis Proof: **„Probestunde anfragen“** (nicht „Gratis …“ ohne Beleg).
 - **Hosting-Fakt:** `www.salsaflow-dc.com` = **Jimdo** live; Neu = `https://salsaflow-dc.vercel.app/`. DNS-Cutover + 301-Matrix vor SEO-Go-Live.
-- **Ship-Blocker (Critic FAIL, noch offen):** (1) **„Kein Supabase“** (diese Datei, Zeile Stack) vs **ARCHITEKTUR.md Supabase-first** — Bau darf nicht beide erfüllen, bis Raphael einmal entscheidet. (2) Ausführbare Redirect-Matrix-Datei fehlt. (3) Dual-Specs in `06-seiten/` — kanonisch nur nummerierte `0N-*.md`.
-- **Run-IDs:** `wf_c3729fb9-2f4` → `wf_bc3d758d-083` → `wf_29643fc6-3fa` (COMPLETE).
-- **Nächster Auftrag:** Blocker schließen **oder** „Bau“ mit Worktree von `main` nach Plan.
+- **Plan-Blocker (Re-Audit 2026-08-12, Lauf 4 + Runde 2): ALLE 4 GESCHLOSSEN.** (1) Supabase-Konflikt: Drizzle + PGlite (dev) gilt, ARCHITEKTUR-Supabase-Teil in „NICHT AUSFÜHREN"-Anhang, Prod-DB-Hosting offen bei Raphael. (2) Meta-Alias-Mapping steht. (3) Spec-Kanon = nur `06-seiten/0N-*.md`, 19 Stubs. (4) `website-plan/14-redirect-matrix.md` mit vollständigem Abnahme-Loop (67 Zeilen, 0 fehlend). Beleg: `website-plan/13-final-critic.md` Re-Verdict + Runde-2-Tabelle, `website-plan/00-dod-status.md`.
+- **Copy v2 (2026-08-12):** Alle 13 kanonischen Seiten SEO-final nach `05b-copy-style.md` FINAL v2 (Referenz-Analyse Special Elements/Fromm/KC + Solar-Sprachmuster; `04d-seo-konkurrenz.md` neu). Unbelegte Claims raus (Gehzeiten, Abo, Mengen, Rollen-Alt-Texte). Screenshots `screenshots/2026-08-12/` 24/24 abgenommen.
+- **Run-IDs:** `wf_c3729fb9-2f4` → `wf_bc3d758d-083` → `wf_29643fc6-3fa` → `wf_b1cc7e53-90f` (COMPLETE).
+- **Nächster Auftrag:** „Bau" auf Raphaels Wort (EnterWorktree von `main`; offen nur Owner-Entscheide GUT-01/PRIV-01–04/R-01 + Privatstunden-Shooting).
 
 ## Feste Entscheidungen (Raphael, 2026-06-30)
 - Schluss mit Lovable (Tool). Lovable-Setup lokal auf diesem Stack nachgebaut.
