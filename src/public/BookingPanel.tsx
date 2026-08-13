@@ -838,6 +838,11 @@ function BookingForm({
               ref={formRef}
               id={`booking-form-${course.id}`}
               className="space-y-2.5"
+              // noValidate wie im InquiryWizard: ohne das feuerte der Browser seine NATIVE
+              // Bubble ("Please fill out this field.", englisch, nennt das Feld nicht),
+              // bevor submit() je lief — die eigene deutsche Validierung samt Fokus aufs
+              // erste Fehlerfeld war damit unerreichbar (UX-Probe mobil, 13.08.2026).
+              noValidate
               onSubmit={(e) => {
                 e.preventDefault();
                 submit();
