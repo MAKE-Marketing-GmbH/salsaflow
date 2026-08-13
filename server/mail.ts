@@ -34,7 +34,28 @@ function safeName(s: string): string {
   return s.replace(/[^a-z0-9._-]+/gi, '_').slice(0, 80);
 }
 
-export async function sendMail(m: MailInput): Promise<MailResult> {
+/**
+ * Zeilenumbrueche aus einem Kopfzeilen-Wert entfernen.
+ *
+ * Warum das noetig ist: Der Betreff traegt Formulardaten, zum Beispiel den Vornamen. Steht dort
+ * ein CRLF, endet die Subject-Zeile vorzeitig und der Rest wird zur naechsten Kopfzeile — aus
+ * "Max\r\nBcc: fremd@example.com" wird eine echte Blindkopie. Der Outbox-Treiber unten baut die
+ * Kopfzeilen selbst per Textverkettung, dort greift kein fremder Schutz.
+ *
+ * Bisher hielt nur der Mailanbieter dagegen (Resend antwortet mit 422). Das ist Glueck, keine
+ * Absicherung: bei einem Anbieterwechsel oder auf dem lokalen Pfad waere die Luecke offen.
+ */
+function headerSafe(value: string): string {
+  return value.replace(/[\r\n]+/g, ' ').trim();
+}
+
+export async function sendMail(input: MailInput): Promise<MailResult> {
+  const m: MailInput = {
+    ...input,
+    to: headerSafe(input.to),
+    subject: headerSafe(input.subject),
+    ...(input.replyTo ? { replyTo: headerSafe(input.replyTo) } : {}),
+  };
   const key = process.env.RESEND_API_KEY?.trim();
 
   // --- Echter Versand ueber Resend -----------------------------------------

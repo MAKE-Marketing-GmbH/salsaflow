@@ -16,6 +16,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { INFO_EMAIL, sendMail } from './mail.js';
+import { clientKey, rateLimit } from './rate-limit.js';
 
 type SeedTeacher = { displayName: string };
 type SeedCourse = {
@@ -43,15 +44,24 @@ const WEEKDAY_DE: Record<string, string> = {
   sun: 'Sonntag',
 };
 
+// Namen und Telefonnummern landen in der Betreffzeile der Mail. Ein Zeilenumbruch darin
+// wuerde dort eine neue Kopfzeile oeffnen (siehe headerSafe in server/mail.ts). Zwei Ebenen:
+// hier abweisen, dort zusaetzlich saeubern.
+const singleLine = z.string().trim().regex(/^[^\r\n]*$/, 'Zeilenumbrüche sind nicht erlaubt');
+
+// Nachname und E-Mail sind Pflicht — genau wie im Formular (BookingPanel.tsx). Vorher war der
+// Server lockerer: per curl kam eine Reservierung ohne Nachname und ohne E-Mail durch, und das
+// Studio bekam eine Anfrage, mit der es niemanden zuordnen oder erreichen kann.
 const personSchema = z.object({
-  firstName: z.string().trim().min(1).max(80),
-  lastName: z.string().trim().max(80).optional().default(''),
-  email: z.string().trim().email().max(160).optional().or(z.literal('')),
-  phone: z.string().trim().max(40).optional().default(''),
+  firstName: singleLine.min(1).max(80),
+  lastName: singleLine.min(1).max(80),
+  email: z.string().trim().email().max(160),
+  phone: singleLine.max(40).optional().default(''),
 });
 
 const reservationSchema = z
   .object({
+    // Kurs-IDs sind UUIDs aus dem Plan. Die enge Form haelt Muell frueh ab.
     courseId: z.string().trim().min(1).max(80),
     role: z.enum(['leader', 'follower']).nullable().optional(),
     mode: z.enum(['solo', 'couple']).default('solo'),
@@ -62,10 +72,6 @@ const reservationSchema = z
     notes: z.string().trim().max(2000).optional().default(''),
     // Honeypot wie im Kontaktformular: gefuellt -> still verwerfen.
     website: z.string().optional(),
-  })
-  .refine((data) => Boolean(data.participant.email?.trim() || data.participant.phone?.trim()), {
-    message: 'E-Mail oder Telefonnummer ist erforderlich',
-    path: ['participant', 'email'],
   });
 
 function personLine(label: string, person: z.infer<typeof personSchema>) {
@@ -101,6 +107,17 @@ export function createReservationRoutes(loadSchedule: () => Promise<SeedSchedule
   });
 
   app.post('/api/public/reservations', async (c) => {
+    // Jede gueltige Reservierung erzeugt eine Mail ans Studio. Fuenf in zehn Minuten decken
+    // jeden echten Fall ab — auch wer sich zu zweit anmeldet und einmal danebengreift.
+    const limit = rateLimit(clientKey(c.req.raw.headers, 'reservations'), 5, 10 * 60 * 1000);
+    if (!limit.ok) {
+      return c.json(
+        { error: 'Zu viele Anfragen in kurzer Zeit. Bitte versuch es später noch einmal.' },
+        429,
+        { 'retry-after': String(limit.retryAfterSeconds) },
+      );
+    }
+
     const parsed = reservationSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) {
       return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
@@ -153,8 +170,10 @@ export function createReservationRoutes(loadSchedule: () => Promise<SeedSchedule
     });
 
     if (!res.ok) {
+      // Der Grund bleibt im Log. Frueher ging die rohe Antwort des Mailanbieters an den
+      // Client — sie nannte Anbieter und Fehlerdetails und half beim Verfeinern eines Angriffs.
       console.error('[reservation] Mailversand fehlgeschlagen:', res.error);
-      return c.json({ error: 'Reservierung konnte nicht gesendet werden', detail: res.error }, 502);
+      return c.json({ error: 'Reservierung konnte nicht gesendet werden' }, 502);
     }
 
     return c.json({ ok: true, status, courseId: course.id }, 200);

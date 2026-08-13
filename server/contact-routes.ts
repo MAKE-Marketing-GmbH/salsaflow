@@ -12,6 +12,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { INFO_EMAIL, sendMail } from './mail.js';
+import { clientKey, rateLimit } from './rate-limit.js';
 
 // Erlaubte Anliegen (das Formular bietet sie als Auswahl; freier Text ist die Nachricht).
 const TOPIC_LABEL: Record<string, string> = {
@@ -27,7 +28,9 @@ const TOPIC_LABEL: Record<string, string> = {
 
 const contactSchema = z
   .object({
-    name: z.string().trim().min(1).max(120),
+    // Der Name steht in der Betreffzeile. Ein Zeilenumbruch darin wuerde dort eine neue
+    // Kopfzeile oeffnen (siehe headerSafe in server/mail.ts).
+    name: z.string().trim().regex(/^[^\r\n]*$/, 'Zeilenumbrüche sind nicht erlaubt').min(1).max(120),
     email: z.string().trim().email().max(160).optional().nullable(),
     phone: z.string().trim().max(40).optional().nullable(),
     topic: z
@@ -58,6 +61,17 @@ export function createContactRoutes() {
   const app = new Hono();
 
   app.post('/api/public/contact', async (c) => {
+    // Jede gueltige Anfrage erzeugt eine Mail ans Studio. Ohne Limit laesst sich das Postfach
+    // fluten; der Honeypot haelt nur naive Bots auf.
+    const limit = rateLimit(clientKey(c.req.raw.headers, 'contact'), 5, 10 * 60 * 1000);
+    if (!limit.ok) {
+      return c.json(
+        { error: 'Zu viele Anfragen in kurzer Zeit. Bitte versuch es später noch einmal.' },
+        429,
+        { 'retry-after': String(limit.retryAfterSeconds) },
+      );
+    }
+
     const parsed = contactSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) {
       return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
@@ -95,7 +109,8 @@ export function createContactRoutes() {
     if (!res.ok) {
       // KEIN Fake-Erfolg: die Person bekommt einen ehrlichen Fehler und kann auf mailto ausweichen.
       console.error('[contact] Mailversand fehlgeschlagen:', res.error);
-      return c.json({ error: 'Mail konnte nicht gesendet werden', detail: res.error }, 502);
+      // Der Grund bleibt im Log, nicht in der Antwort an den Client.
+      return c.json({ error: 'Mail konnte nicht gesendet werden' }, 502);
     }
 
     return c.json({ ok: true, driver: res.driver, id: res.id }, 200);
