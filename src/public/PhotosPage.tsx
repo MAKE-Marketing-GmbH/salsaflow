@@ -108,20 +108,22 @@ export function PhotosPage() {
                           onClick={() => setLightboxIndex(i)}
                           aria-label={p.alt}
                           data-testid="gallery-photo"
-                          className={cn(
-                            'group relative block w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] shadow-sm transition-shadow duration-300 hover:shadow-[0_16px_40px_-16px_rgba(17,17,17,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2',
-                            galleryTileAspect(i),
-                          )}
+                          className="group relative block w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] shadow-sm transition-shadow duration-300 hover:shadow-[0_16px_40px_-16px_rgba(17,17,17,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
                         >
                           <img
                             src={p.src}
                             alt={p.alt}
-                            /* Kopf-Bias statt Mitte (Kritik 10.08.2026): die Kachel-Ratios aus
-                               galleryTileAspect sind oft querformatiger als die Portrait-Quellen
-                               (Team-Album) — object-cover center schnitt dort die Koepfe ab,
-                               uebrig blieben Torso-Kacheln. 30% von oben haelt Gesichter im Bild,
-                               ohne Querformat-Fotos sichtbar zu verschieben. */
-                            className="h-full w-full object-cover object-[center_30%] transition-transform duration-[var(--dur-slow)] ease-out group-hover:scale-[1.04]"
+                            /* Kein Zuschnitt mehr (13.08.2026). Vorher gab galleryTileAspect(i)
+                               jeder Kachel ein Format nach ihrer Position im Raster — ein
+                               Hochformat-Portraet konnte in einer 3:2-Kachel landen und verlor
+                               dort 53 % seiner Hoehe. Der Ausgleich `object-[center_30%]` half
+                               nur halb: gemessen klebte der Scheitel an der Oberkante.
+                               Die Galerie ist ein Masonry-Raster (columns), es braucht gar keine
+                               feste Kachelhoehe. Jedes Bild laeuft jetzt in seinem eigenen
+                               Format. Darum tragen alle 88 Eintraege in gallery/content.ts ihre
+                               echten Masse — ohne sie koennte der Browser die Hoehe nicht
+                               reservieren und das Raster wuerde beim Laden springen. */
+                            className="block h-auto w-full transition-transform duration-[var(--dur-slow)] ease-out group-hover:scale-[1.04]"
                             width={p.width ?? 1080}
                             height={p.height ?? 1350}
                             loading="lazy"
@@ -270,14 +272,6 @@ function FilterHeader() {
 }
 
 // Tile-Seitenverhaeltnisse fuer ein lebendiges masonry-Raster (object-cover schneidet passend zu).
-function galleryTileAspect(index: number) {
-  const slot = index % 9;
-  if (slot === 0 || slot === 5) return 'aspect-[4/5]';
-  if (slot === 1 || slot === 6) return 'aspect-[3/2]';
-  if (slot === 3) return 'aspect-square';
-  return 'aspect-[5/4]';
-}
-
 /* ---------------------------------------------------------------------------- Closing */
 function GalleryClosing() {
   const { lang } = useLang();
