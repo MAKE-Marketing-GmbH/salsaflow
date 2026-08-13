@@ -6,7 +6,7 @@
 // ruhiger Reveal-Takt, echte Buehnen-Fotos als Beweis. Alle Pfeile als Lucide. DE/EN.
 //
 // Rhythmus: Hero -> Anlaesse -> Formate (Show/Animation/Workshop + Kombination) -> Ablauf der
-// Anfrage -> Beweis-Galerie -> Final CTA -> FAQ. Primaerer CTA sitewide -> /kontakt#schnupperstunde.
+// Anfrage -> Beweis-Galerie -> Final CTA -> FAQ. Primaerer CTA dieser Seite -> /kontakt#animationen.
 
 import { motion } from 'framer-motion';
 import {

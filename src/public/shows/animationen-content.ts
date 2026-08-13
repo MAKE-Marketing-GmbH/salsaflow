@@ -7,7 +7,8 @@
 // KEINE erfundenen Zahlen, KEINE Preise (Show-Preise laufen individuell ueber die Anfrage).
 // Bilder: nur echte Buehnen-Fotos aus /photos/shows. Uebersprungen sind die leeren Platzhalter
 // (show-05/06/18, je 66 Byte), die Logo-Grafiken (show-01/10) und Fotos mit Fremd-Watermark
-// (show-04/22 "Bail Adoro", show-15 Fremd-Event-Logo). Primaerer CTA immer -> /kontakt#schnupperstunde.
+// (show-04/22 "Bail Adoro", show-15 Fremd-Event-Logo). Primaerer CTA -> /kontakt#animationen:
+// wer eine Show anfragt, will kein Formular fuer die Gratis-Tanzstunde.
 
 import type { Lang } from '@/lib/i18n';
 import type { Crumb, Faq } from '@/public/subpage/kit';
