@@ -114,7 +114,10 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
                 width={1500}
                 height={1000}
                 loading="lazy"
-                className="h-full w-full origin-bottom scale-[1.35] object-cover object-center"
+                // Kein Zoom mehr: origin-bottom scale-[1.35] schob die Koepfe der vorderen
+                // Taenzerinnen bei 1440 ueber den oberen Rahmen (Critic Runde 6, Item 2).
+                // 22% statt center haelt die Kopfreihe im hohen lg-Fenster im Bild.
+                className="h-full w-full object-cover object-[50%_22%]"
               />
               <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-black/5 to-transparent" />
             </div>

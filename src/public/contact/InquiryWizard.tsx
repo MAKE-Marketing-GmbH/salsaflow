@@ -360,7 +360,10 @@ export function InquiryWizard({
         </p>
       )}
 
-      <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* sm:pr-36: der fixe WhatsApp-FAB (right-6, 140px-Zone) lag sonst genau auf dem
+          Weiter-/Absenden-Knopf. Mobil klebt die Zeile sticky am unteren Rand, damit der
+          Knopf nicht unter dem Fold verschwindet (Critic Runde 6, Item 3). */}
+      <div className="mt-7 flex flex-col-reverse gap-3 max-sm:sticky max-sm:bottom-0 max-sm:-mx-5 max-sm:bg-white max-sm:px-5 max-sm:py-3 sm:flex-row sm:items-center sm:justify-between sm:pr-36">
         {step > 0 ? (
           <button type="button" onClick={() => { setError(''); setStep((current) => current - 1); }} className="t-hover inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]">
             <ArrowLeft aria-hidden className="h-4 w-4" />{copy.back}

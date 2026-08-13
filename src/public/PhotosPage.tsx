@@ -61,7 +61,9 @@ export function PhotosPage() {
                 <FilterHeader />
                 <motion.div
                   variants={item}
-                  className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:flex sm:flex-wrap sm:justify-end"
+                  // sm:pr-32: der fixe WhatsApp-FAB (rechte 140px-Zone) lag auf dem
+                  // "Shows"-Chip (Critic Runde 6, Item 4).
+                  className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:flex sm:flex-wrap sm:justify-end sm:pr-32"
                   role="group"
                   aria-label={lang === 'de' ? 'Album-Filter' : 'Album filter'}
                 >

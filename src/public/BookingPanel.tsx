@@ -264,7 +264,9 @@ function Funnel() {
                   data-testid={`day-${d.key}`}
                   onClick={() => setDay(d.key)}
                   className={cn(
-                    'inline-flex items-center rounded-full border px-2.5 py-1.5 text-[0.8125rem] font-semibold transition-colors sm:px-3.5 sm:py-2.5 sm:text-sm',
+                    // min-h-11: 44px-Tap-Ziel — mit py-1.5 allein massen die Chips 34px
+                    // (Critic Runde 6, Item 5).
+                    'inline-flex min-h-11 items-center rounded-full border px-2.5 py-1.5 text-[0.8125rem] font-semibold transition-colors sm:px-3.5 sm:py-2.5 sm:text-sm',
                     activeDay === d.key
                       ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white'
                       : 'border-[var(--color-line)] bg-white text-[var(--color-ink)] hover:border-[var(--color-salsa)]',
@@ -368,7 +370,9 @@ function Funnel() {
                                 )}
                               </div>
                               <div className="mt-1 flex min-w-0 items-center gap-2 text-xs leading-snug text-[var(--color-ink-muted)]">
-                                <span className="min-w-0 truncate">
+                                {/* Kein truncate: "Studio Elisabethenanlage" wurde bei 390px
+                                    abgeschnitten — umbrechen (Critic Runde 6, Item 5). */}
+                                <span className="min-w-0 break-words">
                                   {teachers && <>{teachers} · </>}
                                   {c.locationName}
                                 </span>
@@ -434,7 +438,8 @@ function Funnel() {
                           )}
                         </div>
                         <div className="mt-1 flex min-w-0 items-center gap-2 text-xs leading-snug text-[var(--color-ink-muted)]">
-                          <span className="min-w-0 truncate">
+                          {/* Kein truncate: Studio-Name bricht um statt … (Critic Runde 6). */}
+                          <span className="min-w-0 break-words">
                             {teachers && <>{teachers} · </>}
                             {c.locationName}
                           </span>

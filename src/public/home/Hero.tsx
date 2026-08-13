@@ -214,7 +214,9 @@ export function Hero() {
             >
               <span className="block">{de ? 'Salsa, Bachata' : 'Salsa, bachata'}</span>
               <span className="block">{de ? 'und Heels.' : 'and heels.'}</span>
-              <span className="block">{de ? 'Mitten in Basel.' : 'Here in Basel.'}</span>
+              {/* Mobil in Ink: das Foto endet bei ~y490, diese Zeile (y484-525) steht sonst
+                  weiss auf paper-warm — Kontrast ~1:1 (Critic Runde 6, Item 1). */}
+              <span className="block max-sm:text-[var(--color-ink)]">{de ? 'Mitten in Basel.' : 'Here in Basel.'}</span>
             </motion.h1>
 
             {/* Der Lead sagte vorher woertlich dasselbe wie die neue H1
