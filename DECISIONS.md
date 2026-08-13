@@ -25,6 +25,11 @@ und macht die nächste offene Welle.
 - **Kontakt-Wizard hat drei Schritte.** Der Prüf-Schritt ist raus (Raphael-Entscheid). Bei
   einer unverbindlichen Anfrage zeigt er nur, was die Person selbst getippt hat.
   Die Spaltenzahl des Fortschrittsbalkens kommt aus den Labels, nie als feste Zahl.
+- **og:/twitter:-Bilder laufen bis zum Cutover über ASSET_ORIGIN** (Vercel-Produktion,
+  seo-config.ts). Auf der Ziel-Domain liegt noch die alte Website, dort war das
+  Vorschaubild 404 — geteilte Links kamen ohne Bild an. **Beim DNS-Cutover auf
+  SITE_ORIGIN zurückstellen:** seo-config.ts, schema.ts, scripts/prerender.mjs,
+  index.html (Kommentar steht an allen vier Stellen).
 - **Englische Fassung: erst nach dem DNS-Cutover.** Die Übersetzung ist vollständig
   (2289 Textpaare, 32 SEO-Blöcke in `seo-config.ts`), aber für Google unsichtbar: kein
   `/en`, kein hreflang, jede Seite liefert `lang="de-CH"`. Solange die Preview-Domain
