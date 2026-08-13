@@ -56,6 +56,7 @@ export function TanzschuhePage() {
 
 /* ------------------------------------------------------------------ Nach Tanzstil */
 function ByStyleSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
+  const { lang } = useLang();
   const { item } = useReveal();
   const s = c.byStyle;
   return (
@@ -77,8 +78,10 @@ function ByStyleSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
               </span>
               <h3 className="mt-3 font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{card.name}</h3>
               <p className="mt-2 flex-1 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{card.text}</p>
+              {/* Der Link trug denselben Text wie die Ueberschrift direkt darueber — auf der
+                  Karte stand "Salsa" zweimal untereinander. Jetzt sagt er, wohin er fuehrt. */}
               <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)]">
-                {card.name}
+                {lang === 'de' ? `${card.name}-Kurse ansehen` : `See ${card.name} classes`}
                 <ArrowRight size={15} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
               </span>
             </motion.a>
