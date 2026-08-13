@@ -765,10 +765,10 @@ function ScheduleBottomCta({ nextStart }: { nextStart: string | null }) {
         <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
           <a
             href="/buchung"
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-500)]"
+            className="group inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-500)]"
           >
             {lang === 'de' ? 'Platz sichern' : 'Book your spot'}
-            <ArrowRight size={16} strokeWidth={2} aria-hidden className="ml-1.5" />
+            <ArrowRight size={16} strokeWidth={2} aria-hidden className="ml-1.5 transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
           </a>
           <a
             href="/kontakt#schnupperstunde"
