@@ -86,6 +86,30 @@ einer Fehlermeldung. Er ist hoechstens einen Deploy alt.
   `lg:h-[18rem]` plus `center 10%` loesen es zusammen.
 - Fehlalarm geprueft und verworfen: der gemeldete Danceflow-Crop ist sauber.
 
+### Sicherheit (dritte Runde)
+
+Ein adversarialer Test hat vier Luecken gefunden, alle geschlossen:
+
+- **Header-Injection.** Ein CRLF im Vornamen erzeugte eine echte `Bcc:`-Zeile in der
+  Mail — verifiziert im Outbox-Pfad. Live hielt bisher nur der Mailanbieter dagegen.
+  Zwei Ebenen: `headerSafe()` in `server/mail.ts` saeubert `to`, `subject`, `replyTo`
+  fuer jede Mail; beide Schemas weisen Umbrueche in Namen und Telefon ab.
+- **Kein Rate-Limit.** `server/rate-limit.ts`: fuenf Anfragen je zehn Minuten und IP,
+  auf Kontakt und Reservierung. Im Speicher (keine DB) — stoppt den realen Fall,
+  nicht einen verteilten Angriff. Ein echtes Limit gehoert an den Rand.
+- **Server lockerer als das Formular.** Nachname und E-Mail waren serverseitig
+  optional; per curl kam eine unbrauchbare Reservierung durch. Server zieht nach.
+- **Fehler-Leak.** Die rohe Antwort des Mailanbieters ging an den Client.
+
+**Live geprueft:** CRLF 400, fehlender Nachname 400, gueltige Reservierung 200,
+sechste Anfrage derselben IP 429.
+
+### Motion (dritte Runde)
+
+18 harte Dauern in 12 Dateien auf die Tokens gezogen — danach null Ausreisser.
+27 Links hatten eine `hover:`-Farbe ohne Uebergang und sprangen hart um; alle
+tragen jetzt `.t-hover`.
+
 ### Nebenbei
 
 `scripts/prerender.mjs` bekommt einen eigenen Vite-Cache — der geteilte Ordner
@@ -102,7 +126,9 @@ Huellen ziehen ihre Titel jetzt aus `SEO_META` statt aus einer Kopie im Skript.
 | Preview crawlbar | `salsaflow-dc.vercel.app` erlaubt Indexierung. Vor dem Cutover auf noindex setzen. |
 | EN ohne `/en` und hreflang | Bewusst offen. |
 | `framer-motion` → `motion/react` | Bewusst offen. |
-| Rate-Limit auf Kontakt und Reservierung | Offen. Beide Routen nehmen unbegrenzt an. |
+| Rate-Limit am Rand | Teilweise. Im Speicher gefixt (5/10 Min je IP). Ein verteilter Angriff umgeht das — eine Vercel-WAF-Regel waere die saubere Loesung. |
+| Anfaenger-Marker im Kursplan | Vorschlag, braucht Entscheidung: Soll ein Kurs pro Tag als "gut fuer den Einstieg" markiert werden, statt alle ins Formular zu schicken? |
+| Mobbin-MCP | Nicht aktivierbar: `/root/.claude.json` gehoert einem anderen Benutzer. `raphael-mcp-ondemand.sh enable mobbin` muss Raphael selbst ausfuehren, danach neue Session. |
 
 ## Gates
 
@@ -114,6 +140,9 @@ Huellen ziehen ihre Titel jetzt aus `SEO_META` statt aus einer Kopie im Skript.
 | Kein `opacity:0` im HTML | PASS (0 auf allen geprueften Seiten) |
 | Live-Sweep `/kontakt` + `/floweekend` | PASS — Folds selbst gelesen, Desktop und Mobil. Wizard zeigt drei Schritte, Floweekend-Band mit allen Koepfen. Ablage `/tmp/salsaflow-live-r6`, `/tmp/sf-wiz3`. |
 | Kursplan im HTML (`DESIGN.md:113`) | PASS — 76 Zeiten auf `/kursplan`, 42 auf `/`, 38 auf `/tanzkurse`. Vorher null. |
+| Header-Injection | PASS — CRLF in Namen wird abgewiesen, `sendMail` saeubert zusaetzlich. |
+| Rate-Limit auf Mail-Routen | PASS — sechste Anfrage derselben IP gibt 429. |
+| Keine harten Motion-Dauern | PASS — null Treffer fuer `duration-150/200/300/500/700`. |
 | Production | Live |
 | DNS Cutover | offen (Owner) |
 
