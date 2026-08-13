@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 import { CONTACT_PAGE, type TopicKey } from '@/public/contact/content';
+import { CONTACT } from '@/public/site/SiteFooter';
 
 // Drei Schritte: Anliegen, Details, Kontakt. Der frühere Prüf-Schritt ist raus (Beschluss
 // 13.08.2026): Bei einer unverbindlichen Anfrage kostet er Abschlüsse und zeigt nur, was die
@@ -152,6 +153,9 @@ export function InquiryWizard({
   }
 
   if (status === 'success') {
+    // Naechste Schritte statt Sackgasse (UX-Audit 13.08.2026, Punkt 4): Stil ist zu diesem
+    // Zeitpunkt schon bekannt — der Kursplan-Link nimmt ihn als Vorfilter mit.
+    const stylePath = needsChoices && style !== 'unsure' ? `/kursplan?stil=${style}` : '/kursplan';
     return (
       <div data-testid="contact-success" role="status" aria-live="polite" className="flex min-h-[18rem] flex-col items-start justify-center p-6 sm:p-8">
         <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-salsa)] text-white">
@@ -159,6 +163,28 @@ export function InquiryWizard({
         </span>
         <h3 className="mt-5 font-display text-3xl font-bold leading-tight text-[var(--color-ink)]">{copy.successTitle}</h3>
         <p className="mt-3 max-w-lg text-base leading-relaxed text-[var(--color-ink-muted)]">{copy.successBody}</p>
+        <h4 className="mt-7 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
+          {de ? 'So geht es weiter' : 'What happens next'}
+        </h4>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <a
+            href={stylePath}
+            data-testid="success-schedule-link"
+            className="group inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
+          >
+            {de ? 'Passende Kurse ansehen' : 'Browse matching classes'}
+            <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+          </a>
+          <a
+            href={CONTACT.whatsapp}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--color-line)] px-5 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)]"
+          >
+            <MessageCircle size={16} strokeWidth={2} aria-hidden />
+            WhatsApp
+          </a>
+        </div>
       </div>
     );
   }
