@@ -1,6 +1,6 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-13 (Reservierung live, Sicherheit + Barrierefreiheit, Production `0dcb74d`)
+**Stand:** 2026-08-13 (Reservierung live, Sicherheit, Barrierefreiheit, Rechtstext korrigiert)
 **Session:** Buchung real gemacht, Kursplan ins HTML, Header-Injection zu, Motion vereinheitlicht
 **Handoff-ready:** ja
 
@@ -117,6 +117,16 @@ kann einem anderen Benutzer gehoeren, dann brach der Build mit EACCES.
 `/buchung` trug den Titel der Rueckkehr-Seite; eigener `seoKey`, und die leeren
 Huellen ziehen ihre Titel jetzt aus `SEO_META` statt aus einer Kopie im Skript.
 
+### Datenschutz korrigiert (vierte Runde)
+
+Die Erklaerung beschrieb eine Website, die es nicht gibt: Stripe als
+Zahlungsabwickler und eine Supabase-Datenbank mit Serverstandort Frankfurt.
+Beides laeuft hier nicht (Zahlungs-Endpunkt gibt live 503, Stripe ist nicht
+einmal Abhaengigkeit). Konkrete Zusagen, die nicht zutreffen, sind schlimmer
+als gar keine. Beide Sprachen korrigiert, Abschnitt "Kursbuchung" heisst jetzt
+"Kursreservierung" ohne Tarif und ohne Vertragsschluss.
+**Geprueft:** null Treffer fuer Stripe und Supabase im HTML von `/datenschutz`.
+
 ## OFFEN
 
 | Thema | Stand |
@@ -204,6 +214,20 @@ Dann jedes Fold-PNG per Read selbst ansehen.
 - **Studio-2-Bild auf `/kontakt/standort-raumvermietung`.** Laut Alt-Text soll es einen
   hellen Tanzraum zeigen, ist aber ein Danceflow-Werbeflyer mit Neon-Schrift und Preisen
   (`standort-content.ts:136`, `hp-13.webp`). Braucht ein echtes Raumfoto vom Kunden.
+- **Drei Studios oder zwei?** Die Seite behauptet dreimal drei Studios und zeigt drei
+  Karten. Das Firmen-Dossier sagt zwei (`website-plan/01-firma-dossier.md:191`) und
+  markiert die Diskrepanz selbst als `OPEN` (`:196`). Die Beschreibungen zu Studio 2 und 3
+  sind fast identisch — das passt zu einem erfundenen dritten Raum.
+  **Kundenfrage, keine Codeaenderung.** Bis zur Antwort steht eine unbelegte Behauptung live.
+- **Mietpreise werden verschwiegen, obwohl sie bekannt sind.** Die Seite sagt dreimal
+  „Preise klaeren wir in deiner Anfrage". Das Dossier hat sie belegt
+  (`01-firma-dossier.md:162`): CHF 50/h bis 17:00, CHF 60/h danach, Mo–Fr 08–17.
+  Vor Veroeffentlichung mit dem Kunden gegenpruefen, ob der Preis noch gilt.
+- **Eventkalender-Pillen sehen aus wie Filter, sind aber keine.**
+  `EventkalenderPage.tsx:85-93` rendert `<li>` ohne Klick-Handler. Wer draufklickt,
+  erwartet Filterung und bekommt nichts. Entweder echte Links auf die Formatseiten oder
+  das Filter-Aussehen weg. Der leere Zustand selbst ist ehrlich benannt — keine
+  erfundenen Termine.
 - **JS-Buendel 1,1 MB in einer Datei.** Code-Splitting ist heikel: `entry-server.tsx`
   nutzt `renderToString`, das kann nicht suspendieren — Lazy-Routen wuerden auf 26
   SEO-Seiten einen Spinner ausliefern. Sicher lazy sind nur `/admin` und `/buchung`.

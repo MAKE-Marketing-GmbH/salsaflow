@@ -41,6 +41,16 @@ und macht die nächste offene Welle.
 - **Rate-Limit im Speicher ist die Untergrenze, nicht das Ziel.** `server/rate-limit.ts`,
   fünf Anfragen je zehn Minuten und IP. Ein verteilter Angriff umgeht das. Ein echtes
   Limit gehört an den Rand (Vercel WAF).
+- **Die Datenschutzerklärung beschreibt nur, was wirklich läuft.** Sie nannte Stripe und
+  eine Supabase-Datenbank in Frankfurt — beides gibt es hier nicht. Konkrete Zusagen, die
+  nicht zutreffen, sind schlimmer als gar keine. **Wer Zahlung oder Datenbank später scharf
+  schaltet, trägt sie in `src/public/legal/content.ts` wieder ein** — beide Sprachen.
+- **ARIA-Rollen versprechen nichts, was die Umsetzung nicht hält.** `role="tablist"` ohne
+  Pfeiltasten-Navigation und ohne verknüpftes Panel ist eine Lüge gegenüber Screenreadern.
+  Filter-Schalter tragen `aria-pressed`, nicht `role="tab"`.
+- **`prefers-reduced-motion` schaltet Bewegung ab, kehrt aber keinen Zustand um.** Ein
+  früherer Versuch setzte `.t-underline` auf `scaleX(1)` — danach trug jeder Link permanent
+  seinen Hover-Unterstrich. Wer Bewegung reduziert, will Ruhe, nicht mehr Farbe.
 
 ## Live-Audit 13.08.2026 — Workspace + Formular + Crops
 
