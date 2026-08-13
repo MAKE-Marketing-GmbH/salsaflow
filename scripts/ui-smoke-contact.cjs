@@ -51,30 +51,36 @@ async function noHOverflow(page) {
     ok('Sektion Raumvermietung', bodyL.includes('raumvermietung'));
     ok('Kontakt bleibt schlank: FAQ liegt nicht auf /kontakt', !bodyL.includes('häufige fragen'));
     ok('Kontakt bleibt schlank: Collabs liegt nicht auf /kontakt', !body.includes('2332dancewear'));
-    ok('Kanal WhatsApp vorhanden', (await page.locator('[data-testid="channel-whatsapp"]').count()) >= 1);
-    ok('Kanal Google-Bewertung vorhanden', (await page.locator('[data-testid="channel-google"]').count()) >= 1);
-    ok('Kanal Instagram vorhanden', (await page.locator('[data-testid="channel-instagram"]').count()) >= 1);
+    // Schlank-Umbau: der fruehere Kanal-Block (channel-* Testids) ist aufgeloest.
+    // WhatsApp = Hero-CTA, Google = Maps-CTA/Footer, Instagram = Footer.
+    ok('Kanal WhatsApp vorhanden', (await page.locator('a[href*="wa.me"]').count()) >= 1);
+    ok('Kanal Google-Bewertung vorhanden', (await page.locator('a[href*="google.com/maps"]').count()) >= 1);
+    ok('Kanal Instagram vorhanden', (await page.locator('a[href*="instagram.com"]').count()) >= 1);
 
     // Direkt-Kontakt-Links + Maps + Collab-Link korrekt
     const mailto = await page.locator('a[href^="mailto:info@salsaflow-dc.com"]').count();
     ok('Direkter E-Mail-Link (mailto info@)', mailto >= 1, `${mailto} mailto`);
-    const wa = await page.locator('[data-testid="channel-whatsapp"]').getAttribute('href');
+    const wa = await page.locator('a[href*="wa.me"]').first().getAttribute('href');
     ok('WhatsApp-Link zeigt auf wa.me', !!wa && wa.includes('wa.me'), wa || '');
     const maps = await page.locator('[data-testid="contact-maps"]').getAttribute('href');
     ok('Maps-Link zeigt auf Google Maps', !!maps && maps.includes('google.com/maps'), maps || '');
 
-    // /mehr traegt FAQ + Collabs in der aktuellen Route-Map.
-    await page.goto(`${BASE}/mehr`, { waitUntil: 'networkidle' });
-    const moreBody = await page.locator('main').innerText();
-    const moreBodyL = moreBody.toLowerCase();
-    ok('/mehr: FAQ-Sektion vorhanden', moreBodyL.includes('häufige fragen') && moreBodyL.includes('gut zu wissen'));
-    ok('/mehr: Collabs (2332dancewear) vorhanden', moreBody.includes('2332dancewear'));
-    const collab = await page.locator('a[href*="2332dancewear.com/collections/salsaflow"]').first().getAttribute('href');
-    ok('/mehr: Collab-Link -> 2332dancewear/collections/salsaflow', !!collab && collab.includes('2332dancewear.com/collections/salsaflow'), collab || '');
-    await page.locator('button[aria-controls^="faq-panel-"]').first().click();
+    // Aktuelle Route-Map: FAQ ist eigene Seite /faq, Collabs liegt unter /mehr/collabs.
+    await page.goto(`${BASE}/faq`, { waitUntil: 'networkidle' });
+    const faqBody = await page.locator('main').innerText();
+    ok('/faq: FAQ-Seite vorhanden', faqBody.toLowerCase().includes('fragen'));
+    // /faq nutzt natives <details>/<summary> (FaqAccordion). Die ersten zwei Items sind
+    // defaultOpen — darum das LETZTE (geschlossene) Item klicken und dessen open pruefen.
+    const lastFaq = page.locator('details').last();
+    await lastFaq.locator('summary').click();
     await page.waitForTimeout(200);
-    const isOpen = await page.locator('button[aria-controls^="faq-panel-"]').first().getAttribute('aria-expanded');
-    ok('/mehr: FAQ-Akkordeon oeffnet auf Klick', isOpen === 'true');
+    const isOpen = await lastFaq.getAttribute('open');
+    ok('/faq: FAQ-Akkordeon oeffnet auf Klick', isOpen !== null);
+    await page.goto(`${BASE}/mehr/collabs`, { waitUntil: 'networkidle' });
+    const collabBody = await page.locator('main').innerText();
+    ok('/mehr/collabs: Collabs (2332dancewear) vorhanden', collabBody.includes('2332dancewear'));
+    const collab = await page.locator('a[href*="2332dancewear.com/collections/salsaflow"]').first().getAttribute('href');
+    ok('/mehr/collabs: Collab-Link -> 2332dancewear/collections/salsaflow', !!collab && collab.includes('2332dancewear.com/collections/salsaflow'), collab || '');
 
     await page.goto(`${BASE}/kontakt`, { waitUntil: 'networkidle' });
 
@@ -88,7 +94,8 @@ async function noHOverflow(page) {
     await page.locator('[data-testid="inquiry-next"]').click();
     await page.locator('[data-testid="contact-name"]').fill('Smoke Tester');
     await page.locator('[data-testid="contact-email"]').fill('smoke@example.com');
-    await page.locator('[data-testid="inquiry-next"]').click();
+    // Kein drittes "Weiter": der Wizard hat 3 Schritte (Anliegen -> Details -> Kontakt),
+    // auf dem letzten steht nur noch contact-submit.
     await page.locator('[data-testid="contact-submit"]').click();
     await page.locator('[data-testid="contact-success"]').waitFor({ timeout: 12000 });
     ok('Formular zeigt Erfolg nach Absenden', true);
