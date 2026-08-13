@@ -584,7 +584,12 @@ export function FaqBlock({
           <Reveal className="divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
             {items.map((f) => (
               <details key={f.q} className="group py-1">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left font-display text-lg font-bold text-[var(--color-ink)] marker:content-none [&::-webkit-details-marker]:hidden">
+                {/* lg:pr-32: der fixe WhatsApp-FAB (rechte ~140px-Zone) lag beim Scrollen
+                    genau auf dem Chevron der untersten sichtbaren Frage (Sweep 14.08.2026,
+                    /tmp/r7-fab-faq.png — auf /privatstunden, /shows-animationen und
+                    /kursaufbau gemessen). Nur der Zeileninhalt rueckt ein, Klickflaeche und
+                    Trennlinien bleiben voll breit. */}
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left font-display text-lg font-bold text-[var(--color-ink)] marker:content-none lg:pr-32 [&::-webkit-details-marker]:hidden">
                   {f.q}
                   <ChevronDown
                     size={20}

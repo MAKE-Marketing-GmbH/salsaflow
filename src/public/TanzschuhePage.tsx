@@ -199,7 +199,8 @@ function PartnerSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
                 loading="lazy"
               />
             </div>
-            <span className="absolute left-5 top-5 rounded-full bg-white/92 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-ink)] shadow-sm backdrop-blur">
+            {/* Festes Papier statt Glas (Sweep 14.08.2026). */}
+            <span className="absolute left-5 top-5 rounded-full bg-[var(--color-paper-warm)] px-4 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-ink)] shadow-sm">
               {p.badge}
             </span>
           </motion.div>

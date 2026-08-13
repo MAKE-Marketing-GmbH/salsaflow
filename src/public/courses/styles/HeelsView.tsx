@@ -231,7 +231,8 @@ function AtmosphereSection({ c }: { c: C }) {
           </motion.div>
           <motion.div variants={item} className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]">
             <img src={a.image.src} alt={a.image.alt} className="aspect-[5/4] w-full object-cover object-[center_35%]" width={1400} height={1120} loading="lazy" />
-            <div className="absolute bottom-4 left-4 right-4 rounded-[var(--radius-card)] border border-black/5 bg-white/92 p-4 text-[var(--color-ink)] shadow-[0_18px_44px_-18px_rgba(17,17,17,0.5)] backdrop-blur sm:right-auto sm:max-w-[20rem]">
+            {/* Festes Papier statt Glas (Sweep 14.08.2026). */}
+            <div className="absolute bottom-4 left-4 right-4 rounded-[var(--radius-card)] border border-black/5 bg-[var(--color-paper-warm)] p-4 text-[var(--color-ink)] shadow-[0_18px_44px_-18px_rgba(17,17,17,0.5)] sm:right-auto sm:max-w-[20rem]">
               <p className="text-[0.95rem] font-semibold leading-snug">{a.microcopy}</p>
             </div>
           </motion.div>

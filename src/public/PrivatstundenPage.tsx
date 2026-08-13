@@ -126,7 +126,10 @@ function PrivatHero({ c }: { c: PrivatContent }) {
               fetchPriority="high"
             />
           </div>
-          <div className="absolute -bottom-5 left-5 right-5 rounded-[var(--radius-card)] border border-black/5 bg-white/92 p-4 text-[var(--color-ink)] shadow-[0_18px_44px_-18px_rgba(17,17,17,0.5)] backdrop-blur sm:left-auto sm:right-5 sm:max-w-[18rem]">
+          {/* Links angedockt statt rechts: der fixe WhatsApp-FAB lag im Erst-Viewport auf
+              der Kartenecke (Sweep 14.08.2026). Festes Papier statt Glas (bg-white/92 +
+              backdrop-blur) — Glas auf Fotos ist seit Critic-Runde 4/5 verboten. */}
+          <div className="absolute -bottom-5 left-5 right-5 rounded-[var(--radius-card)] border border-black/5 bg-[var(--color-paper-warm)] p-4 text-[var(--color-ink)] shadow-[0_18px_44px_-18px_rgba(17,17,17,0.5)] sm:right-auto sm:max-w-[18rem]">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{h.cardLabel}</p>
             <p className="mt-1 font-display text-lg font-bold leading-tight">{h.cardText}</p>
           </div>

@@ -127,7 +127,9 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
               fetchPriority="high"
             />
           </div>
-          <div className="absolute -bottom-5 left-5 right-5 rounded-[var(--radius-card)] border border-black/5 bg-white/92 p-4 text-[var(--color-ink)] shadow-[0_18px_44px_-18px_rgba(17,17,17,0.5)] backdrop-blur sm:left-auto sm:right-5 sm:max-w-[18rem]">
+          {/* Links angedockt + festes Papier statt Glas — FAB lag auf der Kartenecke,
+              Glas auf Fotos verboten (Sweep 14.08.2026, wie PrivatstundenPage). */}
+          <div className="absolute -bottom-5 left-5 right-5 rounded-[var(--radius-card)] border border-black/5 bg-[var(--color-paper-warm)] p-4 text-[var(--color-ink)] shadow-[0_18px_44px_-18px_rgba(17,17,17,0.5)] sm:right-auto sm:max-w-[18rem]">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{h.cardLabel}</p>
             <p className="mt-1 font-display text-lg font-bold leading-tight">{h.cardText}</p>
           </div>
