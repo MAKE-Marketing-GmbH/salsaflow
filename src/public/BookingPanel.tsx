@@ -134,7 +134,18 @@ function Funnel() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(loadPlan, []);
 
-  const days = useMemo(() => (schedule ? buildScheduleDays(schedule.today) : []), [schedule]);
+  // Nur Wochentage mit Kursen — dieselbe Leiste wie /kursplan (Mo–Sa statt Mo–So).
+  // Zwei verschieden lange Tagesleisten fuehlten sich wie zwei Produkte an (UX-Audit,
+  // Punkt 7); ein Tag ganz ohne Kursangebot braucht auch keinen leeren Tab.
+  const days = useMemo(
+    () =>
+      schedule
+        ? buildScheduleDays(schedule.today).filter((d) =>
+            schedule.courses.some((c) => c.weekday === d.key),
+          )
+        : [],
+    [schedule],
+  );
   const activeDay = day ?? days[0]?.key ?? 'mon';
   const dayCourses = useMemo(() => {
     if (!schedule) return [];
