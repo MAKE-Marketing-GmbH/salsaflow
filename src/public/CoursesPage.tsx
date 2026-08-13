@@ -80,7 +80,20 @@ const STYLE_THUMB_FOCUS: Record<string, string> = {
   heels: 'center 25%',
 };
 
-function CourseStartCard({ course, data, index }: { course: ScheduleCourse; data: ScheduleResponse; index: number }) {
+/* Zweit-Motiv je Stil: der Teaser zeigt oft ZWEI Salsa- und ZWEI Bachata-Starts —
+   mit nur einem Motiv pro Stil standen identische Fotos direkt nebeneinander
+   (Sweep 14.08.2026, /tmp/s-r6-tanzkurse-390-4.png). Beide Dateien waren bisher
+   ungenutzt (0 Fundstellen), Dopplungs-Limit unberuehrt. */
+const STYLE_THUMB_ALT: Record<string, string> = {
+  salsa: '/photos/2026/event-social-couple-01.webp',
+  bachata: '/photos/2026/event-social-couple-02.webp',
+};
+const STYLE_THUMB_ALT_FOCUS: Record<string, string> = {
+  salsa: 'center 35%',
+  bachata: 'center 20%',
+};
+
+function CourseStartCard({ course, data, index, altThumb = false }: { course: ScheduleCourse; data: ScheduleResponse; index: number; altThumb?: boolean }) {
   const { lang, t } = useLang();
   const style = lang === 'de' ? course.styleDe : course.styleEn;
   const level = levelLabelI18n(lang === 'de' ? course.levelDe : course.levelEn, course.onVariant);
@@ -94,7 +107,9 @@ function CourseStartCard({ course, data, index }: { course: ScheduleCourse; data
         ? 'Startet bald'
         : 'Starting soon';
   const running = course.phase === 'running';
-  const thumb = STYLE_THUMB[course.styleKey] ?? '/photos/2026/kurse-classfreude-01.webp';
+  const useAlt = altThumb && !!STYLE_THUMB_ALT[course.styleKey];
+  const thumb = (useAlt ? STYLE_THUMB_ALT[course.styleKey] : STYLE_THUMB[course.styleKey]) ?? '/photos/2026/kurse-classfreude-01.webp';
+  const focus = (useAlt ? STYLE_THUMB_ALT_FOCUS[course.styleKey] : STYLE_THUMB_FOCUS[course.styleKey]) ?? 'center 30%';
   return (
     <a
       href={href}
@@ -109,7 +124,7 @@ function CourseStartCard({ course, data, index }: { course: ScheduleCourse; data
           height={500}
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.04]"
-          style={{ objectPosition: STYLE_THUMB_FOCUS[course.styleKey] ?? 'center 30%' }}
+          style={{ objectPosition: focus }}
         />
         <span
           className={cn(
@@ -981,11 +996,16 @@ function CalendarSection() {
           </p>
         ) : (
           <div className="mt-6 grid border-t border-[var(--color-line)] sm:grid-cols-2 lg:grid-cols-4">
-            {teaser.map((course, index) => (
-              <div key={course.id} className="h-full">
-                <CourseStartCard course={course} data={data!} index={index} />
-              </div>
-            ))}
+            {teaser.map((course, index) => {
+              // Jede ZWEITE Karte desselben Stils bekommt das Zweit-Motiv, damit keine
+              // identischen Fotos nebeneinander stehen.
+              const nthOfStyle = teaser.slice(0, index).filter((c) => c.styleKey === course.styleKey).length;
+              return (
+                <div key={course.id} className="h-full">
+                  <CourseStartCard course={course} data={data!} index={index} altThumb={nthOfStyle % 2 === 1} />
+                </div>
+              );
+            })}
           </div>
         )}
       </Shell>
