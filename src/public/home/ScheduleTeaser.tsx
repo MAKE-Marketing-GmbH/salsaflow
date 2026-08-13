@@ -199,7 +199,12 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
               <div
                 role="tablist"
                 aria-label={de ? 'Wochentag wählen' : 'Choose a weekday'}
-                className="grid grid-cols-6 py-3"
+                // sm:gap-1.5: ohne Fuge klebte die helle Hover-Flaeche eines Nachbar-Tabs buendig an
+        // der schwarzen aktiven Kachel — zwei verschweisste Bloecke (Beleg /tmp/hover-tab-mi.png,
+        // Critic-Nachlauf 13.08.2026). Mobil kein gap: 390px / 6 = 58px pro Spalte sind schon
+        // das Minimum fuer "Sa" + Zahl + "1 Kurs" (siehe Kommentar oben), und Hover gibt es
+        // auf Touch nicht.
+        className="grid grid-cols-6 py-3 sm:gap-1.5"
               >
                 {days.map((d) => {
                   const count = byDay.get(d.key)?.length ?? 0;
