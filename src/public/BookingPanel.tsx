@@ -21,6 +21,7 @@ import {
   fetchSchedule,
   buildScheduleDays,
   weekdayKeyForISO,
+  remainingLessons,
   type ScheduleCourse,
   type ScheduleResponse,
   type ScheduleTerm,
@@ -440,6 +441,7 @@ function Funnel() {
               key={course.id}
               course={course}
               term={termOf(course)}
+              today={schedule?.today}
               onBack={() => {
                 setCourse(null);
                 setDay(course.weekday);
@@ -456,10 +458,12 @@ function Funnel() {
 function BookingForm({
   course,
   term,
+  today,
   onBack,
 }: {
   course: ScheduleCourse;
   term?: ScheduleTerm;
+  today?: string;
   onBack: () => void;
 }) {
   const { lang } = useLang();
@@ -753,6 +757,24 @@ function BookingForm({
                     <dd className="min-w-0 leading-snug text-[var(--color-ink)]">
                       {formatDateI18n(term.startDate, lang)} – {formatDateI18n(term.endDate, lang)}
                       <span className="text-[var(--color-ink-muted)]"> · {bt.weeksNote}</span>
+                      {/* Laufende Staffel: sagen, dass Quereinstieg geht und wie viel noch kommt.
+                          Ohne diese Zeile steht der Besucher genau am Entscheidungspunkt vor
+                          einem Datum, das schon angefangen hat (UX-Audit 13.08.2026). Kein
+                          Preis — Entscheid "keine Preise im Funnel" bleibt. */}
+                      {course.phase === 'running' && today && (() => {
+                        const left = remainingLessons(today, term, course.weekday);
+                        if (!left) return null;
+                        const leftLabel = lang === 'de'
+                          ? `noch ${left} ${left === 1 ? 'Lektion' : 'Lektionen'}`
+                          : `${left} ${left === 1 ? 'class' : 'classes'} left`;
+                        return (
+                          <span className="mt-0.5 block font-medium text-[var(--color-salsa)]">
+                            {course.allowsLateEntry
+                              ? (lang === 'de' ? `Staffel läuft — Quereinstieg möglich, ${leftLabel}.` : `Term is running — late entry possible, ${leftLabel}.`)
+                              : (lang === 'de' ? `Staffel läuft — ${leftLabel}. Schreib uns für deinen Einstieg.` : `Term is running — ${leftLabel}. Contact us to join.`)}
+                          </span>
+                        );
+                      })()}
                     </dd>
                   </div>
                 )}

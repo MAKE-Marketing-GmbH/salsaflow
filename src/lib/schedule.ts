@@ -113,6 +113,24 @@ export function weekdayKeyForISO(iso: string): WeekdayKey | null {
   return WEEKDAY_ORDER[(sundayBased + 6) % 7] ?? null;
 }
 
+/** Anzahl noch anstehender Lektionen eines Wochenkurses ab `today` innerhalb der Staffel.
+ * Gleiche Rechnung wie `upcomingDates` in server/public.ts — hier als Zaehler, weil die
+ * Live-Daten (api/index.ts, JSON-Seed) kein `nextDates` mitliefern. */
+export function remainingLessons(today: string, term: ScheduleTerm, weekday: string): number {
+  const target = WEEKDAY_ORDER.indexOf(weekday as WeekdayKey);
+  if (target < 0) return 0;
+  let cursor = term.startDate > today ? term.startDate : today;
+  const fromKey = weekdayKeyForISO(cursor);
+  if (!fromKey) return 0;
+  cursor = addDaysISO(cursor, (target - WEEKDAY_ORDER.indexOf(fromKey) + 7) % 7);
+  let count = 0;
+  while (cursor <= term.endDate) {
+    count += 1;
+    cursor = addDaysISO(cursor, 7);
+  }
+  return count;
+}
+
 function makeScheduleDay(weekday: WeekdayKey, date: string): ScheduleDay {
   const [, month, day] = date.split('-').map(Number);
   const monthIndex = Math.max(0, (month ?? 1) - 1);
