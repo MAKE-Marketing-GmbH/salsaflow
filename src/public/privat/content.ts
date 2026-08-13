@@ -84,6 +84,10 @@ export type PrivatContent = {
 /* Interne Ziel-Routen (echte App-Routen). */
 const R = {
   schnupper: '/kontakt#schnupperstunde',
+  // Eigener Hash fuer Privatstunden. Vorher zeigten auch die acht Knoepfe mit der Aufschrift
+  // "Privatstunde anfragen" auf #schnupperstunde. Das Formular fragte dann nach Tanzstil und
+  // Wochentag statt nach dem Ziel — und schickte das falsche Anliegen ans Studio.
+  privatAnfrage: '/kontakt#privatstunden',
   preise: '/preise',
   kontakt: '/kontakt',
   kursaufbau: '/kursaufbau',
@@ -104,7 +108,7 @@ const de: PrivatContent = {
       'für Einzelpersonen, Paare oder kleine Ziele',
       'direkt im Salsaflow-Studio am Bahnhof SBB',
     ],
-    primary: { label: 'Privatstunde anfragen', href: R.schnupper },
+    primary: { label: 'Privatstunde anfragen', href: R.privatAnfrage },
     secondary: { label: 'Preise ansehen', href: R.preise },
     microcopy: 'Beschreib kurz dein Ziel. Wir empfehlen dir den sinnvollen nächsten Schritt.',
     image: {
@@ -126,7 +130,7 @@ const de: PrivatContent = {
       { title: 'Paartanz als Paar', text: 'Wenn ihr gemeinsam lernen und in eurem Tempo arbeiten wollt.' },
       { title: 'Styling & Musikalität', text: 'Wenn du Bewegungen schöner, freier und musikalischer tanzen möchtest.' },
     ],
-    cta: { label: 'Ziel beschreiben', href: R.schnupper },
+    cta: { label: 'Ziel beschreiben', href: R.privatAnfrage },
   },
   flow: {
     eyebrow: 'So funktioniert es',
@@ -138,7 +142,7 @@ const de: PrivatContent = {
       { tag: 'Schritt 2', title: 'Fokus setzen', text: 'Wir wählen Technik, Bewegungen oder Übungen, die zu deinem Level passen.' },
       { tag: 'Schritt 3', title: 'Direkt korrigieren', text: 'Du bekommst Feedback im Moment, statt erst Wochen später zu merken, was nicht sitzt.' },
     ],
-    cta: { label: 'Privatstunde buchen', href: R.schnupper },
+    cta: { label: 'Privatstunde buchen', href: R.privatAnfrage },
     // Runde 3, Issue 3: war /photos/gallery/kurse/03.jpg — ein Party-Schnappschuss unter
     // der Ueberschrift "Persoenliche Korrektur im Unterricht". Der wide-Crop der
     // Privatstunden-Strecke zeigt genau das: eine Lehrerin fuehrt Hand in Hand.
@@ -178,7 +182,7 @@ const de: PrivatContent = {
     title: 'Beschreib uns dein Ziel. Wir sagen dir, was sinnvoll ist.',
     titleAccent: 'dein Ziel',
     body: 'Schreib kurz, ob es um Salsa, Bachata, Hochzeitstanz, Technik oder Level geht. So können wir dir schneller eine passende Empfehlung geben.',
-    primary: { label: 'Privatstunde anfragen', href: R.schnupper },
+    primary: { label: 'Privatstunde anfragen', href: R.privatAnfrage },
     secondary: { label: 'Kontakt aufnehmen', href: R.kontakt },
     microcopy: 'Persönlich · flexibel · direkt am Bahnhof SBB.',
   },
@@ -218,7 +222,7 @@ const en: PrivatContent = {
       'for individuals, couples or small goals',
       'right in the Salsaflow studio at Basel SBB station',
     ],
-    primary: { label: 'Request a private lesson', href: R.schnupper },
+    primary: { label: 'Request a private lesson', href: R.privatAnfrage },
     secondary: { label: 'See the prices', href: R.preise },
     microcopy: 'Describe your goal in a few words. We recommend the sensible next step.',
     image: {
@@ -240,7 +244,7 @@ const en: PrivatContent = {
       { title: 'Dancing as a couple', text: 'When you want to learn together and work at your own pace.' },
       { title: 'Styling & musicality', text: 'When you want to dance movements more beautifully, freely and musically.' },
     ],
-    cta: { label: 'Describe your goal', href: R.schnupper },
+    cta: { label: 'Describe your goal', href: R.privatAnfrage },
   },
   flow: {
     eyebrow: 'How it works',
@@ -252,7 +256,7 @@ const en: PrivatContent = {
       { tag: 'Step 2', title: 'Set the focus', text: 'We pick technique, movements or exercises that fit your level.' },
       { tag: 'Step 3', title: 'Correct on the spot', text: 'You get feedback in the moment, instead of noticing weeks later what is not working.' },
     ],
-    cta: { label: 'Book a private lesson', href: R.schnupper },
+    cta: { label: 'Book a private lesson', href: R.privatAnfrage },
     image: {
       src: '/photos/premium/offer-privat-wide-original-v2.webp',
       alt: 'Personal correction in a Salsaflow class',
@@ -289,7 +293,7 @@ const en: PrivatContent = {
     title: 'Describe your goal. We will recommend the right format.',
     titleAccent: 'your goal',
     body: 'Tell us briefly whether your goal is Salsa, Bachata, a wedding dance, technique or level placement. We can then recommend the right format.',
-    primary: { label: 'Request a private lesson', href: R.schnupper },
+    primary: { label: 'Request a private lesson', href: R.privatAnfrage },
     secondary: { label: 'Get in touch', href: R.kontakt },
     microcopy: 'Personal · flexible · right by Basel SBB station.',
   },

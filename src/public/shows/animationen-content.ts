@@ -75,8 +75,10 @@ export type ShowsAnimContent = {
   faq: { eyebrow: string; title: string; items: Faq[] };
 };
 
-// Sitewide Conversion-Anker (Master-Plan): Event-Anfrage auf den Schnupper-/Anfrage-Anker /kontakt.
-const ANFRAGE = '/kontakt#schnupperstunde';
+// Anfrage-Anker dieser Seite. Vorher #schnupperstunde: Wer eine Show fuer sein Firmenfest
+// anfragen wollte, landete im Formular fuer die Gratis-Tanzstunde und wurde nach Tanzstil und
+// Wochentag gefragt. #animationen setzt das richtige Anliegen und die passende Rueckfrage.
+const ANFRAGE = '/kontakt#animationen';
 const KONTAKT = '/kontakt';
 
 export const SHOWS_ANIM: Record<Lang, ShowsAnimContent> = {

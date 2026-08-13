@@ -174,6 +174,13 @@ export const EVENTS: Record<Lang, EventsContent> = {
 };
 
 // Eventfrog-Ziel fuer alle Ticket-Buttons + den Eventkalender. Eine Swap-Stelle: vor Launch
-// VITE_EVENTFROG_URL mit dem echten Salsaflow-Eventfrog-Link fuellen (.env). Fallback = Startseite.
-export const EVENTFROG_URL =
-  (import.meta.env.VITE_EVENTFROG_URL as string | undefined)?.trim() || 'https://eventfrog.ch';
+// VITE_EVENTFROG_URL mit dem echten Salsaflow-Eventfrog-Link fuellen (.env).
+//
+// Fallback ist das eigene Kontaktformular, nicht mehr eventfrog.ch. Grund: die nackte Domain
+// leitet auf die Eventfrog-Startseite weiter. Wer dort ankommt, muss Salsaflow erst suchen und
+// hat keinen Weg zurueck. Das eigene Formular beantwortet dieselbe Frage und die Anfrage kommt an.
+const EVENTFROG_ENV = (import.meta.env.VITE_EVENTFROG_URL as string | undefined)?.trim();
+export const EVENTFROG_URL = EVENTFROG_ENV || '/kontakt#events';
+
+/** Zeigt der Ticket-Weg nach draussen? Steuert target/rel und die Button-Beschriftung. */
+export const EVENTFROG_IS_EXTERNAL = Boolean(EVENTFROG_ENV);

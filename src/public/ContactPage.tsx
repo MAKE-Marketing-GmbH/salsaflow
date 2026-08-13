@@ -26,6 +26,7 @@ const ROOM_ICONS: LucideIcon[] = [Music, MapPin, CalendarClock];
 
 const TOPIC_HASHES: Record<string, TopicKey> = {
   '#schnupperstunde': 'schnupperstunde',
+  '#privatstunden': 'privatstunden',
   '#raumvermietung': 'raumvermietung',
   '#geschenkgutschein': 'geschenkgutschein',
   '#events': 'events',

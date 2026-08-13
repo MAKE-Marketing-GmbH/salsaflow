@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { Eyebrow, Shell, CtaText, sectionTitle, sectionLead } from '@/public/site/primitives';
 import { ClosingInvite, MEASURE_L, HeroFrame } from '@/public/subpage/kit';
 import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
-import { EVENTS, EVENTFROG_URL, type EventFact } from '@/public/events/content';
+import { EVENTS, EVENTFROG_URL, EVENTFROG_IS_EXTERNAL, type EventFact } from '@/public/events/content';
 
 // Icon-System fuer die drei Anniversary-Highlights (einmal im Jahr -> Workshops & Partys -> Community).
 const HIGHLIGHT_ICONS: LucideIcon[] = [CalendarDays, PartyPopper, Users];
@@ -89,8 +89,10 @@ function EventfrogCta({
   return (
     <a
       href={EVENTFROG_URL}
-      target="_blank"
-      rel="noreferrer"
+      // Neuer Tab nur, wenn der Weg wirklich nach draussen fuehrt. Ohne echten Eventfrog-Link
+      // zeigt der Knopf auf das eigene Kontaktformular — das gehoert in denselben Tab.
+      target={EVENTFROG_IS_EXTERNAL ? '_blank' : undefined}
+      rel={EVENTFROG_IS_EXTERNAL ? 'noreferrer' : undefined}
       data-testid="eventfrog-cta"
       className={`${base} ${styles}`}
     >
