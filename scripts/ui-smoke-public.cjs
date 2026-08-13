@@ -46,14 +46,16 @@ async function allCardsAttr(page, attr) {
     const bodyDe = await page.locator('body').innerText();
 
     // --- DE/EN-Umschalter: UI + DB-Begriffe wechseln ----------------------
-    await page.locator('[data-testid="lang-en"]').click();
-    await page.getByRole('heading', { name: 'Find your course.' }).waitFor({ timeout: 8000 });
+    await page.locator('[data-testid="lang-en"]').first().click();
+    await page.getByRole('heading', { name: 'Find your class.' }).waitFor({ timeout: 8000 });
     const bodyEn = await page.locator('body').innerText();
     await page.screenshot({ path: `${SHOTS}/02-desktop-en.png`, fullPage: true });
 
-    ok('UI wechselt DE->EN (Laufende Kurse -> Ongoing courses)',
-      bodyDe.includes('Laufende Kurse') && bodyEn.includes('Ongoing courses'),
-      'Phasen-Schalter uebersetzt');
+    // Aktuelles Design (Slot-Faltung 13.08.2026): KEIN Phasen-Schalter, KEIN day-all,
+    // KEINE Level-Chips mehr — ein Tag ist immer aktiv, dazu Stil-Chips.
+    ok('UI wechselt DE->EN (Alle Stile -> All styles)',
+      bodyDe.includes('Alle Stile') && bodyEn.includes('All styles'),
+      'Stil-Chips uebersetzt');
     ok('Level-Begriffe wechseln (Stufe -> Level, DB-getrieben)',
       bodyDe.includes('Stufe') && !bodyEn.includes('Stufe'),
       'kein "Stufe" mehr in EN');
@@ -62,99 +64,57 @@ async function allCardsAttr(page, attr) {
       'Wochentags-Ueberschrift uebersetzt');
     ok('Status-Chip "frei" uebersetzt (Plätze frei -> Spots available)',
       bodyDe.includes('Plätze frei') && bodyEn.includes('Spots available'));
-    ok('Status-Chip "voll" sichtbar + uebersetzt (Ausgebucht -> Fully booked)',
-      bodyDe.includes('Ausgebucht') && bodyEn.includes('Fully booked'),
-      'full-Kurse vorhanden');
+    // "Ausgebucht" existiert nur, wenn wirklich ALLE Staffeln eines Slots voll sind —
+    // datenabhaengig, darum nur bei Vorkommen die Uebersetzung pruefen.
+    ok('Status-Chip "voll" uebersetzt, falls vorhanden',
+      !bodyDe.includes('Ausgebucht') || bodyEn.includes('Fully booked'),
+      bodyDe.includes('Ausgebucht') ? 'full-Kurse vorhanden' : 'keine vollen Kurse im Datenstand');
     ok('Echte Umlaute im DE-UI (keine ASCII-Ersatzschreibung)',
-      bodyDe.includes('zukünftig') && bodyDe.includes('möglich') && !bodyDe.includes('zukuenftig'),
+      bodyDe.includes('Wähle') && bodyDe.includes('läuft') && !bodyDe.includes('Waehle'),
       'Regel 069');
 
     // Zurueck auf DE fuer die Filter-Tests.
-    await page.locator('[data-testid="lang-de"]').click();
+    await page.locator('[data-testid="lang-de"]').first().click();
     await page.getByRole('heading', { name: 'Finde deinen Kurs.' }).waitFor({ timeout: 8000 });
 
-    // --- Phasen-Filter: laufend / zukuenftig ------------------------------
-    await page.locator('[data-testid="phase-upcoming"]').click();
-    await page.waitForTimeout(250);
-    const upCount = await cardCount(page);
-    const upPhases = await allCardsAttr(page, 'data-phase');
-    ok('Filter "Neu & zukuenftig" zeigt nur zukuenftige Kurse',
-      upCount > 0 && upPhases.every((p) => p === 'upcoming'),
-      `${upCount} Karten, alle upcoming`);
-
-    await page.locator('[data-testid="phase-running"]').click();
-    await page.waitForTimeout(250);
-    const runCount = await cardCount(page);
-    const runPhases = await allCardsAttr(page, 'data-phase');
-    ok('Filter "Laufende Kurse" zeigt nur laufende Kurse',
-      runCount > 0 && runPhases.every((p) => p === 'running'),
-      `${runCount} Karten, alle running`);
-
-    await page.locator('[data-testid="phase-all"]').click();
-    await page.waitForTimeout(250);
-    ok('Phasen-Filter "Alle" stellt vollen Plan wieder her', (await cardCount(page)) === baseAll, `${baseAll}`);
-
-    // --- Tag-Filter -------------------------------------------------------
-    const dayChips = page.locator('[data-testid^="day-"]');
-    const dayIds = (await dayChips.evaluateAll((els) => els.map((e) => e.getAttribute('data-testid')))).filter(
-      (id) => id && id !== 'day-all',
-    );
-    const dayKey = dayIds[0].replace('day-', '');
+    // --- Tag-Tabs: genau ein Tag aktiv, Liste folgt -----------------------
+    const dayIds = (await page.locator('[data-testid^="day-"]').evaluateAll(
+      (els) => els.map((e) => e.getAttribute('data-testid')),
+    )).filter(Boolean);
+    ok('Tag-Tabs vorhanden (Mo-Sa)', dayIds.length === 6, `${dayIds.length} Tabs`);
+    const dayKey = dayIds[1].replace('day-', '');
     await page.locator(`[data-testid="day-${dayKey}"]`).click();
     await page.waitForTimeout(250);
     const dayWeekdays = await allCardsAttr(page, 'data-weekday');
-    ok('Tag-Filter zeigt nur den gewaehlten Wochentag',
+    ok('Tag-Tab zeigt nur den gewaehlten Wochentag',
       dayWeekdays.length > 0 && dayWeekdays.every((w) => w === dayKey),
       `Tag ${dayKey}: ${dayWeekdays.length} Karten`);
-    await page.locator('[data-testid="day-all"]').click();
-    await page.waitForTimeout(200);
 
     // --- Stil-Filter ------------------------------------------------------
-    const styleChips = page.locator('[data-testid^="style-"]');
-    const styleIds = (await styleChips.evaluateAll((els) => els.map((e) => e.getAttribute('data-testid')))).filter(
-      (id) => id && id !== 'style-all',
-    );
-    const styleKey = styleIds[0].replace('style-', '');
+    const dayBase = await cardCount(page);
+    const styleIds = (await page.locator('[data-testid^="style-"]').evaluateAll(
+      (els) => els.map((e) => e.getAttribute('data-testid')),
+    )).filter((id) => id && id !== 'style-all');
+    // Einen Stil waehlen, der an diesem Tag vorkommt (sonst ist die Liste leer).
+    const presentStyles = await allCardsAttr(page, 'data-style');
+    const styleKey = styleIds.map((id) => id.replace('style-', '')).find((s) => presentStyles.includes(s));
     await page.locator(`[data-testid="style-${styleKey}"]`).click();
     await page.waitForTimeout(250);
     const styleVals = await allCardsAttr(page, 'data-style');
     ok('Stil-Filter zeigt nur den gewaehlten Stil',
       styleVals.length > 0 && styleVals.every((s) => s === styleKey),
       `Stil ${styleKey}: ${styleVals.length} Karten`);
-    await page.locator('[data-testid="style-all"]').click();
-    await page.waitForTimeout(200);
 
-    // --- Level-Filter (nach Kategorie) ------------------------------------
-    const levelChips = page.locator('[data-testid^="level-"]');
-    const levelIds = (await levelChips.evaluateAll((els) => els.map((e) => e.getAttribute('data-testid')))).filter(
-      (id) => id && id !== 'level-all',
-    );
-    if (levelIds.length > 0) {
-      const before = await cardCount(page);
-      await page.locator(`[data-testid="${levelIds[0]}"]`).click();
-      await page.waitForTimeout(250);
-      const lvCount = await cardCount(page);
-      ok('Level-Filter grenzt den Plan ein', lvCount > 0 && lvCount <= before, `${lvCount}/${before} Karten`);
-    } else {
-      ok('Level-Filter vorhanden', false, 'keine Level-Chips gefunden');
-    }
-
-    // --- Kombi-Filter (Tag + Stil) ---------------------------------------
-    await page.locator('[data-testid="reset-filters"]').click();
-    await page.waitForTimeout(200);
-    await page.locator(`[data-testid="day-${dayKey}"]`).click();
-    await page.locator(`[data-testid="style-${styleKey}"]`).click();
-    await page.waitForTimeout(250);
+    // Kombi ist damit implizit gedeckt: Tag-Tab + Stil-Chip aktiv.
     const comboW = await allCardsAttr(page, 'data-weekday');
-    const comboS = await allCardsAttr(page, 'data-style');
-    ok('Kombi-Filter (Tag + Stil) schneidet korrekt',
-      comboW.every((w) => w === dayKey) && comboS.every((s) => s === styleKey),
+    ok('Kombi (Tag + Stil) schneidet korrekt',
+      comboW.length > 0 && comboW.every((w) => w === dayKey),
       `${comboW.length} Karten`);
 
-    // --- Reset ------------------------------------------------------------
-    await page.locator('[data-testid="reset-filters"]').click();
+    // --- Reset ueber "Alle Stile" -----------------------------------------
+    await page.locator('[data-testid="style-all"]').click();
     await page.waitForTimeout(250);
-    ok('Filter zuruecksetzen stellt vollen Plan wieder her', (await cardCount(page)) === baseAll, `${baseAll}`);
+    ok('"Alle Stile" stellt den Tagesplan wieder her', (await cardCount(page)) === dayBase, `${dayBase}`);
 
     // --- Mobil sauber (iPhone-Breite, kein horizontales Scrollen) ---------
     await page.setViewportSize({ width: 390, height: 844 });
@@ -165,7 +125,13 @@ async function allCardsAttr(page, attr) {
     );
     ok('Mobil ohne horizontalen Ueberlauf', overflow <= 1, `scrollWidth-innerWidth=${overflow}px`);
     await page.screenshot({ path: `${SHOTS}/03-mobile-de.png`, fullPage: true });
-    await page.locator('[data-testid="lang-en"]').click();
+    // Mobil liegt der Sprachschalter im Burger-Menue: fuer den EN-Shot auf Desktop-Breite
+    // umschalten, dann zurueck auf 390.
+    await page.setViewportSize({ width: 1280, height: 1600 });
+    await page.waitForTimeout(200);
+    await page.locator('[data-testid="lang-en"]').first().click();
+    await page.waitForTimeout(300);
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${SHOTS}/04-mobile-en.png`, fullPage: true });
 
