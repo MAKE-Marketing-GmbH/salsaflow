@@ -1,7 +1,7 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-13 (Reservierungs-Runde, Production `a5d2f40`)
-**Session:** Buchung real gemacht, Formular gekuerzt, Bilder und Motion gefixt
+**Stand:** 2026-08-13 (Reservierung live, Sicherheit + Barrierefreiheit, Production `0dcb74d`)
+**Session:** Buchung real gemacht, Kursplan ins HTML, Header-Injection zu, Motion vereinheitlicht
 **Handoff-ready:** ja
 
 ## ERLEDIGT
@@ -165,20 +165,63 @@ Huellen ziehen ihre Titel jetzt aus `SEO_META` statt aus einer Kopie im Skript.
 - `shot-sweep.mjs` faehrt mit `reducedMotion: reduce`. Hover-Unterstriche stehen
   darum im Screenshot dauerhaft — das ist der Endzustand, kein Fehler.
 
-## Naechster Schritt
+## Naechster Schritt (exakt, sofort startbar)
 
-Alle Gates dieser Runde sind gruen. Der naechste sinnvolle Schritt ist eine
-Entscheidung, kein Code:
+Alle Gates dieser Session sind gruen, alles ist live. Der naechste Schritt haengt
+an einer Entscheidung, nicht an Code. In dieser Reihenfolge:
 
-1. **Eventfrog-Link von Fabio holen** und `VITE_EVENTFROG_URL` setzen. Bis dahin
-   fuehrt der Ticket-Knopf ins eigene Formular — funktioniert, ist aber nicht das Ziel.
-2. **DNS-Cutover planen.** Vorher die Preview auf noindex setzen, sonst
-   konkurrieren zwei Staende in der Suche.
+**1. Eventfrog-Link von Fabio holen** (Owner: Raphael). Dann:
+```
+cd /root/clients/salsaflow
+vercel env add VITE_EVENTFROG_URL production   # echter Salsaflow-Eventfrog-Link
+```
+Der Ticket-Knopf geht danach automatisch wieder nach draussen, im neuen Tab.
+Ohne Link fuehrt er ins eigene Formular — funktioniert, ist aber nicht das Ziel.
 
-Wenn stattdessen weiter geprueft werden soll, die noch nicht selbst gelesenen Seiten:
+**2. DNS-Cutover Jimdo → Vercel** (Owner: Raphael). Vorher die Preview auf noindex
+setzen, sonst konkurrieren zwei Staende in der Suche.
 
+**3. Danach erst: englische Routen.** Siehe DECISIONS.md — die Uebersetzung ist
+fertig, aber unsichtbar. Vor dem Cutover bringt EN-SEO nichts.
+
+Wenn stattdessen weiter geprueft werden soll — diese Seiten hat noch niemand
+selbst angesehen:
 ```
 node /root/raphael-skills/skills/eigene/web/scripts/shot-sweep.mjs \
   --base https://salsaflow-dc.vercel.app --out /tmp/sf-next \
-  --routes /kursaufbau,/mehr/tanzschuhe,/mehr/collabs,/faq --static --mobile
+  --routes /kontakt/standort-raumvermietung,/events-workshops/eventkalender,/impressum,/datenschutz \
+  --static --mobile
 ```
+Dann jedes Fold-PNG per Read selbst ansehen.
+
+## Offene Vorschlaege (brauchen eine Produktentscheidung)
+
+- **Anfaenger-Marker im Kursplan.** Drei Vergleichs-Sites (DF Dance Studio, Cucala,
+  Salsannati) beantworten „wo fange ich an" mit einem konkreten Termin, nicht mit einem
+  Formular. Vorschlag: den ersten Anfaenger-Kurs pro Tag in `ScheduleTeaser.tsx` mit
+  „Gut fuer den Einstieg" markieren. Die Daten sind da (`levelDe`/`levelEn`), es braucht
+  kein neues Feld. Offen ist die Frage, wie stark der Kursplan lenken soll.
+- **Studio-2-Bild auf `/kontakt/standort-raumvermietung`.** Laut Alt-Text soll es einen
+  hellen Tanzraum zeigen, ist aber ein Danceflow-Werbeflyer mit Neon-Schrift und Preisen
+  (`standort-content.ts:136`, `hp-13.webp`). Braucht ein echtes Raumfoto vom Kunden.
+- **JS-Buendel 1,1 MB in einer Datei.** Code-Splitting ist heikel: `entry-server.tsx`
+  nutzt `renderToString`, das kann nicht suspendieren — Lazy-Routen wuerden auf 26
+  SEO-Seiten einen Spinner ausliefern. Sicher lazy sind nur `/admin` und `/buchung`.
+
+## Fallen aus dieser Session (fuer die naechste)
+
+- **Mobbin-MCP nicht aktivierbar.** `/root/.claude.json` gehoert einem anderen Benutzer,
+  `raphael-mcp-ondemand.sh enable mobbin` scheitert mit Permission denied. Raphael muss
+  das selbst ausfuehren, danach braucht es eine neue Session.
+- **`raphael-chrome` ist in dieser Umgebung nicht im Pfad.** Browser-Inspiration lief
+  darum ueber Web-Recherche.
+- **Zwei Git-Objektordner gehoeren root** (`.git/objects/ee` und `78`). Ein Blob mit
+  passendem Hash-Praefix laesst sich nicht schreiben. Dann die Datei minimal aendern,
+  damit ein anderer Hash entsteht.
+- **GitHub lehnte Pushes zeitweise mit „Internal Server Error" ab.** Wiederholen hilft;
+  der Commit selbst war jedesmal in Ordnung (auf einem Testbranch geprueft).
+- **`shot-sweep.mjs` faehrt mit `reducedMotion: reduce`.** Hover-Unterstriche stehen im
+  Screenshot darum dauerhaft — das ist der Endzustand, kein Fehler.
+- **Nicht jeder Pruefer-Fund haelt.** In dieser Session waren drei von rund dreissig
+  falsch (ein Bild-Crop, `.t-underline` angeblich unbenutzt, angebliche Federkurven).
+  Jeden Fund selbst nachpruefen, bevor er gefixt wird.

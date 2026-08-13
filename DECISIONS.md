@@ -3,6 +3,45 @@
 Diese Datei ist der Loop-Zustand. Jeder 20-Min-Fire liest sie + den Plan + DESIGN.md
 und macht die nächste offene Welle.
 
+## Reservierungs-Session 13.08.2026 — Raphaels Entscheide
+
+- **Buchung = Reservierung, kein Verkauf.** Raphael wörtlich: „Wir machen ja ohne Payment.
+  Race Conditions: wir machen keinen Preis. Buchung ist es ja nicht, sondern eine Reservierung."
+  Folge: keine Datenbank, kein Stripe, keine Preise und keine Platzzahlen im Funnel. Eine
+  Reservierung ist eine Mail ans Studio; bezahlt wird vor Ort. Umgesetzt in
+  [`server/reservation-routes.ts`](server/reservation-routes.ts).
+  **Nicht rückbauen ohne neue Ansage.** Der Zahlungs-Code (`server/payment-*.ts`) bleibt
+  unangetastet liegen, läuft aber auf dieser Website nicht.
+- **Kontakt-Wizard hat drei Schritte.** Der Prüf-Schritt ist raus (Raphael-Entscheid). Bei
+  einer unverbindlichen Anfrage zeigt er nur, was die Person selbst getippt hat.
+  Die Spaltenzahl des Fortschrittsbalkens kommt aus den Labels, nie als feste Zahl.
+- **Englische Fassung: erst nach dem DNS-Cutover.** Die Übersetzung ist vollständig
+  (2289 Textpaare, 32 SEO-Blöcke in `seo-config.ts`), aber für Google unsichtbar: kein
+  `/en`, kein hreflang, jede Seite liefert `lang="de-CH"`. Solange die Preview-Domain
+  läuft, bringt EN-SEO nichts. **Erst nach dem Cutover angehen**, dann Prerender pro
+  Sprache plus hreflang-Paare.
+- **Platzzahlen werden nicht geraten.** Ohne Datenbank kennt die Website keine freien
+  Plätze. Der Funnel zeigt nur „frei" oder „Warteliste" aus dem Seed-Status.
+  Geraten wäre schlimmer als weglassen.
+- **Kursplan muss im HTML stehen.** `DESIGN.md:113` verlangt vollen Text für öffentliche
+  Routen. `scripts/prerender.mjs` bettet den Plan zur Buildzeit ein, `embeddedSchedule()`
+  in `src/lib/schedule.ts` ist der Startwert der Komponenten. Der Netz-Aufruf läuft weiter
+  und überschreibt ihn. **Wer eine neue kursplan-lesende Komponente baut, nutzt denselben
+  Startwert** — sonst steht dort wieder „wird geladen" im ausgelieferten HTML.
+- **Motion: drei Dauern, eine Kurve.** `--dur-fast/base/slow` und `--ease-sf` in
+  `src/index.css`. Keine harten `duration-*`-Zahlen mehr. Wer eine Hover-Farbe setzt,
+  setzt `.t-hover` dazu — sonst springt sie hart um.
+- **Reveal-Animationen dürfen das HTML nicht leeren.** `useHydrated()` in
+  `src/public/home/motion.tsx`: der Server rendert den Endzustand, die Animation zündet
+  nach der Hydration. **Neue Reveals immer über diesen Haken**, sonst steht wieder
+  `opacity:0` im ausgelieferten HTML.
+- **Mail-Kopfzeilen sind gesäubert.** `headerSafe()` in `server/mail.ts` entfernt
+  Zeilenumbrüche aus `to`, `subject`, `replyTo`. Zusätzlich weisen beide Formular-Schemas
+  Umbrüche in Namen ab. **Beide Ebenen behalten** — der Anbieter ist kein Schutz.
+- **Rate-Limit im Speicher ist die Untergrenze, nicht das Ziel.** `server/rate-limit.ts`,
+  fünf Anfragen je zehn Minuten und IP. Ein verteilter Angriff umgeht das. Ein echtes
+  Limit gehört an den Rand (Vercel WAF).
+
 ## Live-Audit 13.08.2026 — Workspace + Formular + Crops
 
 - **Ein Checkout ist Wahrheit:** [`/root/clients/salsaflow`](/root/clients/salsaflow) auf `main`. Extra-Worktrees nicht anlegen. `EnterWorktree` auf `salsaflow-dc` scheitert (EACCES `.claude`).
