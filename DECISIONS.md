@@ -3,6 +3,19 @@
 Diese Datei ist der Loop-Zustand. Jeder 20-Min-Fire liest sie + den Plan + DESIGN.md
 und macht die nächste offene Welle.
 
+## Live-Audit 13.08.2026 — Workspace + Formular + Crops
+
+- **Ein Checkout ist Wahrheit:** [`/root/clients/salsaflow`](/root/clients/salsaflow) auf `main`. Extra-Worktrees nicht anlegen. `EnterWorktree` auf `salsaflow-dc` scheitert (EACCES `.claude`).
+- **GitHub:** `MAKE-Marketing-GmbH/salsaflow`, öffentlich, nur `main`. Nicht mehr privat/`raphael-hund`.
+- **Push = Deploy.** Vercel hängt an `main`. Lokales `vercel --prod` scheitert an `website-plan/09-mockups/generated` (root-only). Git-Push reicht.
+- **Kontakt-Hashes** (`#schnupperstunde`, `#raumvermietung`, `#geschenkgutschein`, `#events`, `#animationen`) setzen den Wizard-Topic und scrollen zu `#kontaktformular`. Die Infosektion trägt `id="raum-info"`.
+- **Ein Formular.** Direktkarte Mail/Phone/Hours ist aus dem Kontakt-Hero raus (Fold). WhatsApp bleibt. Mail/Phone stehen in Footer und Standort.
+- **Close-up rettet keinen Crop.** Floweekend: Motiv `party-29` statt `party-15`, plus `dense` SubHero. Crop allein auf Close-up lässt Köpfe geschnitten.
+- **`dense`** ist optional auf `SubHero`/`HeroFrame` in `src/public/subpage/kit.tsx`. Nur Floweekend nutzt es.
+- **Image-Reuse:** max 2 Platzierungen; DE+EN in einer Datei = 1; gallery/content.ts exempt. Gate: `scripts/verify-image-reuse.cjs`.
+- **Lokales Vite:** Default-Cache `node_modules/.vite` gehört root. Workaround: untracked `vite.dev.local.config.ts` mit `cacheDir: /tmp/salsaflow-vite-cache`, Port 5174. Nicht committen.
+- **Motion-Paket:** Repo bleibt `framer-motion` bis Raphael den Wechsel will. Skill will `motion/react`.
+
 ## Website-Plan FULL (Raphael/Session 2026-08-12) — GATES GESCHLOSSEN
 
 - **Plan-Ordner:** [`website-plan/`](website-plan/) — Skill `website-plan`, SCOPE=FULL, REPO_STAND=MITNUTZEN, **kein Production-Code** in dieser Welle.
