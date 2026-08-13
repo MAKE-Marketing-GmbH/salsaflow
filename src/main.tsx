@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, Suspense } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import './index.css';
 import { LangProvider } from '@/lib/i18n';
@@ -15,7 +15,11 @@ if (route.redirectTo) {
     <StrictMode>
       <LangProvider>
         <SmoothScroll />
-        <Matched />
+        {/* Suspense nur fuer die lazy Admin-Route (routes.tsx); erzeugt kein DOM und
+            stoert die Hydration der prerenderten Seiten nicht. */}
+        <Suspense fallback={null}>
+          <Matched />
+        </Suspense>
       </LangProvider>
     </StrictMode>
   );

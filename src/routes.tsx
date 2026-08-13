@@ -1,6 +1,9 @@
-import type { ComponentType } from 'react';
+import { lazy, type ComponentType } from 'react';
 import type { SeoKey } from '@/lib/seo';
-import { App } from '@/App';
+// Admin lazy: die komplette Verwaltung (App) lag im einen oeffentlichen Bundle — jeder
+// Besucher der Startseite hat sie mitgeladen. /admin wird nie prerendert (leere Huelle),
+// darum trifft renderToString diese lazy-Komponente nie.
+const App = lazy(() => import('@/App').then((m) => ({ default: m.App })));
 import { HomePage } from '@/public/HomePage';
 import { CoursesPage } from '@/public/CoursesPage';
 import { EventsPage } from '@/public/EventsPage';
