@@ -80,7 +80,11 @@ function PriceRows({ rows, onRequest }: { rows: PriceRow[]; onRequest: string })
           <dt className="text-[0.95rem] leading-snug text-[var(--color-ink-muted)]">{row.label}</dt>
           <dd
             className={cn(
-              'shrink-0 font-display text-base font-extrabold tabular-nums',
+              // Kein tabular-nums: Cal Sans sperrt damit auch Punkt und Strich auf
+              // Ziffernbreite — "CHF 30.-" wurde zu "CHF 30 . -" (Sweep 13.08.2026,
+              // gemessen 73px statt 58px). Die Werte sind rechtsbuendige Strings,
+              // eine Ziffern-Spaltenausrichtung braucht es hier nicht.
+              'shrink-0 font-display text-base font-extrabold',
               i === 0 ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
             )}
           >
@@ -111,7 +115,8 @@ function GroupedPrices({ groups, onRequest }: { groups: PriceGroup[]; onRequest:
                   <dt className="text-[0.95rem] leading-snug text-[var(--color-ink-muted)]">{row.label}</dt>
                   <dd
                     className={cn(
-                      'shrink-0 font-display text-base font-extrabold tabular-nums',
+                      // Kein tabular-nums — gleiche Begruendung wie in PriceRows oben.
+                      'shrink-0 font-display text-base font-extrabold',
                       anchor ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
                     )}
                   >
