@@ -45,9 +45,15 @@ export function WhatsAppFloat({ raised = false }: { raised?: boolean }) {
       className={cn(
         'fixed right-5 z-40 inline-flex h-14 items-center gap-2 rounded-full px-4 sm:right-6',
         'bg-[var(--color-whatsapp)] text-[var(--color-ink)] shadow-lg shadow-black/15 ring-1 ring-black/10',
-        't-hover-move hover:-translate-y-0.5 hover:bg-[var(--color-whatsapp-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-whatsapp)]',
+        't-hover-move transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom] hover:-translate-y-0.5 hover:bg-[var(--color-whatsapp-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-whatsapp)]',
       )}
-      style={{ bottom: raised ? 'calc(1.25rem + var(--cookie-banner-height, 0px))' : '1.25rem' }}
+      // --sticky-cta-height: der mobile Home-CTA-Balken (StickyCta) meldet seine Hoehe,
+      // solange er sichtbar ist — der Float sass sonst genau auf dem roten Knopf.
+      style={{
+        bottom: raised
+          ? 'calc(1.25rem + var(--sticky-cta-height, 0px) + var(--cookie-banner-height, 0px))'
+          : 'calc(1.25rem + var(--sticky-cta-height, 0px))',
+      }}
     >
       <MessageCircle aria-hidden className="h-6 w-6" strokeWidth={2.1} />
       <span className="hidden text-sm font-semibold sm:inline">WhatsApp</span>
