@@ -61,6 +61,31 @@ liefen auf Tailwinds 150ms-Notnagel. Zwei `transition-all` ersetzt. Akkordeon-
 Weichzeichner raus. Die beiden Primaerknoepfe dunkeln jetzt beide beim Hover
 (einer hellte vorher auf).
 
+### Kursplan steht im HTML (zweite Runde)
+
+Der Kursplan existierte fuer Suchmaschinen nicht: Die Komponenten holten ihre Daten
+erst im Browser, das Prerendering fror den Ladezustand ein. Im HTML von `/kursplan`
+stand woertlich "Kursplan wird geladen", keine einzige Kurszeit. Das verstiess gegen
+`DESIGN.md:113` ("Voller Text im HTML für öffentliche Routen").
+
+`scripts/prerender.mjs` liest jetzt denselben Seed wie die API und legt ihn als
+Datenblock in die Seite. `embeddedSchedule()` in `src/lib/schedule.ts` ist der
+Startwert der Komponenten; der Netz-Aufruf ueberschreibt ihn danach.
+
+**Live gemessen:** 76 Kurszeiten auf `/kursplan`, 42 auf `/`, 38 auf `/tanzkurse`.
+Vorher jeweils null. Kein Ladezustand mehr im HTML. Hero zeigt "37 Kurse pro Woche".
+
+Nebeneffekt: Faellt der Netz-Aufruf aus, bleibt der eingebettete Plan stehen statt
+einer Fehlermeldung. Er ist hoechstens einen Deploy alt.
+
+### Weitere Bild-Fixes (zweite Runde)
+
+- Anniversary-Galerie: `hp-14` fehlte dem stehenden Mann der Kopf ganz, `event-07`
+  beiden die Stirn. Position pro Motiv gesetzt.
+- Bachata-Band `/tanzkurse/bachata`: lief waagrecht durch beide Gesichter.
+  `lg:h-[18rem]` plus `center 10%` loesen es zusammen.
+- Fehlalarm geprueft und verworfen: der gemeldete Danceflow-Crop ist sauber.
+
 ### Nebenbei
 
 `scripts/prerender.mjs` bekommt einen eigenen Vite-Cache — der geteilte Ordner
@@ -88,6 +113,7 @@ Huellen ziehen ihre Titel jetzt aus `SEO_META` statt aus einer Kopie im Skript.
 | Reservierung live | PASS (HTTP 200, echte Mail) |
 | Kein `opacity:0` im HTML | PASS (0 auf allen geprueften Seiten) |
 | Live-Sweep `/kontakt` + `/floweekend` | PASS — Folds selbst gelesen, Desktop und Mobil. Wizard zeigt drei Schritte, Floweekend-Band mit allen Koepfen. Ablage `/tmp/salsaflow-live-r6`, `/tmp/sf-wiz3`. |
+| Kursplan im HTML (`DESIGN.md:113`) | PASS — 76 Zeiten auf `/kursplan`, 42 auf `/`, 38 auf `/tanzkurse`. Vorher null. |
 | Production | Live |
 | DNS Cutover | offen (Owner) |
 
