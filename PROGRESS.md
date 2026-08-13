@@ -1,34 +1,83 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-13 (Live-Audit + Production `659f53c`)
-**Session:** Live-Site QA, chirurgische Fixes, Deploy
+**Stand:** 2026-08-13 (Reservierungs-Runde, Production `a5d2f40`)
+**Session:** Buchung real gemacht, Formular gekuerzt, Bilder und Motion gefixt
 **Handoff-ready:** ja
 
 ## ERLEDIGT
 
-- Live-Audit auf [salsaflow-dc.vercel.app](https://salsaflow-dc.vercel.app/) mit kanonischem `shot-sweep.mjs` (nie Ad-hoc-Playwright).
-- Erster Fix-Commit **`e7c5e91`** (schon live vor dieser Runde): ein Kontakt-Pfad, 5 Hero-Crops.
-- Zweiter Fix-Commit **`659f53c`** auf `origin/main` und Production:
-  - `/kontakt`: Wizard im Fold, Hash setzt Topic und scrollt zu `#kontaktformular`.
-  - Infosektion heisst `id="raum-info"` (nicht mehr `#raumvermietung`).
-  - Wizard: Parent-Topic setzt Step und Details zurück. Weiter ist `type="submit"`.
-  - Floweekend: Motiv `party-29`, `dense` Hero, kurze Band-Höhe. Köpfe im 730-Fold belegt.
-  - Heels: `position` + `heightClass`. Preise: Pass-Bild `kurs-07`.
-  - StickyCta auf Home gemountet. EN-Nav-Labels. Footer Gutschein-Hash. FAQ `/events`.
-  - Image-Reuse-Gate PASS (103 Bilder).
-- Production Ready: `dpl_9CFwXRj3sfxfF42CCTCpCAuHB1cS` → Alias [salsaflow-dc.vercel.app](https://salsaflow-dc.vercel.app/) HTTP 200.
+### Reservierung laeuft (der Kern dieser Runde)
 
-## OFFEN (WIP=1)
+Die Buchung war live tot: Vercel fuhr nur eine Stub-API, jeder Aufruf gab 503.
+Der Funnel war aber nie ein Kauf, sondern eine Reservierung. Also braucht er
+keine Datenbank, sondern eine Mail.
 
-**Nächster Task:** Live-Sweep nach Deploy. Nur `/kontakt` und `/events-workshops/floweekend`. Jedes Fold-PNG selbst lesen.
+- `server/reservation-routes.ts` neu: ohne DB, ohne Preis, ohne Stripe.
+  Verfuegbarkeit aus `db/seed/public-schedule.json`, Reservierung als Mail.
+  Voller Kurs wird zur Warteliste. Honeypot wie im Kontaktformular.
+- `BookingPanel`: Tarif-Auswahl, Preisanzeige und Platzzahlen raus.
+- Erfolgstexte sagen die Wahrheit: das Studio bestaetigt, es kommt keine
+  automatische Bestaetigungsmail.
+- **Live verifiziert:** `POST /api/public/reservations` → HTTP 200,
+  `{"ok":true,"status":"reserved"}`. Neun Faelle lokal geprueft.
 
-Nicht in diesem Diff (bewusst):
-- Apex `salsaflow-dc.com` / www bleibt Jimdo bis DNS-Cutover.
-- EN ohne `/en` und ohne hreflang.
-- Fünf Schnupper-CTAs auf Home.
-- `framer-motion` → `motion/react`.
-- Rate-Limit / Mail-error-leak.
-- GhostCta-Look, FAQ `-ml-4`.
+### Ohne JavaScript keine leeren Seiten mehr
+
+Reveal-Animationen schrieben `opacity:0` ins ausgelieferte HTML — 47 Mal auf der
+Startseite, darunter die H1. `useHydrated()` in `home/motion.tsx` loest das:
+Server rendert den Endzustand, die Animation zuendet nach der Hydration.
+**Live verifiziert:** 0 Treffer auf allen geprueften Seiten.
+
+### Bilder
+
+- Galerie `/fotos`: `galleryTileAspect` entfernt. Bilder laufen im eigenen
+  Format im Masonry-Raster, kein Zuschnitt. Alle 88 Eintraege tragen jetzt echte
+  Masse (vorher 13).
+- Kursplan-Band mobil: `object-[center_25%]` (ganze Kopfreihe fehlte).
+- Bachata-Karte auf `/tanzkurse`: `object-[center_25%]` (Oberkopf beider fehlte).
+- Partys-Band: `center 25%` statt 38 %.
+- Jeder Crop am gerenderten Ausschnitt geprueft, nicht geschaetzt.
+
+### Formular
+
+Kontakt-Wizard von vier auf drei Schritte, Pruef-Schritt raus. Dazu sechs Fehler:
+Reset mitten im Ausfuellen, Enter sprang weiter, Honeypot ohne relativen Anker,
+unsichtbarer Fokus bei den Auswahlkarten, zwei Fehlermeldungen gleichzeitig,
+haengender Sendefehler beim zweiten Versuch.
+
+### CTA-Ziele
+
+- Sechs Ticket-Knoepfe zeigten auf `eventfrog.ch` (302 auf die Fremd-Startseite).
+  Fallback jetzt `/kontakt#events`. `VITE_EVENTFROG_URL` schaltet wieder um.
+- Acht „Privatstunde anfragen" zeigten auf `#schnupperstunde` → `#privatstunden`.
+- 15 Show-Anfragen auf `/shows-animationen` → `#animationen`.
+- `#privatstunden` fehlte ganz in `TOPIC_HASHES`.
+
+### Motion
+
+Drei Dauer-Tokens (`--dur-fast/base/slow`) statt fuenf zufaelliger Werte.
+Zehn Navigations- und Fusszeilen-Links hatten Hover ohne Uebergang. 52 Pfeile
+liefen auf Tailwinds 150ms-Notnagel. Zwei `transition-all` ersetzt. Akkordeon-
+Weichzeichner raus. Die beiden Primaerknoepfe dunkeln jetzt beide beim Hover
+(einer hellte vorher auf).
+
+### Nebenbei
+
+`scripts/prerender.mjs` bekommt einen eigenen Vite-Cache — der geteilte Ordner
+kann einem anderen Benutzer gehoeren, dann brach der Build mit EACCES.
+`/buchung` trug den Titel der Rueckkehr-Seite; eigener `seoKey`, und die leeren
+Huellen ziehen ihre Titel jetzt aus `SEO_META` statt aus einer Kopie im Skript.
+
+## OFFEN
+
+| Thema | Stand |
+|---|---|
+| Echter Eventfrog-Link | Fehlt. `VITE_EVENTFROG_URL` setzen, dann geht der Ticket-Knopf wieder nach draussen. Owner: Fabio. |
+| DNS Cutover Jimdo→Vercel | Offen. `www.salsaflow-dc.com` laeuft noch auf Jimdo, darum zeigen die Canonicals ins Leere. |
+| Preview crawlbar | `salsaflow-dc.vercel.app` erlaubt Indexierung. Vor dem Cutover auf noindex setzen. |
+| EN ohne `/en` und hreflang | Bewusst offen. |
+| `framer-motion` → `motion/react` | Bewusst offen. |
+| Rate-Limit auf Kontakt und Reservierung | Offen. Beide Routen nehmen unbegrenzt an. |
 
 ## Gates
 
@@ -36,29 +85,36 @@ Nicht in diesem Diff (bewusst):
 |---|---|
 | G-IA | ENTSCHIEDEN — Kunden-Baseline |
 | G-DESIGN | ENTSCHIEDEN — A Warme Bühne |
-| Image-Reuse | PASS (`scripts/verify-image-reuse.cjs`, 103) |
-| Production `659f53c` | Ready, HTTP 200 |
-| Live-Sweep nach Deploy | offen (WIP=1) |
-| DNS Cutover Jimdo→Vercel | offen (Owner) |
+| Reservierung live | PASS (HTTP 200, echte Mail) |
+| Kein `opacity:0` im HTML | PASS (0 auf allen geprueften Seiten) |
+| Production `a5d2f40` | Live |
+| DNS Cutover | offen (Owner) |
 
 ## Hosting-Fakt
 
 - Wahrheit: [`/root/clients/salsaflow`](/root/clients/salsaflow) auf `main`.
-- GitHub: `MAKE-Marketing-GmbH/salsaflow`.
-- Vercel-Projekt: `salsaflow-dc` (Team MAKE).
-- Neu/Live-Preview: `https://salsaflow-dc.vercel.app/`
-- Apex/www: noch Jimdo/Cloudflare 301.
+- GitHub: `MAKE-Marketing-GmbH/salsaflow`. Push auf `main` = Vercel-Deploy.
+- Live: [salsaflow-dc.vercel.app](https://salsaflow-dc.vercel.app/)
+- Apex/www: noch Jimdo/Cloudflare.
 
-## Uncommitted / nicht Teil dieses Handoffs
+## Fallen
 
-- `vite.dev.local.config.ts` — lokale Vite-Cache-Umgehung, nicht committen.
-- Untracked: `.claude/`, `CLAUDE.md`, `wiki/`, `raw/`, `website/`, `links.json`, … — fremd, nicht mixen.
-- Nie `git add -A`.
+- CWD faellt auf `/root/clients/salsaflow-dc`. Immer `cd /root/clients/salsaflow`.
+- Zwei Ordner unter `.git/objects/` (`ee`, `78`) gehoeren root. Ein Blob mit
+  passendem Hash-Praefix laesst sich nicht schreiben. Dann die Datei minimal
+  aendern, damit ein anderer Hash entsteht.
+- GitHub lehnte Pushes zeitweise mit „Internal Server Error" ab. Wiederholen hilft.
+- Nie `git add -A`. Dateien einzeln vormerken.
+- Nie Ad-hoc-Playwright. Nur `shot-sweep.mjs`.
+- `shot-sweep.mjs` faehrt mit `reducedMotion: reduce`. Hover-Unterstriche stehen
+  darum im Screenshot dauerhaft — das ist der Endzustand, kein Fehler.
 
-## Nächster Schritt (1 Zeile)
+## Naechster Schritt
+
+Live-Sweep ueber die restlichen Seiten, jedes Fold-PNG selbst lesen:
 
 ```
-node /root/raphael-skills/skills/eigene/web/scripts/shot-sweep.mjs --base https://salsaflow-dc.vercel.app --out /tmp/salsaflow-live-r5 --routes /kontakt,/events-workshops/floweekend --static
+node /root/raphael-skills/skills/eigene/web/scripts/shot-sweep.mjs \
+  --base https://salsaflow-dc.vercel.app --out /tmp/sf-rest \
+  --routes /preise,/privatstunden,/shows-animationen,/kursaufbau --static --mobile
 ```
-
-Dann Fold-PNGs per Read ansehen.
