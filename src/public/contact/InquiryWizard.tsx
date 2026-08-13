@@ -196,7 +196,7 @@ export function InquiryWizard({
           <legend className="font-display text-2xl font-bold leading-tight text-[var(--color-ink)]">{copy.topicTitle}</legend>
           <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.topicLead}</p>
           <div className="mt-5 grid grid-cols-2 gap-3">
-            {orderedTopics.map((entry) => {
+            {orderedTopics.map((entry, index) => {
               const Icon = TOPIC_ICONS[entry.key];
               return (
                 <ChoiceCard
@@ -205,7 +205,14 @@ export function InquiryWizard({
                   icon={Icon}
                   label={topicCardLabel(entry.key, entry.label, de)}
                   compact
-                  className={entry.key === 'schnupperstunde' ? 'col-span-2' : undefined}
+                  className={cn(
+                    entry.key === 'schnupperstunde' && 'col-span-2',
+                    // Schnupperstunde belegt die erste Zeile allein; bleibt danach eine
+                    // ungerade Restzahl, stuende die letzte Karte neben einer Leerzelle
+                    // (Critic 13.08.2026: "Shows & Animationen" allein) — sie spannt dann
+                    // beide Spalten.
+                    index === orderedTopics.length - 1 && orderedTopics.length % 2 === 0 && 'col-span-2',
+                  )}
                 >
                   <input className="sr-only" type="radio" name="topic" value={entry.key} checked={topic === entry.key} onChange={() => selectTopic(entry.key)} />
                 </ChoiceCard>
@@ -265,7 +272,7 @@ export function InquiryWizard({
             <legend className="font-display text-2xl font-bold leading-tight text-[var(--color-ink)]">{copy.topicTitle}</legend>
             <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.topicLead}</p>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              {orderedTopics.map((entry) => {
+              {orderedTopics.map((entry, index) => {
                 const Icon = TOPIC_ICONS[entry.key];
                 return (
                   <ChoiceCard
@@ -274,7 +281,12 @@ export function InquiryWizard({
                     icon={Icon}
                     label={topicCardLabel(entry.key, entry.label, de)}
                     compact
-                    className={entry.key === 'schnupperstunde' ? 'col-span-2' : undefined}
+                    className={cn(
+                      entry.key === 'schnupperstunde' && 'col-span-2',
+                      // Wie in der compact-Variante oben: letzte Karte nicht allein neben
+                      // einer Leerzelle (Critic 13.08.2026).
+                      index === orderedTopics.length - 1 && orderedTopics.length % 2 === 0 && 'col-span-2',
+                    )}
                   >
                     <input className="sr-only" type="radio" name="topic" value={entry.key} checked={topic === entry.key} onChange={() => selectTopic(entry.key)} />
                   </ChoiceCard>

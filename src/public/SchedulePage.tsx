@@ -52,7 +52,7 @@ export function SchedulePage() {
               </h1>
               <p className="mt-2.5 text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
                 {lang === 'de'
-                  ? 'Wähle deinen Wochentag — du siehst sofort, wann was läuft.'
+                  ? 'Wähle deinen Wochentag. Du siehst sofort, wann was läuft.'
                   : 'Pick your weekday and see exactly when each class runs.'}
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">

@@ -20,10 +20,12 @@ import {
 import {
   fetchSchedule,
   buildScheduleDays,
+  buildScheduleSlots,
   weekdayKeyForISO,
   remainingLessons,
   type ScheduleCourse,
   type ScheduleResponse,
+  type ScheduleSlot,
   type ScheduleTerm,
 } from '@/lib/schedule';
 import { Seo } from '@/lib/seo';
@@ -147,12 +149,17 @@ function Funnel() {
     [schedule],
   );
   const activeDay = day ?? days[0]?.key ?? 'mon';
-  const dayCourses = useMemo(() => {
-    if (!schedule) return [];
-    return schedule.courses
-      .filter((c) => c.weekday === activeDay)
-      .sort((a, b) => a.startTime.localeCompare(b.startTime));
-  }, [schedule, activeDay]);
+  // Laufende und kommende Staffel desselben Kurses zu EINEM Slot gefaltet — sonst steht
+  // jede Klasse zweimal in der Liste (running + upcoming, Critic 13.08.2026). Gleiche
+  // Faltung wie der Kursplan (CourseEngine).
+  const slots = useMemo(
+    () => (schedule ? buildScheduleSlots(schedule.courses, schedule.terms) : []),
+    [schedule],
+  );
+  const daySlots = useMemo(
+    () => slots.filter((s) => s.weekday === activeDay),
+    [slots, activeDay],
+  );
 
   // Naechster Tag mit Kursen (fuer den Leer-Zustand-Next-Step).
   const nextDayWithCourses = useMemo(() => {
@@ -166,31 +173,28 @@ function Funnel() {
   }, [schedule, days, activeDay]);
 
   // Empfohlene Nachbar-Termine: füllt die Empty-Day-Weisszone mit echtem Booking-Inhalt.
-  const recommendedCourses = useMemo(() => {
-    if (!schedule || !days.length || dayCourses.length > 0) return [];
+  const recommendedSlots = useMemo(() => {
+    if (!days.length || daySlots.length > 0) return [];
     const idx = days.findIndex((d) => d.key === activeDay);
-    const ordered: ScheduleCourse[] = [];
+    const ordered: ScheduleSlot[] = [];
     for (let i = 1; i <= days.length && ordered.length < 4; i++) {
       const d = days[(idx + i) % days.length];
-      const dayHits = schedule.courses
-        .filter((c) => c.weekday === d.key)
-        .sort((a, b) => a.startTime.localeCompare(b.startTime));
+      const dayHits = slots.filter((s) => s.weekday === d.key);
       // freie Plätze zuerst, dann Warteliste — Studio-Rhythmus statt leere Flache.
-      const ranked = [
-        ...dayHits.filter((c) => c.status !== 'full'),
-        ...dayHits.filter((c) => c.status === 'full'),
-      ];
-      for (const c of ranked) {
+      const ranked = [...dayHits.filter((s) => !s.full), ...dayHits.filter((s) => s.full)];
+      for (const s of ranked) {
         if (ordered.length >= 4) break;
-        ordered.push(c);
+        ordered.push(s);
       }
     }
     return ordered;
-  }, [schedule, days, activeDay, dayCourses.length]);
+  }, [slots, days, activeDay, daySlots.length]);
 
-  const visibleCardCourses = dayCourses.length > 0 ? dayCourses : recommendedCourses;
+  const visibleSlots = daySlots.length > 0 ? daySlots : recommendedSlots;
   useEffect(() => {
-    const missing = visibleCardCourses.filter((item) => courseAvailability[item.id] === undefined);
+    const missing = visibleSlots
+      .map((s) => s.bookable)
+      .filter((item) => courseAvailability[item.id] === undefined);
     if (!missing.length) return;
     let cancelled = false;
     Promise.all(
@@ -207,7 +211,7 @@ function Funnel() {
     return () => {
       cancelled = true;
     };
-  }, [visibleCardCourses, courseAvailability]);
+  }, [visibleSlots, courseAvailability]);
 
   const termOf = (c: ScheduleCourse): ScheduleTerm | undefined =>
     schedule?.terms.find((t) => t.id === c.termId);
@@ -251,7 +255,7 @@ function Funnel() {
             aria-label={ft.pickDay}
           >
             {days.map((d) => {
-              const count = schedule.courses.filter((c) => c.weekday === d.key).length;
+              const count = slots.filter((s) => s.weekday === d.key).length;
               return (
                 <button
                   key={d.key}
@@ -281,7 +285,7 @@ function Funnel() {
           </div>
 
           {/* Kurse des Tages: getakteter Fade-up, EINE Signatur fuer den ganzen Funnel. */}
-          {dayCourses.length === 0 ? (
+          {daySlots.length === 0 ? (
             <div data-testid="booking-empty-day" className="mt-2.5 space-y-3">
               <div className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white px-4 py-3.5 sm:px-5 sm:py-3.5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
@@ -313,7 +317,7 @@ function Funnel() {
                 </div>
               </div>
 
-              {recommendedCourses.length > 0 && (
+              {recommendedSlots.length > 0 && (
                 <div data-testid="empty-recommendations">
                   <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
                     <div>
@@ -324,23 +328,24 @@ function Funnel() {
                     </div>
                   </div>
                   <ul className="space-y-2" data-testid="empty-rec-list">
-                    {recommendedCourses.map((c, i) => {
+                    {recommendedSlots.map((s, i) => {
+                      const c = s.primary;
                       const style = lang === 'de' ? c.styleDe : c.styleEn;
                       const level = levelLabelI18n(lang === 'de' ? c.levelDe : c.levelEn, c.onVariant);
                       const teachers = c.teachers.map((t) => t.displayName.split(' ')[0]).join(', ');
-                      const availability = courseAvailability[c.id];
-                      const full = availability ? availability.full : c.status === 'full';
+                      const availability = courseAvailability[s.bookable.id];
+                      const full = availability ? availability.full : s.full;
                       const dayShort = WEEKDAY_LABEL[lang][c.weekday]?.short ?? c.weekday;
                       return (
                         <li
-                          key={c.id}
+                          key={s.key}
                           className="motion-safe:animate-[booking-panel-in_280ms_ease-out_both]"
                           style={{ animationDelay: `${Math.min(i, 4) * 40}ms` }}
                         >
                           <button
                             type="button"
-                            data-testid={`pick-course-${c.id}`}
-                            onClick={() => setCourse(c)}
+                            data-testid={`pick-course-${s.bookable.id}`}
+                            onClick={() => setCourse(s.bookable)}
                             className="group flex w-full items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white px-3.5 py-3 text-left transition-colors hover:border-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] sm:gap-4 sm:px-4 sm:py-3.5"
                           >
                             <div className="w-12 shrink-0 text-center sm:w-14">
@@ -389,15 +394,16 @@ function Funnel() {
             </div>
           ) : (
             <ul className="mt-4 space-y-2.5" data-testid="course-list">
-              {dayCourses.map((c, i) => {
+              {daySlots.map((s, i) => {
+                const c = s.primary;
                 const style = lang === 'de' ? c.styleDe : c.styleEn;
                 const level = levelLabelI18n(lang === 'de' ? c.levelDe : c.levelEn, c.onVariant);
                 const teachers = c.teachers.map((t) => t.displayName.split(' ')[0]).join(', ');
-                const availability = courseAvailability[c.id];
-                const full = availability ? availability.full : c.status === 'full';
+                const availability = courseAvailability[s.bookable.id];
+                const full = availability ? availability.full : s.full;
                 return (
                   <li
-                    key={c.id}
+                    key={s.key}
                     // ease-out statt der frueheren Federkurve: die schoss ueber den Zielwert
                     // hinaus und wippte zurueck. Bei bis zu neun Karten wippt dann alles
                     // nacheinander. Dieselbe Animation lief an drei anderen Stellen im selben
@@ -407,8 +413,10 @@ function Funnel() {
                   >
                     <button
                       type="button"
-                      data-testid={`pick-course-${c.id}`}
-                      onClick={() => setCourse(c)}
+                      // Gebucht wird die buchbare Staffel des Slots (offene laufende vor
+                      // offener kommender), nicht stumpf die laufende.
+                      data-testid={`pick-course-${s.bookable.id}`}
+                      onClick={() => setCourse(s.bookable)}
                       className="group flex w-full items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white px-4 py-3.5 text-left transition-colors hover:border-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] sm:gap-4 sm:px-5 sm:py-4"
                     >
                       <div className="w-14 shrink-0 text-center">

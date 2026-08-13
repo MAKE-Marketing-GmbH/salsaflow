@@ -96,7 +96,9 @@ export function Offer() {
   return (
     <section id="angebot" className={cn('relative scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}>
       <Shell>
-        <Reveal className="grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-end lg:gap-16">
+        {/* Titel und Lead gestapelt statt H2 links / Lead rechts (Split-Header-Ban,
+            Critic 13.08.2026). */}
+        <Reveal>
           <motion.h2
             variants={item}
             className={cn(
@@ -106,7 +108,7 @@ export function Offer() {
           >
             {o.title}
           </motion.h2>
-          <motion.p variants={item} className="max-w-2xl text-pretty text-lg leading-relaxed text-[var(--color-ink-muted)]">
+          <motion.p variants={item} className="mt-4 max-w-[65ch] text-pretty text-lg leading-relaxed text-[var(--color-ink-muted)]">
             {o.lead}
           </motion.p>
         </Reveal>

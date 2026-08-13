@@ -43,7 +43,10 @@ export function WhatsAppFloat({ raised = false }: { raised?: boolean }) {
       aria-label={label}
       title={label}
       className={cn(
-        'fixed right-5 z-40 inline-flex h-14 items-center gap-2 rounded-full px-4 sm:right-6',
+        // hidden sm:inline-flex: unter sm lag der FAB auf Inhalten (390px /kursplan:
+        // Samstag-Kachel verdeckt, Critic 13.08.2026) — der File-Kommentar meinte ihn
+        // ohnehin ab Tablet.
+        'fixed right-5 z-40 hidden h-14 items-center gap-2 rounded-full px-4 sm:right-6 sm:inline-flex',
         'bg-[var(--color-whatsapp)] text-[var(--color-ink)] shadow-lg shadow-black/15 ring-1 ring-black/10',
         't-hover-move transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom] hover:-translate-y-0.5 hover:bg-[var(--color-whatsapp-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-whatsapp)]',
       )}
