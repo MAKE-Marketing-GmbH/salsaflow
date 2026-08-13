@@ -153,7 +153,7 @@ function WhySection({ c }: { c: StyleContent }) {
         {isSalsa ? (
           <Reveal className="mt-10 lg:mt-14">
             <motion.div variants={item} className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]">
-              <img src={w.image.src} alt={w.image.alt} className="aspect-[16/7] w-full object-cover object-[center_42%]" width={1400} height={613} loading="lazy" />
+              <img src={w.image.src} alt={w.image.alt} style={w.image.position ? { objectPosition: w.image.position } : undefined} className="aspect-[16/7] w-full object-cover object-[center_42%]" width={1400} height={613} loading="lazy" />
             </motion.div>
           </Reveal>
         ) : null}
@@ -346,7 +346,7 @@ function SocialSection({ c }: { c: StyleContent }) {
       <Shell>
         <Reveal className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <motion.div variants={item} className="order-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-white/10 lg:order-1">
-            <img src={s.image.src} alt={s.image.alt} className="aspect-[16/11] w-full object-cover" width={1400} height={960} loading="lazy" />
+            <img src={s.image.src} alt={s.image.alt} style={s.image.position ? { objectPosition: s.image.position } : undefined} className="aspect-[16/11] w-full object-cover" width={1400} height={960} loading="lazy" />
           </motion.div>
           <motion.div variants={item} className="order-1 max-w-xl lg:order-2">
             <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white/70">

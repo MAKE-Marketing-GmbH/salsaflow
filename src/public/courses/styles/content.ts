@@ -137,7 +137,7 @@ const salsa: Record<Lang, StyleContent> = {
         { title: 'Partnerwork', text: 'Du verstehst, wie Führung und Folgen funktionieren, ohne dass es verkrampft oder kompliziert wirkt.' },
         { title: 'Social Dance', text: 'Salsa bleibt nicht im Kursraum. Du kannst das Gelernte auf Danceflow Nights und Socials direkt ausprobieren.' },
       ],
-      image: { src: '/photos/gallery/kurse/02.jpg', alt: 'Salsa-Paar beim Partnerwork im Unterricht' },
+      image: { src: '/photos/gallery/kurse/02.jpg', alt: 'Salsa-Paar beim Partnerwork im Unterricht', position: 'center 25%' },
     },
     fit: {
       title: 'Salsa passt zu dir, wenn du Energie suchst, nicht Perfektion',
@@ -260,7 +260,7 @@ const salsa: Record<Lang, StyleContent> = {
         { title: 'Partner work', text: 'You understand how leading and following work, without it feeling tense or complicated.' },
         { title: 'Social dance', text: 'Salsa does not stay in the classroom. You can try what you learned right away at Danceflow Nights and socials.' },
       ],
-      image: { src: '/photos/gallery/kurse/02.jpg', alt: 'Salsa couple doing partner work in class' },
+      image: { src: '/photos/gallery/kurse/02.jpg', alt: 'Salsa couple doing partner work in class', position: 'center 25%' },
     },
     fit: {
       title: 'Salsa suits you if you are after energy, not perfection',
@@ -454,7 +454,7 @@ const bachata: Record<Lang, StyleContent> = {
         'auch für Gäste offen',
       ],
       cta: { label: 'Danceflow Night ansehen', href: R.danceflow },
-      image: { src: '/photos/gallery/danceflow/05.jpg', alt: 'Paar tanzt Bachata bei einer Danceflow Night' },
+      image: { src: '/photos/gallery/danceflow/05.jpg', alt: 'Paar tanzt Bachata bei einer Danceflow Night', position: 'center 15%' },
     },
     closing: {
       title: 'Probiere Bachata in einer',
@@ -579,7 +579,7 @@ const bachata: Record<Lang, StyleContent> = {
         'open to guests too',
       ],
       cta: { label: 'See the Danceflow Night', href: R.danceflow },
-      image: { src: '/photos/gallery/danceflow/05.jpg', alt: 'Couple dancing Bachata at a Danceflow Night' },
+      image: { src: '/photos/gallery/danceflow/05.jpg', alt: 'Couple dancing Bachata at a Danceflow Night', position: 'center 15%' },
     },
     closing: {
       title: 'Try Bachata in a free',

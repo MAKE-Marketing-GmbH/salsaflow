@@ -108,7 +108,9 @@ export const HEELS: Record<Lang, HeelsContent> = {
       band: {
         src: '/photos/2026/kurse-heels-energie-hero-2100.webp',
         alt: 'Heels-Kurs im hellen Studio, energiegeladene Gruppe vor der Salsaflow-Wand',
-        position: 'center 18%',
+        // 8% statt 18%: bei 18% war der Kopf der Taenzerin rechts im Band komplett
+        // abgeschnitten (Kopf-Schnitt-Sweep 13.08.2026).
+        position: 'center 8%',
         heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
       },
       cardLabel: 'Dein Einstieg',
@@ -215,7 +217,9 @@ export const HEELS: Record<Lang, HeelsContent> = {
       band: {
         src: '/photos/2026/kurse-heels-energie-hero-2100.webp',
         alt: 'Heels class in the bright studio, energetic group in front of the Salsaflow wall',
-        position: 'center 18%',
+        // 8% statt 18%: bei 18% war der Kopf der Taenzerin rechts im Band komplett
+        // abgeschnitten (Kopf-Schnitt-Sweep 13.08.2026).
+        position: 'center 8%',
         heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
       },
       cardLabel: 'Your start',

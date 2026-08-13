@@ -19,7 +19,7 @@ const SCHNUPPER_HREF = '/kontakt#schnupperstunde';
 export type PriceRow = { label: string; value?: string };
 export type PriceGroup = { label: string; rows: PriceRow[] };
 type Cta = { label: string; href: string };
-type Img = { src: string; alt: string };
+type Img = { src: string; alt: string; position?: string };
 /** Bild mit echten Datei-Massen — nur dort noetig, wo eine Sektion Dateien mit
  *  unterschiedlichem Seitenverhaeltnis nebeneinander stellt (CLS, siehe workshops). */
 type SizedImg = Img & { width: number; height: number; position?: string };
@@ -349,6 +349,9 @@ export const PREISE: Record<Lang, PreiseContent> = {
       image: {
         src: '/photos/kurse/kurs-07.jpg',
         alt: 'Volle Kursgruppe tanzt gemeinsam im hellen Salsaflow Studio',
+        // Hochformat (1067x1600), Koepfe bei 15-25% der Hoehe: ohne position war der
+        // Haupttaenzer im Querformat-Crop kopflos (Kopf-Schnitt-Sweep 13.08.2026).
+        position: 'center 15%',
       },
     },
     fit: {

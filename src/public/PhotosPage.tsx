@@ -241,7 +241,9 @@ function GalleryHero() {
                 <img
                   src="/photos/instagram/lady-style-v2.webp"
                   alt={lang === 'de' ? 'Lady-Style-Gruppe bei einer Choreografie im Studio' : 'Lady Style group performing choreography in the studio'}
-                  className="h-full w-full object-cover object-center"
+                  // 20% statt Mitte: Hochformat in 4/3-Kachel — mittig fehlten alle fuenf
+                  // Koepfe (Kopf-Schnitt-Sweep 13.08.2026, Crop-Vergleich /tmp/ls-crop-20.png).
+                  className="h-full w-full object-cover object-[center_20%]"
                   width={640}
                   height={1136}
                   loading="eager"

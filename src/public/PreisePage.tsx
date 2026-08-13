@@ -414,6 +414,8 @@ function PassSection({ c }: { c: PreiseContent }) {
             <img
               src={p.image.src}
               alt={p.image.alt}
+              // content darf den Ausschnitt vorgeben (Hochformat-Motive); ohne Angabe bleibt 45%.
+              style={p.image.position ? { objectPosition: p.image.position } : undefined}
               className="order-2 mt-8 aspect-[16/9] w-full rounded-[var(--radius-media)] object-cover object-[center_45%] lg:order-none lg:mb-7 lg:mt-0"
               width={1920}
               height={1280}
