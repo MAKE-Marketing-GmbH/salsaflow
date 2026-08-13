@@ -31,6 +31,9 @@
     (1./3./5. Freitag) — am 13.08. korrekt „Freitag, 21. August".
   - ✅ 7: /buchung-Tagesleiste zeigt nur noch Kurstage (Mo–Sa) wie /kursplan.
   - ✅ 10: Parataxe im Home-Kurs-Kapitel zu einem Satz.
+  - ✅ Polish: WhatsApp-Float weicht mobil dem Sticky-CTA aus (--sticky-cta-height,
+    lag vorher exakt auf dem roten Knopf). Admin-Bundle per React.lazy abgespalten
+    (37,6 kB Chunk nur auf /admin; Startseite referenziert ihn nicht mehr).
   - ⛔ 2 + Preis-Teil von 3: NICHT umgesetzt — Raphael-Entscheid „keine Preise im Funnel".
   - ⏸ 8 (/en-Routen): laut DECISIONS erst nach dem DNS-Cutover.
   - ✋ 9: zwei QA-Test-Mails im Studio-Postfach löschen — nur von Raphael machbar.
