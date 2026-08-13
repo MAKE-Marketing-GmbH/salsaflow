@@ -51,7 +51,9 @@ const HOME_SCHEMA = {
       about: { '@id': 'https://www.salsaflow-dc.com/#business' },
       primaryImageOfPage: {
         '@type': 'ImageObject',
-        url: 'https://www.salsaflow-dc.com/photos/showcase/hp-05.webp',
+        // Bild-Host = ASSET_ORIGIN (seo-config.ts): auf der Ziel-Domain liegt bis zum
+        // DNS-Cutover noch die alte Website, dort ist dieses Bild 404.
+        url: 'https://salsaflow-dc.vercel.app/photos/showcase/hp-05.webp',
       },
     },
   ],

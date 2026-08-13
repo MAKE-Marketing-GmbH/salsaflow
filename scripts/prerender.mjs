@@ -6,7 +6,10 @@ const root = process.cwd();
 const dist = path.join(root, 'dist');
 const templatePath = path.join(dist, 'index.html');
 const siteOrigin = 'https://www.salsaflow-dc.com';
-const socialImage = 'https://www.salsaflow-dc.com/photos/showcase/hp-05.webp';
+// Bild-Host = ASSET_ORIGIN (src/lib/seo-config.ts): die Ziel-Domain traegt bis zum
+// DNS-Cutover noch die alte Website — og:image dort ist 404, geteilte Links kaemen ohne
+// Vorschaubild an. Beim Cutover zuruestellen auf www.salsaflow-dc.com.
+const socialImage = 'https://salsaflow-dc.vercel.app/photos/showcase/hp-05.webp';
 
 const escapeHtml = (value) =>
   value

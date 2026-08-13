@@ -2,6 +2,13 @@ import type { Lang } from '@/lib/i18n';
 
 /** Verbindliche Produktions-Origin. Keine Canonicals oder Schema-IDs auf Preview-Hosts. */
 export const SITE_ORIGIN = 'https://www.salsaflow-dc.com' as const;
+
+// Host fuer Social-/Schema-BILDER. Vor dem DNS-Cutover zeigt SITE_ORIGIN noch auf die
+// ALTE Website — ein og:image dort ist 404 und jeder geteilte Link kommt ohne Vorschaubild
+// an (gemessen 13.08.2026). Die Vercel-Produktions-URL bleibt auch nach dem Cutover
+// erreichbar. BEIM CUTOVER: auf SITE_ORIGIN zurueckstellen (auch scripts/prerender.mjs
+// und index.html pruefen).
+export const ASSET_ORIGIN = 'https://salsaflow-dc.vercel.app' as const;
 export const SITE_NAME = 'Salsaflow Dance Company' as const;
 export const BUSINESS_ID = `${SITE_ORIGIN}/#business` as const;
 export const WEBSITE_ID = `${SITE_ORIGIN}/#website` as const;
@@ -82,7 +89,7 @@ export const SEO_ROUTE_CONFIG: Record<SeoKey, SeoRouteConfig> = {
 };
 
 export const DEFAULT_SOCIAL_IMAGE = {
-  url: `${SITE_ORIGIN}/photos/showcase/hp-05.webp`,
+  url: `${ASSET_ORIGIN}/photos/showcase/hp-05.webp`,
   width: 1800,
   height: 1200,
   type: 'image/webp',
