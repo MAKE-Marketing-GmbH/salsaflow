@@ -351,3 +351,26 @@ body:has([data-cookie-clear='true'])
     transform 180ms ease,
     visibility 0s linear 180ms;
 }
+
+/* Buchungs-Dialog: Kurs-Zusammenfassung.
+   Mobil ist der Block zugeklappt — sonst fuellt er auf 375px den kompletten ersten
+   Bildschirm mit Zeit, Ort, Staffel und Kosten, bevor die erste Frage kommt. Wer hier
+   landet, hat den Kurs gerade selbst angeklickt.
+   Ab 1024px steht der Block als ruhige Seitenspalte neben dem Formular. Dort gibt es
+   keinen Platzmangel, also ist er immer offen und das Dreieck verschwindet. */
+.t-booking-summary > summary::-webkit-details-marker {
+  display: none;
+}
+
+.t-booking-summary[open] .t-booking-chevron {
+  transform: rotate(180deg);
+}
+
+@media (min-width: 1024px) {
+  /* Ab Desktop ist der Block keine Klapp-Mechanik mehr, sondern eine feste
+     Seitenspalte. Den offenen Zustand setzt React (useIsDesktop in BookingPanel.tsx);
+     hier faellt nur die Klick-Wirkung weg. */
+  .t-booking-summary > summary {
+    pointer-events: none;
+  }
+}

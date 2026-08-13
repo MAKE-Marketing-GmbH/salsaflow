@@ -108,6 +108,9 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
       ],
     },
     { label: c.nav.kursplan, href: '/kursplan' },
+    // Preise zusaetzlich top-level: der Preis ist eine Top-3-Frage vor jeder Anmeldung,
+    // versteckt im Tanzkurse-Dropdown brauchte er mobil zwei Taps (UX-Audit 13.08.2026).
+    { label: de ? 'Preise' : 'Prices', href: '/preise' },
     {
       label: c.nav.events,
       href: '/events',

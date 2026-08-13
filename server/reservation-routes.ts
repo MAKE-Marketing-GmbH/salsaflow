@@ -114,6 +114,19 @@ export function createReservationRoutes(loadSchedule: () => Promise<SeedSchedule
   });
 
   app.post('/api/public/reservations', async (c) => {
+    const parsed = reservationSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) {
+      return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
+    }
+    const d = parsed.data;
+
+    // Honeypot VOR dem Rate-Limit: ein Treffer loest keine Mail aus und soll weder das
+    // Budget echter Absender verbrauchen noch je als 429 antworten (gleiche Ordnung wie
+    // in contact-routes.ts).
+    if (d.website && d.website.trim().length > 0) {
+      return c.json({ ok: true, skipped: true }, 200);
+    }
+
     // Jede gueltige Reservierung erzeugt eine Mail ans Studio. Fuenf in zehn Minuten decken
     // jeden echten Fall ab — auch wer sich zu zweit anmeldet und einmal danebengreift.
     const limit = rateLimit(clientKey(c.req.raw.headers, 'reservations'), 5, 10 * 60 * 1000);
@@ -123,16 +136,6 @@ export function createReservationRoutes(loadSchedule: () => Promise<SeedSchedule
         429,
         { 'retry-after': String(limit.retryAfterSeconds) },
       );
-    }
-
-    const parsed = reservationSchema.safeParse(await c.req.json().catch(() => null));
-    if (!parsed.success) {
-      return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
-    }
-    const d = parsed.data;
-
-    if (d.website && d.website.trim().length > 0) {
-      return c.json({ ok: true, skipped: true }, 200);
     }
 
     const schedule = await loadSchedule();

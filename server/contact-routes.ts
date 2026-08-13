@@ -63,17 +63,6 @@ export function createContactRoutes() {
   const app = new Hono();
 
   app.post('/api/public/contact', async (c) => {
-    // Jede gueltige Anfrage erzeugt eine Mail ans Studio. Ohne Limit laesst sich das Postfach
-    // fluten; der Honeypot haelt nur naive Bots auf.
-    const limit = rateLimit(clientKey(c.req.raw.headers, 'contact'), 5, 10 * 60 * 1000);
-    if (!limit.ok) {
-      return c.json(
-        { error: 'Zu viele Anfragen in kurzer Zeit. Bitte versuch es später noch einmal.' },
-        429,
-        { 'retry-after': String(limit.retryAfterSeconds) },
-      );
-    }
-
     const parsed = contactSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) {
       // Die Zod-Fehlerliste bleibt im Log. Nach aussen ging sie vorher mit: Feldnamen, Typen,
@@ -85,12 +74,25 @@ export function createContactRoutes() {
     const d = parsed.data;
     const replyEmail = d.email?.trim() || null;
 
-    // Honeypot ausgeloest -> als Spam still verwerfen. Die Antwort ist Zeichen fuer Zeichen
-    // dieselbe wie im Erfolgsfall. Ein "skipped: true" verriet dem Bot, dass das Feld ihn
-    // enttarnt hat — beim naechsten Versuch liess er es einfach leer.
+    // Honeypot ausgeloest -> als Spam still verwerfen, VOR dem Rate-Limit. Die Antwort ist
+    // Zeichen fuer Zeichen dieselbe wie im Erfolgsfall; ein "skipped: true" verriet dem Bot,
+    // dass das Feld ihn enttarnt hat. Vor dem Limit, weil ein Honeypot-Treffer keine Mail
+    // ausloest — er soll das Budget echter Absender nicht verbrauchen und nie als 429
+    // antworten (auch das waere ein Unterschied zum Erfolgsfall, aus dem ein Bot lernt).
     if (d.website && d.website.trim().length > 0) {
       console.error('[contact] Honeypot ausgeloest, Anfrage verworfen');
       return c.json({ ok: true }, 200);
+    }
+
+    // Jede gueltige Anfrage erzeugt eine Mail ans Studio. Ohne Limit laesst sich das Postfach
+    // fluten; der Honeypot haelt nur naive Bots auf.
+    const limit = rateLimit(clientKey(c.req.raw.headers, 'contact'), 5, 10 * 60 * 1000);
+    if (!limit.ok) {
+      return c.json(
+        { error: 'Zu viele Anfragen in kurzer Zeit. Bitte versuch es später noch einmal.' },
+        429,
+        { 'retry-after': String(limit.retryAfterSeconds) },
+      );
     }
 
     const topicLabel = TOPIC_LABEL[d.topic ?? 'kontakt'] ?? TOPIC_LABEL.kontakt;

@@ -9,6 +9,7 @@
 // Befund kursplan d-mid, Runde 10) — gleiche Footer-Beobachtung wie CookieBanner.tsx.
 
 import { useEffect, useState } from 'react';
+import { MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 
@@ -42,32 +43,14 @@ export function WhatsAppFloat({ raised = false }: { raised?: boolean }) {
       aria-label={label}
       title={label}
       className={cn(
-        'fixed right-5 z-40 hidden h-12 w-12 items-center justify-center rounded-full sm:inline-flex',
-        // Stage 6: kein Fremd-Grün mehr. Marken-konformer Ink-Kreis mit weissem Icon,
-        // beim Hover in Salsa-Rot. Erkennbar bleibt WhatsApp über den Glyph, nicht die Farbe.
-        'bg-[var(--color-ink)] text-white shadow-lg shadow-black/20 ring-1 ring-white/10',
-        't-hover hover:bg-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)]',
-        // Position und Hover-Farbe zusammen: vorher lief nur die Position, ohne Dauer und ohne
-        // Kurve. Der Knopf sprang die Farbe hart um und rutschte linear hoch.
-        'transition-[bottom,background-color] duration-[var(--dur-base)] ease-out',
+        'fixed right-5 z-40 inline-flex h-14 items-center gap-2 rounded-full px-4 sm:right-6',
+        'bg-[var(--color-whatsapp)] text-[var(--color-ink)] shadow-lg shadow-black/15 ring-1 ring-black/10',
+        't-hover-move hover:-translate-y-0.5 hover:bg-[var(--color-whatsapp-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-whatsapp)]',
       )}
       style={{ bottom: raised ? 'calc(1.25rem + var(--cookie-banner-height, 0px))' : '1.25rem' }}
     >
-      {/* WhatsApp-Glyph (Vorlage: SiteFooter.tsx), weisser Strich auf Ink-Kreis. */}
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <path d="M3 21l1.6-4.5A8 8 0 1 1 8 19.5z" />
-        <path d="M8.5 8.5c-.3 1 .2 2.3 1.2 3.4s2.4 1.6 3.4 1.3c.5-.1.9-.6.9-1.1l-.1-.9-1.6-.5-.8.7c-.6-.3-1.2-.8-1.5-1.5l.7-.8-.5-1.6-.9-.1c-.5 0-1 .3-1.1.8z" />
-      </svg>
+      <MessageCircle aria-hidden className="h-6 w-6" strokeWidth={2.1} />
+      <span className="hidden text-sm font-semibold sm:inline">WhatsApp</span>
     </a>
   );
 }

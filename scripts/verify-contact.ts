@@ -127,7 +127,9 @@ async function main() {
   });
   const hpBody = (await resHp.json().catch(() => null)) as { ok?: boolean; skipped?: boolean } | null;
   check('Honeypot: Status 200 (Bot lernt nichts)', resHp.status === 200, `status ${resHp.status}`);
-  check('Honeypot: als skipped markiert', hpBody?.skipped === true, JSON.stringify(hpBody));
+  // Die Antwort ist absichtlich zeichengleich mit dem Erfolgsfall (contact-routes.ts):
+  // ein "skipped: true" wuerde dem Bot verraten, dass das Feld ihn enttarnt hat.
+  check('Honeypot: Antwort wie Erfolgsfall, kein skipped-Leak', hpBody?.ok === true && hpBody?.skipped === undefined, JSON.stringify(hpBody));
   const after5New = emlFiles().filter((f) => !before5.has(f));
   check('Honeypot erzeugt KEINE Mail', after5New.length === 0, `${after5New.length} neu`);
 

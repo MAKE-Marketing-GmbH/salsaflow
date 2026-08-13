@@ -5,6 +5,7 @@ import { createApp } from './app.js';
 
 const port = Number(process.env.API_PORT ?? 8787);
 const handle = await openDb();
+// Reservierungs-Routen montiert createApp selbst (inkl. DB-Fallback fuer Kurs-IDs).
 const app = createApp(handle.db);
 
 serve({ fetch: app.fetch, port }, (info) => {

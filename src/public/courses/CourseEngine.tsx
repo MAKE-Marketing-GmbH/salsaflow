@@ -28,6 +28,7 @@ import {
   buildScheduleDays,
   fetchSchedule,
   formatScheduleDay,
+  weekdayKeyForISO,
   type ScheduleCourse,
   type ScheduleResponse,
   type ScheduleTerm,
@@ -309,21 +310,25 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
       }));
   }, [allSlots, byStyle, data]);
 
-  // Aktiver Tag. Bewusst NICHT "heute": der Kursplan ist ein Wochen-Stundenplan, kein Live-
-  // Terminkalender. Waere heute Freitag, empfinge den Besucher ein fast leerer Plan (3 statt 9
-  // Kurse) und die Seite wirkt duenner als die Schule ist.
+  // Aktiver Tag.
   //  - Selbst angeklickter Tag gewinnt IMMER, auch wenn er leer ist (dann steht dort die
   //    Leer-Meldung). Alles andere waere ein Klick, der nichts tut.
   //  - Tag nur aus der URL (?tag=mon) ist ein Vorschlag: hat er in der Stil-Auswahl keine
   //    Treffer, rutscht der Kalender weiter, damit /kursplan?stil=heels nicht leer aufmacht.
-  //  - Ohne Angabe: erster Tag der Woche mit Kursen (Montag).
+  //  - Ohne Angabe: HEUTE, sonst der naechste Tag mit Kursen — dieselbe Logik wie das
+  //    Home-Widget und /buchung. Der fruehere Montag-Default zeigte ab Dienstag zuerst
+  //    Kurse, die diese Woche schon gelaufen sind, und liess sie kommentarlos reservieren
+  //    (UX-Audit 13.08.2026). Ein duennerer Tag ist ehrlicher als ein vergangener.
   const activeDay = useMemo(() => {
     if (dayPicked && day) return day;
     if (day && days.some((d) => d.key === day && d.count > 0)) return day;
-    const firstWithCourses = days.find((d) => d.count > 0);
+    const todayKey = data ? weekdayKeyForISO(data.today) : null;
+    const todayIndex = todayKey ? days.findIndex((d) => d.key === todayKey) : -1;
+    const fromToday = todayIndex >= 0 ? [...days.slice(todayIndex), ...days.slice(0, todayIndex)] : days;
+    const firstWithCourses = fromToday.find((d) => d.count > 0);
     if (firstWithCourses) return firstWithCourses.key;
     return day ?? days[0]?.key ?? null;
-  }, [day, dayPicked, days]);
+  }, [day, dayPicked, days, data]);
 
   // Aktiven Tag + Stil in die URL schreiben (teilbarer Plan), ohne History-Eintrag.
   useEffect(() => {

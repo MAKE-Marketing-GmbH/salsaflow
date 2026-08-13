@@ -485,6 +485,19 @@ function BookingForm({
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
+  // Ab 1024px steht die Kurs-Zusammenfassung als Seitenspalte und ist immer offen; darunter
+  // ist sie zugeklappt, weil sie sonst den ganzen ersten Bildschirm fuellt. Startwert `false`,
+  // damit Server-HTML und erstes Client-Render uebereinstimmen (der Server kennt keine
+  // Fensterbreite). Der Effekt korrigiert danach.
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const apply = () => setIsDesktop(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+
   const loadAvail = () => {
     setLoading(true);
     setLoadError(false);
@@ -673,25 +686,59 @@ function BookingForm({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain lg:grid lg:grid-cols-[minmax(220px,0.62fr)_1.38fr]">
-          {/* Summary: dichter Kurs-Kontext (weniger leere Weissflaeche links). */}
-          <aside className="border-b border-[var(--color-line)] bg-[var(--color-bg-soft)] px-4 py-3.5 sm:px-4 lg:border-b-0 lg:border-r">
-            <div className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-3.5">
-              <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
-                {lang === 'de' ? 'Dein Kurs' : 'Your class'}
-              </p>
-              <p className="mt-1 font-display text-base font-extrabold leading-tight tracking-tight text-[var(--color-ink)] sm:text-lg">
-                {courseLabel}
-              </p>
-              <dl className="mt-2.5 space-y-1.5 text-sm">
-                <div className="flex gap-2">
-                  <dt className="w-16 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
-                    {lang === 'de' ? 'Zeit' : 'Time'}
-                  </dt>
-                  <dd className="min-w-0 leading-snug text-[var(--color-ink)]">
+          {/* Kurs-Kontext. Auf Desktop eine ruhige Seitenspalte, mobil ein zugeklapptes
+              Detail-Element.
+              Warum: Auf 375px fuellte dieser Block den kompletten ersten Bildschirm — vier
+              Zeilen Verwaltung (Zeit, Ort, Staffel, Kosten), bevor die erste Frage kam. Wer
+              hier landet, hat den Kurs gerade selbst angeklickt; er braucht die Bestaetigung,
+              nicht das Datenblatt. Zugeklappt bleibt der Kurstitel sichtbar, der Rest ist
+              einen Tipp entfernt. Ab `lg` ist das Element dauerhaft offen (`lg:open`
+              gibt es nicht, darum steuert `open` per Media-Query in index.css). */}
+          <aside className="border-b border-[var(--color-line)] bg-[var(--color-bg-soft)] px-4 py-3 sm:px-4 lg:border-b-0 lg:border-r lg:py-3.5">
+            {/* `open` ist hier ein Startwert, kein gesteuerter Zustand: React schreibt das
+                Attribut beim Montieren, das Aufklappen des Nutzers laeuft danach im DOM und
+                wird nicht zurueckgesetzt (React rendert nur bei Zustandsaenderung neu, und
+                `isDesktop` aendert sich nur beim Breakpoint-Wechsel). Der Schluessel erzwingt
+                genau dort einen Neuaufbau, damit der Startwert wieder greift. */}
+            <details
+              key={isDesktop ? 'wide' : 'narrow'}
+              open={isDesktop}
+              className="t-booking-summary rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white"
+            >
+              <summary className="t-hover flex cursor-pointer list-none items-center justify-between gap-3 p-3.5 lg:cursor-default">
+                <span className="min-w-0">
+                  <span className="block text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
+                    {lang === 'de' ? 'Dein Kurs' : 'Your class'}
+                  </span>
+                  <span className="mt-1 block font-display text-base font-extrabold leading-tight tracking-tight text-[var(--color-ink)] sm:text-lg">
+                    {courseLabel}
+                  </span>
+                  <span className="mt-0.5 block text-sm leading-snug text-[var(--color-ink-muted)]">
                     {dayLabel} {course.startTime}-{course.endTime}
-                    {teachers ? ` · ${teachers}` : ''}
-                  </dd>
-                </div>
+                  </span>
+                </span>
+                <svg
+                  aria-hidden
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.25"
+                  className="t-booking-chevron shrink-0 text-[var(--color-ink-muted)] transition-transform duration-[var(--dur-base)] ease-out lg:hidden"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </summary>
+              <dl className="space-y-1.5 border-t border-[var(--color-line)] px-3.5 pb-3.5 pt-2.5 text-sm">
+                {teachers && (
+                  <div className="flex gap-2">
+                    <dt className="w-16 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
+                      {lang === 'de' ? 'Team' : 'Team'}
+                    </dt>
+                    <dd className="min-w-0 leading-snug text-[var(--color-ink)]">{teachers}</dd>
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <dt className="w-16 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
                     {lang === 'de' ? 'Ort' : 'Place'}
@@ -716,13 +763,13 @@ function BookingForm({
                   <dd className="min-w-0 leading-snug text-[var(--color-ink)]">{bt.payOnSite}</dd>
                 </div>
               </dl>
-            </div>
+            </details>
             {!result && (
               <button
                 type="button"
                 onClick={onBack}
                 data-testid="booking-change-course"
-                className="t-hover mt-3 text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4 hover:text-[var(--color-salsa-700)]"
+                className="t-hover mt-2.5 text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4 hover:text-[var(--color-salsa-700)] lg:mt-3"
               >
                 ← {ft.changeCourse}
               </button>

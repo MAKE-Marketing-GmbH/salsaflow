@@ -103,7 +103,7 @@ export function HomePage() {
         <LocationBand />
         <InstagramShowcase compact data-design-unit="home.instagram-showcase" />
       </main>
-      <SiteFooter entryCta={false} float={false} />  {/* S17 Footer (dunkel, WhatsApp-Float auf Home aus) */}
+      <SiteFooter entryCta={false} float />  {/* S17 Footer (dunkel, WhatsApp-Float bleibt auf Home sichtbar) */}
       <StickyCta />
     </div>
   );

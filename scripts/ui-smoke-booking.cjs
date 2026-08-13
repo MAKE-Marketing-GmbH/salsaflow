@@ -5,7 +5,7 @@
 const { chromium } = require('playwright-core');
 const fs = require('node:fs');
 
-const ORIGIN = 'http://localhost:5173';
+const ORIGIN = process.env.SMOKE_ORIGIN || 'http://localhost:5173';
 const PLAN = `${ORIGIN}/kursplan`;
 const SHOTS = '.marathon/e8-shots';
 const results = [];
