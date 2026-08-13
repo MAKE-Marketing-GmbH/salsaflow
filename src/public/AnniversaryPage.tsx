@@ -10,6 +10,7 @@
 import { motion } from 'framer-motion';
 import { Check, GraduationCap, Sparkles, Users, type LucideIcon } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 import { ANNIVERSARY, type AnniversaryContent } from '@/public/events/anniversary-content';
 import {
   ClosingInvite,
@@ -321,7 +322,17 @@ function ProofSection({ c }: { c: AnniversaryContent }) {
                 // Hochformat daneben). Mit fixem Aspect blieb unten ein weisser Kartenboden —
                 // erst bei den kleinen Kacheln (Kritik-Runde), in Runde 3 auch bei der grossen
                 // (lg:aspect-square < Zeilenhoehe). Alle fuellen die Karte deshalb mit h-full.
-                className="aspect-[4/3] w-full object-cover object-center lg:aspect-auto lg:h-full"
+                className={cn(
+                  'aspect-[4/3] w-full object-cover lg:aspect-auto lg:h-full',
+                  // Zwei Hochformat-Motive in einer Querformat-Kachel: mittig geschnitten fehlte
+                  // dem stehenden Mann in hp-14 der Kopf ganz, in event-07 beiden die Stirn.
+                  // Am gerenderten Ausschnitt geprueft.
+                  img.src.includes('hp-14')
+                    ? 'object-[center_5%]'
+                    : img.src.includes('event-07')
+                      ? 'object-[center_10%]'
+                      : 'object-center',
+                )}
                 width={1200}
                 height={900}
                 loading="lazy"

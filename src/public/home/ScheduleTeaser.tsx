@@ -11,6 +11,7 @@ import {
   type ScheduleResponse,
   type ScheduleSlot,
   type WeekdayKey,
+  embeddedSchedule,
 } from '@/lib/schedule';
 import { sectionTitle, sectionLead, Shell } from '@/public/site/primitives';
 import { Reveal, useReveal } from '@/public/home/motion';
@@ -73,15 +74,17 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
   const { lang } = useLang();
   const de = lang === 'de';
   const s = HOME[lang].schedule;
-  const [data, setData] = useState<ScheduleResponse | null>(null);
-  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+  // Startwert aus dem eingebetteten Plan (siehe scripts/prerender.mjs).
+  const [data, setData] = useState<ScheduleResponse | null>(embeddedSchedule);
+  const [state, setState] = useState<'loading' | 'ready' | 'error'>(() => (embeddedSchedule() ? 'ready' : 'loading'));
   const [day, setDay] = useState<WeekdayKey | null>(null);
 
   useEffect(() => {
     let alive = true;
     fetchSchedule()
       .then((schedule) => alive && (setData(schedule), setState('ready')))
-      .catch(() => alive && setState('error'));
+      // Bei Netzfehler den eingebetteten Plan stehen lassen statt eine Fehlermeldung zu zeigen.
+      .catch(() => alive && !embeddedSchedule() && setState('error'));
     return () => {
       alive = false;
     };

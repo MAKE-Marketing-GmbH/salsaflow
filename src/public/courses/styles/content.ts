@@ -376,8 +376,11 @@ const bachata: Record<Lang, StyleContent> = {
       band: {
         src: '/photos/premium/offer-bachata-wide-v2.webp',
         alt: 'Bachata-Paar in ruhiger Haltung im Unterricht',
-        position: 'center 22%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+        // Auf Desktop lief das Band bei 12rem und 22 % waagrecht durch beide Gesichter.
+        // Hoehe und Position zusammen loesen es: 18rem zeigt genug vom Bild, 10 % holt die
+        // Koepfe ins Fenster. Am gerenderten Ausschnitt geprueft.
+        position: 'center 10%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Timing, Connection, Körpergefühl. Ohne Druck.',

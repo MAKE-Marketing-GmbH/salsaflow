@@ -31,6 +31,7 @@ import {
   type ScheduleCourse,
   type ScheduleResponse,
   type ScheduleTerm,
+  embeddedSchedule,
 } from '@/lib/schedule';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 
@@ -240,9 +241,11 @@ function readDayParam(): string | null {
 export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void }) {
   const { lang } = useLang();
   const c = CAL[lang];
-  const [data, setData] = useState<ScheduleResponse | null>(null);
+  // Startwert aus dem eingebetteten Plan: sonst rendert der Prerender "wird geladen"
+  // ins HTML und die Kurszeiten fehlen fuer Suchmaschinen komplett (DESIGN.md:113).
+  const [data, setData] = useState<ScheduleResponse | null>(embeddedSchedule);
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !embeddedSchedule());
   const [styleKeys, setStyleKeys] = useState<string[]>(() => readArrayParam('stil'));
   // null = noch nicht gewaehlt; dann bestimmt der Kalender den sinnvollen Starttag selbst.
   const [day, setDay] = useState<string | null>(() => readDayParam());
@@ -258,7 +261,10 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     try {
       setData(await fetchSchedule());
     } catch {
-      setError(true);
+      // Faellt der Netz-Aufruf aus, bleibt der zur Buildzeit eingebettete Plan stehen. Er ist
+      // hoechstens einen Deploy alt und damit besser als eine Fehlermeldung auf einer Seite,
+      // die eigentlich schon lesbare Kurse zeigt.
+      if (!embeddedSchedule()) setError(true);
     } finally {
       setLoading(false);
     }

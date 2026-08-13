@@ -301,7 +301,14 @@ function CornerMarks() {
 
 function WizardProgress({ step, labels }: { step: number; labels: readonly string[] }) {
   return (
-    <ol className="grid grid-cols-4 gap-2" aria-label="Fortschritt">
+    // Spaltenzahl aus den Labels, nicht als feste Zahl. Beim Kuerzen von vier auf drei Schritte
+    // blieb `grid-cols-4` stehen: die vierte Spalte blieb leer, der Balken endete bei 75 %,
+    // obwohl die Person fertig war. So kann derselbe Fehler nicht wiederkommen.
+    <ol
+      className="grid gap-2"
+      style={{ gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))` }}
+      aria-label="Fortschritt"
+    >
       {labels.map((label, index) => (
         <li key={label} aria-current={index === step ? 'step' : undefined} className="min-w-0">
           <span className={cn('block h-1.5 rounded-full transition-colors', index <= step ? 'bg-[var(--color-salsa)]' : 'bg-[var(--color-line)]')} />

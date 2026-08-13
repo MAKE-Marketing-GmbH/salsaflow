@@ -68,7 +68,41 @@ function sitemapXml(paths) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }
 
-const template = await fs.readFile(templatePath, 'utf8');
+/**
+ * Kursplan zur Buildzeit in die Seite legen.
+ *
+ * Grund: Die Kurs-Komponenten holen ihre Daten erst im Browser (useEffect). Das Prerendering
+ * fror darum den Ladezustand ein — im ausgelieferten HTML von /kursplan stand woertlich
+ * "Kursplan wird geladen ...", keine einzige Kurszeit. DESIGN.md Zeile 113 verlangt aber
+ * "Voller Text im HTML für öffentliche Routen (SEO + KI-Suche)". Genau die Suchen, die
+ * kaufbereite Leute tippen ("Salsa Kurs Basel Dienstag"), fanden nichts.
+ *
+ * Quelle ist dieselbe Datei, aus der auch die API liest. Die Client-Fetches bleiben: der
+ * eingebettete Plan ist nur der Startwert, danach hydratisiert die Seite normal weiter.
+ */
+async function schedulePayload() {
+  const raw = JSON.parse(await fs.readFile(path.join(root, 'db/seed/public-schedule.json'), 'utf8'));
+  const today = new Date().toISOString().slice(0, 10);
+  const terms = raw.terms
+    .filter((term) => term.endDate >= today)
+    .map((term) => ({ ...term, phase: term.startDate <= today ? 'running' : 'upcoming' }));
+  const phase = new Map(terms.map((term) => [term.id, term.phase]));
+  const courses = raw.courses
+    .filter((course) => phase.has(course.termId))
+    .map((course) => ({ ...course, phase: phase.get(course.termId) }));
+  return { ...raw, today, terms, courses, bookingEnabled: false, reservationEnabled: true };
+}
+
+const schedule = await schedulePayload();
+// Damit die Komponenten schon beim serverseitigen Rendern echte Zeiten sehen.
+globalThis.__SCHEDULE__ = schedule;
+
+const scheduleJson = JSON.stringify(schedule)
+  // </script> im Datenblock wuerde den Block vorzeitig schliessen.
+  .replaceAll('<', '\\u003c');
+const scheduleTag = `<script id="schedule-data" type="application/json">${scheduleJson}</script>`;
+
+const template = (await fs.readFile(templatePath, 'utf8')).replace('</head>', `    ${scheduleTag}\n  </head>`);
 // Eigener Cache-Ordner fuer den Prerender-Server. Grund: node_modules/.vite/deps kann einem
 // anderen Benutzer gehoeren als dem, der baut. Vite raeumt den Ordner beim Start auf und
 // scheitert dann mit EACCES. Ein eigener Ordner pro Build umgeht das Rechte-Problem ganz.

@@ -18,6 +18,7 @@
 import { useState } from 'react';
 import { Seo } from '@/lib/seo';
 import { useLang } from '@/lib/i18n';
+import { embeddedSchedule } from '@/lib/schedule';
 import { SiteHeader } from '@/public/site/SiteHeader';
 import { SiteFooter } from '@/public/site/SiteFooter';
 import { TitleAccent } from '@/public/site/primitives';
@@ -27,7 +28,9 @@ export function SchedulePage() {
   const { lang, t } = useLang();
   // Gesamtzahl der Kurse fuer die Hero-Zeile. Die Engine meldet sie nach dem Laden zurueck,
   // damit es keinen zweiten Fetch braucht.
-  const [total, setTotal] = useState<number | null>(null);
+  // Startwert aus dem eingebetteten Plan: sonst steht im ausgelieferten HTML "Kursplan wird
+  // geladen" statt der echten Kurszahl.
+  const [total, setTotal] = useState<number | null>(() => embeddedSchedule()?.courses.length ?? null);
 
   return (
     <>

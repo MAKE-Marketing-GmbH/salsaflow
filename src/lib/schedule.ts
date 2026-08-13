@@ -253,6 +253,30 @@ export function buildScheduleSlots(courses: ScheduleCourse[], terms: ScheduleTer
   );
 }
 
+/**
+ * Der zur Buildzeit eingebettete Kursplan (siehe scripts/prerender.mjs).
+ *
+ * Er dient zwei Zwecken: Er steht als echter Text im ausgelieferten HTML, und er ist der
+ * Startwert im Browser, damit die Seite nicht mit "wird geladen" beginnt. Der Netz-Aufruf
+ * laeuft trotzdem und ueberschreibt ihn mit dem Live-Stand.
+ */
+export function embeddedSchedule(): ScheduleResponse | null {
+  // Beim Prerender laeuft kein Browser: dort setzt scripts/prerender.mjs den Plan als
+  // globalThis.__SCHEDULE__, damit die Komponenten schon serverseitig echte Zeiten rendern.
+  const scope = globalThis as {
+    __SCHEDULE__?: ScheduleResponse;
+    document?: { getElementById(id: string): { textContent: string | null } | null };
+  };
+  if (scope.__SCHEDULE__) return scope.__SCHEDULE__;
+  const node = scope.document?.getElementById('schedule-data');
+  if (!node?.textContent) return null;
+  try {
+    return JSON.parse(node.textContent) as ScheduleResponse;
+  } catch {
+    return null;
+  }
+}
+
 export function fetchSchedule(): Promise<ScheduleResponse> {
   return api.get<ScheduleResponse>('/api/public/schedule');
 }
