@@ -7,6 +7,7 @@
 // Merksatz: der ehrliche "Termine folgen"-Empty-State fuehrt nie in eine Sackgasse und
 // erfindet keine Datumsangaben. Einzige Zeitangabe ist der gesicherte Danceflow-Rhythmus.
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarDays, Sparkles, Star } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
@@ -203,9 +204,34 @@ function FeaturedSection({ c }: { c: EventkalenderContent }) {
 }
 
 /* --------------------------------------------------- Leere Zustaende (Empty-State) */
+
+// Naechste Danceflow Night aus dem gesicherten Rhythmus (1., 3. und 5. Freitag im Monat,
+// business-reality). Kein erfundenes Datum — reine Rechnung aus der Regel.
+function nextDanceflowNight(from: Date): Date {
+  const d = new Date(from);
+  for (let i = 0; i < 64; i++) {
+    if (d.getDay() === 5) {
+      const nth = Math.floor((d.getDate() - 1) / 7) + 1;
+      if (nth === 1 || nth === 3 || nth === 5) return d;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return d;
+}
+
 function EmptyStateSection({ c }: { c: EventkalenderContent }) {
   const { item } = useReveal();
+  const { lang } = useLang();
   const e = c.empty;
+  // Erst nach der Hydration rechnen: der Prerender wuerde sonst das Build-Datum einfrieren
+  // und ein alter Deploy zeigte eine "naechste" Night, die schon vorbei ist.
+  const [nextNight, setNextNight] = useState<string | null>(null);
+  useEffect(() => {
+    const d = nextDanceflowNight(new Date());
+    setNextNight(
+      d.toLocaleDateString(lang === 'de' ? 'de-CH' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' }),
+    );
+  }, [lang]);
   return (
     <section id="kalender" className="scroll-mt-24 bg-[var(--color-paper-warm)] py-16 lg:py-24">
       <Shell>
@@ -240,6 +266,11 @@ function EmptyStateSection({ c }: { c: EventkalenderContent }) {
                   <CalendarDays size={14} strokeWidth={2.25} aria-hidden />
                   {e.stateLabel}
                 </p>
+                {nextNight && (
+                  <p className="mt-4 font-display text-xl font-bold leading-snug text-[var(--color-ink)] sm:text-2xl">
+                    {lang === 'de' ? `Nächste Danceflow Night: ${nextNight}` : `Next Danceflow Night: ${nextNight}`}
+                  </p>
+                )}
                 <p className="mt-4 text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
                   {e.noResults}
                 </p>
