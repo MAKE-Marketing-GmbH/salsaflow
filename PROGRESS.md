@@ -22,10 +22,18 @@
 - **„Preise" top-level im Header** (Top-3-Frage vor jeder Anmeldung).
 - **Deployed:** dpl_EcaCyfbHP4VUqpzV9xKEzZCpEyRH auf Produktion. Live-Smoke grün:
   0× opacity:0, Kurszeiten im HTML, Reservierungs-Route 200, Availability 200.
-- **Audit-Backlog** (10 priorisierte Punkte): /tmp/salsa-ultra/audit/BACKLOG.md.
-  Offen u.a.: Schnupper-Erfolgsscreen mit Folge-CTA (M), Eventkalender ohne Datum (S),
-  gemeinsame Tagesleisten-Komponente (M), /en-Routen (L). Preis im Funnel bleibt laut
-  Raphael-Entscheid draußen — Audit-Punkt 2/3 dazu NICHT umsetzen.
+- **Audit-Backlog abgearbeitet** (zweite Welle, alles einzeln deployed + live verifiziert):
+  - ✅ 3: Buchungsmodal zeigt bei laufender Staffel „Staffel läuft — Quereinstieg möglich,
+    noch X Lektionen" (`remainingLessons()` in src/lib/schedule.ts; ohne Preis).
+  - ✅ 4: Schnupper-Erfolgsscreen mit „So geht es weiter": Kursplan-Link (bei gewähltem
+    Stil vorgefiltert) + WhatsApp.
+  - ✅ 6: Eventkalender rechnet die nächste Danceflow Night aus dem festen Rhythmus
+    (1./3./5. Freitag) — am 13.08. korrekt „Freitag, 21. August".
+  - ✅ 7: /buchung-Tagesleiste zeigt nur noch Kurstage (Mo–Sa) wie /kursplan.
+  - ✅ 10: Parataxe im Home-Kurs-Kapitel zu einem Satz.
+  - ⛔ 2 + Preis-Teil von 3: NICHT umgesetzt — Raphael-Entscheid „keine Preise im Funnel".
+  - ⏸ 8 (/en-Routen): laut DECISIONS erst nach dem DNS-Cutover.
+  - ✋ 9: zwei QA-Test-Mails im Studio-Postfach löschen — nur von Raphael machbar.
 - **Hinweis Studio-Postfach:** Der Live-Audit hat 1 Test-Reservierung + 1 Test-Anfrage
   („QA-Test", qa-test@example.com) ausgelöst — ignorieren.
 
