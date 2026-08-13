@@ -464,7 +464,10 @@ function DayBar({
           schmalen Viewports passen die ausgeschriebenen Daten nicht kollisionsfrei nebeneinander.
           Erst ab lg stehen alle sechs Tage in einer Reihe. */}
       <div
-        role="tablist"
+        // Kein role="tablist": ohne Pfeiltasten-Navigation und ohne verknuepftes Panel
+        // waere das ein Versprechen an Screenreader, das die Umsetzung nicht haelt.
+        // Es sind Filter-Schalter.
+        role="group"
         aria-label={c.day}
         className="grid grid-cols-3 gap-1.5 lg:flex lg:gap-2"
       >
@@ -474,8 +477,7 @@ function DayBar({
           return (
             <button
               key={d.key}
-              role="tab"
-              aria-selected={on}
+              aria-pressed={on}
               data-testid={`day-${d.key}`}
               onClick={() => onSelect(d.key)}
               className={cn(

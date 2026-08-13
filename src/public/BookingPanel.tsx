@@ -232,7 +232,10 @@ function Funnel() {
           {/* Tages-Leiste: dichte Chip-Reihe, Wrap glatt (Mobil 4+3 statt verwaiste So-Zeile). */}
           <div
             className="mt-4 flex flex-wrap gap-1.5 sm:gap-2"
-            role="tablist"
+            // Kein role="tablist": Das ARIA-Tab-Muster verspricht Pfeiltasten-Navigation und
+            // ein verknuepftes Panel. Beides gibt es hier nicht. Es sind Filter-Schalter,
+            // und die beschreibt aria-pressed korrekt.
+            role="group"
             aria-label={ft.pickDay}
           >
             {days.map((d) => {
@@ -241,8 +244,7 @@ function Funnel() {
                 <button
                   key={d.key}
                   type="button"
-                  role="tab"
-                  aria-selected={activeDay === d.key}
+                  aria-pressed={activeDay === d.key}
                   data-testid={`day-${d.key}`}
                   onClick={() => setDay(d.key)}
                   className={cn(

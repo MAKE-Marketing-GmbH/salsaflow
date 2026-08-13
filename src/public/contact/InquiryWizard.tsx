@@ -321,12 +321,16 @@ function WizardProgress({ step, labels }: { step: number; labels: readonly strin
 
 const fieldClass = 'mt-1.5 w-full rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 text-base text-[var(--color-ink)] outline-none focus:border-[var(--color-salsa)] focus:ring-2 focus:ring-[var(--color-salsa)]/25';
 
-function Input({ label, value, onChange, type = 'text', autoComplete, optional, className, testId }: { label: string; value: string; onChange: (value: string) => void; type?: string; autoComplete?: string; optional?: boolean; className?: string; testId?: string }) {
-  return <label className={className}><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><input className={fieldClass} type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} data-testid={testId} /></label>;
+// Feste Kennung der Fehlerzeile. Felder zeigen per aria-describedby darauf, sobald ein Fehler
+// steht — sonst liest ein Screenreader die Meldung vor, ohne zu sagen, wozu sie gehoert.
+const ERROR_ID = 'inquiry-error';
+
+function Input({ label, value, onChange, type = 'text', autoComplete, optional, className, testId, invalid }: { label: string; value: string; onChange: (value: string) => void; type?: string; autoComplete?: string; optional?: boolean; className?: string; testId?: string; invalid?: boolean }) {
+  return <label className={className}><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><input className={fieldClass} type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} data-testid={testId} aria-invalid={invalid || undefined} aria-describedby={invalid ? ERROR_ID : undefined} /></label>;
 }
 
-function TextArea({ label, value, onChange, placeholder, optional }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; optional?: boolean }) {
-  return <label><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><textarea className={cn(fieldClass, 'min-h-28 resize-y')} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} /></label>;
+function TextArea({ label, value, onChange, placeholder, optional, invalid }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; optional?: boolean; invalid?: boolean }) {
+  return <label><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><textarea className={cn(fieldClass, 'min-h-28 resize-y')} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} aria-invalid={invalid || undefined} aria-describedby={invalid ? ERROR_ID : undefined} /></label>;
 }
 
 /**

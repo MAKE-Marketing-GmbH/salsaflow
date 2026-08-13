@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 
 export function LocationBand() {
   const { lang } = useLang();
+  const de = lang === 'de';
   const c = HOME_V3[lang].closer;
 
   return (
@@ -26,7 +27,7 @@ export function LocationBand() {
           <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[520px]">
             <img
               src="/photos/premium/community-story-1600.webp"
-              alt="Tanzende im Salsaflow-Kurs, helle Studio-Atmosphaere nahe Bahnhof Basel SBB."
+              alt={de ? 'Tanzende im Salsaflow-Kurs, helle Studio-Atmosphäre nahe Bahnhof Basel SBB.' : 'Dancers in a Salsaflow class, bright studio atmosphere near Basel SBB station.'}
               className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
               width={1600}
               height={1200}

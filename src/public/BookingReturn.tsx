@@ -1,23 +1,63 @@
-import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
+// Rueckkehr-Seiten unter /buchung/erfolg und /buchung/abbruch.
+//
+// Sie gehoeren zum Stripe-Pfad: der Zahlungsanbieter schickte die Person nach dem Bezahlen
+// hierher zurueck (server/payment-service.ts baut diese Links). Auf dieser Website gibt es
+// keine Zahlung — der Funnel ist eine Reservierung, bezahlt wird vor Ort.
+//
+// Vorher rief diese Seite `/api/public/bookings/:id/status`. Den Endpunkt gibt es hier nicht;
+// die Antwort war ein 503, und die Seite zeigte jedem Besucher "Buchung nicht gefunden".
+// Wer ueber einen alten Link kommt, landete also in einer Sackgasse.
+//
+// Jetzt sagt die Seite, was Sache ist, und fuehrt weiter. Der Server-Code fuer Zahlungen
+// bleibt unangetastet: wird er spaeter scharf geschaltet, gehoert hier wieder eine echte
+// Statusabfrage hin.
+
 import { Seo } from '@/lib/seo';
+import { useLang } from '@/lib/i18n';
 import { SiteHeader } from '@/public/site/SiteHeader';
 import { SiteFooter } from '@/public/site/SiteFooter';
-
-type BookingStatus = { bookingStatus: string };
+import { CtaPill, CtaText } from '@/public/site/primitives';
 
 export function BookingReturn() {
-  const [status, setStatus] = useState<BookingStatus | null>(null);
-  const [failed, setFailed] = useState(false);
-  const bookingId = new URLSearchParams(window.location.search).get('booking');
+  const { lang } = useLang();
+  const de = lang === 'de';
+  const cancelled = typeof window !== 'undefined' && window.location.pathname.includes('abbruch');
 
-  useEffect(() => {
-    if (!bookingId) { setFailed(true); return; }
-    api.get<BookingStatus>(`/api/public/bookings/${bookingId}/status`).then(setStatus).catch(() => setFailed(true));
-  }, [bookingId]);
+  const title = cancelled
+    ? de ? 'Kein Problem.' : 'No problem.'
+    : de ? 'Danke für deine Anfrage.' : 'Thanks for your request.';
+  const body = cancelled
+    ? de
+      ? 'Du hast nichts abgeschlossen. Such dir im Kursplan einen Termin, der besser passt — reservieren kostet nichts und du zahlst erst vor Ort.'
+      : 'Nothing was completed. Pick a time that suits you better in the schedule — reserving is free and you pay on site.'
+    : de
+      ? 'Wir melden uns und bestätigen deinen Platz. Bezahlt wird vor Ort, mit Twint oder bar.'
+      : 'We will get back to you and confirm your spot. You pay on site, by TWINT or cash.';
 
-  const confirmed = status?.bookingStatus === 'confirmed' || status?.bookingStatus === 'completed';
-  const title = confirmed ? 'Deine Buchung ist bestätigt' : failed ? 'Buchung nicht gefunden' : 'Buchungsstatus wird geladen';
-  const body = confirmed ? 'Wir freuen uns auf dich. Die Bestätigung ist per E-Mail unterwegs.' : failed ? 'Bitte prüfe den Link oder melde dich bei uns.' : 'Einen Moment bitte.';
-  return <><Seo page="bookingStatus" noindex /><SiteHeader /><main id="main" tabIndex={-1} className="flex min-h-[80vh] items-center justify-center bg-neutral-50 px-4 py-12" style={{ paddingTop: 'calc(var(--nav-h) + 2rem)' }}><div className="w-full max-w-md rounded-[var(--radius-card)] bg-white p-8 text-center shadow-xl"><h1 className="text-xl font-bold">{title}</h1><p className="mt-2 text-sm text-neutral-600">{body}</p><a href="/kursplan" className="mt-6 inline-block rounded-[var(--radius-chip)] bg-black px-5 py-2 text-sm font-semibold text-white">Zum Kursplan</a></div></main><SiteFooter /></>;
+  return (
+    <>
+      <Seo page="bookingStatus" noindex />
+      <SiteHeader solidBackdrop />
+      <main
+        id="main"
+        tabIndex={-1}
+        className="bg-[var(--color-paper-warm)]"
+        style={{ paddingTop: 'calc(var(--nav-h) + 3rem)' }}
+      >
+        <div className="mx-auto max-w-[38rem] px-5 pb-20 text-center sm:px-8">
+          <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight text-[var(--color-ink)] sm:text-5xl">
+            {title}
+          </h1>
+          <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
+            {body}
+          </p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <CtaPill href="/kursplan">{de ? 'Zum Kursplan' : 'To the schedule'}</CtaPill>
+            <CtaText href="/kontakt">{de ? 'Frage stellen' : 'Ask a question'}</CtaText>
+          </div>
+        </div>
+      </main>
+      <SiteFooter />
+    </>
+  );
 }

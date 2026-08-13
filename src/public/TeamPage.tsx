@@ -797,7 +797,15 @@ function FacesSection() {
                   <span aria-hidden className="absolute inset-x-0 bottom-0 z-10 h-[3px] bg-[var(--color-salsa)]/70" />
                   <img
                     src={face.photo ?? ''}
-                    alt={face.name ? `${face.name}, ${face.role ?? 'Tanzlehrer'} bei Salsaflow` : 'Mitglied des Salsaflow-Teams'}
+                    alt={
+                      face.name
+                        ? lang === 'de'
+                          ? `${face.name}, ${face.role ?? 'Tanzlehrer'} bei Salsaflow`
+                          : `${face.name}, ${face.role ?? 'dance teacher'} at Salsaflow`
+                        : lang === 'de'
+                          ? 'Mitglied des Salsaflow-Teams'
+                          : 'Member of the Salsaflow team'
+                    }
                     className={cn('relative w-full object-cover', shape.ratio, shape.pos, shape.zoom)}
                     loading="lazy"
                     width={1000}

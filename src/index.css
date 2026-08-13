@@ -155,8 +155,15 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Nur die Bewegung abschalten, nicht den Zustand umkehren. Ein frueherer Versuch setzte hier
+     scaleX(1) als Dauerzustand — dann trug jeder Link permanent seinen Hover-Unterstrich, auf
+     den Kurs-Karten sogar eine 3px-Rotkante ueber die volle Breite. Wer Bewegung reduziert,
+     will Ruhe, nicht mehr Farbe. */
   .t-underline {
-    transform: scaleX(1);
+    transition: none;
+  }
+
+  .group:hover .t-underline {
     transition: none;
   }
 }

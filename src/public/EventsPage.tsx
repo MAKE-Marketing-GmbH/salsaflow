@@ -175,6 +175,7 @@ function EventsHero() {
    (Wann / Was / Wo / Fuer wen / Eintritt) + Ticket-CTA. Bright-Editorial wie der EventsTeaser. */
 function DanceflowSection() {
   const { lang } = useLang();
+  const de = lang === 'de';
   const { item } = useReveal();
   const d = EVENTS[lang].danceflow;
   return (
@@ -189,7 +190,7 @@ function DanceflowSection() {
             <figure className="col-span-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-black/5 shadow-[0_24px_60px_-28px_rgba(17,17,17,0.5)]">
               <img
                 src="/photos/gallery/danceflow/02-v3.webp"
-                alt="Volle Tanzfläche bei einer Danceflow Night, viele lachende Gäste"
+                alt={de ? 'Volle Tanzfläche bei einer Danceflow Night, viele lachende Gäste' : 'Packed dance floor at a Danceflow Night with many laughing guests'}
                 className="aspect-[16/10] w-full object-cover object-[center_35%]"
                 width={2048}
                 height={1360}
@@ -199,7 +200,7 @@ function DanceflowSection() {
             <figure className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
               <img
                 src="/photos/gallery/danceflow/01-v3.webp"
-                alt="Frau tanzt lachend mit ausgestreckten Armen auf einer Danceflow Night"
+                alt={de ? 'Frau tanzt lachend mit ausgestreckten Armen auf einer Danceflow Night' : 'Woman dancing with outstretched arms and laughing at a Danceflow Night'}
                 className="aspect-[4/3] w-full object-cover object-[center_22%]"
                 width={2048}
                 height={1360}
@@ -209,7 +210,7 @@ function DanceflowSection() {
             <figure className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
               <img
                 src="/photos/gallery/danceflow/03-v3.webp"
-                alt="Paar tanzt dicht zusammen auf der Tanzfläche"
+                alt={de ? 'Paar tanzt dicht zusammen auf der Tanzfläche' : 'Couple dancing close together on the floor'}
                 className="aspect-[4/3] w-full object-cover object-[center_30%]"
                 width={2048}
                 height={1360}
@@ -426,6 +427,7 @@ function WorkshopsSection() {
 /* ---------------------------------------------------------------------------- Anniversary Weekend */
 function AnniversarySection() {
   const { lang } = useLang();
+  const de = lang === 'de';
   const { item } = useReveal();
   const a = EVENTS[lang].anniversary;
   const highlights =
@@ -447,7 +449,7 @@ function AnniversarySection() {
           <div className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_55px_rgba(17,17,17,0.08)]">
             <img
               src="/photos/events/event-05-v4.webp"
-              alt="Frau in Rot beim Dreh, lacht in die Kamera"
+              alt={de ? 'Frau in Rot beim Dreh, lacht in die Kamera' : 'Woman in red mid-turn, laughing at the camera'}
               className="aspect-[4/5] w-full object-cover sm:aspect-[4/3]"
               width={2048}
               height={1360}
@@ -519,6 +521,7 @@ function AnniversarySection() {
 /* ---------------------------------------------------------------------------- Floweekend */
 function FloweekendSection() {
   const { lang } = useLang();
+  const de = lang === 'de';
   const { item } = useReveal();
   const f = EVENTS[lang].floweekend;
   return (
@@ -545,7 +548,7 @@ function FloweekendSection() {
           <div className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.08)]">
             <img
               src="/photos/events/event-06-v3.webp"
-              alt="Lachendes Social-Dancing-Paar, mehrere Paare im Hintergrund"
+              alt={de ? 'Lachendes Social-Dancing-Paar, mehrere Paare im Hintergrund' : 'Laughing social-dancing couple with more couples behind them'}
               className="aspect-[4/3] w-full object-cover object-[center_42%]"
               width={2048}
               height={1360}

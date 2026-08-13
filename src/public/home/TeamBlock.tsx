@@ -42,6 +42,7 @@ function onImgError(e: React.SyntheticEvent<HTMLImageElement>) {
 
 export function TeamBlock() {
   const { lang } = useLang();
+  const de = lang === 'de';
   const reduced = useReducedMotion();
   const t = HOME_V3[lang].team;
   const { item } = useReveal();
@@ -180,7 +181,7 @@ export function TeamBlock() {
         <img
           src="/photos/showcase/hp-29.webp"
           onError={onImgError}
-          alt="Das ganze Salsaflow-Team liegt lachend vor der Salsaflow-Wand im Studio."
+          alt={de ? 'Das ganze Salsaflow-Team liegt lachend vor der Salsaflow-Wand im Studio.' : 'The whole Salsaflow team lying and laughing in front of the studio wall.'}
           /* Unter sm: festes 240px-Band mit object-position 70%. Dort rendert das Motiv nur
              260px hoch (390px Viewport), sichtbar sind 92% — der Versatz holt nur die letzte
              Parkettzeile weg. Ab sm traegt das Seitenverhaeltnis (siehe Kommentar oben) und

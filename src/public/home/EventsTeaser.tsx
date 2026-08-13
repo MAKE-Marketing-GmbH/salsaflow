@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 
 export function EventsTeaser() {
   const { lang } = useLang();
+  const de = lang === 'de';
   const reduced = useReducedMotion();
   const hydrated = useHydrated();
   const e = HOME[lang].events;
@@ -65,7 +66,7 @@ export function EventsTeaser() {
             <figure className="col-span-2 overflow-hidden rounded-[1.5rem] shadow-[0_24px_60px_-28px_rgba(17,17,17,0.5)] ring-1 ring-black/5">
               <img
                 src="/photos/party/party-31-v3.webp"
-                alt="Fröhliches Paar tanzt vor voller Tanzfläche bei einer Danceflow Night"
+                alt={de ? 'Fröhliches Paar tanzt vor voller Tanzfläche bei einer Danceflow Night' : 'Happy couple dancing in front of a packed floor at a Danceflow Night'}
                 className="aspect-[16/10] w-full object-cover object-[center_40%]"
                 width={2048}
                 height={1360}
@@ -75,7 +76,7 @@ export function EventsTeaser() {
             <figure className="overflow-hidden rounded-[1.25rem] shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
               <img
                 src="/photos/party/party-46-v3.webp"
-                alt="Paar tanzt dicht im blauen Partylicht bei einer Danceflow Night"
+                alt={de ? 'Paar tanzt dicht im blauen Partylicht bei einer Danceflow Night' : 'Couple dancing close in blue party light at a Danceflow Night'}
                 className="aspect-[4/3] w-full object-cover object-center"
                 width={2048}
                 height={1360}
@@ -85,7 +86,7 @@ export function EventsTeaser() {
             <figure className="overflow-hidden rounded-[1.25rem] shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
               <img
                 src="/photos/party/party-50-v3.webp"
-                alt="Paar tanzt Hand in Hand auf voller Tanzfläche"
+                alt={de ? 'Paar tanzt Hand in Hand auf voller Tanzfläche' : 'Couple dancing hand in hand on a packed floor'}
                 className="aspect-[4/3] w-full object-cover object-center"
                 width={2048}
                 height={1360}
