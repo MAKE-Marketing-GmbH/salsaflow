@@ -496,8 +496,10 @@ function DayBar({
                   on ? 'text-white/70' : 'text-[var(--color-ink-muted)]',
                 )}
               >
-                <span className="lg:hidden">{formatScheduleDay(d.date, lang)} · </span>
-                <span>{d.count} {d.count === 1 ? c.classOne : c.classMany}</span>
+                {/* Mobil nur "10.08.": das lange "Montag, 10. August · 9 Kurse" brach in
+                    der 3er-Spalte um (Critic 13.08.2026). */}
+                <span className="lg:hidden">{d.date.slice(8, 10)}.{d.date.slice(5, 7)}.</span>
+                <span className="hidden lg:inline">{d.count} {d.count === 1 ? c.classOne : c.classMany}</span>
               </span>
             </button>
           );

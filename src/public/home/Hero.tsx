@@ -329,7 +329,9 @@ export function Hero() {
               <img
                 src="/photos/2026/hero-paar-dreh-01.webp"
                 alt={alt}
-                className="h-full w-full object-cover object-[50%_38%] sm:object-[50%_32%] lg:object-[50%_18%]"
+                // lg:object-top statt 18%: bei 1440 sass der Scheitel des Mannes an der
+                // Foto-Kante (Critic 13.08.2026).
+                className="h-full w-full object-cover object-[50%_38%] sm:object-[50%_32%] lg:object-top"
                 width={1600}
                 height={1066}
                 loading="eager"

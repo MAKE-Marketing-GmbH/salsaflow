@@ -252,7 +252,9 @@ function LocationSection() {
               loading="eager"
             />
             {/* Sitewide Warm-Soft-Light: letztes editoriales Foto in die warme Bild-Welt. */}
-            <div className="relative m-4 rounded-[var(--radius-card)] bg-[var(--color-paper-warm)] p-4 text-[var(--color-ink)] sm:absolute sm:bottom-4 sm:left-4 sm:m-0 sm:max-w-[17rem] sm:bg-white/92 sm:shadow-xl sm:backdrop-blur">
+            {/* Festes Papier statt Glas (bg-white/92 + backdrop-blur) auf dem Foto —
+                Glas-Optik ist im Bild-System verboten (Critic 13.08.2026). */}
+            <div className="relative m-4 rounded-[var(--radius-card)] bg-[var(--color-paper-warm)] p-4 text-[var(--color-ink)] sm:absolute sm:bottom-4 sm:left-4 sm:m-0 sm:max-w-[17rem] sm:shadow-xl">
               <p className="font-display text-xl font-bold leading-tight">
                 {lang === 'de' ? 'Drei Studios. Wenige Schritte.' : 'Three studios. A few steps.'}
               </p>

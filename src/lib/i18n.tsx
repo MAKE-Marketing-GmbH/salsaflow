@@ -220,7 +220,7 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     successWaitlistTitle: 'Du bist auf der Warteliste',
     loading: 'Verfügbarkeit wird geprüft...',
     redirecting: 'Weiter zur sicheren Bezahlung...',
-    payOnSite: 'Zahlst du einfach vor Ort — Twint oder Bar. Keine Online-Zahlung nötig.',
+    payOnSite: 'Zahlst du einfach vor Ort. Twint oder Bar. Keine Online-Zahlung nötig.',
     payOnlineOption: 'Lieber gleich online mit TWINT oder Karte zahlen.',
     priceOnRequest: 'Preis auf Anfrage',
     pricePerCourse: 'für 8 Wochen',

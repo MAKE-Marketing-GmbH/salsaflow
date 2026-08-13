@@ -100,24 +100,24 @@ export function TeamBlock() {
             Copy kommt dazu oder faellt weg. Dieselbe Zweispalten-Bauform wie #einstieg und
             #faq auf derselben Seite — kein neuer Dialekt. Unter lg bleibt der Stapel. */}
         <Reveal>
-          <div className="grid gap-y-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.86fr)] lg:items-end lg:gap-x-16">
-            <div>
-              <motion.div variants={item}>
-                <Eyebrow>{t.eyebrow}</Eyebrow>
-              </motion.div>
-              <motion.h2
-                variants={item}
-                className={cn(
-                  'mt-5 font-display text-3xl font-extrabold leading-[1.03] tracking-[-0.02em] sm:text-4xl md:text-[3rem] lg:text-[3.35rem]',
-                  MEASURE_L,
-                )}
-              >
-                {t.title}
-              </motion.h2>
-            </div>
+          {/* Titel und Story gestapelt statt H2 links / Story rechts (Split-Header-Ban,
+              Critic 13.08.2026). */}
+          <div>
+            <motion.div variants={item}>
+              <Eyebrow>{t.eyebrow}</Eyebrow>
+            </motion.div>
+            <motion.h2
+              variants={item}
+              className={cn(
+                'mt-5 font-display text-3xl font-extrabold leading-[1.03] tracking-[-0.02em] sm:text-4xl md:text-[3rem] lg:text-[3.35rem]',
+                MEASURE_L,
+              )}
+            >
+              {t.title}
+            </motion.h2>
             <motion.p
               variants={item}
-              className="max-w-xl text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg lg:max-w-none"
+              className="mt-5 max-w-[65ch] text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg"
             >
               {t.story}
             </motion.p>
