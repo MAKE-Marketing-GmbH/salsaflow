@@ -1,10 +1,35 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-13 (Reservierung live, Sicherheit, Barrierefreiheit, Rechtstext korrigiert)
-**Session:** Buchung real gemacht, Kursplan ins HTML, Header-Injection zu, Motion vereinheitlicht
+**Stand:** 2026-08-13 abends (Ultracode-Runde: Startseite wieder voll, Anmeldung bewiesen, deployed)
+**Session:** Kürzung zurückgenommen, Hero-Chips + WhatsApp-Float, Anmeldung end-to-end, Kursplan-Default heute, Preise im Header
 **Handoff-ready:** ja
 
-## ERLEDIGT
+## ERLEDIGT (Ultracode-Runde 13.08. abends)
+
+- **Startseiten-Kürzung zurückgenommen** (Commit d40ca14). Raphael wörtlich: kürzen war
+  nie gemeint. Alle 12 Sektionen wieder da. DECISIONS.md-Eintrag korrigiert.
+- **Mix aus beiden Ständen:** Hero-Stil-Chips (Salsa/Bachata/Heels) + floatender
+  WhatsApp-Knopf vom Preview-Stand übernommen, edler integriert.
+- **Anmeldung end-to-end bewiesen:** Reservierungs-Route jetzt auch im lokalen Server
+  (DB-Fallback für Kurs-IDs — Seed würfelt UUIDs, JSON kannte sie nicht, lokal war jede
+  Reservierung „Kurs nicht gefunden"). 7 curl-Fälle grün, Browser-Flow bis
+  „Reservierung ist da" (Screenshots /tmp/salsa-ultra/). verify:booking 39/39,
+  verify:contact 21/21, verify:public 20/20, verify:seo grün.
+- **Honeypot VOR Rate-Limit** (Kontakt + Reservierung): Bot verbraucht kein Budget,
+  bekommt nie 429 (auch das wäre ein Tell). Test-Erwartung nachgezogen.
+- **Kursplan startet auf HEUTE** statt Montag (gleiche Logik wie /buchung und Home-Widget;
+  UX-Audit: Montag-Default ließ vergangene Kurse kommentarlos reservieren).
+- **„Preise" top-level im Header** (Top-3-Frage vor jeder Anmeldung).
+- **Deployed:** dpl_EcaCyfbHP4VUqpzV9xKEzZCpEyRH auf Produktion. Live-Smoke grün:
+  0× opacity:0, Kurszeiten im HTML, Reservierungs-Route 200, Availability 200.
+- **Audit-Backlog** (10 priorisierte Punkte): /tmp/salsa-ultra/audit/BACKLOG.md.
+  Offen u.a.: Schnupper-Erfolgsscreen mit Folge-CTA (M), Eventkalender ohne Datum (S),
+  gemeinsame Tagesleisten-Komponente (M), /en-Routen (L). Preis im Funnel bleibt laut
+  Raphael-Entscheid draußen — Audit-Punkt 2/3 dazu NICHT umsetzen.
+- **Hinweis Studio-Postfach:** Der Live-Audit hat 1 Test-Reservierung + 1 Test-Anfrage
+  („QA-Test", qa-test@example.com) ausgelöst — ignorieren.
+
+## ERLEDIGT (frühere Runde 13.08.)
 
 ### Reservierung laeuft (der Kern dieser Runde)
 
