@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 const COPY = {
   de: {
     title: 'Vom ersten Grundschritt zur sicheren Tanzfläche.',
-    lead: 'Unsere Kurse sind klar aufgebaut. Du lernst Schritt für Schritt und wächst in dein nächstes Level hinein.',
+    lead: 'Unsere Kurse sind so aufgebaut, dass du Schritt für Schritt in dein nächstes Level wächst.',
     levels: [
       ['Beginner Stufe 1 bis 6', 'Rhythmus, Grundschritte, Drehungen und die wichtigsten Signale im Paartanz.'],
       ['Beginner Flow', 'Beginner-Inhalte verbinden, Timing festigen und freier tanzen.'],
