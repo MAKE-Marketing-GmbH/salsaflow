@@ -140,6 +140,27 @@ body {
   transition-timing-function: var(--ease-sf);
 }
 
+/* Unterstrich, der beim Hover von links einfaehrt. Asymmetrisch: der Eintritt ist schnell
+   (der Zeiger ist da, die Reaktion soll sofort kommen), der Austritt laeuft weicher aus.
+   Ein Wert fuer beide Richtungen wirkt entweder traege beim Kommen oder abgehackt beim Gehen. */
+.t-underline {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-sf);
+}
+
+.group:hover .t-underline {
+  transform: scaleX(1);
+  transition-duration: var(--dur-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-underline {
+    transform: scaleX(1);
+    transition: none;
+  }
+}
+
 /* Fuer Elemente, die sich beim Hover zusaetzlich bewegen (Karten, Pfeile). */
 .t-hover-move {
   transition-property: color, background-color, border-color, transform, opacity, box-shadow;

@@ -12,13 +12,14 @@ import { ArrowRight } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import { Eyebrow, Shell } from '@/public/site/primitives';
-import { Reveal, useReveal, EASE_OUT, VIEWPORT } from '@/public/home/motion';
+import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
 import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
 export function EventsTeaser() {
   const { lang } = useLang();
   const reduced = useReducedMotion();
+  const hydrated = useHydrated();
   const e = HOME[lang].events;
   const { item } = useReveal();
 
@@ -55,7 +56,7 @@ export function EventsTeaser() {
         <motion.div
           data-reveal
           className="order-2 lg:order-1"
-          initial={{ opacity: 0, y: reduced ? 0 : 16 }}
+          initial={hydrated ? { opacity: 0, y: reduced ? 0 : 16 } : false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={VIEWPORT}
           transition={{ duration: reduced ? 0.32 : 0.55, ease: EASE_OUT }}

@@ -139,7 +139,7 @@ export function CtaPill({
         'group inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full',
         'border border-[var(--color-salsa)] bg-[var(--color-salsa)] px-7 py-3.5',
         'text-base font-semibold text-white',
-        'transition-colors duration-200 hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)]',
+        'transition-colors duration-[var(--dur-fast)] ease-out hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
         onNight
           ? 'focus-visible:ring-white focus-visible:ring-offset-[var(--color-surface-dark)]'
@@ -197,8 +197,8 @@ export function CtaText({
         <span
           aria-hidden
           className={cn(
-            'absolute -bottom-0.5 left-0 block h-px w-full origin-left transition-transform duration-[var(--dur-base)] ease-out',
-            'motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100',
+            'absolute -bottom-0.5 left-0 block h-px w-full',
+            't-underline',
             onNight ? 'bg-white' : 'bg-[var(--color-salsa)]',
           )}
         />

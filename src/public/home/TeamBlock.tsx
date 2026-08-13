@@ -27,7 +27,7 @@ import { useLang } from '@/lib/i18n';
 import { HOME_V3 } from '@/public/home/content-v3';
 import { FounderCards } from '@/public/team/FounderRow';
 import { Eyebrow, Shell, BeatMark, CtaArrow } from '@/public/site/primitives';
-import { Reveal, useReveal, EASE_OUT, VIEWPORT } from '@/public/home/motion';
+import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
 import { MEASURE_L } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
@@ -47,8 +47,9 @@ export function TeamBlock() {
   const { item } = useReveal();
 
   // Bild-Reveal: Fade + leichter Anstieg + minimales Grosswerden (wie im Hero-Anker).
+  const hydrated = useHydrated();
   const imgReveal: Variants = {
-    hidden: { opacity: 0, y: reduced ? 0 : 20, scale: reduced ? 1 : 0.99 },
+    hidden: hydrated ? { opacity: 0, y: reduced ? 0 : 20, scale: reduced ? 1 : 0.99 } : { opacity: 1, y: 0, scale: 1 },
     show: { opacity: 1, y: 0, scale: 1, transition: { duration: reduced ? 0.3 : 0.7, ease: EASE_OUT } },
   };
 

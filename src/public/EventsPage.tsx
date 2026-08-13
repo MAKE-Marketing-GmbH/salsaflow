@@ -17,7 +17,7 @@ import { SiteFooter, CONTACT } from '@/public/site/SiteFooter';
 import { cn } from '@/lib/utils';
 import { Eyebrow, Shell, CtaText, sectionTitle, sectionLead } from '@/public/site/primitives';
 import { ClosingInvite, MEASURE_L, HeroFrame } from '@/public/subpage/kit';
-import { Reveal, useReveal, EASE_OUT, VIEWPORT } from '@/public/home/motion';
+import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
 import { EVENTS, EVENTFROG_URL, type EventFact } from '@/public/events/content';
 
 // Icon-System fuer die drei Anniversary-Highlights (einmal im Jahr -> Workshops & Partys -> Community).
@@ -51,11 +51,12 @@ export function EventsPage() {
    `data-reveal` erzwingt Sichtbarkeit im statischen Screenshot-Tool. */
 function PhotoFade({ children, className }: { children: ReactNode; className?: string }) {
   const reduced = useReducedMotion();
+  const hydrated = useHydrated();
   return (
     <motion.div
       data-reveal
       className={className}
-      initial={{ opacity: 0, y: reduced ? 0 : 16 }}
+      initial={hydrated ? { opacity: 0, y: reduced ? 0 : 16 } : false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={VIEWPORT}
       transition={{ duration: reduced ? 0.32 : 0.55, ease: EASE_OUT }}

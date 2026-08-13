@@ -325,7 +325,7 @@ function StylesSection() {
                     {/* Rot-Kante faehrt beim Hover ein — dieselbe Micro-Interaction wie auf der Home. */}
                     <span
                       aria-hidden
-                      className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-[var(--color-salsa)] transition-transform duration-[var(--dur-base)] ease-out motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100"
+                      className="t-underline absolute inset-x-0 bottom-0 h-[3px] bg-[var(--color-salsa)]"
                     />
                   </a>
                   <div className={cn('flex flex-col justify-center py-12', flip && 'lg:order-1')}>

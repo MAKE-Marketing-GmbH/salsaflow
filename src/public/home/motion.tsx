@@ -12,9 +12,29 @@
 // opacity, Eingang 0.4-0.7s, once:true, Distanzen <= 24px, Easing ease.out [0.22,1,0.36,1].
 
 import { motion, useReducedMotion, useInView, type Variants } from 'framer-motion';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 export const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+
+/**
+ * Laeuft der Code schon im Browser?
+ *
+ * Der Grund fuer diesen Haken: Die Reveal-Varianten starten bei `opacity: 0`. Beim Prerender
+ * landet dieser Startwert als Inline-Stil im ausgelieferten HTML — auf der Startseite 47 Mal,
+ * darunter die H1 und der Haupt-CTA. Wer die Seite ohne JavaScript oeffnet, oder bevor das
+ * Bundle da ist, sieht eine leere Flaeche.
+ *
+ * `useSyncExternalStore` gibt auf dem Server false und im Browser true. Damit rendert der
+ * Server den sichtbaren Endzustand, und die Animation zuendet erst nach der Hydration.
+ */
+const emptySubscribe = () => () => {};
+export function useHydrated() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+}
 // Geil-Pass 2026-07-07: -8% statt -12%, damit Reveals frueher zuenden und nicht
 // mitten im Scroll-Glide "nachschwimmen".
 export const VIEWPORT = { once: true, margin: '-8% 0px' } as const;
@@ -24,6 +44,7 @@ export const VIEWPORT = { once: true, margin: '-8% 0px' } as const;
  *  EIN Takt fuer die ganze Seite (Geil-Pass): 14px, 0.45s, Stagger 0.07. */
 export function useReveal(opts?: { stagger?: number; distance?: number; duration?: number }) {
   const reduced = useReducedMotion();
+  const hydrated = useHydrated();
   const stagger = opts?.stagger ?? 0.07;
   const distance = opts?.distance ?? 14;
   const duration = opts?.duration ?? 0.45;
@@ -32,10 +53,12 @@ export function useReveal(opts?: { stagger?: number; distance?: number; duration
     show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.03 } },
   };
   const item: Variants = {
-    hidden: { opacity: 0, y: reduced ? 0 : distance },
+    // Vor der Hydration ist `hidden` der Endzustand. Sonst schreibt der Prerender
+    // opacity:0 ins HTML und die Seite bleibt ohne JavaScript leer.
+    hidden: hydrated ? { opacity: 0, y: reduced ? 0 : distance } : { opacity: 1, y: 0 },
     show: { opacity: 1, y: 0, transition: { duration: reduced ? 0.3 : duration, ease: EASE_OUT } },
   };
-  return { container, item, reduced };
+  return { container, item, reduced, hydrated };
 }
 
 /** Standard-Reveal-Gruppe (motion.div). Kinder mit `variants={item}` steigen gestaffelt ein. */

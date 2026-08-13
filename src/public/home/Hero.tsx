@@ -79,13 +79,14 @@ import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 import { CtaPill, CtaText, StarRating } from '@/public/site/primitives';
-import { EASE_OUT } from '@/public/home/motion';
+import { EASE_OUT, useHydrated } from '@/public/home/motion';
 import { MEASURE_XL } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
 export function Hero() {
   const { lang } = useLang();
   const reduced = useReducedMotion();
+  const hydrated = useHydrated();
   const h = HOME[lang].hero;
   const cta = HOME[lang].cta;
   const de = lang === 'de';
@@ -94,8 +95,10 @@ export function Hero() {
     hidden: {},
     show: { transition: { staggerChildren: reduced ? 0 : 0.08, delayChildren: reduced ? 0 : 0.05 } },
   };
+  // Vor der Hydration ist `hidden` der sichtbare Endzustand. Sonst schreibt der Prerender
+  // opacity:0 in die H1 des Folds, und wer ohne JavaScript kommt, sieht eine leere Seite.
   const item: Variants = {
-    hidden: { opacity: 0, y: reduced ? 0 : 14 },
+    hidden: hydrated ? { opacity: 0, y: reduced ? 0 : 14 } : { opacity: 1, y: 0 },
     show: { opacity: 1, y: 0, transition: { duration: reduced ? 0.3 : 0.5, ease: EASE_OUT } },
   };
   // Das Foto darf NICHT mit `item` reinfahren. Gemessen (scripts/r1-hero-probe.cjs, 390x844):
@@ -105,7 +108,7 @@ export function Hero() {
   // fiel derselbe Versatz nicht auf, da das Bild mitten im Fluss sass. Reveal daher rein ueber
   // die Deckkraft — dieselbe Signatur, nur ohne Versatz.
   const photoItem: Variants = {
-    hidden: { opacity: 0 },
+    hidden: hydrated ? { opacity: 0 } : { opacity: 1 },
     show: { opacity: 1, transition: { duration: reduced ? 0.3 : 0.6, ease: EASE_OUT } },
   };
 

@@ -25,7 +25,7 @@ import { ClosingInvite, MEASURE_L, HeroFrame, GhostCta, PrimaryCta, SCHNUPPER_HR
 import { TEAM, FACES, FOUNDERS, founderRole } from '@/public/team/content';
 import { WALL_REVIEWS, localizeReview } from '@/public/site/reviews';
 import { fetchSchedule, WEEKDAY_ORDER, type ScheduleCourse, type WeekdayKey } from '@/lib/schedule';
-import { Reveal, useReveal, EASE_OUT, VIEWPORT } from '@/public/home/motion';
+import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
 
 /** Der Cookie-Hinweis ist `position: fixed` und nimmt keinen Platz im Dokument ein — die
  *  untersten ~58px der Seite waren dadurch an keiner Scrollposition frei (Kritiker-Runde 3:
@@ -355,8 +355,9 @@ function StorySection() {
   const storyNote =
     lang === 'de' ? 'Du gehörst vom ersten Abend an dazu.' : 'You belong from your very first evening.';
 
+  const hydrated = useHydrated();
   const imgReveal: Variants = {
-    hidden: { opacity: 0, y: reduced ? 0 : 20, scale: reduced ? 1 : 0.99 },
+    hidden: hydrated ? { opacity: 0, y: reduced ? 0 : 20, scale: reduced ? 1 : 0.99 } : { opacity: 1, y: 0, scale: 1 },
     show: { opacity: 1, y: 0, scale: 1, transition: { duration: reduced ? 0.3 : 0.7, ease: EASE_OUT } },
   };
 
@@ -552,8 +553,9 @@ function RolesSection() {
       ? { title: 'Viele Rollen, ein gemeinsamer Kursabend.', alt: 'Salsaflow Kursgruppe im hellen Studio' }
       : { title: 'Many roles, one shared class evening.', alt: 'Salsaflow class group in the studio' };
 
+  const hydrated = useHydrated();
   const imgReveal: Variants = {
-    hidden: { opacity: 0, y: reduced ? 0 : 18, scale: reduced ? 1 : 0.99 },
+    hidden: hydrated ? { opacity: 0, y: reduced ? 0 : 18, scale: reduced ? 1 : 0.99 } : { opacity: 1, y: 0, scale: 1 },
     show: { opacity: 1, y: 0, scale: 1, transition: { duration: reduced ? 0.3 : 0.65, ease: EASE_OUT } },
   };
 

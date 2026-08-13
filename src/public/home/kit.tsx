@@ -24,6 +24,7 @@ import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Shell } from '@/public/site/primitives';
+import { useHydrated } from '@/public/home/motion';
 
 /** Flaechen der Home = dieselben wie auf allen Unterseiten. */
 export const PAPER = 'bg-[var(--color-paper-warm)]';
@@ -156,12 +157,15 @@ export function Rise({
   as?: 'div' | 'li' | 'section';
 }) {
   const reduced = useReducedMotion();
+  const hydrated = useHydrated();
   const M = as === 'li' ? motion.li : as === 'section' ? motion.section : motion.div;
   return (
     <M
       data-reveal
       className={className}
-      initial={{ opacity: 0, y: reduced ? 0 : 16 }}
+      // Vor der Hydration sichtbar starten: sonst schreibt der Prerender opacity:0 ins HTML
+      // und der Inhalt bleibt weg, solange das Bundle nicht laeuft.
+      initial={hydrated ? { opacity: 0, y: reduced ? 0 : 16 } : false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-8% 0px' }}
       transition={{ duration: reduced ? 0.3 : 0.6, delay: reduced ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}
@@ -225,7 +229,9 @@ export function BtnPrimary({
       href={href}
       className={cn(
         'inline-flex h-[52px] items-center justify-center rounded-full bg-[var(--color-salsa)] px-8 text-base font-semibold text-white',
-        'transition-colors duration-200 hover:bg-[var(--color-salsa-500)]',
+        // salsa-700 statt salsa-500: Der zweite Primaerknopf (CtaPill in site/primitives.tsx)
+        // dunkelt beim Hover. Dieser hellte auf. Zwei Richtungen fuer dieselbe Geste.
+        'transition-colors duration-[var(--dur-fast)] ease-out hover:bg-[var(--color-salsa-700)]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
         onNight
           ? 'focus-visible:ring-white focus-visible:ring-offset-[var(--color-surface-dark)]'
@@ -266,7 +272,7 @@ export function BtnLink({
         {children}
         <span
           aria-hidden
-          className="absolute -bottom-1 left-0 block h-px w-full origin-left scale-x-100 bg-[var(--color-salsa)] transition-transform duration-[var(--dur-base)] ease-out motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100"
+          className="t-underline absolute -bottom-1 left-0 block h-px w-full bg-[var(--color-salsa)]"
         />
       </span>
     </a>
