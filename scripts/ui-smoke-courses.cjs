@@ -24,22 +24,23 @@ function ok(name, cond, detail = '') {
 
   try {
     await page.goto(BASE, { waitUntil: 'networkidle' });
-    await page.getByRole('heading', { name: /Such dir deinen Tanz/i }).waitFor({ timeout: 10000 });
+    await page.getByRole('heading', { name: /Finde den Kurs/i }).waitFor({ timeout: 10000 });
     const bodyDe = await page.locator('body').innerText();
     await page.screenshot({ path: `${SHOTS}/01-desktop-de.png`, fullPage: true });
 
-    ok('Tanzkurse-Seite sichtbar', bodyDe.includes('Such dir deinen Tanz'));
+    ok('Tanzkurse-Seite sichtbar', bodyDe.includes('Finde den Kurs'));
     ok('Drei Stile sichtbar', ['Salsa', 'Bachata', 'Heels'].every((x) => bodyDe.includes(x)));
     ok('Levels-Erklaerung vorhanden', bodyDe.includes('Beginner') && bodyDe.includes('Intermediate') && bodyDe.includes('Advanced'));
     ok('Beginner Flow + Intermediate Flow erklaert', bodyDe.includes('Beginner Flow') && bodyDe.includes('Intermediate Flow'));
     ok('Schnupperstunde-Sektion vorhanden', bodyDe.includes('Schnupperstunde') && bodyDe.toLowerCase().includes('gratis'));
     ok('Sommerkurse-Sektion vorhanden', bodyDe.includes('Sommerkurse'));
-    ok('Preise sichtbar (Kundenwunsch)', bodyDe.includes('190 CHF') && bodyDe.includes('100 CHF') && bodyDe.includes('600 CHF'));
+    ok('Preise sichtbar (Kundenwunsch)', bodyDe.includes('CHF 190') && bodyDe.includes('CHF 100') && bodyDe.includes('CHF 600'));
     ok('Kursplan-Teaser statt voller Engine', (await page.locator('[data-testid="course-card"]').count()) === 0);
     ok('CTA zum vollen Kursplan vorhanden', (await page.locator('a[href="/kursplan"]').count()) >= 1);
-    ok('Echte Umlaute im DE', bodyDe.includes('Blöcken') && bodyDe.includes('möglich') && !bodyDe.includes('Bloecken'));
+    ok('Echte Umlaute im DE', bodyDe.includes('möglich') && !bodyDe.includes('moeglich'));
 
-    await page.locator('header [data-testid="lang-en"]').click();
+    // .first(): der Sprachschalter steht doppelt im DOM (Desktop-Header + Mobile-Navigation).
+    await page.locator('header [data-testid="lang-en"]').first().click();
     await page.waitForTimeout(400);
     const bodyEn = await page.locator('body').innerText();
     await page.screenshot({ path: `${SHOTS}/02-desktop-en.png`, fullPage: true });

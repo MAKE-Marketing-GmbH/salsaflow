@@ -68,7 +68,7 @@ export function createContactRoutes() {
       // Die Zod-Fehlerliste bleibt im Log. Nach aussen ging sie vorher mit: Feldnamen, Typen,
       // Grenzwerte — und darunter der Honeypot-Feldname. Ein Bot baute sich daraus mit einem
       // einzigen leeren POST die perfekte Nutzlast. Das Formular kennt seine eigenen Regeln.
-      console.error('[contact] ungueltige Eingabe', parsed.error.issues);
+      console.error('[contact] ungültige Eingabe', parsed.error.issues);
       return c.json({ error: 'Ungültige Eingabe' }, 400);
     }
     const d = parsed.data;
