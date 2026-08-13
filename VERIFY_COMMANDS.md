@@ -27,7 +27,8 @@ Danach:
 ```bash
 node scripts/ui-smoke-public.cjs
 node scripts/ui-smoke-courses.cjs
-node scripts/ui-smoke-booking.cjs
+# Reservierungs-Flow (13.08.2026): Origin des laufenden Vite-Servers mitgeben.
+SMOKE_ORIGIN=http://127.0.0.1:5174 node scripts/ui-smoke-booking.cjs
 node scripts/ui-smoke-contact.cjs
 ```
 
