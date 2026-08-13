@@ -353,7 +353,9 @@ function Funnel() {
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                                <span className="truncate font-display text-sm font-bold text-[var(--color-ink)] sm:text-base">{style}</span>
+                                {/* Kein truncate: lange Stilnamen ("Bodymovement & Ladystyle") brechen um,
+                                    statt bei 390px mit … abzuschneiden (Critic 13.08.2026). */}
+                                <span className="min-w-0 font-display text-sm font-bold text-[var(--color-ink)] sm:text-base">{style}</span>
                                 {level && (
                                   <span className="shrink-0 rounded-full bg-[var(--color-bg-soft)] px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--color-ink-muted)]">
                                     {level}
@@ -370,7 +372,7 @@ function Funnel() {
                             <div className="shrink-0 text-right">
                               <span
                                 className={cn(
-                                  'block rounded-full px-2.5 py-1 text-[0.65rem] font-bold sm:px-3 sm:text-xs',
+                                  'inline-flex min-h-11 items-center rounded-full px-2.5 py-1 text-[0.65rem] font-bold sm:px-3 sm:text-xs',
                                   full ? 'bg-amber-100 text-amber-800' : 'bg-[var(--color-salsa-50)] text-[var(--color-salsa)]',
                                 )}
                               >
@@ -415,7 +417,8 @@ function Funnel() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                          <span className="truncate font-display text-base font-bold text-[var(--color-ink)]">{style}</span>
+                          {/* Kein truncate: lange Stilnamen brechen um statt mit … (Critic 13.08.2026). */}
+                          <span className="min-w-0 font-display text-base font-bold text-[var(--color-ink)]">{style}</span>
                           {level && (
                             <span className="shrink-0 rounded-full bg-[var(--color-bg-soft)] px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--color-ink-muted)]">
                               {level}
@@ -432,7 +435,7 @@ function Funnel() {
                       <div className="shrink-0 text-right">
                         <span
                           className={cn(
-                            'block rounded-full px-3 py-1 text-xs font-bold',
+                            'inline-flex min-h-11 items-center rounded-full px-3 py-1 text-xs font-bold',
                             full ? 'bg-amber-100 text-amber-800' : 'bg-[var(--color-salsa-50)] text-[var(--color-salsa)]',
                           )}
                         >
