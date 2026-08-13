@@ -242,11 +242,13 @@ function LocationSection() {
         <Reveal>
           <motion.div variants={item} className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.08)]">
             {/* Hochformat-Foto (1066x1600) im Querformat-Crop: object-top haelt die Koepfe
-                im Bild, object-center schnitt sie ab (Critic 13.08.2026). */}
+                im Bild, object-center schnitt sie ab. 68% statt center horizontal: am linken
+                Rahmen wurde sonst der Frauenkopf angeschnitten — Crop auf den mittleren
+                Taenzer (Critic 13.08.2026). */}
             <img
               src="/photos/gallery/kurse/06.jpg"
               alt={l.imageAlt}
-              className="aspect-[3/2] w-full object-cover object-top sm:aspect-[4/3]"
+              className="aspect-[3/2] w-full object-cover object-[68%_top] sm:aspect-[4/3]"
               width={1066}
               height={1600}
               loading="eager"
@@ -316,19 +318,23 @@ function RentalSection({ onRequestRoom }: { onRequestRoom: () => void }) {
 
               <div className="relative overflow-hidden bg-[var(--color-paper-warm)] lg:min-h-[28rem] lg:bg-[var(--color-ink)]">
                 <img
-                  src="/photos/gallery/danceflow/05.jpg"
-                  alt={lang === 'de' ? 'Stimmungsvolle Danceflow Night bei Salsaflow' : 'Atmospheric Danceflow Night at Salsaflow'}
-                  // Kritiker final-2, Issue 6 (schwerster Fall auf /kontakt). Datei 1066x1600,
-                  // Rahmen ~740x448: skaliert 740x1111, 663px Hoehe fallen weg. Bei 42% lagen
-                  // 278px oben — der Kopf der Taenzerin lag KOMPLETT ausserhalb, im Rahmen stand
-                  // nur noch Hals und Schulter. Bei 12% (80px oben) ist das Gesicht ganz im Bild.
-                  className="aspect-[4/3] w-full object-cover object-[center_12%] opacity-92 lg:absolute lg:inset-0 lg:h-full lg:aspect-auto"
+                  src="/photos/schedule/kurs-aktion.webp"
+                  alt={lang === 'de'
+                    ? 'Heller Tanzraum mit Spiegelwand und Holzboden im Salsaflow Studio'
+                    : 'Bright dance room with mirror wall and wooden floor at the Salsaflow studio'}
+                  // Raumvermietung zeigt den RAUM: vorher lag hier danceflow/05.jpg, ein
+                  // dunkles Party-Close-up (Critic 13.08.2026). kurs-aktion.webp ist der
+                  // helle Tanzraum mit Spiegelwand — zweite Nutzung neben /kursplan,
+                  // sitewide-Limit 2 eingehalten. 25%: Kopfreihe bleibt im Bild.
+                  className="aspect-[4/3] w-full object-cover object-[center_25%] opacity-92 lg:absolute lg:inset-0 lg:h-full lg:aspect-auto"
                   width={1600}
-                  height={1067}
+                  height={1065}
                   loading="lazy"
                 />
                 <div aria-hidden className="absolute inset-0 hidden bg-gradient-to-t from-black/72 via-black/8 to-transparent lg:block" />
-                <div className="relative m-5 rounded-[var(--radius-media)] bg-white p-5 text-[var(--color-ink)] lg:absolute lg:bottom-5 lg:right-5 lg:m-0 lg:max-w-[25rem] lg:bg-white/92 lg:shadow-xl lg:backdrop-blur">
+                {/* Festes Papier statt Glas auf dem Foto — wie bei der Standort-Karte
+                    (Critic 13.08.2026). */}
+                <div className="relative m-5 rounded-[var(--radius-media)] bg-[var(--color-paper-warm)] p-5 text-[var(--color-ink)] lg:absolute lg:bottom-5 lg:right-5 lg:m-0 lg:max-w-[25rem] lg:shadow-xl">
                   <p className="text-[12px] font-bold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
                     {lang === 'de' ? 'Direkt am Bahnhof SBB' : 'By Basel SBB station'}
                   </p>

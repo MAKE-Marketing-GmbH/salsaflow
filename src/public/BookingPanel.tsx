@@ -44,10 +44,10 @@ const FUNNEL = {
   de: {
     pickDay: 'Wähle deinen Tag',
     noCoursesDay: 'An diesem Tag läuft gerade kein Kurs.',
-    noCoursesHint: 'Wähl einen anderen Tag oben — oder spring direkt zu den nächsten Terminen.',
+    noCoursesHint: 'Wähl einen anderen Tag oben. Oder spring direkt zu den nächsten Terminen.',
     nextDayWithCourses: 'Nächster Tag mit Kursen',
     nextSlotsTitle: 'Nächste Termine für dich',
-    nextSlotsHint: 'Direkt buchen — ohne Tag zu wechseln.',
+    nextSlotsHint: 'Direkt buchen, ohne Tag zu wechseln.',
     trustSolo: 'Auch ohne Tanzpartner willkommen',
     trustStudios: '3 Studios am Bahnhof Basel SBB',
     trustTrial: 'Gratis Schnupperstunde möglich',
@@ -59,16 +59,16 @@ const FUNNEL = {
     changeCourse: 'Anderen Kurs wählen',
     loadPlan: 'Kursplan wird geladen …',
     planError: 'Der Kursplan konnte nicht geladen werden.',
-    emptyWeek: 'In dieser Woche ist alles ausgebucht — schau auf einen anderen Tag oder schreib uns kurz.',
+    emptyWeek: 'In dieser Woche ist alles ausgebucht. Schau auf einen anderen Tag oder schreib uns kurz.',
     today: 'heute',
   },
   en: {
     pickDay: 'Pick your day',
     noCoursesDay: 'No class runs on this day right now.',
-    noCoursesHint: 'Pick another day above — or jump straight to the next openings.',
+    noCoursesHint: 'Pick another day above. Or jump straight to the next openings.',
     nextDayWithCourses: 'Next day with classes',
     nextSlotsTitle: 'Next openings for you',
-    nextSlotsHint: 'Book directly — no day switch needed.',
+    nextSlotsHint: 'Book directly, no day switch needed.',
     trustSolo: 'Welcome without a dance partner',
     trustStudios: '3 studios at Basel SBB station',
     trustTrial: 'Free trial class available',
@@ -80,7 +80,7 @@ const FUNNEL = {
     changeCourse: 'Pick another class',
     loadPlan: 'Loading the schedule …',
     planError: 'The schedule could not be loaded.',
-    emptyWeek: 'Everything is booked this week — try another day or drop us a line.',
+    emptyWeek: 'Everything is booked this week. Try another day or drop us a line.',
     today: 'today',
   },
 } as const;
@@ -792,8 +792,8 @@ function BookingForm({
                         return (
                           <span className="mt-0.5 block font-medium text-[var(--color-salsa)]">
                             {course.allowsLateEntry
-                              ? (lang === 'de' ? `Staffel läuft — Quereinstieg möglich, ${leftLabel}.` : `Term is running — late entry possible, ${leftLabel}.`)
-                              : (lang === 'de' ? `Staffel läuft — ${leftLabel}. Schreib uns für deinen Einstieg.` : `Term is running — ${leftLabel}. Contact us to join.`)}
+                              ? (lang === 'de' ? `Staffel läuft. Quereinstieg möglich, ${leftLabel}.` : `Term is running. Late entry possible, ${leftLabel}.`)
+                              : (lang === 'de' ? `Staffel läuft, ${leftLabel}. Schreib uns für deinen Einstieg.` : `Term is running, ${leftLabel}. Contact us to join.`)}
                           </span>
                         );
                       })()}

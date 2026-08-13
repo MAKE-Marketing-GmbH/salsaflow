@@ -684,7 +684,10 @@ function TeacherPortrait({
               src={portrait.src}
               alt=""
               loading="lazy"
-              className={cn('h-full w-full', portrait.named ? 'object-contain object-top' : 'object-cover')}
+              // object-cover statt contain: die Freisteller sind Ganzkoerper-Fotos —
+              // contain steckte Mini-Figuren in die 48x56-Kachel, cover+top zeigt das
+              // Gesicht (Critic 13.08.2026).
+              className={cn('h-full w-full object-cover', portrait.named && 'object-top')}
             />
           </span>
         );
