@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { Hono } from 'hono';
 import { handle } from 'hono/vercel';
 import { createContactRoutes } from '../server/contact-routes.js';
+import { createReservationRoutes } from '../server/reservation-routes.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const schedulePath = resolve(here, '../db/seed/public-schedule.json');
@@ -26,7 +27,9 @@ async function currentSchedule() {
   const courses = source.courses
     .filter((course: { termId: string }) => termPhase.has(course.termId))
     .map((course: { termId: string }) => ({ ...course, phase: termPhase.get(course.termId) }));
-  return { ...source, today, terms, courses, bookingEnabled: false };
+  // bookingEnabled bleibt false: es gibt keinen Kauf. reservationEnabled ist der Weg,
+  // den der Funnel unter /buchung geht — Platz melden, zahlen vor Ort.
+  return { ...source, today, terms, courses, bookingEnabled: false, reservationEnabled: true };
 }
 
 const app = new Hono();
@@ -37,6 +40,7 @@ app.get('/api/health', (c) =>
     service: 'salsaflow-dc-api',
     mode: 'vercel-static',
     bookingEnabled: false,
+    reservationEnabled: true,
     contactConfigured: Boolean(process.env.RESEND_API_KEY?.trim()),
   }),
 );
@@ -44,12 +48,15 @@ app.get('/api/health', (c) =>
 app.get('/api/public/schedule', async (c) => c.json(await currentSchedule()));
 
 app.route('/', createContactRoutes());
+app.route('/', createReservationRoutes(async () => (await schedulePromise) as { courses: [] }));
 
+// Alles Uebrige unter /api ist Kauf-/Admin-Mechanik und braucht eine Datenbank.
+// Die gibt es hier nicht. Ehrliche 503 statt stiller Fehler.
 app.all('/api/*', (c) =>
   c.json(
     {
-      error: 'Diese Website nimmt Kursbuchungen aktuell über das Kontaktformular an.',
-      detail: 'Die direkte Buchung braucht eine dauerhaft verbundene Postgres-Datenbank.',
+      error: 'Dieser Weg ist auf dieser Website nicht offen.',
+      detail: 'Kursplätze laufen über die Reservierung, alles andere über das Kontaktformular.',
     },
     503,
   ),

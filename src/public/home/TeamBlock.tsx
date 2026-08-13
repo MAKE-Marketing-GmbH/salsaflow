@@ -208,7 +208,7 @@ export function TeamBlock() {
             className="group mt-8 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--color-ink)] underline decoration-[var(--color-salsa)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--color-salsa)]"
           >
             {t.teamLink}
-            <CtaArrow className="transition-transform motion-safe:group-hover:translate-x-0.5" />
+            <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
           </a>
         </div>
       </Shell>

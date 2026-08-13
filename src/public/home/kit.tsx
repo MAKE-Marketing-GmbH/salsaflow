@@ -266,7 +266,7 @@ export function BtnLink({
         {children}
         <span
           aria-hidden
-          className="absolute -bottom-1 left-0 block h-px w-full origin-left scale-x-100 bg-[var(--color-salsa)] transition-transform duration-300 motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100"
+          className="absolute -bottom-1 left-0 block h-px w-full origin-left scale-x-100 bg-[var(--color-salsa)] transition-transform duration-[var(--dur-base)] ease-out motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100"
         />
       </span>
     </a>

@@ -133,7 +133,7 @@ export function EventsTeaser() {
                 size={18}
                 strokeWidth={2.25}
                 aria-hidden
-                className="transition-transform motion-safe:group-hover:translate-x-0.5"
+                className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5"
               />
             </a>
             <span className="text-sm font-semibold text-white/65">{priceNote}</span>

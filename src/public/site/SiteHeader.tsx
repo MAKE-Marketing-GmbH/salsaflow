@@ -251,7 +251,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
                     onClick={() => setOpenGroup((v) => (v === item.href ? null : item.href))}
                     aria-expanded={openGroup === item.href}
                     className={cn(
-                      't-acc-head rounded-[var(--radius-chip)] px-3 py-2.5 text-base font-medium hover:bg-[var(--color-bg-soft)]',
+                      't-acc-head t-hover rounded-[var(--radius-chip)] px-3 py-2.5 text-base font-medium hover:bg-[var(--color-bg-soft)]',
                       groupActive(item) ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
                     )}
                   >
@@ -276,7 +276,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
                           onClick={closeMenu}
                           aria-current={leafActive(ch.href) ? 'page' : undefined}
                           className={cn(
-                            'flex min-h-11 items-center rounded-[var(--radius-chip)] px-2 py-2 text-[0.95rem] font-medium hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]',
+                            't-hover flex min-h-11 items-center rounded-[var(--radius-chip)] px-2 py-2 text-[0.95rem] font-medium hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]',
                             leafActive(ch.href)
                               ? 'bg-[var(--color-bg-soft)] text-[var(--color-salsa)]'
                               : 'text-[var(--color-ink-muted)]',
@@ -335,7 +335,7 @@ function DesktopLink({ item, active }: { item: Leaf; active: boolean }) {
     <a
       href={item.href}
       aria-current={active ? 'page' : undefined}
-      className="relative py-1 text-sm font-medium text-[var(--color-ink)] hover:text-[var(--color-salsa)]"
+      className="t-hover relative py-1 text-sm font-medium text-[var(--color-ink)] hover:text-[var(--color-salsa)]"
     >
       {item.label}
       {active && (
@@ -451,6 +451,7 @@ function DesktopDropdown({
         }}
         className={cn(
           'relative inline-flex items-center gap-1 py-1 text-sm font-medium transition-colors',
+          't-hover',
           active || open ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)] hover:text-[var(--color-salsa)]',
         )}
       >
@@ -507,7 +508,7 @@ function MobileLink({ item, active, onClick }: { item: Leaf; active: boolean; on
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
       className={cn(
-        'flex min-h-11 items-center rounded-[var(--radius-chip)] px-2 py-2.5 text-base font-medium hover:bg-[var(--color-bg-soft)]',
+        't-hover flex min-h-11 items-center rounded-[var(--radius-chip)] px-2 py-2.5 text-base font-medium hover:bg-[var(--color-bg-soft)]',
         active ? 'bg-[var(--color-bg-soft)] text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
       )}
     >
@@ -540,7 +541,7 @@ function LangToggle({
             'inline-flex h-9 min-w-10 items-center justify-center rounded-full px-2.5 uppercase transition-colors',
             lang === l
               ? 'bg-[var(--color-ink)] text-white'
-              : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]',
+              : 't-hover text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]',
           )}
         >
           {l}

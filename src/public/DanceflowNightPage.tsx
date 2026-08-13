@@ -182,7 +182,7 @@ function WhySection({ c }: { c: DanceflowContent }) {
                 className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {w.cta.label}
-                <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
               </a>
             </motion.div>
           </Reveal>
@@ -226,7 +226,7 @@ function FlowSection({ c }: { c: DanceflowContent }) {
               className="group mt-8 inline-flex items-center gap-1.5 rounded-full bg-white px-6 py-3 text-sm font-bold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-salsa)] hover:text-white"
             >
               {f.cta.label}
-              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </a>
           </motion.div>
           <motion.div variants={item} className="overflow-hidden rounded-[var(--radius-media)] ring-1 ring-white/10 lg:sticky lg:top-28">
@@ -323,7 +323,7 @@ function PriceSection({ c }: { c: DanceflowContent }) {
               className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {p.cta.label}
-              <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>

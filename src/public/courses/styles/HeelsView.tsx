@@ -116,7 +116,7 @@ function MythSection({ c }: { c: C }) {
               className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {m.cta.label}
-              <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -205,7 +205,7 @@ function ShoesSection({ c }: { c: C }) {
                 className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {s.cta.label}
-                <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
               </a>
             </motion.div>
           </Reveal>

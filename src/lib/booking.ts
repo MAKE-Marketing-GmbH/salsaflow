@@ -1,20 +1,18 @@
-// Client-Typen + Fetch fuer die oeffentliche Buchung (Etappe 8). Spiegel von
-// server/booking-routes.ts. Keine Personenbezuege in der Verfuegbarkeit.
-// Preise duerfen seit dem Beschluss 2026-07-21 im Buchungsschritt gezeigt werden
-// (nicht auf der Kurs-Karte — die bleibt preislos).
+// Client-Typen + Fetch fuer die Reservierung unter /buchung.
+//
+// Beschluss 13.08.2026: Die Website verkauft nicht. Sie nimmt eine Reservierung entgegen.
+// Darum gibt es hier keine Preise, keine Tarife und keine Platzzahlen mehr. Eine Reservierung
+// erzeugt eine Mail an das Studio; bezahlt wird vor Ort. Spiegel von server/reservation-routes.ts.
 
 import { api } from './api';
 
 export type CourseAvailability = {
   courseId: string;
-  bookingType: 'leader_follower' | 'open';
+  mode: 'reservation';
+  /** Reservieren geht immer — auch bei vollem Kurs, dann als Warteliste. */
   bookable: boolean;
-  freeLeader: number;
-  freeFollower: number;
-  freeOpen: number;
-  capacity: number;
-  free: number;
-  tariffs: { key: string; nameDe: string; nameEn: string; seats: number; amountChf: string | null }[];
+  full: boolean;
+  status: string;
 };
 
 export type BookingPerson = { firstName: string; lastName: string; email: string; phone?: string };
@@ -25,19 +23,15 @@ export type CreateBookingInput = {
   mode: 'solo' | 'couple';
   participant: BookingPerson;
   partner?: BookingPerson | null;
-  tariffKey?: string;
   needsAushilfe?: boolean;
   language?: 'de' | 'en';
   notes?: string;
 };
 
 export type CreateBookingResult = {
-  bookingId: string;
-  status: 'waitlisted' | 'confirmed';
-  role: 'leader' | 'follower' | null;
-  mode: 'solo' | 'couple';
-  waitlistPosition: number | null;
-  amountChf: string;
+  ok: boolean;
+  status: 'waitlisted' | 'reserved';
+  courseId: string;
 };
 
 export function fetchAvailability(courseId: string): Promise<CourseAvailability> {
@@ -45,5 +39,5 @@ export function fetchAvailability(courseId: string): Promise<CourseAvailability>
 }
 
 export function createBooking(input: CreateBookingInput): Promise<CreateBookingResult> {
-  return api.post<CreateBookingResult>('/api/public/bookings', input);
+  return api.post<CreateBookingResult>('/api/public/reservations', input);
 }

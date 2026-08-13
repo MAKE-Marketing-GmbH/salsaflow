@@ -44,7 +44,8 @@ export function FaqItem({ q, a, defaultOpen = false }: Faq & { defaultOpen?: boo
           strokeWidth={2}
           aria-hidden
           className={cn(
-            'shrink-0 text-[var(--color-salsa)] transition-transform group-open:rotate-180',
+            // Gleiche Drehgeschwindigkeit wie der Chevron im mobilen Menue (--acc-chevron).
+            'shrink-0 text-[var(--color-salsa)] transition-transform duration-[var(--acc-chevron)] ease-[var(--acc-ease)] group-open:rotate-180',
             reduced && 'transition-none',
           )}
         />

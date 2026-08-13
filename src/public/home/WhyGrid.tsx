@@ -80,7 +80,7 @@ export function WhyGrid() {
             className="group mt-7 inline-flex min-h-12 items-center gap-2 font-semibold text-[var(--color-ink)] transition-colors hover:text-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-4"
           >
             {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
-            <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform motion-safe:group-hover:translate-x-0.5" />
+            <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
           </motion.a>
 
           {/* Fuellt die gemessene Leerzone unter dem CTA (Kopfkommentar Eingriff 1).

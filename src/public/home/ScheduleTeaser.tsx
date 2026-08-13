@@ -138,7 +138,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
             className="group inline-flex w-fit min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
           >
             {s.all}
-            <ArrowRight aria-hidden className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-0.5" strokeWidth={2.25} />
+            <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2.25} />
           </motion.a>
         </Reveal>
 
@@ -171,7 +171,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                       </span>
                       <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-salsa)]">
                         {de ? 'Termine ansehen' : 'View dates'}
-                        <ArrowRight aria-hidden className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-0.5" strokeWidth={2.25} />
+                        <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2.25} />
                       </span>
                     </a>
                   </li>
@@ -286,7 +286,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                   {de
                     ? `Alle ${activeSlots.length} Kurse an diesem Tag`
                     : `All ${activeSlots.length} classes on this day`}
-                  <ArrowRight aria-hidden className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-0.5" strokeWidth={2} />
+                  <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2} />
                 </a>
               )}
             </>
@@ -384,7 +384,7 @@ export function TeaserCard({
         </span>
         <span className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start rounded-full bg-[var(--color-salsa)] px-5 py-2.5 text-sm font-semibold text-white transition-colors group-hover:bg-[var(--color-salsa-700)] sm:self-center">
           {lang === 'de' ? 'Termine ansehen' : 'View dates'}
-          <ArrowRight aria-hidden className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-0.5" strokeWidth={2} />
+          <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2} />
         </span>
       </a>
     );

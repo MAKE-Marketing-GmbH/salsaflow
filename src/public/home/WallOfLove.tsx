@@ -90,7 +90,7 @@ export function WallOfLove() {
                 className="group inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[var(--color-ink)] hover:text-[var(--color-salsa)]"
               >
                 {c.all}
-                <CtaArrow className="transition-transform motion-safe:group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
               </a>
             </div>
           </motion.div>

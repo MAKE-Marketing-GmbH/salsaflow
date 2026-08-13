@@ -69,9 +69,14 @@ function sitemapXml(paths) {
 }
 
 const template = await fs.readFile(templatePath, 'utf8');
+// Eigener Cache-Ordner fuer den Prerender-Server. Grund: node_modules/.vite/deps kann einem
+// anderen Benutzer gehoeren als dem, der baut. Vite raeumt den Ordner beim Start auf und
+// scheitert dann mit EACCES. Ein eigener Ordner pro Build umgeht das Rechte-Problem ganz.
+// Ueberschreibbar per VITE_CACHE_DIR.
 const vite = await createServer({
   root,
   appType: 'custom',
+  cacheDir: process.env.VITE_CACHE_DIR || path.join(root, 'node_modules', '.vite-prerender'),
   server: { middlewareMode: true },
 });
 
@@ -101,27 +106,21 @@ try {
   });
   await fs.writeFile(path.join(dist, '404.html'), notFoundHtml);
 
-  const adminHtml = buildDocument(template, {
-    route: '/admin',
-    title: 'Admin | Salsaflow Dance Company',
-    description: 'Geschützter Verwaltungsbereich der Salsaflow Dance Company.',
-    body: '',
-    noindex: true,
-    canonical: false,
-    prerendered: false,
-  });
-  await fs.writeFile(path.join(dist, 'admin.html'), adminHtml);
-
-  const bookingHtml = buildDocument(template, {
-    route: '/buchung',
-    title: 'Buchungsstatus | Salsaflow Dance Company',
-    description: 'Status deiner Kursbuchung bei der Salsaflow Dance Company.',
-    body: '',
-    noindex: true,
-    canonical: false,
-    prerendered: false,
-  });
-  await fs.writeFile(path.join(dist, 'buchung.html'), bookingHtml);
+  // Leere Huellen fuer die zwei Routen, die im Browser aufbauen. Titel und Beschreibung kommen
+  // aus SEO_META, damit sie nicht neben der echten Konfiguration veralten.
+  for (const [route, file] of [['/admin', 'admin.html'], ['/buchung', 'buchung.html']]) {
+    const meta = entry.getRouteMeta(route);
+    const html = buildDocument(template, {
+      route,
+      title: meta.title,
+      description: meta.description,
+      body: '',
+      noindex: true,
+      canonical: false,
+      prerendered: false,
+    });
+    await fs.writeFile(path.join(dist, file), html);
+  }
   await fs.writeFile(path.join(dist, 'sitemap.xml'), sitemapXml(manifest.map((route) => route.path)));
 
   process.stdout.write(`Prerender: ${manifest.length} Routen + 404 + Admin + Buchung\n`);

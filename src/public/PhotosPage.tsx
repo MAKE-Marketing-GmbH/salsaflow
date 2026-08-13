@@ -121,7 +121,7 @@ export function PhotosPage() {
                                (Team-Album) — object-cover center schnitt dort die Koepfe ab,
                                uebrig blieben Torso-Kacheln. 30% von oben haelt Gesichter im Bild,
                                ohne Querformat-Fotos sichtbar zu verschieben. */
-                            className="h-full w-full object-cover object-[center_30%] transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                            className="h-full w-full object-cover object-[center_30%] transition-transform duration-[var(--dur-slow)] ease-out group-hover:scale-[1.04]"
                             width={p.width ?? 1080}
                             height={p.height ?? 1350}
                             loading="lazy"
@@ -134,7 +134,7 @@ export function PhotosPage() {
                           />
                           <span
                             aria-hidden
-                            className="pointer-events-none absolute bottom-2.5 right-2.5 flex h-8 w-8 translate-y-1 items-center justify-center rounded-full bg-white/90 text-[var(--color-ink)] opacity-0 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+                            className="pointer-events-none absolute bottom-2.5 right-2.5 flex h-8 w-8 translate-y-1 items-center justify-center rounded-full bg-white/90 text-[var(--color-ink)] opacity-0 shadow-sm backdrop-blur-sm transition-[transform,opacity] duration-[var(--dur-base)] ease-out group-hover:translate-y-0 group-hover:opacity-100"
                           >
                             <Maximize2 size={15} strokeWidth={2} />
                           </span>

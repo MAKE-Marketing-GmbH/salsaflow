@@ -96,7 +96,7 @@ function AnfahrtSection({ c }: { c: StandortContent }) {
               className="group mt-7 inline-flex items-center gap-2 rounded-full border border-[var(--color-ink)] px-6 py-3 text-base font-semibold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-ink)] hover:text-white"
             >
               {a.mapsCta}
-              <ArrowRight size={18} strokeWidth={2} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={18} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </motion.a>
           </Reveal>
           <Reveal className="grid gap-4 sm:grid-cols-2" stagger={0.07}>

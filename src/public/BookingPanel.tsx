@@ -33,22 +33,8 @@ type Person = { firstName: string; lastName: string; email: string; phone: strin
 const emptyPerson = (): Person => ({ firstName: '', lastName: '', email: '', phone: '' });
 const emailOk = (s: string) => /.+@.+\..+/.test(s.trim());
 
-const chf = new Intl.NumberFormat('de-CH', { style: 'currency', currency: 'CHF' });
-const formatChf = (amount: string | null): string | null => {
-  if (!amount) return null;
-  const n = Number(amount);
-  if (!Number.isFinite(n) || n <= 0) return null;
-  return chf.format(n);
-};
-
-const availabilityPrice = (availability: CourseAvailability | null | undefined, lang: 'de' | 'en') => {
-  if (!availability) return null;
-  const prices = availability.tariffs
-    .map((tariff) => Number(tariff.amountChf))
-    .filter((amount) => Number.isFinite(amount) && amount > 0);
-  const lowest = prices.length ? Math.min(...prices) : null;
-  return lowest === null ? null : `${lang === 'de' ? 'ab' : 'from'} ${chf.format(lowest)}`;
-};
+/* Preise gibt es in diesem Fluss nicht (Beschluss 13.08.2026). Der Platz wird reserviert,
+   bezahlt wird vor Ort. Preise stehen auf /preise. */
 
 /* Funnel-Lexikon (nur hier gebraucht — bewusst nicht im globalen Dict). */
 const FUNNEL = {
@@ -329,8 +315,7 @@ function Funnel() {
                       const level = levelLabelI18n(lang === 'de' ? c.levelDe : c.levelEn, c.onVariant);
                       const teachers = c.teachers.map((t) => t.displayName.split(' ')[0]).join(', ');
                       const availability = courseAvailability[c.id];
-                      const full = availability ? availability.free === 0 : c.status === 'full';
-                      const price = availabilityPrice(availability, lang);
+                      const full = availability ? availability.full : c.status === 'full';
                       const dayShort = WEEKDAY_LABEL[lang][c.weekday]?.short ?? c.weekday;
                       return (
                         <li
@@ -375,13 +360,8 @@ function Funnel() {
                                   full ? 'bg-amber-100 text-amber-800' : 'bg-[var(--color-salsa-50)] text-[var(--color-salsa)]',
                                 )}
                               >
-                                {full
-                                  ? ft.waitlist
-                                  : availability
-                                    ? `${availability.free} ${lang === 'de' ? 'Plätze frei' : 'spots free'}`
-                                    : ft.free}
+                                {full ? ft.waitlist : ft.free}
                               </span>
-                              {price && <span className="mt-1 block text-xs font-semibold text-[var(--color-ink-muted)]">{price}</span>}
                             </div>
                           </button>
                         </li>
@@ -398,8 +378,7 @@ function Funnel() {
                 const level = levelLabelI18n(lang === 'de' ? c.levelDe : c.levelEn, c.onVariant);
                 const teachers = c.teachers.map((t) => t.displayName.split(' ')[0]).join(', ');
                 const availability = courseAvailability[c.id];
-                const full = availability ? availability.free === 0 : c.status === 'full';
-                const price = availabilityPrice(availability, lang);
+                const full = availability ? availability.full : c.status === 'full';
                 return (
                   <li
                     key={c.id}
@@ -439,13 +418,8 @@ function Funnel() {
                             full ? 'bg-amber-100 text-amber-800' : 'bg-[var(--color-salsa-50)] text-[var(--color-salsa)]',
                           )}
                         >
-                          {full
-                            ? ft.waitlist
-                            : availability
-                              ? `${availability.free} ${lang === 'de' ? 'Plätze frei' : 'spots free'}`
-                              : ft.free}
+                          {full ? ft.waitlist : ft.free}
                         </span>
-                        {price && <span className="mt-1 block text-xs font-semibold text-[var(--color-ink-muted)]">{price}</span>}
                       </div>
                     </button>
                   </li>
@@ -492,7 +466,6 @@ function BookingForm({
 
   const [role, setRole] = useState<'leader' | 'follower' | null>(null);
   const [mode, setMode] = useState<'solo' | 'couple'>('solo');
-  const [tariffKey, setTariffKey] = useState('normal');
   const [needsAushilfe, setNeedsAushilfe] = useState(false);
   const [me, setMe] = useState<Person>(emptyPerson);
   const [partner, setPartner] = useState<Person>(emptyPerson);
@@ -510,11 +483,7 @@ function BookingForm({
     setLoading(true);
     setLoadError(false);
     fetchAvailability(course.id)
-      .then((a) => {
-        setAvail(a);
-        const hasNormal = a.tariffs.some((t) => t.key === 'normal');
-        setTariffKey(hasNormal ? 'normal' : a.tariffs[0]?.key ?? 'normal');
-      })
+      .then(setAvail)
       .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   };
@@ -563,20 +532,16 @@ function BookingForm({
     };
   }, [onBack]);
 
-  const isOpen = avail?.bookingType === 'open';
+  // Heels wird ohne Rollentrennung getanzt: dort gibt es kein Leader/Follower und kein Paar.
+  const isOpen = course.styleKey === 'heels';
 
   function changeMode(next: 'solo' | 'couple') {
     setMode(next);
-    if (next === 'couple') {
-      setNeedsAushilfe(false);
-      if (avail?.tariffs.some((t) => t.key === 'couple')) setTariffKey('couple');
-    } else if (tariffKey === 'couple') {
-      setTariffKey(avail?.tariffs.some((t) => t.key === 'normal') ? 'normal' : avail?.tariffs[0]?.key ?? 'normal');
-    }
+    if (next === 'couple') setNeedsAushilfe(false);
   }
 
-  // Ein gemeinsamer Platzpool fuer alle Rollen und Anmeldearten.
-  const laneFull = avail?.free === 0;
+  // Voll heisst: der Kursplan meldet den Kurs als ausgebucht. Dann geht die Anfrage auf die Warteliste.
+  const laneFull = avail?.full ?? course.status === 'full';
 
   const courseLabel = `${lang === 'de' ? course.styleDe : course.styleEn} ${levelLabelI18n(
     lang === 'de' ? course.levelDe : course.levelEn,
@@ -618,7 +583,6 @@ function BookingForm({
           mode === 'couple'
             ? { firstName: partner.firstName, lastName: partner.lastName, email: partner.email, phone: partner.phone || undefined }
             : null,
-        tariffKey,
         needsAushilfe: !isOpen && mode === 'solo' ? needsAushilfe : false,
         notes: notes.trim() || undefined,
         language: lang,
@@ -714,16 +678,12 @@ function BookingForm({
                     </dd>
                   </div>
                 )}
-                {avail && !loading && (
-                  <div className="flex gap-2">
-                    <dt className="w-16 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
-                      {lang === 'de' ? 'Frei' : 'Open'}
-                    </dt>
-                    <dd className="min-w-0 leading-snug text-[var(--color-ink)]">
-                      {avail.free} {lang === 'de' ? 'Plätze frei' : 'spots free'}
-                    </dd>
-                  </div>
-                )}
+                <div className="flex gap-2">
+                  <dt className="w-16 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
+                    {lang === 'de' ? 'Kosten' : 'Payment'}
+                  </dt>
+                  <dd className="min-w-0 leading-snug text-[var(--color-ink)]">{bt.payOnSite}</dd>
+                </div>
               </dl>
             </div>
             {!result && (
@@ -843,43 +803,6 @@ function BookingForm({
                   </p>
                 )}
 
-                {/* Tarif (mit Preis — Preis wird im Buchungsschritt gezeigt, nie auf der Karte) */}
-                <label className="block border-t border-[var(--color-line)] pt-2.5">
-                  <span className="mb-1.5 block text-sm font-bold text-[var(--color-ink)]">{bt.tariff}</span>
-                  <select
-                    name="tariff"
-                    data-testid="bk-tariff"
-                    value={tariffKey}
-                    onChange={(e) => setTariffKey(e.target.value)}
-                    className="w-full rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] px-3 py-2 pr-8 text-sm font-medium text-[var(--color-ink)] focus:border-[var(--color-salsa)] focus:outline-none"
-                  >
-                    {avail.tariffs.map((t) => (
-                      <option key={t.key} value={t.key}>
-                        {lang === 'de' ? t.nameDe : t.nameEn}
-                        {' — '}
-                        {t.amountChf === '0.00' ? bt.priceFree : (formatChf(t.amountChf) ?? bt.priceOnRequest)}
-                      </option>
-                    ))}
-                  </select>
-                  {(() => {
-                    const sel = avail.tariffs.find((t) => t.key === tariffKey);
-                    if (sel?.amountChf === '0.00') {
-                      return (
-                        <p data-testid="bk-price" className="mt-2 text-sm text-[var(--color-ink)]">
-                          <span className="font-display text-lg font-extrabold">{bt.priceFree}</span>
-                        </p>
-                      );
-                    }
-                    const price = formatChf(sel?.amountChf ?? null);
-                    return price ? (
-                      <p data-testid="bk-price" className="mt-2 text-sm text-[var(--color-ink)]">
-                        <span className="font-display text-lg font-extrabold">{price}</span>{' '}
-                        <span className="font-medium text-[var(--color-ink-muted)]">{bt.pricePerCourse}</span>
-                      </p>
-                    ) : null;
-                  })()}
-                </label>
-
                 {/* Gruppe 2: Personendaten */}
                 <h3 className="border-t border-[var(--color-line)] pt-4 font-display text-lg font-bold text-[var(--color-ink)]">{bt.stepData}</h3>
 
@@ -972,7 +895,7 @@ function SuccessPanel({ result, onBack }: { result: CreateBookingResult; onBack:
         {waitlisted ? bt.successWaitlistTitle : bt.successConfirmedTitle}
       </h3>
       <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[var(--color-ink-muted)]">
-        {waitlisted ? waitlistBody(lang, result.waitlistPosition) : bt.successConfirmedBody}
+        {waitlisted ? waitlistBody(lang) : bt.successConfirmedBody}
       </p>
 
       {/* Naechste Schritte: konkret, kein Marketing. */}

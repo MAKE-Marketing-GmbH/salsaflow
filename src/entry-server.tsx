@@ -17,6 +17,17 @@ export function getPrerenderManifest() {
   return PRERENDER_ROUTES.map(({ path, routeClass, seoKey }) => ({ path, routeClass, seoKey }));
 }
 
+/**
+ * Titel und Beschreibung einer Route, ohne sie zu rendern. Das Build-Skript schreibt fuer
+ * /admin und /buchung leere Huellen; deren Texte standen frueher als Kopie im Skript und
+ * liefen darum auseinander. Einzige Quelle bleibt SEO_META.
+ */
+export function getRouteMeta(pathname: string) {
+  const route = resolveRoute(pathname);
+  const meta = SEO_META[route.seoKey].de;
+  return { title: meta.title, description: meta.description };
+}
+
 export function renderRoute(pathname: string): PrerenderResult {
   const route = resolveRoute(pathname);
   const Matched = route.component;

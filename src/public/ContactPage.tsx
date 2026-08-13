@@ -166,7 +166,7 @@ function ContactHero() {
             className="group mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
           >
             {direct.whatsappLabel}
-            <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
           </motion.a>
         </motion.div>
       </Shell>
@@ -236,7 +236,7 @@ function LocationSection() {
               className="group mt-6 inline-flex items-center gap-2 rounded-full border border-[var(--color-ink)] px-6 py-3 text-base font-semibold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-ink)] hover:text-white"
             >
               {l.mapsCta}
-              <ArrowRight size={18} strokeWidth={2} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={18} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -318,7 +318,7 @@ function RentalSection({ onRequestRoom }: { onRequestRoom: () => void }) {
                   className="group mt-8 inline-flex w-fit items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
                 >
                   {r.cta}
-                  <ArrowRight size={18} strokeWidth={2.25} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight size={18} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
                 </a>
               </div>
 

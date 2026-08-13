@@ -98,7 +98,7 @@ function EventfrogCta({
         size={18}
         strokeWidth={2.25}
         aria-hidden
-        className="transition-transform group-hover:translate-x-0.5"
+        className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5"
       />
     </a>
   );

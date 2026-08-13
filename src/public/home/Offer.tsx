@@ -24,7 +24,7 @@ function FeaturedStyle({ card }: { card: OfferCard }) {
       <img
         src={card.photo}
         alt={card.alt}
-        className="absolute inset-0 h-full w-full object-cover object-[center_42%] transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.025]"
+        className="absolute inset-0 h-full w-full object-cover object-[center_42%] transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.025]"
         width={1600}
         height={1067}
         loading="lazy"
@@ -43,7 +43,7 @@ function FeaturedStyle({ card }: { card: OfferCard }) {
         <p className="mt-4 max-w-md text-pretty text-base leading-relaxed text-white/80">{card.text}</p>
         <span className="mt-6 inline-flex min-h-11 items-center gap-2 font-semibold">
           {lang === 'de' ? 'Salsa entdecken' : 'Explore salsa'}
-          <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform motion-safe:group-hover:translate-x-0.5" />
+          <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
         </span>
       </div>
     </a>
@@ -63,7 +63,7 @@ function StyleRow({ card, index }: { card: OfferCard; index: number }) {
           src={card.photo}
           alt={card.alt}
           className={cn(
-            'h-full w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.035]',
+            'h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.035]',
             card.key === 'bachata' ? 'photo-grade-bachata' : card.key === 'privat' ? 'photo-grade-private' : undefined,
             index === 1 ? 'object-[center_36%]' : index === 2 ? 'object-[center_20%]' : 'object-[center_46%]',
           )}
@@ -83,7 +83,7 @@ function StyleRow({ card, index }: { card: OfferCard; index: number }) {
           {card.title}
         </h3>
       </div>
-      <ArrowRight aria-hidden size={20} strokeWidth={2} className="text-[var(--color-ink)] transition-transform motion-safe:group-hover:translate-x-1 group-hover:text-[var(--color-salsa)]" />
+      <ArrowRight aria-hidden size={20} strokeWidth={2} className="text-[var(--color-ink)] transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-1 group-hover:text-[var(--color-salsa)]" />
     </a>
   );
 }
@@ -132,7 +132,7 @@ export function Offer() {
             {lang === 'de'
               ? 'Alle Tanzkurse im Überblick'
               : 'See all dance classes'}
-            <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform motion-safe:group-hover:translate-x-0.5" />
+            <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
           </motion.a>
         </Reveal>
       </Shell>

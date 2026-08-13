@@ -61,7 +61,7 @@ export function Faq() {
               className="group mt-7 inline-flex items-center gap-1.5 text-base font-semibold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-salsa-700)]"
             >
               {f.more}
-              <CtaArrow className="transition-transform motion-safe:group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
             </motion.a>
           </Reveal>
 

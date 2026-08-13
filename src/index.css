@@ -76,6 +76,17 @@
   --acc-collapse: 250ms;
   --acc-chevron: 250ms;
   --acc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Motion-Ordnung (13.08.2026). Vorher liefen fuenf Dauern durcheinander: 150, 200, 300,
+     500 und 700ms fuer dieselbe Art Interaktion. Ab jetzt gibt es drei Stufen:
+       fast  — Zeigerkontakt: Farbe, Rahmen, kleine Verschiebung
+       base  — sichtbare Zustandswechsel: Unterstrich, Karte hebt an, Chevron
+       slow  — grosse Flaechen: Bild-Zoom
+     Eine Kurve fuer alles: ease-out. Der Effekt startet schnell und laeuft weich aus. */
+  --dur-fast: 160ms;
+  --dur-base: 240ms;
+  --dur-slow: 420ms;
+  --ease-sf: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (max-width: 639px) {
@@ -120,6 +131,29 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Zeigerkontakt-Uebergang (13.08.2026). Vorher sprangen Navigations- und Fusszeilen-Links
+   ihre Hover-Farbe hart um, weil die transition-Klasse fehlte. Diese Klasse bewegt genau die
+   Eigenschaften, die ein Link wechselt — nie "all", das wuerde auch Layout mitanimieren. */
+.t-hover {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-duration: var(--dur-fast);
+  transition-timing-function: var(--ease-sf);
+}
+
+/* Fuer Elemente, die sich beim Hover zusaetzlich bewegen (Karten, Pfeile). */
+.t-hover-move {
+  transition-property: color, background-color, border-color, transform, opacity, box-shadow;
+  transition-duration: var(--dur-base);
+  transition-timing-function: var(--ease-sf);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-hover,
+  .t-hover-move {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* transitions.dev Pattern 21: Accordion. Der mobile Header bleibt eine einzige
    Flaeche und waechst nach unten. Padding liegt immer im Inneren, nie am Panel. */
 .t-acc-head {
@@ -135,14 +169,13 @@ body {
   transition: grid-template-rows var(--acc-collapse) var(--acc-ease);
 }
 
+/* Kein Weichzeichner mehr (13.08.2026): 4px Blur lag auf Fliesstext, den man in dem Moment
+   lesen will. Das Auge stellt zweimal scharf. Die Blende allein reicht. */
 .t-acc-panel-inner {
   min-height: 0;
   overflow: hidden;
   opacity: 0;
-  filter: blur(4px);
-  transition:
-    opacity var(--acc-collapse) var(--acc-ease),
-    filter var(--acc-collapse) var(--acc-ease);
+  transition: opacity var(--acc-collapse) var(--acc-ease);
 }
 
 .t-acc[data-open='true'] > .t-acc-panel {
@@ -152,7 +185,6 @@ body {
 
 .t-acc[data-open='true'] > .t-acc-panel > .t-acc-panel-inner {
   opacity: 1;
-  filter: blur(0);
   transition-duration: var(--acc-expand);
 }
 

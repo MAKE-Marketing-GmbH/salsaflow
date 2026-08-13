@@ -77,7 +77,9 @@ export function SchedulePage() {
                 width={1600}
                 height={1067}
                 loading="eager"
-                className="h-[160px] w-full object-cover sm:h-[190px] lg:h-[132px]"
+                // 25% statt Mitte: Das Band ist sehr flach (160px auf voller Breite). Mittig
+                // geschnitten faellt die ganze Kopfreihe raus, man sieht nur Rumpf und Beine.
+                className="h-[160px] w-full object-cover object-[center_25%] sm:h-[190px] lg:h-[132px]"
               />
             </figure>
           </div>

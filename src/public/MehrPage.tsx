@@ -109,7 +109,7 @@ function HubCards() {
                 key={card.href}
                 variants={item}
                 href={card.href}
-                className="group flex flex-col rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-7 shadow-[0_16px_50px_rgba(17,17,17,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--color-salsa)] hover:shadow-[0_24px_70px_rgba(17,17,17,0.10)] sm:p-8"
+                className="group flex flex-col rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-7 shadow-[0_16px_50px_rgba(17,17,17,0.06)] t-hover-move hover:-translate-y-0.5 hover:border-[var(--color-salsa)] hover:shadow-[0_24px_70px_rgba(17,17,17,0.10)] sm:p-8"
               >
                 <span
                   aria-hidden
@@ -125,7 +125,7 @@ function HubCards() {
                 </p>
                 <span className="mt-6 inline-flex items-center gap-1.5 text-base font-semibold text-[var(--color-salsa)]">
                   {card.cta}
-                  <ArrowRight size={17} strokeWidth={2.25} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight size={17} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
                 </span>
               </motion.a>
             );

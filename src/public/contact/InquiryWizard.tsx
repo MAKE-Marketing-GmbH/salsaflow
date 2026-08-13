@@ -18,6 +18,11 @@ import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 import { CONTACT_PAGE, type TopicKey } from '@/public/contact/content';
 
+// Drei Schritte: Anliegen, Details, Kontakt. Der frühere Prüf-Schritt ist raus (Beschluss
+// 13.08.2026): Bei einer unverbindlichen Anfrage kostet er Abschlüsse und zeigt nur, was die
+// Person gerade selbst eingetippt hat.
+const LAST_STEP = 2;
+
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 type StyleKey = 'salsa' | 'bachata' | 'heels' | 'unsure';
 type TimeKey = 'weekday' | 'weekend' | 'flexible';
@@ -60,13 +65,20 @@ export function InquiryWizard({
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState('');
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const lastTopic = useRef(initialTopic);
 
+  // Wechselt das Anliegen von aussen (Hash-Link aus Nav oder Footer), springt der Wizard zurueck
+  // auf Schritt 1. Der Vergleich mit lastTopic verhindert, dass ein blosser Re-Render der
+  // Elternkomponente laufende Eingaben loescht.
   useEffect(() => {
+    if (lastTopic.current === initialTopic) return;
+    lastTopic.current = initialTopic;
     setTopic(initialTopic);
     setStyle('unsure');
     setTime('flexible');
     setNotes('');
     setError('');
+    setStatus('idle');
     setStep(0);
   }, [initialTopic]);
 
@@ -96,17 +108,13 @@ export function InquiryWizard({
       setError(copy.detailError);
       return;
     }
-    if (step === 2 && !contactValid) {
-      setError(copy.contactError);
-      return;
-    }
     setError('');
-    setStep((current) => Math.min(3, current + 1));
+    setStep((current) => Math.min(LAST_STEP, current + 1));
   }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (step < 3) {
+    if (step < LAST_STEP) {
       goNext();
       return;
     }
@@ -115,6 +123,8 @@ export function InquiryWizard({
       return;
     }
     if (status === 'submitting') return;
+    // setStatus('submitting') loescht auch einen alten Sendefehler. Sonst stuende die alte
+    // Meldung noch da, waehrend der neue Versuch laeuft.
     setStatus('submitting');
     setError('');
     const details = needsChoices
@@ -154,7 +164,7 @@ export function InquiryWizard({
   }
 
   return (
-    <form onSubmit={submit} noValidate className={cn('p-5 sm:p-6', !compact && 'lg:p-8')}>
+    <form onSubmit={submit} onKeyDown={blockEnterSubmit} noValidate className={cn('p-5 sm:p-6', !compact && 'lg:p-8')}>
       <WizardProgress step={step} labels={copy.progress} />
 
       <div className="mt-5 min-h-[12rem]">
@@ -228,29 +238,23 @@ export function InquiryWizard({
               <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" optional className="sm:col-span-2" />
             </div>
             <p className="mt-4 text-xs leading-relaxed text-[var(--color-ink-muted)]">{copy.privacy}</p>
-            <div aria-hidden className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
-              <label>Website<input tabIndex={-1} autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} /></label>
+            {/* Honeypot: eigener relativ positionierter Anker, sonst haengt das Feld an einem
+                fremden Vorfahren und kann das Layout verschieben. */}
+            <div className="relative">
+              <div aria-hidden className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+                <label>Website<input tabIndex={-1} autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} /></label>
+              </div>
             </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div>
-            <h3 ref={headingRef} tabIndex={-1} className="font-display text-2xl font-bold leading-tight text-[var(--color-ink)] outline-none">{copy.reviewTitle}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.reviewLead}</p>
-            <dl className="mt-6 divide-y divide-[var(--color-line)] rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] px-5">
-              <ReviewRow label={copy.requestLabel} value={topicLabel} />
-              {needsChoices && <ReviewRow label={copy.styleLabel} value={styleLabel} />}
-              {needsChoices && <ReviewRow label={copy.timeLabel} value={timeLabel} />}
-              {notes.trim() && <ReviewRow label={copy.noteLabel} value={notes.trim()} />}
-              <ReviewRow label={copy.contactLabel} value={[name.trim(), phone.trim(), email.trim()].filter(Boolean).join(' · ')} />
-            </dl>
           </div>
         )}
       </div>
 
-      {error && <p role="alert" className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-salsa-50)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">{error}</p>}
-      {status === 'error' && <p role="alert" className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-salsa-50)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">{copy.sendError}</p>}
+      {/* Eine Meldezeile statt zwei: sonst stehen Eingabefehler und Sendefehler gleichzeitig da. */}
+      {(error || status === 'error') && (
+        <p role="alert" className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-salsa-50)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">
+          {error || copy.sendError}
+        </p>
+      )}
 
       <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
         {step > 0 ? (
@@ -258,7 +262,7 @@ export function InquiryWizard({
             <ArrowLeft aria-hidden className="h-4 w-4" />{copy.back}
           </button>
         ) : <span />}
-        {step < 3 ? (
+        {step < LAST_STEP ? (
           <button key="wizard-next" type="submit" data-testid="inquiry-next" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-7 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]">
             {copy.next}<ArrowRight aria-hidden className="h-4 w-4" />
           </button>
@@ -275,7 +279,9 @@ export function InquiryWizard({
 function ChoiceCard({ active, icon: Icon, label, compact = false, className, children }: { active: boolean; icon?: LucideIcon; label: string; compact?: boolean; className?: string; children: ReactNode }) {
   return (
     <label className={cn(
-      'relative flex cursor-pointer items-center gap-3 rounded-[var(--radius-card)] border px-4 text-left font-semibold transition-[background-color,border-color,color,transform] duration-200',
+      // focus-within macht die Tastatur-Auswahl sichtbar: das echte Radio ist sr-only, ohne
+      // diesen Ring sieht man beim Durchtabben und bei Pfeiltasten gar nichts.
+      'relative flex cursor-pointer items-center gap-3 rounded-[var(--radius-card)] border px-4 text-left font-semibold transition-[background-color,border-color,color,transform] duration-200 focus-within:ring-2 focus-within:ring-[var(--color-salsa)] focus-within:ring-offset-2',
       compact ? 'min-h-14 py-3 text-sm' : 'min-h-[4.2rem] text-base',
       active ? 'z-10 scale-[1.015] border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white shadow-[0_12px_28px_-18px_rgba(173,24,39,0.8)]' : 'border-[var(--color-line)] bg-[var(--color-paper)] text-[var(--color-ink)] hover:border-[var(--color-salsa)]',
       className,
@@ -316,8 +322,14 @@ function TextArea({ label, value, onChange, placeholder, optional }: { label: st
   return <label><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><textarea className={cn(fieldClass, 'min-h-28 resize-y')} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} /></label>;
 }
 
-function ReviewRow({ label, value }: { label: string; value: string }) {
-  return <div className="grid gap-1 py-4 sm:grid-cols-[8rem_1fr]"><dt className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{label}</dt><dd className="whitespace-pre-line text-sm font-semibold leading-relaxed text-[var(--color-ink)]">{value}</dd></div>;
+/**
+ * Enter in einem einzeiligen Feld schickt sonst das Formular ab und springt einen Schritt weiter,
+ * mitten im Tippen. Im mehrzeiligen Feld bleibt Enter ein Zeilenumbruch.
+ */
+function blockEnterSubmit(event: import('react').KeyboardEvent<HTMLFormElement>) {
+  const target = event.target as HTMLElement;
+  if (event.key !== 'Enter' || target.tagName === 'TEXTAREA') return;
+  if (target.tagName === 'INPUT') event.preventDefault();
 }
 
 function wizardCopy(de: boolean, topic: TopicKey) {
@@ -342,7 +354,7 @@ function wizardCopy(de: boolean, topic: TopicKey) {
   };
   const [detailTitle, detailLead] = prompts[topic];
   return {
-    progress: de ? ['Anliegen', 'Details', 'Kontakt', 'Prüfen'] : ['Request', 'Details', 'Contact', 'Review'],
+    progress: de ? ['Anliegen', 'Details', 'Kontakt'] : ['Request', 'Details', 'Contact'],
     topicTitle: de ? 'Worum geht es?' : 'What can we help with?',
     topicLead: de ? 'Wähle den Weg, der am besten passt. Der nächste Schritt wird darauf abgestimmt.' : 'Choose the path that fits best. The next step adapts to your request.',
     detailTitle,
@@ -368,10 +380,8 @@ function wizardCopy(de: boolean, topic: TopicKey) {
     phone: de ? 'Handy' : 'Mobile',
     email: de ? 'E-Mail' : 'Email',
     privacy: de ? 'Wir nutzen deine Angaben nur, um auf diese Anfrage zu antworten.' : 'We only use your details to answer this request.',
-    reviewTitle: de ? 'Passt alles?' : 'Does everything look right?',
-    reviewLead: de ? 'Prüfe deine Auswahl. Zurückgehen ändert nichts an deinen bisherigen Angaben.' : 'Review your choices. Going back keeps everything you entered.',
+    // requestLabel steht in der Mail an das Studio, nicht auf der Seite.
     requestLabel: de ? 'Anliegen' : 'Request',
-    contactLabel: de ? 'Kontakt' : 'Contact',
     detailError: de ? 'Bitte schreib kurz, worum es geht.' : 'Please add a short note about your request.',
     contactError: de ? 'Bitte gib deinen Vornamen und eine E-Mail oder Handynummer an.' : 'Please add your first name and either an email or mobile number.',
     back: de ? 'Zurück' : 'Back',

@@ -220,7 +220,7 @@ function ProgrammSection({ c }: { c: AnniversaryContent }) {
               className="group mt-auto inline-flex items-center gap-1.5 pt-7 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {p.cta.label}
-              <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -283,7 +283,7 @@ function AudienceSection({ c }: { c: AnniversaryContent }) {
                 className="group mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {a.cta.label}
-                <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
               </a>
             </motion.div>
           </Reveal>
@@ -338,7 +338,7 @@ function ProofSection({ c }: { c: AnniversaryContent }) {
               className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {link.label}
-              <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </motion.a>
           ))}
         </Reveal>

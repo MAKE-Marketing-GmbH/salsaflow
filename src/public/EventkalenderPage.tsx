@@ -140,7 +140,7 @@ function CardsSection({ c }: { c: EventkalenderContent }) {
                 className="group mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {ev.cta.label}
-                <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
               </a>
             </motion.article>
           ))}
@@ -190,7 +190,7 @@ function FeaturedSection({ c }: { c: EventkalenderContent }) {
                     className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-ink)] transition-colors hover:text-[var(--color-salsa)]"
                   >
                     {l.label}
-                    <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+                    <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
                   </a>
                 ))}
               </div>

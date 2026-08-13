@@ -116,7 +116,7 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
           <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
             <a
               href="/kontakt#schnupperstunde"
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-salsa)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)]"
+              className="t-hover inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-salsa)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)]"
             >
               {lang === 'de' ? 'Gratis Schnupperstunde' : 'Free trial class'}
             </a>
@@ -124,7 +124,7 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
               href={CONTACT.whatsapp}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--color-ink)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-ink)] hover:text-white"
+              className="t-hover inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--color-ink)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-ink)] hover:text-white"
             >
               WhatsApp
             </a>
@@ -189,10 +189,10 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
               </p>
               {/* Mail und Telefon gehoeren mit in das <address>-Element: es umschliesst die
                   Kontaktdaten der Seite, nicht nur die Postanschrift. */}
-              <a href={`mailto:${CONTACT.email}`} className="flex items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white">
+              <a href={`mailto:${CONTACT.email}`} className="t-hover flex items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white">
                 <MailIcon /> {CONTACT.email}
               </a>
-              <a href={CONTACT.phoneHref} className="flex items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white">
+              <a href={CONTACT.phoneHref} className="t-hover flex items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white">
                 <PhoneIcon /> {CONTACT.phoneDisplay}
               </a>
             </address>

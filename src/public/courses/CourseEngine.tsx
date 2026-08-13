@@ -659,7 +659,7 @@ function SlotRow({ slot, hideStart = false }: { slot: WeekSlot; hideStart?: bool
           ScheduleBottomCta. */}
       <span className="inline-flex min-h-8 shrink-0 items-center justify-center gap-1.5 self-start px-1 text-sm font-semibold text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-salsa)] sm:self-center">
         {label}
-        <ArrowRight size={16} strokeWidth={2} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+        <ArrowRight size={16} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
       </span>
     </a>
   );

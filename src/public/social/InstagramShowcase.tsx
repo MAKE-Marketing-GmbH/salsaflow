@@ -88,7 +88,7 @@ function InstagramVideoCard({ video }: { video: InstagramVideo }) {
               width={video.width}
               height={video.height}
               loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.025]"
+              className="h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.025]"
             />
             <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,0.02)_0%,rgba(10,10,10,0.08)_45%,rgba(10,10,10,0.82)_100%)]" />
             <span className="absolute inset-0 flex items-center justify-center">

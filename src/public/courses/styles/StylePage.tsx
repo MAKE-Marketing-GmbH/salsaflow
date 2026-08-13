@@ -206,7 +206,7 @@ function FitSection({ c }: { c: StyleContent }) {
               className="group mt-auto inline-flex w-fit items-center gap-1.5 pt-6 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {f.cta.label}
-              <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -327,7 +327,7 @@ function LevelsSection({ c }: { c: StyleContent }) {
                 className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {l.cta.label}
-                <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
               </a>
             </div>
           </motion.div>
@@ -370,7 +370,7 @@ function SocialSection({ c }: { c: StyleContent }) {
               className="group mt-8 inline-flex items-center gap-1.5 rounded-full bg-white px-6 py-3 text-sm font-bold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-salsa)] hover:text-white"
             >
               {s.cta.label}
-              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>

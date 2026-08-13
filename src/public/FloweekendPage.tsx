@@ -210,7 +210,8 @@ function FitSection({ c }: { c: FloweekendContent }) {
               className="group mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {f.cta.label}
-              <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+              {/* Pfeil-Dauer aus dem Motion-Token, sonst faellt Tailwind auf 150ms zurueck. */}
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -252,7 +253,7 @@ function PrepSection({ c }: { c: FloweekendContent }) {
                   className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
                 >
                   {l.label}
-                  <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+                  <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
                 </a>
               ))}
             </motion.div>

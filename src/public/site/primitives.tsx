@@ -154,7 +154,7 @@ export function CtaPill({
         strokeWidth={2.25}
         aria-hidden
         className={cn(
-          'transition-transform',
+          'transition-transform duration-[var(--dur-fast)] ease-out',
           down ? 'motion-safe:group-hover:translate-y-0.5' : 'motion-safe:group-hover:translate-x-0.5',
         )}
       />
@@ -197,7 +197,7 @@ export function CtaText({
         <span
           aria-hidden
           className={cn(
-            'absolute -bottom-0.5 left-0 block h-px w-full origin-left transition-transform duration-300',
+            'absolute -bottom-0.5 left-0 block h-px w-full origin-left transition-transform duration-[var(--dur-base)] ease-out',
             'motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100',
             onNight ? 'bg-white' : 'bg-[var(--color-salsa)]',
           )}
@@ -208,7 +208,7 @@ export function CtaText({
         strokeWidth={2.25}
         aria-hidden
         className={cn(
-          'shrink-0 transition-transform',
+          'shrink-0 transition-transform duration-[var(--dur-fast)] ease-out',
           down ? 'motion-safe:group-hover:translate-y-0.5' : 'motion-safe:group-hover:translate-x-0.5',
         )}
       />

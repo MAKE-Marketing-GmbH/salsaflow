@@ -59,7 +59,7 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
             className="group mt-6 inline-flex min-h-11 items-center gap-2 text-base font-semibold text-[var(--color-salsa)]"
           >
             {c.cta}
-            <ArrowRight size={17} strokeWidth={2.25} className="transition-transform motion-safe:group-hover:translate-x-0.5" aria-hidden />
+            <ArrowRight size={17} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" aria-hidden />
           </a>
         </div>
 

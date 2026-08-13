@@ -108,7 +108,7 @@ function CourseStartCard({ course, data, index }: { course: ScheduleCourse; data
           width={800}
           height={500}
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out motion-safe:group-hover:scale-[1.04]"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.04]"
           style={{ objectPosition: STYLE_THUMB_FOCUS[course.styleKey] ?? 'center 30%' }}
         />
         <span
@@ -153,7 +153,7 @@ function CourseStartCard({ course, data, index }: { course: ScheduleCourse; data
       </span>
       <span className="mt-auto flex items-center justify-between gap-3 pt-2 text-sm font-semibold text-[var(--color-salsa)]">
         <span>{course.status === 'full' ? t.fullyBooked : lang === 'de' ? 'Kurs ansehen' : 'View class'}</span>
-        <ArrowRight aria-hidden className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-1" strokeWidth={2.25} />
+        <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-1" strokeWidth={2.25} />
       </span>
     </a>
   );
@@ -312,7 +312,12 @@ function StylesSection() {
                     <img
                       src={card.photo}
                       alt={card.alt ?? card.title}
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out motion-safe:group-hover:scale-[1.04]"
+                      className={cn(
+                        'absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.04]',
+                        // Das Bachata-Motiv ist hochkant. In der Querformat-Karte (7/5) schneidet
+                        // ein mittiger Ausschnitt beiden Tanzenden den Oberkopf ab.
+                        card.photo?.includes('offer-bachata') && 'object-[center_25%]',
+                      )}
                       width={1200}
                       height={857}
                       loading="lazy"
@@ -320,7 +325,7 @@ function StylesSection() {
                     {/* Rot-Kante faehrt beim Hover ein — dieselbe Micro-Interaction wie auf der Home. */}
                     <span
                       aria-hidden
-                      className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-[var(--color-salsa)] transition-transform duration-500 ease-out motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100"
+                      className="absolute inset-x-0 bottom-0 h-[3px] origin-left bg-[var(--color-salsa)] transition-transform duration-[var(--dur-base)] ease-out motion-safe:scale-x-0 motion-safe:group-hover:scale-x-100"
                     />
                   </a>
                   <div className={cn('flex flex-col justify-center py-12', flip && 'lg:order-1')}>
@@ -662,7 +667,7 @@ function PricesSection() {
                     className="group relative mt-auto inline-flex items-center gap-1.5 pt-8 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
                   >
                     {courseGroup.cta.label}
-                    <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+                    <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
                   </a>
                 ) : null}
               </motion.article>
@@ -699,7 +704,7 @@ function PricesSection() {
                     className="group mt-auto inline-flex items-center gap-1.5 pt-6 text-sm font-semibold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
                   >
                     {privatGroup.cta.label}
-                    <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+                    <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
                   </a>
                 ) : null}
               </motion.article>
@@ -887,7 +892,7 @@ function PrivatSection() {
                 className="group inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-3.5 text-base font-semibold text-[var(--color-ink)] transition-colors hover:text-[var(--color-salsa)]"
               >
                 {de ? 'Schreib uns auf WhatsApp' : 'Message us on WhatsApp'}
-                <CtaArrow className="transition-transform group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
               </a>
             </motion.div>
           </Reveal>

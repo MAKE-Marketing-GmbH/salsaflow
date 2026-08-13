@@ -68,7 +68,7 @@ export function FounderCards({ className = '' }: { className?: string }) {
                 <img
                   src={founder.photo}
                   alt={`${founder.name} ${founder.last}, ${role} ${lang === 'de' ? 'von' : 'at'} Salsaflow`}
-                  className="absolute max-w-none transition-transform duration-500 ease-out motion-safe:group-hover:scale-[1.02]"
+                  className="absolute max-w-none transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.02]"
                   style={{ width: founder.bust.w, left: founder.bust.l, top: founder.bust.t }}
                   loading="lazy"
                   width={1000}

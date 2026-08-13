@@ -215,8 +215,8 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     close: 'Schliessen',
     requiredHint: 'Bitte fülle die Pflichtfelder aus.',
     errorGeneric: 'Buchung fehlgeschlagen. Bitte versuche es erneut.',
-    successConfirmedTitle: 'Platz reserviert',
-    successConfirmedBody: 'Schön, dass du dabei bist. Du bekommst gleich eine Bestätigung per E-Mail. Zahlen kannst du einfach vor Ort (Twint oder Bar).',
+    successConfirmedTitle: 'Reservierung ist da',
+    successConfirmedBody: 'Schön, dass du dabei bist. Wir prüfen den Platz und bestätigen dir kurz. Zahlen kannst du einfach vor Ort (Twint oder Bar).',
     successWaitlistTitle: 'Du bist auf der Warteliste',
     loading: 'Verfügbarkeit wird geprüft...',
     redirecting: 'Weiter zur sicheren Bezahlung...',
@@ -234,10 +234,10 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     messageOptional: 'optional',
     messagePlaceholder: 'Zum Beispiel: Ich habe vor zwei Jahren mal Salsa getanzt …',
     successNextTitle: 'So geht es weiter',
-    successNextMail: 'Deine Bestätigung ist unterwegs — schau in dein Postfach (auch Spam).',
+    successNextMail: 'Wir melden uns bei dir und bestätigen deinen Platz — meist am selben Tag.',
     successNextLocation: 'Studio Elisabethenanlage 7, 4051 Basel — 5 Minuten vom Bahnhof SBB.',
     successNextBring: 'Bring bequeme Kleidung und saubere Schuhe mit flacher Sohle mit.',
-    waitlistBodyExtra: 'Sobald jemand abspringt, rückst du automatisch nach — wir schreiben dir sofort.',
+    waitlistBodyExtra: 'Sobald ein Platz frei wird, schreiben wir dir sofort.',
     toSchedule: 'Zurück zum Kursplan',
     retry: 'Erneut versuchen',
     backToCourses: 'Anderen Kurs wählen',
@@ -273,8 +273,8 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     close: 'Close',
     requiredHint: 'Please fill in the required fields.',
     errorGeneric: 'Booking failed. Please try again.',
-    successConfirmedTitle: 'Spot reserved',
-    successConfirmedBody: 'Great to have you. You will receive a confirmation by email shortly. You can simply pay on site (TWINT or cash).',
+    successConfirmedTitle: 'Your request is in',
+    successConfirmedBody: 'Great to have you. We check the spot and confirm it shortly. You can simply pay on site (TWINT or cash).',
     successWaitlistTitle: 'You are on the waiting list',
     loading: 'Checking availability...',
     redirecting: 'Continuing to secure payment...',
@@ -292,10 +292,10 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     messageOptional: 'optional',
     messagePlaceholder: 'For example: I danced salsa two years ago …',
     successNextTitle: 'What happens next',
-    successNextMail: 'Your confirmation is on its way — check your inbox (and spam folder).',
+    successNextMail: 'We get back to you and confirm your spot — usually the same day.',
     successNextLocation: 'Studio Elisabethenanlage 7, 4051 Basel — 5 minutes from Basel SBB.',
     successNextBring: 'Bring comfortable clothes and clean flat-soled shoes.',
-    waitlistBodyExtra: 'As soon as someone drops out, you move up automatically — we will email you right away.',
+    waitlistBodyExtra: 'As soon as a spot opens up, we write to you right away.',
     toSchedule: 'Back to the schedule',
     retry: 'Try again',
     backToCourses: 'Pick another class',
@@ -365,12 +365,11 @@ export const PAYMENT_UI: Record<Lang, PaymentDict> = {
   },
 };
 
-// Wartelisten-Text mit Position (DE/EN).
-export function waitlistBody(lang: Lang, position: number | null): string {
-  const pos = position ?? 1;
+// Wartelisten-Text (DE/EN). Ohne Platznummer: die kennt nur das Studio, nicht die Website.
+export function waitlistBody(lang: Lang): string {
   return lang === 'de'
-    ? `Diese Rolle ist gerade voll. Du stehst auf Warteplatz ${pos}. Wir melden uns, sobald ein Platz frei wird.`
-    : `This role is currently full. You are number ${pos} on the waiting list. We will get in touch as soon as a spot opens up.`;
+    ? 'Dieser Kurs ist gerade voll. Wir setzen dich auf die Warteliste und melden uns, sobald ein Platz frei wird.'
+    : 'This class is currently full. We put you on the waiting list and get in touch as soon as a spot opens up.';
 }
 
 /* Level-Kategorien fuer den Level-Filter (DE/EN). Quelle: level_rungs.category. */

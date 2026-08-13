@@ -174,7 +174,7 @@ function ThemesSection({ c }: { c: FaqPageContent }) {
                 size={18}
                 strokeWidth={2}
                 aria-hidden
-                className="mt-1 shrink-0 text-[var(--color-salsa)] transition-transform group-hover:translate-x-0.5"
+                className="mt-1 shrink-0 text-[var(--color-salsa)] transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5"
               />
             </motion.a>
           ))}

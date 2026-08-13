@@ -35,6 +35,7 @@ export type SeoKey =
   | 'faq'
   | 'admin'
   | 'booking'
+  | 'bookingStatus'
   | 'notFound';
 
 export type Meta = {
@@ -76,6 +77,7 @@ export const SEO_ROUTE_CONFIG: Record<SeoKey, SeoRouteConfig> = {
   schedule: { canonicalPath: '/kursplan', indexable: true },
   admin: { canonicalPath: '/admin', indexable: false },
   booking: { canonicalPath: '/buchung', indexable: false },
+  bookingStatus: { canonicalPath: '/buchung', indexable: false },
   notFound: { canonicalPath: '/404', indexable: false },
 };
 
@@ -414,6 +416,16 @@ export const SEO_META: Record<SeoKey, Record<Lang, Meta>> = {
     },
   },
   booking: {
+    de: {
+      title: 'Platz reservieren | Salsaflow Dance Company',
+      description: 'Reserviere deinen Platz im Tanzkurs bei der Salsaflow Dance Company.',
+    },
+    en: {
+      title: 'Reserve your spot | Salsaflow Dance Company',
+      description: 'Reserve your spot in a dance class at the Salsaflow Dance Company.',
+    },
+  },
+  bookingStatus: {
     de: {
       title: 'Buchungsstatus | Salsaflow Dance Company',
       description: 'Status deiner Kursbuchung bei der Salsaflow Dance Company.',
