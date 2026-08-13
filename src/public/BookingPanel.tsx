@@ -384,10 +384,10 @@ function Funnel() {
                 return (
                   <li
                     key={c.id}
-                    // ease-out statt Federkurve: cubic-bezier(0.34,1.56,0.64,1) schiesst ueber den
-                    // Zielwert hinaus und wippt zurueck. Bei einer Liste von bis zu neun Karten
-                    // wippt dann alles nacheinander. Dieselbe Animation lief an drei anderen
-                    // Stellen im selben Panel schon mit ease-out.
+                    // ease-out statt der frueheren Federkurve: die schoss ueber den Zielwert
+                    // hinaus und wippte zurueck. Bei bis zu neun Karten wippt dann alles
+                    // nacheinander. Dieselbe Animation lief an drei anderen Stellen im selben
+                    // Panel schon mit ease-out.
                     className="motion-safe:animate-[booking-panel-in_280ms_ease-out_both]"
                     style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
                   >
