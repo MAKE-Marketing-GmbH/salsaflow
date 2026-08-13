@@ -41,7 +41,10 @@ export function PartysPage() {
         primary={c.hero.primary}
         secondary={c.hero.secondary}
         microcopy={c.hero.microcopy}
-        media={{ src: c.hero.image.src, alt: c.hero.image.alt, position: 'center 38%' }}
+        // 25 % statt 38 %: Das Band zeigt nur 190 von 956 skalierten Pixeln, also ein Fuenftel
+        // des Bildes. Bei 38 % lag das Fenster unter dem Gesicht der Taenzerin, die der
+        // Alt-Text nennt — sichtbar blieben zwei angeschnittene Koepfe dahinter.
+        media={{ src: c.hero.image.src, alt: c.hero.image.alt, position: 'center 25%' }}
       />
       <DanceflowSection c={c} />
       <MoreSection c={c} />
