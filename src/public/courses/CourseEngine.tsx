@@ -59,8 +59,6 @@ const CAL: Record<Lang, {
   until: string;
   teacherTba: string;
   beginner: string;
-  moreStyles: (n: number) => string;
-  lessStyles: string;
 }> = {
   de: {
     day: 'Tag',
@@ -79,8 +77,6 @@ const CAL: Record<Lang, {
     until: 'bis',
     teacherTba: 'Lehrer folgt',
     beginner: 'Ideal zum Einsteigen',
-    moreStyles: (n) => `+ ${n} weitere`,
-    lessStyles: 'Weniger',
   },
   en: {
     day: 'Day',
@@ -99,8 +95,6 @@ const CAL: Record<Lang, {
     until: 'until',
     teacherTba: 'Teacher to be announced',
     beginner: 'Perfect for starting out',
-    moreStyles: (n) => `+ ${n} more`,
-    lessStyles: 'Less',
   },
 };
 
@@ -454,10 +448,6 @@ function DayBar({
 }) {
   const { lang } = useLang();
   const c = CAL[lang];
-  // Stil-Chips mobil eingeklappt (siehe Kommentar an der Chip-Zeile).
-  const [stylesExpanded, setStylesExpanded] = useState(false);
-  const MOBILE_CHIPS = 3;
-  const hiddenStyleCount = styles.filter((s, i) => i >= MOBILE_CHIPS && !styleKeys.includes(s.key)).length;
 
   return (
     // Bewusst NICHT sticky. Ein Tag hat hoechstens 9 Kurse (rund eine Bildschirmhoehe), die
@@ -515,13 +505,11 @@ function DayBar({
       </div>
 
       {/* EINE schlanke Zeile Stil-Chips. Mehr Filter gibt es bewusst nicht.
-          Mobil wird NICHT mehr horizontal gescrollt: die Reihe schnitt am Viewport-Rand mitten
+          Mobil wird NICHT horizontal gescrollt: die Reihe schnitt am Viewport-Rand mitten
           ins Wort ("Cho" statt "Cha Cha Cha") und sah kaputt aus (Beleg:
-          /tmp/salsaflow-r2-mobil/kursplan-mobile-00-fold.png). Jetzt umbrechen die Chips, und
-          damit 8 Stile x lange Namen ("Bodymovement & Ladystyle") den ersten Kurs nicht unter
-          den Fold schieben, sind mobil nur die ersten drei plus ein "+ n weitere"-Schalter
-          sichtbar. Ein aktiver Filter bleibt immer sichtbar, sonst waere er unsichtbar aktiv.
-          Ab sm stehen ohnehin alle Chips nebeneinander. */}
+          /tmp/salsaflow-r2-mobil/kursplan-mobile-00-fold.png). Die Chips umbrechen, und es
+          sind ALLE sichtbar: der fruehere "+ n weitere"-Schalter versteckte fuenf Stile
+          hinter einem Extra-Tap (Critic 13.08.2026). */}
       <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <span className="mr-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
           {c.style}
@@ -529,29 +517,16 @@ function DayBar({
         <StyleChip active={styleKeys.length === 0} onClick={() => onStyle([])} testid="style-all">
           {c.allStyles}
         </StyleChip>
-        {styles.map((s, i) => (
+        {styles.map((s) => (
           <StyleChip
             key={s.key}
             active={styleKeys.includes(s.key)}
             onClick={() => onStyle(styleKeys.includes(s.key) ? styleKeys.filter((k) => k !== s.key) : [...styleKeys, s.key])}
             testid={`style-${s.key}`}
-            // hidden nur mobil und nur fuer nicht gewaehlte Chips hinter den ersten dreien
-            className={cn(i >= MOBILE_CHIPS && !stylesExpanded && !styleKeys.includes(s.key) && 'hidden sm:inline-flex')}
           >
             {lang === 'de' ? s.de : s.en}
           </StyleChip>
         ))}
-        {hiddenStyleCount > 0 && (
-          <button
-            type="button"
-            onClick={() => setStylesExpanded((v) => !v)}
-            data-testid="style-more"
-            aria-expanded={stylesExpanded}
-            className="min-h-11 shrink-0 whitespace-nowrap rounded-full border border-dashed border-[var(--color-ink-muted)] px-3.5 py-1.5 text-[0.8rem] font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)] sm:hidden"
-          >
-            {stylesExpanded ? c.lessStyles : c.moreStyles(hiddenStyleCount)}
-          </button>
-        )}
       </div>
     </div>
   );
@@ -671,7 +646,7 @@ function SlotRow({ slot, hideStart = false }: { slot: WeekSlot; hideStart?: bool
           Pill-CTA, alle weiteren einen Textlink — sah aus wie zwei Buchungs-Systeme.
           Jetzt EIN ruhiger Zeilen-CTA fuer alle; die rote Hauptaktion gehoert dem
           ScheduleBottomCta. */}
-      <span className="inline-flex min-h-8 shrink-0 items-center justify-center gap-1.5 self-start px-1 text-sm font-semibold text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-salsa)] sm:self-center">
+      <span className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start px-1 text-sm font-semibold text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-salsa)] sm:self-center">
         {label}
         <ArrowRight size={16} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
       </span>

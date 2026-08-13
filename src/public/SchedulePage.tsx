@@ -80,9 +80,11 @@ export function SchedulePage() {
                 width={1600}
                 height={1067}
                 loading="eager"
-                // 25% statt Mitte: Das Band ist sehr flach (160px auf voller Breite). Mittig
-                // geschnitten faellt die ganze Kopfreihe raus, man sieht nur Rumpf und Beine.
-                className="h-[160px] w-full object-cover object-[center_25%] sm:h-[190px] lg:h-[132px]"
+                // 12% statt Mitte: Das Band ist sehr flach (160px auf voller Breite). Mittig
+                // geschnitten faellt die ganze Kopfreihe raus. 25% reichte nicht: zwischen
+                // 640 und 1023px (Band 190px) schnitt der Crop die hintere Kopfreihe oben an
+                // (Critic 13.08.2026); 12% haelt sie auf allen Breiten im Bild.
+                className="h-[160px] w-full object-cover object-[center_12%] sm:h-[190px] lg:h-[132px]"
               />
             </figure>
           </div>
