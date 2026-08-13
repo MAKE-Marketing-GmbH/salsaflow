@@ -215,7 +215,10 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                       disabled={count === 0}
                       onClick={() => setDay(d.key)}
                       className={cn(
-                        'group flex min-w-0 flex-col items-start gap-1 rounded-[var(--radius-chip)] px-1.5 py-2.5 text-left transition-colors sm:px-3',
+                        // Inhalt zentriert wie in den /kursplan-Tag-Tabs: linksbuendige Labels
+                        // liessen in den breiten Desktop-Spalten ein Loch zwischen dem "Mi"-Text
+                        // und der vollbreiten aktiven Kachel (Critic 13.08.2026).
+                        'group flex min-w-0 flex-col items-center gap-1 rounded-[var(--radius-chip)] px-1.5 py-2.5 text-center transition-colors sm:px-3',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-paper-warm)]',
                         count === 0
                           ? 'cursor-default text-[var(--color-line)]'
