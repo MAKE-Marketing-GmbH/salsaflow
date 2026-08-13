@@ -304,7 +304,7 @@ export function Hero() {
               <img
                 src="/photos/2026/hero-paar-dreh-01.webp"
                 alt={alt}
-                className="h-full w-full object-cover object-[50%_38%] sm:object-[50%_32%]"
+                className="h-full w-full object-cover object-[50%_38%] sm:object-[50%_32%] lg:object-[50%_18%]"
                 width={1600}
                 height={1066}
                 loading="eager"

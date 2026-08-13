@@ -12,7 +12,7 @@ import type { Faq, Crumb } from '@/public/subpage/kit';
 export type StyleKey = 'salsa' | 'bachata';
 
 type Cta = { label: string; href: string };
-type Img = { src: string; alt: string; position?: string; mobileSrc?: string };
+type Img = { src: string; alt: string; position?: string; mobileSrc?: string; heightClass?: string };
 
 export type StyleContent = {
   seo: SeoKey;
@@ -373,7 +373,12 @@ const bachata: Record<Lang, StyleContent> = {
       secondary: { label: 'Bachata Kursplan ansehen', href: R.bachataPlan },
       microcopy: 'Wir helfen dir, sicher und passend einzusteigen.',
       image: { src: '/photos/premium/offer-bachata-1200.webp', alt: 'Bachata-Paar mit ruhiger, warmer Verbindung im Salsaflow Studio' },
-      band: { src: '/photos/premium/offer-bachata-hero-2100.webp', alt: 'Bachata-Paar in warmer Nähe, ruhige Verbindung im Studio' },
+      band: {
+        src: '/photos/premium/offer-bachata-wide-v2.webp',
+        alt: 'Bachata-Paar in ruhiger Haltung im Unterricht',
+        position: 'center 22%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+      },
       cardLabel: 'Dein Einstieg',
       cardText: 'Timing, Connection, Körpergefühl. Ohne Druck.',
     },
@@ -391,11 +396,7 @@ const bachata: Record<Lang, StyleContent> = {
         { title: 'Was du lernst', text: 'Basics, Gewicht, Führung und Folgen, Körperkontrolle, sichere Bewegungsqualität.' },
         { title: 'Was sich ändert', text: 'Deine Bewegungen sehen weich aus, weil sie kontrolliert sind: Das Timing sitzt, Signale sind klar, Nähe bleibt respektvoll.' },
       ],
-      // Runde 3, Issue 3: war /photos/gallery/kurse/03.jpg (dasselbe Foto wie Home-Hero,
-      // /kontakt, Team, Bachata-Kachel, Galerie). Der wide-Crop desselben Bachata-Moments
-      // zeigt hier den ganzen Raum, waehrend der Hero-Crop oben nah am Paar bleibt —
-      // "klar anderer Einsatz" im Sinne von DESIGN.md:93.
-      image: { src: '/photos/premium/offer-bachata-wide-v2.webp', alt: 'Bachata-Paar in ruhiger Haltung im Unterricht' },
+      image: { src: '/photos/gallery/kurse/03.jpg', alt: 'Lachendes Bachata-Paar im Unterricht, Köpfe vollständig' },
     },
     fit: {
       title: 'Bachata passt, wenn du Flow suchst, aber trotzdem Struktur brauchst',
@@ -425,7 +426,7 @@ const bachata: Record<Lang, StyleContent> = {
         { tag: 'Modul 4', title: 'Musikalität', text: 'Du verstehst, wie du auf Musik reagierst, damit sich Bachata weniger gezählt und mehr getanzt anfühlt.' },
       ],
       cta: { label: 'Bachata Kurse ansehen', href: R.bachataPlan },
-      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Bachata-Grundschritt im Unterricht' },
+      image: { src: '/photos/gallery/kurse/04.jpg', alt: 'Zwei Tänzerinnen im Bachata-Kurs, Blickkontakt und Lachen' },
     },
     levels: {
       title: 'Wir finden den Bachata-Kurs, der zu deinem',
@@ -499,7 +500,12 @@ const bachata: Record<Lang, StyleContent> = {
       secondary: { label: 'See the Bachata schedule', href: R.bachataPlan },
       microcopy: 'We help you get in safely and at the right level.',
       image: { src: '/photos/premium/offer-bachata-1200.webp', alt: 'Bachata couple with a calm, warm connection in the Salsaflow studio' },
-      band: { src: '/photos/premium/offer-bachata-hero-2100.webp', alt: 'Bachata couple in warm closeness, calm connection in the studio' },
+      band: {
+        src: '/photos/premium/offer-bachata-wide-v2.webp',
+        alt: 'Bachata couple in a calm posture during class',
+        position: 'center 22%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+      },
       cardLabel: 'Your start',
       cardText: 'Timing, connection and body awareness. Without pressure.',
     },
@@ -515,7 +521,7 @@ const bachata: Record<Lang, StyleContent> = {
         { title: 'What you learn', text: 'Basics, weight transfer, leading and following, body control and safe technique.' },
         { title: 'What changes', text: 'Your movement looks soft because it is controlled: the timing sits, signals are clear, closeness stays respectful.' },
       ],
-      image: { src: '/photos/premium/offer-bachata-wide-v2.webp', alt: 'Bachata couple in a calm posture during class' },
+      image: { src: '/photos/gallery/kurse/03.jpg', alt: 'Smiling Bachata couple in class, heads fully visible' },
     },
     fit: {
       title: 'Bachata suits you if you want flow, but still need structure',
@@ -545,7 +551,7 @@ const bachata: Record<Lang, StyleContent> = {
         { tag: 'Module 4', title: 'Musicality', text: 'You understand how to react to the music, so Bachata feels less counted and more danced.' },
       ],
       cta: { label: 'See Bachata courses', href: R.bachataPlan },
-      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Bachata basic step in class' },
+      image: { src: '/photos/gallery/kurse/04.jpg', alt: 'Two women dancing Bachata in class, eye contact and a smile' },
     },
     levels: {
       title: 'We help you find the Bachata class for your',

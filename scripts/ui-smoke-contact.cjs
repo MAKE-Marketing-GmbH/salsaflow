@@ -80,12 +80,15 @@ async function noHOverflow(page) {
 
     await page.screenshot({ path: `${SHOTS}/kontakt-desktop-de.png`, fullPage: true });
 
-    // KERN: Formular absenden -> Erfolg + neue .eml in der Outbox (End-to-End-Nachweis)
+    // KERN: Wizard absenden -> Erfolg + neue .eml in der Outbox (End-to-End-Nachweis)
     const token = `SMOKE-CONTACT-${Date.now()}`;
     const before = emlSet();
+    await page.locator('[data-testid="inquiry-next"]').click();
+    await page.locator('textarea').fill(`Automatischer Smoke-Test. Marker ${token}`);
+    await page.locator('[data-testid="inquiry-next"]').click();
     await page.locator('[data-testid="contact-name"]').fill('Smoke Tester');
     await page.locator('[data-testid="contact-email"]').fill('smoke@example.com');
-    await page.locator('[data-testid="contact-message"]').fill(`Automatischer Smoke-Test. Marker ${token}`);
+    await page.locator('[data-testid="inquiry-next"]').click();
     await page.locator('[data-testid="contact-submit"]').click();
     await page.locator('[data-testid="contact-success"]').waitFor({ timeout: 12000 });
     ok('Formular zeigt Erfolg nach Absenden', true);

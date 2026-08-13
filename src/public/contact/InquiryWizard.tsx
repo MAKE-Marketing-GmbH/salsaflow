@@ -80,6 +80,9 @@ export function InquiryWizard({
   function selectTopic(next: TopicKey) {
     setTopic(next);
     onTopicChange?.(next);
+    setStyle('unsure');
+    setTime('flexible');
+    setNotes('');
     setError('');
   }
 
@@ -98,6 +101,15 @@ export function InquiryWizard({
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (step < 3) {
+      goNext();
+      return;
+    }
+    if (!contactValid || (!needsChoices && notes.trim().length < 5)) {
+      setError(!contactValid ? copy.contactError : copy.detailError);
+      return;
+    }
+    if (status === 'submitting') return;
     setStatus('submitting');
     setError('');
     const details = needsChoices
@@ -126,7 +138,7 @@ export function InquiryWizard({
 
   if (status === 'success') {
     return (
-      <div data-testid="inquiry-success" role="status" aria-live="polite" className="flex min-h-[18rem] flex-col items-start justify-center p-6 sm:p-8">
+      <div data-testid="contact-success" role="status" aria-live="polite" className="flex min-h-[18rem] flex-col items-start justify-center p-6 sm:p-8">
         <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-salsa)] text-white">
           <Check aria-hidden className="h-6 w-6" strokeWidth={2.4} />
         </span>
@@ -206,9 +218,9 @@ export function InquiryWizard({
             <h3 ref={headingRef} tabIndex={-1} className="font-display text-2xl font-bold leading-tight text-[var(--color-ink)] outline-none">{copy.contactTitle}</h3>
             <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.contactLead}</p>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <Input label={copy.name} value={name} onChange={(value) => { setName(value); setError(''); }} autoComplete="name" />
+              <Input testId="contact-name" label={copy.name} value={name} onChange={(value) => { setName(value); setError(''); }} autoComplete="name" />
               <Input label={copy.phone} value={phone} onChange={(value) => { setPhone(value); setError(''); }} type="tel" autoComplete="tel" optional />
-              <Input label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" optional className="sm:col-span-2" />
+              <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" optional className="sm:col-span-2" />
             </div>
             <p className="mt-4 text-xs leading-relaxed text-[var(--color-ink-muted)]">{copy.privacy}</p>
             <div aria-hidden className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
@@ -242,11 +254,11 @@ export function InquiryWizard({
           </button>
         ) : <span />}
         {step < 3 ? (
-          <button key="wizard-next" type="button" onClick={(event) => { event.preventDefault(); goNext(); }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-7 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]">
+          <button key="wizard-next" type="button" data-testid="inquiry-next" onClick={(event) => { event.preventDefault(); goNext(); }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-7 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]">
             {copy.next}<ArrowRight aria-hidden className="h-4 w-4" />
           </button>
         ) : (
-          <button key="wizard-submit" type="submit" data-testid="inquiry-submit" disabled={status === 'submitting'} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-7 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)] disabled:cursor-not-allowed disabled:opacity-55">
+          <button key="wizard-submit" type="submit" data-testid="contact-submit" disabled={status === 'submitting'} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-7 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)] disabled:cursor-not-allowed disabled:opacity-55">
             {status === 'submitting' ? copy.sending : copy.submit}<ArrowRight aria-hidden className="h-4 w-4" />
           </button>
         )}
@@ -291,8 +303,8 @@ function WizardProgress({ step, labels }: { step: number; labels: readonly strin
 
 const fieldClass = 'mt-1.5 w-full rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 text-base text-[var(--color-ink)] outline-none focus:border-[var(--color-salsa)] focus:ring-2 focus:ring-[var(--color-salsa)]/25';
 
-function Input({ label, value, onChange, type = 'text', autoComplete, optional, className }: { label: string; value: string; onChange: (value: string) => void; type?: string; autoComplete?: string; optional?: boolean; className?: string }) {
-  return <label className={className}><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><input className={fieldClass} type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} /></label>;
+function Input({ label, value, onChange, type = 'text', autoComplete, optional, className, testId }: { label: string; value: string; onChange: (value: string) => void; type?: string; autoComplete?: string; optional?: boolean; className?: string; testId?: string }) {
+  return <label className={className}><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><input className={fieldClass} type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} data-testid={testId} /></label>;
 }
 
 function TextArea({ label, value, onChange, placeholder, optional }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; optional?: boolean }) {

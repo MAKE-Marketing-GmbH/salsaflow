@@ -50,14 +50,17 @@ async function runFunnel(page, prefix) {
   await page.waitForTimeout(500);
   // Das CTA-Ziel direkt laden, damit paralleles Hot-Reload keinen SPA-Zwischenzustand festhaelt.
   if (href) await page.goto(BASE + href, { waitUntil: 'networkidle', timeout: 30000 });
-  await page.locator('[data-testid="contact-name"]:visible').first().waitFor({ timeout: 15000 });
+  await page.locator('[data-testid="inquiry-next"]').first().waitFor({ timeout: 15000 });
   await page.waitForTimeout(400);
-  await funnelShot(page, `${prefix}-01`); // leeres Formular (Kurs vorausgewaehlt)
+  await funnelShot(page, `${prefix}-01`); // Wizard Step 0 (Kurs vorausgewaehlt)
+  await page.locator('[data-testid="inquiry-next"]').click();
+  const msg = page.locator('textarea').first();
+  if (await msg.count()) await msg.fill('Testbuchung Critic Runde 1: bitte einen Platz reservieren.');
+  await page.locator('[data-testid="inquiry-next"]').click();
   await page.locator('[data-testid="contact-name"]:visible').first().fill('Critic Test');
   await page.locator('[data-testid="contact-email"]:visible').first().fill('critic-test@example.com');
-  const msg = page.locator('[data-testid="contact-message"]:visible').first();
-  if (await msg.count()) await msg.fill('Testbuchung Critic Runde 1: bitte einen Platz reservieren.');
-  await funnelShot(page, `${prefix}-02`); // ausgefuellt
+  await page.locator('[data-testid="inquiry-next"]').click();
+  await funnelShot(page, `${prefix}-02`); // Review vor Absenden
   await page.locator('[data-testid="contact-submit"]:visible').first().click();
   await page.locator('[data-testid="contact-success"]').waitFor({ timeout: 15000 });
   await page.waitForTimeout(500);

@@ -210,7 +210,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
             </div>
             <a
               href="/kontakt#schnupperstunde"
-              className="hidden items-center gap-1.5 rounded-full border border-[var(--color-salsa)] bg-[var(--color-salsa)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)] lg:inline-flex"
+              className="hidden items-center gap-1.5 rounded-full border border-[var(--color-salsa)] bg-[var(--color-salsa)] px-3 py-2 text-sm font-semibold text-white transition-colors hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)] sm:inline-flex sm:px-4"
             >
               {c.cta.trial}
               <ArrowRight size={16} strokeWidth={2.25} aria-hidden />

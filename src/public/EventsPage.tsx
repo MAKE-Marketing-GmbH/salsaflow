@@ -149,12 +149,13 @@ function EventsHero() {
       lead={h.lead}
       facts={facts}
       media={{
-        src: '/photos/party/party-35-v3.webp',
+        src: '/photos/party/party-52.webp',
         alt:
           lang === 'de'
-            ? 'Lächelndes Tanzpaar bei einer Salsaflow Danceflow Night'
-            : 'Smiling dance couple at a Salsaflow Danceflow Night',
-        position: 'center 42%',
+            ? 'Tanzteam auf der Danceflow Night, alle Köpfe sichtbar'
+            : 'Dance team at the Danceflow Night, all heads visible',
+        position: 'center 28%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
       }}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -620,7 +621,7 @@ function TicketsSection() {
           {/* Design-Kritik Runde 2, Issue 4 ("~530px leeres Weiss in der linken Spalte",
               Beleg /tmp/slices/z_events_card2.jpg).
 
-              ROOT CAUSE, nicht Symptom: das <img> stand im normalen Fluss der Grid-Zelle.
+              ROOT CAUSE, nicht Symptom: das Foto stand im normalen Fluss der Grid-Zelle.
               `h-full` loest gegen eine Elternhoehe auf, die selbst noch `auto` ist — der
               Browser faellt deshalb auf das intrinsische Seitenverhaeltnis zurueck und
               rechnet die Hoehe AUS DER BREITE. Nachgerechnet auf 1440px:

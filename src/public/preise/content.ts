@@ -25,7 +25,7 @@ type Img = { src: string; alt: string };
 type SizedImg = Img & { width: number; height: number; position?: string };
 /** Full-bleed Band unter dem Typo-Hero. Gleiche Form wie HeroFrame `media` auf /events und
  *  /team (subpage/kit.tsx) — `position` steuert den Ausschnitt. */
-type HeroMedia = { src: string; alt: string; position?: string };
+type HeroMedia = { src: string; alt: string; position?: string; heightClass?: string };
 type FitOption = { when: string; pick: string; href: string };
 
 export type PreiseContent = {
@@ -166,10 +166,10 @@ export const PREISE: Record<Lang, PreiseContent> = {
         // Kritiker Runde 3, Fix 6 ("leerer Decken-Crop"): 10% war zwar schnittfrei, hat aber
         // die obere Bildhaelfte des Bandes mit Decke und Neonroehren gefuellt — im Screen
         // d-01 (scratch/pv3) ist unter der Falz 250px lang NUR Decke zu sehen, die Tanzenden
-        // beginnen erst im naechsten Screen. Der Ausschnitt wandert nach unten auf die Ebene
-        // der Menschen; welcher Wert die Gesichter vollstaendig traegt, ist unten gemessen
-        // (scratch/pv3-band.cjs, echter Renderkasten 1440x480 im laufenden Dev-Server).
-        position: 'center 34%',
+        // Band ist jetzt 18rem. Fold zeigt den oberen Streifen.
+        // 32% traf Decke, 50% traf Schultern. 38% trifft die hintere Kopfreihe im Fold.
+        position: 'center 38%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
       },
       cardLabel: 'Klar und übersichtlich',
       cardText: 'Alle Preise auf einen Blick. Den Rest klärst du im Kursplan oder per Nachricht.',
@@ -410,10 +410,9 @@ export const PREISE: Record<Lang, PreiseContent> = {
       media: {
         src: '/photos/kurse/kurs-05.jpg',
         alt: 'A full course term in the bright Salsaflow studio, everyone dancing in time',
-        // Gleicher Ausschnitt wie de: bei 42% halbiert die Unterkante denselben Kopf (y=548,
-        // gemessen mit /tmp/pv/facecut.py). Der Wert stand hier noch auf dem alten Stand und
-        // war damit ein zweiter, nur in EN sichtbarer Beschnitt-Bug.
-        position: 'center 10%',
+        // Gleicher Ausschnitt wie de.
+        position: 'center 38%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
       },
       cardLabel: 'Clear and simple',
       cardText: 'All prices at a glance. You sort out the rest in the schedule or by message.',

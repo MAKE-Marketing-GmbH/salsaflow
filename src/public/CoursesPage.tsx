@@ -227,9 +227,9 @@ function CoursesHero() {
       media={{
         src: '/photos/2026/kurse-classfreude-hero-2100.webp',
         alt: de ? 'Tanzkurs im hellen Salsaflow Studio' : 'Dance class in the bright Salsaflow studio',
-        /* Crop etwas hoeher: Gesichter/Oberkoerper bleiben sichtbar, wenn Cookie die
-           untere Bildhaelfte deckt. Band hoeher gezogen (nicht nur duenner Kopfstreifen). */
-        position: 'center 28%',
+        /* Live-Fold 1440x730: 28% koepfte die vordere Reihe. 16% holt die Gesichter
+           in den sichtbaren Streifen unter der Typo. */
+        position: 'center 16%',
         heightClass: 'h-[20rem] sm:h-[26rem] lg:h-[34rem]',
       }}
     />

@@ -6,7 +6,7 @@
 // erfundenen Fakten. Copy nach Regel 003/069/085 (simpel, du-Form, echte Umlaute, CH-ss, keine
 // Em-Dashes).
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
@@ -27,7 +27,7 @@ const ROOM_ICONS: LucideIcon[] = [Music, MapPin, CalendarClock];
 export function ContactPage() {
   // Anliegen-State liegt hier in der Parent-Komponente (state lifting), damit "Raum anfragen"
   // in der RentalSection das Dropdown im Formular vorbelegen kann. FormSection ist controlled.
-  const [topic, setTopic] = useState<TopicKey>('kontakt');
+  const [topic, setTopic] = useState<TopicKey>('schnupperstunde');
   const [cookieVisible, setCookieVisible] = useState(false);
   const [cookieClear, setCookieClear] = useState(false);
 
@@ -202,11 +202,9 @@ function ContactHero() {
               ? 'Lachende Tanzende auf der Fläche bei einer Salsaflow Danceflow Night'
               : 'Laughing dancers on the floor at a Salsaflow Danceflow Night'
           }
-          // Kritiker final-2, Issue 6: Datei 1500x1000, Hero-Band 1440x480 -> skaliert 1440x960,
-          // 480px fallen weg. Bei 40% lagen 192px oben: die Koepfe der hinteren Reihe standen
-          // dicht an der Oberkante, unten wurde ein Gesicht halbiert. Bei 22% (106px oben)
-          // bekommt die hintere Reihe Kopfraum, und der Schnitt unten faellt in den Boden.
-          className="h-[18rem] w-full object-cover object-[center_4%] sm:h-[24rem] lg:h-[32rem]"
+          // Fold 1440x730 zeigt nur den oberen Streifen. Kurzes Band + 42%
+          // legt die Gesichter in diesen Streifen, nicht die rote Wand.
+          className="h-[12rem] w-full object-cover object-[center_42%] sm:h-[15rem] lg:h-[18rem]"
           width={1500}
           height={1000}
           loading="eager"
@@ -218,8 +216,6 @@ function ContactHero() {
 }
 
 /* ---------------------------------------------------------------------------- Formular + Direktkontakt */
-type Status = 'idle' | 'submitting' | 'success' | 'error';
-
 function FormSection({
   topic,
   setTopic,
@@ -228,84 +224,7 @@ function FormSection({
   setTopic: (topic: TopicKey) => void;
 }) {
   const { lang } = useLang();
-  const f = CONTACT_PAGE[lang].form;
   const { item } = useReveal();
-  const topicHints: Record<TopicKey, string> =
-    lang === 'de'
-      ? {
-          kontakt: 'Allgemeine Frage. Wir leiten dich an die richtige Person weiter.',
-          schnupperstunde: 'Schnupperstunde. Wir schlagen dir direkt passende Kurse vor.',
-          kurs: 'Kursfrage. Nenne uns gern Stil, Level oder Wochentag.',
-          privatstunden: 'Privatstunden. Schreib kurz dein Ziel und deinen Wunschzeitraum.',
-          raumvermietung: 'Raumvermietung. Nenne Datum, Uhrzeit und Gruppengrösse.',
-          events: 'Events. Schreib kurz, zu welchem Abend du eine Frage hast.',
-          geschenkgutschein: 'Geschenkgutschein. Nenne kurz Betrag oder Anlass.',
-          animationen: 'Animationen und Shows. Schreib Ort, Datum und Rahmen dazu.',
-        }
-      : {
-          kontakt: 'General question. We forward it to the right person.',
-          schnupperstunde: 'Trial class. We suggest suitable classes right away.',
-          kurs: 'Class question. Tell us the style, level or weekday if you know it.',
-          privatstunden: 'Private lessons. Share your goal and preferred time.',
-          raumvermietung: 'Room rental. Add date, time and group size.',
-          events: 'Events. Tell us which night you mean.',
-          geschenkgutschein: 'Gift voucher. Add the amount or occasion.',
-          animationen: 'Animations and shows. Add place, date and context.',
-        };
-  const submitHelper =
-    lang === 'de'
-      ? 'Wir melden uns so schnell wie möglich mit dem passenden nächsten Schritt.'
-      : 'We will get back to you as soon as possible with the right next step.';
-
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [message, setMessage] = useState('');
-  const [website, setWebsite] = useState(''); // Honeypot (fuer Menschen unsichtbar)
-  const [status, setStatus] = useState<Status>('idle');
-  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
-  const formRef = useRef<HTMLFormElement>(null);
-
-  const mailtoFallback = `mailto:${CONTACT.email}`;
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next: { name?: string; email?: string; message?: string } = {};
-    if (!name.trim()) next.name = lang === 'de' ? 'Bitte gib deinen Namen ein.' : 'Please enter your name.';
-    if (!email.trim()) {
-      next.email = lang === 'de' ? 'Bitte gib deine E-Mail-Adresse ein.' : 'Please enter your email address.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      next.email = lang === 'de' ? 'Bitte prüfe deine E-Mail-Adresse.' : 'Please check your email address.';
-    }
-    if (message.trim().length < 5) {
-      next.message = lang === 'de' ? 'Bitte schreib mindestens fünf Zeichen.' : 'Please write at least five characters.';
-    }
-    setErrors(next);
-    if (Object.keys(next).length > 0) {
-      window.requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus());
-      return;
-    }
-    setStatus('submitting');
-    try {
-      const res = await fetch('/api/public/contact', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone.trim() ? phone.trim() : null,
-          topic,
-          message: message.trim(),
-          language: lang,
-          website,
-        }),
-      });
-      if (!res.ok) throw new Error('request failed');
-      setStatus('success');
-    } catch {
-      setStatus('error');
-    }
-  }
 
   return (
     <section id="schnupperstunde" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-16 lg:py-24">
@@ -319,8 +238,6 @@ function FormSection({
             className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)]"
           >
             <div className="grid gap-0 border-b border-[var(--color-line)] bg-[var(--color-paper-warm)] lg:grid-cols-[1fr_0.62fr]">
-              {/* Eyebrow "Anfrage planen" raus: er sagte dasselbe wie die H2 direkt darunter
-                  (Formel-Abbau, Lex-Lin Regel 11 — die Headline traegt die Hierarchie). */}
               <div className="p-6 sm:p-8 lg:p-10">
                 <h2 className={cn(sectionTitle, MEASURE_L)}>
                   {lang === 'de' ? 'Deine Anfrage, Schritt für Schritt.' : 'Your request, step by step.'}
@@ -350,200 +267,10 @@ function FormSection({
             </div>
 
             <InquiryWizard initialTopic={topic} onTopicChange={setTopic} />
-
-            <details className="border-t border-[var(--color-line)] bg-[var(--color-paper-warm)] px-6 py-5 sm:px-8 lg:px-10">
-              <summary className="cursor-pointer text-sm font-semibold text-[var(--color-ink)] hover:text-[var(--color-salsa)]">
-                {lang === 'de' ? 'Lieber direkt eine Nachricht schreiben?' : 'Prefer to write a direct message?'}
-              </summary>
-              {/* Kein eigener Karten-Rahmen mehr: dieser Block sitzt bereits in der aeusseren
-                  Kontakt-Karte. Zusammen mit den Feld-Kaesten darin waren das drei Ebenen
-                  (Design-Kritik Runde 1, "Karten in Karten"). Jetzt traegt eine Trennlinie. */}
-              <div className="mt-5 overflow-hidden border-t border-[var(--color-line)]">
-            {status === 'success' ? (
-              <div
-                role="status"
-                data-testid="contact-success"
-                className="m-6 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] p-6 sm:m-8 sm:p-8 lg:m-10"
-              >
-                <p className="font-display text-xl font-bold text-[var(--color-ink)]">{f.successTitle}</p>
-                <p className="mt-3 text-base leading-relaxed text-[var(--color-ink-muted)]">{f.successBody}</p>
-              </div>
-            ) : (
-              <form ref={formRef} onSubmit={onSubmit} className="space-y-5 p-6 sm:p-8 lg:p-10" noValidate>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <Field id="cf-name" label={f.name} required error={errors.name}>
-                    <input
-                      id="cf-name"
-                      name="name"
-                      data-testid="contact-name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => {
-                        setName(e.target.value);
-                        if (errors.name) setErrors((current) => ({ ...current, name: undefined }));
-                      }}
-                      autoComplete="name"
-                      required
-                      aria-invalid={Boolean(errors.name)}
-                      aria-describedby={errors.name ? 'cf-name-error' : undefined}
-                      className={inputClass}
-                    />
-                  </Field>
-                  <Field id="cf-email" label={f.email} required error={errors.email}>
-                    <input
-                      id="cf-email"
-                      name="email"
-                      data-testid="contact-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        if (errors.email) setErrors((current) => ({ ...current, email: undefined }));
-                      }}
-                      autoComplete="email"
-                      required
-                      aria-invalid={Boolean(errors.email)}
-                      aria-describedby={errors.email ? 'cf-email-error' : undefined}
-                      className={inputClass}
-                    />
-                  </Field>
-                </div>
-
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <Field id="cf-phone" label={`${f.phone} (${f.phoneOptional})`}>
-                    <input
-                      id="cf-phone"
-                      name="phone"
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      autoComplete="tel"
-                      className={inputClass}
-                    />
-                  </Field>
-                  <Field id="cf-topic" label={f.topic}>
-                    <select
-                      id="cf-topic"
-                      name="topic"
-                      value={topic}
-                      onChange={(e) => setTopic(e.target.value as TopicKey)}
-                      className={inputClass}
-                    >
-                      {f.topicOptions.map((opt) => (
-                        <option key={opt.key} value={opt.key}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{topicHints[topic]}</p>
-                  </Field>
-                </div>
-
-                <Field id="cf-message" label={f.message} required error={errors.message}>
-                  <textarea
-                    id="cf-message"
-                    name="message"
-                    data-testid="contact-message"
-                    value={message}
-                    onChange={(e) => {
-                      setMessage(e.target.value);
-                      if (errors.message) setErrors((current) => ({ ...current, message: undefined }));
-                    }}
-                    required
-                    aria-invalid={Boolean(errors.message)}
-                    aria-describedby={errors.message ? 'cf-message-error' : undefined}
-                    rows={5}
-                    placeholder={f.messagePlaceholder}
-                    className={cn(inputClass, 'resize-y')}
-                  />
-                </Field>
-
-                {/* Honeypot: fuer Menschen unsichtbar, Bots fuellen es gern aus. */}
-                <div aria-hidden className="absolute left-[-9999px] h-0 w-0 overflow-hidden" style={{ position: 'absolute' }}>
-                  <label>
-                    Website
-                    <input
-                      type="text"
-                      tabIndex={-1}
-                      autoComplete="off"
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                    />
-                  </label>
-                </div>
-
-                {status === 'error' && (
-                  <div role="alert" className="rounded-[var(--radius-chip)] border border-[var(--color-salsa)]/30 bg-white p-4">
-                    <p className="text-sm font-semibold text-[var(--color-salsa)]">{f.errorTitle}</p>
-                    <p className="mt-1 text-sm text-[var(--color-ink-muted)]">{f.errorBody}</p>
-                    <a
-                      href={mailtoFallback}
-                      className="mt-2 inline-flex text-sm font-semibold text-[var(--color-salsa)] underline-offset-2 hover:underline"
-                    >
-                      {f.mailtoFallback}
-                    </a>
-                  </div>
-                )}
-
-                <div className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-4">
-                  <p className="text-sm leading-relaxed text-[var(--color-ink-muted)]">{submitHelper}</p>
-                  <button
-                    type="submit"
-                    data-testid="contact-submit"
-                    disabled={status === 'submitting'}
-                    className="inline-flex items-center justify-center rounded-full bg-[var(--color-salsa)] px-7 py-3.5 text-base font-semibold text-white hover:bg-[var(--color-salsa-700)] disabled:opacity-60"
-                  >
-                    {/* Lade-Spinner nur waehrend submitting; unter reduced-motion versteckt
-                        (der Text "Wird gesendet" traegt dann die Loading-Info allein). */}
-                    {status === 'submitting' && (
-                      <span
-                        aria-hidden
-                        className="mr-2.5 h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-white/40 border-t-white"
-                      />
-                    )}
-                    {status === 'submitting' ? f.submitting : f.submit}
-                  </button>
-                </div>
-              </form>
-            )}
-              </div>
-            </details>
           </motion.div>
         </Reveal>
       </Shell>
     </section>
-  );
-}
-
-const inputClass =
-  'mt-1.5 w-full rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-white px-4 py-3 text-base text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)]/70 focus:border-[var(--color-salsa)] focus:outline-none focus:ring-2 focus:ring-[var(--color-salsa)]/30';
-
-function Field({
-  id,
-  label,
-  required = false,
-  error,
-  children,
-}: {
-  id: string;
-  label: string;
-  required?: boolean;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="text-sm font-semibold text-[var(--color-ink)]">
-        {label}
-        {required && <span className="text-[var(--color-salsa)]"> *</span>}
-      </label>
-      {children}
-      {error && (
-        <p id={`${id}-error`} role="alert" className="mt-1.5 text-sm font-medium text-[var(--color-salsa)]">
-          {error}
-        </p>
-      )}
-    </div>
   );
 }
 

@@ -108,7 +108,7 @@ const de: PrivatContent = {
     secondary: { label: 'Preise ansehen', href: R.preise },
     microcopy: 'Beschreib kurz dein Ziel. Wir empfehlen dir den sinnvollen nächsten Schritt.',
     image: {
-      src: '/photos/premium/offer-privat-1200.webp',
+      src: '/photos/premium/offer-privat-square-1200.webp',
       alt: 'Persönlicher Tanzunterricht im hellen Salsaflow Studio',
     },
     cardLabel: 'Dein Ziel',
@@ -222,7 +222,7 @@ const en: PrivatContent = {
     secondary: { label: 'See the prices', href: R.preise },
     microcopy: 'Describe your goal in a few words. We recommend the sensible next step.',
     image: {
-      src: '/photos/premium/offer-privat-1200.webp',
+      src: '/photos/premium/offer-privat-square-1200.webp',
       alt: 'Personal dance coaching in the bright Salsaflow studio',
     },
     cardLabel: 'Your goal',
