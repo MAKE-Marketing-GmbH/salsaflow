@@ -87,7 +87,8 @@ Huellen ziehen ihre Titel jetzt aus `SEO_META` statt aus einer Kopie im Skript.
 | G-DESIGN | ENTSCHIEDEN — A Warme Bühne |
 | Reservierung live | PASS (HTTP 200, echte Mail) |
 | Kein `opacity:0` im HTML | PASS (0 auf allen geprueften Seiten) |
-| Production `a5d2f40` | Live |
+| Live-Sweep `/kontakt` + `/floweekend` | PASS — Folds selbst gelesen, Desktop und Mobil. Wizard zeigt drei Schritte, Floweekend-Band mit allen Koepfen. Ablage `/tmp/salsaflow-live-r6`, `/tmp/sf-wiz3`. |
+| Production | Live |
 | DNS Cutover | offen (Owner) |
 
 ## Hosting-Fakt
@@ -111,10 +112,18 @@ Huellen ziehen ihre Titel jetzt aus `SEO_META` statt aus einer Kopie im Skript.
 
 ## Naechster Schritt
 
-Live-Sweep ueber die restlichen Seiten, jedes Fold-PNG selbst lesen:
+Alle Gates dieser Runde sind gruen. Der naechste sinnvolle Schritt ist eine
+Entscheidung, kein Code:
+
+1. **Eventfrog-Link von Fabio holen** und `VITE_EVENTFROG_URL` setzen. Bis dahin
+   fuehrt der Ticket-Knopf ins eigene Formular — funktioniert, ist aber nicht das Ziel.
+2. **DNS-Cutover planen.** Vorher die Preview auf noindex setzen, sonst
+   konkurrieren zwei Staende in der Suche.
+
+Wenn stattdessen weiter geprueft werden soll, die noch nicht selbst gelesenen Seiten:
 
 ```
 node /root/raphael-skills/skills/eigene/web/scripts/shot-sweep.mjs \
-  --base https://salsaflow-dc.vercel.app --out /tmp/sf-rest \
-  --routes /preise,/privatstunden,/shows-animationen,/kursaufbau --static --mobile
+  --base https://salsaflow-dc.vercel.app --out /tmp/sf-next \
+  --routes /kursaufbau,/mehr/tanzschuhe,/mehr/collabs,/faq --static --mobile
 ```
