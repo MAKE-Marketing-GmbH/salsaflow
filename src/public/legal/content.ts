@@ -2,8 +2,13 @@
 // Copy-Regeln 003/069/085: simpel, du-Form, echte Umlaute (ä/ö/ü, kein ae/oe/ue), CH-ss (kein
 // Eszett, Schweiz), keine Em-Dashes. Die Datenschutzerklaerung beschreibt die TATSAECHLICHEN
 // Datenfluesse der Seite (Quellen: ARCHITEKTUR.md, DECISIONS Etappe 8/9/14): Kontaktformular ->
-// Mail an info@, Buchung -> Postgres/Supabase (EU/Frankfurt), Zahlung -> Stripe, Mailversand ->
+// Mail an info@, Reservierung -> ebenfalls Mail (KEINE Datenbank, KEINE Zahlung), Mailversand ->
 // Resend, Hosting -> Vercel, localStorage -> Sprache und Cookie-Hinweis (kein Analytics).
+//
+// Korrektur 13.08.2026: Der Text nannte Stripe als Zahlungsabwickler und eine Supabase-Datenbank
+// mit Serverstandort Frankfurt. Beides laeuft auf dieser Website nicht (Beschluss "Reservierung
+// statt Kauf", siehe DECISIONS.md). Eine konkrete Zusage, die nicht zutrifft, ist schlimmer als
+// gar keine. Wer Zahlung oder Datenbank spaeter scharf schaltet, traegt sie hier wieder ein.
 //
 // Rechtsname, Adresse, Vertretung und UID stammen aus CONTENT-SPEC und Business-Reality.
 // Ein MWST-Status wird nicht behauptet, weil dafuer kein Beleg vorliegt.
@@ -141,17 +146,17 @@ export const DATENSCHUTZ: Record<Lang, LegalDoc> = {
         ],
       },
       {
-        title: 'Kursbuchung',
+        title: 'Kursreservierung',
         body: [
-          'Wenn du einen Kurs buchst, verarbeiten wir Vor- und Nachname, E-Mail, Telefonnummer, deine Rollenwahl (Leader/Follower), den Tarif und bei einer Paar-Anmeldung die Daten deiner Tanzpartnerin oder deines Tanzpartners.',
-          'Wir brauchen diese Daten, um deinen Kursplatz zu verwalten, dich zu kontaktieren und die Anmeldung zu bestätigen. Rechtsgrundlage ist die Vertragserfüllung.',
+          'Wenn du einen Kursplatz reservierst, verarbeiten wir Vor- und Nachname, E-Mail, Telefonnummer, deine Rollenwahl (Leader/Follower) und bei einer Anmeldung zu zweit die Daten deiner Tanzpartnerin oder deines Tanzpartners.',
+          'Deine Reservierung erreicht uns als E-Mail. Wir brauchen die Daten, um den Platz zu prüfen, dich zu erreichen und die Reservierung zu bestätigen. Rechtsgrundlage ist unser berechtigtes Interesse, deine Anfrage zu beantworten.',
         ],
       },
       {
         title: 'Zahlung',
         body: [
-          'Die Zahlung läuft über den Zahlungsdienstleister Stripe (TWINT, Kredit- und Debitkarte). Deine Zahlungsdaten gibst du direkt auf der sicheren Bezahlseite von Stripe ein.',
-          'Wir sehen keine vollständigen Kartendaten. Wir erhalten nur die Bestätigung, ob die Zahlung erfolgreich war, plus einen Beleg-Verweis. Stripe kann Daten auch ausserhalb der Schweiz/EU bearbeiten; die Übermittlung ist durch Standardvertragsklauseln abgesichert.',
+          'Über diese Website läuft keine Zahlung. Du reservierst nur deinen Platz; bezahlt wird vor Ort im Studio, mit Twint oder bar.',
+          'Wir erheben deshalb keine Zahlungsdaten und geben keine an einen Zahlungsdienstleister weiter.',
         ],
       },
       {
@@ -164,7 +169,7 @@ export const DATENSCHUTZ: Record<Lang, LegalDoc> = {
         title: 'Hosting und Datenbank',
         body: [
           'Diese Website wird bei Vercel gehostet. Beim Aufruf entstehen technische Server-Protokolle (zum Beispiel IP-Adresse, Datum, aufgerufene Seite), die dem Betrieb und der Sicherheit dienen.',
-          'Buchungsdaten speichern wir in einer Datenbank (Supabase) mit Serverstandort in der EU (Frankfurt).',
+          'Diese Website betreibt keine eigene Datenbank. Deine Reservierungen und Anfragen erreichen uns als E-Mail und liegen danach in unserem Postfach.',
         ],
       },
       {
@@ -223,17 +228,17 @@ export const DATENSCHUTZ: Record<Lang, LegalDoc> = {
         ],
       },
       {
-        title: 'Course booking',
+        title: 'Course reservation',
         body: [
-          'When you book a course, we process your first and last name, email, phone number, your role (leader/follower), the tariff and, for a couple booking, the details of your dance partner.',
-          'We need this data to manage your spot, contact you and confirm your registration. The legal basis is the performance of a contract.',
+          'When you reserve a spot, we process your first and last name, email, phone number, your role (leader/follower) and, if you sign up as a pair, the details of your dance partner.',
+          'Your reservation reaches us as an email. We need the data to check the spot, get in touch and confirm the reservation. The legal basis is our legitimate interest in answering your request.',
         ],
       },
       {
         title: 'Payment',
         body: [
-          'Payments are handled by the payment provider Stripe (TWINT, credit and debit card). You enter your payment details directly on the secure Stripe payment page.',
-          'We never see full card details. We only receive a confirmation of whether the payment succeeded plus a receipt reference. Stripe may process data outside Switzerland/the EU; the transfer is safeguarded by standard contractual clauses.',
+          'No payment runs through this website. You only reserve your spot; you pay on site at the studio, by TWINT or cash.',
+          'We therefore collect no payment data and pass none on to a payment provider.',
         ],
       },
       {
@@ -246,7 +251,7 @@ export const DATENSCHUTZ: Record<Lang, LegalDoc> = {
         title: 'Hosting and database',
         body: [
           'This website is hosted by Vercel. When you access the site, technical server logs are created (for example IP address, date, page requested) that serve operation and security.',
-          'Booking data is stored in a database (Supabase) with a server location in the EU (Frankfurt).',
+          'This website runs no database of its own. Your reservations and requests reach us as email and then sit in our mailbox.',
         ],
       },
       {
