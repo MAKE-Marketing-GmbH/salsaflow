@@ -36,6 +36,7 @@ export function FloweekendPage() {
           das Weekend-Motiv laeuft randlos unter der Headline. */}
       <SubHero
         axis="left"
+        dense
         seoCrumbs={c.crumbs}
         title={c.hero.title}
         titleAccent={c.hero.titleAccent}
@@ -43,7 +44,12 @@ export function FloweekendPage() {
         primary={c.hero.primary}
         secondary={c.hero.secondary}
         microcopy={c.hero.microcopy}
-        media={{ src: c.hero.image.src, alt: c.hero.image.alt, position: 'center 40%' }}
+        media={{
+          src: c.hero.image.src,
+          alt: c.hero.image.alt,
+          position: 'center 32%',
+          heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+        }}
       />
       <WhatSection c={c} />
       <ProgramSection c={c} />

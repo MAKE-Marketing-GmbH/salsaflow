@@ -347,7 +347,7 @@ export const PREISE: Record<Lang, PreiseContent> = {
       // Headline ("mehr als einen Kurs"). Die Datei war seit dem Hero-Wechsel
       // (home/Hero.tsx:14) ohne Platzierung.
       image: {
-        src: '/photos/2026/kurse-classfreude-01.webp',
+        src: '/photos/kurse/kurs-07.jpg',
         alt: 'Volle Kursgruppe tanzt gemeinsam im hellen Salsaflow Studio',
       },
     },
@@ -558,7 +558,7 @@ export const PREISE: Record<Lang, PreiseContent> = {
       ],
       cta: { label: 'Ask about the pass', href: '/kontakt' },
       image: {
-        src: '/photos/2026/kurse-classfreude-01.webp',
+        src: '/photos/kurse/kurs-07.jpg',
         alt: 'A full class dancing together in the bright Salsaflow studio',
       },
     },

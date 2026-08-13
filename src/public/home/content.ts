@@ -147,8 +147,8 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
         { key: 'privat', title: 'Privatstunden: gezielt besser werden', hint: '1:1 Coaching', text: 'Privatstunden passen, wenn du an Technik, Stil, Hochzeitstanz oder einem konkreten Ziel arbeiten möchtest.', photo: offerPhotos.privat, alt: 'Lehrerin begleitet einen Schüler in einer Privatstunde', href: '/privatstunden' },
       ],
       extras: [
-        { key: 'gutschein', title: 'Geschenkgutschein', text: 'Verschenk Tanzen. Ein Gutschein für die Schnupperstunde, einen Kurs oder Privatstunden.', cta: 'Gutschein anfragen', href: '/kontakt', icon: 'gift' },
-        { key: 'shows', title: 'Animationen & Shows', text: 'Wir bringen Tanz auf deine Bühne. Auftritte und Animation für Feste, Firmen und Events.', cta: 'Auftritt anfragen', href: '/kontakt', icon: 'show' },
+        { key: 'gutschein', title: 'Geschenkgutschein', text: 'Verschenk Tanzen. Ein Gutschein für die Schnupperstunde, einen Kurs oder Privatstunden.', cta: 'Gutschein anfragen', href: '/kontakt#geschenkgutschein', icon: 'gift' },
+        { key: 'shows', title: 'Animationen & Shows', text: 'Wir bringen Tanz auf deine Bühne. Auftritte und Animation für Feste, Firmen und Events.', cta: 'Auftritt anfragen', href: '/kontakt#animationen', icon: 'show' },
       ],
     },
     schedule: {
@@ -258,8 +258,8 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
         { key: 'privat', title: 'Private lessons for a specific goal', hint: '1:1 coaching', text: 'Private lessons are useful when you want to work on technique, style, a wedding dance or another specific goal.', photo: offerPhotos.privat, alt: 'Teacher giving a private lesson', href: '/privatstunden' },
       ],
       extras: [
-        { key: 'gutschein', title: 'Gift voucher', text: 'Give the gift of dance. A voucher for a trial class, a course or private lessons.', cta: 'Request a voucher', href: '/kontakt', icon: 'gift' },
-        { key: 'shows', title: 'Shows & animation', text: 'We bring dance to your stage. Performances and animation for parties, companies and events.', cta: 'Request a show', href: '/kontakt', icon: 'show' },
+        { key: 'gutschein', title: 'Gift voucher', text: 'Give the gift of dance. A voucher for a trial class, a course or private lessons.', cta: 'Request a voucher', href: '/kontakt#geschenkgutschein', icon: 'gift' },
+        { key: 'shows', title: 'Shows & animation', text: 'We bring dance to your stage. Performances and animation for parties, companies and events.', cta: 'Request a show', href: '/kontakt#animationen', icon: 'show' },
       ],
     },
     schedule: {

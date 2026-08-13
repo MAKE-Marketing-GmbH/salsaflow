@@ -11,6 +11,7 @@ import type { Crumb, Faq } from '@/public/subpage/kit';
 
 type Cta = { label: string; href: string };
 type Img = { src: string; alt: string };
+type HeroBand = Img & { position?: string; heightClass?: string };
 
 export type HeelsContent = {
   seo: SeoKey;
@@ -26,7 +27,7 @@ export type HeelsContent = {
     microcopy: string;
     image: Img;
     /** Full-bleed Charakter-Band unter dem Typo-Hero (21:9 Polished-Hero, Foto-Pipeline 2026-08-06). */
-    band: Img;
+    band: HeroBand;
     cardLabel: string;
     cardText: string;
   };
@@ -104,7 +105,12 @@ export const HEELS: Record<Lang, HeelsContent> = {
       secondary: { label: 'Frage zum Einstieg stellen', href: R.kontakt },
       microcopy: 'Level, Schuhe und Vorbereitung klären wir vor dem Start.',
       image: { src: '/photos/premium/offer-heels-1200.webp', alt: 'Heels-Tänzerin mit klarer Linie und Präsenz im Salsaflow Studio' },
-      band: { src: '/photos/2026/kurse-heels-energie-hero-2100.webp', alt: 'Heels-Kurs im hellen Studio, energiegeladene Gruppe vor der Salsaflow-Wand' },
+      band: {
+        src: '/photos/2026/kurse-heels-energie-hero-2100.webp',
+        alt: 'Heels-Kurs im hellen Studio, energiegeladene Gruppe vor der Salsaflow-Wand',
+        position: 'center 18%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+      },
       cardLabel: 'Dein Einstieg',
       cardText: 'Sicher stehen, Haltung finden, freier bewegen.',
     },
@@ -206,7 +212,12 @@ export const HEELS: Record<Lang, HeelsContent> = {
       secondary: { label: 'Ask about getting started', href: R.kontakt },
       microcopy: 'We sort out level, shoes and preparation before you start.',
       image: { src: '/photos/premium/offer-heels-1200.webp', alt: 'Heels dancer with a clear line and presence in the Salsaflow studio' },
-      band: { src: '/photos/2026/kurse-heels-energie-hero-2100.webp', alt: 'Heels class in the bright studio, energetic group in front of the Salsaflow wall' },
+      band: {
+        src: '/photos/2026/kurse-heels-energie-hero-2100.webp',
+        alt: 'Heels class in the bright studio, energetic group in front of the Salsaflow wall',
+        position: 'center 18%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+      },
       cardLabel: 'Your start',
       cardText: 'Stand safely, find posture, move more freely.',
     },

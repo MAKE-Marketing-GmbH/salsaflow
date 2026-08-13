@@ -224,6 +224,7 @@ export function SubHero({
   facts,
   axis = 'split',
   media,
+  dense = false,
 }: {
   seoCrumbs: Crumb[];
   title: string;
@@ -236,11 +237,14 @@ export function SubHero({
   axis?: HeroAxis;
   /** Optionales full-bleed Band unter dem Typo-Block (randlos, ohne Radius). */
   media?: { src: string; alt: string; position?: string; heightClass?: string };
+  /** Kuerzerer Hero, damit ein kurzes Bildband noch in den 730er-Fold passt. */
+  dense?: boolean;
 }) {
   return (
     <HeroFrame
       axis={axis}
       media={media}
+      dense={dense}
       crumbs={seoCrumbs}
       title={title}
       titleAccent={titleAccent}
@@ -267,6 +271,7 @@ export function HeroFrame({
   microcopy,
   facts,
   media,
+  dense = false,
   children,
 }: {
   axis?: HeroAxis;
@@ -279,6 +284,8 @@ export function HeroFrame({
   microcopy?: string;
   facts?: [string, string][];
   media?: { src: string; alt: string; position?: string; heightClass?: string };
+  /** Kuerzerer Hero, damit ein kurzes Bildband noch in den 730er-Fold passt. */
+  dense?: boolean;
   /** Zusatzinhalt unter dem CTA-Block (z. B. Chip-Reihe auf den Stilseiten). */
   children?: ReactNode;
 }) {
@@ -363,13 +370,16 @@ export function HeroFrame({
   return (
     <section
       className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
-      style={{ paddingTop: 'calc(var(--nav-h) + 1.5rem)' }}
+      style={{ paddingTop: dense ? 'calc(var(--nav-h) + 0.75rem)' : 'calc(var(--nav-h) + 1.5rem)' }}
     >
       <div
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
-      <Shell className={cn('pt-6 lg:pt-10', media ? 'pb-10 sm:pb-12' : 'pb-14 sm:pb-16 lg:pb-20')}>
+      <Shell className={cn(
+        dense ? 'pt-3 lg:pt-5' : 'pt-6 lg:pt-10',
+        media ? (dense ? 'pb-6 sm:pb-7' : 'pb-10 sm:pb-12') : 'pb-14 sm:pb-16 lg:pb-20',
+      )}>
         <motion.div
           data-reveal
           variants={container}

@@ -22,6 +22,7 @@ import { EventsTeaser } from '@/public/home/EventsTeaser';
 import { Faq } from '@/public/home/Faq';
 import { LocationBand } from '@/public/home/LocationBand';
 import { InstagramShowcase } from '@/public/social/InstagramShowcase';
+import { StickyCta } from '@/public/home/StickyCta';
 
 export function HomePage() {
   // Kritiker-Runde 3, Befunde d-11 / m-01 / m-05 / m-07 / m-08: die fixe Cookie-Leiste
@@ -89,7 +90,7 @@ export function HomePage() {
           Beibehalten aus Kritiker final-2, Issue 2: ScheduleTeaser + CoursePath bleiben EIN
           Kapitel mit einer H2 (withCoursePath), und InstagramShowcase bleibt ganz unten als
           Ausblick statt als Station im Scroll. */}
-      <main id="main" tabIndex={-1} className="pb-20 md:pb-0">
+      <main id="main" tabIndex={-1} className="pb-20 sm:pb-0">
         <Hero />
         <Offer />
         <ScheduleTeaser withCoursePath />
@@ -103,6 +104,7 @@ export function HomePage() {
         <InstagramShowcase compact data-design-unit="home.instagram-showcase" />
       </main>
       <SiteFooter entryCta={false} float={false} />  {/* S17 Footer (dunkel, WhatsApp-Float auf Home aus) */}
+      <StickyCta />
     </div>
   );
 }

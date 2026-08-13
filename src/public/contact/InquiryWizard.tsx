@@ -63,6 +63,11 @@ export function InquiryWizard({
 
   useEffect(() => {
     setTopic(initialTopic);
+    setStyle('unsure');
+    setTime('flexible');
+    setNotes('');
+    setError('');
+    setStep(0);
   }, [initialTopic]);
 
   useEffect(() => {
@@ -149,10 +154,10 @@ export function InquiryWizard({
   }
 
   return (
-    <form onSubmit={submit} noValidate className={cn('p-6 sm:p-8', !compact && 'lg:p-10')}>
+    <form onSubmit={submit} noValidate className={cn('p-5 sm:p-6', !compact && 'lg:p-8')}>
       <WizardProgress step={step} labels={copy.progress} />
 
-      <div className="mt-7 min-h-[18rem]">
+      <div className="mt-5 min-h-[12rem]">
         {step === 0 && (
           <fieldset>
             <legend className="font-display text-2xl font-bold leading-tight text-[var(--color-ink)]">{copy.topicTitle}</legend>
@@ -254,7 +259,7 @@ export function InquiryWizard({
           </button>
         ) : <span />}
         {step < 3 ? (
-          <button key="wizard-next" type="button" data-testid="inquiry-next" onClick={(event) => { event.preventDefault(); goNext(); }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-7 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]">
+          <button key="wizard-next" type="submit" data-testid="inquiry-next" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-7 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]">
             {copy.next}<ArrowRight aria-hidden className="h-4 w-4" />
           </button>
         ) : (

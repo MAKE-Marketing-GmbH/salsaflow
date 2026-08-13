@@ -62,7 +62,7 @@ const R = {
   kursplan: '/kursplan',
   tanzkurse: '/tanzkurse',
   preise: '/preise',
-  events: '/events-workshops',
+  events: '/events',
   tanzschuhe: '/mehr/tanzschuhe',
   standort: '/kontakt/standort-raumvermietung',
 };

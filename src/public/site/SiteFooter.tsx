@@ -62,9 +62,9 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
     // Runde 2, Issue 9: Gutschein und Shows/Animationen standen als eigenes Zwei-Karten-Band
     // auf der Startseite (src/public/home/Offer.tsx). Beides sind Nebenwege, keine
     // Hauptentscheidung - sie gehoeren in den Footer, nicht in den Scroll der Startseite.
-    { label: lang === 'de' ? 'Geschenkgutschein' : 'Gift voucher', href: '/kontakt' },
+    { label: lang === 'de' ? 'Geschenkgutschein' : 'Gift voucher', href: '/kontakt#geschenkgutschein' },
     { label: lang === 'de' ? 'Raumvermietung' : 'Room rental', href: '/kontakt/standort-raumvermietung' },
-    { label: lang === 'de' ? 'Shows & Animationen' : 'Shows & entertainment', href: '/shows-animationen' },
+    { label: lang === 'de' ? 'Shows & Animationen' : 'Shows & animation', href: '/shows-animationen' },
   ];
 
   // Spalte 4 "Folg uns": beschriftete Liste (Icon + Label) im selben Rhythmus wie "Entdecken",

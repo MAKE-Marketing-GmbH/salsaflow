@@ -24,25 +24,42 @@ import { Music, MapPin, CalendarClock, ArrowRight, type LucideIcon } from 'lucid
 // (helle Raeume mit Anlage -> Lage am SBB -> flexible Nutzung).
 const ROOM_ICONS: LucideIcon[] = [Music, MapPin, CalendarClock];
 
+const TOPIC_HASHES: Record<string, TopicKey> = {
+  '#schnupperstunde': 'schnupperstunde',
+  '#raumvermietung': 'raumvermietung',
+  '#geschenkgutschein': 'geschenkgutschein',
+  '#events': 'events',
+  '#animationen': 'animationen',
+};
+
+function topicFromLocation(): TopicKey {
+  if (typeof window === 'undefined') return 'schnupperstunde';
+  const fromHash = TOPIC_HASHES[window.location.hash];
+  if (fromHash) return fromHash;
+  if (new URLSearchParams(window.location.search).has('kurs')) return 'kurs';
+  return 'schnupperstunde';
+}
+
 export function ContactPage() {
   // Anliegen-State liegt hier in der Parent-Komponente (state lifting), damit "Raum anfragen"
   // in der RentalSection das Dropdown im Formular vorbelegen kann. FormSection ist controlled.
-  const [topic, setTopic] = useState<TopicKey>('schnupperstunde');
+  const [topic, setTopic] = useState<TopicKey>(topicFromLocation);
   const [cookieVisible, setCookieVisible] = useState(false);
   const [cookieClear, setCookieClear] = useState(false);
 
-  // Hash-Vorauswahl: kommt der Besucher ueber den sitewide CTA /kontakt#schnupperstunde,
-  // ist das Anliegen-Dropdown direkt auf "Schnupperstunde" vorbelegt. Ueber /kontakt#raumvermietung
-  // (Mehr-Nav) ist es analog auf "Raumvermietung" vorbelegt.
+  // Hash setzt das Anliegen und scrollt zum Wizard. #raumvermietung darf nicht an der
+  // Infosektion landen — die Traegt bewusst keine gleichnamige id mehr.
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (window.location.hash === '#schnupperstunde') {
-      setTopic('schnupperstunde');
-    } else if (window.location.hash === '#raumvermietung') {
-      setTopic('raumvermietung');
-    } else if (new URLSearchParams(window.location.search).has('kurs')) {
-      setTopic('kurs');
-    }
+    const next = topicFromLocation();
+    setTopic(next);
+    if (!TOPIC_HASHES[window.location.hash]) return;
+    const target = document.getElementById('kontaktformular');
+    if (!target) return;
+    const frame = window.requestAnimationFrame(() => {
+      target.scrollIntoView({ block: 'start' });
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   // Die fixe Cookie-Leiste darf den letzten Kontaktinhalt nicht verdecken. Das bestehende
@@ -105,7 +122,7 @@ function ContactHero() {
   const direct = CONTACT_PAGE[lang].direct;
   const { container, item } = useReveal();
   return (
-    <section className="relative isolate overflow-hidden bg-[var(--color-paper-warm)]" style={{ paddingTop: 'calc(var(--nav-h) + 1.5rem)' }}>
+    <section className="relative isolate overflow-hidden bg-[var(--color-paper-warm)]" style={{ paddingTop: 'calc(var(--nav-h) + 0.75rem)' }}>
       {/* Kunden-Feedback 2026-08-07: "Die Hintergrund-Illustrationen sehen uebelst komisch aus."
           Die gezeichnete Choreo-Kurve (/graphics/choreo-curve-*.webp) lag hier hinter dem
           Hero und ist ersatzlos gestrichen — sie war die einzige gezeichnete Grafik der
@@ -118,7 +135,7 @@ function ContactHero() {
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
-      <Shell className="grid items-center gap-8 pb-12 pt-6 sm:pb-14 lg:grid-cols-[1fr_0.72fr] lg:gap-14 lg:pt-10">
+      <Shell className="pb-4 pt-2 sm:pb-5 lg:pt-3">
         <motion.div variants={container} initial="hidden" animate="show" className="max-w-3xl">
           {/* Hierarchie: die H1 traegt NUR den Zuruf ("Schreib uns, was du suchst."). Der zweite
               Satz ("Wir helfen dir beim naechsten Schritt.") war vorher als erzwungener Block in
@@ -128,7 +145,7 @@ function ContactHero() {
           <motion.h1
             variants={item}
             className={cn(
-              'font-display text-[2.5rem] font-extrabold leading-[1.04] tracking-[-0.022em] text-balance text-[var(--color-ink)] sm:text-5xl lg:text-[3.55rem]',
+              'font-display text-[2.15rem] font-extrabold leading-[1.04] tracking-[-0.022em] text-balance text-[var(--color-ink)] sm:text-4xl lg:text-[2.85rem]',
               MEASURE_XL,
             )}
           >
@@ -136,81 +153,23 @@ function ContactHero() {
           </motion.h1>
           <motion.p
             variants={item}
-            className="mt-5 max-w-lg text-pretty font-display text-xl font-bold leading-snug text-[var(--color-ink)] sm:text-2xl"
+            className="mt-3 max-w-lg text-pretty font-display text-lg font-bold leading-snug text-[var(--color-ink)] sm:text-xl"
           >
             {h.titleB}
           </motion.p>
-          <motion.p variants={item} className={`mt-4 max-w-xl text-pretty ${sectionLead}`}>{h.lead}</motion.p>
-        </motion.div>
-
-        <motion.div variants={item} initial="hidden" animate="show">
-          <aside className="rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-6 shadow-[0_18px_50px_rgba(17,17,17,0.08)] sm:p-7">
-            <h2 className="font-display text-2xl font-bold leading-tight text-[var(--color-ink)]">
-              {direct.title}
-            </h2>
-            <div className="mt-6 space-y-3">
-              <a
-                href={CONTACT.whatsapp}
-                target="_blank"
-                rel="noreferrer"
-                className="group grid min-h-14 grid-cols-[1fr_auto] items-center gap-3 rounded-[var(--radius-card)] bg-[var(--color-salsa)] px-4 py-3 font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
-              >
-                <span>{direct.whatsappLabel}</span>
-                <ArrowRight size={18} strokeWidth={2.25} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
-              </a>
-              <a
-                href={`mailto:${CONTACT.email}`}
-                className="grid min-h-14 gap-1 rounded-[var(--radius-card)] border border-[var(--color-line)] px-4 py-3 font-semibold text-[var(--color-ink)] hover:border-[var(--color-salsa)] sm:grid-cols-[auto_1fr] sm:items-center sm:gap-4"
-              >
-                <span>{direct.emailLabel}</span>
-                <span className="min-w-0 break-words text-sm font-medium leading-snug text-[var(--color-ink-muted)] sm:text-right">
-                  {CONTACT.email}
-                </span>
-              </a>
-              <a
-                href={CONTACT.phoneHref}
-                className="grid min-h-14 gap-1 rounded-[var(--radius-card)] border border-[var(--color-line)] px-4 py-3 font-semibold text-[var(--color-ink)] hover:border-[var(--color-salsa)] sm:grid-cols-[auto_1fr] sm:items-center sm:gap-4"
-              >
-                <span>{direct.phoneLabel}</span>
-                <span className="text-sm font-medium leading-snug text-[var(--color-ink-muted)] sm:text-right">{CONTACT.phoneDisplay}</span>
-              </a>
-            </div>
-            <p className="mt-5 border-t border-[var(--color-line)] pt-5 text-sm leading-relaxed text-[var(--color-ink-muted)]">
-              {direct.hours}
-            </p>
-          </aside>
+          <motion.p variants={item} className={`mt-3 max-w-xl text-pretty ${sectionLead}`}>{h.lead}</motion.p>
+          <motion.a
+            variants={item}
+            href={CONTACT.whatsapp}
+            target="_blank"
+            rel="noreferrer"
+            className="group mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
+          >
+            {direct.whatsappLabel}
+            <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
+          </motion.a>
         </motion.div>
       </Shell>
-
-      {/* Kritiker final-1, Issue 3 ("Utility-Seiten eine Klasse unter den Story-Seiten"):
-          /events und /team oeffnen beide mit Typo-Block PLUS full-bleed Bildband darunter
-          (subpage/kit.tsx HeroFrame, Prop `media`) — /kontakt hatte als einzige Story-relevante
-          Seite gar kein Bild ueber der Falz und startete direkt mit dem Formular.
-
-          Gemessen an den Kritiker-Screenshots (_screenshots-kritiker/final-1, gerenderte
-          <img src="/photos/...">-Tags in dist/): team 12, events 12, kontakt 6, preise 1.
-
-          Dieselbe Geometrie wie HeroFrame media (h-[16rem] / sm:h-[22rem] / lg:h-[30rem],
-          randlos, ohne Radius) — bewusst kopierte MASSE statt kopierter Code, weil dieser
-          Hero seine eigene Bauform mit der Direkt-Karte rechts traegt und nicht auf HeroFrame
-          umgestellt werden kann, ohne genau diese Karte zu verlieren. */}
-      <div className="relative w-full overflow-hidden">
-        <img
-          src="/photos/party/party-29.webp"
-          alt={
-            lang === 'de'
-              ? 'Lachende Tanzende auf der Fläche bei einer Salsaflow Danceflow Night'
-              : 'Laughing dancers on the floor at a Salsaflow Danceflow Night'
-          }
-          // Fold 1440x730 zeigt nur den oberen Streifen. Kurzes Band + 42%
-          // legt die Gesichter in diesen Streifen, nicht die rote Wand.
-          className="h-[12rem] w-full object-cover object-[center_42%] sm:h-[15rem] lg:h-[18rem]"
-          width={1500}
-          height={1000}
-          loading="eager"
-          fetchPriority="high"
-        />
-      </div>
     </section>
   );
 }
@@ -227,7 +186,7 @@ function FormSection({
   const { item } = useReveal();
 
   return (
-    <section id="schnupperstunde" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-16 lg:py-24">
+    <section id="schnupperstunde" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-5 lg:py-8">
       {/* id="kontaktformular" bleibt als Alias-Anker (Shell nimmt keine id entgegen), damit
           "Raum anfragen" weiter hierher scrollt. */}
       <span id="kontaktformular" aria-hidden className="block scroll-mt-24" />
@@ -237,33 +196,15 @@ function FormSection({
             variants={item}
             className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)]"
           >
-            <div className="grid gap-0 border-b border-[var(--color-line)] bg-[var(--color-paper-warm)] lg:grid-cols-[1fr_0.62fr]">
-              <div className="p-6 sm:p-8 lg:p-10">
-                <h2 className={cn(sectionTitle, MEASURE_L)}>
-                  {lang === 'de' ? 'Deine Anfrage, Schritt für Schritt.' : 'Your request, step by step.'}
-                </h2>
-                <p className={`mt-4 max-w-md text-pretty ${sectionLead}`}>
-                  {lang === 'de'
-                    ? 'Wähle dein Anliegen. Danach fragen wir nur, was wirklich zählt.'
-                    : 'Choose your request. We then only ask what really matters.'}
-                </p>
-              </div>
-              <div className="relative hidden min-h-full overflow-hidden bg-[var(--color-ink)] lg:block">
-                <img
-                  src="/photos/gallery/danceflow/08.jpg"
-                  alt={lang === 'de' ? 'Salsaflow Gespräch nach dem Kurs' : 'Salsaflow conversation after class'}
-                  className="h-full w-full object-cover object-[center_42%] opacity-85"
-                  width={1200}
-                  height={900}
-                  loading="lazy"
-                />
-                <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/8 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4 rounded-[var(--radius-card)] bg-white/92 p-4 text-[var(--color-ink)] backdrop-blur">
-                  <p className="font-display text-lg font-bold leading-tight">
-                    {lang === 'de' ? 'Eine Person aus dem Team meldet sich.' : 'Someone from the team gets back to you.'}
-                  </p>
-                </div>
-              </div>
+            <div className="border-b border-[var(--color-line)] bg-[var(--color-paper-warm)] px-6 py-4 sm:px-8 lg:px-10">
+              <h2 className={cn(sectionTitle, MEASURE_L)}>
+                {lang === 'de' ? 'Deine Anfrage, Schritt für Schritt.' : 'Your request, step by step.'}
+              </h2>
+              <p className={`mt-2 max-w-md text-pretty ${sectionLead}`}>
+                {lang === 'de'
+                  ? 'Wähle dein Anliegen. Danach fragen wir nur, was wirklich zählt.'
+                  : 'Choose your request. We then only ask what really matters.'}
+              </p>
             </div>
 
             <InquiryWizard initialTopic={topic} onTopicChange={setTopic} />
@@ -345,7 +286,7 @@ function RentalSection({ onRequestRoom }: { onRequestRoom: () => void }) {
       ? ['Training', 'Workshop', 'Probe', 'kleines Event']
       : ['Training', 'Workshop', 'Rehearsal', 'small event'];
   return (
-    <section id="raumvermietung" className="scroll-mt-24 bg-[var(--color-bg-soft)] pt-16 pb-[calc(4rem+var(--contact-cookie-safe,0px))] lg:pt-24 lg:pb-[calc(6rem+var(--contact-cookie-safe,0px))]">
+    <section id="raum-info" className="scroll-mt-24 bg-[var(--color-bg-soft)] pt-16 pb-[calc(4rem+var(--contact-cookie-safe,0px))] lg:pt-24 lg:pb-[calc(6rem+var(--contact-cookie-safe,0px))]">
       <Shell>
         <Reveal>
           <motion.article

@@ -98,8 +98,8 @@ export const FLOWEEKEND: Record<Lang, FloweekendContent> = {
       // /events/eventkalender und hier — drei Event-Unterseiten mit demselben Aufmacher.
       // Floweekend bekommt einen eigenen Social-Moment aus der Party-Strecke.
       image: {
-        src: '/photos/party/party-15.webp',
-        alt: 'Volle Tanzfläche mit tanzenden Menschen bei einem Salsaflow Event in Basel',
+        src: '/photos/party/party-29.webp',
+        alt: 'Gruppe tanzt gemeinsam im hellen Salsaflow Studio',
       },
       cardLabel: 'Floweekend',
       cardText: 'Mehr Zeit, mehr Themen, mehr Menschen.',
@@ -203,8 +203,8 @@ export const FLOWEEKEND: Record<Lang, FloweekendContent> = {
       secondary: { label: 'Ask about your level', href: R.kontakt },
       microcopy: 'The programme, levels and prices will be published with the next confirmed date.',
       image: {
-        src: '/photos/party/party-15.webp',
-        alt: 'Full dance floor with people dancing at a Salsaflow event in Basel',
+        src: '/photos/party/party-29.webp',
+        alt: 'Group dancing together in the bright Salsaflow studio',
       },
       cardLabel: 'Floweekend',
       cardText: 'More time, more topics, more people.',
