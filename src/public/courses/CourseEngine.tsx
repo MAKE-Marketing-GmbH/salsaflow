@@ -547,7 +547,7 @@ function DayBar({
             onClick={() => setStylesExpanded((v) => !v)}
             data-testid="style-more"
             aria-expanded={stylesExpanded}
-            className="shrink-0 whitespace-nowrap rounded-full border border-dashed border-[var(--color-ink-muted)] px-3 py-1.5 text-[0.8rem] font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)] sm:hidden"
+            className="min-h-11 shrink-0 whitespace-nowrap rounded-full border border-dashed border-[var(--color-ink-muted)] px-3.5 py-1.5 text-[0.8rem] font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)] sm:hidden"
           >
             {stylesExpanded ? c.lessStyles : c.moreStyles(hiddenStyleCount)}
           </button>
@@ -576,7 +576,8 @@ function StyleChip({
       data-testid={testid}
       aria-pressed={active}
       className={cn(
-        'shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-[0.8rem] font-semibold transition-colors',
+        // min-h-11 (44px): Tap-Ziel-Richtwert; die Chips lagen bei 33px (Raphael 13.08.2026).
+        'min-h-11 shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[0.8rem] font-semibold transition-colors',
         active
           ? 'border-[var(--color-ink)] bg-[var(--color-ink)] text-white'
           : 'border-[var(--color-line)] bg-white text-[var(--color-ink-muted)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]',
