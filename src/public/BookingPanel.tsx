@@ -527,13 +527,31 @@ function BookingForm({
     };
 
     window.addEventListener('keydown', onKey);
-    const prevOverflow = document.body.style.overflow;
+
+    // Body-Scroll sperren. `overflow: hidden` allein reicht auf iOS Safari nicht — dort
+    // scrollt der Hintergrund weiter und nimmt die Geste mit, sodass der Dialog selbst
+    // stehen bleibt. Der Body wird darum zusaetzlich auf `position: fixed` gelegt und die
+    // Scrollposition festgehalten, damit die Seite beim Schliessen nicht nach oben springt.
+    const scrollY = window.scrollY;
+    const prev = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width,
+    };
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
 
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prevOverflow;
+      document.body.style.overflow = prev.overflow;
+      document.body.style.position = prev.position;
+      document.body.style.top = prev.top;
+      document.body.style.width = prev.width;
+      window.scrollTo(0, scrollY);
       previouslyFocused?.focus?.();
     };
   }, [onBack]);
@@ -616,7 +634,14 @@ function BookingForm({
         aria-modal="true"
         aria-labelledby={`booking-panel-title-${course.id}`}
         data-testid="booking-dialog"
-        className="my-auto flex w-full max-w-[980px] max-h-[min(92vh,900px)] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-panel-in_180ms_ease-out]"
+        /* Hoehe in `dvh`, nicht `vh`. Auf Mobil-Browsern meint `vh` den Viewport OHNE
+           Adressleiste — der Dialog wurde damit hoeher als der sichtbare Bereich und die
+           Fusszeile mit dem Absende-Knopf lag darunter, unerreichbar. `dvh` folgt der
+           tatsaechlich sichtbaren Hoehe. Die Klasse ist der `vh`-Fallback fuer Browser ohne
+           `dvh`; die Inline-Regel ueberschreibt sie dort, wo die Einheit bekannt ist.
+           Kennt der Browser `dvh` nicht, verwirft er die Deklaration und die Klasse bleibt. */
+        style={{ maxHeight: 'min(92dvh, 900px)' }}
+        className="my-auto flex max-h-[min(92vh,900px)] w-full max-w-[980px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-panel-in_180ms_ease-out]"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="relative shrink-0 overflow-hidden bg-[var(--color-ink)] px-4 py-3 text-white sm:px-5 sm:py-3.5">

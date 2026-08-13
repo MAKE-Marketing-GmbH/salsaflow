@@ -114,11 +114,11 @@ export function InquiryWizard({
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (step < LAST_STEP) {
+    if (!compact && step < LAST_STEP) {
       goNext();
       return;
     }
-    if (!contactValid || (!needsChoices && notes.trim().length < 5)) {
+    if (!contactValid || (!compact && !needsChoices && notes.trim().length < 5)) {
       setError(!contactValid ? copy.contactError : copy.detailError);
       return;
     }
@@ -160,6 +160,72 @@ export function InquiryWizard({
         <h3 className="mt-5 font-display text-3xl font-bold leading-tight text-[var(--color-ink)]">{copy.successTitle}</h3>
         <p className="mt-3 max-w-lg text-base leading-relaxed text-[var(--color-ink-muted)]">{copy.successBody}</p>
       </div>
+    );
+  }
+
+  if (compact) {
+    return (
+      <form onSubmit={submit} onKeyDown={blockEnterSubmit} noValidate className="p-5 sm:p-6">
+        <fieldset>
+          <legend className="font-display text-2xl font-bold leading-tight text-[var(--color-ink)]">{copy.topicTitle}</legend>
+          <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.topicLead}</p>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            {orderedTopics.map((entry) => {
+              const Icon = TOPIC_ICONS[entry.key];
+              return (
+                <ChoiceCard
+                  key={entry.key}
+                  active={topic === entry.key}
+                  icon={Icon}
+                  label={topicCardLabel(entry.key, entry.label, de)}
+                  compact
+                  className={entry.key === 'schnupperstunde' ? 'col-span-2' : undefined}
+                >
+                  <input className="sr-only" type="radio" name="topic" value={entry.key} checked={topic === entry.key} onChange={() => selectTopic(entry.key)} />
+                </ChoiceCard>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        {needsChoices && (
+          <fieldset className="mt-6">
+            <legend className="text-sm font-semibold text-[var(--color-ink)]">{copy.styleLabel}</legend>
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {copy.styles.map((entry) => (
+                <ChoiceCard key={entry.key} active={style === entry.key} label={entry.label} compact>
+                  <input className="sr-only" type="radio" name="style" value={entry.key} checked={style === entry.key} onChange={() => setStyle(entry.key)} />
+                </ChoiceCard>
+              ))}
+            </div>
+          </fieldset>
+        )}
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <Input testId="contact-name" label={copy.name} value={name} onChange={(value) => { setName(value); setError(''); }} autoComplete="given-name" />
+          <Input label={copy.phone} value={phone} onChange={(value) => { setPhone(value); setError(''); }} type="tel" autoComplete="tel" />
+          <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" className="sm:col-span-2" />
+        </div>
+        <p className="mt-4 text-xs leading-relaxed text-[var(--color-ink-muted)]">{copy.privacy}</p>
+        <div className="relative">
+          <div aria-hidden className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+            <label>Website<input tabIndex={-1} autoComplete="off" value={website} onChange={(event) => setWebsite(event.target.value)} /></label>
+          </div>
+        </div>
+
+        {(error || status === 'error') && (
+          <p role="alert" className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-salsa-50)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">
+            {error || copy.sendError}
+          </p>
+        )}
+
+        <div className="mt-6">
+          <button type="submit" data-testid="contact-submit" disabled={status === 'submitting'} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-7 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)] disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto">
+            {status === 'submitting' ? copy.sending : copy.submit}
+            <ArrowRight aria-hidden className="h-4 w-4" />
+          </button>
+        </div>
+      </form>
     );
   }
 

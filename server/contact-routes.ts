@@ -29,8 +29,10 @@ const TOPIC_LABEL: Record<string, string> = {
 const contactSchema = z
   .object({
     // Der Name steht in der Betreffzeile. Ein Zeilenumbruch darin wuerde dort eine neue
-    // Kopfzeile oeffnen (siehe headerSafe in server/mail.ts).
-    name: z.string().trim().regex(/^[^\r\n]*$/, 'Zeilenumbrüche sind nicht erlaubt').min(1).max(120),
+    // Kopfzeile oeffnen (siehe headerSafe in server/mail.ts). Die Regex steht VOR dem
+    // Trimmen — sonst ist ein fuehrender Umbruch schon weg, bevor sie ihn sehen kann
+    // (dieselbe Reihenfolge wie in reservation-routes.ts, dort ausfuehrlich begruendet).
+    name: z.string().regex(/^[^\r\n]*$/, 'Zeilenumbrüche sind nicht erlaubt').trim().min(1).max(120),
     email: z.string().trim().email().max(160).optional().nullable(),
     phone: z.string().trim().max(40).optional().nullable(),
     topic: z
@@ -74,14 +76,21 @@ export function createContactRoutes() {
 
     const parsed = contactSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) {
-      return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
+      // Die Zod-Fehlerliste bleibt im Log. Nach aussen ging sie vorher mit: Feldnamen, Typen,
+      // Grenzwerte — und darunter der Honeypot-Feldname. Ein Bot baute sich daraus mit einem
+      // einzigen leeren POST die perfekte Nutzlast. Das Formular kennt seine eigenen Regeln.
+      console.error('[contact] ungueltige Eingabe', parsed.error.issues);
+      return c.json({ error: 'Ungültige Eingabe' }, 400);
     }
     const d = parsed.data;
     const replyEmail = d.email?.trim() || null;
 
-    // Honeypot ausgeloest -> als Spam still verwerfen (kein Versand, aber kein Fehler nach aussen).
+    // Honeypot ausgeloest -> als Spam still verwerfen. Die Antwort ist Zeichen fuer Zeichen
+    // dieselbe wie im Erfolgsfall. Ein "skipped: true" verriet dem Bot, dass das Feld ihn
+    // enttarnt hat — beim naechsten Versuch liess er es einfach leer.
     if (d.website && d.website.trim().length > 0) {
-      return c.json({ ok: true, skipped: true }, 200);
+      console.error('[contact] Honeypot ausgeloest, Anfrage verworfen');
+      return c.json({ ok: true }, 200);
     }
 
     const topicLabel = TOPIC_LABEL[d.topic ?? 'kontakt'] ?? TOPIC_LABEL.kontakt;

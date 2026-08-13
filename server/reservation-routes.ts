@@ -47,7 +47,14 @@ const WEEKDAY_DE: Record<string, string> = {
 // Namen und Telefonnummern landen in der Betreffzeile der Mail. Ein Zeilenumbruch darin
 // wuerde dort eine neue Kopfzeile oeffnen (siehe headerSafe in server/mail.ts). Zwei Ebenen:
 // hier abweisen, dort zusaetzlich saeubern.
-const singleLine = z.string().trim().regex(/^[^\r\n]*$/, 'Zeilenumbrüche sind nicht erlaubt');
+//
+// Die Pruefung steht VOR dem Trimmen. Zod wendet Transformationen in Kettenreihenfolge an:
+// stand .trim() zuerst, war ein fuehrender oder schliessender Umbruch schon entfernt, bevor
+// die Regex ihn sehen konnte. Gemessen: "\r\nBcc: fremd@example.com" kam als
+// "Bcc: fremd@example.com" durch, statt eine 400 auszuloesen. Nur der Umbruch mitten im Wort
+// fiel auf. Der Schaden blieb klein, weil headerSafe danach ohnehin saeubert — aber die
+// Ebene, die hier abweisen soll, tat es zur Haelfte nicht.
+const singleLine = z.string().regex(/^[^\r\n]*$/, 'Zeilenumbrüche sind nicht erlaubt').trim();
 
 // Nachname und E-Mail sind Pflicht — genau wie im Formular (BookingPanel.tsx). Vorher war der
 // Server lockerer: per curl kam eine Reservierung ohne Nachname und ohne E-Mail durch, und das

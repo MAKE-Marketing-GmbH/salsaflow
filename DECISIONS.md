@@ -3,6 +3,16 @@
 Diese Datei ist der Loop-Zustand. Jeder 20-Min-Fire liest sie + den Plan + DESIGN.md
 und macht die nächste offene Welle.
 
+## Korrektur 13.08.2026 (Raphael, wörtlich): Startseite NICHT kürzen
+
+- **„Startseite ist kurz" war ein Missverständnis und ist zurückgenommen.** Raphael: „mit zu
+  lang habe ich nicht gemeint, dass du die Startseite kürzer machen sollst". Die volle
+  Startseite (Hero, Offer, ScheduleTeaser, WhyGrid, WallOfLove, Events, Team, Preise, FAQ,
+  Standort, Instagram) ist wiederhergestellt und bleibt. Nicht wieder kürzen.
+- **Header-CTA und Hero-CTA** zeigen wieder auf `/kontakt#schnupperstunde`.
+- **Lenis ist aus.** Natives Scrollen. Raphael konnte in der Session nicht scrollen. Nicht wieder einschalten ohne seine Ansage.
+- **Lokale API muss laufen**, sonst ist der Kursplan tot. `npm run db:migrate && npm run db:seed && npm run dev:api` (Port 8787), Vite auf 5174.
+
 ## Reservierungs-Session 13.08.2026 — Raphaels Entscheide
 
 - **Buchung = Reservierung, kein Verkauf.** Raphael wörtlich: „Wir machen ja ohne Payment.

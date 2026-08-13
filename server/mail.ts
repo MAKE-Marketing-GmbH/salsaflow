@@ -44,9 +44,20 @@ function safeName(s: string): string {
  *
  * Bisher hielt nur der Mailanbieter dagegen (Resend antwortet mit 422). Das ist Glueck, keine
  * Absicherung: bei einem Anbieterwechsel oder auf dem lokalen Pfad waere die Luecke offen.
+ *
+ * Die Zeichenklasse deckt mehr ab als CR und LF. Gemessen gingen vorher NUL, VT, FF, NEL
+ * (U+0085) und die Unicode-Zeilentrenner U+2028/U+2029 unveraendert durch. Gegen SMTP sind
+ * das keine Kopfzeilen-Terminatoren, aber sie verwirren Parser beim Empfaenger und
+ * verschmutzen das Log. Eine Betreffzeile braucht kein einziges Steuerzeichen.
+ *
+ * Die Laengengrenze ist praktisch, nicht formal: RFC 5322 erlaubt 998 Zeichen je Zeile,
+ * lesbar ist ein Betreff aber in keinem Client jenseits von 200.
  */
+// eslint-disable-next-line no-control-regex
+const HEADER_UNSAFE = /[\r\n\u0000-\u001F\u007F\u0085\u2028\u2029]+/g;
+
 function headerSafe(value: string): string {
-  return value.replace(/[\r\n]+/g, ' ').trim();
+  return value.replace(HEADER_UNSAFE, ' ').trim().slice(0, 200);
 }
 
 export async function sendMail(input: MailInput): Promise<MailResult> {

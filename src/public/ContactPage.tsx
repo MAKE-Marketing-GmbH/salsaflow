@@ -136,7 +136,7 @@ function ContactHero() {
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
-      <Shell className="pb-4 pt-2 sm:pb-5 lg:pt-3">
+      <Shell className="pb-2 pt-1 sm:pb-3 lg:pt-2">
         <motion.div variants={container} initial="hidden" animate="show" className="max-w-3xl">
           {/* Hierarchie: die H1 traegt NUR den Zuruf ("Schreib uns, was du suchst."). Der zweite
               Satz ("Wir helfen dir beim naechsten Schritt.") war vorher als erzwungener Block in
@@ -158,13 +158,12 @@ function ContactHero() {
           >
             {h.titleB}
           </motion.p>
-          <motion.p variants={item} className={`mt-3 max-w-xl text-pretty ${sectionLead}`}>{h.lead}</motion.p>
           <motion.a
             variants={item}
             href={CONTACT.whatsapp}
             target="_blank"
             rel="noreferrer"
-            className="group mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
+            className="group mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
           >
             {direct.whatsappLabel}
             <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
@@ -183,7 +182,6 @@ function FormSection({
   topic: TopicKey;
   setTopic: (topic: TopicKey) => void;
 }) {
-  const { lang } = useLang();
   const { item } = useReveal();
 
   return (
@@ -197,17 +195,6 @@ function FormSection({
             variants={item}
             className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)]"
           >
-            <div className="border-b border-[var(--color-line)] bg-[var(--color-paper-warm)] px-6 py-4 sm:px-8 lg:px-10">
-              <h2 className={cn(sectionTitle, MEASURE_L)}>
-                {lang === 'de' ? 'Deine Anfrage, Schritt für Schritt.' : 'Your request, step by step.'}
-              </h2>
-              <p className={`mt-2 max-w-md text-pretty ${sectionLead}`}>
-                {lang === 'de'
-                  ? 'Wähle dein Anliegen. Danach fragen wir nur, was wirklich zählt.'
-                  : 'Choose your request. We then only ask what really matters.'}
-              </p>
-            </div>
-
             <InquiryWizard initialTopic={topic} onTopicChange={setTopic} />
           </motion.div>
         </Reveal>
