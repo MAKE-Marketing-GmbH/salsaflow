@@ -218,7 +218,7 @@ function Funnel() {
             type="button"
             onClick={loadPlan}
             data-testid="plan-retry"
-            className="mt-4 rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-600)]"
+            className="t-hover mt-4 rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-600)]"
           >
             {BOOKING_UI[lang].retry}
           </button>
@@ -281,7 +281,7 @@ function Funnel() {
                         type="button"
                         data-testid="empty-next-day"
                         onClick={() => setDay(nextDayWithCourses.key)}
-                        className="inline-flex h-10 items-center rounded-full bg-[var(--color-salsa)] px-4 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)]"
+                        className="t-hover inline-flex h-10 items-center rounded-full bg-[var(--color-salsa)] px-4 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)]"
                       >
                         {ft.nextDayWithCourses}
                         <span className="ml-1.5 text-white/80">
@@ -291,7 +291,7 @@ function Funnel() {
                     )}
                     <a
                       href="/kontakt#kontaktformular"
-                      className="inline-flex h-10 items-center rounded-full border border-[var(--color-line)] px-4 text-sm font-semibold text-[var(--color-ink)] hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)]"
+                      className="t-hover inline-flex h-10 items-center rounded-full border border-[var(--color-line)] px-4 text-sm font-semibold text-[var(--color-ink)] hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)]"
                     >
                       {lang === 'de' ? 'Frag uns' : 'Ask us'}
                     </a>
@@ -636,7 +636,7 @@ function BookingForm({
               onClick={onBack}
               data-testid="booking-close"
               aria-label={bt.backToCourses}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="t-hover inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 6 6 18M6 6l12 12" />
@@ -695,7 +695,7 @@ function BookingForm({
                 type="button"
                 onClick={onBack}
                 data-testid="booking-change-course"
-                className="mt-3 text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4 hover:text-[var(--color-salsa-700)]"
+                className="t-hover mt-3 text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4 hover:text-[var(--color-salsa-700)]"
               >
                 ← {ft.changeCourse}
               </button>
@@ -712,7 +712,7 @@ function BookingForm({
                 type="button"
                 onClick={loadAvail}
                 data-testid="avail-retry"
-                className="mt-3 rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-600)]"
+                className="t-hover mt-3 rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-600)]"
               >
                 {bt.retry}
               </button>
@@ -851,7 +851,7 @@ function BookingForm({
                 <button
                   type="button"
                   onClick={onBack}
-                  className="hidden rounded-full px-5 py-2.5 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)] sm:inline-flex"
+                  className="t-hover hidden rounded-full px-5 py-2.5 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)] sm:inline-flex"
                 >
                   {bt.back}
                 </button>
@@ -860,7 +860,7 @@ function BookingForm({
                   form={`booking-form-${course.id}`}
                   data-testid="booking-submit"
                   disabled={submitting}
-                  className="flex-1 rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-600)] disabled:opacity-50 sm:flex-none"
+                  className="t-hover flex-1 rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-600)] disabled:opacity-50 sm:flex-none"
                 >
                   {submitting ? bt.submitting : bt.reserveCta}
                 </button>
@@ -926,7 +926,7 @@ function SuccessPanel({ result, onBack }: { result: CreateBookingResult; onBack:
       <div className="mt-7 flex flex-col items-center justify-center gap-2 sm:flex-row">
         <a
           href="/kursplan"
-          className="rounded-full bg-[var(--color-ink)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa)]"
+          className="t-hover rounded-full bg-[var(--color-ink)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa)]"
         >
           {bt.toSchedule}
         </a>
@@ -934,7 +934,7 @@ function SuccessPanel({ result, onBack }: { result: CreateBookingResult; onBack:
           type="button"
           onClick={onBack}
           data-testid="booking-success-back"
-          className="rounded-full px-6 py-2.5 text-sm font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
+          className="t-hover rounded-full px-6 py-2.5 text-sm font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
         >
           {bt.backToCourses}
         </button>

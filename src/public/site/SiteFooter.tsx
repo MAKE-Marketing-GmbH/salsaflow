@@ -206,7 +206,7 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
             <ul className="grid grid-cols-2 gap-x-6 gap-y-0.5 sm:gap-y-1">
               {discover.map((item) => (
                 <li key={item.label}>
-                  <a href={item.href} className="inline-flex items-center py-1.5 text-sm text-white/85 hover:text-white">
+                  <a href={item.href} className="t-hover inline-flex items-center py-1.5 text-sm text-white/85 hover:text-white">
                     {item.label}
                   </a>
                 </li>
@@ -225,9 +225,9 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
                     target="_blank"
                     rel="noreferrer"
                     aria-label={s.label}
-                    className="group flex items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white"
+                    className="t-hover group flex items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white"
                   >
-                    <span className="text-white/70 group-hover:text-white">{s.icon}</span>
+                    <span className="t-hover text-white/70 group-hover:text-white">{s.icon}</span>
                     {s.label}
                   </a>
                 </li>
@@ -241,8 +241,8 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
             &copy; {year} {c.rights} &middot; {c.legal}
           </p>
           <div className="flex gap-5">
-            <a href="/impressum" className="inline-flex min-h-8 items-center hover:text-white">{c.impressum}</a>
-            <a href="/datenschutz" className="inline-flex min-h-8 items-center hover:text-white">{c.datenschutz}</a>
+            <a href="/impressum" className="t-hover inline-flex min-h-8 items-center hover:text-white">{c.impressum}</a>
+            <a href="/datenschutz" className="t-hover inline-flex min-h-8 items-center hover:text-white">{c.datenschutz}</a>
           </div>
         </div>
       </Shell>

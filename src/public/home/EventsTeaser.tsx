@@ -127,7 +127,7 @@ export function EventsTeaser() {
           <motion.div variants={item} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
             <a
               href="/events"
-              className="group inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full bg-[var(--color-salsa)] px-7 py-3.5 text-base font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-colors duration-200 hover:bg-white hover:text-[var(--color-night)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-night)]"
+              className="group inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full bg-[var(--color-salsa)] px-7 py-3.5 text-base font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-colors duration-[var(--dur-fast)] hover:bg-white hover:text-[var(--color-night)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-night)]"
             >
               {e.cta}
               <ArrowRight

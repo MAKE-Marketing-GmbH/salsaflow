@@ -157,7 +157,7 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
           type="button"
           data-testid="cookie-accept"
           onClick={accept}
-          className="h-10 min-w-11 shrink-0 rounded-full bg-[var(--color-salsa)] px-3 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:h-9 sm:px-5"
+          className="t-hover h-10 min-w-11 shrink-0 rounded-full bg-[var(--color-salsa)] px-3 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:h-9 sm:px-5"
         >
           {c.accept}
         </button>

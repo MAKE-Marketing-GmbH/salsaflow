@@ -92,7 +92,7 @@ function InstagramVideoCard({ video }: { video: InstagramVideo }) {
             />
             <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,0.02)_0%,rgba(10,10,10,0.08)_45%,rgba(10,10,10,0.82)_100%)]" />
             <span className="absolute inset-0 flex items-center justify-center">
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[var(--color-ink)] shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition-transform duration-300 motion-safe:group-hover:scale-105">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[var(--color-ink)] shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition-transform duration-[var(--dur-base)] motion-safe:group-hover:scale-105">
                 <Play aria-hidden className="ml-1 h-6 w-6 fill-current" strokeWidth={1.5} />
               </span>
             </span>

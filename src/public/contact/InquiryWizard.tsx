@@ -258,7 +258,7 @@ export function InquiryWizard({
 
       <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
         {step > 0 ? (
-          <button type="button" onClick={() => { setError(''); setStep((current) => current - 1); }} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]">
+          <button type="button" onClick={() => { setError(''); setStep((current) => current - 1); }} className="t-hover inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]">
             <ArrowLeft aria-hidden className="h-4 w-4" />{copy.back}
           </button>
         ) : <span />}
@@ -281,7 +281,7 @@ function ChoiceCard({ active, icon: Icon, label, compact = false, className, chi
     <label className={cn(
       // focus-within macht die Tastatur-Auswahl sichtbar: das echte Radio ist sr-only, ohne
       // diesen Ring sieht man beim Durchtabben und bei Pfeiltasten gar nichts.
-      'relative flex cursor-pointer items-center gap-3 rounded-[var(--radius-card)] border px-4 text-left font-semibold transition-[background-color,border-color,color,transform] duration-200 focus-within:ring-2 focus-within:ring-[var(--color-salsa)] focus-within:ring-offset-2',
+      'relative flex cursor-pointer items-center gap-3 rounded-[var(--radius-card)] border px-4 text-left font-semibold transition-[background-color,border-color,color,transform] duration-[var(--dur-fast)] focus-within:ring-2 focus-within:ring-[var(--color-salsa)] focus-within:ring-offset-2',
       compact ? 'min-h-14 py-3 text-sm' : 'min-h-[4.2rem] text-base',
       active ? 'z-10 scale-[1.015] border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white shadow-[0_12px_28px_-18px_rgba(173,24,39,0.8)]' : 'border-[var(--color-line)] bg-[var(--color-paper)] text-[var(--color-ink)] hover:border-[var(--color-salsa)]',
       className,

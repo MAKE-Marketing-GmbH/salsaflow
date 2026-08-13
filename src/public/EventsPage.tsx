@@ -81,7 +81,7 @@ function EventfrogCta({
   // /events, aber nicht auf /preise (gemessene Glow-Pixel 14396 vs. 1893). Der Zustand
   // wechselt jetzt wie sitewide ueber Farbtiefe (salsa -> salsa-700) plus 1px-Kontur.
   const base =
-    'group inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-7 py-3.5 text-base font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-paper-warm)]';
+    'group inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-7 py-3.5 text-base font-semibold transition-colors duration-[var(--dur-fast)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-paper-warm)]';
   const styles =
     variant === 'primary'
       ? 'border border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)]'

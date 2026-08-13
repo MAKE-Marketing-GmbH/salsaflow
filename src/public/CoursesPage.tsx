@@ -313,7 +313,7 @@ function StylesSection() {
                       src={card.photo}
                       alt={card.alt ?? card.title}
                       className={cn(
-                        'absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.04]',
+                        'absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-base)] ease-out motion-safe:group-hover:scale-[1.04]',
                         // Das Bachata-Motiv ist hochkant. In der Querformat-Karte (7/5) schneidet
                         // ein mittiger Ausschnitt beiden Tanzenden den Oberkopf ab.
                         card.photo?.includes('offer-bachata') && 'object-[center_25%]',

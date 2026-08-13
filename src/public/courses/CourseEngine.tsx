@@ -851,7 +851,7 @@ function EmptyState({ onReset }: { onReset: () => void }) {
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         <button
           onClick={onReset}
-          className="rounded-full border border-[var(--color-ink)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-ink)] hover:text-white"
+          className="t-hover rounded-full border border-[var(--color-ink)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-ink)] hover:text-white"
         >
           {t.reset}
         </button>
@@ -915,7 +915,7 @@ function WhatsappLink({ children }: { children: React.ReactNode }) {
       href={WHATSAPP_HREF}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)]"
+      className="t-hover inline-flex items-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)]"
     >
       {children}
     </a>

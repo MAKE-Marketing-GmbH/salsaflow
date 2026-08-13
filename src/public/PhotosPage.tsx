@@ -108,7 +108,7 @@ export function PhotosPage() {
                           onClick={() => setLightboxIndex(i)}
                           aria-label={p.alt}
                           data-testid="gallery-photo"
-                          className="group relative block w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] shadow-sm transition-shadow duration-300 hover:shadow-[0_16px_40px_-16px_rgba(17,17,17,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
+                          className="group relative block w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] shadow-sm transition-shadow duration-[var(--dur-base)] hover:shadow-[0_16px_40px_-16px_rgba(17,17,17,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
                         >
                           <img
                             src={p.src}
@@ -132,7 +132,7 @@ export function PhotosPage() {
                               dass die Kachel die Lightbox oeffnet (State-Signal, nicht nur Zoom). */}
                           <span
                             aria-hidden
-                            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/0 opacity-0 transition-opacity duration-[var(--dur-base)] group-hover:opacity-100"
                           />
                           <span
                             aria-hidden
@@ -322,7 +322,7 @@ function FilterChip({
       aria-pressed={active}
       data-testid={testId}
       className={cn(
-        'min-h-11 rounded-full border px-4 py-2 text-center text-sm font-semibold leading-tight transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2',
+        'min-h-11 rounded-full border px-4 py-2 text-center text-sm font-semibold leading-tight transition-colors duration-[var(--dur-fast)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2',
         active
           ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white'
           : 'border-[var(--color-line)] bg-white text-[var(--color-ink)] hover:border-[var(--color-ink)]',
@@ -422,7 +422,7 @@ function Lightbox({
         type="button"
         onClick={onClose}
         aria-label={lb.close}
-        className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        className="t-hover absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
         <X size={22} strokeWidth={2} aria-hidden />
       </button>
@@ -432,7 +432,7 @@ function Lightbox({
         type="button"
         onClick={prev}
         aria-label={lb.prev}
-        className="absolute left-3 top-1/2 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 text-white hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:left-6"
+        className="t-hover absolute left-3 top-1/2 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 text-white hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:left-6"
       >
         <ChevronLeft size={24} strokeWidth={2} aria-hidden />
       </button>
@@ -456,7 +456,7 @@ function Lightbox({
         type="button"
         onClick={next}
         aria-label={lb.next}
-        className="absolute right-3 top-1/2 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 text-white hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-6"
+        className="t-hover absolute right-3 top-1/2 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 text-white hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-6"
       >
         <ChevronRight size={24} strokeWidth={2} aria-hidden />
       </button>

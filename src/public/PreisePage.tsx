@@ -459,7 +459,7 @@ function FitSection({ c }: { c: PreiseContent }) {
                   <span className="block font-display text-lg font-bold leading-tight text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-salsa)]">{o.when}</span>
                   <span className="mt-1 block text-[0.95rem] leading-snug text-[var(--color-ink-muted)]">{o.pick}</span>
                 </span>
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-line)] text-[var(--color-salsa)] transition-colors duration-200 group-hover:border-[var(--color-salsa)] group-hover:bg-[var(--color-salsa)] group-hover:text-white">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-line)] text-[var(--color-salsa)] transition-colors duration-[var(--dur-fast)] group-hover:border-[var(--color-salsa)] group-hover:bg-[var(--color-salsa)] group-hover:text-white">
                   <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
                 </span>
               </motion.a>

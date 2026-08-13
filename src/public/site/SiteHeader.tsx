@@ -147,7 +147,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
     <header
       ref={headerRef}
       className={cn(
-        'fixed inset-x-0 top-0 z-50 will-change-transform transition-transform duration-300 ease-out motion-reduce:transition-none',
+        'fixed inset-x-0 top-0 z-50 will-change-transform transition-transform duration-[var(--dur-base)] ease-out motion-reduce:transition-none',
         solidBackdrop && 'bg-[var(--color-paper-warm)]',
       )}
       style={{
@@ -460,7 +460,7 @@ function DesktopDropdown({
           size={14}
           strokeWidth={2}
           aria-hidden
-          className={cn('transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', open && '-scale-y-100')}
+          className={cn('transition-transform duration-[var(--dur-fast)] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', open && '-scale-y-100')}
         />
         {active && (
           <span className="absolute -bottom-0.5 left-0 right-6 h-0.5 rounded-full bg-[var(--color-salsa)]" />
@@ -472,7 +472,7 @@ function DesktopDropdown({
         // im Accessibility-Tree, obwohl nichts zu sehen ist.
         inert={!open}
         className={cn(
-          'absolute left-1/2 top-full z-50 w-60 -translate-x-1/2 pt-3 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+          'absolute left-1/2 top-full z-50 w-60 -translate-x-1/2 pt-3 transition-[opacity,transform] duration-[var(--dur-fast)] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
           open ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0',
         )}
       >

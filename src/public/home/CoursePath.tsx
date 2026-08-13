@@ -75,7 +75,7 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
                     className={cn(
                       'absolute left-0 top-2 h-[9px] w-[9px] rounded-full bg-[var(--color-salsa)] ring-4',
                       embedded ? 'ring-[var(--color-paper-warm)]' : 'ring-[var(--color-paper)]',
-                      'transition-transform duration-300 ease-out motion-safe:group-hover:scale-150',
+                      'transition-transform duration-[var(--dur-base)] ease-out motion-safe:group-hover:scale-150',
                     )}
                   />
                   <LevelHeading

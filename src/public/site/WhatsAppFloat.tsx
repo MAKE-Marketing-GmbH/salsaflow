@@ -46,7 +46,7 @@ export function WhatsAppFloat({ raised = false }: { raised?: boolean }) {
         // Stage 6: kein Fremd-Grün mehr. Marken-konformer Ink-Kreis mit weissem Icon,
         // beim Hover in Salsa-Rot. Erkennbar bleibt WhatsApp über den Glyph, nicht die Farbe.
         'bg-[var(--color-ink)] text-white shadow-lg shadow-black/20 ring-1 ring-white/10',
-        'hover:bg-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)]',
+        't-hover hover:bg-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)]',
         // Position und Hover-Farbe zusammen: vorher lief nur die Position, ohne Dauer und ohne
         // Kurve. Der Knopf sprang die Farbe hart um und rutschte linear hoch.
         'transition-[bottom,background-color] duration-[var(--dur-base)] ease-out',

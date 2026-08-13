@@ -47,14 +47,14 @@ export function NotFoundPage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a
                 href="/"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-6 text-base font-semibold text-white hover:bg-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
+                className="t-hover inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-6 text-base font-semibold text-white hover:bg-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
               >
                 <House size={18} aria-hidden />
                 {c.home}
               </a>
               <a
                 href="/kursplan"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-6 text-base font-semibold text-[var(--color-ink)] hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
+                className="t-hover inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-6 text-base font-semibold text-[var(--color-ink)] hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
               >
                 {c.schedule}
                 <ArrowRight size={18} aria-hidden />

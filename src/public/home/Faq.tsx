@@ -98,7 +98,7 @@ export function Faq() {
                       {/* Chevron im Kreis. Aktiver Zustand = einziger roter Vollton (kein Pastell). */}
                       <span
                         aria-hidden
-                        className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border transition-colors duration-200 motion-reduce:transition-none ${
+                        className={`grid h-9 w-9 shrink-0 place-items-center rounded-full border transition-colors duration-[var(--dur-fast)] motion-reduce:transition-none ${
                           isOpen
                             ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white'
                             : 'border-[var(--color-line)] text-[var(--color-salsa)] group-hover/btn:border-[var(--color-salsa)]'
@@ -107,7 +107,7 @@ export function Faq() {
                         <ChevronDown
                           size={17}
                           strokeWidth={2.25}
-                          className={`transition-transform duration-300 motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`}
+                          className={`transition-transform duration-[var(--dur-base)] motion-reduce:transition-none ${isOpen ? 'rotate-180' : ''}`}
                         />
                       </span>
                     </button>
@@ -117,7 +117,7 @@ export function Faq() {
                     role="region"
                     aria-labelledby={`faq-q-${i}`}
                     hidden={!isOpen}
-                    className="grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none"
+                    className="grid transition-[grid-template-rows] duration-[var(--dur-base)] ease-out motion-reduce:transition-none"
                     style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
                   >
                     <div className="overflow-hidden">

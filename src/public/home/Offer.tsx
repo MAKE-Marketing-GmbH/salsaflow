@@ -58,7 +58,7 @@ function StyleRow({ card, index }: { card: OfferCard; index: number }) {
       className="group grid min-h-[10rem] grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-4 border-b border-[var(--color-line)] py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:gap-6"
     >
 
-      <div className="h-24 overflow-hidden rounded-[1.25rem] bg-[var(--color-bg-soft)] transition-transform duration-300 ease-out motion-safe:group-hover:-translate-y-0.5 sm:h-32 sm:rounded-[1.5rem]">
+      <div className="h-24 overflow-hidden rounded-[1.25rem] bg-[var(--color-bg-soft)] transition-transform duration-[var(--dur-base)] ease-out motion-safe:group-hover:-translate-y-0.5 sm:h-32 sm:rounded-[1.5rem]">
         <img
           src={card.photo}
           alt={card.alt}

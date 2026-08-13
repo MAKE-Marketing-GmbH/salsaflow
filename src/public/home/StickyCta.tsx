@@ -26,7 +26,7 @@ export function StickyCta() {
     <div
       data-sticky-cta
       aria-hidden={!show}
-      className={`fixed inset-x-0 z-30 border-t border-[var(--color-line)] bg-[var(--color-paper-warm)]/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur transition-[opacity,transform] duration-300 motion-reduce:transition-none sm:hidden ${
+      className={`fixed inset-x-0 z-30 border-t border-[var(--color-line)] bg-[var(--color-paper-warm)]/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur transition-[opacity,transform] duration-[var(--dur-base)] motion-reduce:transition-none sm:hidden ${
         show ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-full opacity-0'
       }`}
       style={{ bottom: 'var(--cookie-banner-height, 0px)' }}
