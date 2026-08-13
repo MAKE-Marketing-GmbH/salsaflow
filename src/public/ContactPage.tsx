@@ -241,12 +241,14 @@ function LocationSection() {
             Team-Sektion (TeamPage.tsx:203) — es haette die Dopplung nur verschoben. */}
         <Reveal>
           <motion.div variants={item} className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.08)]">
+            {/* Hochformat-Foto (1066x1600) im Querformat-Crop: object-top haelt die Koepfe
+                im Bild, object-center schnitt sie ab (Critic 13.08.2026). */}
             <img
               src="/photos/gallery/kurse/06.jpg"
               alt={l.imageAlt}
-              className="aspect-[3/2] w-full object-cover object-center sm:aspect-[4/3]"
-              width={1600}
-              height={1066}
+              className="aspect-[3/2] w-full object-cover object-top sm:aspect-[4/3]"
+              width={1066}
+              height={1600}
               loading="eager"
             />
             {/* Sitewide Warm-Soft-Light: letztes editoriales Foto in die warme Bild-Welt. */}
