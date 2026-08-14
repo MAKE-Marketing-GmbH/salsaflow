@@ -18,7 +18,7 @@
 
 import { useReducedMotion } from 'framer-motion';
 import { useLang } from '@/lib/i18n';
-import { Marquee } from '@/public/home/motion';
+import { Marquee, useHydrated } from '@/public/home/motion';
 import { LABEL, TEXT_LOW, PAPER, SECTION_Y_PEAK, Rise, Wrap } from '@/public/home/kit';
 
 type BandPhoto = { src: string; alt: string; altEn: string };
@@ -93,6 +93,13 @@ function Frame({ photo, eager = false }: { photo: BandPhoto; eager?: boolean }) 
 export function CommunityBand() {
   const { lang } = useLang();
   const reduced = useReducedMotion();
+  // Ohne Bewegung ist ein ruhiges 3er-Grid besser als ein stehendes Laufband. Diese
+  // Entscheidung faellt aber ERST nach der Hydration: der Server kennt die Motion-
+  // Praeferenz nicht, und ein Struktur-Wechsel im ersten Frame wirft den ganzen
+  // Seitenbaum weg (Fehler 418). Bis dahin steht das Marquee still (siehe motion.tsx),
+  // niemand sieht also ungewollte Bewegung.
+  const hydrated = useHydrated();
+  const stillLayout = hydrated && reduced;
 
   return (
     // Das Community-Bild ist laut Kritik Runde 2 DER Hoehepunkt der Startseite und bekommt
@@ -106,7 +113,7 @@ export function CommunityBand() {
         </Rise>
       </Wrap>
 
-      {reduced ? (
+      {stillLayout ? (
         // Ohne Bewegung: ruhiges 3er-Grid statt eines stehenden Bandes.
         <div className="mt-6 grid grid-cols-1 gap-px bg-[var(--color-line)] sm:grid-cols-3">
           {PHOTOS.slice(0, 3).map((photo) => (

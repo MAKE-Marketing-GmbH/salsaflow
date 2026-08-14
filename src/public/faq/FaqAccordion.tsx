@@ -14,7 +14,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { EASE_OUT } from '@/public/home/motion';
 import type { Faq } from '@/public/subpage/kit';
 
@@ -43,32 +42,33 @@ export function FaqItem({ q, a, defaultOpen = false }: Faq & { defaultOpen?: boo
           size={20}
           strokeWidth={2}
           aria-hidden
-          className={cn(
-            // Gleiche Drehgeschwindigkeit wie der Chevron im mobilen Menue (--acc-chevron).
-            'shrink-0 text-[var(--color-salsa)] transition-transform duration-[var(--acc-chevron)] ease-[var(--acc-ease)] group-open:rotate-180',
-            reduced && 'transition-none',
-          )}
+          // Gleiche Drehgeschwindigkeit wie der Chevron im mobilen Menue (--acc-chevron).
+          // motion-safe: statt einer `reduced`-Klasse — die Klasse haengt sonst am
+          // JS-Wert von useReducedMotion, den der Server nicht kennt (Hydration-Mismatch).
+          // Die CSS-Variante gilt schon im ersten Frame und braucht kein JavaScript.
+          className="shrink-0 text-[var(--color-salsa)] motion-safe:transition-transform motion-safe:duration-[var(--acc-chevron)] motion-safe:ease-[var(--acc-ease)] group-open:rotate-180"
         />
       </summary>
-      {/* Bei reduced-motion: Panel sofort da, kein Hoehen-Tween, kein Fade. */}
-      {reduced ? (
-        open ? <FaqAnswer>{a}</FaqAnswer> : null
-      ) : (
-        <AnimatePresence initial={false}>
-          {open ? (
-            <motion.div
-              key="panel"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.32, ease: EASE_OUT }}
-              className="overflow-hidden"
-            >
-              <FaqAnswer>{a}</FaqAnswer>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-      )}
+      {/* Bei reduced-motion: Panel sofort da, kein Hoehen-Tween, kein Fade.
+          WICHTIG: der Baum bleibt in beiden Faellen gleich AUFGEBAUT. Frueher stand hier
+          ein Zweig ohne motion.div. Der Server kennt die Motion-Praeferenz nicht und
+          rendert immer die Animations-Variante — bei prefers-reduced-motion sah React
+          im Browser dann eine andere Struktur, verwarf den ganzen Seitenbaum und rendert
+          neu (Fehler 418). Nur die Werte haengen jetzt an `reduced`, nicht die Struktur. */}
+      <AnimatePresence initial={false}>
+        {open ? (
+          <motion.div
+            key="panel"
+            initial={reduced ? false : { height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={reduced ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
+            transition={reduced ? { duration: 0 } : { duration: 0.32, ease: EASE_OUT }}
+            className="overflow-hidden"
+          >
+            <FaqAnswer>{a}</FaqAnswer>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </details>
   );
 }

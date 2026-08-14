@@ -148,19 +148,16 @@ export function Marquee({
   duration?: number;
 }) {
   const reduced = useReducedMotion();
-  if (reduced) {
-    return (
-      <div aria-hidden className={`overflow-x-auto ${className ?? ''}`}>
-        <div className="flex w-max">{children}</div>
-      </div>
-    );
-  }
+  // Struktur bleibt in beiden Faellen gleich: der Server kennt die Motion-Praeferenz
+  // nicht, und ein Struktur-Wechsel beim Hydrieren wirft den ganzen Baum weg (Fehler 418).
+  // Ohne Bewegung steht das Band still und laesst sich seitlich scrollen; der doppelte
+  // Kinder-Satz bleibt drin, weil er sonst wieder die Knotenzahl aendern wuerde.
   return (
-    <div aria-hidden className={`overflow-hidden ${className ?? ''}`}>
+    <div aria-hidden className={`${reduced ? 'overflow-x-auto' : 'overflow-hidden'} ${className ?? ''}`}>
       <motion.div
         className="flex w-max"
-        animate={{ x: ['0%', '-50%'] }}
-        transition={{ duration, ease: 'linear', repeat: Infinity }}
+        animate={reduced ? undefined : { x: ['0%', '-50%'] }}
+        transition={reduced ? undefined : { duration, ease: 'linear', repeat: Infinity }}
       >
         {children}
         {children}
