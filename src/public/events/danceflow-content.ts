@@ -176,7 +176,11 @@ export const DANCEFLOW: Record<Lang, DanceflowContent> = {
       cards: [
         { label: 'Salsaflow-Schüler:innen', value: 'CHF 5.-' },
         { label: 'Gäste', value: 'CHF 10.-' },
-        { label: 'Workshop davor', value: 'separat gemäss aktueller Liste' },
+        // Aus dem Kunden-Onboarding, leistungen[2].was, woertlich: "Besuchst Du einen
+        // Workshops, so zahlst Du keinen Eintritt fuer unsere regulaeren Danceflow Nights!"
+        // Stand bisher nirgends. Vorher hiess es hier "separat gemaess aktueller Liste" —
+        // das klang nach Zusatzkosten statt nach einem Vorteil.
+        { label: 'Mit Workshop davor', value: 'Eintritt frei' },
       ],
       cta: { label: 'Preise ansehen', href: R.preise },
     },
@@ -306,7 +310,7 @@ export const DANCEFLOW: Record<Lang, DanceflowContent> = {
       cards: [
         { label: 'Salsaflow students', value: 'CHF 5.-' },
         { label: 'Guests', value: 'CHF 10.-' },
-        { label: 'Workshop before', value: 'separate, as per the current list' },
+        { label: 'With workshop before', value: 'entry free' },
       ],
       cta: { label: 'See the prices', href: R.preise },
     },

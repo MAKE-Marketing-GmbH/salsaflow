@@ -113,7 +113,12 @@ export const WALL_REVIEWS: Review[] = [
     name: 'Solange',
     stars: 5,
     when: 'vor 2 Jahren',
-    aspect: 'Beste in Basel',
+    // Der Tag hiess "Beste in Basel". Die Zitate sind Fremdaussagen und duerfen so klingen,
+    // der Tag aber ist redaktionell vergeben — damit behauptete Salsaflow im eigenen Namen,
+    // die Beste zu sein. Das Kunden-Onboarding verbietet unter "niemals" ausdruecklich
+    // "uebertriebene Werbesprueche oder Superlative" und "namentliche Vergleiche mit anderen
+    // Tanzschulen". Der neue Tag zitiert dasselbe Review, ohne zu vergleichen.
+    aspect: 'Wie eine Familie',
     lang: 'de',
     text: 'Salsaflow ist die beste Tanzschule in Basel. Der Unterricht macht Spass und man lernt gleichzeitig viel und schnell. Man fühlt sich einfach gut aufgehoben, wie in einer grossen Familie.',
   },
@@ -191,7 +196,7 @@ const REVIEW_ASPECT: Record<string, Record<Lang, string>> = {
   'Ohne Partner': { de: 'Ohne Partner', en: 'No partner' },
   Partys: { de: 'Partys', en: 'Parties' },
   'Neu in Basel': { de: 'Neu in Basel', en: 'New in Basel' },
-  'Beste in Basel': { de: 'Beste in Basel', en: 'Best in Basel' },
+  'Wie eine Familie': { de: 'Wie eine Familie', en: 'Like a family' },
   Persönlich: { de: 'Persönlich', en: 'Personal' },
 };
 

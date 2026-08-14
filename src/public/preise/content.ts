@@ -294,10 +294,14 @@ export const PREISE: Record<Lang, PreiseContent> = {
       lead: 'Zwei Wege, mehr auf die Tanzfläche zu kommen: ein Thema vertiefen oder einfach mittanzen.',
       workshop: {
         title: 'Workshop',
-        body: 'Vertiefe ein Thema vor der Danceflow Night oder als Spezialformat.',
+        // Zweiter Satz aus dem Kunden-Onboarding (leistungen[2].was): "Besuchst Du einen
+        // Workshops, so zahlst Du keinen Eintritt fuer unsere regulaeren Danceflow Nights!"
+        // Der Vorteil ist rechenbar (30.- statt 30.- plus 10.-) und stand nirgends.
+        body: 'Vertiefe ein Thema vor der Danceflow Night oder als Spezialformat. Wer den Freitag-Workshop besucht, kommt danach ohne Eintritt in die Danceflow Night.',
         rows: [
           { label: 'Freitag Workshop', value: 'CHF 30.-' },
           { label: 'Schüler und Studenten', value: 'CHF 25.-' },
+          { label: 'Danceflow Night danach', value: 'inklusive' },
         ],
         // Kursformat, kein Partybild: die Copy verspricht "ein Thema vertiefen", also zeigt
         // das Foto Unterricht im Studio. Nachbarspalte trägt bewusst den Social-Dance-Moment,
@@ -528,10 +532,11 @@ export const PREISE: Record<Lang, PreiseContent> = {
       lead: 'Two ways to get more time on the floor: go deeper on a topic or simply dance along.',
       workshop: {
         title: 'Workshop',
-        body: 'Go deeper on a topic before the Danceflow Night or as a special format.',
+        body: 'Go deeper on a topic before the Danceflow Night or as a special format. If you join the Friday workshop, you get into the Danceflow Night afterwards for free.',
         rows: [
           { label: 'Friday workshop', value: 'CHF 30.-' },
           { label: 'Pupils and students', value: 'CHF 25.-' },
+          { label: 'Danceflow Night afterwards', value: 'included' },
         ],
         image: {
           src: '/photos/gallery/kurse/08.jpg',
