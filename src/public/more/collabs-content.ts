@@ -99,7 +99,11 @@ export const COLLABS: Record<Lang, CollabsContent> = {
       eyebrow: 'Unsere Auswahl',
       title: 'Was eine Empfehlung für uns erfüllen',
       titleAccent: 'muss.',
-      body: 'Wir empfehlen nur Angebote, die einen konkreten Bezug zum Tanzen haben. Partnerschaften und Vorteile kennzeichnen wir offen.',
+      // Zweiter Satz aus dem Kunden-Onboarding, Feld "sonderInfo": "das wir unser Beitrag fuer
+      // Salsa Community leisten wollen, wir foerdern Vereine und wollen die Konkurrenz barrieren
+      // aufloesen." Das ist die einzige echte Haltung im Onboarding — sie stand nirgends und
+      // passt genau hierher, wo es um Kooperationen geht.
+      body: 'Wir empfehlen nur Angebote, die einen konkreten Bezug zum Tanzen haben. Partnerschaften und Vorteile kennzeichnen wir offen. Wir arbeiten auch mit Vereinen und anderen Schulen zusammen: Die Szene wird grösser, wenn man sie nicht gegeneinander aufstellt.',
       template: [
         { label: 'Bezug zum Tanzen', hint: 'Das Angebot unterstützt Unterricht, Social Dancing oder Events.' },
         { label: 'Konkreter Nutzen', hint: 'Du erkennst, wobei dir die Empfehlung helfen kann.' },
@@ -187,7 +191,7 @@ export const COLLABS: Record<Lang, CollabsContent> = {
       eyebrow: 'How we choose',
       title: 'What we expect from a',
       titleAccent: 'recommendation.',
-      body: 'We recommend offers that have a clear connection to dancing. Partnerships and benefits are always identified.',
+      body: 'We recommend offers that have a clear connection to dancing. Partnerships and benefits are always identified. We also work with clubs and other schools: the scene grows when you stop playing it against itself.',
       template: [
         { label: 'Relevant to dancing', hint: 'The offer supports classes, social dancing or events.' },
         { label: 'A practical benefit', hint: 'You can see exactly how the recommendation may help.' },

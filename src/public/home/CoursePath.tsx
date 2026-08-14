@@ -11,7 +11,10 @@ const COPY = {
     levels: [
       ['Beginner Stufe 1 bis 6', 'Rhythmus, Grundschritte, Drehungen und die wichtigsten Signale im Paartanz.'],
       ['Beginner Flow', 'Beginner-Inhalte verbinden, Timing festigen und freier tanzen.'],
-      ['Intermediate Stufe 7 bis 12', 'Technik, Musikalität und komplexere Kombinationen aufbauen.'],
+      // "Musikalitaet" stand sitewide 20 Mal ohne ein Wort Erklaerung. No-Go des Kunden:
+      // "keine Fachbegriffe, die Laien nicht verstehen". Hier erklaert, wo der Begriff zuerst
+      // auftaucht — ein Halbsatz reicht.
+      ['Intermediate Stufe 7 bis 12', 'Technik und komplexere Kombinationen. Dazu Musikalität: hören, was die Musik gerade macht, und passend darauf tanzen.'],
       ['Intermediate Flow', 'Intermediate-Inhalte variieren und sicher auf der Tanzfläche einsetzen.'],
       ['Advanced ab Stufe 13', 'Details, Dynamik, Flow und eigenen Ausdruck vertiefen.'],
     ],
@@ -24,7 +27,7 @@ const COPY = {
     levels: [
       ['Beginner stages 1 to 6', 'Rhythm, basic steps, turns and the most important partner-dance signals.'],
       ['Beginner Flow', 'Connect the beginner material, strengthen your timing and dance more freely.'],
-      ['Intermediate stages 7 to 12', 'Build technique, musicality and more complex combinations.'],
+      ['Intermediate stages 7 to 12', 'Technique and more complex combinations. Plus musicality: hearing what the music is doing and dancing to it.'],
       ['Intermediate Flow', 'Vary the intermediate material and use it confidently on the dance floor.'],
       ['Advanced from stage 13', 'Refine detail, dynamics, flow and individual expression.'],
     ],

@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, Suspense } from 'react';
 import { renderToString } from 'react-dom/server';
 import { LangProvider } from '@/lib/i18n';
 import { SmoothScroll } from '@/public/site/SmoothScroll';
@@ -32,11 +32,17 @@ export function renderRoute(pathname: string): PrerenderResult {
   const route = resolveRoute(pathname);
   const Matched = route.component;
   const meta = SEO_META[route.seoKey].de;
+  // Der Baum muss ZEICHEN FUER ZEICHEN dem aus main.tsx entsprechen, inklusive <Suspense>.
+  // Ohne das Suspense hier sah React beim Hydrieren an derselben Stelle einmal <Suspense>
+  // und einmal das JSON-LD-<script> und warf den ganzen Baum weg (Fehler 418). Sichtbar
+  // war das nicht, teuer schon: jede Seite rendert nach dem Laden komplett neu.
   const html = renderToString(
     <StrictMode>
       <LangProvider>
         <SmoothScroll />
-        <Matched />
+        <Suspense fallback={null}>
+          <Matched />
+        </Suspense>
       </LangProvider>
     </StrictMode>,
   );

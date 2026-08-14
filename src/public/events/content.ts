@@ -58,7 +58,10 @@ export const EVENTS: Record<Lang, EventsContent> = {
         { label: 'Wann', value: 'Jeden 1., 3. und 5. Freitag' },
         { label: 'Was', value: 'Social Dancing mit eigenen DJs' },
         { label: 'Wo', value: 'Am Bahnhof Basel SBB' },
+        // "Gute Taenzer aus FR, DE und CH" aus dem Onboarding (leistungen[2].resultat) —
+        // erklaert das Niveau der Abende und stand nirgends.
         { label: 'Für wen', value: 'Alle Levels, allein oder zu zweit' },
+        { label: 'Wer kommt', value: 'Tanzende aus der Schweiz, Frankreich und Deutschland' },
         { label: 'Eintritt', value: 'Schüler CHF 5.-, Gäste CHF 10.-' },
       ],
       ctaTickets: 'Nächste Danceflow Night ansehen',
@@ -77,7 +80,9 @@ export const EVENTS: Record<Lang, EventsContent> = {
         'Technik: saubere Bewegung statt nur mehr Figuren',
         'Styling: bewusster Ausdruck in Salsa, Bachata oder Heels',
         'Musikalität: besser hören, besser reagieren',
-        'Special Topics: je nach Gastlehrer:innen und Eventprogramm',
+        // Konkretisiert aus dem Onboarding: "Artisten aus ganz Europa kommen monatlich zu
+        // Salsaflow" (leistungen[2].besonders). Vorher stand hier nur "je nach Gastlehrer:innen".
+        'Special Topics: mit Gastlehrer:innen, die monatlich aus ganz Europa anreisen',
       ],
     },
     anniversary: {
@@ -125,6 +130,7 @@ export const EVENTS: Record<Lang, EventsContent> = {
         { label: 'What', value: 'Social dancing with our own DJs' },
         { label: 'Where', value: 'At Basel SBB station' },
         { label: 'For whom', value: 'All levels, alone or as a pair' },
+        { label: 'Who comes', value: 'Dancers from Switzerland, France and Germany' },
         { label: 'Entry', value: 'Students CHF 5.-, guests CHF 10.-' },
       ],
       ctaTickets: 'See the next Danceflow Night',
@@ -143,7 +149,7 @@ export const EVENTS: Record<Lang, EventsContent> = {
         'Technique: clean movement instead of just more figures',
         'Styling: conscious expression in Salsa, Bachata or Heels',
         'Musicality: hear better, react better',
-        'Special topics: depending on guest teachers and the event programme',
+        'Special topics: with guest teachers who travel in from across Europe every month',
       ],
     },
     anniversary: {

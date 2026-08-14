@@ -182,8 +182,15 @@ export const TEAM: Record<Lang, TeamContent> = {
     story: {
       eyebrow: 'Unsere Geschichte',
       title: 'So wurde aus einer Idee Salsaflow.',
-      body: 'Vier Freunde hatten auf dem Weg zum Starbucks die Idee, ein eigenes Studio zu öffnen. 2018 gründeten sie Salsaflow in Basel. Daraus entstand eine Tanzschule, in der gemeinsames Lernen und Tanzen zusammengehören.',
-      body2: 'Daraus ist ein Team geworden, das heute rund 40 Kurse pro Woche gibt. Jede und jeder bringt einen eigenen Stil mit. Was alle teilen, ist dieselbe Haltung: Du gehörst vom ersten Abend an dazu.',
+      // Ergaenzt 14.08.2026 aus dem Kunden-Onboarding:
+      // - "geschichte": "alle haben schon unterrichtet und hatten schon Erfahrung" — ohne den
+      //   Halbsatz klang die Gruendung nach Spontanidee statt nach erfahrenen Leuten.
+      // - "erfolge": "An den Schueler merkt man das, wenn sie dann ploetzlich Shows machen.
+      //   Shows sind auch von den Schueler. Unser Team tun wir selbst ausbilden."
+      // - "qualifikationen": "Teilnahme an nationalen Tanzwettbewerben" — einziges hartes
+      //   Qualifikations-Signal im Onboarding, stand nirgends.
+      body: 'Vier Freunde hatten auf dem Weg zum Starbucks die Idee, ein eigenes Studio zu öffnen. Alle vier unterrichteten damals schon. 2018 gründeten sie Salsaflow in Basel und haben seither an nationalen Tanzwettbewerben teilgenommen.',
+      body2: 'Daraus ist ein Team geworden, das heute rund 40 Kurse pro Woche gibt. Unsere Lehrerinnen und Lehrer bilden wir selbst aus, oft aus den eigenen Kursen heraus. Wer bei uns anfängt, steht ein paar Staffeln später vielleicht selbst in einer Show.',
     },
     roles: {
       eyebrow: '',
@@ -259,8 +266,8 @@ export const TEAM: Record<Lang, TeamContent> = {
     story: {
       eyebrow: 'Our story',
       title: 'How an idea became Salsaflow.',
-      body: 'On the way to Starbucks, four friends had the idea to open their own studio. They founded Salsaflow in Basel in 2018. It grew into a dance school where learning and dancing together belong side by side.',
-      body2: 'From there grew a team that now teaches around 40 classes a week. Everyone brings their own style. What we all share is the same attitude: you belong from your very first evening.',
+      body: 'On the way to Starbucks, four friends had the idea to open their own studio. All four were already teaching at the time. They founded Salsaflow in Basel in 2018 and have since taken part in national dance competitions.',
+      body2: 'From there grew a team that now teaches around 40 classes a week. We train our teachers ourselves, often from our own courses. Whoever starts with us might be on stage in a show a few terms later.',
     },
     roles: {
       eyebrow: '',

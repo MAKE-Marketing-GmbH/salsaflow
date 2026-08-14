@@ -486,8 +486,13 @@ const bachata: Record<Lang, StyleContent> = {
         a: 'Ja. Im Beginner-Kurs lernst du Grundschritte, einfache Drehungen, Haltung und wie du dich im Paartanz sicher fühlst.',
       },
       {
+        // Erklaerung ergaenzt 14.08.2026: "Sensual" stand sitewide als blosses Etikett, auch auf
+        // der Startseite. Das Kunden-Onboarding erklaert es selbst (leistungen[1].was): Bachata
+        // kommt aus der Dominikanischen Republik, Sensual ist die moderne, weichere Spielart, die
+        // sich vor allem in Spanien entwickelt hat. No-Go des Kunden: "keine Fachbegriffe, die
+        // Laien nicht verstehen".
         q: 'Ist Bachata Sensual zu schwierig für den Anfang?',
-        a: 'Nicht, wenn es sauber aufgebaut wird. Gute Kurse starten mit Basics und Technik, bevor komplexere Körperbewegungen dazukommen.',
+        a: 'Sensual ist die modernere, weichere Spielart der Bachata. Mehr Körperbewegung und Nähe als beim klassischen Stil aus der Dominikanischen Republik. Schwierig ist sie nicht, wenn sie sauber aufgebaut wird. Gute Kurse starten mit Basics und Technik, bevor komplexere Bewegungen dazukommen.',
       },
       {
         q: 'Muss ich als Paar kommen?',
@@ -612,7 +617,7 @@ const bachata: Record<Lang, StyleContent> = {
       },
       {
         q: 'Is Bachata Sensual too hard for the start?',
-        a: 'Not if it is built up cleanly. Good courses start with basics and technique before more complex body movement comes in.',
+        a: 'Sensual is the more modern, softer variant of Bachata. More body movement and closeness than the classic style from the Dominican Republic. It is not hard if it is built up cleanly. Good courses start with basics and technique before more complex movement comes in.',
       },
       {
         q: 'Do I have to come as a couple?',

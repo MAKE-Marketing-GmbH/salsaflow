@@ -142,10 +142,12 @@ export const HOME_V3: Record<Lang, HomeV3Strings> = {
       // Die beiden ersten Saetze bleiben unveraendert: sie tragen die Gruender-Namen (Anlauf auf
       // die FounderCards darunter) und das heutige Team — Fakten, die sonst nirgends stehen.
       story: 'Salsaflow wurde von Fabio, Claudia, Vanessa und Sebastian gegründet. Heute trägt ein grosses Team aus Lehrpersonen, Bereichsleitern und Nachwuchstalenten die Community mit.',
+      // "~400 Tanzende pro Jahr" aus dem Kunden-Onboarding (zahlen.proJahr: "400"). Die Zahl
+      // sagt mehr ueber die Community als eine Kurszahl und stand bisher nirgends.
       stats: [
         { v: '2018', l: 'gegründet' },
         { v: '3', l: 'Studios am Bahnhof SBB' },
-        { v: '~40', l: 'Kurse pro Woche' },
+        { v: '~400', l: 'Tanzende pro Jahr' },
       ],
       promise: 'Ich bin Jelena und unterrichte bei Salsaflow. Wenn du unsicher bist, schreib mir einfach. Ich sag dir, welcher Kurs zu dir passt, und begrüsse dich an deinem ersten Abend.',
       contactLine: 'Fragen vor deinem ersten Abend?',
@@ -282,7 +284,7 @@ export const HOME_V3: Record<Lang, HomeV3Strings> = {
       stats: [
         { v: '2018', l: 'founded' },
         { v: '3', l: 'studios at Basel SBB' },
-        { v: '~40', l: 'classes a week' },
+        { v: '~400', l: 'dancers a year' },
       ],
       promise: 'I am Jelena and I teach at Salsaflow. If you are unsure, just message me. I tell you which class fits you and welcome you on your first evening.',
       contactLine: 'Questions before your first evening?',
