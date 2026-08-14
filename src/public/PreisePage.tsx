@@ -187,7 +187,15 @@ function RegularSection({ c }: { c: PreiseContent }) {
             <BeatMark />
             {r.entry.label}
           </motion.p>
-          <div className="mt-6 grid gap-x-16 gap-y-8 lg:grid-cols-[0.9fr_1.1fr]">
+          {/* Spaltenzahl aus der Anzahl Karten. Das feste Zwei-Spalten-Raster war fuer genau
+              zwei gebaut; die dritte Karte (Festpreis) stand allein in der linken Spalte und
+              liess rechts ein Loch. */}
+          <div
+            className={cn(
+              'mt-6 grid gap-x-16 gap-y-8',
+              r.entry.items.length === 2 ? 'lg:grid-cols-[0.9fr_1.1fr]' : 'md:grid-cols-2 lg:grid-cols-3',
+            )}
+          >
             {r.entry.items.map((e) => (
               <motion.div key={e.title} variants={item}>
                 <h3 className="font-display text-lg font-bold leading-snug text-balance text-[var(--color-ink)]">

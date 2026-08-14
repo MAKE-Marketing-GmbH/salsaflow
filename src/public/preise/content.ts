@@ -241,6 +241,14 @@ export const PREISE: Record<Lang, PreiseContent> = {
             title: 'Auch mitten in der Staffel',
             text: 'Bei vielen Kursen kannst du später einsteigen. Ob dein Wunschkurs gerade offen ist, steht direkt beim Kurs im Kursplan.',
           },
+          {
+            // Festpreis-Versprechen aus dem Kunden-Onboarding (make-onboarding-2026-08-07.json,
+            // Feld "versprechen"): "Festpreisgarantie für alle Tanzkurse ohne versteckte Kosten".
+            // Dasselbe Dokument nennt unter "niemals" ausdrücklich "keine versteckten Kosten bei
+            // Privatstunden oder Kursen". Stand bisher nirgends auf der Seite.
+            title: 'Der Preis ist der Preis',
+            text: 'Was hier steht, zahlst du. Keine Anmeldegebühr, keine Mitgliedschaft, keine Nachschläge. Auch die Aushilfe im Kurs kostet nichts extra.',
+          },
         ],
         link: { label: 'Schnupperstunde abmachen', href: SCHNUPPER_HREF },
       },
@@ -475,6 +483,10 @@ export const PREISE: Record<Lang, PreiseContent> = {
           {
             title: 'Also mid-term',
             text: 'For many courses you can join later. Whether your course is open right now is shown on the course itself in the schedule.',
+          },
+          {
+            title: 'The price is the price',
+            text: 'What you see here is what you pay. No sign-up fee, no membership, no extras. The stand-in partner in class costs nothing either.',
           },
         ],
         link: { label: 'Arrange a trial class', href: SCHNUPPER_HREF },
