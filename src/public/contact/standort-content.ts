@@ -128,17 +128,21 @@ export const STANDORT: Record<Lang, StandortContent> = {
         {
           name: 'Studio 1',
           text: 'Heller Raum mit Spiegelwand und Parkett. Ideal für Kurse und Workshops.',
-          image: { src: '/photos/showcase/hp-06.webp', alt: 'Heller Tanzraum bei Salsaflow mit Spiegelwand' },
+          // Sweep 14.08.2026: Die drei Studio-Karten trugen Alt-Texte, die Raeume
+          // versprachen — die Bilder zeigten Teamfotos und einen Event-Flyer (hp-13).
+          // Der Flyer ist ersetzt (kurse/07.jpg, echtes Tageslicht-Studio, 2. Nutzung,
+          // Limit 2 ok); die Alt-Texte beschreiben jetzt, was wirklich zu sehen ist.
+          image: { src: '/photos/showcase/hp-06.webp', alt: 'Fünf aus dem Salsaflow-Team im hellen Studio' },
         },
         {
           name: 'Studio 2',
           text: 'Heller Tanzraum mit Spiegeln. Ideal für Kurse, Proben und kleine Gruppen.',
-          image: { src: '/photos/showcase/hp-13.webp', alt: 'Salsaflow Studio mit viel Tageslicht und Tanzfläche' },
+          image: { src: '/photos/gallery/kurse/07.jpg', alt: 'Kurs im hellen Studio vor den grossen Fenstern' },
         },
         {
           name: 'Studio 3',
           text: 'Zentraler Raum am Bahnhof SBB. Ideal für Workshops, Trainings und Bewegung.',
-          image: { src: '/photos/showcase/hp-21.webp', alt: 'Offener Bewegungsraum bei Salsaflow am Bahnhof Basel SBB' },
+          image: { src: '/photos/showcase/hp-21.webp', alt: 'Die Salsaflow-Gruppe vor der Logo-Wand im Studio' },
         },
       ],
     },
@@ -234,17 +238,17 @@ export const STANDORT: Record<Lang, StandortContent> = {
         {
           name: 'Studio 1',
           text: 'Bright room with a mirror wall and parquet floor. Ideal for courses and workshops.',
-          image: { src: '/photos/showcase/hp-06.webp', alt: 'Bright Salsaflow dance room with a mirror wall' },
+          image: { src: '/photos/showcase/hp-06.webp', alt: 'Five of the Salsaflow team in the bright studio' },
         },
         {
           name: 'Studio 2',
           text: 'Bright dance room with mirrors. Ideal for courses, rehearsals and small groups.',
-          image: { src: '/photos/showcase/hp-13.webp', alt: 'Salsaflow studio with lots of daylight and a dance floor' },
+          image: { src: '/photos/gallery/kurse/07.jpg', alt: 'Class in the bright studio in front of the big windows' },
         },
         {
           name: 'Studio 3',
           text: 'Central room by Basel SBB. Ideal for workshops, trainings and movement.',
-          image: { src: '/photos/showcase/hp-21.webp', alt: 'Open movement room at Salsaflow by Basel SBB station' },
+          image: { src: '/photos/showcase/hp-21.webp', alt: 'The Salsaflow group in front of the logo wall in the studio' },
         },
       ],
     },
