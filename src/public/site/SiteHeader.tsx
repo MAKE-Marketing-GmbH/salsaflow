@@ -104,7 +104,8 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
         { label: 'Heels', href: '/tanzkurse/heels' },
         { label: de ? 'Privatstunden' : 'Private lessons', href: '/privatstunden' },
         { label: de ? 'Kursaufbau' : 'Course levels', href: '/kursaufbau' },
-        { label: de ? 'Preise' : 'Prices', href: '/preise' },
+        // Preise NICHT mehr hier: der Eintrag lebt top-level (unten) — doppelt gefuehrt
+        // trugen auf /preise Tanzkurse UND Preise den Current-Strich (Critic Runde 10, Item 4).
       ],
     },
     { label: c.nav.kursplan, href: '/kursplan' },

@@ -72,12 +72,15 @@ function FilterSection({ c }: { c: EventkalenderContent }) {
             {f.body}
           </motion.p>
         </Reveal>
+        {/* Jede Karte ist ein Link auf ihre Format-Seite: vorher sahen die Pills wie
+            waehlbare Filter aus, ein Klick tat nichts (Critic Runde 10, Item 2). */}
         <Reveal className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" stagger={0.07}>
           {f.groups.map((g) => (
-            <motion.div
+            <motion.a
               key={g.label}
+              href={g.href}
               variants={item}
-              className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[0_14px_40px_rgba(17,17,17,0.04)]"
+              className="group flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[0_14px_40px_rgba(17,17,17,0.04)] transition-colors hover:border-[var(--color-salsa)]"
             >
               <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
                 <Sparkles size={14} strokeWidth={2.25} aria-hidden />
@@ -93,7 +96,11 @@ function FilterSection({ c }: { c: EventkalenderContent }) {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+              <span className="mt-auto inline-flex min-h-11 items-center gap-1.5 pt-3 text-sm font-bold text-[var(--color-salsa)] transition-colors group-hover:text-[var(--color-ink)]">
+                {f.groupCta}
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              </span>
+            </motion.a>
           ))}
         </Reveal>
       </Shell>

@@ -331,7 +331,9 @@ function StylesSection() {
                         'absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-base)] ease-out motion-safe:group-hover:scale-[1.04]',
                         // Das Bachata-Motiv ist hochkant. In der Querformat-Karte (7/5) schneidet
                         // ein mittiger Ausschnitt beiden Tanzenden den Oberkopf ab.
-                        card.photo?.includes('offer-bachata') && 'object-[center_25%]',
+                        // 12% statt 25%: der Maennerkopf war oben angeschnitten
+                        // (Critic Runde 10, Item 5).
+                        card.photo?.includes('offer-bachata') && 'object-[center_12%]',
                       )}
                       width={1200}
                       height={857}

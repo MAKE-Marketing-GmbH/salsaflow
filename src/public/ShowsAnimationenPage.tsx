@@ -72,39 +72,42 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
   return (
     <section
       className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
-      style={{ paddingTop: 'calc(var(--nav-h) + 1.5rem)' }}
+      style={{ paddingTop: 'calc(var(--nav-h) + 1rem)' }}
     >
       <div
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
-      <Shell className="grid items-center gap-10 pb-14 pt-6 sm:pb-16 lg:grid-cols-[0.98fr_1.02fr] lg:gap-14 lg:pb-20 lg:pt-8">
+      {/* Straffer Takt (pt/mt reduziert): der Primary-CTA sass auf flachen Desktop-Folds
+          (1440x730) unter der Kante — nur ein roter Streifen sichtbar (Critic Runde 10,
+          Item 3). */}
+      <Shell className="grid items-center gap-10 pb-14 pt-3 sm:pb-16 lg:grid-cols-[0.98fr_1.02fr] lg:gap-14 lg:pb-20 lg:pt-3">
         <motion.div data-reveal variants={container} initial="hidden" animate="show" className="max-w-2xl">
-          <motion.div variants={item} className="mb-6">
+          <motion.div variants={item} className="mb-3">
             <Breadcrumb trail={[c.crumb]} />
           </motion.div>
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
           <motion.h1
             variants={item}
-            className="mt-5 font-display text-[2.4rem] font-extrabold leading-[1.02] tracking-[-0.022em] text-balance sm:text-[3rem] lg:text-[3.4rem]"
+            className="mt-3 font-display text-[2.4rem] font-extrabold leading-[1.02] tracking-[-0.022em] text-balance sm:text-[3rem] lg:text-[3.4rem]"
           >
             {h.title}
           </motion.h1>
-          <motion.p variants={item} className={`mt-6 max-w-xl ${sectionLead}`}>
+          <motion.p variants={item} className={`mt-3 max-w-xl ${sectionLead}`}>
             {h.lead}
           </motion.p>
-          <motion.ul variants={item} className="mt-7 flex flex-wrap gap-2">
+          <motion.ul variants={item} className="mt-4 flex flex-wrap gap-2">
             {h.bullets.map((b) => (
               <li
                 key={b}
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-3.5 py-1.5 text-sm font-semibold text-[var(--color-ink)] shadow-sm"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-3.5 py-1 text-sm font-semibold text-[var(--color-ink)] shadow-sm"
               >
                 <Check size={13} strokeWidth={3} aria-hidden className="text-[var(--color-salsa)]" />
                 {b}
               </li>
             ))}
           </motion.ul>
-          <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <motion.div variants={item} className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
             <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
             <GhostCta href={h.secondary.href} down>
               {h.secondary.label}

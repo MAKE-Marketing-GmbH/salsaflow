@@ -277,8 +277,10 @@ function Funnel() {
                     {d.date.slice(8, 10)}.{d.date.slice(5, 7)}.
                   </span>
                   {count > 0 && (
-                    <span className={cn('ml-1 text-[0.7rem] tabular-nums sm:text-xs', activeDay === d.key ? 'text-white/75' : 'text-[var(--color-ink-muted)]')}>
-                      ·{count}
+                    // "9 Kurse" mit Abstand statt "·9": Datum und Zahl klebten zu einer
+                    // Zahl zusammen ("10.08. ·9", Critic Runde 10, Item 1).
+                    <span className={cn('ml-1.5 text-[0.7rem] tabular-nums sm:text-xs', activeDay === d.key ? 'text-white/75' : 'text-[var(--color-ink-muted)]')}>
+                      {count} {count === 1 ? (lang === 'de' ? 'Kurs' : 'class') : (lang === 'de' ? 'Kurse' : 'classes')}
                     </span>
                   )}
                 </button>
