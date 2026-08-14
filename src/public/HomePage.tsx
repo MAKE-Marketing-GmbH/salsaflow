@@ -90,7 +90,10 @@ export function HomePage() {
           Beibehalten aus Kritiker final-2, Issue 2: ScheduleTeaser + CoursePath bleiben EIN
           Kapitel mit einer H2 (withCoursePath), und InstagramShowcase bleibt ganz unten als
           Ausblick statt als Station im Scroll. */}
-      <main id="main" tabIndex={-1} className="pb-20 sm:pb-0">
+      {/* paddingBottom via --sticky-cta-height statt statischem pb-20: der Sticky-Balken
+          (77px, mobil ab 480px Scroll) deckte sonst am Seitenende den letzten Inhalt
+          (Critic Runde 15, Item 2). Die Variable ist 0px, sobald der Balken weg ist. */}
+      <main id="main" tabIndex={-1} style={{ paddingBottom: 'var(--sticky-cta-height, 0px)' }}>
         <Hero />
         <Offer />
         <ScheduleTeaser withCoursePath />

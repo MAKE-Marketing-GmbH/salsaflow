@@ -78,7 +78,9 @@ function DanceflowSection({ c }: { c: (typeof PARTYS)['de'] }) {
               />
             </div>
           </motion.div>
-          <motion.div variants={item} className="order-1 max-w-xl lg:order-2">
+          {/* lg:pr-36: der Danceflow-Lead endete bei x=1356 und lief beim Scrollen unter
+              den FAB (ab x=1294; Critic Runde 15, Item 5). */}
+          <motion.div variants={item} className="order-1 max-w-xl lg:order-2 lg:pr-36">
             <Eyebrow>{d.eyebrow}</Eyebrow>
             <h2 className={`mt-5 ${sectionTitle}`}>
               {d.title} <TitleAccent>{d.titleAccent}</TitleAccent>

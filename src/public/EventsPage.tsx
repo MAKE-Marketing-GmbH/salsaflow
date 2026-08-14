@@ -224,8 +224,10 @@ function DanceflowSection() {
           </div>
         </PhotoFade>
 
-        {/* RECHTS: Text + Fakten + Ticket-CTA. */}
-        <Reveal className="order-2 max-w-xl">
+        {/* RECHTS: Text + Fakten + Ticket-CTA.
+            lg:pr-36: die H2 endete bei x=1344 und lief beim Scrollen unter den FAB
+            (ab x=1294; Critic Runde 15, Item 4). */}
+        <Reveal className="order-2 max-w-xl lg:pr-36">
           <motion.div variants={item}>
             <Eyebrow>{d.eyebrow}</Eyebrow>
           </motion.div>

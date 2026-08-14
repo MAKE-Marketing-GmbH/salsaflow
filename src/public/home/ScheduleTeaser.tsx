@@ -130,7 +130,10 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
   return (
     <section id="kurse" className={cn('scroll-mt-24 bg-[var(--color-paper-warm)]', SECTION_Y_HOME)}>
       <Shell>
-        <Reveal className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        {/* lg:pr-36: der Knopf "Zum ganzen Kursplan" (x=1206-1388) lag in der Zone des
+            fixen WhatsApp-FAB (ab x=1294) — wie das Tages-Grid darunter
+            (Critic Runde 15, Item 1). */}
+        <Reveal className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:pr-36">
           <motion.div variants={item} className="max-w-2xl">
             <h2 className={cn(sectionTitle, MEASURE_L)}>{s.title}</h2>
             <p className={`mt-3 ${sectionLead}`}>{s.lead}</p>
