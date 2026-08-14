@@ -1,7 +1,9 @@
-// Sweep privatstunden/events/partys/collabs: Overflow, Touch-Ziele, FAB, Bild-Crops.
-// Rein lesend. Aufruf: node scripts/aaa-sweep4.cjs
+// Seiten-Sweep: Overflow, Touch-Ziele, FAB, Bild-Crops. Rein lesend.
+// Aufruf: node scripts/aaa-sweep4.cjs [/pfad1 /pfad2 ...] (Default: Runde-11-Seiten)
 const { chromium } = require('playwright-core');
-const PAGES = ['/privatstunden', '/events', '/mehr/partys', '/mehr/collabs'];
+const PAGES = process.argv.slice(2).length
+  ? process.argv.slice(2)
+  : ['/privatstunden', '/events', '/mehr/partys', '/mehr/collabs'];
 
 (async () => {
   const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome' });

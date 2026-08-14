@@ -49,7 +49,9 @@ export function GoogleRating({ className }: { className?: string }) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'group inline-flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-full',
+        // py-3 -my-3: hebt die Tap-Flaeche der ~20px-Textzeile auf 44px, ohne das Layout
+        // der Umgebung zu verschieben (Touch-Sweep 14.08.2026, /fotos-Hero 332x20).
+        'group -my-3 inline-flex flex-wrap items-center gap-x-2.5 gap-y-1 rounded-full py-3',
         className,
       )}
     >

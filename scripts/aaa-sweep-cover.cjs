@@ -1,10 +1,8 @@
-// Element-Screenshots aller grossen Bilder der Sweep-Seiten (Kopf-Check). Rein lesend.
-// Aufruf: node scripts/aaa-sweep4-imgs.cjs <breite> [/pfad1 /pfad2 ...]
+// Element-Screenshots NUR der cover-gecroppten Bilder (Kopf-Check am gerenderten
+// Ausschnitt). Rein lesend. Aufruf: node scripts/aaa-sweep-cover.cjs <breite> /pfad1 [/pfad2 ...]
 const { chromium } = require('playwright-core');
 const W = Number(process.argv[2] || 390);
-const PAGES = process.argv.slice(3).length
-  ? process.argv.slice(3)
-  : ['/privatstunden', '/events', '/mehr/partys', '/mehr/collabs'];
+const PAGES = process.argv.slice(3);
 
 (async () => {
   const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome' });
@@ -25,14 +23,16 @@ const PAGES = process.argv.slice(3).length
     for (const img of imgs) {
       const box = await img.boundingBox();
       if (!box || box.width < 100 || box.height < 80) continue;
+      const fit = await img.evaluate((el) => getComputedStyle(el).objectFit);
+      if (fit !== 'cover') continue;
       const src = await img.getAttribute('src');
       const name = (src || 'x').split('/').pop().replace(/\.\w+$/, '').slice(0, 30);
       await img.scrollIntoViewIfNeeded();
       await p.waitForTimeout(150);
-      await img.screenshot({ path: `/tmp/sweep4img-${path.replace(/\//g, '_')}-${n}-${name}-${W}.png` });
+      await img.screenshot({ path: `/tmp/r12c-${path.replace(/\//g, '_')}-${n}-${name}-${W}.png` });
       n++;
     }
-    console.log(`${path}: ${n} Bilder`);
+    console.log(`${path} @${W}: ${n} cover-Bilder`);
     await p.close();
   }
   await b.close();
