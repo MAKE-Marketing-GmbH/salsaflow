@@ -205,9 +205,11 @@ function FitSection({ c }: { c: FloweekendContent }) {
               {f.unsureTitle}
             </p>
             <p className="mt-5 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{f.unsure}</p>
+            {/* min-h-12: der Textlink mass 20px — zu kleines Tap-Ziel (Sweep 14.08.2026,
+                gleicher Fall wie die Format-CTAs auf /shows-animationen). */}
             <a
               href={f.cta.href}
-              className="group mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+              className="group mt-4 inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {f.cta.label}
               {/* Pfeil-Dauer aus dem Motion-Token, sonst faellt Tailwind auf 150ms zurueck. */}
@@ -245,12 +247,14 @@ function PrepSection({ c }: { c: FloweekendContent }) {
                 </li>
               ))}
             </motion.ul>
-            <motion.div variants={item} className="mt-7 flex flex-wrap gap-x-6 gap-y-3">
+            {/* min-h-12 je Link (Sweep 14.08.2026: 20px Tap-Ziele). gap-y kleiner, weil die
+                Links jetzt selbst Hoehe mitbringen. */}
+            <motion.div variants={item} className="mt-5 flex flex-wrap gap-x-6 gap-y-0">
               {p.links.map((l) => (
                 <a
                   key={l.href}
                   href={l.href}
-                  className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+                  className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
                 >
                   {l.label}
                   <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
