@@ -237,8 +237,10 @@ export function SubHero({
   microcopy?: string;
   facts?: [string, string][];
   axis?: HeroAxis;
-  /** Optionales full-bleed Band unter dem Typo-Block (randlos, ohne Radius). */
-  media?: { src: string; alt: string; position?: string; heightClass?: string };
+  /** Optionales full-bleed Band unter dem Typo-Block (randlos, ohne Radius).
+   *  positionClass: responsive object-position (z. B. Gruppenfoto, das je Breite anders
+   *  schneiden muss) — gewinnt gegen `position`, weil Inline-Style keine Breakpoints kann. */
+  media?: { src: string; alt: string; position?: string; positionClass?: string; heightClass?: string };
   /** Kuerzerer Hero, damit ein kurzes Bildband noch in den 730er-Fold passt. */
   dense?: boolean;
 }) {
@@ -285,7 +287,7 @@ export function HeroFrame({
   secondary?: HeroCta;
   microcopy?: string;
   facts?: [string, string][];
-  media?: { src: string; alt: string; position?: string; heightClass?: string };
+  media?: { src: string; alt: string; position?: string; positionClass?: string; heightClass?: string };
   /** Kuerzerer Hero, damit ein kurzes Bildband noch in den 730er-Fold passt. */
   dense?: boolean;
   /** Zusatzinhalt unter dem CTA-Block (z. B. Chip-Reihe auf den Stilseiten). */
@@ -443,8 +445,9 @@ export function HeroFrame({
             className={cn(
               'w-full object-cover',
               media.heightClass ?? 'h-[16rem] sm:h-[22rem] lg:h-[30rem]',
+              media.positionClass,
             )}
-            style={{ objectPosition: media.position ?? 'center 40%' }}
+            style={media.positionClass ? undefined : { objectPosition: media.position ?? 'center 40%' }}
             width={2048}
             height={1152}
             loading="eager"

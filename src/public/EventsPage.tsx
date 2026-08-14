@@ -157,10 +157,11 @@ function EventsHero() {
           lang === 'de'
             ? 'Tanzteam auf der Danceflow Night, alle Köpfe sichtbar'
             : 'Dance team at the Danceflow Night, all heads visible',
-        // 18% statt 28%: bei 28% war der getragene Taenzer oben ohne Kopf, bei 12% schnitt
-        // das Band die vorderen Gesichter unten an. Koepfe liegen bei 10-62% der Bildhoehe,
-        // 18% deckt beide Reihen (Kopf-Schnitt-Sweep 13.08.2026).
-        position: 'center 18%',
+        // 18% deckt beide Kopf-Reihen nur, solange das Band relativ zur Bildhoehe hoch ist
+        // (mobil ~60% Fenster). Ab lg schrumpft das Fenster auf ~20% — dort halbierte 18%
+        // die untere Gesichter-Reihe an der Unterkante (Sweep 14.08.2026). 13% legt den
+        // Schnitt oberhalb der unteren Stirnen: obere Reihe ganz, untere sauber draussen.
+        positionClass: 'object-[center_18%] lg:object-[center_13%]',
         heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
       }}
     >
