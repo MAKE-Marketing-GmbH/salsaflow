@@ -166,10 +166,12 @@ export const PREISE: Record<Lang, PreiseContent> = {
         // Kritiker Runde 3, Fix 6 ("leerer Decken-Crop"): 10% war zwar schnittfrei, hat aber
         // die obere Bildhaelfte des Bandes mit Decke und Neonroehren gefuellt — im Screen
         // d-01 (scratch/pv3) ist unter der Falz 250px lang NUR Decke zu sehen, die Tanzenden
-        // Band ist jetzt 18rem. Fold zeigt den oberen Streifen.
-        // 32% traf Decke, 50% traf Schultern. 38% trifft die hintere Kopfreihe im Fold.
-        position: 'center 38%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+        // Critic Runde 13, Item 1: 38% war gegen den alten 480px-Kasten gerechnet, die
+        // Hoehe stand aber laengst auf 10-12rem (160-192px) — der Mann rechts im weissen
+        // Shirt verlor den Kopf. Band jetzt wirklich 18rem wie Salsa/Bachata; Position am
+        // gerenderten 1440x288- und 390x160-Ausschnitt neu gemessen (Werte s. unten).
+        position: 'center 24%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
       },
       cardLabel: 'Klar und übersichtlich',
       cardText: 'Alle Preise auf einen Blick. Den Rest klärst du im Kursplan oder per Nachricht.',

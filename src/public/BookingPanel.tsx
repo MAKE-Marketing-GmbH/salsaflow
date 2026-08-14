@@ -784,7 +784,9 @@ function BookingForm({
                       {lang === 'de' ? 'Staffel' : 'Term'}
                     </dt>
                     <dd className="min-w-0 leading-snug text-[var(--color-ink)]">
-                      {formatDateI18n(term.startDate, lang)} – {formatDateI18n(term.endDate, lang)}
+                      {/* "bis"/"to" statt En-Dash: der Gedankenstrich zwischen zwei Daten
+                          las sich wie ein Minus (Critic Runde 13, Item 5). */}
+                      {formatDateI18n(term.startDate, lang)}{lang === 'de' ? ' bis ' : ' to '}{formatDateI18n(term.endDate, lang)}
                       <span className="text-[var(--color-ink-muted)]"> · {bt.weeksNote}</span>
                       {/* Laufende Staffel: sagen, dass Quereinstieg geht und wie viel noch kommt.
                           Ohne diese Zeile steht der Besucher genau am Entscheidungspunkt vor

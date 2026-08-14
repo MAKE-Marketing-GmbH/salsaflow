@@ -6,6 +6,7 @@
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 import {
   ClosingInvite,
   SubPageShell,
@@ -130,11 +131,16 @@ function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
             </motion.div>
           </Reveal>
           <Reveal className="grid gap-3 sm:grid-cols-2" stagger={0.06}>
-            {m.template.map((row) => (
+            {m.template.map((row, index) => (
               <motion.div
                 key={row.label}
                 variants={item}
-                className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-5 shadow-[0_14px_40px_rgba(17,17,17,0.04)]"
+                className={cn(
+                  'rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-5 shadow-[0_14px_40px_rgba(17,17,17,0.04)]',
+                  // Bei ungerader Kartenzahl stand die letzte Karte allein neben einer
+                  // Leerzelle (Critic Runde 13, Item 4) — sie laeuft ueber beide Spalten.
+                  index === m.template.length - 1 && m.template.length % 2 === 1 && 'sm:col-span-2',
+                )}
               >
                 <p className="flex items-center gap-2 font-display text-base font-bold text-[var(--color-ink)]">
                   <BeatMark size="sm" />

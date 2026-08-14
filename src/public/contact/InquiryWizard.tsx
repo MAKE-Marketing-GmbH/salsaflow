@@ -271,7 +271,9 @@ export function InquiryWizard({
           <fieldset>
             <legend className="font-display text-2xl font-bold leading-tight text-[var(--color-ink)]">{copy.topicTitle}</legend>
             <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.topicLead}</p>
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            {/* sm:pr-36 wie an der Button-Zeile: der FAB lag auf der Gutschein-Karte
+                (Overlap 61x49 im Erst-Viewport, Critic Runde 13, Item 2). */}
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:pr-36">
               {orderedTopics.map((entry, index) => {
                 const Icon = TOPIC_ICONS[entry.key];
                 return (
@@ -304,7 +306,9 @@ export function InquiryWizard({
               <div className="mt-6 space-y-6">
                 <fieldset>
                   <legend className="text-sm font-semibold text-[var(--color-ink)]">{copy.styleLabel}</legend>
-                  <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {/* sm:pr-36: FAB lag in Schritt 2 auf der letzten Wahl-Karte
+                      (Critic Runde 13, Item 2). */}
+                  <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:pr-36">
                     {copy.styles.map((entry) => (
                       <ChoiceCard key={entry.key} active={style === entry.key} label={entry.label} compact>
                         <input className="sr-only" type="radio" name="style" value={entry.key} checked={style === entry.key} onChange={() => setStyle(entry.key)} />
@@ -314,7 +318,8 @@ export function InquiryWizard({
                 </fieldset>
                 <fieldset>
                   <legend className="text-sm font-semibold text-[var(--color-ink)]">{copy.timeLabel}</legend>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  {/* sm:pr-36: gleiche FAB-Zone wie beim Stil-Grid darueber. */}
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3 sm:pr-36">
                     {copy.times.map((entry) => (
                       <ChoiceCard key={entry.key} active={time === entry.key} icon={entry.icon} label={entry.label} compact>
                         <input className="sr-only" type="radio" name="time" value={entry.key} checked={time === entry.key} onChange={() => setTime(entry.key)} />

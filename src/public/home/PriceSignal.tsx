@@ -79,9 +79,11 @@ export function PriceSignal() {
                   {p.plan}
                   <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
                 </a>
+                {/* min-h-12: der Textlink mass 106x20 — zu klein als Tap-Ziel
+                    (Critic Runde 13, Item 3). */}
                 <a
                   href="/preise"
-                  className="text-sm font-semibold text-[var(--color-ink-muted)] underline underline-offset-4 transition-colors hover:text-[var(--color-salsa)]"
+                  className="inline-flex min-h-12 items-center text-sm font-semibold text-[var(--color-ink-muted)] underline underline-offset-4 transition-colors hover:text-[var(--color-salsa)]"
                 >
                   {p.allPrices}
                 </a>
