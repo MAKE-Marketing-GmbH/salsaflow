@@ -123,7 +123,15 @@ const salsa: Record<Lang, StyleContent> = {
       secondary: { label: 'Salsa Kursplan ansehen', href: R.salsaPlan },
       microcopy: 'Kostenlos · unverbindlich · wir helfen dir beim passenden Level.',
       image: { src: '/photos/premium/offer-salsa-1200.webp', alt: 'Lachendes Salsa-Paar in Bewegung im hellen Salsaflow Studio' },
-      band: { src: '/photos/premium/offer-salsa-hero-2100.webp', alt: 'Salsa-Paar im Unterricht, Nähe und Energie im Salsaflow Studio', position: 'center 0%' },
+      band: {
+        src: '/photos/premium/offer-salsa-hero-2100.webp',
+        alt: 'Salsa-Paar im Unterricht, Nähe und Energie im Salsaflow Studio',
+        // Wie beim Bachata-Band: Default-Hoehe (30rem) zeigte bei 480px Fensterhoehe fast das
+        // ganze 21:9-Bild und begann erst unter dem Fold. 18rem + 0% halten die Gesichter
+        // (sie sitzen im oberen Bilddrittel) im Ausschnitt. Am gerenderten Ausschnitt geprueft.
+        position: 'center 0%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
+      },
       cardLabel: 'Dein Einstieg',
       cardText: 'Rhythmus, Grundschritt, erste Drehung. In Ruhe.',
     },
@@ -246,7 +254,13 @@ const salsa: Record<Lang, StyleContent> = {
       secondary: { label: 'See the Salsa schedule', href: R.salsaPlan },
       microcopy: 'Free · without obligation · we help you find the right level.',
       image: { src: '/photos/premium/offer-salsa-1200.webp', alt: 'Smiling Salsa couple dancing in the bright Salsaflow studio' },
-      band: { src: '/photos/premium/offer-salsa-hero-2100.webp', alt: 'Salsa couple in class, closeness and energy in the Salsaflow studio', position: 'center 0%' },
+      band: {
+        src: '/photos/premium/offer-salsa-hero-2100.webp',
+        alt: 'Salsa couple in class, closeness and energy in the Salsaflow studio',
+        // Gleiche Begruendung wie im DE-Block: 18rem-Band + 0% statt Default-30rem.
+        position: 'center 0%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
+      },
       cardLabel: 'Your start',
       cardText: 'Rhythm, basic step, first turn. Calmly.',
     },

@@ -114,7 +114,10 @@ function PrivatHero({ c }: { c: PrivatContent }) {
           </motion.p>
         </motion.div>
 
-        <motion.div data-reveal variants={item} initial="hidden" animate="show" className="relative">
+        {/* Mobil steht das Foto VOR dem Textblock (Critic Runde 11, Item 3): einspaltig lag
+            es komplett unter dem Fold und der Einstieg war reine Textwand. Ab lg gilt wieder
+            Text links / Foto rechts. */}
+        <motion.div data-reveal variants={item} initial="hidden" animate="show" className="relative -order-1 lg:order-none">
           <div className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_30px_70px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
             <img
               src={h.image.src}
@@ -129,7 +132,9 @@ function PrivatHero({ c }: { c: PrivatContent }) {
           {/* Links angedockt statt rechts: der fixe WhatsApp-FAB lag im Erst-Viewport auf
               der Kartenecke (Sweep 14.08.2026). Festes Papier statt Glas (bg-white/92 +
               backdrop-blur) — Glas auf Fotos ist seit Critic-Runde 4/5 verboten. */}
-          <div className="absolute -bottom-5 left-5 right-5 rounded-[var(--radius-card)] border border-black/5 bg-[var(--color-paper-warm)] p-4 text-[var(--color-ink)] shadow-[0_18px_44px_-18px_rgba(17,17,17,0.5)] sm:right-auto sm:max-w-[18rem]">
+          {/* bottom-4 statt -bottom-5: die herausragende Karte wurde am Fold/Cookie-Banner
+              abgeschnitten und riss aus dem Foto (Critic Runde 11, Item 3). */}
+          <div className="absolute bottom-4 left-5 right-5 rounded-[var(--radius-card)] border border-black/5 bg-[var(--color-paper-warm)] p-4 text-[var(--color-ink)] shadow-[0_18px_44px_-18px_rgba(17,17,17,0.5)] sm:right-auto sm:max-w-[18rem]">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{h.cardLabel}</p>
             <p className="mt-1 font-display text-lg font-bold leading-tight">{h.cardText}</p>
           </div>

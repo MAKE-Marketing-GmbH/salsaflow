@@ -70,7 +70,9 @@ function HowSection({ c }: { c: (typeof COLLABS)['de'] }) {
               {h.body}
             </motion.p>
           </Reveal>
-          <Reveal className="grid gap-3 sm:grid-cols-2" stagger={0.06}>
+          {/* lg:pr-36: der fixe WhatsApp-FAB lag auf der rechten Kartenspalte und verdeckte
+              Text (Critic Runde 11, Item 5) — gleiches Muster wie ScheduleTeaser. */}
+          <Reveal className="grid gap-3 sm:grid-cols-2 lg:pr-36" stagger={0.06}>
             {h.template.map((row) => (
               <motion.div
                 key={row.label}

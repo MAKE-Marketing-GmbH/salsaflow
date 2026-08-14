@@ -76,6 +76,9 @@ function StyleHero({ c }: { c: StyleContent }) {
       // axis="left" auch fuer Bachata: split + lg:items-end liess die linke Spalte leer
       // und schob Copy/CTA nach oben rechts (Critic Runde 9, Item 1).
       axis="left"
+      // dense: das Hero-Band lag auf beiden Stilseiten komplett unter dem 730er-Fold und
+      // bei 390 war der letzte Bullet-Chip angeschnitten (Critic Runde 11, Item 1).
+      dense
       crumbs={[{ label: 'Tanzkurse', href: '/tanzkurse' }, c.crumb]}
       title={h.title}
       titleAccent={h.titleAccent}

@@ -596,10 +596,12 @@ function RolesSection() {
               der Galerie. Jetzt ein echter Kursmoment vor der Salsaflow-Wand
               (Luminanz 159/255 statt 53/255) — er zeigt, was die Sektion behauptet:
               viele Menschen, ein gemeinsamer Kursabend. */}
+          {/* 22% statt 40%: das 21:9-Fenster nimmt ~12% der Bildhoehe weg, bei 40% fehlte
+              der Frau rechts (weisse Bluse) die Schaedeldecke (Critic Runde 11, Item 2). */}
           <img
             src="/photos/2026/kurse-heels-energie-01.webp"
             alt={supportVisual.alt}
-            className="aspect-[21/9] w-full rounded-[var(--radius-media)] object-cover object-[center_40%]"
+            className="aspect-[21/9] w-full rounded-[var(--radius-media)] object-cover object-[center_22%]"
             /* Runde 3, Issue 8: die Datei ist jetzt 1920x935 (Wasserzeichen-Streifen unten
                abgeschnitten). width/height muessen das echte Seitenverhaeltnis melden,
                sonst reserviert der Browser die falsche Hoehe (CLS). */
