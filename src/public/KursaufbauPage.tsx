@@ -184,7 +184,9 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
             </motion.div>
 
             {/* Rechte Spalte: die Leiter */}
-            <motion.div variants={item} className="bg-[var(--color-bg-soft)] p-5 sm:p-7 lg:p-8">
+            {/* lg:pr-36: die Leiter-Tags endeten bei x=1309-1330 und liefen beim Scrollen
+                unter den FAB (ab x=1294; Critic Runde 16, Item 4). */}
+            <motion.div variants={item} className="bg-[var(--color-bg-soft)] p-5 sm:p-7 lg:p-8 lg:pr-36">
               <div className="rounded-[1.75rem] border border-[var(--color-line)] bg-[var(--color-paper-warm)] p-5 sm:p-6">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">

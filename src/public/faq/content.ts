@@ -115,15 +115,30 @@ export const FAQ_CONTENT: Record<Lang, FaqPageContent> = {
           // man kann es perfekt nach der lektion, aber uebung macht den meister."
           // Der wichtigste Erwartungs-Irrtum laut Kunde — stand bisher nirgends auf der Seite.
           q: 'Wie viele Figuren lerne ich am Anfang?',
-          a: 'Weniger, als du denkst — und das ist gut so. Am Anfang geht es um Führen und Folgen. Wer das kann, tanzt mit jeder Person, auch ohne eine einzige Figur. Die Figuren kommen dann von selbst.',
+          // Em-Dash raus (Projektregel "keine Em-Dashes"; Critic Runde 16, Item 2).
+          a: 'Weniger, als du denkst. Und das ist gut so. Am Anfang geht es um Führen und Folgen. Wer das kann, tanzt mit jeder Person, auch ohne eine einzige Figur. Die Figuren kommen dann von selbst.',
         },
         {
           q: 'Wie buche ich eine Schnupperstunde?',
           a: 'Über den Kursplan oder das Schnupperformular. Auf der Kurskarte siehst du, wo Schnuppern möglich ist.',
         },
         {
+          // "Wir organisieren Aushilfe" stand mehrfach als Behauptung. WIE es laeuft, stand
+          // nirgends. Aus dem Onboarding, Feld "methode": "man hat einen leader aushilfe chat
+          // und einene follower aushilfe chat". Der Beweis macht das Versprechen glaubhaft.
           q: 'Kann ich ohne Tanzpartner kommen?',
-          a: 'Ja. Du kannst dich auch alleine anmelden. Im Kurs wird auf eine gute Balance geachtet und du lernst mit wechselnden Partner:innen.',
+          a: 'Ja. Du kannst dich auch alleine anmelden. Im Kurs wird auf eine gute Balance geachtet und du lernst mit wechselnden Partner:innen. Fehlt einmal jemand, fragen wir in unseren beiden Aushilfe-Chats: einer für Leader, einer für Follower. Meistens springt schnell jemand ein.',
+        },
+        {
+          // Uebernommen von /kontakt. Beide Bedenken stammen woertlich aus dem Onboarding
+          // (Feld "kundenZurueck") und standen bisher nur auf der Kontaktseite — also nicht im
+          // FAQPage-Schema, das nur /faq ausspielt.
+          q: 'Passe ich da rein, auch von meinem Alter her?',
+          a: 'Ja. Bei uns tanzen Menschen aller Altersgruppen ab etwa 12 Jahren. Du wirst vom ersten Abend an herzlich aufgenommen.',
+        },
+        {
+          q: 'Wie schnell komme ich voran?',
+          a: 'Schon nach einem Kurs spürst du den Fortschritt. Am schnellsten wirst du, wenn du dranbleibst und das Gelernte an den Danceflow Nights anwendest.',
         },
         {
           q: 'Was ist, wenn ich mein Level nicht kenne?',
@@ -247,7 +262,7 @@ export const FAQ_CONTENT: Record<Lang, FaqPageContent> = {
         },
         {
           q: 'How many figures do I learn at the start?',
-          a: 'Fewer than you expect — and that is a good thing. At the start it is about leading and following. Once that works, you can dance with anyone, without a single figure. The figures follow on their own.',
+          a: 'Fewer than you expect. And that is a good thing. At the start it is about leading and following. Once that works, you can dance with anyone, without a single figure. The figures follow on their own.',
         },
         {
           q: 'How do I book a trial class?',
@@ -255,7 +270,15 @@ export const FAQ_CONTENT: Record<Lang, FaqPageContent> = {
         },
         {
           q: 'Can I come without a dance partner?',
-          a: 'Yes. You can sign up on your own. The course keeps a good balance and you learn with changing partners.',
+          a: 'Yes. You can sign up on your own. The course keeps a good balance and you learn with changing partners. If someone is missing, we ask in our two stand-in chats: one for leaders, one for followers. Usually someone steps in quickly.',
+        },
+        {
+          q: 'Do I fit in, also in terms of my age?',
+          a: 'Yes. People of all ages from around 12 upwards dance with us. You are welcomed warmly from the very first evening.',
+        },
+        {
+          q: 'How fast do I make progress?',
+          a: 'You feel the progress after a single course. You get fastest by staying with it and using what you learned at the Danceflow Nights.',
         },
         {
           q: 'What if I do not know my level?',

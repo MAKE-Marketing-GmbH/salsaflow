@@ -146,7 +146,9 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
             Fix: auf Mobil laufen die Link-Listen zweispaltig (gap-x), der Touch-Target bleibt
             ueber `py-1.5` statt `min-h-8` erhalten (Zeile ~36px inkl. Padding, weiter ueber der
             24px-Textzeile). Zehn Links brauchen damit fuenf Zeilen statt zehn. Ab `sm` gilt
-            wieder das Vier-Spalten-Raster, dort ist eine Spalte pro Liste richtig. */}
+            wieder das Vier-Spalten-Raster, dort ist eine Spalte pro Liste richtig.
+            Nachtrag Critic Runde 16, Item 5: alle Footer-Links tragen zusaetzlich `min-h-11`
+            (44px-Tap-Ziel) — die Zweispaltigkeit bleibt, die Spalten werden moderat hoeher. */}
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1.35fr_0.9fr]">
           {/* 1. Marke */}
           <div className="space-y-4">
@@ -189,10 +191,10 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
               </p>
               {/* Mail und Telefon gehoeren mit in das <address>-Element: es umschliesst die
                   Kontaktdaten der Seite, nicht nur die Postanschrift. */}
-              <a href={`mailto:${CONTACT.email}`} className="t-hover flex items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white">
+              <a href={`mailto:${CONTACT.email}`} className="t-hover flex min-h-11 items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white">
                 <MailIcon /> {CONTACT.email}
               </a>
-              <a href={CONTACT.phoneHref} className="t-hover flex items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white">
+              <a href={CONTACT.phoneHref} className="t-hover flex min-h-11 items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white">
                 <PhoneIcon /> {CONTACT.phoneDisplay}
               </a>
             </address>
@@ -206,7 +208,7 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
             <ul className="grid grid-cols-2 gap-x-6 gap-y-0.5 sm:gap-y-1">
               {discover.map((item) => (
                 <li key={item.label}>
-                  <a href={item.href} className="t-hover inline-flex items-center py-1.5 text-sm text-white/85 hover:text-white">
+                  <a href={item.href} className="t-hover inline-flex min-h-11 items-center py-1.5 text-sm text-white/85 hover:text-white">
                     {item.label}
                   </a>
                 </li>
@@ -225,7 +227,7 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
                     target="_blank"
                     rel="noreferrer"
                     aria-label={s.label}
-                    className="t-hover group flex items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white"
+                    className="t-hover group flex min-h-11 items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white"
                   >
                     <span className="t-hover text-white/70 group-hover:text-white">{s.icon}</span>
                     {s.label}
@@ -241,8 +243,8 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
             &copy; {year} {c.rights} &middot; {c.legal}
           </p>
           <div className="flex gap-5">
-            <a href="/impressum" className="t-hover inline-flex min-h-8 items-center hover:text-white">{c.impressum}</a>
-            <a href="/datenschutz" className="t-hover inline-flex min-h-8 items-center hover:text-white">{c.datenschutz}</a>
+            <a href="/impressum" className="t-hover inline-flex min-h-11 items-center hover:text-white">{c.impressum}</a>
+            <a href="/datenschutz" className="t-hover inline-flex min-h-11 items-center hover:text-white">{c.datenschutz}</a>
           </div>
         </div>
       </Shell>

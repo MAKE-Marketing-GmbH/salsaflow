@@ -303,7 +303,7 @@ function Funnel() {
                         type="button"
                         data-testid="empty-next-day"
                         onClick={() => setDay(nextDayWithCourses.key)}
-                        className="t-hover inline-flex h-10 items-center rounded-full bg-[var(--color-salsa)] px-4 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)]"
+                        className="t-hover inline-flex min-h-11 items-center rounded-full bg-[var(--color-salsa)] px-4 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)]"
                       >
                         {ft.nextDayWithCourses}
                         <span className="ml-1.5 text-white/80">
@@ -313,7 +313,7 @@ function Funnel() {
                     )}
                     <a
                       href="/kontakt#kontaktformular"
-                      className="t-hover inline-flex h-10 items-center rounded-full border border-[var(--color-line)] px-4 text-sm font-semibold text-[var(--color-ink)] hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)]"
+                      className="t-hover inline-flex min-h-11 items-center rounded-full border border-[var(--color-line)] px-4 text-sm font-semibold text-[var(--color-ink)] hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)]"
                     >
                       {lang === 'de' ? 'Frag uns' : 'Ask us'}
                     </a>
@@ -703,13 +703,15 @@ function BookingForm({
                 {teachers && <span>{teachers}</span>}
               </p>
             </div>
+            {/* h-11/w-11 statt h-10: 44px-Tap-Ziel fuer den Dialog-Schliessen-Knopf
+                (Critic Runde 16, Item 3). */}
             <button
               ref={closeRef}
               type="button"
               onClick={onBack}
               data-testid="booking-close"
               aria-label={bt.backToCourses}
-              className="t-hover inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="t-hover inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 6 6 18M6 6l12 12" />
