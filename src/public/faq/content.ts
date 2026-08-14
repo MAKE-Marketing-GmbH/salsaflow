@@ -110,6 +110,14 @@ export const FAQ_CONTENT: Record<Lang, FaqPageContent> = {
           a: 'Nein. Beginner-Kurse starten ohne Vorkenntnisse. Wichtig ist nur, dass du offen bist, Schritt für Schritt zu lernen.',
         },
         {
+          // Aus dem Kunden-Onboarding, Feld "kundenIrrtum": "Sie denken sie muessen Figuren
+          // lernen, aber eigentlich muessen sie nur fuehren und fuehren lassen lernen. sie denken
+          // man kann es perfekt nach der lektion, aber uebung macht den meister."
+          // Der wichtigste Erwartungs-Irrtum laut Kunde — stand bisher nirgends auf der Seite.
+          q: 'Wie viele Figuren lerne ich am Anfang?',
+          a: 'Weniger, als du denkst — und das ist gut so. Am Anfang geht es um Führen und Folgen. Wer das kann, tanzt mit jeder Person, auch ohne eine einzige Figur. Die Figuren kommen dann von selbst.',
+        },
+        {
           q: 'Wie buche ich eine Schnupperstunde?',
           a: 'Über den Kursplan oder das Schnupperformular. Auf der Kurskarte siehst du, wo Schnuppern möglich ist.',
         },
@@ -236,6 +244,10 @@ export const FAQ_CONTENT: Record<Lang, FaqPageContent> = {
         {
           q: 'Do I already need to know how to dance?',
           a: 'No. Beginner courses start with no experience. All that matters is that you are open to learning step by step.',
+        },
+        {
+          q: 'How many figures do I learn at the start?',
+          a: 'Fewer than you expect — and that is a good thing. At the start it is about leading and following. Once that works, you can dance with anyone, without a single figure. The figures follow on their own.',
         },
         {
           q: 'How do I book a trial class?',
