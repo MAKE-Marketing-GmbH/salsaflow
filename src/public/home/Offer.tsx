@@ -117,7 +117,10 @@ export function Offer() {
           <motion.div variants={item} className="min-w-0 lg:-mb-8">
             <FeaturedStyle card={o.cards[0]} />
           </motion.div>
-          <motion.div variants={item} className="border-t border-[var(--color-line)] lg:pt-2">
+          {/* lg:pr-36: der fixe WhatsApp-FAB (x ab 1294) lag beim Scrollen auf dem rechten
+              Zeilenende (right=1388, Pfeil + Textende) — Muster ScheduleTeaser
+              (Critic Runde 12, Item 5). */}
+          <motion.div variants={item} className="border-t border-[var(--color-line)] lg:pr-36 lg:pt-2">
             {o.cards.slice(1).map((card, index) => (
               <StyleRow key={card.key} card={card} index={index + 1} />
             ))}

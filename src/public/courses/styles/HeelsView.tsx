@@ -57,6 +57,9 @@ function HeelsHero({ c }: { c: C }) {
   return (
     <HeroFrame
       axis="center"
+      // dense wie Salsa/Bachata: auf 390 war der letzte Chip im Fold abgeschnitten
+      // (Critic Runde 12, Item 4).
+      dense
       crumbs={[{ label: 'Tanzkurse', href: '/tanzkurse' }, c.crumb]}
       title={h.title}
       titleAccent={h.titleAccent}
@@ -66,11 +69,15 @@ function HeelsHero({ c }: { c: C }) {
       microcopy={h.microcopy}
       media={h.band}
     >
-      <ul className="flex flex-wrap justify-center gap-2">
+      {/* Chip-Bauform wie StylePage (Salsa/Bachata, Critic Runde 9), mobil eine Stufe
+          enger (px-2, gap-x-1): den Heels-Texten fehlten exakt 3px zum Zweier-Wrap
+          (157+190+6 = 353 bei 350 verfuegbar) — einzeilig gestapelt lag der letzte Chip
+          35px unter dem 390er-Fold (Critic Runde 12, Item 4). min-h-11 bleibt (Runde 9). */}
+      <ul className="flex flex-wrap justify-center gap-x-1 gap-y-1.5 sm:gap-2">
         {h.bullets.map((b) => (
           <li
             key={b}
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-3.5 py-1.5 text-sm font-semibold text-[var(--color-ink)]"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-2 py-1 text-[0.72rem] font-semibold leading-tight text-[var(--color-ink)] sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm"
           >
             <Check size={13} strokeWidth={3} aria-hidden className="text-[var(--color-salsa)]" />
             {b}

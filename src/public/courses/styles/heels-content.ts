@@ -110,10 +110,11 @@ export const HEELS: Record<Lang, HeelsContent> = {
         alt: 'Heels-Kurs im hellen Studio, energiegeladene Gruppe vor der Salsaflow-Wand',
         // Kein heightClass mehr: das flache 10-12rem-Band (192px auf 1440) schnitt
         // Stirn und Scheitel der Gruppe (Critic Runde 8, Item 1) — es gilt wieder die
-        // HeroFrame-Default-Hoehe h-[16rem] sm:h-[22rem] lg:h-[30rem]. Im hohen Band
-        // haelt 15% die Kopfreihe im Bild, ohne nur Decke zu zeigen (25% schnitt der
-        // Taenzerin rechts noch die Schaedeldecke an).
-        position: 'center 15%',
+        // HeroFrame-Default-Hoehe h-[16rem] sm:h-[22rem] lg:h-[30rem].
+        // 0% statt 15%: auch 15% kappte der Frau rechts (weisse Bluse) noch den
+        // Oberkopf; bei 0% sind Pony und Stirn ganz (Critic Runde 12, Item 1 — am
+        // 1440x480-Ausschnitt geprueft).
+        position: 'center 0%',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Sicher stehen, Haltung finden, freier bewegen.',
@@ -221,10 +222,11 @@ export const HEELS: Record<Lang, HeelsContent> = {
         alt: 'Heels class in the bright studio, energetic group in front of the Salsaflow wall',
         // Kein heightClass mehr: das flache 10-12rem-Band (192px auf 1440) schnitt
         // Stirn und Scheitel der Gruppe (Critic Runde 8, Item 1) — es gilt wieder die
-        // HeroFrame-Default-Hoehe h-[16rem] sm:h-[22rem] lg:h-[30rem]. Im hohen Band
-        // haelt 15% die Kopfreihe im Bild, ohne nur Decke zu zeigen (25% schnitt der
-        // Taenzerin rechts noch die Schaedeldecke an).
-        position: 'center 15%',
+        // HeroFrame-Default-Hoehe h-[16rem] sm:h-[22rem] lg:h-[30rem].
+        // 0% statt 15%: auch 15% kappte der Frau rechts (weisse Bluse) noch den
+        // Oberkopf; bei 0% sind Pony und Stirn ganz (Critic Runde 12, Item 1 — am
+        // 1440x480-Ausschnitt geprueft).
+        position: 'center 0%',
       },
       cardLabel: 'Your start',
       cardText: 'Stand safely, find posture, move more freely.',
