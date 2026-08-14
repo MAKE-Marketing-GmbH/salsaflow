@@ -108,10 +108,12 @@ export const HEELS: Record<Lang, HeelsContent> = {
       band: {
         src: '/photos/2026/kurse-heels-energie-hero-2100.webp',
         alt: 'Heels-Kurs im hellen Studio, energiegeladene Gruppe vor der Salsaflow-Wand',
-        // 8% statt 18%: bei 18% war der Kopf der Taenzerin rechts im Band komplett
-        // abgeschnitten (Kopf-Schnitt-Sweep 13.08.2026).
-        position: 'center 8%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+        // Kein heightClass mehr: das flache 10-12rem-Band (192px auf 1440) schnitt
+        // Stirn und Scheitel der Gruppe (Critic Runde 8, Item 1) — es gilt wieder die
+        // HeroFrame-Default-Hoehe h-[16rem] sm:h-[22rem] lg:h-[30rem]. Im hohen Band
+        // haelt 15% die Kopfreihe im Bild, ohne nur Decke zu zeigen (25% schnitt der
+        // Taenzerin rechts noch die Schaedeldecke an).
+        position: 'center 15%',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Sicher stehen, Haltung finden, freier bewegen.',
@@ -217,10 +219,12 @@ export const HEELS: Record<Lang, HeelsContent> = {
       band: {
         src: '/photos/2026/kurse-heels-energie-hero-2100.webp',
         alt: 'Heels class in the bright studio, energetic group in front of the Salsaflow wall',
-        // 8% statt 18%: bei 18% war der Kopf der Taenzerin rechts im Band komplett
-        // abgeschnitten (Kopf-Schnitt-Sweep 13.08.2026).
-        position: 'center 8%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+        // Kein heightClass mehr: das flache 10-12rem-Band (192px auf 1440) schnitt
+        // Stirn und Scheitel der Gruppe (Critic Runde 8, Item 1) — es gilt wieder die
+        // HeroFrame-Default-Hoehe h-[16rem] sm:h-[22rem] lg:h-[30rem]. Im hohen Band
+        // haelt 15% die Kopfreihe im Bild, ohne nur Decke zu zeigen (25% schnitt der
+        // Taenzerin rechts noch die Schaedeldecke an).
+        position: 'center 15%',
       },
       cardLabel: 'Your start',
       cardText: 'Stand safely, find posture, move more freely.',

@@ -229,7 +229,10 @@ function FlowSection({ c }: { c: DanceflowContent }) {
               <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
             </a>
           </motion.div>
-          <motion.div variants={item} className="overflow-hidden rounded-[var(--radius-media)] ring-1 ring-white/10 lg:sticky lg:top-28">
+          {/* lg:mr-36: der fixe WhatsApp-FAB lag auf dem rechten unteren Bildrand
+              (Critic Runde 8, Item 5 — margin statt padding, sonst entsteht Leerraum
+              im gerundeten Rahmen). */}
+          <motion.div variants={item} className="overflow-hidden rounded-[var(--radius-media)] ring-1 ring-white/10 lg:sticky lg:top-28 lg:mr-36">
             <img
               src={f.image.src}
               alt={f.image.alt}

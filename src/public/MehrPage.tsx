@@ -49,7 +49,9 @@ function MoreHero() {
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
           <motion.h1
             variants={item}
-            className="mt-5 font-display text-[2.65rem] font-extrabold leading-[1.03] tracking-tight text-[var(--color-ink)] sm:text-5xl lg:text-[4.1rem]"
+            // text-balance: auf 390 stand "Tanzen" als Waisenwort allein in der letzten
+            // Zeile (Critic Runde 8, Item 3).
+            className="mt-5 font-display text-[2.65rem] font-extrabold leading-[1.03] tracking-tight text-balance text-[var(--color-ink)] sm:text-5xl lg:text-[4.1rem]"
           >
             {h.titleA}{' '}
             <TitleAccent>{h.titleAccent}</TitleAccent>

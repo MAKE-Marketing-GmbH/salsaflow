@@ -183,7 +183,9 @@ function ShoesSection({ c }: { c: C }) {
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
           <Reveal className="order-2 lg:order-1">
             <motion.div variants={item} className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]">
-              <img src={s.image.src} alt={s.image.alt} className="aspect-[4/3] w-full object-cover object-[center_45%]" width={1200} height={900} loading="lazy" />
+              {/* 80% statt 45%: die Schuhe stehen unten im Motiv — 45% legte den leeren
+                  Saal in die Mitte und schnitt die Schuhe an (Critic Runde 8, Item 2). */}
+              <img src={s.image.src} alt={s.image.alt} className="aspect-[4/3] w-full object-cover object-[center_80%]" width={1200} height={900} loading="lazy" />
             </motion.div>
           </Reveal>
           <Reveal className="order-1 max-w-xl lg:order-2">

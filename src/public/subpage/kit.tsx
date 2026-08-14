@@ -163,7 +163,9 @@ export function Breadcrumb({ trail }: { trail: Crumb[] }) {
                   {c.label}
                 </span>
               ) : (
-                <a href={c.href} className="t-hover hover:text-[var(--color-salsa)]">
+                // min-h-11: die Crumb-Anker massen 20px — zu kleines Tap-Ziel
+                // (Critic Runde 8, Item 4).
+                <a href={c.href} className="t-hover inline-flex min-h-11 items-center hover:text-[var(--color-salsa)]">
                   {c.label}
                 </a>
               )}
