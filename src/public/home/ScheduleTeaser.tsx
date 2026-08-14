@@ -204,7 +204,9 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
         // Critic-Nachlauf 13.08.2026). Mobil kein gap: 390px / 6 = 58px pro Spalte sind schon
         // das Minimum fuer "Sa" + Zahl + "1 Kurs" (siehe Kommentar oben), und Hover gibt es
         // auf Touch nicht.
-        className="grid grid-cols-6 py-3 sm:gap-1.5"
+        // lg:pr-36: der fixe WhatsApp-FAB lag beim Scrollen auf der Sa-Kachel
+        // ("1 Kurs" verdeckt, Critic Runde 9, Item 2).
+        className="grid grid-cols-6 py-3 sm:gap-1.5 lg:pr-36"
               >
                 {days.map((d) => {
                   const count = byDay.get(d.key)?.length ?? 0;

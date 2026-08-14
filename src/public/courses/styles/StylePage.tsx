@@ -73,7 +73,9 @@ function StyleHero({ c }: { c: StyleContent }) {
   const h = c.hero;
   return (
     <HeroFrame
-      axis={c.seo === 'bachata' ? 'split' : 'left'}
+      // axis="left" auch fuer Bachata: split + lg:items-end liess die linke Spalte leer
+      // und schob Copy/CTA nach oben rechts (Critic Runde 9, Item 1).
+      axis="left"
       crumbs={[{ label: 'Tanzkurse', href: '/tanzkurse' }, c.crumb]}
       title={h.title}
       titleAccent={h.titleAccent}
@@ -83,11 +85,13 @@ function StyleHero({ c }: { c: StyleContent }) {
       microcopy={h.microcopy}
       media={h.band}
     >
-      <ul className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
+      {/* flex-wrap auf allen Breiten statt grid-cols-2 unter sm: das Raster brach
+          (erste Chips 165x53, letzter 255x24 — Critic Runde 9, Item 5). Chips min-h-11. */}
+      <ul className="flex flex-wrap gap-1.5 sm:gap-2">
         {h.bullets.map((b) => (
           <li
             key={b}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-2.5 py-1 text-[0.72rem] font-semibold leading-tight text-[var(--color-ink)] last:col-span-2 last:w-fit sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm sm:last:col-span-1"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-2.5 py-1 text-[0.72rem] font-semibold leading-tight text-[var(--color-ink)] sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm"
           >
             <Check size={13} strokeWidth={3} aria-hidden className="text-[var(--color-salsa)]" />
             {b}

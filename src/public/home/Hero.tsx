@@ -179,7 +179,7 @@ export function Hero() {
                 <a
                   key={style.label}
                   href={style.href}
-                  className="t-hover-move group inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-paper-warm)]/90 px-4 py-2 text-sm font-semibold text-[var(--color-ink-muted)] shadow-sm backdrop-blur-sm hover:-translate-y-0.5 hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)] max-sm:border-white/30 max-sm:bg-black/20 max-sm:text-white max-sm:hover:border-[var(--color-script-cream)] max-sm:hover:text-[var(--color-script-cream)]"
+                  className="t-hover-move group inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-paper-warm)]/90 px-4 py-2 text-sm font-semibold text-[var(--color-ink-muted)] shadow-sm backdrop-blur-sm hover:-translate-y-0.5 hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)] max-sm:border-white/30 max-sm:bg-black/20 max-sm:text-white max-sm:hover:border-[var(--color-script-cream)] max-sm:hover:text-[var(--color-script-cream)]"
                 >
                   <span>{style.label}</span>
                   <ArrowUpRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-[var(--ease-sf)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.25} />

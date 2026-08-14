@@ -64,7 +64,7 @@ export function SchedulePage() {
                 <span aria-hidden className="text-[var(--color-line)]">·</span>
                 <a
                   href="/kontakt#schnupperstunde"
-                  className="inline-flex min-h-10 items-center rounded-full border border-[var(--color-salsa)] px-4 py-2 text-sm font-semibold text-[var(--color-salsa)] transition-colors hover:bg-[var(--color-salsa)] hover:text-white"
+                  className="inline-flex min-h-11 items-center rounded-full border border-[var(--color-salsa)] px-4 py-2 text-sm font-semibold text-[var(--color-salsa)] transition-colors hover:bg-[var(--color-salsa)] hover:text-white"
                 >
                   {lang === 'de' ? 'Neu? Gratis Schnupperstunde' : 'New here? Free trial class'}
                 </a>
