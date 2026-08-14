@@ -286,7 +286,10 @@ function StylesSection() {
               als zwei konkurrierende Sektions-Koepfe. Der rechte Block ist kein Kopf, sondern
               ein Hinweis — er bekommt jetzt keinen Eyebrow mehr, nur den Takt-Marker als Anker.
               Runde 2: die weisse Schatten-Box um den Hinweis ist raus, es bleibt eine Oberkante. */}
-          <motion.div variants={item} className="border-t border-[var(--color-line)] pt-5">
+          {/* hidden lg:block: unter lg stapelte der Hinweis als toter BeatMark-Block
+              zwischen H2 und erstem Foto (Critic Runde 14, Item 5) — er ist eine
+              Rand-Notiz fuer die breite Zweispalter-Zeile, kein Mobilinhalt. */}
+          <motion.div variants={item} className="hidden border-t border-[var(--color-line)] pt-5 lg:block">
             <BeatMark />
             <p className="mt-3 text-pretty text-sm leading-relaxed text-[var(--color-ink-muted)]">
               {de

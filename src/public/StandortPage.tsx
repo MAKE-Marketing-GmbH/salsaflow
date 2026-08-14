@@ -148,7 +148,9 @@ function StudiosSection({ c }: { c: StandortContent }) {
         <Reveal className="max-w-2xl">
           <SectionHead eyebrow={s.eyebrow} title={s.title} titleAccent={s.titleAccent} lead={s.lead} />
         </Reveal>
-        <Reveal className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" stagger={0.08}>
+        {/* lg:pr-36: der fixe WhatsApp-FAB lag auf dem Text der dritten Studio-Karte
+            (Critic Runde 14, Item 3 — Muster ScheduleTeaser/Offer). */}
+        <Reveal className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:pr-36" stagger={0.08}>
           {s.items.map((studio) => (
             <motion.div
               key={studio.name}

@@ -349,7 +349,10 @@ export function TeaserCard({
         className="group flex flex-col gap-3 border-b border-[var(--color-line)] px-1 py-5 transition-colors last:border-b-0 hover:bg-[var(--color-bg-soft)] sm:flex-row sm:items-center sm:gap-6 sm:px-4"
       >
         <span className="flex shrink-0 items-baseline gap-2 sm:w-32 sm:flex-col sm:items-start sm:gap-1">
-          <span className="font-display text-2xl font-extrabold leading-none tabular-nums text-[var(--color-ink)]">
+          {/* Ohne tabular-nums: Cal Sans machte aus der Uhr "18 : 30" mit Loechern um den
+              Doppelpunkt (Critic Runde 14, Item 2 — wie CourseEngine). Die Tages-KACHELN
+              oben behalten tabular-nums: dort steht eine reine Zahl, gleiche Breite gewollt. */}
+          <span className="font-display text-2xl font-extrabold leading-none text-[var(--color-ink)]">
             {course.startTime}
           </span>
           <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">

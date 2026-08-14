@@ -120,10 +120,14 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
 
         <motion.div data-reveal variants={item} initial="hidden" animate="show" className="relative">
           <div className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_30px_70px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
+            {/* 32% horizontal statt center: bei 50% hing rechts der halbe Kopf des
+                Taenzers im Anschnitt; bei 32% ist der linke Taenzer ganz und rechts
+                bleibt nur ein Stoffrand (Critic Runde 14, Item 1 — am gerenderten
+                1440- und 390-Ausschnitt geprueft). */}
             <img
               src={h.image.src}
               alt={h.image.alt}
-              className="aspect-[4/5] w-full object-cover object-[center_35%] sm:aspect-[5/4] lg:aspect-[4/5]"
+              className="aspect-[4/5] w-full object-cover object-[32%_35%] sm:aspect-[5/4] lg:aspect-[4/5]"
               width={1600}
               height={1067}
               loading="eager"

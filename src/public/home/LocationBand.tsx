@@ -65,20 +65,22 @@ export function LocationBand() {
                 <CtaPill href={TRIAL_HREF}>{c.cta}</CtaPill>
               </div>
 
-              {/* Kontakt-Zeile: WhatsApp + Telefon, klickbar (5-Sekunden-Kontakt). */}
+              {/* Kontakt-Zeile: WhatsApp + Telefon, klickbar (5-Sekunden-Kontakt).
+                  min-h-12: beide Links massen nur ~20px Hoehe — zu klein als Tap-Ziel
+                  (Critic Runde 14, Item 4). */}
               <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-semibold text-[var(--color-ink)]">
                 <a
                   href={CONTACT.whatsapp}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 transition-colors hover:text-[var(--color-salsa)]"
+                  className="inline-flex min-h-12 items-center gap-2 transition-colors hover:text-[var(--color-salsa)]"
                 >
                   <WhatsAppGlyph className="text-[var(--color-salsa)]" />
                   {c.whatsapp}
                 </a>
                 <a
                   href={CONTACT.phoneHref}
-                  className="inline-flex items-center gap-2 tabular-nums transition-colors hover:text-[var(--color-salsa)]"
+                  className="inline-flex min-h-12 items-center gap-2 tabular-nums transition-colors hover:text-[var(--color-salsa)]"
                 >
                   <Phone size={16} strokeWidth={1.75} aria-hidden className="text-[var(--color-salsa)]" />
                   {CONTACT.phoneDisplay}

@@ -576,7 +576,9 @@ function TimeBlock({ start, end, children }: { start: string; end: string; child
   return (
     <div className="grid gap-1.5 border-b border-[var(--color-line)] py-3 sm:grid-cols-[8.5rem_minmax(0,1fr)] sm:gap-5 sm:py-5 lg:grid-cols-[10rem_minmax(0,1fr)]">
       <p className="flex items-baseline gap-2 sm:block sm:self-stretch sm:border-r sm:border-[var(--color-line)] sm:pr-5">
-        <span className="inline-flex items-center gap-2 font-display text-[2rem] font-extrabold leading-none tabular-nums text-[var(--color-ink)]">
+        {/* Ohne tabular-nums: Cal Sans reserviert sonst Ziffernbreite fuer den Doppelpunkt
+            — die Uhr las sich als "18 : 30" (Critic Runde 14, Item 2). */}
+        <span className="inline-flex items-center gap-2 font-display text-[2rem] font-extrabold leading-none text-[var(--color-ink)]">
           <span aria-hidden className="h-2 w-2 rounded-full bg-[var(--color-salsa)]" />
           {start}
         </span>
