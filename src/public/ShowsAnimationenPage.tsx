@@ -402,7 +402,7 @@ function GallerySection({ c }: { c: ShowsAnimContent }) {
           <motion.div variants={item}>
             <a
               href={g.link.href}
-              className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+              className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {g.link.label}
               <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />

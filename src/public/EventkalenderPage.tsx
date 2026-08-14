@@ -138,7 +138,7 @@ function CardsSection({ c }: { c: EventkalenderContent }) {
               <p className="mt-4 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{ev.text}</p>
               <a
                 href={ev.cta.href}
-                className="group mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+                className="group mt-4 inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {ev.cta.label}
                 <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
@@ -188,7 +188,7 @@ function FeaturedSection({ c }: { c: EventkalenderContent }) {
                   <a
                     key={l.href}
                     href={l.href}
-                    className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-ink)] transition-colors hover:text-[var(--color-salsa)]"
+                    className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-ink)] transition-colors hover:text-[var(--color-salsa)]"
                   >
                     {l.label}
                     <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />

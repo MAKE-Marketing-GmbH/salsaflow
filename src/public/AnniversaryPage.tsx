@@ -220,7 +220,7 @@ function ProgrammSection({ c }: { c: AnniversaryContent }) {
             </ul>
             <a
               href={p.cta.href}
-              className="group mt-auto inline-flex items-center gap-1.5 pt-7 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+              className="group mt-auto inline-flex min-h-12 items-center gap-1.5 pt-7 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {p.cta.label}
               <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
@@ -283,7 +283,7 @@ function AudienceSection({ c }: { c: AnniversaryContent }) {
               <p className="mt-2 text-[0.96rem] leading-relaxed text-[var(--color-ink-muted)]">{a.newBody}</p>
               <a
                 href={a.cta.href}
-                className="group mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+                className="group mt-4 inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {a.cta.label}
                 <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
@@ -348,7 +348,7 @@ function ProofSection({ c }: { c: AnniversaryContent }) {
               key={link.href}
               variants={item}
               href={link.href}
-              className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+              className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {link.label}
               <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />

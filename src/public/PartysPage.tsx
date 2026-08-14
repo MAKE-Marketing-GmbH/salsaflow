@@ -122,7 +122,7 @@ function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
             <motion.div variants={item} className="mt-7">
               <a
                 href={m.cta.href}
-                className="group inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+                className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {m.cta.label}
                 <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />

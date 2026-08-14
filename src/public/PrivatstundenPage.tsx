@@ -295,7 +295,7 @@ function PricesSection({ c }: { c: PrivatContent }) {
               <PrimaryCta href={p.cta.href}>{p.cta.label}</PrimaryCta>
               <a
                 href={p.altCta.href}
-                className="group inline-flex items-center gap-1.5 px-2 py-2 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+                className="group inline-flex min-h-12 items-center gap-1.5 px-2 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {p.altCta.label}
                 <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
