@@ -213,7 +213,8 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
             </div>
             <a
               href="/kontakt#schnupperstunde"
-              className="hidden items-center gap-1.5 rounded-full border border-[var(--color-salsa)] bg-[var(--color-salsa)] px-3 py-2 text-sm font-semibold text-white transition-colors hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)] sm:inline-flex sm:px-4"
+              // min-h-11: der CTA mass 38px (Critic Runde 7, Item 5).
+              className="hidden min-h-11 items-center gap-1.5 rounded-full border border-[var(--color-salsa)] bg-[var(--color-salsa)] px-3 py-2 text-sm font-semibold text-white transition-colors hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)] sm:inline-flex sm:px-4"
             >
               {c.cta.trial}
               <ArrowRight size={16} strokeWidth={2.25} aria-hidden />
@@ -225,7 +226,8 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
               aria-expanded={open}
               aria-controls="mobile-navigation"
               aria-label={de ? 'Menü' : 'Menu'}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-3 text-[var(--color-ink)] shadow-sm lg:hidden"
+              // min-h-11 statt h-10: 40px Menue-Knopf unter dem Tap-Ziel (Critic Runde 7, Item 5).
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-3 text-[var(--color-ink)] shadow-sm lg:hidden"
             >
               <Menu size={18} strokeWidth={2} aria-hidden />
               <span className="text-xs font-semibold">{open ? (de ? 'Schliessen' : 'Close') : (de ? 'Menü' : 'Menu')}</span>
@@ -529,7 +531,7 @@ function LangToggle({
 }) {
   return (
     <div
-      className="inline-flex min-h-10 shrink-0 items-center gap-0.5 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] p-0.5 text-xs font-semibold shadow-sm"
+      className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] p-0.5 text-xs font-semibold shadow-sm"
       role="group"
       aria-label="Sprache / Language"
     >
@@ -541,7 +543,9 @@ function LangToggle({
           aria-pressed={lang === l}
           data-testid={`lang-${l}`}
           className={cn(
-            'inline-flex h-9 min-w-10 items-center justify-center rounded-full px-2.5 uppercase transition-colors',
+            // min-h-11 auf dem Button selbst: das Tap-Ziel ist der Knopf, nicht die Pille
+            // drumherum (Critic Runde 7, Item 5 — vorher 36px).
+            'inline-flex min-h-11 min-w-10 items-center justify-center rounded-full px-2.5 uppercase transition-colors',
             lang === l
               ? 'bg-[var(--color-ink)] text-white'
               : 't-hover text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]',

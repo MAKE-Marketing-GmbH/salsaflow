@@ -191,9 +191,12 @@ function FormSection({
       <span id="kontaktformular" aria-hidden className="block scroll-mt-24" />
       <Shell>
         <Reveal>
+          {/* overflow-visible statt hidden: der mobile sticky "Weiter"-Knopf des Wizards
+              sass bei y=832 im 844er-Fold und wurde vom Rahmen abgeschnitten (Critic
+              Runde 7, Item 1). */}
           <motion.div
             variants={item}
-            className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)]"
+            className="overflow-visible rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)]"
           >
             <InquiryWizard initialTopic={topic} onTopicChange={setTopic} />
           </motion.div>

@@ -50,7 +50,7 @@ export type ShowsAnimContent = {
     whatLabel: string;
     fitLabel: string;
     items: ShowFormat[]; // genau drei: Show / Animation / Workshop
-    combo: { name: string; what: string; fit: string };
+    combo: { name: string; what: string; fit: string; cta: Cta };
     image: Img;
   };
   process: {
@@ -166,6 +166,7 @@ export const SHOWS_ANIM: Record<Lang, ShowsAnimContent> = {
         name: 'Kombination',
         what: 'Erst Show, dann Animation oder Workshop.',
         fit: 'der Abend einen klaren Höhepunkt und danach Beteiligung bekommen soll.',
+        cta: { label: 'Kombination anfragen', href: ANFRAGE },
       },
       image: {
         src: '/photos/shows/show-16.webp',
@@ -325,6 +326,7 @@ export const SHOWS_ANIM: Record<Lang, ShowsAnimContent> = {
         name: 'Combination',
         what: 'First the show, then an animation or a workshop.',
         fit: 'the evening needs a clear highlight and some participation afterwards.',
+        cta: { label: 'Ask about a combination', href: ANFRAGE },
       },
       image: {
         src: '/photos/shows/show-16.webp',

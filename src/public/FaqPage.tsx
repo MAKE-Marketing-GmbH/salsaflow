@@ -152,7 +152,9 @@ function ThemesSection({ c }: { c: FaqPageContent }) {
         <Reveal className="max-w-2xl">
           <SectionHead title={t.title} titleAccent={t.titleAccent} lead={t.lead} />
         </Reveal>
-        <Reveal className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-12" stagger={0.06}>
+        {/* lg:pr-36: der fixe WhatsApp-FAB lag auf der Preise-Sprungkarte rechts aussen
+            (Critic Runde 7, Item 4). */}
+        <Reveal className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-12 lg:pr-36" stagger={0.06}>
           {t.items.map((theme, index) => (
             <motion.a
               key={theme.label}

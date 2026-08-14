@@ -54,7 +54,9 @@ function KursaufbauHero({ c }: { c: KursaufbauContent }) {
   return (
     <section
       className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
-      style={{ paddingTop: 'calc(var(--nav-h) + 1.5rem)' }}
+      // paddingBottom: solange die Cookie-Leiste steht, deckte sie 58px des Hero-Fotos —
+      // der Hero macht ihr Platz; nach Accept wird die Variable 0px (Critic Runde 7, Item 3).
+      style={{ paddingTop: 'calc(var(--nav-h) + 1.5rem)', paddingBottom: 'var(--cookie-banner-height, 0px)' }}
     >
       <div
         aria-hidden

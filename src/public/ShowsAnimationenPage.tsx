@@ -249,9 +249,11 @@ function FormatsSection({ c }: { c: ShowsAnimContent }) {
                       <dd className="mt-1 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{fmt.fit}</dd>
                     </div>
                   </dl>
+                  {/* min-h-12: der Textlink mass 20px — zu kleines Tap-Ziel (Critic
+                      Runde 7, Item 2). */}
                   <a
                     href={fmt.cta.href}
-                    className="group mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+                    className="group mt-3 inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
                   >
                     {fmt.cta.label}
                     <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
@@ -281,6 +283,15 @@ function FormatsSection({ c }: { c: ShowsAnimContent }) {
                   <dd className="mt-1 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{f.combo.fit}</dd>
                 </div>
               </dl>
+              {/* Gleicher Anfrage-Link wie die drei Formate — die Kombi-Karte war die
+                  einzige ohne CTA (Critic Runde 7, Item 2). */}
+              <a
+                href={f.combo.cta.href}
+                className="group mt-3 inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+              >
+                {f.combo.cta.label}
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              </a>
             </motion.div>
           </Reveal>
 
