@@ -79,7 +79,8 @@ export function Funnel() {
                     >
                       {de ? 'Schreib uns auf WhatsApp' : 'Message us on WhatsApp'}
                     </a>
-                    {de ? ' — auch ohne Formular.' : ' — no form needed.'}
+                    {/* Punkt statt Em-Dash (Projektregel; Critic Runde 17, Item 1). */}
+                    {de ? '. Auch ohne Formular.' : '. No form needed.'}
                   </dd>
                 </div>
               </div>

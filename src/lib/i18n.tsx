@@ -293,7 +293,7 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     messagePlaceholder: 'For example: I danced salsa two years ago …',
     successNextTitle: 'What happens next',
     successNextMail: 'We get back to you and confirm your spot, usually the same day.',
-    successNextLocation: 'Studio Elisabethenanlage 7, 4051 Basel — 5 minutes from Basel SBB.',
+    successNextLocation: 'Studio Elisabethenanlage 7, 4051 Basel. 5 minutes from Basel SBB.',
     successNextBring: 'Bring comfortable clothes and clean flat-soled shoes.',
     waitlistBodyExtra: 'As soon as a spot opens up, we write to you right away.',
     toSchedule: 'Back to the schedule',

@@ -55,10 +55,11 @@ export function Faq() {
             <motion.p variants={item} className={`mt-5 max-w-sm ${sectionLead}`}>
               {lead}
             </motion.p>
+            {/* min-h-12: der Textlink mass nur 24px Hoehe (Critic Runde 17, Item 2). */}
             <motion.a
               variants={item}
               href="/kontakt"
-              className="group mt-7 inline-flex items-center gap-1.5 text-base font-semibold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-salsa-700)]"
+              className="group mt-7 inline-flex min-h-12 items-center gap-1.5 text-base font-semibold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-salsa-700)]"
             >
               {f.more}
               <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />

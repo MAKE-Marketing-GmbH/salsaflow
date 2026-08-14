@@ -173,7 +173,7 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
                     <a
                       key={s.href}
                       href={s.href}
-                      className="group inline-flex items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--color-ink)] shadow-sm transition-colors hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)]"
+                      className="group inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--color-ink)] shadow-sm transition-colors hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)]"
                     >
                       {s.label}
                       <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />

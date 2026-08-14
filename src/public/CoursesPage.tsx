@@ -163,7 +163,9 @@ function CourseStartCard({ course, data, index, altThumb = false }: { course: Sc
         </span>
         <span>
           <span className="block text-[10px] text-[var(--color-ink-muted)]">{lang === 'de' ? 'Zeit' : 'Time'}</span>
-          <span className="mt-px block font-semibold tabular-nums text-[var(--color-ink)]">{course.startTime}</span>
+          {/* Ohne tabular-nums: Doppelpunkt-Uhr bekam Ziffernbreiten-Loecher
+              (Critic Runde 17, Item 3 — wie CourseEngine/ScheduleTeaser in Runde 14). */}
+          <span className="mt-px block font-semibold text-[var(--color-ink)]">{course.startTime}</span>
         </span>
       </span>
       <span className="mt-auto flex items-center justify-between gap-3 pt-2 text-sm font-semibold text-[var(--color-salsa)]">
