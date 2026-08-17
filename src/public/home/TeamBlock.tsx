@@ -102,22 +102,24 @@ export function TeamBlock() {
         <Reveal>
           {/* Titel und Story gestapelt statt H2 links / Story rechts (Split-Header-Ban,
               Critic 13.08.2026). */}
-          <div>
-            <motion.div variants={item}>
-              <Eyebrow>{t.eyebrow}</Eyebrow>
-            </motion.div>
-            <motion.h2
-              variants={item}
-              className={cn(
-                'mt-5 font-display text-3xl font-extrabold leading-[1.03] tracking-[-0.02em] sm:text-4xl md:text-[3rem] lg:text-[3.35rem]',
-                MEASURE_L,
-              )}
-            >
-              {t.title}
-            </motion.h2>
+          <div className="lg:grid lg:grid-cols-2 lg:items-end lg:gap-16">
+            <div>
+              <motion.div variants={item}>
+                <Eyebrow>{t.eyebrow}</Eyebrow>
+              </motion.div>
+              <motion.h2
+                variants={item}
+                className={cn(
+                  'type-h2 mt-5',
+                  MEASURE_L,
+                )}
+              >
+                {t.title}
+              </motion.h2>
+            </div>
             <motion.p
               variants={item}
-              className="mt-5 max-w-[65ch] text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg"
+              className="mt-5 max-w-[65ch] text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg lg:mt-0"
             >
               {t.story}
             </motion.p>

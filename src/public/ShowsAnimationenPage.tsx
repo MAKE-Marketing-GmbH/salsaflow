@@ -72,7 +72,8 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
   return (
     <section
       className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
-      style={{ paddingTop: 'calc(var(--nav-h) + 1rem)' }}
+      // R75: 1rem -> 0.25rem Section-Top (zusaetzlich 12 px Luft zum Fold, nur Abstand).
+      style={{ paddingTop: 'calc(var(--nav-h) + 0.25rem)' }}
     >
       <div
         aria-hidden
@@ -89,7 +90,7 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
           <motion.h1
             variants={item}
-            className="mt-3 font-display text-[2.4rem] font-extrabold leading-[1.02] tracking-[-0.022em] text-balance sm:text-[3rem] lg:text-[3.4rem]"
+            className="type-h1 mt-3"
           >
             {h.title}
           </motion.h1>
@@ -123,11 +124,15 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
             {/* 32% horizontal statt center: bei 50% hing rechts der halbe Kopf des
                 Taenzers im Anschnitt; bei 32% ist der linke Taenzer ganz und rechts
                 bleibt nur ein Stoffrand (Critic Runde 14, Item 1 — am gerenderten
-                1440- und 390-Ausschnitt geprueft). */}
+                1440- und 390-Ausschnitt geprueft).
+                R75 (Fold 1440x730): lg 4/5 -> 5/4 (Foto 814 -> 521 px) — die CTA
+                sass mit 4/5 als rote Kappe unter dem Fold (ctaTop 717). Durch das
+                flachere Foto hebt die links zentrierte Spalte: CTA-Bottom 771 -> 650,
+                80 px Luft. Motiv, object-position, Copy, Chips, H1 unberuehrt. */}
             <img
               src={h.image.src}
               alt={h.image.alt}
-              className="aspect-[4/5] w-full object-cover object-[32%_35%] sm:aspect-[5/4] lg:aspect-[4/5]"
+              className="aspect-[4/5] w-full object-cover object-[32%_35%] sm:aspect-[5/4] lg:aspect-[5/4]"
               width={1600}
               height={1067}
               loading="eager"
@@ -197,7 +202,7 @@ function OccasionsSection({ c }: { c: ShowsAnimContent }) {
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
                     <Icon size={18} strokeWidth={1.9} aria-hidden />
                   </span>
-                  <h3 className="mt-4 font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{card.title}</h3>
+                  <h3 className="mt-4 type-h3 text-[var(--color-ink)]">{card.title}</h3>
                   <p className="mt-2 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{card.text}</p>
                 </motion.div>
               );
@@ -247,7 +252,7 @@ function FormatsSection({ c }: { c: ShowsAnimContent }) {
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[var(--color-salsa)] shadow-sm">
                       <Icon size={18} strokeWidth={1.9} aria-hidden />
                     </span>
-                    <h3 className="font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{fmt.name}</h3>
+                    <h3 className="type-h3 text-[var(--color-ink)]">{fmt.name}</h3>
                   </div>
                   <dl className="mt-5 space-y-3">
                     <div>
@@ -281,7 +286,7 @@ function FormatsSection({ c }: { c: ShowsAnimContent }) {
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-salsa)] text-white shadow-sm">
                   <Sparkles size={18} strokeWidth={1.9} aria-hidden />
                 </span>
-                <h3 className="font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{f.combo.name}</h3>
+                <h3 className="type-h3 text-[var(--color-ink)]">{f.combo.name}</h3>
               </div>
               <dl className="mt-5 space-y-3">
                 <div>
@@ -347,7 +352,7 @@ function ProcessSection({ c }: { c: ShowsAnimContent }) {
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-salsa)] font-display text-base font-bold tabular-nums text-white">
                 {String(i + 1).padStart(2, '0')}
               </span>
-              <h3 className="mt-4 font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{step.title}</h3>
+              <h3 className="mt-4 type-h3 text-[var(--color-ink)]">{step.title}</h3>
               <p className="mt-2 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{step.text}</p>
             </motion.div>
           ))}

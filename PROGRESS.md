@@ -1,8 +1,22 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-13 abends (Ultracode-Runde: Startseite wieder voll, Anmeldung bewiesen, deployed)
-**Session:** Kürzung zurückgenommen, Hero-Chips + WhatsApp-Float, Anmeldung end-to-end, Kursplan-Default heute, Preise im Header
+**Stand:** 2026-08-17 05:22 UTC — Geil-Welle Zwischenstand. S0–S7 plus Runden bis R77 genommen. R78 Buchung-Karte offen. Preview-Push auf Branch `geil-welle`. Nicht Production.
+**Session:** Watchdog Grok + Worker Kimi in `29e7fd18`
+**Handoff:** [HANDOFF-2026-08-14.md](/root/clients/salsaflow/worklog/watchdog/HANDOFF-2026-08-14.md)
 **Handoff-ready:** ja
+
+## Geil-Welle 14.08 (Worktree `/root/clients/salsaflow-w1`, Branch `geil-welle`)
+
+- ERLEDIGT: S0 Seed August+Oktober · S1 Rot/Icons/Typo · S2 Kursplan-Hero+Staffel · S3 Kontakt 2×4 · S4 Instagram-Embed (redaktionell) · S5 Booking-Success · S6 SEO-Gate PASS + priceRange CHF 5–600 + Snapshot August/Oktober
+- S7 Mobile (Code + 12 Nachher-Shots):
+  - Kontakt 390: Anliegen-Karten stapeln Icon über dem Wort. „Schnupperstunde“ steht vollständig.
+  - Kursplan 390: Bei sichtbarer Cookie-Leiste Foto-Band und Kalender-Kopf kürzer. Wochen-Pfeile liegen über der Leiste.
+  - Nachher: [shots/S7/nachher](/root/clients/salsaflow/worklog/watchdog/shots/S7/nachher/)
+  - Kritik: Workflow `s7-390-kritik` (JS-Validate PASS, Rhai-Smoke PASS). Sol PASS, Grok-worker PASS, Kimi PASS. Opus 429 (3×).
+- Stack: Vite 5175, API 8788. Root-Checkout nicht anfassen.
+- Nicht gepusht. Nicht mergen ohne Raphael.
+
+## Älter (13.08, main / deployed)
 
 ## ERLEDIGT (Ultracode-Runde 13.08. abends)
 

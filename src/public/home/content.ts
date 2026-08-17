@@ -99,7 +99,7 @@ export type HomeStrings = {
 const offerPhotos = {
   salsa: '/photos/kurse/kurs-01.jpg',
   bachata: '/photos/premium/offer-bachata-wide-v2.webp',
-  heels: '/photos/premium/offer-heels-1200.webp',
+  heels: '/photos/2026/kurse-heels-energie-01.webp',
   privat: '/photos/premium/offer-privat-wide-original-v2.webp',
 };
 

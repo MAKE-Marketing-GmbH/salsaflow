@@ -74,7 +74,7 @@ export function PriceSignal() {
                   href="/kursplan"
                   /* Ring-Offset folgt der neuen Panel-Flaeche (paper-warm statt bg-soft),
                      sonst zeichnet der Fokusring einen falschfarbigen Rahmen. */
-                  className="group inline-flex items-center justify-center gap-1.5 rounded-full border border-[var(--color-ink)] px-6 py-3 text-base font-semibold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-ink)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-paper-warm)]"
+                  className="btn-base btn-outline group px-6 py-3 text-base"
                 >
                   {p.plan}
                   <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />

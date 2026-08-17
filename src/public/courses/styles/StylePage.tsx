@@ -71,6 +71,7 @@ export function StylePage({ data }: { data: Record<'de' | 'en', StyleContent> })
 
 function StyleHero({ c }: { c: StyleContent }) {
   const h = c.hero;
+  const isSalsa = c.seo === 'salsa';
   return (
     <HeroFrame
       // axis="left" auch fuer Bachata: split + lg:items-end liess die linke Spalte leer
@@ -79,6 +80,10 @@ function StyleHero({ c }: { c: StyleContent }) {
       // dense: das Hero-Band lag auf beiden Stilseiten komplett unter dem 730er-Fold und
       // bei 390 war der letzte Bullet-Chip angeschnitten (Critic Runde 11, Item 1).
       dense
+      // R73-Nachzieh: nur Salsa hebt den Band-Top ueber den gestrafften Typo-Block,
+      // damit im 1440x730-Fold zwei Gesichter inkl. Kinn mit Luft liegen. Bachata
+      // (eigener tight-Hebel), Heels, Preise, R72-Wrap bleiben unberuehrt.
+      liftMedia={isSalsa}
       crumbs={[{ label: 'Tanzkurse', href: '/tanzkurse' }, c.crumb]}
       title={h.title}
       titleAccent={h.titleAccent}
@@ -89,12 +94,19 @@ function StyleHero({ c }: { c: StyleContent }) {
       media={h.band}
     >
       {/* flex-wrap auf allen Breiten statt grid-cols-2 unter sm: das Raster brach
-          (erste Chips 165x53, letzter 255x24 — Critic Runde 9, Item 5). Chips min-h-11. */}
-      <ul className="flex flex-wrap gap-1.5 sm:gap-2">
+          (erste Chips 165x53, letzter 255x24 — Critic Runde 9, Item 5). Chips min-h-11.
+          R71-Nachzieh: whitespace-nowrap + shrink-0 pro Chip, damit kein Chip
+          innerhalb umbricht. R72: lg:justify-center — eine einzelne Zeile aus
+          flex-nowrap schnitt den fuenften Chip rechts ab (gemessen: letzter Chip
+          endete bei 1555 > 1440, "Danceflow Night" fehlte). Wrap auf lg bricht die
+          fuenf Chips zentriert auf zwei Zeilen (4+1, gemessen maxRight 1298 < 1440);
+          das Foto-Band beginnt unter dem Content, darum bleiben die R71-Koepfe im
+          Fold. Keine neue Copy, Crop und Band-Hoehe unveraendert (R72-Stopp). */}
+      <ul className="flex flex-wrap gap-1.5 sm:gap-2 lg:justify-center">
         {h.bullets.map((b) => (
           <li
             key={b}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-2.5 py-1 text-[0.72rem] font-semibold leading-tight text-[var(--color-ink)] sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm"
+            className="inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--color-line)] bg-white px-2.5 py-1 text-[0.72rem] font-semibold leading-tight text-[var(--color-ink)] sm:gap-2 sm:px-3.5 sm:py-1.5 lg:px-3 lg:text-[0.8rem]"
           >
             <Check size={13} strokeWidth={3} aria-hidden className="text-[var(--color-salsa)]" />
             {b}
@@ -150,7 +162,7 @@ function WhySection({ c }: { c: StyleContent }) {
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div>
-                  <h3 className="font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{b.title}</h3>
+                  <h3 className="type-h3 text-[var(--color-ink)]">{b.title}</h3>
                   <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{b.text}</p>
                 </div>
               </motion.div>
@@ -252,7 +264,7 @@ function BeginnerSection({ c }: { c: StyleContent }) {
                   </span>
                   <div>
                     <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{p.tag}</p>
-                    <h3 className="font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{p.title}</h3>
+                    <h3 className="type-h3 text-[var(--color-ink)]">{p.title}</h3>
                     <p className="mt-1.5 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{p.text}</p>
                   </div>
                 </li>
@@ -306,7 +318,7 @@ function LevelsSection({ c }: { c: StyleContent }) {
                   <span className="mt-4 font-display text-sm font-extrabold tabular-nums text-[var(--color-salsa)]">
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <h3 className="mt-2 font-display text-xl font-bold leading-tight text-balance text-[var(--color-ink)]">{r.name}</h3>
+                  <h3 className="mt-2 type-h3 text-[var(--color-ink)]">{r.name}</h3>
                   <p className="mt-2 text-pretty text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{r.text}</p>
                 </motion.li>
               ))}
@@ -360,7 +372,7 @@ function SocialSection({ c }: { c: StyleContent }) {
               <BeatMark />
               Danceflow Night
             </p>
-            <h2 className={cn('mt-5 font-display text-3xl font-bold leading-[1.06] tracking-tight text-balance sm:text-4xl md:text-[2.6rem]', MEASURE_L)}>
+            <h2 className={cn('type-h2 mt-5', MEASURE_L)}>
               {s.title} {s.titleAccent ? <TitleAccent dark>{s.titleAccent}</TitleAccent> : null}
             </h2>
             <p className="mt-4 text-pretty text-base leading-relaxed text-white/80 sm:text-lg">{s.body}</p>
@@ -374,7 +386,7 @@ function SocialSection({ c }: { c: StyleContent }) {
             </ul>
             <a
               href={s.cta.href}
-              className="group mt-8 inline-flex items-center gap-1.5 rounded-full bg-white px-6 py-3 text-sm font-bold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-salsa)] hover:text-white"
+              className="btn-base btn-primary group mt-8 px-6 py-3 text-sm"
             >
               {s.cta.label}
               <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />

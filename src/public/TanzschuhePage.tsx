@@ -33,9 +33,15 @@ export function TanzschuhePage() {
   return (
     <SubPageShell seo="tanzschuhe">
       {/* Runde 2, Issue 1: Typo-Hero statt Foto-Split. Achse 'left' — die Seite ist eine
-          ruhige Beratungsseite, sie beginnt linksbuendig gestapelt. */}
+          ruhige Beratungsseite, sie beginnt linksbuendig gestapelt.
+          R68: Das Schuh-Motiv sass ungenutzt in der Content-Datei (hero.image), der Fold
+          war nur Text. Jetzt axis="left" + dense + media-Band nach dem Eventkalender-Muster
+          (R58): das Foto laeuft randlos unter der Headline, Schuhe im 1440-Fold sichtbar.
+          13rem statt Eventkalender-18rem: die H1 ist hier dreizeilig, dadurch bleibt das
+          Band trotz laengerem Kopf im Fold. */}
       <SubHero
         axis="left"
+        dense
         seoCrumbs={c.crumbs}
         title={c.hero.title}
         titleAccent={c.hero.titleAccent}
@@ -43,6 +49,15 @@ export function TanzschuhePage() {
         primary={c.hero.primary}
         secondary={c.hero.secondary}
         microcopy={c.hero.microcopy}
+        media={{
+          src: c.hero.image.src,
+          alt: c.hero.image.alt,
+          // Motiv ist quadratisch (1600x1600), die Schuhe sitzen im unteren Drittel
+          // (~72-80% Hoehe). center 30% zeigte nur den leeren Spiegel oben — 72% holt
+          // die beiden Schuh-Paare in den sichtbaren Fold-Streifen.
+          position: 'center 72%',
+          heightClass: 'h-[11rem] sm:h-[13rem] lg:h-[16rem]',
+        }}
       />
       <ByStyleSection c={c} />
       <PracticalSection c={c} />
@@ -76,7 +91,7 @@ function ByStyleSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
               <span className="font-display text-sm font-extrabold tabular-nums text-[var(--color-salsa)]">
                 {String(i + 1).padStart(2, '0')}
               </span>
-              <h3 className="mt-3 font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{card.name}</h3>
+              <h3 className="mt-3 type-h3 text-[var(--color-ink)]">{card.name}</h3>
               <p className="mt-2 flex-1 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{card.text}</p>
               {/* Der Link trug denselben Text wie die Ueberschrift direkt darueber — auf der
                   Karte stand "Salsa" zweimal untereinander. Jetzt sagt er, wohin er fuehrt. */}
@@ -120,7 +135,7 @@ function PracticalSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
               <BeatMark />
               {cl.eyebrow}
             </p>
-            <h2 className="mt-4 font-display text-2xl font-bold leading-tight text-[var(--color-ink)] sm:text-3xl">
+            <h2 className="type-h2 mt-4 text-[var(--color-ink)]">
               {cl.title} <TitleAccent>{cl.titleAccent}</TitleAccent>
             </h2>
             <CheckList items={cl.items} className="mt-6" />
@@ -133,7 +148,7 @@ function PracticalSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
               <BeatMark />
               {ca.eyebrow}
             </p>
-            <h2 className="mt-4 font-display text-2xl font-bold leading-tight text-[var(--color-ink)] sm:text-3xl">
+            <h2 className="type-h2 mt-4 text-[var(--color-ink)]">
               {ca.title} <TitleAccent>{ca.titleAccent}</TitleAccent>
             </h2>
             <ul className="mt-6 space-y-px">
@@ -164,7 +179,7 @@ function NotNeededSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
           </motion.div>
           <motion.h2
             variants={item}
-            className="mt-5 font-display text-3xl font-bold leading-[1.06] tracking-tight text-[var(--color-ink)] sm:text-4xl"
+            className="type-h2 mt-5 text-[var(--color-ink)]"
           >
             {n.title} <TitleAccent>{n.titleAccent}</TitleAccent>
           </motion.h2>

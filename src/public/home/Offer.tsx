@@ -34,7 +34,7 @@ function FeaturedStyle({ card }: { card: OfferCard }) {
         <span className="text-sm font-semibold text-white/80">{card.hint}</span>
         <h3
           className={cn(
-            'mt-3 font-display text-[2.35rem] leading-[0.94] tracking-[-0.025em] sm:text-[3.1rem]',
+            'type-h3 mt-3',
             MEASURE_L,
           )}
         >
@@ -76,7 +76,7 @@ function StyleRow({ card, index }: { card: OfferCard; index: number }) {
         <span className="text-xs font-semibold text-[var(--color-salsa)]">{card.hint}</span>
         <h3
           className={cn(
-            'mt-1 font-display text-[1.4rem] leading-[1] tracking-[-0.02em] text-[var(--color-ink)] sm:text-[1.75rem]',
+            'type-h3 mt-1 text-[var(--color-ink)]',
             MEASURE_M,
           )}
         >
@@ -102,7 +102,7 @@ export function Offer() {
           <motion.h2
             variants={item}
             className={cn(
-              'font-display text-[2.5rem] leading-[0.96] tracking-[-0.03em] text-[var(--color-ink)] sm:text-[3.5rem] lg:text-[4rem]',
+              'type-h2 text-[var(--color-ink)]',
               MEASURE_L,
             )}
           >

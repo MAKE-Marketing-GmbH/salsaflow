@@ -4,6 +4,14 @@ import './index.css';
 import { LangProvider } from '@/lib/i18n';
 import { SmoothScroll } from '@/public/site/SmoothScroll';
 import { resolveRoute } from '@/routes';
+import type { ScheduleResponse } from '@/lib/schedule';
+// Dev-Startwert des Kursplans (scripts/dev-schedule-global.mjs). Im Prerender-Build
+// traegt das HTML den schedule-data-Tag; im Dev setzt diese Zeile denselben Plan als
+// globale, BEVOR irgendeine Komponente rendert — embeddedSchedule() findet ihn dann.
+import { embeddedScheduleData } from '@/generated/schedule-embedded';
+
+(globalThis as { __EMBEDDED_SCHEDULE__?: ScheduleResponse }).__EMBEDDED_SCHEDULE__ ??=
+  embeddedScheduleData;
 
 const route = resolveRoute(window.location.pathname);
 

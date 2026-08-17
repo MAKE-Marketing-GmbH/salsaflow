@@ -104,7 +104,7 @@ export function EventsTeaser() {
           <motion.h2
             variants={item}
             className={cn(
-              'mt-4 font-display text-4xl font-bold leading-[1.0] tracking-[-0.025em] text-white sm:text-5xl',
+              'type-h2 mt-4 text-white',
               MEASURE_L,
             )}
           >
@@ -128,7 +128,7 @@ export function EventsTeaser() {
           <motion.div variants={item} className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
             <a
               href="/events"
-              className="group inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full bg-[var(--color-salsa)] px-7 py-3.5 text-base font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-colors duration-[var(--dur-fast)] hover:bg-white hover:text-[var(--color-night)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-night)]"
+              className="btn-base btn-primary group min-h-12 px-7 py-3.5 text-base"
             >
               {e.cta}
               <ArrowRight

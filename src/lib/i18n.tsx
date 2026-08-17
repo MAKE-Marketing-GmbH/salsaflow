@@ -178,6 +178,13 @@ export type BookingDict = {
   successNextLocation: string;
   successNextBring: string;
   waitlistBodyExtra: string;
+  /* Erfolgs-Ansicht (S5): Fakten-Zeilen + eine starke Aktion. */
+  successFactWhen: string;
+  successFactWhere: string;
+  successFactPay: string;
+  successPayShort: string;
+  successWaitlistFor: string;
+  successWhatsApp: string;
   toSchedule: string;
   retry: string;
   backToCourses: string;
@@ -190,8 +197,8 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     title: 'Kurs buchen',
     notBookable: 'Dieser Kurs ist aktuell nicht buchbar.',
     chooseRole: 'Ich tanze als',
-    leader: 'Mann',
-    follower: 'Frau',
+    leader: 'Leader',
+    follower: 'Follower',
     roleHelper: 'Meistens tanzen Frauen als Follower und Männer als Leader. Wähle einfach, was auf dich zutrifft. Wir brauchen das nur für die Balance im Kurs.',
     openClassNote: 'Offene Klasse - keine Rollenwahl nötig.',
     roleFull: 'Diese Rolle ist gerade voll. Du kommst auf die Warteliste.',
@@ -215,9 +222,11 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     close: 'Schliessen',
     requiredHint: 'Bitte fülle die Pflichtfelder aus.',
     errorGeneric: 'Buchung fehlgeschlagen. Bitte versuche es erneut.',
-    successConfirmedTitle: 'Reservierung ist da',
-    successConfirmedBody: 'Schön, dass du dabei bist. Wir prüfen den Platz und bestätigen dir kurz. Zahlen kannst du einfach vor Ort (Twint oder Bar).',
-    successWaitlistTitle: 'Du bist auf der Warteliste',
+    successConfirmedTitle: 'Dein Platz ist reserviert',
+    // Ehrlich: es geht KEINE automatische Bestaetigungs-Mail raus. Die Reservierung
+    // landet als Mail beim Studio, und dort schaut ein Mensch drauf (Absprache).
+    successConfirmedBody: 'Wir haben deine Anmeldung. Das Studio schaut sie an und bestätigt dir den Platz, meist am selben Tag.',
+    successWaitlistTitle: 'Du stehst auf der Warteliste',
     loading: 'Verfügbarkeit wird geprüft...',
     redirecting: 'Weiter zur sicheren Bezahlung...',
     payOnSite: 'Zahlst du einfach vor Ort. Twint oder Bar. Keine Online-Zahlung nötig.',
@@ -238,7 +247,13 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     successNextLocation: 'Studio Elisabethenanlage 7, 4051 Basel. 5 Minuten vom Bahnhof SBB.',
     successNextBring: 'Bring bequeme Kleidung und saubere Schuhe mit flacher Sohle mit.',
     waitlistBodyExtra: 'Sobald ein Platz frei wird, schreiben wir dir sofort.',
-    toSchedule: 'Zurück zum Kursplan',
+    successFactWhen: 'Wann',
+    successFactWhere: 'Wo',
+    successFactPay: 'Bezahlen',
+    successPayShort: 'Vor Ort, Twint oder bar',
+    successWaitlistFor: 'Warteliste für',
+    successWhatsApp: 'Frag uns auf WhatsApp',
+    toSchedule: 'Alle Kurse ansehen',
     retry: 'Erneut versuchen',
     backToCourses: 'Anderen Kurs wählen',
     back: 'Zurück',
@@ -248,8 +263,8 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     title: 'Book course',
     notBookable: 'This course is currently not bookable.',
     chooseRole: 'I dance as',
-    leader: 'Man',
-    follower: 'Woman',
+    leader: 'Leader',
+    follower: 'Follower',
     roleHelper: 'Usually women dance as followers and men as leaders. Just pick what fits you. We only need this to keep the class balanced.',
     openClassNote: 'Open class - no role selection needed.',
     roleFull: 'This role is currently full. You will join the waiting list.',
@@ -273,8 +288,8 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     close: 'Close',
     requiredHint: 'Please fill in the required fields.',
     errorGeneric: 'Booking failed. Please try again.',
-    successConfirmedTitle: 'Your request is in',
-    successConfirmedBody: 'Great to have you. We check the spot and confirm it shortly. You can simply pay on site (TWINT or cash).',
+    successConfirmedTitle: 'Your spot is reserved',
+    successConfirmedBody: 'We have your sign-up. The studio looks at it and confirms your spot, usually the same day.',
     successWaitlistTitle: 'You are on the waiting list',
     loading: 'Checking availability...',
     redirecting: 'Continuing to secure payment...',
@@ -296,7 +311,13 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     successNextLocation: 'Studio Elisabethenanlage 7, 4051 Basel. 5 minutes from Basel SBB.',
     successNextBring: 'Bring comfortable clothes and clean flat-soled shoes.',
     waitlistBodyExtra: 'As soon as a spot opens up, we write to you right away.',
-    toSchedule: 'Back to the schedule',
+    successFactWhen: 'When',
+    successFactWhere: 'Where',
+    successFactPay: 'Payment',
+    successPayShort: 'On site, TWINT or cash',
+    successWaitlistFor: 'Waiting list for',
+    successWhatsApp: 'Ask us on WhatsApp',
+    toSchedule: 'See all classes',
     retry: 'Try again',
     backToCourses: 'Pick another class',
     back: 'Back',
@@ -368,8 +389,8 @@ export const PAYMENT_UI: Record<Lang, PaymentDict> = {
 // Wartelisten-Text (DE/EN). Ohne Platznummer: die kennt nur das Studio, nicht die Website.
 export function waitlistBody(lang: Lang): string {
   return lang === 'de'
-    ? 'Dieser Kurs ist gerade voll. Wir setzen dich auf die Warteliste und melden uns, sobald ein Platz frei wird.'
-    : 'This class is currently full. We put you on the waiting list and get in touch as soon as a spot opens up.';
+    ? 'Der Kurs ist gerade voll. Wir tragen dich ein und melden uns, sobald ein Platz frei wird.'
+    : 'This class is currently full. We put you on the list and get in touch as soon as a spot opens up.';
 }
 
 /* Level-Kategorien fuer den Level-Filter (DE/EN). Quelle: level_rungs.category. */

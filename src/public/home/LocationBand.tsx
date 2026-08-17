@@ -26,9 +26,9 @@ export function LocationBand() {
           {/* LINKS: echtes Kurs-Foto, fuellt die Kartenkante (kein Freisteller, keine KI-Person). */}
           <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[520px]">
             <img
-              src="/photos/premium/community-story-1600.webp"
-              alt={de ? 'Tanzende im Salsaflow-Kurs, helle Studio-Atmosphäre nahe Bahnhof Basel SBB.' : 'Dancers in a Salsaflow class, bright studio atmosphere near Basel SBB station.'}
-              className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
+              src="/photos/gallery/kurse/07.jpg"
+              alt={de ? 'Kurs im hellen Studio vor den Fenstern, Bahnhof Basel SBB.' : 'Class in the bright studio by the windows, Basel SBB.'}
+              className="absolute inset-0 h-full w-full object-cover object-[center_45%]"
               width={1600}
               height={1200}
               loading="lazy"
@@ -50,7 +50,7 @@ export function LocationBand() {
                   390px. MEASURE_L skaliert mit der Schriftgroesse. */}
               <h2
                 className={cn(
-                  'mt-5 font-display text-4xl font-extrabold leading-[0.98] tracking-tight text-[var(--color-ink)] sm:text-[2.9rem] lg:text-5xl',
+                  'type-h2 mt-5 text-[var(--color-ink)]',
                   MEASURE_L,
                 )}
               >

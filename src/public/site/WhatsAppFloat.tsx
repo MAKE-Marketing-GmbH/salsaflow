@@ -9,7 +9,7 @@
 // Befund kursplan d-mid, Runde 10) — gleiche Footer-Beobachtung wie CookieBanner.tsx.
 
 import { useEffect, useState } from 'react';
-import { MessageCircle } from 'lucide-react';
+import { WhatsAppIcon } from '@/public/site/BrandIcons';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 
@@ -20,6 +20,7 @@ export function WhatsAppFloat({ raised = false }: { raised?: boolean }) {
   const label = lang === 'de' ? 'Schreib uns auf WhatsApp' : 'Message us on WhatsApp';
   // Footer sichtbar -> Float weg (Doppel-WhatsApp + Overlap mit Footer-Button vermeiden).
   const [footerInView, setFooterInView] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const footer = document.querySelector('footer');
@@ -33,7 +34,23 @@ export function WhatsAppFloat({ raised = false }: { raised?: boolean }) {
     return () => io.disconnect();
   }, []);
 
-  if (footerInView) return null;
+  useEffect(() => {
+    const check = () => {
+      setDialogOpen(!!document.querySelector('[data-testid="booking-dialog"], [aria-modal="true"]'));
+    };
+    check();
+    const obs =
+      typeof MutationObserver !== 'undefined' ? new MutationObserver(check) : null;
+    obs?.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['aria-modal', 'data-testid'],
+    });
+    return () => obs?.disconnect();
+  }, []);
+
+  if (footerInView || dialogOpen) return null;
 
   return (
     <a
@@ -58,7 +75,8 @@ export function WhatsAppFloat({ raised = false }: { raised?: boolean }) {
           : 'calc(1.25rem + var(--sticky-cta-height, 0px))',
       }}
     >
-      <MessageCircle aria-hidden className="h-6 w-6" strokeWidth={2.1} />
+      {/* Echtes WhatsApp-Zeichen im gruenen Kreis (vorher generische Lucide-Sprechblase). */}
+      <WhatsAppIcon className="h-6 w-6 shrink-0" />
       <span className="hidden text-sm font-semibold sm:inline">WhatsApp</span>
     </a>
   );

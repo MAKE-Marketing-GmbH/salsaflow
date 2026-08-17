@@ -118,10 +118,10 @@ function FaqSection({ c }: { c: FaqPageContent }) {
             </p>
             <a
               href="/kontakt"
-              className="mt-2 -ml-4 inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-salsa)] transition-colors hover:bg-[var(--color-salsa-50)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
+              className="group mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
             >
               {lang === 'de' ? 'Frag uns direkt' : 'Ask us directly'}
-              <ArrowRight size={16} strokeWidth={2.25} aria-hidden />
+              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
             </a>
           </div>
         </Reveal>
@@ -165,7 +165,7 @@ function ThemesSection({ c }: { c: FaqPageContent }) {
               }`}
             >
               <span>
-                <span className="block font-display text-lg font-bold leading-tight text-[var(--color-ink)]">
+                <span className="block type-h3 text-[var(--color-ink)]">
                   {theme.label}
                 </span>
                 <span className="mt-1.5 block text-sm leading-relaxed text-[var(--color-ink-muted)]">

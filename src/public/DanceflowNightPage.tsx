@@ -67,7 +67,7 @@ function DanceflowHero({ c }: { c: DanceflowContent }) {
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
           <motion.h1
             variants={item}
-            className="mt-5 font-display text-[2.5rem] font-extrabold leading-[1.0] tracking-[-0.024em] text-balance sm:text-[3.2rem] lg:text-[3.7rem]"
+            className="type-h1 mt-5"
           >
             {h.h1.pre}
             <TitleAccent>{h.h1.accent}</TitleAccent>
@@ -101,7 +101,7 @@ function DanceflowHero({ c }: { c: DanceflowContent }) {
             <BeatMark />
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{h.cardLabel}</p>
-              <p className="mt-1 font-display text-base font-bold leading-tight text-[var(--color-ink)]">{h.cardText}</p>
+              <p className="mt-1 type-h3 text-[var(--color-ink)]">{h.cardText}</p>
             </div>
           </motion.div>
         </motion.div>
@@ -171,7 +171,7 @@ function WhySection({ c }: { c: DanceflowContent }) {
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <div>
-                  <h3 className="font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{b.title}</h3>
+                  <h3 className="type-h3 text-[var(--color-ink)]">{b.title}</h3>
                   <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{b.text}</p>
                 </div>
               </motion.div>
@@ -202,7 +202,7 @@ function FlowSection({ c }: { c: DanceflowContent }) {
         <Reveal className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <motion.div variants={item} className="max-w-xl">
             <Eyebrow dark>{f.eyebrow}</Eyebrow>
-            <h2 className="mt-5 font-display text-3xl font-bold leading-[1.06] tracking-tight sm:text-4xl md:text-[2.6rem]">
+            <h2 className="type-h2 mt-5">
               {f.title}
             </h2>
             <ol className="mt-9 space-y-3">
@@ -215,7 +215,7 @@ function FlowSection({ c }: { c: DanceflowContent }) {
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <div>
-                    <h3 className="font-display text-lg font-bold leading-tight text-white">{s.title}</h3>
+                    <h3 className="type-h3 text-white">{s.title}</h3>
                     <p className="mt-1.5 text-[0.95rem] leading-relaxed text-white/70">{s.text}</p>
                   </div>
                 </li>
@@ -223,7 +223,7 @@ function FlowSection({ c }: { c: DanceflowContent }) {
             </ol>
             <a
               href={f.cta.href}
-              className="group mt-8 inline-flex items-center gap-1.5 rounded-full bg-white px-6 py-3 text-sm font-bold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-salsa)] hover:text-white"
+              className="btn-base btn-primary group mt-8 px-6 py-3 text-sm"
             >
               {f.cta.label}
               <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
@@ -348,7 +348,7 @@ function EtiquetteSection({ c }: { c: DanceflowContent }) {
           </motion.div>
           <motion.h2
             variants={item}
-            className="mt-5 font-display text-2xl font-bold leading-[1.15] tracking-tight text-[var(--color-ink)] sm:text-3xl"
+            className="type-h2 mt-5 text-[var(--color-ink)]"
           >
             {e.title}
           </motion.h2>

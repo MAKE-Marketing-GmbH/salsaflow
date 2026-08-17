@@ -157,12 +157,18 @@ function EventsHero() {
           lang === 'de'
             ? 'Tanzteam auf der Danceflow Night, alle Köpfe sichtbar'
             : 'Dance team at the Danceflow Night, all heads visible',
-        // 18% deckt beide Kopf-Reihen nur, solange das Band relativ zur Bildhoehe hoch ist
-        // (mobil ~60% Fenster). Ab lg schrumpft das Fenster auf ~20% — dort halbierte 18%
-        // die untere Gesichter-Reihe an der Unterkante (Sweep 14.08.2026). 13% legt den
-        // Schnitt oberhalb der unteren Stirnen: obere Reihe ganz, untere sauber draussen.
-        positionClass: 'object-[center_18%] lg:object-[center_13%]',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+        // Mobil 18%: Band nimmt genug Hoehe, Köpfe sitzen. Desktop-Band war 12rem + 13%
+        // und zeigte nur Arme. lg: 16rem plus 32% legt das Fenster auf die vordere Reihe.
+        // R76 (Fold 1440x730): 14rem + 40% zeigte im 97px-Streifen (bandTop 633) nur
+        // Stirn und Augen — die Kinne lagen UNTER dem Fold. Live-Reihe (Anker-Modell,
+        // Motiv 1500x1000, scaledH 960): bei lg:h-[21rem] + object-[center_42%] deckt
+        // der sichtbare Streifen nat. Y~526-623 ab — fuenf Frauen (lachend, schwarzes
+        // Top, dunkles Haar, zwei rechts) plus der Bart-Mann zeigen alle Auge/Nase/Mund/
+        // Kinn mit Luft, kein Kinn auf der 730er-Kante. 20rem kappt den Bart-Mann oben,
+        // 22rem kappt ihn unten. Nur positionClass + heightClass (Mobil 18% / h-[10rem]
+        // unberuehrt), Motiv party-52, H1, Lead, Knoepfe, Zahlenzeile bleiben.
+        positionClass: 'object-[center_18%] lg:object-[center_42%]',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[21rem]',
       }}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -500,7 +506,7 @@ function AnniversarySection() {
                     strokeWidth={1.75}
                   />
                   <span>
-                    <span className="block font-display text-lg font-bold leading-tight text-[var(--color-ink)]">
+                    <span className="block type-h3 text-[var(--color-ink)]">
                       {title}
                     </span>
                     <span className="mt-1 block text-sm leading-relaxed text-[var(--color-ink-muted)]">
@@ -536,7 +542,7 @@ function FloweekendSection() {
         <Reveal className="max-w-xl">
           <motion.div variants={item} className="flex flex-wrap items-center gap-3">
             <Eyebrow>{f.eyebrow}</Eyebrow>
-            <span className="rounded-full bg-[var(--color-salsa-50)] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-salsa)]">
+            <span className="rounded-full bg-[var(--color-salsa)] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
               {f.badge}
             </span>
           </motion.div>
@@ -611,7 +617,7 @@ function TicketsSection() {
                     {i + 1}
                   </span>
                   <span>
-                    <span className="block font-display text-xl font-bold leading-tight text-[var(--color-ink)]">
+                    <span className="block type-h3 text-[var(--color-ink)]">
                       {title}
                     </span>
                     <span className="mt-1 block text-sm leading-relaxed text-[var(--color-ink-muted)]">

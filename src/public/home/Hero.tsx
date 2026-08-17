@@ -80,6 +80,7 @@ import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 import { CtaPill, CtaText, StarRating } from '@/public/site/primitives';
+
 import { EASE_OUT, useHydrated } from '@/public/home/motion';
 import { MEASURE_XL } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
@@ -208,7 +209,7 @@ export function Hero() {
             <motion.h1
               variants={item}
               className={cn(
-                'mt-2 font-display text-[2.75rem] leading-[0.92] tracking-[-0.035em] text-[var(--color-ink)] max-sm:text-white sm:text-[4.25rem] lg:text-[3.75rem] xl:text-[4.75rem]',
+                'type-h1 mt-2 text-[var(--color-ink)] max-sm:text-white',
                 MEASURE_XL,
               )}
             >
@@ -274,6 +275,11 @@ export function Hero() {
               className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--color-line)] pt-5 text-[0.9375rem] max-sm:mt-6 max-sm:pt-4 sm:mt-10"
             >
               <div className="flex items-center gap-2">
+                {/* Quelle vor dem Urteil: das G sagt WOHER die Zahl kommt, die Sterne sagen WIE
+                    gut sie ist. Vierfarbiges Original-G auf hellem Grund — Repo-Regel in
+                    primitives.tsx:59-62 (einfarbig nur im dunklen Footer). alt="" + sr-only
+                    <dt> darunter liest "Google-Bewertung" schon vor. */}
+                <img src="/logo/google-g.svg" alt="" width={16} height={16} className="h-4 w-4 shrink-0" />
                 <StarRating size={14} />
                 <dt className="sr-only">{de ? 'Google-Bewertung' : 'Google rating'}</dt>
                 <dd className="font-semibold text-[var(--color-ink)]">

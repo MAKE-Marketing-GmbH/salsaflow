@@ -13,7 +13,8 @@ import { useLang } from '@/lib/i18n';
 import { Seo } from '@/lib/seo';
 import { SiteHeader } from '@/public/site/SiteHeader';
 import { SiteFooter, CONTACT } from '@/public/site/SiteFooter';
-import { sectionTitle, sectionLead, TitleAccent, Shell, Eyebrow } from '@/public/site/primitives';
+import { sectionTitle, sectionLead, TitleAccent, Shell, Eyebrow, GoogleRating } from '@/public/site/primitives';
+import { WhatsAppIcon } from '@/public/site/BrandIcons';
 import { MEASURE_XL, MEASURE_L } from '@/public/subpage/kit';
 import { Reveal, useReveal } from '@/public/home/motion';
 import { CONTACT_PAGE, type TopicKey } from '@/public/contact/content';
@@ -117,6 +118,23 @@ export function ContactPage() {
 }
 
 /* ---------------------------------------------------------------------------- Hero */
+// S3 (14.08.2026): Der Hero trug vorher nur Headline, eine Zeile und den WhatsApp-Knopf auf
+// leerem Papier. Auf 1440px stand damit oberhalb des Formulars eine kalte Textwand ohne ein
+// einziges Gesicht — auf der EINEN Seite, auf der jemand eine Person ansprechen will.
+//
+// Vorbild ist der /fotos-Hero (PhotosPage.tsx GalleryHero): links Text plus echte
+// Google-Zeile, rechts eine kompakte Foto-Komposition aus hellen Studio-Bildern. Dieselbe
+// Bauform, dieselbe Bild-Sprache, damit die Seite nicht ihr eigenes Muster erfindet.
+//
+// Bild-Wahl nach DESIGN.md:92/93 (ein Bild-Stil ueber die Seite, kein Bild sitewide mehr als
+// zweimal). Alle drei Kacheln sind bisher ungenutzt und WARM gemessen (Mittelwert R minus B):
+//   kurse/kurs-07.jpg                       +58.9   Kurs im Studio, Tageslicht
+//   2026/kurse-heels-energie-card-960.webp  +26.8   Heels-Gruppe vor der Studiowand
+//   2026/hero-paar-dreh-card-960.webp       +93.6   Paar im Drehmoment
+// Das Team-Gruppenfoto (gallery/kurse/09.jpg) stand hier zuerst und ist wieder raus: es ist
+// vor grauem Studio-Hintergrund fotografiert und misst -22.5, also KUEHL. Neben +26.8 und
+// +93.6 war das ein Sprung von rund 50 Punkten in einer Dreier-Komposition — genau der
+// Bild-Stil-Bruch, den DESIGN.md:92 ausschliesst.
 function ContactHero() {
   const { lang } = useLang();
   const h = CONTACT_PAGE[lang].hero;
@@ -136,8 +154,8 @@ function ContactHero() {
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
-      <Shell className="pb-2 pt-1 sm:pb-3 lg:pt-2">
-        <motion.div variants={container} initial="hidden" animate="show" className="max-w-3xl">
+      <Shell className="grid grid-cols-1 items-center gap-9 pb-8 pt-2 lg:grid-cols-[1.02fr_0.98fr] lg:gap-14 lg:pb-12">
+        <motion.div variants={container} initial="hidden" animate="show" className="max-w-2xl">
           {/* Hierarchie: die H1 traegt NUR den Zuruf ("Schreib uns, was du suchst."). Der zweite
               Satz ("Wir helfen dir beim naechsten Schritt.") war vorher als erzwungener Block in
               derselben H1 und hat sie auf 1440px auf 3 Zeilen mit Waisenwort "Schritt." gerissen
@@ -146,7 +164,7 @@ function ContactHero() {
           <motion.h1
             variants={item}
             className={cn(
-              'font-display text-[2.15rem] font-extrabold leading-[1.04] tracking-[-0.022em] text-balance text-[var(--color-ink)] sm:text-4xl lg:text-[2.85rem]',
+              'type-h1 text-[var(--color-ink)]',
               MEASURE_XL,
             )}
           >
@@ -158,16 +176,102 @@ function ContactHero() {
           >
             {h.titleB}
           </motion.p>
-          <motion.a
+          <motion.p
             variants={item}
-            href={CONTACT.whatsapp}
-            target="_blank"
-            rel="noreferrer"
-            className="group mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
+            className="mt-4 max-w-md text-pretty text-base leading-relaxed text-[var(--color-ink-muted)]"
           >
-            {direct.whatsappLabel}
-            <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
-          </motion.a>
+            {lang === 'de'
+              ? 'Ein paar Angaben genügen. Wir antworten meistens innerhalb von 24 Stunden.'
+              : 'A few details are enough. We usually reply within 24 hours.'}
+          </motion.p>
+          {/* R56: Der einzige Hero-Knopf fuehrte per WhatsApp raus, das eigene Formular
+              (direkt unter dem Hero, Anker #kontaktformular) blieb ohne Einstieg. Jetzt
+              Primary = Formular ("Anfrage starten"), WhatsApp als ruhiger zweiter Weg
+              daneben (Outline statt Primary-Rot). */}
+          <motion.div variants={item} className="mt-5 flex flex-wrap items-center gap-3">
+            <a
+              href="#kontaktformular"
+              className="btn-base btn-primary group gap-2 px-5 text-sm"
+            >
+              {h.primaryCta}
+              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+            </a>
+            <a
+              href={CONTACT.whatsapp}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-base btn-outline group gap-2 px-5 text-sm"
+            >
+              <WhatsAppIcon className="h-4 w-4 shrink-0" />
+              {direct.whatsappLabel}
+            </a>
+          </motion.div>
+          {/* Echte Google-Bewertung auf hellem Grund, mit dem Vierfarb-G aus
+              public/logo/google-g.svg (GoogleRating in site/primitives). */}
+          <motion.div variants={item} className="mt-6">
+            <GoogleRating />
+          </motion.div>
+        </motion.div>
+
+        {/* Foto-Komposition nach /fotos-Vorbild: ein grosses Hochformat plus zwei Querformate. */}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="mx-auto grid w-full max-w-md grid-cols-2 gap-3 sm:gap-4 lg:max-w-none"
+        >
+          <motion.div
+            variants={item}
+            className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
+          >
+            <img
+              src="/photos/kurse/kurs-07.jpg"
+              alt={lang === 'de'
+                ? 'Eine Kursgruppe von Salsaflow übt gemeinsam den Grundschritt im Studio'
+                : 'A Salsaflow class practising the basic step together in the studio'}
+              // object-top: Hochformat (1067x1600) im 4/5-Ausschnitt, mittig lagen die Koepfe
+              // der hinteren Reihe ausserhalb.
+              className="h-full w-full object-cover object-top"
+              width={1067}
+              height={1600}
+              loading="eager"
+              fetchPriority="high"
+            />
+          </motion.div>
+          <div className="grid gap-3 sm:gap-4">
+            <motion.div
+              variants={item}
+              className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_20px_48px_-26px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
+            >
+              <img
+                src="/photos/2026/kurse-heels-energie-card-960.webp"
+                alt={lang === 'de'
+                  ? 'Eine Heels-Gruppe tanzt im hellen Studio von Salsaflow'
+                  : 'A heels group dancing in the bright Salsaflow studio'}
+                // 8%: Hochformat (960x1200) in der 4/3-Kachel. Bei 22% lag der Scheitel der
+                // vorderen Taenzerin ausserhalb (Crop-Vergleich /tmp/heels-{0,8,15,22}.png).
+                className="h-full w-full object-cover object-[center_8%]"
+                width={960}
+                height={1200}
+                loading="eager"
+              />
+            </motion.div>
+            <motion.div
+              variants={item}
+              className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_20px_48px_-26px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
+            >
+              <img
+                src="/photos/2026/hero-paar-dreh-card-960.webp"
+                alt={lang === 'de'
+                  ? 'Ein Paar dreht sich beim Tanzen im Salsaflow Studio'
+                  : 'A couple turning while dancing in the Salsaflow studio'}
+                className="h-full w-full object-cover object-[center_28%]"
+                width={960}
+                height={1200}
+                loading="eager"
+              />
+            </motion.div>
+          </div>
         </motion.div>
       </Shell>
     </section>
@@ -185,18 +289,22 @@ function FormSection({
   const { item } = useReveal();
 
   return (
-    <section id="schnupperstunde" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-5 lg:py-8">
+    <section id="schnupperstunde" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-10 lg:py-14">
       {/* id="kontaktformular" bleibt als Alias-Anker (Shell nimmt keine id entgegen), damit
           "Raum anfragen" weiter hierher scrollt. */}
       <span id="kontaktformular" aria-hidden className="block scroll-mt-24" />
       <Shell>
         <Reveal>
-          {/* overflow-visible statt hidden: der mobile sticky "Weiter"-Knopf des Wizards
+          {/* max-w-[640px] zentriert (Absprache S3, Punkt 2): der Wizard lief vorher ueber die
+              volle 1400px-Shell. Ein Formular mit drei Feldern in einer 1400px-Karte liest sich
+              wie ein leeres Amtsblatt; die Anliegen-Karten wurden dabei so breit, dass zwischen
+              Icon und Label ein halber Bildschirm Luft stand.
+              overflow-visible statt hidden: der mobile sticky "Weiter"-Knopf des Wizards
               sass bei y=832 im 844er-Fold und wurde vom Rahmen abgeschnitten (Critic
               Runde 7, Item 1). */}
           <motion.div
             variants={item}
-            className="overflow-visible rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)]"
+            className="mx-auto w-full max-w-[640px] overflow-visible rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)]"
           >
             <InquiryWizard initialTopic={topic} onTopicChange={setTopic} />
           </motion.div>
@@ -220,11 +328,11 @@ function LocationSection() {
           <motion.p variants={item} className={`mt-4 max-w-xl text-pretty ${sectionLead}`}>{l.body}</motion.p>
           <motion.div variants={item}>
             <a
-              href={CONTACT.googleReviews}
+              href={CONTACT.anfahrt}
               data-testid="contact-maps"
               target="_blank"
               rel="noreferrer"
-              className="group mt-6 inline-flex items-center gap-2 rounded-full border border-[var(--color-ink)] px-6 py-3 text-base font-semibold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-ink)] hover:text-white"
+              className="btn-base btn-outline group mt-6 gap-2 px-6 py-3 text-base"
             >
               {l.mapsCta}
               <ArrowRight size={18} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
@@ -294,7 +402,7 @@ function RentalSection({ onRequestRoom }: { onRequestRoom: () => void }) {
               <div className="flex flex-col justify-between p-7 sm:p-9 lg:p-10">
                 <div>
                   <Eyebrow>{r.eyebrow}</Eyebrow>
-                  <h2 className={cn('mt-5 font-display text-3xl font-bold leading-[1.05] tracking-tight text-balance text-[var(--color-ink)] sm:text-4xl', MEASURE_L)}>
+                  <h2 className={cn('type-h2 mt-5 text-[var(--color-ink)]', MEASURE_L)}>
                     {r.title}
                   </h2>
                   <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-[var(--color-ink-muted)]">{r.body}</p>
@@ -312,7 +420,7 @@ function RentalSection({ onRequestRoom }: { onRequestRoom: () => void }) {
                 <a
                   href="#kontaktformular"
                   onClick={onRequestRoom}
-                  className="group mt-8 inline-flex w-fit items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
+                  className="btn-base btn-primary group mt-8 w-fit gap-2 px-6 py-3 text-base"
                 >
                   {r.cta}
                   <ArrowRight size={18} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />

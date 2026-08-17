@@ -51,7 +51,8 @@ export type OverviewContent = {
     title: string;
     titleAccent?: string;
     lead: string;
-    flowNote: string; // erklaert die "Flow"-Zwischenstufen
+    flowNoteBeginner: string; // erklaert die "Flow"-Zwischenstufe nach den Beginner-Stufen
+    flowNoteIntermediate: string; // erklaert die "Flow"-Zwischenstufe nach den Intermediate-Stufen
     tracks: LevelTrack[];
     onTitle: string;
     onText: string; // Salsa On1 / On2
@@ -148,7 +149,8 @@ export const COURSES_OVERVIEW: Record<Lang, OverviewContent> = {
       title: 'Du musst dein Level nicht kennen. Wir finden es gemeinsam',
       titleAccent: 'heraus.',
       lead: 'Wenn du zwischen zwei Levels stehst oder nach einer Pause zurückkommst, helfen dir eine Schnupperstunde oder eine kurze Nachricht bei der Einordnung.',
-      flowNote: 'Flow heisst: üben, verbinden und tanzen, bevor es eine Stufe höher geht.',
+      flowNoteBeginner: 'Beginner Flow heisst: die Grundschritte festigen, bis sie sicher sitzen.',
+      flowNoteIntermediate: 'Intermediate Flow heisst: die Figuren variieren und frei kombinieren.',
       tracks: [
         {
           key: 'salsa-bachata',
@@ -285,7 +287,8 @@ export const COURSES_OVERVIEW: Record<Lang, OverviewContent> = {
       title: 'You do not need to know your level. We find it',
       titleAccent: 'together.',
       lead: 'If you are between two levels or returning after a break, a trial class or a quick message will help us place you correctly.',
-      flowNote: 'Flow means: practise, connect and dance before you move up a level.',
+      flowNoteBeginner: 'Beginner Flow means: reinforcing the basic steps until they feel secure.',
+      flowNoteIntermediate: 'Intermediate Flow means: varying the figures and combining them freely.',
       tracks: [
         {
           key: 'salsa-bachata',

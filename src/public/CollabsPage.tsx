@@ -31,15 +31,28 @@ export function CollabsPage() {
   return (
     <SubPageShell seo="collabs">
       {/* Runde 2, Issue 1: Typo-Hero statt Foto-Split. Achse 'split' — Headline links,
-          Angebot + CTA in der rechten Schiene (B2B-Anfrageseite). */}
+          Angebot + CTA in der rechten Schiene (B2B-Anfrageseite).
+          R69: Das Team-Motiv hp-27 sass ungenutzt in der Content-Datei (hero.image),
+          der Fold war nur Text. Jetzt dense + media-Band wie R68 Tanzschuhe: das Foto
+          laeuft randlos unter Typo und Schiene. Achse bleibt 'split'. center 40% auf
+          dem 1800x1200-Motiv trifft Koepfe und Shirt-Logos; 15rem Band hoeher als
+          Tanzschuhe (13rem), weil das Split-Layout kuenzer stapelt und die Koepfe
+          mehr Hoehe brauchen. */}
       <SubHero
         axis="split"
+        dense
         seoCrumbs={c.crumbs}
         title={c.hero.title}
         titleAccent={c.hero.titleAccent}
         lead={c.hero.lead}
         primary={c.hero.primary}
         secondary={c.hero.secondary}
+        media={{
+          src: c.hero.image.src,
+          alt: c.hero.image.alt,
+          position: 'center 40%',
+          heightClass: 'h-[11rem] sm:h-[13rem] lg:h-[15rem]',
+        }}
       />
       <HowSection c={c} />
       <PartnerSection c={c} />
@@ -79,7 +92,7 @@ function HowSection({ c }: { c: (typeof COLLABS)['de'] }) {
                 variants={item}
                 className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-5 shadow-[0_14px_40px_rgba(17,17,17,0.04)]"
               >
-                <p className="flex items-center gap-2 font-display text-base font-bold text-[var(--color-ink)]">
+                <p className="flex items-center gap-2 type-h3 text-[var(--color-ink)]">
                   <BeatMark size="sm" />
                   {row.label}
                 </p>

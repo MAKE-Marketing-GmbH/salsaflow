@@ -251,6 +251,21 @@ h4 {
   font-synthesis-weight: none;
 }
 
+/* Display-Tracking frisst Leerzeichen in kurzen Überschriften (R27/R28).
+ * R67: FaqBlock rendert die Frage in <summary class="type-h3">, nicht in h3 —
+ * die Regel #faq h3 griff nicht. summary explizit dazu, sonst kleben die Wörter
+ * ("Gibt esStudentenpreise?"). */
+#faq h3,
+#faq h2,
+#faq summary,
+#booking-role-title,
+[data-testid="booking-dialog"] h3,
+form legend.type-h3,
+form h3.type-h3 {
+  letter-spacing: 0;
+  word-spacing: 0.1em;
+}
+
 /* Kontrast-Schutz (Regel 005): Ein Link ohne eigene text-Klasse erbt die
  * Umgebungs-Farbe (Ink) statt auf Browser-Blau zu fallen. :where() hat 0
  * Spezifitaet, also schlaegt jede explizite Tailwind text-*-Utility diese Regel.
@@ -276,6 +291,125 @@ h4 {
 @media (max-width: 639px) {
   main :not(a):not(button):not(input):not(select):not(textarea):not([role='button']) {
     box-shadow: none;
+  }
+}
+
+/* Typo-Skala und Button-Satz (S1, 14.08.2026)
+ * -----------------------------------------------------------------------------
+ * VORHER: 88 Heading-Tags mit 9 H3-Groessen, 5 H2-Groessen und 3 H1-Groessen.
+ * Dieselbe Ebene lief je Seite anders (H3 von text-xs bis text-3xl). Ursache war
+ * dieselbe wie bei den CTAs: es gab keine Definition, jede Seite tippte ihre Kette.
+ *
+ * Ab jetzt gilt EINE Skala je Ebene. Die Werte sind nicht neu erfunden, sondern die
+ * dominante Variante aus dem Inventar:
+ *   .type-h1  Hero-Ebene   clamp 2.6-4.3rem  (HeroFrame, subpage/kit.tsx:309)
+ *   .type-h2  Sektionskopf clamp 1.875-2.75rem (sectionTitle, primitives.tsx:367)
+ *   .type-h3  Karte/Block  clamp 1.25-1.5rem  (13x text-xl war die groesste Gruppe)
+ *   .type-h4  Label        0.75rem versal     (beide H4 im Inventar waren text-xs)
+ * Display = Cal Sans, tightes Leading, negatives Tracking (DESIGN.md Typography).
+ * Der Seiten-Charakter bleibt: H1 > H2 > H3. Vereinheitlicht wird JE Ebene.
+ *
+ * Farbe steht bewusst NICHT drin: dieselbe Ebene laeuft auf Papier in ink und im
+ * dunklen Band in weiss. Wer die Klasse setzt, setzt die Farbe daneben. */
+@layer components {
+  .type-h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.6rem, 5.2vw, 4.3rem);
+    line-height: 1;
+    letter-spacing: -0.026em;
+    text-wrap: balance;
+  }
+
+  .type-h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.875rem, 3.4vw, 2.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+  }
+
+  .type-h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.25rem, 1.6vw, 1.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.018em;
+    text-wrap: balance;
+  }
+
+  .type-h4 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  /* Buttons: GENAU DREI Varianten sitewide.
+   *   .btn-primary  roter Pill, hover dunkelt auf salsa-700
+   *   .btn-outline  Kontur, transparenter Grund, hover fuellt mit ink
+   *   Text-Link mit Pfeil = CtaText/GhostCta in site/primitives.tsx (keine Klasse noetig)
+   *
+   * Hover geht NIE nach Rosa. salsa-50/100 als Hover-Flaeche hellt den Knopf auf,
+   * statt ihn zu vertiefen — der Zustandswechsel las sich als "deaktiviert".
+   * Groesse, Padding und Icon bleiben an der Stelle; hier steht nur die Bauform. */
+  .btn-base {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 2.75rem; /* 44px Touch-Target */
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    font-weight: 600;
+    transition-property: color, background-color, border-color;
+    transition-duration: var(--dur-fast);
+    transition-timing-function: ease-out;
+  }
+
+  .btn-primary {
+    border-color: var(--color-salsa);
+    background-color: var(--color-salsa);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    border-color: var(--color-salsa-700);
+    background-color: var(--color-salsa-700);
+  }
+
+  .btn-outline {
+    border-color: var(--color-ink);
+    background-color: transparent;
+    color: var(--color-ink);
+  }
+
+  .btn-outline:hover {
+    background-color: var(--color-ink);
+    color: #fff;
+  }
+
+  /* Outline in Salsa statt Ink — fuer Sektionen, in denen der Knopf zum roten
+   * Akzent gehoert (z. B. Kursplan-Filterleiste). Gleiche Bauform, andere Kante. */
+  .btn-outline-salsa {
+    border-color: var(--color-salsa);
+    background-color: transparent;
+    color: var(--color-salsa);
+  }
+
+  .btn-outline-salsa:hover {
+    background-color: var(--color-salsa);
+    color: #fff;
+  }
+
+  .btn-base:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--color-paper-warm),
+      0 0 0 4px var(--color-salsa);
   }
 }
 
@@ -333,6 +467,37 @@ html:has(.faq-page) {
 @media (width < 40rem) {
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-hero-fold] {
     padding-bottom: var(--cookie-banner-height);
+  }
+
+  /* /kursplan: die Wochen-Pfeile sitzen im ersten Fold, nicht am Dokumentende.
+     Body-Polster schiebt sie nicht hoch. Bei sichtbarer Leiste das Foto-Band und
+     den Kalender-Kopf so weit stauchen, dass die Pfeile über der Leiste bleiben. */
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
+    height: 8.25rem;
+  }
+
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero] > .mx-auto {
+    padding-bottom: 1.25rem;
+  }
+
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) #kursplan-list {
+    padding-top: 1.25rem;
+  }
+}
+
+/* Desktop-Fold: Cookie schnitt die Tageskarten, Foto-Band war 19rem.
+   Stauchen hebt die Leiste über die Cookie-Zeile. */
+@media (width >= 40rem) {
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
+    height: 14rem;
+  }
+
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero] > .mx-auto {
+    padding-bottom: 1.75rem;
+  }
+
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) #kursplan-list {
+    padding-top: 1.5rem;
   }
 }
 

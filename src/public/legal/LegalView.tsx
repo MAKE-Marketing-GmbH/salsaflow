@@ -59,7 +59,7 @@ export function LegalView({ doc, seoKey }: { doc: Record<'de' | 'en', LegalDoc>;
           <div className="space-y-10">
             {d.sections.map((s) => (
               <section key={s.title}>
-                <h2 className="font-display text-xl font-bold tracking-tight text-[var(--color-ink)] sm:text-2xl">
+                <h2 className="type-h3 text-[var(--color-ink)]">
                   {s.title}
                 </h2>
                 <div className="mt-3 space-y-3">

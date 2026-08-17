@@ -46,13 +46,10 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
     <>
         <div className="max-w-3xl">
           <Heading
-            className={cn(
-              'font-display font-bold leading-[0.98] tracking-tight text-[var(--color-ink)]',
-              embedded
-                ? 'text-2xl sm:text-3xl md:text-[2.25rem]'
-                : 'text-3xl sm:text-4xl md:text-[2.75rem]',
-              MEASURE_L,
-            )}
+            /* Eingebettet ist dieselbe Zeile eine Ebene tiefer (h3 statt h2), also traegt
+               sie auch die H3-Groesse. Vorher lief sie eingebettet auf 36px — eine eigene,
+               sechste Groesse zwischen H2 (44px) und H3 (23px). */
+            className={cn(embedded ? 'type-h3' : 'type-h2', 'text-[var(--color-ink)]', MEASURE_L)}
           >
             {c.title}
           </Heading>
@@ -83,7 +80,7 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
                   />
                   <LevelHeading
                     className={cn(
-                      'font-display text-2xl font-bold leading-[1.05] tracking-[-0.02em] text-[var(--color-ink)]',
+                      'type-h3 text-[var(--color-ink)]',
                       MEASURE_M,
                     )}
                   >

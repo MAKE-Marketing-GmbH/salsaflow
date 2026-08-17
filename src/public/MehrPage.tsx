@@ -51,7 +51,7 @@ function MoreHero() {
             variants={item}
             // text-balance: auf 390 stand "Tanzen" als Waisenwort allein in der letzten
             // Zeile (Critic Runde 8, Item 3).
-            className="mt-5 font-display text-[2.65rem] font-extrabold leading-[1.03] tracking-tight text-balance text-[var(--color-ink)] sm:text-5xl lg:text-[4.1rem]"
+            className="type-h1 mt-5 text-[var(--color-ink)]"
           >
             {h.titleA}{' '}
             <TitleAccent>{h.titleAccent}</TitleAccent>
@@ -61,13 +61,13 @@ function MoreHero() {
           <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
               href={h.primaryHref}
-              className="inline-flex items-center justify-center rounded-full bg-[var(--color-salsa)] px-7 py-3.5 text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
+              className="btn-base btn-primary px-7 py-3.5 text-base"
             >
               {h.primary}
             </a>
             <a
               href={h.secondaryHref}
-              className="inline-flex items-center justify-center rounded-full border border-[var(--color-ink)] px-7 py-3.5 text-base font-semibold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-ink)] hover:text-white"
+              className="btn-base btn-outline px-7 py-3.5 text-base"
             >
               {h.secondary}
             </a>
@@ -119,7 +119,7 @@ function HubCards() {
                 >
                   <Icon size={22} strokeWidth={2} />
                 </span>
-                <h2 className="mt-6 font-display text-2xl font-bold leading-tight text-[var(--color-ink)] sm:text-[1.7rem]">
+                <h2 className="type-h2 mt-6 text-[var(--color-ink)]">
                   {card.title}
                 </h2>
                 <p className="mt-3 max-w-sm text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)] sm:text-base">

@@ -160,7 +160,7 @@ function TrainingSection({ c }: { c: C }) {
                   key={it.name}
                   className="border-b border-[var(--color-line)] py-5 sm:px-6 sm:odd:border-r sm:odd:pl-0 sm:even:pr-0"
                 >
-                  <h3 className="font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{it.name}</h3>
+                  <h3 className="type-h3 text-[var(--color-ink)]">{it.name}</h3>
                   <p className="mt-2 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{it.text}</p>
                 </div>
               ))}

@@ -40,12 +40,15 @@ export const TEXT_LOW = 'text-[var(--color-muted)]';
  *  waren beide 46px/-0.92px, die drei Geschwister-H3 fielen auf 32px — die erste Karte hat
  *  damit ihre eigene Sektionsueberschrift ueberstimmt).
  *  Jetzt: H1 ~80 -> H2 56 -> H3 34, und ALLE Karten-H3 gleich gross. */
+/*  S1 (14.08.2026): die drei Stufen zeigen jetzt auf die sitewide Skala in src/index.css.
+ *  DISPLAY_XL bleibt groesser als .type-h1 — der Home-Hero ist der eine Fokuspunkt der
+ *  Site (DESIGN.md: "Der Foto-Hero gehoert GENAU EINER Seite"), das ist Seiten-Charakter.
+ *  DISPLAY_L (Sektions-H2) und DISPLAY_M (Karten-H3) laufen ab jetzt exakt wie auf den
+ *  Unterseiten; vorher war die Home-H2 mit 56px eine eigene, sechste H2-Groesse. */
 export const DISPLAY_XL =
-  'font-display font-bold leading-[0.92] tracking-[-0.03em] text-[clamp(2.75rem,6.4vw,5rem)]';
-export const DISPLAY_L =
-  'font-display font-bold leading-[1.0] tracking-[-0.03em] text-[clamp(2.25rem,4.4vw,3.5rem)]';
-export const DISPLAY_M =
-  'font-display font-bold leading-[1.08] tracking-[-0.02em] text-[clamp(1.5rem,2.6vw,2.125rem)]';
+  'font-display font-bold leading-[0.92] tracking-[-0.03em] text-balance text-[clamp(2.75rem,6.4vw,5rem)]';
+export const DISPLAY_L = 'type-h2';
+export const DISPLAY_M = 'type-h3';
 
 export const BODY_L = 'text-[1.25rem] leading-[1.55]';
 /** Die EINE Fliesstext-Rolle. Mobil und Desktop identisch verankert (17px/27px), damit

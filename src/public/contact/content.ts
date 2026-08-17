@@ -21,7 +21,7 @@ export type TopicKey =
   | 'animationen';
 
 export type ContactContent = {
-  hero: { eyebrow: string; titleA: string; titleAccent: string; titleB: string; lead: string };
+  hero: { eyebrow: string; titleA: string; titleAccent: string; titleB: string; lead: string; primaryCta: string };
   form: {
     eyebrow: string;
     title: string;
@@ -96,6 +96,7 @@ export const CONTACT_PAGE: Record<Lang, ContactContent> = {
       titleAccent: 'suchst.',
       titleB: 'Wir helfen dir beim nächsten Schritt.',
       lead: 'Egal ob Kurs, Level, Schnupperstunde, Privatstunde, Show, Raumvermietung oder allgemeine Frage: Je konkreter deine Nachricht, desto schneller können wir sinnvoll antworten.',
+      primaryCta: 'Anfrage starten',
     },
     form: {
       eyebrow: 'Kontaktformular',
@@ -210,6 +211,7 @@ export const CONTACT_PAGE: Record<Lang, ContactContent> = {
       titleAccent: 'need.',
       titleB: 'We will help you take the next step.',
       lead: 'Whether it is a course, level, trial class, private lesson, show, room rental or a general question: the more concrete your message, the faster we can give you a useful answer.',
+      primaryCta: 'Start your request',
     },
     form: {
       eyebrow: 'Contact form',

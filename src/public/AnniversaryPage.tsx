@@ -71,7 +71,7 @@ function AnniversaryHero({ c }: { c: AnniversaryContent }) {
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
           <motion.h1
             variants={item}
-            className="mt-5 font-display text-[2.3rem] font-extrabold leading-[1.04] tracking-[-0.022em] text-balance sm:text-[2.9rem] lg:text-[3.2rem]"
+            className="type-h1 mt-5"
           >
             {h.h1.pre}
             <TitleAccent>{h.h1.accent}</TitleAccent>
@@ -145,7 +145,7 @@ function AboutSection({ c }: { c: AnniversaryContent }) {
                       <Icon size={20} strokeWidth={2} aria-hidden />
                     </span>
                     <div>
-                      <h3 className="font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{p.title}</h3>
+                      <h3 className="type-h3 text-[var(--color-ink)]">{p.title}</h3>
                       <p className="mt-1.5 text-[0.96rem] leading-relaxed text-[var(--color-ink-muted)]">{p.text}</p>
                     </div>
                   </div>
@@ -281,7 +281,7 @@ function AudienceSection({ c }: { c: AnniversaryContent }) {
               </ul>
             </motion.div>
             <motion.div variants={item} className="mt-5 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] p-6">
-              <h3 className="font-display text-base font-bold leading-tight text-[var(--color-ink)]">{a.newTitle}</h3>
+              <h3 className="type-h3 text-[var(--color-ink)]">{a.newTitle}</h3>
               <p className="mt-2 text-[0.96rem] leading-relaxed text-[var(--color-ink-muted)]">{a.newBody}</p>
               <a
                 href={a.cta.href}

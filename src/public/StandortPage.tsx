@@ -50,10 +50,8 @@ export function StandortPage() {
         media={{
           src: c.hero.image.src,
           alt: c.hero.image.alt,
-          // hero-02.jpg ist ein 1080x1616-Portrait; im flachen Hero-Band lag das Fenster mit
-          // 45% bei ~35-57% der Bildhoehe — Gesichter (~26%) abgeschnitten, nur Torsi sichtbar
-          // (Beleg: kontakt__standort…-01-y0.png, Kritik 10.08.2026). 20% holt die Koepfe rein.
-          position: 'center 20%',
+          // classfreude-hero ist Querformat-Kursraum. Mitte zeigt Parkett + Gruppe.
+          position: 'center 55%',
         }}
       />
       <AnfahrtSection c={c} />
@@ -90,10 +88,10 @@ function AnfahrtSection({ c }: { c: StandortContent }) {
             </motion.p>
             <motion.a
               variants={item}
-              href={CONTACT.googleReviews}
+              href={CONTACT.anfahrt}
               target="_blank"
               rel="noreferrer"
-              className="group mt-7 inline-flex items-center gap-2 rounded-full border border-[var(--color-ink)] px-6 py-3 text-base font-semibold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-ink)] hover:text-white"
+              className="btn-base btn-outline group mt-7 gap-2 px-6 py-3 text-base"
             >
               {a.mapsCta}
               <ArrowRight size={18} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
@@ -168,7 +166,7 @@ function StudiosSection({ c }: { c: StandortContent }) {
                 />
               </div>
               <div className="flex flex-1 flex-col p-6">
-                <h3 className="font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{studio.name}</h3>
+                <h3 className="type-h3 text-[var(--color-ink)]">{studio.name}</h3>
                 <p className="mt-2 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{studio.text}</p>
               </div>
             </motion.div>
@@ -186,8 +184,19 @@ function RentalSection({ c }: { c: StandortContent }) {
   return (
     <section id="mieten" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
-        <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-start lg:gap-14">
-          <Reveal>
+          {/* R57: lg:items-start liess die linke Spalte nach "note" enden, waehrend die
+              Checkliste rechts allein weiterlief — darunter lag leere Flaeche.
+              R57-Nachzieh: Stretch + mt-auto schob die Notiz nur nach unten, zwischen
+              Pillen und Satz blieb ein Loch so hoch wie vier Check-Zeilen (Watchdog FAIL).
+              Jetzt traegt ein Studio-Foto die Mitte: kurse/01.jpg (Kurs im hellen
+              Tageslicht-Studio) zwischen Pillen und Notiz. Nicht kurse/07.jpg — das ist ein
+              dunkler Abend-Social und wuerde einen Party-Raum statt des hellen Miet-Raums
+              zeigen. 2. Nutzung auf dieser Seite (Studio 1), sitewide-Limit 2 eingehalten.
+              Beide Spalten enden so auf einer Unterkante, ohne dass ein Text-Block
+              kuenstlich gestreckt wird. */}
+        <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-stretch lg:gap-14">
+          <Reveal className="lg:h-full">
+            <div className="flex h-full flex-col">
             <motion.div variants={item}>
               <Eyebrow>{r.eyebrow}</Eyebrow>
             </motion.div>
@@ -214,16 +223,30 @@ function RentalSection({ c }: { c: StandortContent }) {
                 </li>
               ))}
             </motion.ul>
-            <motion.p variants={item} className="mt-6 max-w-md text-sm leading-relaxed text-[var(--color-ink-muted)]">
+            <motion.div
+              variants={item}
+              className="mt-6 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] shadow-[0_18px_50px_rgba(17,17,17,0.06)]"
+            >
+              <img
+                src="/photos/gallery/kurse/01.jpg"
+                alt={c.studios.items[0].image.alt}
+                className="aspect-[16/9] w-full object-cover object-[center_35%] lg:aspect-[21/9]"
+                width={1200}
+                height={900}
+                loading="lazy"
+              />
+            </motion.div>
+            <motion.p variants={item} className="mt-6 max-w-md text-sm leading-relaxed text-[var(--color-ink-muted)] lg:mt-auto lg:pt-6">
               {r.note}
             </motion.p>
+            </div>
           </Reveal>
           <Reveal>
             <motion.div
               variants={item}
               className="rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-7 shadow-[0_18px_50px_rgba(17,17,17,0.06)] sm:p-8"
             >
-              <h3 className="font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{r.checklistTitle}</h3>
+              <h3 className="type-h3 text-[var(--color-ink)]">{r.checklistTitle}</h3>
               <ul className="mt-5 space-y-px">
                 {r.checklist.map((entry) => (
                   <li key={entry} className="flex items-start gap-3 border-t border-[var(--color-line)] py-3 first:border-t-0">

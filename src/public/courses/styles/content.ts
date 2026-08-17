@@ -126,10 +126,23 @@ const salsa: Record<Lang, StyleContent> = {
       band: {
         src: '/photos/premium/offer-salsa-hero-2100.webp',
         alt: 'Salsa-Paar im Unterricht, Nähe und Energie im Salsaflow Studio',
-        // Wie beim Bachata-Band: Default-Hoehe (30rem) zeigte bei 480px Fensterhoehe fast das
-        // ganze 21:9-Bild und begann erst unter dem Fold. 18rem + 0% halten die Gesichter
-        // (sie sitzen im oberen Bilddrittel) im Ausschnitt. Am gerenderten Ausschnitt geprueft.
-        position: 'center 0%',
+        // R71-Nachzieh (tight-Block in subpage/kit.tsx) brachte den Band-Top auf 555,
+        // sichtbar 175px. R73: Crop 0% zeigte davon nur Dutt und Haar — die Gesichter
+        // sitzen UNTER dem Streifen (Quell-y ~255 von 900). 18rem + 0% hielt die
+        // Gesichter also nicht, der alte Kommentar unten stimmte nicht mehr.
+        // R73: Erste Live-Kalibrierung (12%) und danach 24% scheiterten — das
+        // Mann-Kinn sass jeweils auf/unter der 730er-Schnittkante (Opus-Kritik
+        // FAIL). Ueber Quell-Teststreifen (convert -crop 2100x420+0+N) abgelesen:
+        // Erst die gezoomten Band-Bilder (convert -crop 1440x175+0+555 -resize 200%)
+        // gaben objektive Kinn-Positionen; Vollbild-Ablesungen lagen immer daneben.
+        // Befund ueber 4..52: bei 4..8 beide Kinne unter dem Fold, bei 28+ sinkt die
+        // Frau ab, bei 48+ der Mann. Kritik-Split bei 18 (Opus PASS, Grok FAIL
+        // Frau-Kinn zu knapp): die Kinn-Spanne Mann~710/Frau~690 klebte zu nah an
+        // der 730er-Kante. Vollbild-Zonen-Crops (2000x350) zeigen bei 14% beide
+        // Profile mit Kiefer- und Kinnlinie IM Fenster, Mann zentraler im Band.
+        // 14% zentriert die Spanne, statt sie nach oben zu schieben. Motiv,
+        // Band-Hoehe, Copy, Bachata, Heels unberuehrt (R73-Stopp).
+        position: 'center 14%',
         heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
       },
       cardLabel: 'Dein Einstieg',
@@ -390,11 +403,15 @@ const bachata: Record<Lang, StyleContent> = {
       band: {
         src: '/photos/premium/offer-bachata-wide-v2.webp',
         alt: 'Bachata-Paar in ruhiger Haltung im Unterricht',
-        // Auf Desktop lief das Band bei 12rem und 22 % waagrecht durch beide Gesichter.
-        // Hoehe und Position zusammen loesen es: 18rem zeigt genug vom Bild, 10 % holt die
-        // Koepfe ins Fenster. Am gerenderten Ausschnitt geprueft.
-        position: 'center 10%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
+        // R71: 10% zeigte nur Boden, 25% nur Haar-Kuppen (63px Streifen zu flach).
+        // R71-Nachzieh: zwei Hebel zusammen — Band-Top ~220px hoch (tight-Block in
+        // subpage/kit.tsx: pt-0, pb-0, mb-1, gap-2.5; nur dense+media, ohne facts,
+        // Achse left), das Band auf lg 11rem geoeffnet und die Chip-Reihe auf eine
+        // Zeile gebracht (flex-nowrap, StylePage). Crop 20% legt das Fenster auf den
+        // Gesichtsblock (Frau Kinn Quell-y ~640, skaliert 462/1080), sodass im
+        // 730er-Fold zwei Gesichter inkl. Kinn stehen. Am Live-Render gemessen.
+        position: 'center 20%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[11rem]',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Timing, Connection, Körpergefühl. Ohne Druck.',

@@ -163,7 +163,9 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
       {/* Aussenpadding so gesetzt, dass Pillen-Border (1px) + Innenpadding (pl-3.5 / sm:pl-4)
           das Logo GENAU auf die Textkante der Shell legt: 6+1+14 = 21px mobil (Shell px-5 = 20),
           16+1+16 = 33px ab sm (Shell px-8 = 32). Vorher 10/20 -> Logo lag 4-5px rechts der H1. */}
-      <div className="mx-auto max-w-[1400px] px-[5px] pt-[9px] sm:px-[15px] sm:pt-[10px]">
+      {/* py statt pt: die Pille hatte oben 9px/10px Abstand und unten keinen — sie sass
+          sichtbar zu hoch in der 76px-Leiste. Oben und unten jetzt gleich. */}
+      <div className="mx-auto max-w-[1400px] px-[5px] py-[9px] sm:px-[15px] sm:py-[10px]">
         {/* ROOT-CAUSE des bekannten Dropdown-Bugs, gemessen mit scripts/nav-probe.cjs:
             Das Desktop-Submenu ging immer auf (`opacity: 1`, `visibility: visible`), wurde
             aber von GENAU dieser Pille abgeschnitten. Sie traegt `overflow-hidden` (noetig
@@ -310,7 +312,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
             <a
               href="/kontakt#schnupperstunde"
               onClick={closeMenu}
-              className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-full bg-[var(--color-salsa)] px-4 py-3 text-center text-base font-semibold text-white"
+              className="btn-base btn-primary mt-2 px-4 py-3 text-base"
             >
               {c.cta.trial}
               <ArrowRight size={18} strokeWidth={2.25} aria-hidden />

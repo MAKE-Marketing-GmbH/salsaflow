@@ -50,7 +50,7 @@ export function WallOfLove() {
                 64px Angebot (Hauptkapitel), 52px Einstieg, 44px alle Mittel-Sektionen. */}
             <h2
               className={cn(
-                'font-display text-4xl font-bold leading-[1.05] tracking-[-0.025em] text-[var(--color-ink)] sm:text-[2.75rem]',
+                'type-h2 text-[var(--color-ink)]',
                 MEASURE_L,
               )}
             >
@@ -190,7 +190,7 @@ export function WallOfLove() {
                 </blockquote>
                 <figcaption className="mt-auto flex items-end justify-between gap-3 pt-6">
                   <div className="min-w-0">
-                    <div className="truncate font-display text-base font-bold text-[var(--color-ink)]">{review.name}</div>
+                    <div className="truncate type-h3 text-[var(--color-ink)]">{review.name}</div>
                     <div className="text-xs text-[var(--color-ink-muted)]">{localized.when}</div>
                   </div>
                   <span className="shrink-0 text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-salsa)]">

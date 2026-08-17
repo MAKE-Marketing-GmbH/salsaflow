@@ -87,7 +87,7 @@ function PrivatHero({ c }: { c: PrivatContent }) {
 
           <motion.h1
             variants={item}
-            className="mt-5 font-display text-[2.4rem] font-extrabold leading-[1.02] tracking-[-0.022em] text-balance sm:text-[3rem] lg:text-[3.4rem]"
+            className="type-h1 mt-5"
           >
             <Accented text={h.title} accent={h.titleAccent} />
           </motion.h1>
@@ -173,7 +173,7 @@ function WhenSection({ c }: { c: PrivatContent }) {
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
                   <Icon size={20} strokeWidth={2} aria-hidden />
                 </span>
-                <h3 className="mt-5 font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{card.title}</h3>
+                <h3 className="mt-5 type-h3 text-[var(--color-ink)]">{card.title}</h3>
                 <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{card.text}</p>
               </motion.div>
             );
@@ -218,7 +218,7 @@ function FlowSection({ c }: { c: PrivatContent }) {
                   </span>
                   <div>
                     <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{p.tag}</p>
-                    <h3 className="font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{p.title}</h3>
+                    <h3 className="type-h3 text-[var(--color-ink)]">{p.title}</h3>
                     <p className="mt-1.5 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{p.text}</p>
                   </div>
                 </li>
@@ -270,7 +270,7 @@ function FormatsSection({ c }: { c: PrivatContent }) {
                 <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-card)] bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
                   <Icon size={22} strokeWidth={2} aria-hidden />
                 </span>
-                <h3 className="mt-5 font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{fmt.name}</h3>
+                <h3 className="mt-5 type-h3 text-[var(--color-ink)]">{fmt.name}</h3>
                 <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{fmt.text}</p>
               </motion.div>
             );
@@ -338,7 +338,7 @@ function NotForSection({ c }: { c: PrivatContent }) {
         <Reveal className="mx-auto max-w-2xl rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white px-6 py-12 text-center shadow-[0_18px_50px_rgba(17,17,17,0.05)] sm:px-10 sm:py-14">
           <motion.h2
             variants={item}
-            className="font-display text-3xl font-bold leading-[1.06] tracking-tight text-[var(--color-ink)] sm:text-4xl"
+            className="type-h2 text-[var(--color-ink)]"
           >
             <Accented text={n.title} accent={n.titleAccent} />
           </motion.h2>

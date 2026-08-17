@@ -47,8 +47,12 @@ export function FloweekendPage() {
         media={{
           src: c.hero.image.src,
           alt: c.hero.image.alt,
-          position: 'center 32%',
-          heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+          // R53-Nachzieh-2: 16rem + Crop 27%. 14rem war zu flach — das vordere Kinn blieb auf
+          // der Fold-Kante, hintere Koepfe ohne Kinn (dreizeilige H1, Band y578, Fold 152px).
+          // Das 16rem-Fenster croppt relativ hoeher: bei 27% sitzen die vordere Frau (Stirn bis
+          // Kinn mit Luft) und 3-4 hintere Koepfe ganz im sichtbaren Streifen. Motiv party-29.
+          position: 'center 27%',
+          heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[16rem]',
         }}
       />
       <WhatSection c={c} />
@@ -105,7 +109,7 @@ function WhatSection({ c }: { c: FloweekendContent }) {
                       <Icon size={20} strokeWidth={2} aria-hidden />
                     </span>
                     <div>
-                      <h3 className="font-display text-lg font-bold leading-tight text-[var(--color-ink)]">
+                      <h3 className="type-h3 text-[var(--color-ink)]">
                         {el.title}
                       </h3>
                       <p className="mt-1 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{el.text}</p>
@@ -145,7 +149,7 @@ function ProgramSection({ c }: { c: FloweekendContent }) {
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
                   <Icon size={20} strokeWidth={2} aria-hidden />
                 </span>
-                <h3 className="mt-4 font-display text-xl font-bold leading-tight text-[var(--color-ink)]">
+                <h3 className="mt-4 type-h3 text-[var(--color-ink)]">
                   {b.title}
                 </h3>
                 <p className="mt-2 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{b.text}</p>
