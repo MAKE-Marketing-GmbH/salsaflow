@@ -791,7 +791,6 @@ function FacesSection() {
                 variants={item}
                 className={cn(
                   'flex w-full flex-col',
-                  shape.drop,
                   // Waise mittig, aber in derselben Bauform und Spaltenbreite wie die
                   // anderen vier (Breite = eine Rasterspalte inkl. halber Rasterluecke).
                   banner &&
@@ -816,7 +815,7 @@ function FacesSection() {
                           ? 'Mitglied des Salsaflow-Teams'
                           : 'Member of the Salsaflow team'
                     }
-                    className={cn('relative w-full object-cover', shape.ratio, shape.pos, shape.zoom)}
+                    className={cn('relative w-full object-cover', shape.ratio, shape.pos)}
                     loading="lazy"
                     width={1000}
                     height={1414}
