@@ -6,6 +6,7 @@
  *  - /kursplan 390: WhatsApp circle is on the right; weekday chips stay free of it.
  *  - /tanzkurse, /tanzkurse/salsa, /preise: circle exists, right, not display:none.
  *  - /schnupperstunde 390: circle on the right; Facts-Lead does not overlap it.
+ *  - / 390: circle on the right; Ghost-CTA «Kursplan ansehen» does not overlap it.
  * Exit 0 only if every assertion holds.
  */
 import { chromium } from 'playwright-core';
@@ -36,6 +37,9 @@ async function measure(page, foldH) {
     const waDisplay = waEl ? getComputedStyle(waEl).display : null;
     const h1 = document.querySelector('h1');
     const h1r = h1 ? h1.getBoundingClientRect() : null;
+    const heroImg = document.querySelector('section img[fetchpriority="high"], section picture img');
+    const heroImgR = heroImg ? heroImg.getBoundingClientRect() : null;
+    const heroObjectPos = heroImg ? getComputedStyle(heroImg).objectPosition : null;
     const frei = [...document.querySelectorAll('span, a, button')].filter((el) => {
       const t = (el.textContent || '').trim();
       return t === 'frei' || t === 'Plätze frei';
@@ -57,6 +61,13 @@ async function measure(page, foldH) {
       const r = el.getBoundingClientRect();
       return { x: r.x, y: r.y, width: r.width, height: r.height, text: (el.textContent || '').trim().slice(0, 48) };
     });
+    const planCtas = [...document.querySelectorAll('a[href="/kursplan"]')].filter((el) => {
+      const t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      return /Kursplan ansehen|View schedule|Zum Kursplan/.test(t);
+    }).map((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height, text: (el.textContent || '').trim().slice(0, 32) };
+    });
     const arrows = [...document.querySelectorAll('button, a, [role="button"]')].filter((el) => {
       const t = (el.textContent || '').replace(/\s+/g, '').trim();
       const al = (el.getAttribute('aria-label') || '').toLowerCase();
@@ -72,6 +83,10 @@ async function measure(page, foldH) {
       chips,
       arrows,
       leads,
+      planCtas,
+      heroPhoto: heroImgR
+        ? { x: heroImgR.x, y: heroImgR.y, width: heroImgR.width, height: heroImgR.height, objectPosition: heroObjectPos }
+        : null,
       fold,
       vw: window.innerWidth,
     };
@@ -88,7 +103,8 @@ const browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '
 
 async function shot(name, w, h, path) {
   const page = await browser.newPage({ viewport: { width: w, height: h } });
-  await page.goto(BASE + path, { waitUntil: 'networkidle', timeout: 30000 });
+  await page.goto(BASE + path, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForSelector('#main h1', { timeout: 15000 });
   await dismissCookie(page);
   await page.waitForTimeout(400);
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -155,6 +171,22 @@ check('schnupper-lead-frei', leadHits.length === 0, JSON.stringify({ wa: sm.wa, 
 const sd = schnupperDsk.info;
 check('schnupper-dsk-wa-right', Boolean(sd.wa && sd.wa.x > 720), JSON.stringify(sd.wa));
 
+const homeMob = await shot('home-mobil-390', 390, 844, '/');
+const homeDsk = await shot('home-desktop-1440', 1440, 730, '/');
+const hm = homeMob.info;
+check('home-wa-right', Boolean(hm.wa && hm.wa.x > 195 && hm.wa.display !== 'none'), JSON.stringify(hm.wa));
+const planHits = (hm.planCtas || []).filter((c) => c.y < 844 && overlaps(c, hm.wa));
+check('home-kursplan-frei', planHits.length === 0, JSON.stringify({ wa: hm.wa, planHits, planCtas: hm.planCtas }));
+const hp = hm.heroPhoto;
+const yMatch = hp && /26%/.test(String(hp.objectPosition || ''));
+check(
+  'home-kinn-sichtbar',
+  Boolean(hp && hp.height >= 450 && hp.y <= 0 && yMatch && hm.h1 && hm.h1.y < 844),
+  JSON.stringify({ heroPhoto: hp, h1: hm.h1 }),
+);
+const hd = homeDsk.info;
+check('home-dsk-wa-right', Boolean(hd.wa && hd.wa.x > 720), JSON.stringify(hd.wa));
+
 const report = {
   fails,
   buchungMob: bm,
@@ -169,10 +201,13 @@ const report = {
   preiseDsk: preiseDsk.info,
   schnupperMob: sm,
   schnupperDsk: sd,
+  homeMob: hm,
+  homeDsk: hd,
   files: [
     buchungMob.file, buchungDsk.file, kursplanMob.file, kursplanDsk.file,
     tanzMob.file, tanzDsk.file, salsaMob.file, salsaDsk.file, preiseMob.file, preiseDsk.file,
     schnupperMob.file, schnupperDsk.file,
+    homeMob.file, homeDsk.file,
   ],
 };
 const reportPath = `${OUT}/verify-report.json`;

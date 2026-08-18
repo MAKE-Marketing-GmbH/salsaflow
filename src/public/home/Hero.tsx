@@ -265,7 +265,7 @@ export function Hero() {
               </CtaPill>
               <CtaText
                 href="/kursplan"
-                className="max-sm:justify-center max-sm:rounded-full max-sm:border max-sm:border-[var(--color-line)] max-sm:px-6"
+                className="max-sm:mr-16 max-sm:justify-center max-sm:rounded-full max-sm:border max-sm:border-[var(--color-line)] max-sm:px-6"
               >
                 {cta.plan}
               </CtaText>
@@ -346,9 +346,11 @@ export function Hero() {
               <img
                 src="/photos/2026/hero-paar-dreh-01.webp"
                 alt={alt}
+                // R126: mobil 38% schnitt Mund/Kinn der Frau. 26% dreht den Crop nach oben
+                // (Koepfe bei y 12..50 %, weniger Hals). sm+ unveraendert.
                 // lg:object-top statt 18%: bei 1440 sass der Scheitel des Mannes an der
                 // Foto-Kante (Critic 13.08.2026).
-                className="h-full w-full object-cover object-[50%_38%] sm:object-[50%_32%] lg:object-top"
+                className="h-full w-full object-cover object-[50%_26%] sm:object-[50%_32%] lg:object-top"
                 width={1600}
                 height={1066}
                 loading="eager"

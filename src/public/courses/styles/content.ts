@@ -112,13 +112,11 @@ const salsa: Record<Lang, StyleContent> = {
       eyebrow: 'Salsa Kurse in Basel',
       title: 'Lerne Salsa so, dass du dich auf der Tanzfläche sicher fühlst.',
       lead: 'Bei Salsaflow lernst du Rhythmus, Grundschritte, Führung, Folgen und erste Kombinationen in klar aufgebauten Kursen, auch wenn du ganz neu startest und ohne Tanzpartner kommst.',
-      bullets: [
-        'Salsa Beginner bis Advanced',
-        'Gratis Schnupperstunde möglich',
-        'Ohne Tanzpartner möglich',
-        'Direkt am Bahnhof Basel SBB',
-        'Danceflow Night zum Üben im echten Social',
-      ],
+      // R131 (Mobil-Fold, 18.08.): Die Pills brauchten mobil drei Zeilen und
+      // endeten bei y=707. Das Band startete dadurch erst bei y=739 und zeigte
+      // im 844er-Fold nur Stirn und Dutt. Brief erlaubt: Pills weichen, wenn
+      // sie das Band aus dem Fold druecken. EN-Bullets bleiben unveraendert.
+      bullets: [],
       primary: { label: 'Salsa Schnupperstunde buchen', href: R.schnupper },
       secondary: { label: 'Salsa Kursplan ansehen', href: R.salsaPlan },
       microcopy: 'Kostenlos · unverbindlich · wir helfen dir beim passenden Level.',
@@ -149,8 +147,11 @@ const salsa: Record<Lang, StyleContent> = {
         // Luft zum Fold. Crop bleibt center 14% (P85), Motiv bleibt, EN 55
         // bleibt, R87-22rem-Rueckdreh gilt nicht (damals wurde der Crop
         // mitbewegt, jetzt nur die Hoehe).
+        // R131: Mobil war das Fenster mit 10rem (160px, davon 104 im Fold) zu
+        // flach fuer beide Gesichter. Mobil/sm hoeher: 20rem / 22rem. lg bleibt
+        // 24rem wie in R109. Crop bleibt center 14% (P85-Lock, nicht gedreht).
         position: 'center 14%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[24rem]',
+        heightClass: 'h-[20rem] sm:h-[22rem] lg:h-[24rem]',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Rhythmus, Grundschritt, erste Drehung. In Ruhe.',

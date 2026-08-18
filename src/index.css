@@ -497,13 +497,24 @@ html:has(.faq-page) {
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) #kursplan-list {
     padding-top: 1.25rem;
   }
+
+  /* /buchung: Cookie schnitt die letzte Fold-Kurszeile. Foto stauchen.
+     Leiste selbst nicht mehr fixed — sie sitzt im Footer-Fluss (Akzeptieren bleibt). */
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-buchung-photo] img {
+    height: 5.25rem;
+  }
+
+  body:has([data-buchung]) [data-cookie-banner] {
+    position: static;
+    inset: auto;
+  }
 }
 
 /* Desktop-Fold: Cookie schnitt die Tageskarten, Foto-Band war 19rem.
    Stauchen hebt die Leiste über die Cookie-Zeile. */
 @media (width >= 40rem) {
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
-    height: 14rem;
+    height: 10rem;
   }
 
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero] > .mx-auto {

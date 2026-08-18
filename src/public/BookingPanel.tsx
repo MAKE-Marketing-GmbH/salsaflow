@@ -262,7 +262,25 @@ function Funnel() {
   const termOf = (c: ScheduleCourse): ScheduleTerm | undefined =>
     schedule?.terms.find((t) => t.id === c.termId);
 
+  const showDayList = !(course && !reserveOpen);
+
   return (
+    <>
+    {showDayList && (
+      <div data-buchung-photo className="relative mb-4 w-full overflow-hidden">
+        <img
+          src="/photos/2026/kurse-heels-energie-01.webp"
+          alt={lang === 'de'
+            ? 'Heels-Kurs bei Salsaflow, Energie auf der Fläche'
+            : 'Heels class at Salsaflow, energy on the floor'}
+          width={2100}
+          height={900}
+          loading="eager"
+          fetchPriority="high"
+          className="h-[7.5rem] w-full object-cover object-[center_22%] sm:h-[12rem]"
+        />
+      </div>
+    )}
     <div className="mx-auto max-w-[1080px] px-5 sm:px-8">
       {/* Fortschritt: drei Worte, keine Deko. */}
       <ol className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]" aria-hidden>
@@ -303,7 +321,7 @@ function Funnel() {
             </p>
           )}
 
-          {!(course && !reserveOpen) && (
+          {showDayList && (
           <>
           <h1 className="type-h1 text-[var(--color-ink)]">
             {ft.pickDay}
@@ -592,6 +610,7 @@ full
         </>
       )}
     </div>
+    </>
   );
 }
 
@@ -704,11 +723,11 @@ function CourseDetail({
             </dd>
           </div>
         </dl>
-        <div className="relative h-52 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)]">
+        <div className="relative h-64 min-h-[16rem] overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)]">
           <iframe
             title={de ? 'Standort Salsaflow auf Google Maps' : 'Salsaflow location on Google Maps'}
-            src={CONTACT.mapsEmbed}
-            className="absolute inset-0 h-full w-full border-0"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8000!2d7.5866!3d47.548917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f14!3m3!1m2!1s0x4791b9bbe6210ca7%3A0xe24471415832cb62!2sSalsaflow%20Dance%20Company%20GmbH!5e0!3m2!1sde!2sch"
+            className="h-full w-full min-h-[16rem] border-0"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />

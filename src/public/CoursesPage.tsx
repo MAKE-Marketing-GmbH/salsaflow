@@ -218,6 +218,16 @@ function CoursesHero() {
   const { lang } = useLang();
   const h = COURSES_OVERVIEW[lang].hero;
   const de = lang === 'de';
+  /* Facts (~290px unter den CTAs) schieben das Foto auf 390 aus dem Fold.
+     Ab sm (640) bleiben die drei Zahlen; darunter weglassen. */
+  const [wide, setWide] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 640px)');
+    const apply = () => setWide(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
   /* Mobile: "Studios am Bahnhof SBB" brach als alleinstehendes "SBB" unter "Bahnhof".
      Kurzeres Label + keep-all im HeroFrame-Fact-Label. Desktop bleibt lesbar. */
   const stats: [string, string][] =
@@ -235,6 +245,8 @@ function CoursesHero() {
   return (
     <HeroFrame
       axis="split"
+      dense
+      liftMedia
       title={`${h.title}${h.titleAccent ? ` ${h.titleAccent}` : ''}`}
       lead={h.lead}
       primary={{
@@ -242,7 +254,7 @@ function CoursesHero() {
         href: SCHNUPPER_HREF,
       }}
       secondary={{ label: de ? 'Kursplan ansehen' : 'See the schedule', href: '#kurskalender' }}
-      facts={stats}
+      facts={wide ? stats : undefined}
       media={{
         src: '/photos/2026/kurse-classfreude-hero-2100.webp',
         alt: de ? 'Tanzkurs im hellen Salsaflow Studio' : 'Dance class in the bright Salsaflow studio',

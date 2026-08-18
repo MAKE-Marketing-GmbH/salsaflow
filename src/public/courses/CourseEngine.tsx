@@ -775,7 +775,7 @@ function DayBar({
               data-testid={`day-${d.key}`}
               onClick={() => onSelect(d.key)}
               className={cn(
-                'group flex flex-col items-center justify-center rounded-[var(--radius-card)] border px-2 py-2.5 transition-colors sm:min-w-0 sm:flex-1 sm:px-3 sm:py-4',
+                'group flex flex-col items-center justify-center rounded-[var(--radius-card)] border px-2 py-2.5 transition-colors sm:min-w-0 sm:flex-1 sm:px-3 sm:py-4 lg:py-2.5',
                 on
                   ? 'border-[var(--color-ink)] bg-[var(--color-ink)] text-white'
                   : empty
