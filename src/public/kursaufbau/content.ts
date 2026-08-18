@@ -93,7 +93,7 @@ export type KursaufbauContent = {
 const R = {
   kursplan: '/kursplan',
   preise: '/preise',
-  schnupper: '/kontakt#schnupperstunde',
+  schnupper: '/schnupperstunde',
   salsa: '/tanzkurse/salsa',
   bachata: '/tanzkurse/bachata',
   heels: '/tanzkurse/heels',

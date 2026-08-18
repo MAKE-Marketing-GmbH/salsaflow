@@ -383,4 +383,4 @@ export const HOME_V3: Record<Lang, HomeV3Strings> = {
 };
 
 // Ein Ziel sitewide: die Gratis-Schnupperstunde. Anker wie im Rest der App (Hero, Footer).
-export const TRIAL_HREF = '/kontakt#schnupperstunde';
+export const TRIAL_HREF = '/schnupperstunde';

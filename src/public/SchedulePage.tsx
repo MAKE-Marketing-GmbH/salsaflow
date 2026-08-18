@@ -51,7 +51,10 @@ export function SchedulePage() {
       {/* Kein solidBackdrop: die Pille bekaeme sonst ihre eigene Flaeche und erzeugte
           genau die Kante, die dieser Umbau entfernt (siehe Kopfkommentar, Mangel 1). */}
       <SiteHeader />
-      <main id="main" tabIndex={-1}>
+      {/* R101: data-kursplan-markiert den Seitenstamm. index.css setzt darauf mobil
+          --whatsapp-lift: 5rem — der WhatsApp-Float rechnet die Variable in seinen
+          Inline-bottom mit und gibt die Tages-Chips Mo–Sa frei. Desktop (sm+) 0. */}
+      <main id="main" tabIndex={-1} data-kursplan>
         {/* Hero. Die Flaeche beginnt bei y=0 und laeuft hinter der Kopfleiste durch; der
             Textblock bekommt den Headroom ueber paddingTop (Regel 062). Bauform und Masse
             folgen HeroFrame/axis="split" von /tanzkurse. */}
@@ -94,7 +97,7 @@ export function SchedulePage() {
                       Trenner stand als einzelner Punkt allein am Zeilenende. */}
                   <span aria-hidden className="hidden text-[var(--color-line)] sm:inline">·</span>
                   <a
-                    href="/kontakt#schnupperstunde"
+                    href="/schnupperstunde"
                     className="btn-base btn-outline-salsa px-4 py-2 text-sm"
                   >
                     {de ? 'Neu? Gratis Schnupperstunde' : 'New here? Free trial class'}
@@ -108,10 +111,10 @@ export function SchedulePage() {
               bis an beide Viewport-Kanten. Es traegt keinen Text. */}
           <div data-schedule-hero-photo className="relative w-full overflow-hidden">
             <img
-              src="/photos/2026/hero-paar-studiowand-hero-2100.webp"
+              src="/photos/2026/community-diversitaet-01.webp"
               alt={de
-                ? 'Tanzpaar vor der Salsaflow-Studiowand in Basel'
-                : 'Dance couple in front of the Salsaflow studio wall in Basel'}
+                ? 'Tanzende verschiedener Altersgruppen in einer Salsaflow-Stunde'
+                : 'Dancers of different ages in a Salsaflow class'}
               width={2100}
               height={900}
               loading="eager"
@@ -136,9 +139,13 @@ export function SchedulePage() {
           </div>
         </section>
       </main>
-      {/* Kein Float: auf 1440 liegt die gruene Pille auf der Samstag-Karte
-          (S7-Kritik Sol, kursplan-desktop-fold). WhatsApp bleibt im Footer. */}
-      <SiteFooter entryCta={false} float={false} />
+      {/* Kein Float-Overlap: auf 1440 laege die gruene Pille auf der Samstag-Karte
+          (S7-Kritik Sol, kursplan-desktop-fold). WhatsApp bleibt im Footer.
+          R101: mobil sass der Float auf dem Tages-Chip «Mi». Der Lift laeuft ueber
+          data-kursplan am <main> (oben) + --whatsapp-lift in index.css, NICHT ueber eine
+          Klasse — der Float-bottom ist inline und wuerde eine Klasse schlagen. Copy/Raster
+          bleiben. */}
+      <SiteFooter entryCta={false} />
     </>
   );
 }

@@ -26,7 +26,7 @@ export function LocationBand() {
           {/* LINKS: echtes Kurs-Foto, fuellt die Kartenkante (kein Freisteller, keine KI-Person). */}
           <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[520px]">
             <img
-              src="/photos/gallery/kurse/07.jpg"
+              src="/photos/2026/event-party-dreh-01.webp"
               alt={de ? 'Kurs im hellen Studio vor den Fenstern, Bahnhof Basel SBB.' : 'Class in the bright studio by the windows, Basel SBB.'}
               className="absolute inset-0 h-full w-full object-cover object-[center_45%]"
               width={1600}

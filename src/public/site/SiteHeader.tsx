@@ -11,7 +11,7 @@ import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 
 type Leaf = { label: string; href: string };
-type NavItem = Leaf & { children?: Leaf[] };
+type NavItem = { label: string; href?: string; children?: Leaf[] };
 
 export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean } = {}) {
   const { lang, setLang } = useLang();
@@ -127,10 +127,9 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
     { label: c.nav.team, href: '/team' },
     { label: c.nav.fotos, href: '/fotos' },
     {
+      // Raphael 17.08.: Mehr ist nur ein Dropdown. Keine Übersicht, kein /mehr-Hub.
       label: c.nav.mehr,
-      href: '/mehr',
       children: [
-        { label: de ? 'Übersicht' : 'Overview', href: '/mehr' },
         { label: c.nav.faq, href: '/faq' },
         { label: c.nav.collabs, href: '/mehr/collabs' },
         { label: c.nav.tanzschuhe, href: '/mehr/tanzschuhe' },
@@ -143,9 +142,9 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
   const leafActive = (href: string) => pathname === href;
   const groupActive = (item: NavItem) =>
     !!item.children &&
-    (pathname === item.href ||
+    ((item.href !== undefined && pathname === item.href) ||
       item.children.some((ch) => ch.href !== '/' && pathname.startsWith(ch.href.split('?')[0])) ||
-      pathname.startsWith(item.href + '/'));
+      (item.href !== undefined && pathname.startsWith(item.href + '/')));
 
   return (
     <header
@@ -203,10 +202,10 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
           <nav className="hidden items-center gap-x-3.5 lg:flex xl:gap-x-4" aria-label={de ? 'Hauptnavigation' : 'Main navigation'}>
             {nav.map((item) =>
               item.children ? (
-                <DesktopDropdown key={item.href} item={item} active={groupActive(item)} pathname={pathname} />
-              ) : (
-                <DesktopLink key={item.href} item={item} active={leafActive(item.href)} />
-              ),
+                <DesktopDropdown key={item.label} item={item} active={groupActive(item)} pathname={pathname} />
+              ) : item.href ? (
+                <DesktopLink key={item.href} item={{ label: item.label, href: item.href }} active={leafActive(item.href)} />
+              ) : null,
             )}
           </nav>
 
@@ -215,7 +214,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
               <LangToggle lang={lang} setLang={setLang} />
             </div>
             <a
-              href="/kontakt#schnupperstunde"
+              href="/schnupperstunde"
               // min-h-11: der CTA mass 38px (Critic Runde 7, Item 5).
               className="hidden min-h-11 items-center gap-1.5 rounded-full border border-[var(--color-salsa)] bg-[var(--color-salsa)] px-3 py-2 text-sm font-semibold text-white transition-colors hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)] sm:inline-flex sm:px-4"
             >
@@ -253,11 +252,11 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
           <nav className="flex max-h-[calc(100dvh-var(--nav-h)-1rem)] flex-col gap-1 overflow-y-auto border-t border-[var(--color-line)] px-4 pb-4 pt-3 sm:px-6" aria-label={de ? 'Mobile Navigation' : 'Mobile navigation'}>
             {nav.map((item) =>
               item.children ? (
-                <div key={item.href} className="t-acc" data-open={openGroup === item.href}>
+                <div key={item.label} className="t-acc" data-open={openGroup === item.label}>
                   <button
                     type="button"
-                    onClick={() => setOpenGroup((v) => (v === item.href ? null : item.href))}
-                    aria-expanded={openGroup === item.href}
+                    onClick={() => setOpenGroup((v) => (v === item.label ? null : item.label))}
+                    aria-expanded={openGroup === item.label}
                     className={cn(
                       't-acc-head t-hover rounded-[var(--radius-chip)] px-3 py-2.5 text-base font-medium hover:bg-[var(--color-bg-soft)]',
                       groupActive(item) ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
@@ -271,7 +270,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
                       aria-hidden
                     />
                   </button>
-                  <div className="t-acc-panel" aria-hidden={openGroup !== item.href} inert={openGroup !== item.href}>
+                  <div className="t-acc-panel" aria-hidden={openGroup !== item.label} inert={openGroup !== item.label}>
                     <div className="t-acc-panel-inner">
                     <div className="ml-3 flex flex-col gap-0.5 border-l border-[var(--color-line)] pb-2 pl-3">
                       {item.children.map((ch) => (
@@ -297,9 +296,9 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
                     </div>
                   </div>
                 </div>
-              ) : (
-                <MobileLink key={item.href} item={item} active={leafActive(item.href)} onClick={closeMenu} />
-              ),
+              ) : item.href ? (
+                <MobileLink key={item.href} item={{ label: item.label, href: item.href }} active={leafActive(item.href)} onClick={closeMenu} />
+              ) : null,
             )}
 
             <div className="mt-3 flex items-center justify-between gap-4 border-t border-[var(--color-line)] px-3 pt-4">
@@ -310,7 +309,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
               <LangToggle lang={lang} setLang={setLang} />
             </div>
             <a
-              href="/kontakt#schnupperstunde"
+              href="/schnupperstunde"
               onClick={closeMenu}
               className="btn-base btn-primary mt-2 px-4 py-3 text-base"
             >
@@ -382,7 +381,7 @@ function DesktopDropdown({
   const wrapRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLAnchorElement>(null);
   const timer = useRef<number | undefined>(undefined);
-  const menuId = `nav-menu-${item.href.replace(/\W+/g, '-')}`;
+  const menuId = `nav-menu-${(item.href ?? item.label).replace(/\W+/g, '-')}`;
 
   // EIN Timer fuer beide Richtungen: jede neue Absicht loescht die alte. Genau das macht
   // die Bewegung interruptible — zurueck auf den Trigger cancelt das Schliessen.
@@ -441,19 +440,26 @@ function DesktopDropdown({
       onPointerEnter={(e) => { if (e.pointerType !== 'touch') schedule(true, OPEN_DELAY); }}
       onPointerLeave={(e) => { if (e.pointerType !== 'touch') schedule(false, CLOSE_DELAY); }}
       // Tab-out schliesst: der Fokus hat die Gruppe verlassen, das Menu haette keinen Bezug mehr.
-      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false); }}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false); }}
     >
       <a
         ref={triggerRef}
-        href={item.href}
+        href={item.href ?? item.children?.[0]?.href ?? '#'}
         aria-haspopup="true"
         aria-expanded={open}
         aria-controls={menuId}
         onKeyDown={onTriggerKeyDown}
         // Touch: der erste Tipp oeffnet das Menu (statt direkt zu navigieren), damit die
         // Unterseiten auf Tablets ueberhaupt erreichbar sind. Ein zweiter Tipp folgt dem Link.
+        // Raphael 17.08.: Mehr hat keinen Hub. Der Trigger oeffnet nur das Dropdown.
         onClick={(e) => {
           if (e.detail === 0) return; // Tastatur-"Klick" (Enter) hat onTriggerKeyDown schon behandelt
+          if (!item.href) {
+            e.preventDefault();
+            cancel();
+            setOpen((wasOpen) => !wasOpen);
+            return;
+          }
           const coarse = window.matchMedia('(pointer: coarse)').matches;
           if (coarse && !open) { e.preventDefault(); cancel(); setOpen(true); }
         }}

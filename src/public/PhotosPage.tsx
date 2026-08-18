@@ -344,7 +344,7 @@ function GalleryClosing() {
           </motion.p>
           {/* Runde 2, Issue 2: Glow-Halo raus, EINE Button-Definition (CtaPill). */}
           <motion.div variants={item} className="mt-8 flex justify-center">
-            <CtaPill href="/kontakt#schnupperstunde">{c.cta}</CtaPill>
+            <CtaPill href="/schnupperstunde">{c.cta}</CtaPill>
           </motion.div>
         </Reveal>
       </Shell>

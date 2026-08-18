@@ -24,7 +24,7 @@ import { EVENTS, EVENTFROG_URL, EVENTFROG_IS_EXTERNAL, type EventFact } from '@/
 const HIGHLIGHT_ICONS: LucideIcon[] = [CalendarDays, PartyPopper, Users];
 
 // Globaler Conversion-Anker (CONTENT-SPEC): jeder Schnupper-Weg zielt auf /kontakt#schnupperstunde.
-const CONTACT_HREF = '/kontakt#schnupperstunde';
+const CONTACT_HREF = '/schnupperstunde';
 
 export function EventsPage() {
   return (
@@ -167,7 +167,7 @@ function EventsHero() {
         // Kinn mit Luft, kein Kinn auf der 730er-Kante. 20rem kappt den Bart-Mann oben,
         // 22rem kappt ihn unten. Nur positionClass + heightClass (Mobil 18% / h-[10rem]
         // unberuehrt), Motiv party-52, H1, Lead, Knoepfe, Zahlenzeile bleiben.
-        positionClass: 'object-[center_18%] lg:object-[center_42%]',
+        positionClass: 'object-[center_55%] lg:object-[center_42%]',
         heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[21rem]',
       }}
     >

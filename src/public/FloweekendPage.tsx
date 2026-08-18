@@ -47,11 +47,12 @@ export function FloweekendPage() {
         media={{
           src: c.hero.image.src,
           alt: c.hero.image.alt,
-          // R53-Nachzieh-2: 16rem + Crop 27%. 14rem war zu flach — das vordere Kinn blieb auf
-          // der Fold-Kante, hintere Koepfe ohne Kinn (dreizeilige H1, Band y578, Fold 152px).
-          // Das 16rem-Fenster croppt relativ hoeher: bei 27% sitzen die vordere Frau (Stirn bis
-          // Kinn mit Luft) und 3-4 hintere Koepfe ganz im sichtbaren Streifen. Motiv party-29.
-          position: 'center 27%',
+          // R83: 16rem + Crop 34%. Band-Fenster 226px (bandTop 504, Fold 730). Anker-Modell:
+          // Translation = Y% x (scaledH-bandH) = Y% x 704. Bei 27% sass das Kinn der tanzenden
+          // Frau (weisses Shirt) an der 730er-Unterkante (FAIL), bei 37% rutschte ihr Haaransatz
+          // an die Oberkante. 34% hebt das Motiv so, dass die tanzende Frau Kinn+Hals mit Luft
+          // UND die lila-Top-Frau dahinter ganz mit Kinn zeigen. Motiv party-29 bleibt.
+          position: 'center 34%',
           heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[16rem]',
         }}
       />

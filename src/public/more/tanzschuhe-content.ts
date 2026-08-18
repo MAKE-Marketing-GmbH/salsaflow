@@ -82,7 +82,6 @@ export type TanzschuheContent = {
 export const TANZSCHUHE: Record<Lang, TanzschuheContent> = {
   de: {
     crumbs: [
-      { label: 'Mehr', href: '/mehr' },
       { label: 'Tanzschuhe', href: '/mehr/tanzschuhe' },
     ],
     hero: {
@@ -195,7 +194,6 @@ export const TANZSCHUHE: Record<Lang, TanzschuheContent> = {
   },
   en: {
     crumbs: [
-      { label: 'More', href: '/mehr' },
       { label: 'Dance shoes', href: '/mehr/tanzschuhe' },
     ],
     hero: {

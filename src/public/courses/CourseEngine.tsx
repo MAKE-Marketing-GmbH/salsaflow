@@ -211,7 +211,7 @@ function portraitFor(teacher: ScheduleCourse['teachers'][number] | undefined, st
   if (teacher?.photoUrl) return { src: teacher.photoUrl, named: true };
   const name = teacher?.displayName.trim().toLowerCase();
   if (name && TEACHER_PHOTOS[name]) return { src: TEACHER_PHOTOS[name], named: true };
-  return { src: STYLE_PHOTOS[styleKey] ?? '/photos/2026/kurse-classfreude-01.webp', named: false };
+  return { src: STYLE_PHOTOS[styleKey] ?? '/photos/premium/offer-salsa-800.webp', named: false };
 }
 
 /* Kurzes Start-Datum fuer die Badge ("9. Sep." / "Sep 9"). Das lange Format aus
@@ -669,11 +669,10 @@ function TermBar({
         </div>
       ) : null}
 
-      {/* Wochen-Navigation. Text links auf derselben Achse wie Staffel-Zeile und Tages-Tabs,
-          die beiden Pfeile als Paar rechts — zentrierter Text haette eine dritte Achse in
-          einen Block gebracht, der sonst konsequent linksbuendig ist. */}
+      {/* Wochen-Navigation. Mobil: Pfeile unter «Woche ab», links — sonst liegen sie
+          unter dem WhatsApp-Kreis. Ab sm: Text links, Pfeile rechts wie zuvor. */}
       {weeks.length > 1 && activeWeek ? (
-        <div className="flex items-center justify-between gap-3 border-y border-[var(--color-line)] py-2">
+        <div className="flex flex-col items-start gap-2 border-y border-[var(--color-line)] py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <p className="min-w-0">
             <span className="block truncate text-sm font-semibold text-[var(--color-ink)]">
               {c.weekOf} {formatDateI18n(activeWeek, lang)}
@@ -1061,7 +1060,7 @@ function ScheduleBottomCta({ nextStart }: { nextStart: string | null }) {
             <ArrowRight size={16} strokeWidth={2} aria-hidden className="ml-1.5 transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
           </a>
           <a
-            href="/kontakt#schnupperstunde"
+            href="/schnupperstunde"
             className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/25 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:border-white"
           >
             {lang === 'de' ? 'Gratis Schnupperstunde' : 'Free trial class'}

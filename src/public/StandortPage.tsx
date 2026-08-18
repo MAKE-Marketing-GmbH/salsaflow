@@ -130,6 +130,17 @@ function AnfahrtSection({ c }: { c: StandortContent }) {
               </motion.div>
             ))}
           </Reveal>
+          <Reveal className="lg:col-span-2">
+            <div className="relative mx-auto h-72 max-w-3xl overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white">
+              <iframe
+                title={a.mapsCta}
+                src={CONTACT.mapsEmbed}
+                className="absolute inset-0 h-full w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </Reveal>
         </div>
       </Shell>
     </section>
@@ -228,7 +239,7 @@ function RentalSection({ c }: { c: StandortContent }) {
               className="mt-6 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] shadow-[0_18px_50px_rgba(17,17,17,0.06)]"
             >
               <img
-                src="/photos/gallery/kurse/01.jpg"
+                src="/photos/2026/hero-paar-studiowand-01.webp"
                 alt={c.studios.items[0].image.alt}
                 className="aspect-[16/9] w-full object-cover object-[center_35%] lg:aspect-[21/9]"
                 width={1200}

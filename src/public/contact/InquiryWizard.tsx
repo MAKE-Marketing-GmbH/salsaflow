@@ -60,7 +60,7 @@ type Reach = 'whatsapp' | 'call' | 'email';
 /** Jedes Icon steht genau einmal und fuer genau eine Bedeutung im ganzen Wizard.
  *  Deshalb tauchen CalendarCheck, HelpCircle und Sparkles NICHT zusaetzlich in den
  *  Detail-Optionen auf: dort tragen die Wahl-Karten gar keine Icons mehr. */
-const TOPIC_ICONS: Record<TopicKey, LucideIcon> = {
+const TOPIC_ICONS = {
   schnupperstunde: Sparkles,
   kurs: BookOpen,
   privatstunden: Users,
@@ -69,7 +69,7 @@ const TOPIC_ICONS: Record<TopicKey, LucideIcon> = {
   events: PartyPopper,
   animationen: Star,
   kontakt: MessageCircle,
-};
+} as const satisfies Record<TopicKey, LucideIcon>;
 
 /** Reihenfolge der acht Karten. Zwei Spalten, vier Reihen, links oben der haeufigste Weg. */
 const TOPIC_ORDER = [
@@ -87,7 +87,7 @@ const TOPIC_ORDER = [
    Haelfte blieb leer. Jetzt eine kurze Erklaerzeile je Karte — sie sagt, was die
    Wahl ausloest, und gibt der Flaeche einen Job. Lebt hier neben den Icons, nicht
    in content.ts: reine Karten-Mikrocopy, kein Seiten-Text. */
-const TOPIC_HINTS: Record<TopicKey, { de: string; en: string }> = {
+const TOPIC_HINTS = {
   schnupperstunde: { de: 'Gratis reinschauen', en: 'Free trial visit' },
   kurs: { de: 'Platz im laufenden Kurs', en: 'A spot in a running course' },
   privatstunden: { de: 'Eins zu eins, Tempo frei', en: 'One-to-one, at your pace' },
@@ -96,7 +96,7 @@ const TOPIC_HINTS: Record<TopicKey, { de: string; en: string }> = {
   events: { de: 'Workshops und Socials', en: 'Workshops and socials' },
   animationen: { de: 'Auftritt für deinen Anlass', en: 'A show for your occasion' },
   kontakt: { de: 'Alles andere', en: 'Anything else' },
-};
+} as const satisfies Record<TopicKey, { de: string; en: string }>;
 
 /* ------------------------------------------------------------------ Detail-Felder je Anliegen */
 
@@ -124,7 +124,7 @@ const STYLE_OPTIONS = [
 ];
 
 /** Der Satz Fragen pro Anliegen. Genau die aus der Absprache vom 13.08.2026. */
-const DETAIL_FIELDS: Record<TopicKey, DetailField[]> = {
+const DETAIL_FIELDS = {
   schnupperstunde: [
     { kind: 'choice', id: 'stil', label: { de: 'Tanzstil', en: 'Dance style' }, options: STYLE_OPTIONS },
     {
@@ -211,16 +211,19 @@ const DETAIL_FIELDS: Record<TopicKey, DetailField[]> = {
       long: true,
     },
   ],
-};
+} satisfies Record<TopicKey, DetailField[]>;
 
 export function InquiryWizard({
   initialTopic = 'schnupperstunde',
   onTopicChange,
   compact = false,
+  lockTopic = false,
 }: {
   initialTopic?: TopicKey;
   onTopicChange?: (topic: TopicKey) => void;
   compact?: boolean;
+  /** true: Anliegen steht fest (eigene Schnupper-Seite). Kein 8er-Raster. */
+  lockTopic?: boolean;
 }) {
   const { lang } = useLang();
   const de = lang === 'de';
@@ -230,7 +233,7 @@ export function InquiryWizard({
     label: topicCardLabel(key, topics.find((entry) => entry.key === key)?.label ?? key, de),
   }));
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(lockTopic ? 1 : 0);
   const [topic, setTopic] = useState<TopicKey>(initialTopic);
   // Antworten auf die Detail-Felder, nach Feld-id. Leer heisst: nicht beantwortet.
   const [details, setDetails] = useState<Record<string, string>>({});
@@ -259,8 +262,8 @@ export function InquiryWizard({
     setNotes('');
     setError('');
     setStatus('idle');
-    setStep(0);
-  }, [initialTopic]);
+    setStep(lockTopic ? 1 : 0);
+  }, [initialTopic, lockTopic]);
 
   useEffect(() => {
     if (step > 0) headingRef.current?.focus();
@@ -436,7 +439,10 @@ export function InquiryWizard({
 
   return (
     <form onSubmit={submit} onKeyDown={blockEnterSubmit} noValidate className="flex flex-col p-5 sm:p-6 lg:p-7">
-      <WizardProgress step={step} labels={copy.progress} />
+      <WizardProgress
+        step={lockTopic ? step - 1 : step}
+        labels={lockTopic ? copy.progress.slice(1) : copy.progress}
+      />
 
       {/* pb-4 mobil als Reserve unter dem letzten Feld. Die klebende Leiste selbst braucht
           keine eigene Hoehe mehr im Fluss: sie steht jetzt auch mobil in EINER Zeile
@@ -445,7 +451,7 @@ export function InquiryWizard({
           zweiten Wahl-Gruppe (Beleg /tmp/s3-mob-step2-fold.png).
           min-h nur bis sm: darueber haelt es die Karte bei kurzen Schritten stabil, mobil
           erzeugte es zusammen mit der Reserve rund 290px Leerraue ueber der Leiste. */}
-      <div className="mt-5 pb-4 sm:min-h-[14rem] sm:pb-0">
+      <div className="mt-5 pb-20 sm:min-h-[14rem] sm:pb-0">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={step}
@@ -490,7 +496,7 @@ export function InquiryWizard({
                           ))}
                         </div>
                       </fieldset>
-                    ) : field.long ? (
+                    ) : 'long' in field && field.long ? (
                       <TextArea
                         key={field.id}
                         label={field.label[de ? 'de' : 'en']}
@@ -562,8 +568,8 @@ export function InquiryWizard({
 
       {/* Mobil klebt die Zeile am unteren Rand, damit der Knopf nicht unter dem Fold
           verschwindet. Die Reserve dafuer steht oben am Scroll-Container (pb-24). */}
-      <div className="mt-7 flex flex-row items-center justify-between gap-3 max-sm:sticky max-sm:bottom-0 max-sm:-mx-5 max-sm:border-t max-sm:border-[var(--color-line)] max-sm:bg-white max-sm:px-5 max-sm:py-3">
-        {step > 0 ? (
+      <div className="mt-7 flex flex-row items-center justify-between gap-3 max-sm:sticky max-sm:bottom-0 max-sm:-mx-5 max-sm:border-t max-sm:border-[var(--color-line)] max-sm:bg-white max-sm:px-5 max-sm:py-3 max-sm:pr-20">
+        {step > (lockTopic ? 1 : 0) ? (
           <button type="button" onClick={() => { setError(''); setStep((current) => current - 1); }} className="t-hover inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]">
             <ArrowLeft aria-hidden className="h-4 w-4 shrink-0" />{copy.back}
           </button>
@@ -635,7 +641,7 @@ function ChoiceCard({
   children,
 }: {
   active: boolean;
-  icon?: LucideIcon;
+  icon?: LucideIcon | ((props: { className?: string }) => ReactNode);
   label: string;
   /** kurze Erklaerzeile unter dem Label (Anliegen-Karten, R62). */
   hint?: string;
@@ -776,6 +782,7 @@ function TextArea({ label, value, onChange, placeholder, optional, invalid }: { 
  * mitten im Tippen. Im mehrzeiligen Feld bleibt Enter ein Zeilenumbruch.
  */
 function blockEnterSubmit(event: import('react').KeyboardEvent<HTMLFormElement>) {
+  // SAFETY: Form-Keydown kommt vom aktuellen Zielknoten. Nur TAG-Name wird gelesen.
   const target = event.target as HTMLElement;
   if (event.key !== 'Enter' || target.tagName === 'TEXTAREA') return;
   if (target.tagName === 'INPUT') event.preventDefault();
@@ -817,15 +824,29 @@ function wizardCopy(de: boolean, topic: TopicKey) {
     email: de ? 'E-Mail' : 'Email',
     reachLabel: de ? 'Wie erreichen wir dich am besten?' : 'How should we reach you?',
     reachOptions: [
-      { key: 'whatsapp' as const, label: 'WhatsApp', icon: WhatsAppIcon as unknown as LucideIcon },
+      { key: 'whatsapp' as const, label: 'WhatsApp', icon: WhatsAppIcon },
       { key: 'call' as const, label: de ? 'Anruf' : 'Phone call', icon: Phone },
       // Mail, nicht MessageCircle: die Sprechblase steht im Anliegen-Raster schon fuer
       // "Allgemeine Frage". Ein Icon, eine Bedeutung.
       { key: 'email' as const, label: de ? 'E-Mail' : 'Email', icon: Mail },
     ],
-    privacyLabel: de
-      ? 'Ich habe die Datenschutzerklärung gelesen und bin damit einverstanden.'
-      : 'I have read the privacy policy and agree to it.',
+    privacyLabel: de ? (
+      <>
+        Ich habe die{' '}
+        <a href="/datenschutz" className="font-semibold text-[var(--color-salsa)] underline underline-offset-4">
+          Datenschutzerklärung
+        </a>{' '}
+        gelesen und bin damit einverstanden.
+      </>
+    ) : (
+      <>
+        I have read the{' '}
+        <a href="/datenschutz" className="font-semibold text-[var(--color-salsa)] underline underline-offset-4">
+          privacy policy
+        </a>{' '}
+        and agree to it.
+      </>
+    ),
     // requestLabel steht in der Mail an das Studio, nicht auf der Seite.
     requestLabel: de ? 'Anliegen' : 'Request',
     contactError: de ? 'Bitte gib deinen Vornamen und eine E-Mail oder Handynummer an.' : 'Please add your first name and either an email or mobile number.',

@@ -261,9 +261,23 @@ h4 {
 #booking-role-title,
 [data-testid="booking-dialog"] h3,
 form legend.type-h3,
-form h3.type-h3 {
+form h3.type-h3,
+#schnupper-facts h2 {
   letter-spacing: 0;
   word-spacing: 0.1em;
+}
+
+/* R101: /kursplan Mobil — der WhatsApp-Float (fixed, bottom 1.25rem, right-5) sass auf dem
+   Tages-Chip «Mi»; die Wochen-Leiste laeuft horizontal und «Mi» endet am rechten Rand. Der
+   Float rechnet --whatsapp-lift in seinen Inline-bottom mit (WhatsAppFloat.tsx). Hier heben
+   wir den Float NUR unter sm um 5rem an — weit genug ueber die Chip-Reihe, ohne Copy oder
+   das Tages-Raster anzufassen. Desktop (ab sm) bleibt 0px. */
+@media (max-width: 639px) {
+  :root:has([data-kursplan]) {
+    /* R101 bleibt: 5rem hebt den Float ueber die Tages-Chips. (12rem aus R118
+       zurueckgedreht — Raphael R120: 12rem war falsche Flaeche.) */
+    --whatsapp-lift: 5rem;
+  }
 }
 
 /* Kontrast-Schutz (Regel 005): Ein Link ohne eigene text-Klasse erbt die
@@ -499,10 +513,6 @@ html:has(.faq-page) {
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) #kursplan-list {
     padding-top: 1.5rem;
   }
-}
-
-body:has(.preise-page) a[href*='wa.me'][target='_blank'][title] {
-  display: none;
 }
 
 body:has([data-cookie-clear='true'])

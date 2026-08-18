@@ -45,7 +45,7 @@ import {
 const PRIVAT_ICONS: LucideIcon[] = [Users, Music, CalendarClock, HeartHandshake];
 
 // EIN CTA-Ziel sitewide (Master-Plan): der Schnupper-Anker scrollt auf /kontakt zum Formular.
-const SCHNUPPER_HREF = '/kontakt#schnupperstunde';
+const SCHNUPPER_HREF = '/schnupperstunde';
 const SECTION_OFFSET = 'calc(var(--nav-h) + 1.5rem)';
 
 function courseStart(course: ScheduleCourse, data: ScheduleResponse, lang: 'de' | 'en') {
@@ -112,7 +112,7 @@ function CourseStartCard({ course, data, index, altThumb = false }: { course: Sc
         : 'Starting soon';
   const running = course.phase === 'running';
   const useAlt = altThumb && !!STYLE_THUMB_ALT[course.styleKey];
-  const thumb = (useAlt ? STYLE_THUMB_ALT[course.styleKey] : STYLE_THUMB[course.styleKey]) ?? '/photos/2026/kurse-classfreude-01.webp';
+  const thumb = (useAlt ? STYLE_THUMB_ALT[course.styleKey] : STYLE_THUMB[course.styleKey]) ?? '/photos/premium/offer-salsa-800.webp';
   const focus = (useAlt ? STYLE_THUMB_ALT_FOCUS[course.styleKey] : STYLE_THUMB_FOCUS[course.styleKey]) ?? 'center 30%';
   return (
     <a
@@ -202,10 +202,8 @@ export function CoursesPage() {
       </main>
       {/* Runde 3, Issue 7: EIN Abbinder pro Seite. Die Seite schliesst mit TrialSection
           ("Schnupperstunde"); der generische Footer-Streifen mit demselben CTA entfaellt.
-          float={false}: wie /preise und Home — der fixe WhatsApp-FAB lag auf den
-          rechtsbuendigen Privat-Preisen (100 CHF) in der Preise-Sektion. WhatsApp bleibt
-          ueber Privatstunden-CTA, Kontakt und Footer erreichbar. */}
-      <SiteFooter entryCta={false} float={false} />
+          Float bleibt an: Raphael will den Kreis sitewide unten rechts. */}
+      <SiteFooter entryCta={false} />
     </>
   );
 }

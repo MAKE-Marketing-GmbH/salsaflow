@@ -83,7 +83,7 @@ export type AnniversaryContent = {
 /* Interne Ziel-Routen (echte App-Routen). */
 const R = {
   eventkalender: '/events-workshops/eventkalender',
-  kontakt: '/kontakt#schnupperstunde',
+  kontakt: '/schnupperstunde',
   fotos: '/fotos',
   danceflow: '/events-workshops/danceflow-night',
   self: '/events-workshops/anniversary-weekend',

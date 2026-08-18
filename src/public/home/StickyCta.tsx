@@ -50,7 +50,7 @@ export function StickyCta() {
       style={{ bottom: 'var(--cookie-banner-height, 0px)' }}
     >
       <a
-        href="/kontakt#schnupperstunde"
+        href="/schnupperstunde"
         tabIndex={show ? 0 : -1}
         className="btn-base btn-primary h-[52px] w-full text-base"
       >

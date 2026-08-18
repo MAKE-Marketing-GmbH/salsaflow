@@ -14,7 +14,7 @@
 import type { Lang } from '@/lib/i18n';
 
 // EIN Schnupper-Ziel sitewide (Master-Plan): Anker auf /kontakt.
-const SCHNUPPER_HREF = '/kontakt#schnupperstunde';
+const SCHNUPPER_HREF = '/schnupperstunde';
 
 export type PriceRow = { label: string; value?: string };
 export type PriceGroup = { label: string; rows: PriceRow[] };

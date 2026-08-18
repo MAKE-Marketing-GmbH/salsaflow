@@ -83,7 +83,7 @@ export type PrivatContent = {
 
 /* Interne Ziel-Routen (echte App-Routen). */
 const R = {
-  schnupper: '/kontakt#schnupperstunde',
+  schnupper: '/schnupperstunde',
   // Eigener Hash fuer Privatstunden. Vorher zeigten auch die acht Knoepfe mit der Aufschrift
   // "Privatstunde anfragen" auf #schnupperstunde. Das Formular fragte dann nach Tanzstil und
   // Wochentag statt nach dem Ziel — und schickte das falsche Anliegen ans Studio.

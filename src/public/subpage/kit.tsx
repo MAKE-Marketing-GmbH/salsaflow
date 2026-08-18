@@ -31,7 +31,7 @@ import { Reveal, useReveal } from '@/public/home/motion';
 import { SECTION_Y } from '@/public/home/kit';
 
 // EIN CTA-Ziel sitewide (Master-Plan): Schnupperstunden-Anker auf /kontakt.
-export const SCHNUPPER_HREF = '/kontakt#schnupperstunde';
+export const SCHNUPPER_HREF = '/schnupperstunde';
 
 /* ----------------------------------------------------------------- Zeilenmass (Measure)
  * Vorbild: src/public/home/kit.tsx (MEASURE_XL/MEASURE_L, Home-Redesign 2026-08).
@@ -231,6 +231,7 @@ export function SubHero({
   axis = 'split',
   media,
   dense = false,
+  tightBottom = false,
 }: {
   seoCrumbs: Crumb[];
   title: string;
@@ -247,12 +248,17 @@ export function SubHero({
   media?: { src: string; alt: string; position?: string; positionClass?: string; heightClass?: string };
   /** Kuerzerer Hero, damit ein kurzes Bildband noch in den 730er-Fold passt. */
   dense?: boolean;
+  /** R84 (nur /schnupperstunde): kuerzt das Shell-Padding unten (Default pb-14/lg:pb-20),
+      damit der Anfrage-Block #anfrage in den 730er-Fold rueckt. Reiner Abstand-Hebel,
+      Default false = alle anderen Seiten unveraendert. */
+  tightBottom?: boolean;
 }) {
   return (
     <HeroFrame
       axis={axis}
       media={media}
       dense={dense}
+      tightBottom={tightBottom}
       crumbs={seoCrumbs}
       title={title}
       titleAccent={titleAccent}
@@ -281,6 +287,7 @@ export function HeroFrame({
   media,
   dense = false,
   liftMedia = false,
+  tightBottom = false,
   children,
 }: {
   axis?: HeroAxis;
@@ -300,6 +307,9 @@ export function HeroFrame({
       Kein negatives Band-Margin (wuerde Chips/CTA ueberdecken), keine neue Copy,
       Crop und Band-Hoehe bleiben. Wirkt nur zusammen mit dense+media. */
   liftMedia?: boolean;
+  /** R84 (nur /schnupperstunde): kuerzt das Shell-Padding unten, damit #anfrage in den
+      730er-Fold rueckt. Reiner Abstand-Hebel, Default false = andere Seiten unveraendert. */
+  tightBottom?: boolean;
   /** Zusatzinhalt unter dem CTA-Block (z. B. Chip-Reihe auf den Stilseiten). */
   children?: ReactNode;
 }) {
@@ -320,7 +330,7 @@ export function HeroFrame({
   /* R73-Nachzieh: liftMedia (nur salsa) zieht den Section-Top auf var(--nav-h) — wie
      tight, aber unabhaengig davon geschaltet, damit bachata (tight) unveraendert bleibt. */
   const lift = Boolean(liftMedia && dense && media);
-  const topPad = tight || lift
+  const topPad = tight || lift || tightBottom
     ? 'var(--nav-h)'
     : dense
       ? 'calc(var(--nav-h) + 0.5rem)'
@@ -434,7 +444,7 @@ export function HeroFrame({
         // microToBand 0 -> 32, Koepfe bleiben im Fold: sichtbar 217px, zwei Koepfe
         // vorn inkl. Kinn). salsa/bachata/heels (tight) haben keine Microcopy ->
         // bleiben pb-0. Tanzschuhe/Collabs (dense+media, nicht tight) behalten pb-6.
-        media ? (dense ? (tight ? (microcopy ? 'pb-8' : 'pb-0') : 'pb-6 sm:pb-6') : 'pb-10 sm:pb-12') : 'pb-14 sm:pb-16 lg:pb-20',
+        media ? (dense ? (tight ? (microcopy ? 'pb-8' : 'pb-0') : 'pb-6 sm:pb-6') : 'pb-10 sm:pb-12') : (tightBottom ? 'pb-6 lg:pb-8' : 'pb-14 sm:pb-16 lg:pb-20'),
       )}>
         <motion.div
           data-reveal
@@ -444,8 +454,11 @@ export function HeroFrame({
           className={center ? 'text-center' : undefined}
         >
           {crumbs ? (
-            <motion.div variants={item} className={cn(dense ? (tight ? 'mb-1' : 'mb-3') : 'mb-6', center && 'flex justify-center')}>
-              <Breadcrumb trail={crumbs} compact={tight} />
+            <motion.div variants={item} className={cn(dense ? (tight || tightBottom ? 'mb-1' : 'mb-3') : 'mb-6', center && 'flex justify-center')}>
+              {/* R84: tightBottom (nur /schnupperstunde) schaltet die Crumb auf compact
+                  (Tap-Hoehe 44->20px), damit #anfrage mit erster Zeile in den 730er-Fold
+                  rueckt. Reiner Abstand-Hebel, Default false = andere Seiten unveraendert. */}
+              <Breadcrumb trail={crumbs} compact={tight || tightBottom} />
             </motion.div>
           ) : null}
           {/* Kein Hero-Eyebrow mehr (Meta-Kritik 2026-08-07). Er stand hier auf JEDER Unterseite
@@ -523,6 +536,7 @@ export function SectionHead({
   lead,
   center = false,
   className,
+  tight = false,
 }: {
   eyebrow?: string;
   title: string;
@@ -530,6 +544,10 @@ export function SectionHead({
   lead?: string;
   center?: boolean;
   className?: string;
+  /** R84 (nur /schnupperstunde): kuerzt den Abstand ueber der H2 (mt-5 -> mt-0) und zum
+      Lead (mt-4 -> mt-2), damit #anfrage mit erster Zeile in den 730er-Fold rueckt.
+      Reiner Abstand-Hebel, Default false = alle anderen Seiten unveraendert. */
+  tight?: boolean;
 }) {
   return (
     <div className={cn(center ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl', className)}>
@@ -538,10 +556,10 @@ export function SectionHead({
           <Eyebrow>{eyebrow}</Eyebrow>
         </div>
       ) : null}
-      <h2 className={cn('mt-5', sectionTitle, MEASURE_L, center && 'mx-auto')}>
+      <h2 className={cn(tight ? 'mt-0' : 'mt-5', sectionTitle, MEASURE_L, center && 'mx-auto')}>
         {title} {titleAccent ? <TitleAccent>{titleAccent}</TitleAccent> : null}
       </h2>
-      {lead ? <p className={cn('mt-4 text-pretty', sectionLead)}>{lead}</p> : null}
+      {lead ? <p className={cn(tight ? 'mt-2' : 'mt-4', 'text-pretty', sectionLead)}>{lead}</p> : null}
     </div>
   );
 }

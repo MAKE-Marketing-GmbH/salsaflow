@@ -100,7 +100,7 @@ const R = {
   salsaPage: '/tanzkurse/salsa',
   bachataPage: '/tanzkurse/bachata',
   heelsPage: '/tanzkurse/heels',
-  schnupper: '/kontakt#schnupperstunde',
+  schnupper: '/schnupperstunde',
 };
 
 /* ============================================================= SALSA (Muster, 1:1 pages/03) */
@@ -141,9 +141,16 @@ const salsa: Record<Lang, StyleContent> = {
         // der 730er-Kante. Vollbild-Zonen-Crops (2000x350) zeigen bei 14% beide
         // Profile mit Kiefer- und Kinnlinie IM Fenster, Mann zentraler im Band.
         // 14% zentriert die Spanne, statt sie nach oben zu schieben. Motiv,
-        // Band-Hoehe, Copy, Bachata, Heels unberuehrt (R73-Stopp).
+        // Copy, Bachata, Heels unberuehrt (R73-Stopp).
+        // R109 (Raphael-last, 17.08.): Bei 18rem lag das Kinn auf/unter der
+        // 730er-Schnittkante (Band y=566–854, nur Stirn im Fenster — Harness
+        // FAIL salsaKoepfe). Einziger erlaubter Hebel: DE heightClass lg
+        // hoeher. 24rem (Band-Top 660) zeigt beide Gesichter inkl. Kinn mit
+        // Luft zum Fold. Crop bleibt center 14% (P85), Motiv bleibt, EN 55
+        // bleibt, R87-22rem-Rueckdreh gilt nicht (damals wurde der Crop
+        // mitbewegt, jetzt nur die Hoehe).
         position: 'center 14%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[24rem]',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Rhythmus, Grundschritt, erste Drehung. In Ruhe.',
@@ -189,7 +196,7 @@ const salsa: Record<Lang, StyleContent> = {
         { tag: 'Phase 4', title: 'Social-Dance-Gefühl', text: 'Du übst, mit wechselnden Partner:innen ruhig, klar und freundlich zu tanzen.' },
       ],
       cta: { label: 'Salsa Beginner ansehen', href: R.salsaPlan },
-      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Salsa-Grundschritt im Unterricht, Lehrperson zeigt vor' },
+      image: { src: '/photos/2026/event-social-couple-01.webp', alt: 'Salsa-Grundschritt im Unterricht, Lehrperson zeigt vor' },
     },
     levels: {
       title: 'Salsa wächst mit',
@@ -270,8 +277,15 @@ const salsa: Record<Lang, StyleContent> = {
       band: {
         src: '/photos/premium/offer-salsa-hero-2100.webp',
         alt: 'Salsa couple in class, closeness and energy in the Salsaflow studio',
-        // Gleiche Begruendung wie im DE-Block: 18rem-Band + 0% statt Default-30rem.
-        position: 'center 0%',
+        // R79 (EN Fold 1440x730): Band top 498, Fenster 730-498 = 232px (konstant).
+        // Runde 1: 0% nur Dutt + Maennerstirn, 20% (beide FAIL) zeigte nur den Mann klar,
+        // die Dutt-Frau blieb Hinterkopf/Wange. Anker-Modell: Translation = Y% x
+        // Ueberschuss (Motiv 1440x617, band 288 -> Ueberschuss 329). Fuer Frauen-Kinn
+        // (~Y295) UND Mann-Kinn (~Y340-360) mit Luft braucht das Fenster Start ~Y180:
+        // 55% x 329 = 181. 42-50% sitzen ebenfalls, 55% gibt beiden Kinnen die meiste
+        // Luft ueber der Fold-Kante. NUR der EN-Block — DE bleibt center 14% (P85,
+        // nicht angefasst), Motiv offer-salsa-hero-2100 und lg:h-[18rem] bleiben.
+        position: 'center 55%',
         heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
       },
       cardLabel: 'Your start',
@@ -318,7 +332,7 @@ const salsa: Record<Lang, StyleContent> = {
         { tag: 'Phase 4', title: 'Social-dance feeling', text: 'You practise dancing with changing partners calmly, clearly and kindly.' },
       ],
       cta: { label: 'See Salsa beginner courses', href: R.salsaPlan },
-      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Salsa basic step in class, teacher demonstrating' },
+      image: { src: '/photos/2026/event-social-couple-01.webp', alt: 'Salsa basic step in class, teacher demonstrating' },
     },
     levels: {
       title: 'Salsa grows with',

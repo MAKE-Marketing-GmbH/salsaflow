@@ -27,12 +27,24 @@ export const CONTACT = {
   // Die alte generische Suche (maps/search?query=) bleibt keinem sichtbaren Knopf mehr.
   anfahrt: 'https://www.google.com/maps/dir/?api=1&destination=Elisabethenanlage+7,+4051+Basel',
   googleReviews: GOOGLE_REVIEWS.url,
+  mapsEmbed:
+    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2692.8!2d7.5895042!3d47.548917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f16!3m3!1m2!1s0x4791b9bbe6210ca7%3A0xe24471415832cb62!2sSalsaflow%20Dance%20Company%20GmbH!5e0!3m2!1sde!2sch',
 };
 
 // entryCta: der "Dein Einstieg"-Block ueber den Footer-Spalten. Sitewide an, auf der
 // Startseite aus (dort schliesst schon der dunkle Fullbleed-Closer mit demselben CTA,
 // zwei Abschluss-CTAs direkt nacheinander waeren doppelt).
-export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boolean; float?: boolean }) {
+export function SiteFooter({
+  entryCta = true,
+  float = true,
+  floatClass = '',
+}: {
+  entryCta?: boolean;
+  float?: boolean;
+  // R101: optionale Positions-Korrektur des WhatsApp-Floats pro Seite. /kursplan nutzt sie,
+  // damit der Float mobil nicht auf den Tages-Chips Mo–Sa liegt. Copy/Raster unveraendert.
+  floatClass?: string;
+}) {
   const { lang } = useLang();
   const c = HOME[lang].footer;
   const nav = HOME[lang].nav;
@@ -129,7 +141,7 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
           {/* CTA-Dock: ein klarer Abschluss, kein zweiter Hero. */}
           <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
             <a
-              href="/kontakt#schnupperstunde"
+              href="/schnupperstunde"
               className="btn-base btn-primary px-5 py-2.5 text-sm"
             >
               {lang === 'de' ? 'Gratis Schnupperstunde' : 'Free trial class'}
@@ -267,7 +279,7 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
 
     {/* Sitewide-Floats: liegen position:fixed ueber dem Layout, darum als Geschwister neben dem
         Footer (nicht im Footer-Fluss). Erscheinen damit auf jeder Seite (sitewide.md §7/§8). */}
-    {float && <WhatsAppFloat raised={cookieVisible} />}
+    {float && <WhatsAppFloat raised={cookieVisible} className={floatClass} />}
     <CookieBanner onVisibleChange={setCookieVisible} />
     </>
   );

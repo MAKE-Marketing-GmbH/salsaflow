@@ -81,7 +81,7 @@ const R = {
   heelsPlan: '/kursplan?stil=heels',
   tanzschuhe: '/mehr/tanzschuhe',
   kontakt: '/kontakt',
-  schnupper: '/kontakt#schnupperstunde',
+  schnupper: '/schnupperstunde',
   heelsPage: '/tanzkurse/heels',
 };
 

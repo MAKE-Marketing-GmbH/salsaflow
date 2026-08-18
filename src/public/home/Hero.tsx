@@ -153,7 +153,13 @@ export function Hero() {
           {/* `data-hero-fold`: Haken fuer die Bodenluft gegen die fixe Cookie-Leiste
               (Befund m-01, Regel in index.css). Der Fold ist viewportgebunden, das
               Dokument-Polster greift hier also nicht. */}
-          <div data-hero-fold className="relative z-10 self-center px-5 pt-[calc(58svh-12rem)] sm:px-8 sm:pt-0 lg:py-10 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-0">
+          {/* R100 Nachzieh: die Foto-Naht sass auf 390 mitten durch «und Heels.». Der erste
+              Bau drehte nur die Farbe — die Lage blieb, schwarz lag auf dunklem Foto (FAIL).
+              Hebel ist LAGE, nicht Farbe: der Textblock startet jetzt 8rem statt 12rem vor
+              der Foto-Unterkante (58svh). Damit liegt die Naht zwischen «Salsa, Bachata»
+              (weiss, oben auf dem Foto) und «und Heels.» (erste Zeile UNTER der Naht, auf
+              Papier) — mit Luft. sm+ unveraendert (pt-0). Foto 58svh bleibt, Crop bleibt. */}
+          <div data-hero-fold className="relative z-10 self-center px-5 pt-[calc(58svh-10rem)] sm:px-8 sm:pt-0 lg:py-10 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-0">
             {/* leading-[1.3] statt leading-none: Alex Brush setzt Ober- und Unterlaengen
                 ausserhalb einer 1.0-Zeilenbox, dadurch stimmten die Abstaende nicht. */}
             {/* Auf dem Foto traegt Salsa-Rot nicht: gegen das warme Studiolicht (Luminanz ~0.35)
@@ -214,8 +220,11 @@ export function Hero() {
               )}
             >
               <span className="block">{de ? 'Salsa, Bachata' : 'Salsa, bachata'}</span>
-              <span className="block">{de ? 'und Heels.' : 'and heels.'}</span>
-              {/* Mobil in Ink: das Foto endet bei ~y490, diese Zeile (y484-525) steht sonst
+              {/* R100 Nachzieh: Lage statt Farbe. Der Textblock sitzt jetzt so, dass die
+                  Foto-Naht zwischen «Salsa, Bachata» (oben, weiss auf Foto) und dieser Zeile
+                  liegt. «und Heels.» steht ganz auf Papier — mit Ink, sonst weiss auf Papier. */}
+              <span className="block max-sm:text-[var(--color-ink)]">{de ? 'und Heels.' : 'and heels.'}</span>
+              {/* Mobil in Ink: das Foto endet bei ~y490, diese Zeile steht sonst
                   weiss auf paper-warm — Kontrast ~1:1 (Critic Runde 6, Item 1). */}
               <span className="block max-sm:text-[var(--color-ink)]">{de ? 'Mitten in Basel.' : 'Here in Basel.'}</span>
             </motion.h1>
@@ -251,7 +260,7 @@ export function Hero() {
                 erlaubt genau einen Primary pro Sektion. Ab sm unveraendert der Textlink.
                 Beide liegen laut Sonde auf Papier, nicht auf dem Foto (Messung unten). */}
             <motion.div variants={item} className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 max-sm:mt-6 max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2">
-              <CtaPill href="/kontakt#schnupperstunde" className="max-sm:w-full">
+              <CtaPill href="/schnupperstunde" className="max-sm:w-full">
                 {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
               </CtaPill>
               <CtaText

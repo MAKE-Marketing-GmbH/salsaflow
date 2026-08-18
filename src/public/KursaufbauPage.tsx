@@ -102,7 +102,12 @@ function KursaufbauHero({ c }: { c: KursaufbauContent }) {
             <img
               src={h.image.src}
               alt={h.image.alt}
-              className="aspect-[4/5] w-full object-cover object-[center_42%] sm:aspect-[5/4] lg:aspect-[4/5]"
+              // R80 (Fold 1440x730): lg:aspect-[4/5] (Foto 814px) zog die Grid-Zeile so
+              // tief, dass der rote CTA bei top 720 mit 44px unter den Fold hing.
+              // lg:aspect-[3/2] (Foto ~433px) schrumpft die rechte Spalte; items-center
+              // zentriert beide Spalten hoeher -> CTA bottom ~610, ganz im Fenster.
+              // Motiv kurs-02.jpg, Copy, Chips, H1 bleiben. Salsa DE14/EN55 unberuehrt.
+              className="aspect-[4/5] w-full object-cover object-[center_42%] sm:aspect-[5/4] lg:aspect-[3/2]"
               width={1600}
               height={1067}
               loading="eager"
