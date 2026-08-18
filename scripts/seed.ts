@@ -447,30 +447,25 @@ export async function runSeed() {
     weekCount: source.term.week_count,
   });
 
-  // 2)+3) Laufende + zukuenftige Staffel relativ zu heute (8-Wochen-Takt), damit der
-  // öffentliche Plan immer eine laufende und eine zukuenftige Staffel hat.
-  const today = todayISO();
-  const runStart = addDaysISO(today, -28);
-  const runEnd = addDaysISO(runStart, 8 * 7 - 1); // 8 Wochen, heute etwa zur Haelfte
-  const nextStart = addDaysISO(runEnd, 7); // eine Woche Pause, dann die naechste Staffel
-  const nextEnd = addDaysISO(nextStart, 8 * 7 - 1);
+  // 2)+3) Feste Staffeln laut Watchdog-Vertrag S0 (PROMPT-R2, 2026-08-14):
+  // eine laufende und eine kommende Staffel mit deterministischen Daten,
+  // damit Shots und Vorausbuchung stabil pruefbar sind.
 
-  // Laufende Staffel: Quereinstieg bei allem ausser Advanced möglich (damit der
+  // Laufende Staffel August: Quereinstieg bei allem ausser Advanced möglich (damit der
   // "Quereinstieg möglich"-Chip im Plan sichtbar variiert); die ersten drei Kurse als
   // 'full' (zeigt den "Ausgebucht"-Chip live).
   await insertTerm(
-    { name: `Staffel ${monthYearDe(runStart)}`, startDate: runStart, endDate: runEnd, weekCount: 8 },
+    { name: 'Staffel August 2026', startDate: '2026-08-10', endDate: '2026-10-02', weekCount: 8 },
     (c) => !(c.level_raw ?? '').toLowerCase().includes('advanced'),
     (idx) => (idx < 3 ? 'full' : 'open'),
   );
 
-  // Zukuenftige Staffel (als Sommerkurse markiert; reine Anzeige - Buchung ist Etappe 8/9).
+  // Kommende Staffel Oktober (upcoming; Vorausbuchung zeigt auf diese Termine).
   await insertTerm({
-    name: `Sommerkurse ${nextStart.slice(0, 4)}`,
-    startDate: nextStart,
-    endDate: nextEnd,
+    name: 'Staffel Oktober 2026',
+    startDate: '2026-10-12',
+    endDate: '2026-12-05',
     weekCount: 8,
-    isSummer: true,
   });
 
   console.log('[seed] fertig:');
@@ -478,7 +473,7 @@ export async function runSeed() {
   console.log(`  Level-Rungs:  ${rungDefs.length}`);
   console.log(`  Tarife:       ${TARIFFS.length}`);
   console.log(`  Lehrer:       ${teacherRows.length}`);
-  console.log(`  Staffeln:     ${counts.terms} (Januar 2026 + laufend + zukuenftig)`);
+  console.log(`  Staffeln:     ${counts.terms} (Januar + August + Oktober 2026)`);
   console.log(`  Kurse:        ${counts.courses}`);
   console.log(`  Kurs-Lehrer:  ${counts.links}`);
   console.log(`  Kurs-Preise:  ${counts.prices}`);
@@ -496,27 +491,6 @@ async function tariffId(db: Awaited<ReturnType<typeof openDb>>['db'], key: strin
   const id = tariffIdCache.get(key);
   if (!id) throw new Error(`Tarif nicht gefunden: ${key}`);
   return id;
-}
-
-/* ---------------------------------------------------------------------------
- * Datums-Helfer für die relativen Staffeln (laufend/zukuenftig). Reine String-Mathematik.
- * ------------------------------------------------------------------------- */
-function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-function addDaysISO(iso: string, days: number): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  dt.setUTCDate(dt.getUTCDate() + days);
-  return dt.toISOString().slice(0, 10);
-}
-const MONTHS_DE = [
-  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
-];
-function monthYearDe(iso: string): string {
-  const [y, m] = iso.split('-').map(Number);
-  return `${MONTHS_DE[(m - 1) % 12]} ${y}`;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

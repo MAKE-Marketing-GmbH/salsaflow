@@ -45,7 +45,7 @@ export function BookingReturn() {
         style={{ paddingTop: 'calc(var(--nav-h) + 3rem)' }}
       >
         <div className="mx-auto max-w-[38rem] px-5 pb-20 text-center sm:px-8">
-          <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight text-[var(--color-ink)] sm:text-5xl">
+          <h1 className="type-h1 text-[var(--color-ink)]">
             {title}
           </h1>
           <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">

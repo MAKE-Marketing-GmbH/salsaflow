@@ -81,7 +81,18 @@ export function Faq() {
                       type="button"
                       aria-expanded={isOpen}
                       aria-controls={`faq-panel-${i}`}
-                      onClick={() => setOpen(isOpen ? null : i)}
+                      onClick={() => {
+                        const next = isOpen ? null : i;
+                        setOpen(next);
+                        if (next === items.length - 1) {
+                          window.setTimeout(() => {
+                            document.getElementById(`faq-panel-${next}`)?.scrollIntoView({
+                              block: 'end',
+                              behavior: 'instant',
+                            });
+                          }, 80);
+                        }
+                      }}
                       /* Kritiker-Befund 2026-08-09, "Mid-Sections (Levels/FAQ): vertikale
                          Rhythmen enger". Gemessen (Playwright, 1440px): jede Accordion-Zeile
                          war 77px hoch fuer eine EINZEILIGE Frage — 36px Chevron-Kreis plus
@@ -93,7 +104,7 @@ export function Faq() {
                          der untersten in DESIGN.md erlaubten Stufe. */
                       className="group/btn flex w-full items-center justify-between gap-5 py-4 text-left"
                     >
-                      <span className="font-display text-lg font-bold leading-snug tracking-[-0.01em] text-[var(--color-ink)] transition-colors group-hover/btn:text-[var(--color-salsa)] sm:text-xl">
+                      <span className="hyphens-none !tracking-normal font-display text-lg font-bold leading-snug text-[var(--color-ink)] transition-colors [word-spacing:0.12em] group-hover/btn:text-[var(--color-salsa)] sm:text-xl">
                         {it.q}
                       </span>
                       {/* Chevron im Kreis. Aktiver Zustand = einziger roter Vollton (kein Pastell). */}
@@ -122,7 +133,13 @@ export function Faq() {
                     style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
                   >
                     <div className="overflow-hidden">
-                      <p className="max-w-2xl pb-6 pr-4 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)] sm:text-base">
+                      <p
+                        className={cn(
+                          'max-w-2xl pb-6 pr-4 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)] sm:text-base',
+                          i === items.length - 1 &&
+                            'max-sm:pb-[calc(2rem+var(--sticky-cta-height,5.5rem))]',
+                        )}
+                      >
                         {it.a}
                       </p>
                     </div>

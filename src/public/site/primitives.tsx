@@ -5,9 +5,10 @@
 
 import { type ElementType, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { ArrowRight, ArrowDown, MessageCircle, Star } from 'lucide-react';
+import { ArrowRight, ArrowDown, Star } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
+import { WhatsAppIcon } from '@/public/site/BrandIcons';
 
 /** Geteilte 1400px-Shell (v2-Direktive Raphael 2026-07-07: Sektionen 1400px breit statt 1200).
  *  Ersetzt die alten `max-w-6xl mx-auto px-6`-Container sitewide. `as` fuer semantisches Tag. */
@@ -55,6 +56,9 @@ export function GoogleRating({ className }: { className?: string }) {
         className,
       )}
     >
+      {/* Vierfarbiges Original-G (public/logo/google-g.svg), nicht das einfarbige BrandIcons-G:
+          diese Zeile steht auf hellem Papier, dort traegt das Markenlogo in Originalfarbe.
+          Das einfarbige GoogleIcon nutzt der Footer, wo currentColor auf Dunkel noetig ist. */}
       <img src="/logo/google-g.svg" alt="Google" width={18} height={18} className="h-[18px] w-[18px] shrink-0" />
       <StarRating />
       <span className="text-sm font-bold text-[var(--color-ink)]">
@@ -218,13 +222,13 @@ export function CtaText({
   );
 }
 
-/** Chat-Kontakt-Glyph: neutrales, konsistentes Lucide MessageCircle (keine gebastelte SVG,
- *  Regel Lucide-Pflicht). Gleiche Stroke-DNA wie die anderen Line-Icons (Phone, Gift):
- *  size 16, strokeWidth 1.75, currentColor. Ersetzt das fruehere billig wirkende
- *  Hand-SVG. Name bleibt WhatsAppGlyph, damit die bestehenden Kontakt-Links sitewide
- *  unveraendert weiter darauf zeigen. */
+/** WhatsApp-Glyph fuer Kontakt-Links: das ECHTE Markenzeichen (BrandIcons, Simple Icons CC0),
+ *  16px, currentColor. Vorher stand hier ein Lucide `MessageCircle` — eine generische
+ *  Sprechblase neben dem Wort "WhatsApp". Der Kanal war damit am Icon nicht zu erkennen.
+ *  Name bleibt WhatsAppGlyph, damit die bestehenden Kontakt-Links sitewide unveraendert
+ *  weiter darauf zeigen. */
 export function WhatsAppGlyph({ className }: { className?: string }) {
-  return <MessageCircle size={16} strokeWidth={1.75} aria-hidden className={className} />;
+  return <WhatsAppIcon className={cn('h-4 w-4 shrink-0', className)} />;
 }
 
 /** Rotes Takt-Leitmotiv + Label (nutzt BeatMark). Eine Signatur sitewide. */
@@ -359,7 +363,9 @@ export function TitleAccent({
   );
 }
 
-export const sectionTitle =
-  'font-display text-3xl font-bold leading-[1.05] tracking-tight text-[var(--color-ink)] sm:text-4xl md:text-[2.75rem]';
+/* Die EINE H2-Groesse sitewide. Zeigt seit S1 (14.08.2026) auf `.type-h2` in
+ * src/index.css — vorher stand die Kette hier UND in fuenf Varianten an einzelnen
+ * Seiten. Der Name bleibt, damit die 15 Unterseiten unveraendert darauf zeigen. */
+export const sectionTitle = 'type-h2 text-[var(--color-ink)]';
 
 export const sectionLead = 'text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg';

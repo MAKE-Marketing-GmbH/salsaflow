@@ -9,7 +9,11 @@
 // alles motion-safe, also respektiert prefers-reduced-motion automatisch.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { EASE_OUT, useHydrated } from '@/public/home/motion';
+import { WhatsAppIcon } from '@/public/site/BrandIcons';
+import { CONTACT } from '@/public/site/SiteFooter';
 import { BOOKING_UI, WEEKDAY_LABEL, useLang, waitlistBody, levelLabelI18n, formatDateI18n } from '@/lib/i18n';
 import {
   createBooking,
@@ -19,10 +23,10 @@ import {
 } from '@/lib/booking';
 import {
   fetchSchedule,
+  embeddedSchedule,
   buildScheduleDays,
   buildScheduleSlots,
   weekdayKeyForISO,
-  remainingLessons,
   type ScheduleCourse,
   type ScheduleResponse,
   type ScheduleSlot,
@@ -61,6 +65,8 @@ const FUNNEL = {
     planError: 'Der Kursplan konnte nicht geladen werden.',
     emptyWeek: 'In dieser Woche ist alles ausgebucht. Schau auf einen anderen Tag oder schreib uns kurz.',
     today: 'heute',
+    // R64: toter ?kurs=-Link — klar sagen, dann die Termine unter dem Satz stehen lassen.
+    kursGone: 'Dieser Kurs läuft gerade nicht mehr. Hier sind die aktuellen Termine:',
   },
   en: {
     pickDay: 'Pick your day',
@@ -82,6 +88,7 @@ const FUNNEL = {
     planError: 'The schedule could not be loaded.',
     emptyWeek: 'Everything is booked this week. Try another day or drop us a line.',
     today: 'today',
+    kursGone: 'This class is no longer running. Here are the current openings:',
   },
 } as const;
 
@@ -94,7 +101,13 @@ export function BookingPage() {
         id="main"
         tabIndex={-1}
         data-testid="booking-funnel"
-        className="bg-[var(--color-paper-warm)] pb-8 sm:pb-10"
+        // R117: data-buchung markiert den Seitenstamm. index.css setzt darauf mobil
+        // --whatsapp-lift (wie R101 data-kursplan), weil der Float auf dem frei-Badge
+        // der letzten Fold-Zeile sass (Luna + Kimi FAIL).
+        data-buchung
+        // pb-24 mobil: Float (5rem Lift + Eigengroesse) schwebt ueber leerem Raum
+        // unter der Liste statt ueber einer Kurs-Zeile. Desktop pb-10 unveraendert.
+        className="bg-[var(--color-paper-warm)] pb-24 sm:pb-10"
         style={{ paddingTop: 'calc(var(--nav-h) + 1rem)' }}
       >
         <Funnel />
@@ -108,16 +121,27 @@ function Funnel() {
   const { lang } = useLang();
   const ft = FUNNEL[lang];
 
-  const [schedule, setSchedule] = useState<ScheduleResponse | null>(null);
+  // Watchdog R63: Startwert aus dem eingebetteten Plan — derselbe Vertrag wie in
+  // CourseEngine und ScheduleTeaser. Der erste Render zeigt Tage und Kurse aus dem
+  // Bundle statt «Plan lädt» ueber einem leeren Tag; der Netz-Aufruf aktualisiert nur.
+  const [schedule, setSchedule] = useState<ScheduleResponse | null>(embeddedSchedule);
   const [planError, setPlanError] = useState(false);
-  const [planLoading, setPlanLoading] = useState(true);
+  const [planLoading, setPlanLoading] = useState(() => !embeddedSchedule());
   const [courseAvailability, setCourseAvailability] = useState<Record<string, CourseAvailability | null>>({});
 
   const [course, setCourse] = useState<ScheduleCourse | null>(null);
+  const [reserveOpen, setReserveOpen] = useState(false);
   const [day, setDay] = useState<string | null>(null);
+  // Watchdog R64: toter ?kurs=-Deep-Link. Gesetzt aber in keiner Plan-Quelle gefunden
+  // → ein Satz sagt Bescheid, statt still auf heute zu fallen. null = noch nicht entschieden
+  // (Embed-Pruefung laeuft), true = Kurs fehlt, false = Link ok oder kein ?kurs=.
+  const [kursMissing, setKursMissing] = useState<boolean | null>(null);
+  // R54: fertiger Buchungs-Stand liegt in BookingForm (Dialog). Der Funnel braucht ihn fuer
+  // Schritt 3 der Fortschritts-Leiste — BookingForm meldet ihn ueber onDone hoch.
+  const [done, setDone] = useState(false);
 
   const loadPlan = () => {
-    setPlanLoading(true);
+    if (!embeddedSchedule()) setPlanLoading(true);
     setPlanError(false);
     fetchSchedule()
       .then((s) => {
@@ -126,11 +150,33 @@ function Funnel() {
         const hit = preselect ? s.courses.find((c) => c.id === preselect) : null;
         if (hit) {
           setCourse(hit);
+          setReserveOpen(false);
+          setKursMissing(false);
         } else {
-          setDay(weekdayKeyForISO(s.today) ?? 'mon');
+          // Nur meckern, wenn ein Link gesetzt ist UND der Live-Plan ihn nicht kennt.
+          setKursMissing(preselect ? true : false);
+          // R64: toter Link → nicht auf einem leeren heutigen Tag landen (heute = So ohne
+          // Kurse wirkt wie eine zweite Fehlermeldung). Auf den naechsten Tag MIT Kursen
+          // vorziehen, damit unter dem Satz echte Termine stehen.
+          const todayKey = weekdayKeyForISO(s.today) ?? 'mon';
+          const daysWithCourses = buildScheduleDays(s.today).filter((d) =>
+            s.courses.some((c) => c.weekday === d.key),
+          );
+          const startIdx = daysWithCourses.findIndex((d) => d.key === todayKey);
+          const firstWithCourses =
+            (startIdx >= 0 && s.courses.some((c) => c.weekday === todayKey)
+              ? todayKey
+              : daysWithCourses[startIdx + 1]?.key) ??
+            daysWithCourses[0]?.key ??
+            todayKey;
+          setDay(firstWithCourses);
         }
       })
-      .catch(() => setPlanError(true))
+      // R63: Faellt das Netz aus, bleibt der eingebettete Plan stehen (hoechstens ein
+      // Deploy alt) — besser als eine Fehlermeldung ueber einem schon lesbaren Funnel.
+      .catch(() => {
+        if (!embeddedSchedule()) setPlanError(true);
+      })
       .finally(() => setPlanLoading(false));
   };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -222,7 +268,11 @@ function Funnel() {
       <ol className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]" aria-hidden>
         <li className={cn(!course && 'text-[var(--color-salsa)]')}>{ft.step1}</li>
         <li className="text-[var(--color-line)]">→</li>
-        <li className={cn(course && 'text-[var(--color-salsa)]')}>{ft.step2}</li>
+        <li className={cn(course && !done && 'text-[var(--color-salsa)]')}>{ft.step2}</li>
+        <li className="text-[var(--color-line)]">→</li>
+        {/* R54: Copy kennt drei Schritte, die Leiste zeigte nur zwei. Schritt 3 wird aktiv,
+            sobald die Buchung fertig ist (done). */}
+        <li className={cn(done && 'text-[var(--color-salsa)]')}>{ft.step3}</li>
       </ol>
 
       {planLoading ? (
@@ -234,14 +284,28 @@ function Funnel() {
             type="button"
             onClick={loadPlan}
             data-testid="plan-retry"
-            className="t-hover mt-4 rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-600)]"
+            className="btn-base btn-primary mt-4 px-6 py-2.5 text-sm"
           >
             {BOOKING_UI[lang].retry}
           </button>
         </div>
       ) : (
         <>
-          <h1 className="font-display text-3xl font-extrabold tracking-tight text-[var(--color-ink)] sm:text-4xl">
+          {/* R64: toter ?kurs=-Link — ein ruhiger Satz statt stillem Fallback auf heute.
+              Kein Alert, kein Dialog; die Termine darunter bleiben der Weg. */}
+          {kursMissing === true && (
+            <p
+              role="status"
+              data-testid="kurs-gone"
+              className="mb-3 mt-2 inline-block rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] px-4 py-2.5 text-sm font-medium leading-snug text-[var(--color-ink)]"
+            >
+              {ft.kursGone}
+            </p>
+          )}
+
+          {!(course && !reserveOpen) && (
+          <>
+          <h1 className="type-h1 text-[var(--color-ink)]">
             {ft.pickDay}
           </h1>
 
@@ -303,7 +367,7 @@ function Funnel() {
                         type="button"
                         data-testid="empty-next-day"
                         onClick={() => setDay(nextDayWithCourses.key)}
-                        className="t-hover inline-flex min-h-11 items-center rounded-full bg-[var(--color-salsa)] px-4 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)]"
+                        className="btn-base btn-primary px-4 text-sm"
                       >
                         {ft.nextDayWithCourses}
                         <span className="ml-1.5 text-white/80">
@@ -313,7 +377,7 @@ function Funnel() {
                     )}
                     <a
                       href="/kontakt#kontaktformular"
-                      className="t-hover inline-flex min-h-11 items-center rounded-full border border-[var(--color-line)] px-4 text-sm font-semibold text-[var(--color-ink)] hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)]"
+                      className="btn-base btn-outline px-4 text-sm"
                     >
                       {lang === 'de' ? 'Frag uns' : 'Ask us'}
                     </a>
@@ -325,7 +389,7 @@ function Funnel() {
                 <div data-testid="empty-recommendations">
                   <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
+                      <p className="type-h4 text-[var(--color-salsa)]">
                         {ft.nextSlotsTitle}
                       </p>
                       <p className="mt-0.5 text-sm text-[var(--color-ink-muted)]">{ft.nextSlotsHint}</p>
@@ -349,7 +413,10 @@ function Funnel() {
                           <button
                             type="button"
                             data-testid={`pick-course-${s.bookable.id}`}
-                            onClick={() => setCourse(s.bookable)}
+                            onClick={() => {
+                              setCourse(s.bookable);
+                              setReserveOpen(false);
+                            }}
                             className="group flex w-full items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white px-3.5 py-3 text-left transition-colors hover:border-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] sm:gap-4 sm:px-4 sm:py-3.5"
                           >
                             <div className="w-12 shrink-0 text-center sm:w-14">
@@ -384,7 +451,11 @@ function Funnel() {
                               <span
                                 className={cn(
                                   'inline-flex min-h-11 items-center rounded-full px-2.5 py-1 text-[0.65rem] font-bold sm:px-3 sm:text-xs',
-                                  full ? 'bg-amber-100 text-amber-800' : 'bg-[var(--color-salsa-50)] text-[var(--color-salsa)]',
+                                  // Warteliste neutral, nicht amber: Amber steht in keinem Token der DESIGN.md und
+// riss eine zweite Akzentfarbe auf. Neutrale Flaeche, roter Rand als Akzent.
+full
+  ? 'border border-[var(--color-salsa)]/35 bg-[var(--color-bg-soft)] text-[var(--color-salsa)]'
+  : 'bg-[var(--color-salsa)] text-white',
                                 )}
                               >
                                 {full ? ft.waitlist : ft.free}
@@ -399,7 +470,16 @@ function Funnel() {
               )}
             </div>
           ) : (
-            <ul className="mt-4 space-y-2.5" data-testid="course-list">
+            // R78 (Fold 1440x730): Die letzte sichtbare Karte hing als Streifen am unteren
+            // Rand — Di/Mi/Do schnitt der Fold Karte 6 hart (top 729, 1px sichtbar), Mo bei 724.
+            // Liste hoch (mt-2) + dichter (gap 8) + flachere Karten (py-2.5) lassen Karte 6 ganz
+            // (bottom 715). Zusaetzlich bekommt Karte 7+ eine 16px-Luecke (mt-4): damit liegt der
+            // Fold in der Luecke zwischen Karte 6 und 7 — Karte 7 rutscht mit top 731 ganz unter
+            // den Fold statt als 7px-Streifen anzuhaengen. Karte 6 bleibt die letzte GANZE Karte,
+            // ein gleichmaessiger groesserer Gap ueberall (space-y-4) wuerde Karte 6 selbst kappen
+            // (bottom 755). Kein Umbruch (h 81->69), Chips bleiben eine Zeile.
+            // Nur Abstand/Kartenhoehe/Listen-Padding — Termine, Copy, Embed-Plan unberuehrt.
+            <ul className="mt-2 space-y-2 [&>li:nth-child(n+7)]:mt-4" data-testid="course-list">
               {daySlots.map((s, i) => {
                 const c = s.primary;
                 const style = lang === 'de' ? c.styleDe : c.styleEn;
@@ -422,17 +502,32 @@ function Funnel() {
                       // Gebucht wird die buchbare Staffel des Slots (offene laufende vor
                       // offener kommender), nicht stumpf die laufende.
                       data-testid={`pick-course-${s.bookable.id}`}
-                      onClick={() => setCourse(s.bookable)}
-                      className="group flex w-full items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white px-4 py-3.5 text-left transition-colors hover:border-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] sm:gap-4 sm:px-5 sm:py-4"
+                      onClick={() => {
+                        setCourse(s.bookable);
+                        setReserveOpen(false);
+                      }}
+                      className="group flex w-full items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white px-4 py-2.5 text-left transition-colors hover:border-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] sm:gap-4 sm:px-5 sm:py-2.5"
                     >
                       <div className="w-14 shrink-0 text-center">
                         <div className="font-display text-lg font-extrabold leading-none text-[var(--color-ink)]">{c.startTime}</div>
                         <div className="mt-0.5 text-xs text-[var(--color-ink-muted)]">{c.endTime}</div>
+                        {/* R120: Badge mobil unter die Zeit (links), Desktop bleibt rechts.
+                            Kreis rechts unten deckte sonst das rechte «frei» (Raphael R120). */}
+                        <span
+                          className={cn(
+                            'mt-1.5 inline-flex min-h-6 items-center rounded-full px-2 py-0.5 text-[0.65rem] font-bold sm:hidden',
+                            full
+                              ? 'border border-[var(--color-salsa)]/35 bg-[var(--color-bg-soft)] text-[var(--color-salsa)]'
+                              : 'bg-[var(--color-salsa)] text-white',
+                          )}
+                        >
+                          {full ? ft.waitlist : ft.free}
+                        </span>
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                           {/* Kein truncate: lange Stilnamen brechen um statt mit … (Critic 13.08.2026). */}
-                          <span className="min-w-0 font-display text-base font-bold text-[var(--color-ink)]">{style}</span>
+                          <span className="min-w-0 type-h3 text-[var(--color-ink)]">{style}</span>
                           {level && (
                             <span className="shrink-0 rounded-full bg-[var(--color-bg-soft)] px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--color-ink-muted)]">
                               {level}
@@ -447,11 +542,15 @@ function Funnel() {
                           </span>
                         </div>
                       </div>
-                      <div className="shrink-0 text-right">
+                      <div className="hidden shrink-0 text-right sm:block">
                         <span
                           className={cn(
                             'inline-flex min-h-11 items-center rounded-full px-3 py-1 text-xs font-bold',
-                            full ? 'bg-amber-100 text-amber-800' : 'bg-[var(--color-salsa-50)] text-[var(--color-salsa)]',
+                            // Warteliste neutral, nicht amber: Amber steht in keinem Token der DESIGN.md und
+// riss eine zweite Akzentfarbe auf. Neutrale Flaeche, roter Rand als Akzent.
+full
+  ? 'border border-[var(--color-salsa)]/35 bg-[var(--color-bg-soft)] text-[var(--color-salsa)]'
+  : 'bg-[var(--color-salsa)] text-white',
                           )}
                         >
                           {full ? ft.waitlist : ft.free}
@@ -463,18 +562,31 @@ function Funnel() {
               })}
             </ul>
           )}
+          </>
+          )}
 
-          {/* Buchungs-Dialog: Overlay mit Backdrop, Fokus-Isolation und Scroll-Lock. */}
-          {course && (
+          {course && !reserveOpen && (
+            <CourseDetail
+              course={course}
+              term={termOf(course)}
+              onReserve={() => setReserveOpen(true)}
+              onChange={() => {
+                setCourse(null);
+                setDay(course.weekday);
+                setDone(false);
+              }}
+            />
+          )}
+
+          {course && reserveOpen && (
             <BookingForm
               key={course.id}
               course={course}
-              term={termOf(course)}
-              today={schedule?.today}
               onBack={() => {
-                setCourse(null);
-                setDay(course.weekday);
+                setReserveOpen(false);
+                setDone(false);
               }}
+              onDone={() => setDone(true)}
             />
           )}
         </>
@@ -483,21 +595,168 @@ function Funnel() {
   );
 }
 
-/* Schritt 2+3: Formular und Bestaetigung als Dialog-Overlay. */
-function BookingForm({
+function CourseDetail({
   course,
   term,
-  today,
-  onBack,
+  onReserve,
+  onChange,
 }: {
   course: ScheduleCourse;
   term?: ScheduleTerm;
-  today?: string;
+  onReserve: () => void;
+  onChange: () => void;
+}) {
+  const { lang } = useLang();
+  const de = lang === 'de';
+  const [avail, setAvail] = useState<CourseAvailability | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetchAvailability(course.id)
+      .then((next) => {
+        if (!cancelled) setAvail(next);
+      })
+      .catch(() => {
+        if (!cancelled) setAvail(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [course.id]);
+
+  const full = avail?.full ?? course.status === 'full';
+  const courseLabel = `${de ? course.styleDe : course.styleEn} ${levelLabelI18n(
+    de ? course.levelDe : course.levelEn,
+    course.onVariant,
+  )}`.trim();
+  const teachers = course.teachers.map((t) => t.displayName.split(' ')[0]).join(', ');
+  const dayLabel = WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday;
+
+  return (
+    <section
+      data-testid="course-detail"
+      className="mt-6 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-5 sm:p-6"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
+            {de ? 'Dein Kurs' : 'Your class'}
+          </p>
+          <h2 className="mt-1 font-display text-2xl font-extrabold leading-tight text-[var(--color-ink)]">
+            {courseLabel}
+          </h2>
+          <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
+            {dayLabel} {course.startTime}-{course.endTime}
+            {teachers ? ` · ${teachers}` : ''}
+          </p>
+        </div>
+        <span
+          className={cn(
+            'inline-flex min-h-11 items-center rounded-full px-3 py-1 text-xs font-bold',
+            full
+              ? 'border border-[var(--color-salsa)]/35 bg-[var(--color-bg-soft)] text-[var(--color-salsa)]'
+              : 'bg-[var(--color-salsa)] text-white',
+          )}
+        >
+          {full ? (de ? 'Ausgebucht' : 'Fully booked') : de ? 'Plätze frei' : 'Spots left'}
+        </span>
+      </div>
+
+      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] lg:items-start">
+        <dl className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
+              {de ? 'Ort' : 'Place'}
+            </dt>
+            <dd className="mt-1 text-sm text-[var(--color-ink)]">{course.locationName}</dd>
+          </div>
+          {term && (
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
+                {de ? 'Staffel' : 'Term'}
+              </dt>
+              <dd className="mt-1 text-sm text-[var(--color-ink)]">
+                {formatDateI18n(term.startDate, lang)}
+                {de ? ' bis ' : ' to '}
+                {formatDateI18n(term.endDate, lang)}
+              </dd>
+            </div>
+          )}
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
+              {de ? 'Kosten' : 'Payment'}
+            </dt>
+            <dd className="mt-1 text-sm text-[var(--color-ink)]">
+              {de ? 'Vor Ort, Twint oder Bar.' : 'On site, TWINT or cash.'}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
+              {de ? 'Einstieg' : 'Entry'}
+            </dt>
+            <dd className="mt-1 text-sm text-[var(--color-ink)]">
+              {course.phase === 'running' && course.allowsLateEntry
+                ? de
+                  ? 'Quereinstieg möglich.'
+                  : 'Late entry possible.'
+                : de
+                  ? 'Neue Staffel, Einstieg zum Start.'
+                  : 'New term, start at the first class.'}
+            </dd>
+          </div>
+        </dl>
+        <div className="relative h-52 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)]">
+          <iframe
+            title={de ? 'Standort Salsaflow auf Google Maps' : 'Salsaflow location on Google Maps'}
+            src={CONTACT.mapsEmbed}
+            className="absolute inset-0 h-full w-full border-0"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+      </div>
+      <a
+        href={CONTACT.anfahrt}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4"
+      >
+        {de ? 'Route in Google Maps öffnen' : 'Open route in Google Maps'}
+      </a>
+
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <button type="button" onClick={onReserve} data-testid="reserve-spot" className="btn-base btn-primary px-6 py-2.5 text-sm">
+          {full
+            ? de
+              ? 'Auf Warteliste setzen'
+              : 'Join the waiting list'
+            : de
+              ? 'Platz reservieren'
+              : 'Reserve a spot'}
+        </button>
+        <button
+          type="button"
+          onClick={onChange}
+          className="t-hover text-sm font-semibold text-[var(--color-ink-muted)] underline underline-offset-4"
+        >
+          {de ? 'Anderen Kurs wählen' : 'Pick another class'}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/* Schritt 2+3: Formular und Bestaetigung als Dialog-Overlay. */
+function BookingForm({
+  course,
+  onBack,
+  onDone,
+}: {
+  course: ScheduleCourse;
   onBack: () => void;
+  onDone?: () => void;
 }) {
   const { lang } = useLang();
   const bt = BOOKING_UI[lang];
-  const ft = FUNNEL[lang];
 
   const [avail, setAvail] = useState<CourseAvailability | null>(null);
   const [loading, setLoading] = useState(true);
@@ -509,6 +768,7 @@ function BookingForm({
   const [me, setMe] = useState<Person>(emptyPerson);
   const [partner, setPartner] = useState<Person>(emptyPerson);
   const [notes, setNotes] = useState('');
+  const [privacy, setPrivacy] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -517,19 +777,6 @@ function BookingForm({
   const formRef = useRef<HTMLFormElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-
-  // Ab 1024px steht die Kurs-Zusammenfassung als Seitenspalte und ist immer offen; darunter
-  // ist sie zugeklappt, weil sie sonst den ganzen ersten Bildschirm fuellt. Startwert `false`,
-  // damit Server-HTML und erstes Client-Render uebereinstimmen (der Server kennt keine
-  // Fensterbreite). Der Effekt korrigiert danach.
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1024px)');
-    const apply = () => setIsDesktop(mq.matches);
-    apply();
-    mq.addEventListener('change', apply);
-    return () => mq.removeEventListener('change', apply);
-  }, []);
 
   const loadAvail = () => {
     setLoading(true);
@@ -544,6 +791,7 @@ function BookingForm({
 
   // Dialog-Isolation: Body-Scroll sperren, Escape schliessen, Fokus-Trap, Fokus zurueckgeben.
   useEffect(() => {
+    // SAFETY: activeElement ist Element | null. Wir brauchen nur .focus() beim Schliessen.
     const previouslyFocused = document.activeElement as HTMLElement | null;
     const frame = window.requestAnimationFrame(() => closeRef.current?.focus());
 
@@ -641,6 +889,10 @@ function BookingForm({
       focusFirstInvalid();
       return;
     }
+    if (!privacy) {
+      setFormError(lang === 'de' ? 'Bitte setze das Häkchen beim Datenschutz.' : 'Please tick the privacy box.');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -658,6 +910,7 @@ function BookingForm({
         language: lang,
       });
       setResult(r);
+      onDone?.();
     } catch (e) {
       setFormError(e instanceof Error ? e.message : bt.errorGeneric);
     } finally {
@@ -687,7 +940,7 @@ function BookingForm({
            `dvh`; die Inline-Regel ueberschreibt sie dort, wo die Einheit bekannt ist.
            Kennt der Browser `dvh` nicht, verwirft er die Deklaration und die Klasse bleibt. */
         style={{ maxHeight: 'min(92dvh, 900px)' }}
-        className="my-auto flex max-h-[min(92vh,900px)] w-full max-w-[980px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-panel-in_180ms_ease-out]"
+        className="my-auto flex max-h-[min(92vh,900px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-panel-in_180ms_ease-out]"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="relative shrink-0 overflow-hidden bg-[var(--color-ink)] px-4 py-3 text-white sm:px-5 sm:py-3.5">
@@ -720,117 +973,7 @@ function BookingForm({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain lg:grid lg:grid-cols-[minmax(220px,0.62fr)_1.38fr]">
-          {/* Kurs-Kontext. Auf Desktop eine ruhige Seitenspalte, mobil ein zugeklapptes
-              Detail-Element.
-              Warum: Auf 375px fuellte dieser Block den kompletten ersten Bildschirm — vier
-              Zeilen Verwaltung (Zeit, Ort, Staffel, Kosten), bevor die erste Frage kam. Wer
-              hier landet, hat den Kurs gerade selbst angeklickt; er braucht die Bestaetigung,
-              nicht das Datenblatt. Zugeklappt bleibt der Kurstitel sichtbar, der Rest ist
-              einen Tipp entfernt. Ab `lg` ist das Element dauerhaft offen (`lg:open`
-              gibt es nicht, darum steuert `open` per Media-Query in index.css). */}
-          <aside className="border-b border-[var(--color-line)] bg-[var(--color-bg-soft)] px-4 py-3 sm:px-4 lg:border-b-0 lg:border-r lg:py-3.5">
-            {/* `open` ist hier ein Startwert, kein gesteuerter Zustand: React schreibt das
-                Attribut beim Montieren, das Aufklappen des Nutzers laeuft danach im DOM und
-                wird nicht zurueckgesetzt (React rendert nur bei Zustandsaenderung neu, und
-                `isDesktop` aendert sich nur beim Breakpoint-Wechsel). Der Schluessel erzwingt
-                genau dort einen Neuaufbau, damit der Startwert wieder greift. */}
-            <details
-              key={isDesktop ? 'wide' : 'narrow'}
-              open={isDesktop}
-              className="t-booking-summary rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white"
-            >
-              <summary className="t-hover flex cursor-pointer list-none items-center justify-between gap-3 p-3.5 lg:cursor-default">
-                <span className="min-w-0">
-                  <span className="block text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
-                    {lang === 'de' ? 'Dein Kurs' : 'Your class'}
-                  </span>
-                  <span className="mt-1 block font-display text-base font-extrabold leading-tight tracking-tight text-[var(--color-ink)] sm:text-lg">
-                    {courseLabel}
-                  </span>
-                  <span className="mt-0.5 block text-sm leading-snug text-[var(--color-ink-muted)]">
-                    {dayLabel} {course.startTime}-{course.endTime}
-                  </span>
-                </span>
-                <svg
-                  aria-hidden
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.25"
-                  className="t-booking-chevron shrink-0 text-[var(--color-ink-muted)] transition-transform duration-[var(--dur-base)] ease-out lg:hidden"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </summary>
-              <dl className="space-y-1.5 border-t border-[var(--color-line)] px-3.5 pb-3.5 pt-2.5 text-sm">
-                {teachers && (
-                  <div className="flex gap-2">
-                    <dt className="w-16 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
-                      {lang === 'de' ? 'Team' : 'Team'}
-                    </dt>
-                    <dd className="min-w-0 leading-snug text-[var(--color-ink)]">{teachers}</dd>
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <dt className="w-16 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
-                    {lang === 'de' ? 'Ort' : 'Place'}
-                  </dt>
-                  <dd className="min-w-0 leading-snug text-[var(--color-ink)]">{course.locationName}</dd>
-                </div>
-                {term && (
-                  <div className="flex gap-2">
-                    <dt className="w-16 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
-                      {lang === 'de' ? 'Staffel' : 'Term'}
-                    </dt>
-                    <dd className="min-w-0 leading-snug text-[var(--color-ink)]">
-                      {/* "bis"/"to" statt En-Dash: der Gedankenstrich zwischen zwei Daten
-                          las sich wie ein Minus (Critic Runde 13, Item 5). */}
-                      {formatDateI18n(term.startDate, lang)}{lang === 'de' ? ' bis ' : ' to '}{formatDateI18n(term.endDate, lang)}
-                      <span className="text-[var(--color-ink-muted)]"> · {bt.weeksNote}</span>
-                      {/* Laufende Staffel: sagen, dass Quereinstieg geht und wie viel noch kommt.
-                          Ohne diese Zeile steht der Besucher genau am Entscheidungspunkt vor
-                          einem Datum, das schon angefangen hat (UX-Audit 13.08.2026). Kein
-                          Preis — Entscheid "keine Preise im Funnel" bleibt. */}
-                      {course.phase === 'running' && today && (() => {
-                        const left = remainingLessons(today, term, course.weekday);
-                        if (!left) return null;
-                        const leftLabel = lang === 'de'
-                          ? `noch ${left} ${left === 1 ? 'Lektion' : 'Lektionen'}`
-                          : `${left} ${left === 1 ? 'class' : 'classes'} left`;
-                        return (
-                          <span className="mt-0.5 block font-medium text-[var(--color-salsa)]">
-                            {course.allowsLateEntry
-                              ? (lang === 'de' ? `Staffel läuft. Quereinstieg möglich, ${leftLabel}.` : `Term is running. Late entry possible, ${leftLabel}.`)
-                              : (lang === 'de' ? `Staffel läuft, ${leftLabel}. Schreib uns für deinen Einstieg.` : `Term is running, ${leftLabel}. Contact us to join.`)}
-                          </span>
-                        );
-                      })()}
-                    </dd>
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <dt className="w-16 shrink-0 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
-                    {lang === 'de' ? 'Kosten' : 'Payment'}
-                  </dt>
-                  <dd className="min-w-0 leading-snug text-[var(--color-ink)]">{bt.payOnSite}</dd>
-                </div>
-              </dl>
-            </details>
-            {!result && (
-              <button
-                type="button"
-                onClick={onBack}
-                data-testid="booking-change-course"
-                className="t-hover mt-2.5 text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4 hover:text-[var(--color-salsa-700)] lg:mt-3"
-              >
-                ← {ft.changeCourse}
-              </button>
-            )}
-          </aside>
-
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="px-4 py-4 sm:px-5 sm:py-4">
           {loading ? (
             <p role="status" className="py-6 text-center text-sm text-[var(--color-ink-muted)]">{bt.loading}</p>
@@ -841,7 +984,7 @@ function BookingForm({
                 type="button"
                 onClick={loadAvail}
                 data-testid="avail-retry"
-                className="t-hover mt-3 rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-600)]"
+                className="btn-base btn-primary mt-3 px-6 py-2.5 text-sm"
               >
                 {bt.retry}
               </button>
@@ -854,7 +997,15 @@ function BookingForm({
               </a>
             </div>
           ) : result ? (
-            <SuccessPanel result={result} onBack={onBack} />
+            <SuccessPanel
+              result={result}
+              onBack={onBack}
+              courseLabel={courseLabel}
+              dayLabel={dayLabel}
+              startTime={course.startTime}
+              endTime={course.endTime}
+              locationName={course.locationName}
+            />
           ) : (
             <form
               ref={formRef}
@@ -871,7 +1022,7 @@ function BookingForm({
               }}
             >
                 {/* Gruppe 1: Anmeldung (Rolle, Modus, Tarif) — flach, ohne Karten-Verschachtelung. */}
-                <h3 className="font-display text-base font-bold text-[var(--color-ink)]">{bt.stepRegister}</h3>
+                <h3 className="type-h3 text-[var(--color-ink)]">{bt.stepRegister}</h3>
 
                 {/* Rolle (nur bei Leader/Follower-Kursen) */}
                 {isOpen ? (
@@ -895,7 +1046,9 @@ function BookingForm({
                         invalid={showErrors && mode === 'solo' && role === null}
                       />
                     </div>
-                    <p className="mt-1.5 text-xs leading-snug text-[var(--color-ink-muted)]">{bt.roleHelper}</p>
+                    <p className="mt-1.5 text-xs leading-snug text-[var(--color-ink-muted)]">
+                      {lang === 'de' ? 'Für die Balance im Kurs.' : 'Helps us balance the class.'}
+                    </p>
                     {showErrors && mode === 'solo' && role === null && (
                       <p id="booking-role-error" className="mt-1.5 text-sm font-medium text-[var(--color-salsa)]">{bt.requiredHint}</p>
                     )}
@@ -923,7 +1076,9 @@ function BookingForm({
                           onChange={(e) => setNeedsAushilfe(e.target.checked)}
                           className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-salsa)]"
                         />
-                        <span className="min-w-0 flex-1 text-pretty">{bt.aushilfeLabel}</span>
+                        <span className="min-w-0 flex-1 text-pretty">
+                          {lang === 'de' ? 'Keine feste Tanzpartnerin / keinen festen Tanzpartner' : 'No fixed dance partner'}
+                        </span>
                       </label>
                     )}
                     {mode === 'solo' && needsAushilfe && (
@@ -935,14 +1090,14 @@ function BookingForm({
                 {laneFull && (
                   <p
                     data-testid="lane-full-note"
-                    className="rounded-[var(--radius-chip)] bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800"
+                    className="rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] px-3 py-2 text-sm font-medium text-[var(--color-ink)]"
                   >
                     {bt.courseFull}
                   </p>
                 )}
 
                 {/* Gruppe 2: Personendaten */}
-                <h3 className="border-t border-[var(--color-line)] pt-4 font-display text-lg font-bold text-[var(--color-ink)]">{bt.stepData}</h3>
+                <h3 className="border-t border-[var(--color-line)] pt-4 type-h3 text-[var(--color-ink)]">{bt.stepData}</h3>
 
                 {/* Eigene Daten */}
                 <PersonFields legend={bt.yourData} prefix="bk" person={me} onChange={setMe} bt={bt} showErrors={showErrors} hideLegend />
@@ -977,6 +1132,34 @@ function BookingForm({
 
         {!loading && !loadError && avail?.bookable && !result && (
           <div className="sticky bottom-0 z-10 shrink-0 border-t border-[var(--color-line)] bg-white px-4 py-3 sm:px-5">
+            <label className="mb-2 flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+              <input
+                type="checkbox"
+                data-testid="booking-privacy"
+                checked={privacy}
+                onChange={(e) => setPrivacy(e.target.checked)}
+                className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-salsa)]"
+              />
+              <span className="min-w-0 text-pretty">
+                {lang === 'de' ? (
+                  <>
+                    Ich habe die{' '}
+                    <a href="/datenschutz" className="font-semibold text-[var(--color-salsa)] underline underline-offset-4">
+                      Datenschutzerklärung
+                    </a>{' '}
+                    gelesen und bin damit einverstanden.
+                  </>
+                ) : (
+                  <>
+                    I have read the{' '}
+                    <a href="/datenschutz" className="font-semibold text-[var(--color-salsa)] underline underline-offset-4">
+                      privacy policy
+                    </a>{' '}
+                    and agree to it.
+                  </>
+                )}
+              </span>
+            </label>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-center text-xs font-medium text-[var(--color-ink-muted)] sm:text-left">
                 {lang === 'de' ? 'Bezahlt wird vor Ort' : 'Pay on site'}
@@ -994,7 +1177,7 @@ function BookingForm({
                   form={`booking-form-${course.id}`}
                   data-testid="booking-submit"
                   disabled={submitting}
-                  className="t-hover flex-1 rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-600)] disabled:opacity-50 sm:flex-none"
+                  className="btn-base btn-primary flex-1 px-6 py-2.5 text-sm disabled:opacity-50 sm:flex-none"
                 >
                   {submitting ? bt.submitting : bt.reserveCta}
                 </button>
@@ -1007,72 +1190,177 @@ function BookingForm({
   );
 }
 
-/* Schritt 3: Bestaetigung (frei) oder Warteliste (voll) — jeweils mit naechsten Schritten. */
-function SuccessPanel({ result, onBack }: { result: CreateBookingResult; onBack: () => void }) {
+/* Schritt 3: Bestaetigung (frei) oder Warteliste (voll).
+ *
+ * Der Bildschirm beantwortet zuerst die Frage, die der Besucher gerade hat: WAS habe ich
+ * gebucht? Darum steht der Kursname gross oben, darunter drei Fakten-Zeilen (Wann, Wo,
+ * Bezahlen). Erst danach kommt der Text. Vorher stand hier eine Ueberschrift, ein
+ * Fliesstext-Block und eine nummerierte Liste — keine einzige Zeile nannte den Kurs.
+ *
+ * Ehrlichkeit: es geht KEINE automatische Bestaetigungs-Mail raus. Die Reservierung
+ * landet als Mail beim Studio, ein Mensch bestaetigt (Absprache 13.08.2026). Der Text
+ * sagt genau das und verspricht keinen Automatismus.
+ *
+ * Warteliste: kein bg-amber-100 mehr (Fremdfarbe ausserhalb der Token-Liste, DESIGN.md
+ * "keine neue Farbe in der Komponente"). Neutrale bg-soft-Flaeche, Salsa-Rot als Akzent,
+ * gleiche Klarheit wie der Erfolgs-Fall.
+ */
+function SuccessPanel({
+  result,
+  onBack,
+  courseLabel,
+  dayLabel,
+  startTime,
+  endTime,
+  locationName,
+}: {
+  result: CreateBookingResult;
+  onBack: () => void;
+  courseLabel: string;
+  dayLabel: string;
+  startTime: string;
+  endTime: string;
+  locationName: string;
+}) {
   const { lang } = useLang();
   const bt = BOOKING_UI[lang];
   const waitlisted = result.status === 'waitlisted';
+  const reduced = useReducedMotion();
+  const hydrated = useHydrated();
+
+  // EIN authored Moment: die Karte steigt mit Feder-Kurve ein, der Haken zeichnet sich
+  // in derselben Bewegung. 380ms, danach ist Ruhe. Kein Bounce, kein zweiter Effekt.
+  // Vor der Hydration und bei prefers-reduced-motion ist der Endzustand der Startzustand:
+  // kein opacity:0 im ausgelieferten HTML, kein Versatz fuer Leute, die keine Bewegung wollen.
+  const still = reduced || !hydrated;
+  const cardInitial = still ? { opacity: 1, transform: 'translateY(0px)' } : { opacity: 0, transform: 'translateY(12px)' };
+
   return (
-    <div
-      className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white px-5 py-8 text-center shadow-sm"
+    <motion.div
+      className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white shadow-sm"
       data-testid="booking-success"
       data-status={waitlisted ? 'waitlisted' : 'confirmed'}
+      role="status"
+      aria-live="polite"
+      initial={cardInitial}
+      animate={{ opacity: 1, transform: 'translateY(0px)' }}
+      transition={still ? { duration: 0 } : { type: 'spring', duration: 0.42, bounce: 0.12 }}
     >
+      {/* Kopf: Haken + Kursname + Fakten. Der Erfolgs-Fall traegt Salsa-Rot als Flaeche,
+          die Warteliste dieselbe Struktur auf neutraler bg-soft-Flaeche mit rotem Akzent. */}
       <div
         className={cn(
-          'mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full',
-          waitlisted ? 'bg-amber-100 text-amber-700' : 'bg-[var(--color-salsa-50)] text-[var(--color-salsa)]',
+          'px-5 py-6 text-center sm:px-6 sm:py-7',
+          waitlisted
+            ? 'border-b border-[var(--color-line)] bg-[var(--color-bg-soft)]'
+            : 'bg-[var(--color-salsa)] text-white',
         )}
-        aria-hidden
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-          {waitlisted ? <path d="M12 7v5l3 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z" /> : <path d="M20 6 9 17l-5-5" />}
-        </svg>
-      </div>
-      <h3 className="font-display text-2xl font-bold leading-tight text-[var(--color-ink)]">
-        {waitlisted ? bt.successWaitlistTitle : bt.successConfirmedTitle}
-      </h3>
-      <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[var(--color-ink-muted)]">
-        {waitlisted ? waitlistBody(lang) : bt.successConfirmedBody}
-      </p>
+        <div
+          className={cn(
+            'mx-auto flex h-14 w-14 items-center justify-center rounded-full',
+            waitlisted ? 'bg-white text-[var(--color-salsa)] ring-1 ring-[var(--color-line)]' : 'bg-white/15 text-white',
+          )}
+          aria-hidden
+        >
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            {/* Der Haken (bzw. die Uhr) zeichnet sich einmal. pathLength normiert die Laenge
+                auf 1, damit dieselbe Dauer fuer beide Formen gilt. */}
+            <motion.path
+              d={waitlisted ? 'M12 7v5l3 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z' : 'M20 6 9 17l-5-5'}
+              pathLength={1}
+              initial={still ? { strokeDasharray: 1, strokeDashoffset: 0 } : { strokeDasharray: 1, strokeDashoffset: 1 }}
+              animate={{ strokeDashoffset: 0 }}
+              transition={still ? { duration: 0 } : { duration: 0.38, ease: EASE_OUT, delay: 0.08 }}
+            />
+          </svg>
+        </div>
 
-      {/* Naechste Schritte: konkret, kein Marketing. */}
-      <div className="mx-auto mt-6 max-w-sm text-left">
-        <h4 className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-salsa)]">{bt.successNextTitle}</h4>
-        <ul className="mt-3 space-y-3">
+        <p className={cn('mt-4 text-xs font-bold uppercase tracking-[0.16em]', waitlisted ? 'text-[var(--color-salsa)]' : 'text-white/70')}>
+          {waitlisted ? bt.successWaitlistFor : bt.successConfirmedTitle}
+        </p>
+        <h3 className={cn('type-h2 mt-1 text-balance', waitlisted ? 'text-[var(--color-ink)]' : 'text-white')} data-testid="booking-success-course">
+          {courseLabel}
+        </h3>
+
+        {/* Drei Fakten, die vorher nirgends standen. Kein Fliesstext. */}
+        <dl className={cn('mx-auto mt-5 grid max-w-md gap-3 text-left sm:grid-cols-3', waitlisted ? 'text-[var(--color-ink)]' : 'text-white')}>
+          <Fact label={bt.successFactWhen} tone={waitlisted ? 'light' : 'dark'}>
+            {dayLabel} {startTime}-{endTime}
+          </Fact>
+          <Fact label={bt.successFactWhere} tone={waitlisted ? 'light' : 'dark'}>
+            {locationName}
+          </Fact>
+          <Fact label={bt.successFactPay} tone={waitlisted ? 'light' : 'dark'}>
+            {bt.successPayShort}
+          </Fact>
+        </dl>
+      </div>
+
+      <div className="px-5 py-5 sm:px-6 sm:py-6">
+        {waitlisted && (
+          <h4 className="type-h3 text-[var(--color-ink)]">{bt.successWaitlistTitle}</h4>
+        )}
+        <p className={cn('max-w-prose text-sm leading-relaxed text-[var(--color-ink-muted)]', waitlisted && 'mt-2')}>
+          {waitlisted ? waitlistBody(lang) : bt.successConfirmedBody}
+        </p>
+
+        {/* Naechste Schritte: konkret, kein Marketing. Ohne die Mail-Zeile — sie stand
+            wortgleich schon im Text darueber. */}
+        <ul className="mt-4 space-y-2.5">
           {(waitlisted
-            ? [bt.successNextMail, bt.waitlistBodyExtra]
-            : [bt.successNextMail, bt.successNextLocation, bt.successNextBring]
-          ).map((text, i) => (
-            <li key={i} className="flex items-start gap-3 text-sm leading-relaxed text-[var(--color-ink)]">
-              <span
-                aria-hidden
-                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-salsa-50)] font-display text-xs font-bold text-[var(--color-salsa)]"
-              >
-                {i + 1}
-              </span>
-              <span>{text}</span>
+            ? [bt.waitlistBodyExtra]
+            : [bt.successNextLocation, bt.successNextBring]
+          ).map((text) => (
+            <li key={text} className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--color-ink)]">
+              <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-salsa)]" />
+              <span className="text-pretty">{text}</span>
             </li>
           ))}
         </ul>
-      </div>
 
-      <div className="mt-7 flex flex-col items-center justify-center gap-2 sm:flex-row">
-        <a
-          href="/kursplan"
-          className="t-hover rounded-full bg-[var(--color-ink)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa)]"
-        >
-          {bt.toSchedule}
-        </a>
-        <button
-          type="button"
-          onClick={onBack}
-          data-testid="booking-success-back"
-          className="t-hover rounded-full px-6 py-2.5 text-sm font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
-        >
-          {bt.backToCourses}
-        </button>
+        {/* EINE starke Aktion: WhatsApp. Kursplan bleibt Text-Link, damit kein Button-Zoo
+            entsteht. "Anderen Kurs waehlen" schliesst den Dialog und bleibt still. */}
+        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+          <a
+            href={CONTACT.whatsapp}
+            target="_blank"
+            rel="noreferrer"
+            data-testid="booking-success-whatsapp"
+            className="btn-base btn-primary gap-2 px-6 py-2.5 text-sm"
+          >
+            <WhatsAppIcon className="h-4 w-4 shrink-0" />
+            {bt.successWhatsApp}
+          </a>
+          <a
+            href="/kursplan"
+            data-testid="booking-success-schedule"
+            className="t-hover text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4 hover:text-[var(--color-salsa-700)]"
+          >
+            {bt.toSchedule}
+          </a>
+          <button
+            type="button"
+            onClick={onBack}
+            data-testid="booking-success-back"
+            className="t-hover text-sm font-semibold text-[var(--color-ink-muted)] underline underline-offset-4 hover:text-[var(--color-ink)]"
+          >
+            {bt.backToCourses}
+          </button>
+        </div>
       </div>
+    </motion.div>
+  );
+}
+
+/** Eine Fakten-Zeile der Erfolgs-Ansicht: Label klein, Wert lesbar. */
+function Fact({ label, tone, children }: { label: string; tone: 'light' | 'dark'; children: React.ReactNode }) {
+  return (
+    <div>
+      <dt className={cn('text-[0.65rem] font-bold uppercase tracking-[0.14em]', tone === 'dark' ? 'text-white/65' : 'text-[var(--color-ink-muted)]')}>
+        {label}
+      </dt>
+      <dd className="mt-0.5 text-sm font-semibold leading-snug">{children}</dd>
     </div>
   );
 }
@@ -1100,7 +1388,7 @@ function RoleTile({
       className={cn(
         'relative flex flex-col items-start rounded-[var(--radius-card)] border px-3 py-2.5 text-left transition-colors sm:px-3.5 sm:py-3',
         active
-          ? 'border-[var(--color-salsa)] bg-[var(--color-salsa-50)] shadow-[inset_0_0_0_1.5px_var(--color-salsa)] ring-1 ring-[var(--color-salsa)]/30'
+          ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white shadow-[inset_0_0_0_1.5px_var(--color-salsa)] ring-1 ring-[var(--color-salsa)]/30'
           : 'border-[var(--color-line)] bg-[var(--color-bg-soft)] hover:border-[var(--color-salsa)]',
         invalid && !active && 'border-[var(--color-salsa)]/50',
       )}

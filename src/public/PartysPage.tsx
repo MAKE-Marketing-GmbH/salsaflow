@@ -35,6 +35,7 @@ export function PartysPage() {
           gerahmte Kachel neben dem Text. */}
       <SubHero
         axis="wide"
+        dense
         seoCrumbs={c.crumbs}
         title={c.hero.title}
         titleAccent={c.hero.titleAccent}
@@ -42,12 +43,14 @@ export function PartysPage() {
         primary={c.hero.primary}
         secondary={c.hero.secondary}
         microcopy={c.hero.microcopy}
-        // 25 % statt 38 %: Das Band zeigt nur 190 von 956 skalierten Pixeln, also ein Fuenftel
-        // des Bildes. Bei 38 % lag das Fenster unter dem Gesicht der Taenzerin, die der
-        // Alt-Text nennt — sichtbar blieben zwei angeschnittene Koepfe dahinter.
-        // 12% statt 25%: bei 25% war die Schaedeldecke des Taenzers hinter der laechelnden
-        // Frau angeschnitten (Kopf-Schnitt-Sweep 13.08.2026).
-        media={{ src: c.hero.image.src, alt: c.hero.image.alt, position: 'center 12%' }}
+        // Desktop-Fold zeigt nur den oberen Streifen. 12% + hohes Default-Band = Stirn/Augen.
+        // Wie Events R50: 14rem ganz im Fold, 30% auf die zwei Gesichter (Paar vorn).
+        media={{
+          src: c.hero.image.src,
+          alt: c.hero.image.alt,
+          positionClass: 'object-[center_18%] lg:object-[center_30%]',
+          heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[14rem]',
+        }}
       />
       <DanceflowSection c={c} />
       <MoreSection c={c} />
@@ -144,7 +147,7 @@ function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
                   index === m.template.length - 1 && m.template.length % 2 === 1 && 'sm:col-span-2',
                 )}
               >
-                <p className="flex items-center gap-2 font-display text-base font-bold text-[var(--color-ink)]">
+                <p className="flex items-center gap-2 type-h3 text-[var(--color-ink)]">
                   <BeatMark size="sm" />
                   {row.label}
                 </p>

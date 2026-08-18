@@ -102,7 +102,7 @@ export const STANDORT: Record<Lang, StandortContent> = {
       primary: { label: 'Anfahrt öffnen', href: R.anfahrt },
       secondary: { label: 'Raum anfragen', href: R.mieten },
       microcopy: 'Für Raumvermietung bitte Datum, Zeitraum und Zweck nennen.',
-      image: { src: '/photos/hero/hero-02.jpg', alt: 'Helles Salsaflow Studio direkt am Bahnhof Basel SBB' },
+      image: { src: '/photos/2026/kurse-classfreude-hero-2100.webp', alt: 'Kurs im hellen Salsaflow-Studio am Bahnhof Basel SBB, Parkett und Fenster' },
       cardLabel: 'Basel SBB',
       cardText: 'Drei Studios. Wenige Schritte vom Zug.',
     },
@@ -132,7 +132,7 @@ export const STANDORT: Record<Lang, StandortContent> = {
           // versprachen — die Bilder zeigten Teamfotos und einen Event-Flyer (hp-13).
           // Der Flyer ist ersetzt (kurse/07.jpg, echtes Tageslicht-Studio, 2. Nutzung,
           // Limit 2 ok); die Alt-Texte beschreiben jetzt, was wirklich zu sehen ist.
-          image: { src: '/photos/showcase/hp-06.webp', alt: 'Fünf aus dem Salsaflow-Team im hellen Studio' },
+          image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Kurs im hellen Studio, Parkett und Spiegel im Hintergrund' },
         },
         {
           name: 'Studio 2',
@@ -142,7 +142,7 @@ export const STANDORT: Record<Lang, StandortContent> = {
         {
           name: 'Studio 3',
           text: 'Zentraler Raum am Bahnhof SBB. Ideal für Workshops, Trainings und Bewegung.',
-          image: { src: '/photos/showcase/hp-21.webp', alt: 'Die Salsaflow-Gruppe vor der Logo-Wand im Studio' },
+          image: { src: '/photos/gallery/kurse/08.jpg', alt: 'Tanz im Studio auf Parkett, heller Raum mit roter Wand' },
         },
       ],
     },
@@ -212,7 +212,7 @@ export const STANDORT: Record<Lang, StandortContent> = {
       primary: { label: 'Open directions', href: R.anfahrt },
       secondary: { label: 'Request a room', href: R.mieten },
       microcopy: 'For room rental, please tell us the date, time frame and purpose.',
-      image: { src: '/photos/hero/hero-02.jpg', alt: 'Bright Salsaflow studio right by Basel SBB station' },
+      image: { src: '/photos/2026/kurse-classfreude-hero-2100.webp', alt: 'Class in the bright Salsaflow studio by Basel SBB, parquet and windows' },
       cardLabel: 'Basel SBB',
       cardText: 'Three studios. A few steps from the train.',
     },
@@ -238,7 +238,7 @@ export const STANDORT: Record<Lang, StandortContent> = {
         {
           name: 'Studio 1',
           text: 'Bright room with a mirror wall and parquet floor. Ideal for courses and workshops.',
-          image: { src: '/photos/showcase/hp-06.webp', alt: 'Five of the Salsaflow team in the bright studio' },
+          image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Class in the bright studio, parquet and mirrors in the background' },
         },
         {
           name: 'Studio 2',
@@ -248,7 +248,7 @@ export const STANDORT: Record<Lang, StandortContent> = {
         {
           name: 'Studio 3',
           text: 'Central room by Basel SBB. Ideal for workshops, trainings and movement.',
-          image: { src: '/photos/showcase/hp-21.webp', alt: 'The Salsaflow group in front of the logo wall in the studio' },
+          image: { src: '/photos/gallery/kurse/08.jpg', alt: 'Dancing in the studio on parquet, bright room with a red wall' },
         },
       ],
     },

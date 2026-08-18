@@ -100,7 +100,7 @@ const R = {
   salsaPage: '/tanzkurse/salsa',
   bachataPage: '/tanzkurse/bachata',
   heelsPage: '/tanzkurse/heels',
-  schnupper: '/kontakt#schnupperstunde',
+  schnupper: '/schnupperstunde',
 };
 
 /* ============================================================= SALSA (Muster, 1:1 pages/03) */
@@ -126,11 +126,31 @@ const salsa: Record<Lang, StyleContent> = {
       band: {
         src: '/photos/premium/offer-salsa-hero-2100.webp',
         alt: 'Salsa-Paar im Unterricht, Nähe und Energie im Salsaflow Studio',
-        // Wie beim Bachata-Band: Default-Hoehe (30rem) zeigte bei 480px Fensterhoehe fast das
-        // ganze 21:9-Bild und begann erst unter dem Fold. 18rem + 0% halten die Gesichter
-        // (sie sitzen im oberen Bilddrittel) im Ausschnitt. Am gerenderten Ausschnitt geprueft.
-        position: 'center 0%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
+        // R71-Nachzieh (tight-Block in subpage/kit.tsx) brachte den Band-Top auf 555,
+        // sichtbar 175px. R73: Crop 0% zeigte davon nur Dutt und Haar — die Gesichter
+        // sitzen UNTER dem Streifen (Quell-y ~255 von 900). 18rem + 0% hielt die
+        // Gesichter also nicht, der alte Kommentar unten stimmte nicht mehr.
+        // R73: Erste Live-Kalibrierung (12%) und danach 24% scheiterten — das
+        // Mann-Kinn sass jeweils auf/unter der 730er-Schnittkante (Opus-Kritik
+        // FAIL). Ueber Quell-Teststreifen (convert -crop 2100x420+0+N) abgelesen:
+        // Erst die gezoomten Band-Bilder (convert -crop 1440x175+0+555 -resize 200%)
+        // gaben objektive Kinn-Positionen; Vollbild-Ablesungen lagen immer daneben.
+        // Befund ueber 4..52: bei 4..8 beide Kinne unter dem Fold, bei 28+ sinkt die
+        // Frau ab, bei 48+ der Mann. Kritik-Split bei 18 (Opus PASS, Grok FAIL
+        // Frau-Kinn zu knapp): die Kinn-Spanne Mann~710/Frau~690 klebte zu nah an
+        // der 730er-Kante. Vollbild-Zonen-Crops (2000x350) zeigen bei 14% beide
+        // Profile mit Kiefer- und Kinnlinie IM Fenster, Mann zentraler im Band.
+        // 14% zentriert die Spanne, statt sie nach oben zu schieben. Motiv,
+        // Copy, Bachata, Heels unberuehrt (R73-Stopp).
+        // R109 (Raphael-last, 17.08.): Bei 18rem lag das Kinn auf/unter der
+        // 730er-Schnittkante (Band y=566–854, nur Stirn im Fenster — Harness
+        // FAIL salsaKoepfe). Einziger erlaubter Hebel: DE heightClass lg
+        // hoeher. 24rem (Band-Top 660) zeigt beide Gesichter inkl. Kinn mit
+        // Luft zum Fold. Crop bleibt center 14% (P85), Motiv bleibt, EN 55
+        // bleibt, R87-22rem-Rueckdreh gilt nicht (damals wurde der Crop
+        // mitbewegt, jetzt nur die Hoehe).
+        position: 'center 14%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[24rem]',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Rhythmus, Grundschritt, erste Drehung. In Ruhe.',
@@ -176,7 +196,7 @@ const salsa: Record<Lang, StyleContent> = {
         { tag: 'Phase 4', title: 'Social-Dance-Gefühl', text: 'Du übst, mit wechselnden Partner:innen ruhig, klar und freundlich zu tanzen.' },
       ],
       cta: { label: 'Salsa Beginner ansehen', href: R.salsaPlan },
-      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Salsa-Grundschritt im Unterricht, Lehrperson zeigt vor' },
+      image: { src: '/photos/2026/event-social-couple-01.webp', alt: 'Salsa-Grundschritt im Unterricht, Lehrperson zeigt vor' },
     },
     levels: {
       title: 'Salsa wächst mit',
@@ -257,8 +277,15 @@ const salsa: Record<Lang, StyleContent> = {
       band: {
         src: '/photos/premium/offer-salsa-hero-2100.webp',
         alt: 'Salsa couple in class, closeness and energy in the Salsaflow studio',
-        // Gleiche Begruendung wie im DE-Block: 18rem-Band + 0% statt Default-30rem.
-        position: 'center 0%',
+        // R79 (EN Fold 1440x730): Band top 498, Fenster 730-498 = 232px (konstant).
+        // Runde 1: 0% nur Dutt + Maennerstirn, 20% (beide FAIL) zeigte nur den Mann klar,
+        // die Dutt-Frau blieb Hinterkopf/Wange. Anker-Modell: Translation = Y% x
+        // Ueberschuss (Motiv 1440x617, band 288 -> Ueberschuss 329). Fuer Frauen-Kinn
+        // (~Y295) UND Mann-Kinn (~Y340-360) mit Luft braucht das Fenster Start ~Y180:
+        // 55% x 329 = 181. 42-50% sitzen ebenfalls, 55% gibt beiden Kinnen die meiste
+        // Luft ueber der Fold-Kante. NUR der EN-Block — DE bleibt center 14% (P85,
+        // nicht angefasst), Motiv offer-salsa-hero-2100 und lg:h-[18rem] bleiben.
+        position: 'center 55%',
         heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
       },
       cardLabel: 'Your start',
@@ -305,7 +332,7 @@ const salsa: Record<Lang, StyleContent> = {
         { tag: 'Phase 4', title: 'Social-dance feeling', text: 'You practise dancing with changing partners calmly, clearly and kindly.' },
       ],
       cta: { label: 'See Salsa beginner courses', href: R.salsaPlan },
-      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Salsa basic step in class, teacher demonstrating' },
+      image: { src: '/photos/2026/event-social-couple-01.webp', alt: 'Salsa basic step in class, teacher demonstrating' },
     },
     levels: {
       title: 'Salsa grows with',
@@ -390,11 +417,15 @@ const bachata: Record<Lang, StyleContent> = {
       band: {
         src: '/photos/premium/offer-bachata-wide-v2.webp',
         alt: 'Bachata-Paar in ruhiger Haltung im Unterricht',
-        // Auf Desktop lief das Band bei 12rem und 22 % waagrecht durch beide Gesichter.
-        // Hoehe und Position zusammen loesen es: 18rem zeigt genug vom Bild, 10 % holt die
-        // Koepfe ins Fenster. Am gerenderten Ausschnitt geprueft.
-        position: 'center 10%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
+        // R71: 10% zeigte nur Boden, 25% nur Haar-Kuppen (63px Streifen zu flach).
+        // R71-Nachzieh: zwei Hebel zusammen — Band-Top ~220px hoch (tight-Block in
+        // subpage/kit.tsx: pt-0, pb-0, mb-1, gap-2.5; nur dense+media, ohne facts,
+        // Achse left), das Band auf lg 11rem geoeffnet und die Chip-Reihe auf eine
+        // Zeile gebracht (flex-nowrap, StylePage). Crop 20% legt das Fenster auf den
+        // Gesichtsblock (Frau Kinn Quell-y ~640, skaliert 462/1080), sodass im
+        // 730er-Fold zwei Gesichter inkl. Kinn stehen. Am Live-Render gemessen.
+        position: 'center 20%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[11rem]',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Timing, Connection, Körpergefühl. Ohne Druck.',

@@ -70,7 +70,7 @@ function KursaufbauHero({ c }: { c: KursaufbauContent }) {
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
           <motion.h1
             variants={item}
-            className="mt-5 font-display text-[2.4rem] font-extrabold leading-[1.02] tracking-[-0.022em] text-balance sm:text-[3rem] lg:text-[3.4rem]"
+            className="type-h1 mt-5"
           >
             {h.title} {h.titleAccent ? <TitleAccent>{h.titleAccent}</TitleAccent> : null}
           </motion.h1>
@@ -102,7 +102,12 @@ function KursaufbauHero({ c }: { c: KursaufbauContent }) {
             <img
               src={h.image.src}
               alt={h.image.alt}
-              className="aspect-[4/5] w-full object-cover object-[center_42%] sm:aspect-[5/4] lg:aspect-[4/5]"
+              // R80 (Fold 1440x730): lg:aspect-[4/5] (Foto 814px) zog die Grid-Zeile so
+              // tief, dass der rote CTA bei top 720 mit 44px unter den Fold hing.
+              // lg:aspect-[3/2] (Foto ~433px) schrumpft die rechte Spalte; items-center
+              // zentriert beide Spalten hoeher -> CTA bottom ~610, ganz im Fenster.
+              // Motiv kurs-02.jpg, Copy, Chips, H1 bleiben. Salsa DE14/EN55 unberuehrt.
+              className="aspect-[4/5] w-full object-cover object-[center_42%] sm:aspect-[5/4] lg:aspect-[3/2]"
               width={1600}
               height={1067}
               loading="eager"
@@ -173,7 +178,7 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
                     <a
                       key={s.href}
                       href={s.href}
-                      className="group inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--color-ink)] shadow-sm transition-colors hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)]"
+                      className="btn-base btn-outline group px-4 py-2 text-sm"
                     >
                       {s.label}
                       <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
@@ -191,7 +196,7 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <BeatMark />
-                    <h3 className="font-display text-xl font-bold text-[var(--color-ink)]">
+                    <h3 className="type-h3 text-[var(--color-ink)]">
                       {de ? 'Salsa & Bachata: Stufe für Stufe' : 'Salsa & Bachata: stage by stage'}
                     </h3>
                   </div>
@@ -371,7 +376,7 @@ function TermSection({ c }: { c: KursaufbauContent }) {
                   <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
                     <Icon aria-hidden className="h-[1.2rem] w-[1.2rem]" strokeWidth={1.75} />
                   </span>
-                  <h3 className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+                  <h3 className="type-h4 mt-5 text-[var(--color-ink-muted)]">
                     {card.label}
                   </h3>
                   <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink)]">{card.value}</p>

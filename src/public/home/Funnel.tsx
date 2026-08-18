@@ -18,7 +18,8 @@
 //     erfundene Zahl, keine erfundene Zusage.
 
 import { useLang } from '@/lib/i18n';
-import { MessageCircle, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
+import { WhatsAppIcon } from '@/public/site/BrandIcons';
 import { InquiryWizard } from '@/public/contact/InquiryWizard';
 import { Shell, GoogleRating } from '@/public/site/primitives';
 import { CONTACT } from '@/public/site/SiteFooter';
@@ -36,7 +37,7 @@ export function Funnel() {
           <div className="max-w-xl lg:sticky lg:top-[calc(var(--nav-h)+2rem)]">
             <h2
               className={cn(
-                'font-display text-4xl font-bold leading-[1.01] tracking-[-0.025em] text-[var(--color-ink)] sm:text-5xl',
+                'type-h2 text-[var(--color-ink)]',
                 MEASURE_L,
               )}
             >
@@ -54,7 +55,7 @@ export function Funnel() {
               <div className="flex items-start gap-3.5 border-b border-[var(--color-line)] py-4">
                 <Clock aria-hidden size={18} strokeWidth={1.75} className="mt-0.5 shrink-0 text-[var(--color-salsa)]" />
                 <div>
-                  <dt className="font-display text-base font-bold leading-tight text-[var(--color-ink)]">
+                  <dt className="type-h3 text-[var(--color-ink)]">
                     {de ? 'Ein Mensch antwortet dir' : 'A person will answer you'}
                   </dt>
                   <dd className="mt-1 text-[0.95rem] leading-snug text-[var(--color-ink-muted)]">
@@ -65,9 +66,9 @@ export function Funnel() {
                 </div>
               </div>
               <div className="flex items-start gap-3.5 border-b border-[var(--color-line)] py-4">
-                <MessageCircle aria-hidden size={18} strokeWidth={1.75} className="mt-0.5 shrink-0 text-[var(--color-salsa)]" />
+                <WhatsAppIcon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-[var(--color-salsa)]" />
                 <div>
-                  <dt className="font-display text-base font-bold leading-tight text-[var(--color-ink)]">
+                  <dt className="type-h3 text-[var(--color-ink)]">
                     {de ? 'Lieber kurz schreiben?' : 'Prefer a quick message?'}
                   </dt>
                   <dd className="mt-1 text-[0.95rem] leading-snug text-[var(--color-ink-muted)]">

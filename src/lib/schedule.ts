@@ -283,16 +283,25 @@ export function embeddedSchedule(): ScheduleResponse | null {
   // globalThis.__SCHEDULE__, damit die Komponenten schon serverseitig echte Zeiten rendern.
   const scope = globalThis as {
     __SCHEDULE__?: ScheduleResponse;
+    __EMBEDDED_SCHEDULE__?: ScheduleResponse;
     document?: { getElementById(id: string): { textContent: string | null } | null };
   };
   if (scope.__SCHEDULE__) return scope.__SCHEDULE__;
   const node = scope.document?.getElementById('schedule-data');
-  if (!node?.textContent) return null;
-  try {
-    return JSON.parse(node.textContent) as ScheduleResponse;
-  } catch {
-    return null;
+  if (node?.textContent) {
+    try {
+      return JSON.parse(node.textContent) as ScheduleResponse;
+    } catch {
+      return null;
+    }
   }
+  // Watchdog R63: Dev-Fallback. Der Prerender-Tag `schedule-data` existiert nur im
+  // gebauten HTML — der Dev-Server (und damit jeder Watchdog-Shot) lief bisher mit
+  // leerem Start und «wird geladen». scripts/dev-schedule-global.mjs schreibt den
+  // aktuellen API-Stand nach src/generated/schedule-embedded.ts; src/main.tsx laedt
+  // ihn als globalThis.__EMBEDDED_SCHEDULE__, bevor irgendeine Komponente rendert.
+  // Derselbe Vertrag wie im Build: Startwert aus dem Bundle, Fetch aktualisiert nur.
+  return scope.__EMBEDDED_SCHEDULE__ ?? null;
 }
 
 export function fetchSchedule(): Promise<ScheduleResponse> {

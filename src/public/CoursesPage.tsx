@@ -22,11 +22,12 @@ import { Seo } from '@/lib/seo';
 import { SiteHeader } from '@/public/site/SiteHeader';
 import { SiteFooter, CONTACT } from '@/public/site/SiteFooter';
 import { Shell, Eyebrow, CtaArrow, CtaPill, CtaText, BeatMark, sectionTitle, sectionLead } from '@/public/site/primitives';
+import { WhatsAppIcon } from '@/public/site/BrandIcons';
 import { MEASURE_L, HeroFrame, ClosingInvite } from '@/public/subpage/kit';
 import { Reveal, useReveal } from '@/public/home/motion';
 import { cn } from '@/lib/utils';
 import { COURSES_OVERVIEW } from '@/public/courses/overview-content';
-import { fetchSchedule, pickVariedCourses, type ScheduleCourse, type ScheduleResponse } from '@/lib/schedule';
+import { fetchSchedule, nextScheduleDate, pickVariedCourses, type ScheduleCourse, type ScheduleResponse, type WeekdayKey } from '@/lib/schedule';
 import {
   ArrowRight,
   Check,
@@ -44,11 +45,14 @@ import {
 const PRIVAT_ICONS: LucideIcon[] = [Users, Music, CalendarClock, HeartHandshake];
 
 // EIN CTA-Ziel sitewide (Master-Plan): der Schnupper-Anker scrollt auf /kontakt zum Formular.
-const SCHNUPPER_HREF = '/kontakt#schnupperstunde';
+const SCHNUPPER_HREF = '/schnupperstunde';
 const SECTION_OFFSET = 'calc(var(--nav-h) + 1.5rem)';
 
 function courseStart(course: ScheduleCourse, data: ScheduleResponse, lang: 'de' | 'en') {
-  const iso = data.terms.find((term) => term.id === course.termId)?.startDate;
+  const term = data.terms.find((t) => t.id === course.termId);
+  const iso =
+    course.nextDates?.[0] ??
+    (term ? nextScheduleDate(term.startDate, course.weekday as WeekdayKey, [term]) : null);
   if (!iso) return lang === 'de' ? 'Start laut Kursplan' : 'Start according to schedule';
   return new Intl.DateTimeFormat(lang === 'de' ? 'de-CH' : 'en-GB', {
     day: 'numeric',
@@ -108,7 +112,7 @@ function CourseStartCard({ course, data, index, altThumb = false }: { course: Sc
         : 'Starting soon';
   const running = course.phase === 'running';
   const useAlt = altThumb && !!STYLE_THUMB_ALT[course.styleKey];
-  const thumb = (useAlt ? STYLE_THUMB_ALT[course.styleKey] : STYLE_THUMB[course.styleKey]) ?? '/photos/2026/kurse-classfreude-01.webp';
+  const thumb = (useAlt ? STYLE_THUMB_ALT[course.styleKey] : STYLE_THUMB[course.styleKey]) ?? '/photos/premium/offer-salsa-800.webp';
   const focus = (useAlt ? STYLE_THUMB_ALT_FOCUS[course.styleKey] : STYLE_THUMB_FOCUS[course.styleKey]) ?? 'center 30%';
   return (
     <a
@@ -141,7 +145,7 @@ function CourseStartCard({ course, data, index, altThumb = false }: { course: Sc
         <span className="text-[var(--color-salsa)]">{String(index + 1).padStart(2, '0')}</span>
         <span className="truncate">{WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday}</span>
       </span>
-      <span className="mt-1.5 font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{style}</span>
+      <span className="mt-1.5 type-h3 text-[var(--color-ink)]">{style}</span>
       {level ? (
         <span
           className={cn(
@@ -150,7 +154,7 @@ function CourseStartCard({ course, data, index, altThumb = false }: { course: Sc
               ? 'bg-[var(--color-ink)] text-white'
               : course.styleKey === 'bachata'
                 ? 'bg-[var(--color-bg-soft)] text-[var(--color-ink)] ring-1 ring-[var(--color-line)]'
-                : 'bg-[var(--color-salsa-50)] text-[var(--color-salsa)]',
+                : 'bg-[var(--color-salsa)] text-white',
           )}
         >
           {level}
@@ -198,10 +202,8 @@ export function CoursesPage() {
       </main>
       {/* Runde 3, Issue 7: EIN Abbinder pro Seite. Die Seite schliesst mit TrialSection
           ("Schnupperstunde"); der generische Footer-Streifen mit demselben CTA entfaellt.
-          float={false}: wie /preise und Home — der fixe WhatsApp-FAB lag auf den
-          rechtsbuendigen Privat-Preisen (100 CHF) in der Preise-Sektion. WhatsApp bleibt
-          ueber Privatstunden-CTA, Kontakt und Footer erreichbar. */}
-      <SiteFooter entryCta={false} float={false} />
+          Float bleibt an: Raphael will den Kreis sitewide unten rechts. */}
+      <SiteFooter entryCta={false} />
     </>
   );
 }
@@ -354,7 +356,7 @@ function StylesSection() {
                     <span className="text-[12px] font-semibold uppercase leading-[1.4] tracking-[0.16em] text-[var(--color-ink-muted)]">
                       {String(i + 1).padStart(2, '0')} · {(metaByKey[card.key] ?? []).join(' · ')}
                     </span>
-                    <h3 className="mt-4 font-display text-[clamp(1.5rem,2.6vw,2.125rem)] font-bold leading-[1.08] tracking-[-0.02em] text-balance text-[var(--color-ink)]">
+                    <h3 className="mt-4 type-h3 text-[var(--color-ink)]">
                       {card.title}
                     </h3>
                     <p className="mt-4 max-w-[42ch] text-pretty text-[1.0625rem] leading-[1.588] text-[var(--color-ink-muted)]">
@@ -387,7 +389,7 @@ function StylesSection() {
             >
               <div className="order-2 flex flex-col justify-center py-8 lg:order-1 lg:py-14">
                 <GraduationCap aria-hidden className="h-8 w-8 text-[var(--color-salsa)]" strokeWidth={1.75} />
-                <h3 className="mt-4 font-display text-[clamp(1.5rem,2.6vw,2.125rem)] font-bold leading-[1.08] tracking-[-0.02em] text-balance text-[var(--color-ink)]">
+                <h3 className="mt-4 type-h3 text-[var(--color-ink)]">
                   {workshop.title}
                 </h3>
                 <p className="mt-4 max-w-[42ch] text-pretty text-[1.0625rem] leading-[1.588] text-[var(--color-ink-muted)]">
@@ -468,7 +470,7 @@ function LevelsSection() {
                   drei Ebenen fuer eine Aufzaehlung. Jetzt traegt die aeussere Karte alles,
                   getrennt nur durch 1px-Linien und Weissraum. */}
               <div className="mt-6 border-t border-[var(--color-line)] pt-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{sideTitle}</p>
+                <p className="type-h4 text-[var(--color-ink-muted)]">{sideTitle}</p>
                 <p className="mt-2.5 max-w-xl text-base leading-relaxed text-[var(--color-ink-muted)]">{sideText}</p>
                 <ul className="mt-4 grid gap-x-6 sm:grid-cols-3 lg:grid-cols-1">
                   {sideItems.map(([number, label]) => (
@@ -485,11 +487,11 @@ function LevelsSection() {
 
               <div className="mt-6 grid gap-x-10 gap-y-5 border-t border-[var(--color-line)] pt-5 sm:grid-cols-2">
                 <div>
-                  <h3 className="font-display text-lg font-bold text-[var(--color-ink)]">{l.onTitle}</h3>
+                  <h3 className="type-h3 text-[var(--color-ink)]">{l.onTitle}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{l.onText}</p>
                 </div>
                 <div>
-                  <h3 className="font-display text-lg font-bold text-[var(--color-ink)]">{heelsTrack?.title ?? 'Heels'}</h3>
+                  <h3 className="type-h3 text-[var(--color-ink)]">{heelsTrack?.title ?? 'Heels'}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{heelsTrack?.note}</p>
                   {/* Pillen -> Meta-Zeile: das waren Deko-Label, kein Filter (Kritik Runde 2). */}
                   <p className="mt-2.5 text-sm font-semibold text-[var(--color-ink)]">
@@ -507,7 +509,7 @@ function LevelsSection() {
                   <div>
                     <div className="flex items-center gap-3">
                       <BeatMark />
-                      <h3 className="font-display text-2xl font-bold text-[var(--color-ink)]">{mainTrack?.title}</h3>
+                      <h3 className="type-h3 text-[var(--color-ink)]">{mainTrack?.title}</h3>
                     </div>
                     <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{mainTrack?.note}</p>
                   </div>
@@ -550,7 +552,12 @@ function LevelsSection() {
                             {rung}
                           </span>
                           {isFlow ? (
-                            <span className="mt-1 block text-sm leading-relaxed text-[var(--color-ink-muted)]">{l.flowNote}</span>
+                            <span className="mt-1 block text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                              {/* R59: ein Satz pro Stufe. Vorher trugen Beginner Flow und
+                                  Intermediate Flow denselben flowNote-Text. Jetzt Beginner =
+                                  Grundschritte festigen, Intermediate = Figuren variieren. */}
+                              {/beginner/i.test(rung) ? l.flowNoteBeginner : l.flowNoteIntermediate}
+                            </span>
                           ) : null}
                         </span>
                         <span className="col-span-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)] sm:col-span-1 sm:text-right">
@@ -664,7 +671,7 @@ function PricesSection() {
                   className="pointer-events-none absolute -top-16 right-0 -z-10 h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.08)_0%,transparent_70%)] sm:-right-16"
                 />
                 <div className="relative">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+                  <p className="type-h4 text-[var(--color-ink-muted)]">
                     {courseGroup.title}
                   </p>
                   <p className="mt-6 font-display text-[4rem] font-extrabold leading-none tracking-[-0.022em] text-[var(--color-salsa)] sm:text-[4.65rem]">
@@ -700,7 +707,7 @@ function PricesSection() {
                 variants={item}
                 className="flex h-full flex-col py-6 sm:pb-7 sm:pl-8"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{privatGroup.title}</p>
+                <p className="type-h4 text-[var(--color-ink-muted)]">{privatGroup.title}</p>
                 <dl className="mt-5 border-t border-[var(--color-line)]">
                   {privatGroup.rows.map((row, i) => (
                     <div
@@ -846,10 +853,10 @@ function PrivatSection() {
                 />
               </div>
               <div className="mt-5 border-t border-[var(--color-line)] pt-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+                <p className="type-h4 text-[var(--color-ink-muted)]">
                   {de ? '1:1 Coaching' : '1:1 coaching'}
                 </p>
-                <p className="mt-1.5 font-display text-lg font-bold leading-tight text-[var(--color-ink)]">
+                <p className="mt-1.5 type-h3 text-[var(--color-ink)]">
                   {de ? 'Dein Tempo. Dein Fokus.' : 'Your pace. Your focus.'}
                 </p>
               </div>
@@ -882,7 +889,7 @@ function PrivatSection() {
 
             {/* Kompakte Preis-Tabelle (gleiche Zahlen wie in der Preise-Sektion). */}
             <motion.div variants={item} className="mt-8 border-t border-[var(--color-line)] pt-6">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+              <h3 className="type-h4 text-[var(--color-ink-muted)]">
                 {de ? 'Preise' : 'Prices'}
               </h3>
               <dl className="mt-3 space-y-px">
@@ -913,6 +920,7 @@ function PrivatSection() {
                 rel="noopener noreferrer"
                 className="group inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-3.5 text-base font-semibold text-[var(--color-ink)] transition-colors hover:text-[var(--color-salsa)]"
               >
+                <WhatsAppIcon className="h-4 w-4 shrink-0" />
                 {de ? 'Schreib uns auf WhatsApp' : 'Message us on WhatsApp'}
                 <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
               </a>

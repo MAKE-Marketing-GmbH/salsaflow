@@ -63,15 +63,20 @@ function AnniversaryHero({ c }: { c: AnniversaryContent }) {
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
-      <Shell className="grid items-center gap-10 pb-14 pt-6 sm:pb-16 lg:grid-cols-[0.98fr_1.02fr] lg:gap-14 lg:pb-20 lg:pt-8">
+      {/* R82 (Fold 1440x730): lg:pt-8 -> lg:pt-0 hebt den Hero-Inhalt um 32px. Zusammen
+          mit H1-Kappung, Foto lg:aspect-[3/2] und CTA lg:mt-4 sitzt der rote Knopf
+          "Programm ansehen" ganz im Fenster. NUR Abstand + H1-Schriftgroesse. */}
+      <Shell className="grid items-center gap-10 pb-14 pt-6 sm:pb-16 lg:grid-cols-[0.98fr_1.02fr] lg:gap-14 lg:pb-20 lg:pt-0">
         <motion.div data-reveal variants={container} initial="hidden" animate="show" className="max-w-2xl">
           <motion.div variants={item} className="mb-6">
             <Breadcrumb trail={c.crumbs} />
           </motion.div>
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
+          {/* R82: H1 bricht bei 4.3rem auf 5 Zeilen (275px). Kappung auf 3.4rem (nur
+              diese Seite, nur Desktop) bringt ~3-4 Zeilen. Kein Text geaendert. */}
           <motion.h1
             variants={item}
-            className="mt-5 font-display text-[2.3rem] font-extrabold leading-[1.04] tracking-[-0.022em] text-balance sm:text-[2.9rem] lg:text-[3.2rem]"
+            className="type-h1 mt-5 lg:mt-0 lg:text-[clamp(2.6rem,5.2vw,3.4rem)]"
           >
             {h.h1.pre}
             <TitleAccent>{h.h1.accent}</TitleAccent>
@@ -80,7 +85,7 @@ function AnniversaryHero({ c }: { c: AnniversaryContent }) {
           <motion.p variants={item} className={`mt-6 max-w-xl ${sectionLead}`}>
             {h.lead}
           </motion.p>
-          <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center lg:mt-4">
             <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
             <GhostCta href={h.secondary.href}>{h.secondary.label}</GhostCta>
           </motion.div>
@@ -94,7 +99,9 @@ function AnniversaryHero({ c }: { c: AnniversaryContent }) {
             <img
               src={h.image.src}
               alt={h.image.alt}
-              className="aspect-[4/5] w-full object-cover object-[center_38%] sm:aspect-[5/4] lg:aspect-[4/5]"
+              // R82: lg:aspect-[4/5] (Foto 814px) -> lg:aspect-[3/2] (~434px) schrumpft
+              // die rechte Spalte; items-center zentriert hoeher. Motiv/Crop bleiben.
+              className="aspect-[4/5] w-full object-cover object-[center_38%] sm:aspect-[5/4] lg:aspect-[3/2]"
               width={1400}
               height={933}
               loading="eager"
@@ -145,7 +152,7 @@ function AboutSection({ c }: { c: AnniversaryContent }) {
                       <Icon size={20} strokeWidth={2} aria-hidden />
                     </span>
                     <div>
-                      <h3 className="font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{p.title}</h3>
+                      <h3 className="type-h3 text-[var(--color-ink)]">{p.title}</h3>
                       <p className="mt-1.5 text-[0.96rem] leading-relaxed text-[var(--color-ink-muted)]">{p.text}</p>
                     </div>
                   </div>
@@ -281,7 +288,7 @@ function AudienceSection({ c }: { c: AnniversaryContent }) {
               </ul>
             </motion.div>
             <motion.div variants={item} className="mt-5 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] p-6">
-              <h3 className="font-display text-base font-bold leading-tight text-[var(--color-ink)]">{a.newTitle}</h3>
+              <h3 className="type-h3 text-[var(--color-ink)]">{a.newTitle}</h3>
               <p className="mt-2 text-[0.96rem] leading-relaxed text-[var(--color-ink-muted)]">{a.newBody}</p>
               <a
                 href={a.cta.href}

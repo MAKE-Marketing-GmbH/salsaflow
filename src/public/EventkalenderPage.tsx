@@ -36,9 +36,15 @@ export function EventkalenderPage() {
   return (
     <SubPageShell seo={c.seo}>
       {/* Runde 2, Issue 1: Typo-Hero statt Foto-Split. Achse 'wide' — die H1 laeuft ueber die
-          volle Shell, darunter beginnt sofort der Filter/Kalender. */}
+          volle Shell, darunter beginnt sofort der Filter/Kalender.
+          R58: Das Danceflow-Motiv sass ungenutzt in der Content-Datei (hero.image), der Fold
+          war nur Text. Jetzt axis="left" + dense + media-Band nach dem Floweekend-Muster:
+          das Foto laeuft randlos unter der Headline, Koepfe bleiben im sichtbaren Streifen.
+          18rem statt 16rem: die H1 ist hier zweizeilig (Floweekend dreizeilig), dadurch
+          steht das Band hoeher und der 730-Fold zeigt mehr vom Motiv. */}
       <SubHero
-        axis="wide"
+        axis="left"
+        dense
         seoCrumbs={c.crumbs}
         title={c.hero.title}
         titleAccent={c.hero.titleAccent}
@@ -46,6 +52,12 @@ export function EventkalenderPage() {
         primary={c.hero.primary}
         secondary={c.hero.secondary}
         microcopy={c.hero.microcopy}
+        media={{
+          src: c.hero.image.src,
+          alt: c.hero.image.alt,
+          position: 'center 30%',
+          heightClass: 'h-[11rem] sm:h-[13rem] lg:h-[18rem]',
+        }}
       />
       <FilterSection c={c} />
       <CardsSection c={c} />
@@ -129,7 +141,7 @@ function CardsSection({ c }: { c: EventkalenderContent }) {
                 <CalendarDays size={14} strokeWidth={2.25} aria-hidden />
                 {ev.when}
               </p>
-              <h3 className="mt-3 font-display text-2xl font-bold leading-tight text-[var(--color-ink)]">
+              <h3 className="mt-3 type-h3 text-[var(--color-ink)]">
                 {ev.name}
               </h3>
               <ul className="mt-4 flex flex-wrap gap-2">

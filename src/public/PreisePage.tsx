@@ -47,6 +47,7 @@ export function PreisePage() {
 
       <SubHero
         axis="center"
+        dense
         seoCrumbs={[c.crumb]}
         title={c.hero.title}
         titleAccent={c.hero.titleAccent}
@@ -198,7 +199,7 @@ function RegularSection({ c }: { c: PreiseContent }) {
           >
             {r.entry.items.map((e) => (
               <motion.div key={e.title} variants={item}>
-                <h3 className="font-display text-lg font-bold leading-snug text-balance text-[var(--color-ink)]">
+                <h3 className="type-h3 text-[var(--color-ink)]">
                   {e.title}
                 </h3>
                 <p className="mt-2 max-w-[52ch] text-pretty text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">
@@ -266,7 +267,7 @@ function PrivatSection({ c }: { c: PreiseContent }) {
               </div>
               <div className="mt-5 border-t border-[var(--color-line)] pt-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{p.cardLabel}</p>
-                <p className="mt-1.5 font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{p.cardText}</p>
+                <p className="mt-1.5 type-h3 text-[var(--color-ink)]">{p.cardText}</p>
               </div>
             </motion.div>
           </Reveal>
@@ -306,6 +307,7 @@ function WorkshopCard({
   rows,
   foot,
   image,
+  cta,
   onRequest,
 }: {
   title: string;
@@ -313,6 +315,7 @@ function WorkshopCard({
   rows: PriceRow[];
   foot?: string;
   image: { src: string; alt: string; width: number; height: number; position?: string };
+  cta: { label: string; href: string };
   onRequest: string;
 }) {
   return (
@@ -334,7 +337,7 @@ function WorkshopCard({
       />
       <div className="flex items-center gap-3">
         <BeatMark />
-        <h3 className="font-display text-2xl font-bold leading-tight text-[var(--color-ink)]">{title}</h3>
+        <h3 className="type-h3 text-[var(--color-ink)]">{title}</h3>
       </div>
       <p className="mt-3 text-pretty text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{body}</p>
       <div className="mt-6">
@@ -342,8 +345,15 @@ function WorkshopCard({
       </div>
 
       {foot ? (
-        <p className="mt-auto pt-5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{foot}</p>
+        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{foot}</p>
       ) : null}
+
+      {/* R60: eigener Knopf pro Karte, per mt-auto an der gemeinsamen Unterkante. Vorher
+          sass EIN Section-Knopf unter der linken Karte — die rechte (Danceflow Night)
+          trug keine Aktion und endete hoeher. Jetzt enden beide Karten auf einer Linie. */}
+      <div className="mt-auto pt-6">
+        <PrimaryCta href={cta.href}>{cta.label}</PrimaryCta>
+      </div>
     </div>
   );
 }
@@ -367,6 +377,7 @@ function WorkshopsSection({ c }: { c: PreiseContent }) {
               body={w.workshop.body}
               rows={w.workshop.rows}
               image={w.workshop.image}
+              cta={w.workshop.cta}
               onRequest={c.onRequest}
             />
           </motion.div>
@@ -377,13 +388,9 @@ function WorkshopsSection({ c }: { c: PreiseContent }) {
               rows={w.social.rows}
               foot={w.social.foot}
               image={w.social.image}
+              cta={w.social.cta}
               onRequest={c.onRequest}
             />
-          </motion.div>
-        </Reveal>
-        <Reveal className="mt-8">
-          <motion.div variants={item}>
-            <PrimaryCta href={w.cta.href}>{w.cta.label}</PrimaryCta>
           </motion.div>
         </Reveal>
       </Shell>
@@ -471,7 +478,7 @@ function FitSection({ c }: { c: PreiseContent }) {
                 className="group flex items-center justify-between gap-5 border-b border-[var(--color-line)] py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-soft)]"
               >
                 <span className="min-w-0">
-                  <span className="block font-display text-lg font-bold leading-tight text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-salsa)]">{o.when}</span>
+                  <span className="block type-h3 text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-salsa)]">{o.when}</span>
                   <span className="mt-1 block text-[0.95rem] leading-snug text-[var(--color-ink-muted)]">{o.pick}</span>
                 </span>
                 <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-line)] text-[var(--color-salsa)] transition-colors duration-[var(--dur-fast)] group-hover:border-[var(--color-salsa)] group-hover:bg-[var(--color-salsa)] group-hover:text-white">

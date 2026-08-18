@@ -80,6 +80,7 @@ import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 import { CtaPill, CtaText, StarRating } from '@/public/site/primitives';
+
 import { EASE_OUT, useHydrated } from '@/public/home/motion';
 import { MEASURE_XL } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
@@ -152,7 +153,13 @@ export function Hero() {
           {/* `data-hero-fold`: Haken fuer die Bodenluft gegen die fixe Cookie-Leiste
               (Befund m-01, Regel in index.css). Der Fold ist viewportgebunden, das
               Dokument-Polster greift hier also nicht. */}
-          <div data-hero-fold className="relative z-10 self-center px-5 pt-[calc(58svh-12rem)] sm:px-8 sm:pt-0 lg:py-10 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-0">
+          {/* R100 Nachzieh: die Foto-Naht sass auf 390 mitten durch «und Heels.». Der erste
+              Bau drehte nur die Farbe — die Lage blieb, schwarz lag auf dunklem Foto (FAIL).
+              Hebel ist LAGE, nicht Farbe: der Textblock startet jetzt 8rem statt 12rem vor
+              der Foto-Unterkante (58svh). Damit liegt die Naht zwischen «Salsa, Bachata»
+              (weiss, oben auf dem Foto) und «und Heels.» (erste Zeile UNTER der Naht, auf
+              Papier) — mit Luft. sm+ unveraendert (pt-0). Foto 58svh bleibt, Crop bleibt. */}
+          <div data-hero-fold className="relative z-10 self-center px-5 pt-[calc(58svh-10rem)] sm:px-8 sm:pt-0 lg:py-10 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-0">
             {/* leading-[1.3] statt leading-none: Alex Brush setzt Ober- und Unterlaengen
                 ausserhalb einer 1.0-Zeilenbox, dadurch stimmten die Abstaende nicht. */}
             {/* Auf dem Foto traegt Salsa-Rot nicht: gegen das warme Studiolicht (Luminanz ~0.35)
@@ -208,13 +215,16 @@ export function Hero() {
             <motion.h1
               variants={item}
               className={cn(
-                'mt-2 font-display text-[2.75rem] leading-[0.92] tracking-[-0.035em] text-[var(--color-ink)] max-sm:text-white sm:text-[4.25rem] lg:text-[3.75rem] xl:text-[4.75rem]',
+                'type-h1 mt-2 text-[var(--color-ink)] max-sm:text-white',
                 MEASURE_XL,
               )}
             >
               <span className="block">{de ? 'Salsa, Bachata' : 'Salsa, bachata'}</span>
-              <span className="block">{de ? 'und Heels.' : 'and heels.'}</span>
-              {/* Mobil in Ink: das Foto endet bei ~y490, diese Zeile (y484-525) steht sonst
+              {/* R100 Nachzieh: Lage statt Farbe. Der Textblock sitzt jetzt so, dass die
+                  Foto-Naht zwischen «Salsa, Bachata» (oben, weiss auf Foto) und dieser Zeile
+                  liegt. «und Heels.» steht ganz auf Papier — mit Ink, sonst weiss auf Papier. */}
+              <span className="block max-sm:text-[var(--color-ink)]">{de ? 'und Heels.' : 'and heels.'}</span>
+              {/* Mobil in Ink: das Foto endet bei ~y490, diese Zeile steht sonst
                   weiss auf paper-warm — Kontrast ~1:1 (Critic Runde 6, Item 1). */}
               <span className="block max-sm:text-[var(--color-ink)]">{de ? 'Mitten in Basel.' : 'Here in Basel.'}</span>
             </motion.h1>
@@ -250,7 +260,7 @@ export function Hero() {
                 erlaubt genau einen Primary pro Sektion. Ab sm unveraendert der Textlink.
                 Beide liegen laut Sonde auf Papier, nicht auf dem Foto (Messung unten). */}
             <motion.div variants={item} className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 max-sm:mt-6 max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2">
-              <CtaPill href="/kontakt#schnupperstunde" className="max-sm:w-full">
+              <CtaPill href="/schnupperstunde" className="max-sm:w-full">
                 {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
               </CtaPill>
               <CtaText
@@ -274,6 +284,11 @@ export function Hero() {
               className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--color-line)] pt-5 text-[0.9375rem] max-sm:mt-6 max-sm:pt-4 sm:mt-10"
             >
               <div className="flex items-center gap-2">
+                {/* Quelle vor dem Urteil: das G sagt WOHER die Zahl kommt, die Sterne sagen WIE
+                    gut sie ist. Vierfarbiges Original-G auf hellem Grund — Repo-Regel in
+                    primitives.tsx:59-62 (einfarbig nur im dunklen Footer). alt="" + sr-only
+                    <dt> darunter liest "Google-Bewertung" schon vor. */}
+                <img src="/logo/google-g.svg" alt="" width={16} height={16} className="h-4 w-4 shrink-0" />
                 <StarRating size={14} />
                 <dt className="sr-only">{de ? 'Google-Bewertung' : 'Google rating'}</dt>
                 <dd className="font-semibold text-[var(--color-ink)]">

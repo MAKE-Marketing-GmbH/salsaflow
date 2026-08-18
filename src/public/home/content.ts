@@ -99,7 +99,7 @@ export type HomeStrings = {
 const offerPhotos = {
   salsa: '/photos/kurse/kurs-01.jpg',
   bachata: '/photos/premium/offer-bachata-wide-v2.webp',
-  heels: '/photos/premium/offer-heels-1200.webp',
+  heels: '/photos/2026/kurse-heels-energie-card-960.webp',
   privat: '/photos/premium/offer-privat-wide-original-v2.webp',
 };
 
@@ -190,9 +190,9 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
       title: 'Was als Nächstes ansteht.',
       all: 'Alle News',
       items: [
-        { key: 'staffel', kicker: 'Neue Staffel', date: 'Alle 8 Wochen', title: 'Die nächsten Kurse starten bald', text: 'Quereinstieg ist möglich. Sichere dir früh deinen Platz im Kursplan.', photo: '/photos/kurse/kurs-07.jpg', alt: 'Fussarbeit auf dem Parkett beim Kurs', href: '/kursplan' },
+        { key: 'staffel', kicker: 'Neue Staffel', date: 'Alle 8 Wochen', title: 'Die nächsten Kurse starten bald', text: 'Quereinstieg ist möglich. Sichere dir früh deinen Platz im Kursplan.', photo: '/photos/kurse/kurs-04.jpg', alt: 'Paar übt im Kurs eine enge Figur', href: '/kursplan' },
         { key: 'night', kicker: 'Danceflow Night', date: '1., 3. und 5. Freitag', title: 'Frei tanzen am Freitag', text: 'Jeden 1., 3. und 5. Freitag tanzen wir frei zusammen. Eigene DJs und warme Stimmung für alle Levels.', photo: '/photos/events/event-07.jpg', alt: 'Lachende Frau im Dreh mit ihrem Partner', href: '/events' },
-        { key: 'schnupper', kicker: 'Schnupperstunde', date: 'Jederzeit', title: 'Komm gratis vorbei', text: 'Probier eine Stunde aus, bevor du dich entscheidest. Ganz ohne Verpflichtung.', photo: '/photos/gallery/kurse/07.jpg', alt: 'Paar tanzt im Kurs, Gruppe im Hintergrund', href: '/kontakt#schnupperstunde' },
+        { key: 'schnupper', kicker: 'Schnupperstunde', date: 'Jederzeit', title: 'Komm gratis vorbei', text: 'Probier eine Stunde aus, bevor du dich entscheidest. Ganz ohne Verpflichtung.', photo: '/photos/gallery/kurse/07.jpg', alt: 'Paar tanzt im Kurs, Gruppe im Hintergrund', href: '/schnupperstunde' },
       ],
     },
     closing: {
@@ -301,9 +301,9 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
       title: 'What is coming up next.',
       all: 'All news',
       items: [
-        { key: 'staffel', kicker: 'New course block', date: 'Every 8 weeks', title: 'The next courses start soon', text: 'Late entry may be possible. Check the schedule for available places.', photo: '/photos/kurse/kurs-07.jpg', alt: 'Footwork on the dance floor in class', href: '/kursplan' },
+        { key: 'staffel', kicker: 'New course block', date: 'Every 8 weeks', title: 'The next courses start soon', text: 'Late entry may be possible. Check the schedule for available places.', photo: '/photos/kurse/kurs-04.jpg', alt: 'Couple practising a close figure in class', href: '/kursplan' },
         { key: 'night', kicker: 'Danceflow Night', date: '1st, 3rd and 5th Friday', title: 'Free dancing on Friday', text: 'Every 1st, 3rd and 5th Friday we dance freely together. Our own DJs and a warm vibe for all levels.', photo: '/photos/events/event-07.jpg', alt: 'Laughing woman spinning with her partner', href: '/events' },
-        { key: 'schnupper', kicker: 'Trial class', date: 'Anytime', title: 'Drop by for free', text: 'Try a class before you decide. No strings attached.', photo: '/photos/gallery/kurse/07.jpg', alt: 'Couple dancing in class, group in the background', href: '/kontakt#schnupperstunde' },
+        { key: 'schnupper', kicker: 'Trial class', date: 'Anytime', title: 'Drop by for free', text: 'Try a class before you decide. No strings attached.', photo: '/photos/gallery/kurse/07.jpg', alt: 'Couple dancing in class, group in the background', href: '/schnupperstunde' },
       ],
     },
     closing: {

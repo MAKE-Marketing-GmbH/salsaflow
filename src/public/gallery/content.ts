@@ -147,7 +147,6 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/05-v3.webp', alt: 'Tanzende bewegen sich zur Musik durch den Saal', width: 1360, height: 2048 },
   { albumId: 'kurse', src: '/photos/gallery/kurse/03.jpg', alt: 'Paar arbeitet an der Haltung im Salsa-Kurs', width: 1600, height: 1066 },
   { albumId: 'team', src: '/photos/founders/sebastian.webp', alt: 'Sebastian Carballo, Mitgründer von Salsaflow', width: 1000, height: 1414 },
-  { albumId: 'shows', src: '/photos/shows/show-04.webp', alt: 'Gruppe tanzt eine Choreografie auf der Bühne', width: 1000, height: 667 },
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/06.jpg', alt: 'Voller Saal an einer Danceflow Night in Basel', width: 1066, height: 1600 },
 
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/07.jpg', alt: 'Paar in geschlossener Tanzhaltung auf der Fläche', width: 1600, height: 1067 },

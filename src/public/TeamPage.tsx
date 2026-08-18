@@ -158,10 +158,11 @@ function useTeaching(lang: 'de' | 'en'): Map<string, Teaching> {
  *  das Audit an dieser Seite ruegt. Die Zeile erklaert sich aus sich selbst. */
 function TeachingLine({ teaching, lang }: { teaching: Teaching | undefined; lang: 'de' | 'en' }) {
   const has = !!teaching?.styles.length;
-  const styles = has ? teaching!.styles.slice(0, 2).join(', ') : null;
-  const days = has ? teaching!.weekdays.map((day) => WEEKDAY_LABEL[lang][day]?.short ?? day).join(' + ') : '';
+  if (!has) return null;
+  const styles = teaching!.styles.slice(0, 2).join(', ');
+  const days = teaching!.weekdays.map((day) => WEEKDAY_LABEL[lang][day]?.short ?? day).join(' + ');
   return (
-    <p className="mt-2 block min-h-[1.4rem] text-[0.9rem] leading-snug text-[var(--color-ink-muted)]">
+    <p className="mt-2 block text-[0.9rem] leading-snug text-[var(--color-ink-muted)]">
       {styles}
       {days ? <span className="text-[var(--color-ink-muted)]/75"> · {days}</span> : null}
     </p>
@@ -213,6 +214,7 @@ function TeamHero() {
         </>
       }
       lead={h.lead}
+      primary={{ href: SCHNUPPER_HREF, label: lang === 'de' ? 'Schnupperstunde buchen' : 'Book a trial class' }}
       media={{
         src: '/photos/showcase/hp-03.webp',
         alt: 'Das Salsaflow-Team gemeinsam im hellen Studio',
@@ -406,7 +408,7 @@ function StorySection() {
           <motion.h2
             variants={item}
             className={cn(
-              'mt-5 font-display text-3xl font-extrabold leading-[1.05] tracking-[-0.02em] text-balance text-[var(--color-ink)] sm:text-4xl lg:text-[2.9rem]',
+              'type-h2 mt-5 text-[var(--color-ink)]',
               MEASURE_L,
             )}
           >
@@ -460,7 +462,7 @@ function TrialBand() {
         <Reveal className="flex flex-col gap-5 border-y border-[var(--color-line)] py-8 sm:flex-row sm:items-center sm:justify-between sm:gap-10">
           <motion.p
             variants={item}
-            className="max-w-[26em] text-balance font-display text-[1.55rem] font-bold leading-[1.15] tracking-[-0.015em] text-[var(--color-ink)] sm:text-[1.85rem]"
+            className="type-h3 max-w-[26em] text-[var(--color-ink)]"
           >
             {de ? 'Am schnellsten lernst du uns kennen, indem du einmal mittanzt.' : 'The fastest way to meet us is to dance with us once.'}
           </motion.p>
@@ -652,7 +654,7 @@ function RolesSection() {
                 </div>
 
                 <div className="min-w-0">
-                  <h3 className="font-display text-[1.45rem] font-bold leading-[1.1] tracking-tight text-[var(--color-ink)] sm:text-[1.7rem]">
+                  <h3 className="type-h3 text-[var(--color-ink)]">
                     {grp.title}
                   </h3>
                   {anchor ? <RoleFaces anchor={anchor} lang={lang} /> : null}
@@ -704,11 +706,11 @@ function RolesSection() {
  *  DESKTOP-Problem (das gleichfoermige Fuenfer-Band), auf Mobil erzeugt er nur eine
  *  ausgerissene Reihe. Die Formatvariation gilt darum ab `lg`, unterhalb tragen alle
  *  Kacheln dasselbe 4/5-Fenster. `pos`/`zoom` bleiben je Person unveraendert gueltig. */
-const FACE_SHAPE: { pos: string; zoom?: string; ratio: string; drop?: string }[] = [
+const FACE_SHAPE: { pos: string; ratio: string }[] = [
   { ratio: 'aspect-[4/5]', pos: 'object-[48%_2%]' },
-  { ratio: 'aspect-[4/5] lg:aspect-[3/4]', pos: 'object-[52%_15%]', zoom: 'scale-[1.16]', drop: 'lg:mt-10' },
-  { ratio: 'aspect-[4/5] lg:aspect-[5/7]', pos: 'object-[54%_1%]' },
-  { ratio: 'aspect-[4/5] lg:aspect-[3/4]', pos: 'object-[50%_14%]', zoom: 'scale-[1.12]', drop: 'lg:mt-10' },
+  { ratio: 'aspect-[4/5]', pos: 'object-[52%_8%]' },
+  { ratio: 'aspect-[4/5]', pos: 'object-[54%_1%]' },
+  { ratio: 'aspect-[4/5]', pos: 'object-[50%_8%]' },
   { ratio: 'aspect-[4/5]', pos: 'object-[50%_3%]' },
 ];
 
@@ -727,7 +729,12 @@ function FacesSection() {
      nicht mehr fuer Personen-Kacheln benutzt. */
   const panelStyle = { background: 'var(--color-bg-soft)' };
   return (
-    <section id="gesichter" className="scroll-mt-24 bg-[var(--color-paper-warm)] py-16 lg:py-20">
+    /* Watchdog R61, Grok-FAIL auf dem ersten Nachher: die Gründer sind freigestellte
+       Cutouts ohne sichtbare Foto-Kante, die Lehrer standen als bg-soft-Kacheln auf
+       paper-warm — fuenf harte Rechtecke. Rahmen und rote Leiste waren schon weg,
+       der TON war die zweite Sprache. Sektion jetzt auf bg-soft wie die Kacheln:
+       die Rechteck-Kante faellt weg, die Lehrer stehen freigestellt wie die Gruender. */
+    <section id="gesichter" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-16 lg:py-20">
       <Shell>
         {/* Kunden-Feedback 2026-08-07, dritter Zahlen-Block dieser Seite: rechts neben dem
             Titel hingen "5 Tanzlehrer" und "3 Studios am Bahnhof SBB" (Beleg
@@ -784,19 +791,19 @@ function FacesSection() {
                 variants={item}
                 className={cn(
                   'flex w-full flex-col',
-                  shape.drop,
                   // Waise mittig, aber in derselben Bauform und Spaltenbreite wie die
                   // anderen vier (Breite = eine Rasterspalte inkl. halber Rasterluecke).
                   banner &&
                     'col-span-2 mx-auto w-[calc((100%-0.75rem)/2)] sm:w-[calc((100%-1.25rem)/2)] lg:col-span-1 lg:mx-0 lg:w-full',
                 )}
               >
+                {/* Eine Kartensprache auf der Seite (Watchdog R61): die Lehrer tragen
+                    wie die Gruender keinen Chrome — kein Rahmen, kein Schatten, keine
+                    rote Grundlinie. Trennung macht die Linie ueber dem Namen. */}
                 <div
-                  className="relative w-full overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] shadow-[0_14px_38px_-18px_rgba(17,17,17,0.32)]"
+                  className="relative w-full overflow-hidden bg-[var(--color-bg-soft)]"
                   style={panelStyle}
                 >
-                  {/* dezenter Rot-Akzent: schmale Grundlinie unter dem Freisteller */}
-                  <span aria-hidden className="absolute inset-x-0 bottom-0 z-10 h-[3px] bg-[var(--color-salsa)]/70" />
                   <img
                     src={face.photo ?? ''}
                     alt={
@@ -808,7 +815,7 @@ function FacesSection() {
                           ? 'Mitglied des Salsaflow-Teams'
                           : 'Member of the Salsaflow team'
                     }
-                    className={cn('relative w-full object-cover', shape.ratio, shape.pos, shape.zoom)}
+                    className={cn('relative w-full object-cover', shape.ratio, shape.pos)}
                     loading="lazy"
                     width={1000}
                     height={1414}
@@ -817,13 +824,12 @@ function FacesSection() {
                 {/* `p` statt `span` aus demselben Grund wie bei den Gruender-Karten: nur so
                     sieht der Ausweich-Guard des Cookie-Hinweises diese Namen und Rollen
                     (Befund m-02/m-07, Ursache in site/CookieBanner.tsx:17). */}
-                <figcaption className="mt-3.5 min-w-0 px-1">
+                <figcaption className="mt-4 min-w-0 border-t border-[var(--color-line)] pt-3">
                   <p className="font-display text-xl font-extrabold leading-none tracking-[-0.01em] text-[var(--color-ink)] sm:text-2xl">
                     {face.name ?? f.namePlaceholder}
                   </p>
                   {face.role && (
-                    <p className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
-                      <span aria-hidden className="h-1 w-1 rounded-full bg-[var(--color-salsa)]" />
+                    <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
                       {face.role}
                     </p>
                   )}

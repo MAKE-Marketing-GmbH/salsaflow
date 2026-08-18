@@ -31,7 +31,7 @@ import { Reveal, useReveal } from '@/public/home/motion';
 import { SECTION_Y } from '@/public/home/kit';
 
 // EIN CTA-Ziel sitewide (Master-Plan): Schnupperstunden-Anker auf /kontakt.
-export const SCHNUPPER_HREF = '/kontakt#schnupperstunde';
+export const SCHNUPPER_HREF = '/schnupperstunde';
 
 /* ----------------------------------------------------------------- Zeilenmass (Measure)
  * Vorbild: src/public/home/kit.tsx (MEASURE_XL/MEASURE_L, Home-Redesign 2026-08).
@@ -134,8 +134,11 @@ function JsonLd({ id, data }: { id: string; data: unknown }) {
 export type Crumb = { label: string; href: string };
 
 /** Sichtbare Breadcrumb-Spur + BreadcrumbList-JSON-LD (Plan-Schema). `trail` ohne Home;
- *  Home wird automatisch vorangestellt. Letzter Eintrag ist die aktuelle Seite (nicht verlinkt). */
-export function Breadcrumb({ trail }: { trail: Crumb[] }) {
+ *  Home wird automatisch vorangestellt. Letzter Eintrag ist die aktuelle Seite (nicht verlinkt).
+ *  `compact` (R71-Nachzieh, nur /tanzkurse/bachata via HeroFrame-tight): hebt die
+ *  Mindest-Tap-Hoehe der Anker von 44px auf 20px ab, damit das Foto-Band in den
+ *  730er-Fold rueckt. Ausnahme zu Critic Runde 8 Item 4, bewusst nur hier. */
+export function Breadcrumb({ trail, compact = false }: { trail: Crumb[]; compact?: boolean }) {
   const { lang } = useLang();
   const home: Crumb = { label: lang === 'de' ? 'Start' : 'Home', href: '/' };
   const full = [home, ...trail];
@@ -164,8 +167,9 @@ export function Breadcrumb({ trail }: { trail: Crumb[] }) {
                 </span>
               ) : (
                 // min-h-11: die Crumb-Anker massen 20px — zu kleines Tap-Ziel
-                // (Critic Runde 8, Item 4).
-                <a href={c.href} className="t-hover inline-flex min-h-11 items-center hover:text-[var(--color-salsa)]">
+                // (Critic Runde 8, Item 4). compact (nur bachata-Hero) nimmt das
+                // Polster wieder raus, damit das Foto-Band in den Fold kommt.
+                <a href={c.href} className={cn('t-hover inline-flex items-center hover:text-[var(--color-salsa)]', compact ? 'min-h-5' : 'min-h-11')}>
                   {c.label}
                 </a>
               )}
@@ -227,6 +231,7 @@ export function SubHero({
   axis = 'split',
   media,
   dense = false,
+  tightBottom = false,
 }: {
   seoCrumbs: Crumb[];
   title: string;
@@ -243,12 +248,17 @@ export function SubHero({
   media?: { src: string; alt: string; position?: string; positionClass?: string; heightClass?: string };
   /** Kuerzerer Hero, damit ein kurzes Bildband noch in den 730er-Fold passt. */
   dense?: boolean;
+  /** R84 (nur /schnupperstunde): kuerzt das Shell-Padding unten (Default pb-14/lg:pb-20),
+      damit der Anfrage-Block #anfrage in den 730er-Fold rueckt. Reiner Abstand-Hebel,
+      Default false = alle anderen Seiten unveraendert. */
+  tightBottom?: boolean;
 }) {
   return (
     <HeroFrame
       axis={axis}
       media={media}
       dense={dense}
+      tightBottom={tightBottom}
       crumbs={seoCrumbs}
       title={title}
       titleAccent={titleAccent}
@@ -276,6 +286,8 @@ export function HeroFrame({
   facts,
   media,
   dense = false,
+  liftMedia = false,
+  tightBottom = false,
   children,
 }: {
   axis?: HeroAxis;
@@ -290,6 +302,14 @@ export function HeroFrame({
   media?: { src: string; alt: string; position?: string; positionClass?: string; heightClass?: string };
   /** Kuerzerer Hero, damit ein kurzes Bildband noch in den 730er-Fold passt. */
   dense?: boolean;
+  /** R73-Nachzieh (nur /tanzkurse/salsa): hebt den Band-Top, indem der Typo-Block
+      ueber dem Band gestrafft wird (Section-Top, Lead-Zeilenhoehe, Microcopy-Abstand).
+      Kein negatives Band-Margin (wuerde Chips/CTA ueberdecken), keine neue Copy,
+      Crop und Band-Hoehe bleiben. Wirkt nur zusammen mit dense+media. */
+  liftMedia?: boolean;
+  /** R84 (nur /schnupperstunde): kuerzt das Shell-Padding unten, damit #anfrage in den
+      730er-Fold rueckt. Reiner Abstand-Hebel, Default false = andere Seiten unveraendert. */
+  tightBottom?: boolean;
   /** Zusatzinhalt unter dem CTA-Block (z. B. Chip-Reihe auf den Stilseiten). */
   children?: ReactNode;
 }) {
@@ -297,17 +317,36 @@ export function HeroFrame({
   const center = axis === 'center';
   const wide = axis === 'wide';
   const split = axis === 'split';
+  /* R71-Nachzieh: /tanzkurse/bachata (dense+media, Achse left, ohne facts) braucht den
+     Band-Top um ~110px hoeher, damit im 730er-Fold zwei GESICHTER inkl. Kinn liegen
+     statt nur Haar. Gemessen 16.08.2026 live: Band-Top 667, sichtbar 63px. Zusammen mit
+     der Band-Hoehe 18rem->11rem (content.ts) landet der Top bei ~445 und das Fenster
+     traegt das Motiv bis Kinn (Quell-y 462/1080, Crop 17%).
+     Konditioniert auf dense+media+!facts+!split, damit /preise (facts+pb-6 aus R70) und
+     die split-Seiten unveraendert bleiben. tight hebt zusaetzlich die Mindest-Tap-Hoehe
+     der Crumb-Anker auf (44px -> 20px, Critic Runde 8 Item 4, prop compact auf
+     Breadcrumb) und strafft den Section-Top (0.5rem -> 0) — nur auf bachata. */
+  const tight = Boolean(dense && media && !(facts && facts.length) && !split);
+  /* R73-Nachzieh: liftMedia (nur salsa) zieht den Section-Top auf var(--nav-h) — wie
+     tight, aber unabhaengig davon geschaltet, damit bachata (tight) unveraendert bleibt. */
+  const lift = Boolean(liftMedia && dense && media);
+  const topPad = tight || lift || tightBottom
+    ? 'var(--nav-h)'
+    : dense
+      ? 'calc(var(--nav-h) + 0.5rem)'
+      : 'calc(var(--nav-h) + 1.5rem)';
 
   const heading = (
     <motion.h1
       variants={item}
       className={cn(
-        'font-display font-extrabold tracking-[-0.026em] text-balance text-[var(--color-ink)]',
-        // Ohne Foto daneben traegt die Typo die Flaeche allein und darf deutlich groesser
-        // laufen als im alten Split (dort lg:3.7rem = 59px auf halber Breite).
+        // .type-h1 = die EINE H1-Groesse (src/index.css). `wide` behaelt seine groessere
+        // Stufe: dort traegt die H1 die volle Shell allein, das ist Seiten-Charakter,
+        // keine Abweichung von der Ebene.
+        'type-h1 text-[var(--color-ink)]',
         wide
           ? 'text-[2.7rem] leading-[0.98] sm:text-[4rem] lg:text-[5rem] max-w-[16em]'
-          : 'text-[2.6rem] leading-[1.0] sm:text-[3.5rem] lg:text-[4.3rem] ' + MEASURE_XL,
+          : MEASURE_XL,
         center && 'mx-auto',
       )}
     >
@@ -316,7 +355,13 @@ export function HeroFrame({
   );
 
   const leadEl = lead ? (
-    <motion.p variants={item} className={cn('text-pretty', sectionLead, center ? 'mx-auto max-w-2xl' : 'max-w-xl')}>
+    <motion.p
+      variants={item}
+      className={cn('text-pretty', sectionLead, center ? 'mx-auto max-w-2xl' : 'max-w-xl')}
+      // R73-Nachzieh: auf salsa (lift) die Lead-Zeilenhoehe dichter, damit das Band
+      // hoeher sitzt und die Koepfe Luft unter dem Kinn bekommen. Nur Anzeige-Straffung.
+      style={lift ? { lineHeight: 1.32 } : undefined}
+    >
       {lead}
     </motion.p>
   ) : null;
@@ -340,6 +385,8 @@ export function HeroFrame({
     <motion.p
       variants={item}
       className={cn('text-sm leading-relaxed text-[var(--color-ink-muted)]', center && 'mx-auto max-w-xl')}
+      // R73-Nachzieh: Microcopy-Abstand zum CTA-Block auf salsa (lift) leicht kuerzen.
+      style={lift ? { marginTop: '-0.25rem' } : undefined}
     >
       {microcopy}
     </motion.p>
@@ -352,7 +399,9 @@ export function HeroFrame({
       <motion.dl
         variants={item}
         className={cn(
-          'grid grid-cols-3 gap-4 border-t border-[var(--color-line)] pt-6',
+          // R52: unter md eine Spalte (Preise auf 390 quetschten in einer Zeile: Zahl eng an
+          // Zahl, Label klein). Ab md bleibt es drei Spalten — Desktop unveraendert.
+          'grid grid-cols-1 gap-5 border-t border-[var(--color-line)] pt-6 md:grid-cols-3 md:gap-4',
           split ? 'max-w-xl' : wide ? 'max-w-3xl' : center ? 'mx-auto max-w-2xl' : 'max-w-xl',
         )}
       >
@@ -374,15 +423,28 @@ export function HeroFrame({
   return (
     <section
       className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
-      style={{ paddingTop: dense ? 'calc(var(--nav-h) + 0.75rem)' : 'calc(var(--nav-h) + 1.5rem)' }}
+      style={{ paddingTop: topPad }}
     >
       <div
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
       <Shell className={cn(
-        dense ? 'pt-3 lg:pt-5' : 'pt-6 lg:pt-10',
-        media ? (dense ? 'pb-6 sm:pb-7' : 'pb-10 sm:pb-12') : 'pb-14 sm:pb-16 lg:pb-20',
+        dense ? (tight ? 'pt-0' : 'pt-2 lg:pt-3') : 'pt-6 lg:pt-10',
+        // R51-Nachzieh: bei dense+media den Restabstand zum Band kuerzen. R70-Nachzieh:
+        // pb-2 (8px) legte die grauen Preis-Unterzeilen AUF die Bandkante — pb-6 (24px)
+        // gibt ihnen Papier-Luft, ohne das Band aus dem 730-Fold zu schieben (gemessen:
+        // Labels y572, Band-Top y590, Band 224px -> 140px Koepfe im Fold). Betrifft nur
+        // dense+media-Seiten (/preise, /mehr/tanzschuhe, /mehr/collabs, /events).
+        // R71-Nachzieh: auf bachata (tight) pb-0 — die Chips schliessen fast an der
+        // Falz ab, Papier-Luft kommt dort aus dem freien Band, nicht aus Padding.
+        // R77: Ausnahme fuer tight-Seiten MIT Microcopy (/mehr/partys): ohne Abstand
+        // klebt der Satz exakt auf der Foto-Naht (microBottom 481 = bandTop 481,
+        // kaum lesbar). tight+media+microcopy -> pb-8 (32px Papier-Luft, gemessen
+        // microToBand 0 -> 32, Koepfe bleiben im Fold: sichtbar 217px, zwei Koepfe
+        // vorn inkl. Kinn). salsa/bachata/heels (tight) haben keine Microcopy ->
+        // bleiben pb-0. Tanzschuhe/Collabs (dense+media, nicht tight) behalten pb-6.
+        media ? (dense ? (tight ? (microcopy ? 'pb-8' : 'pb-0') : 'pb-6 sm:pb-6') : 'pb-10 sm:pb-12') : (tightBottom ? 'pb-6 lg:pb-8' : 'pb-14 sm:pb-16 lg:pb-20'),
       )}>
         <motion.div
           data-reveal
@@ -392,8 +454,11 @@ export function HeroFrame({
           className={center ? 'text-center' : undefined}
         >
           {crumbs ? (
-            <motion.div variants={item} className={cn('mb-6', center && 'flex justify-center')}>
-              <Breadcrumb trail={crumbs} />
+            <motion.div variants={item} className={cn(dense ? (tight || tightBottom ? 'mb-1' : 'mb-3') : 'mb-6', center && 'flex justify-center')}>
+              {/* R84: tightBottom (nur /schnupperstunde) schaltet die Crumb auf compact
+                  (Tap-Hoehe 44->20px), damit #anfrage mit erster Zeile in den 730er-Fold
+                  rueckt. Reiner Abstand-Hebel, Default false = andere Seiten unveraendert. */}
+              <Breadcrumb trail={crumbs} compact={tight || tightBottom} />
             </motion.div>
           ) : null}
           {/* Kein Hero-Eyebrow mehr (Meta-Kritik 2026-08-07). Er stand hier auf JEDER Unterseite
@@ -419,7 +484,7 @@ export function HeroFrame({
               </div>
             </div>
           ) : (
-            <div className={cn('flex flex-col', center ? 'items-center gap-6' : 'gap-6', wide && 'gap-7')}>
+            <div className={cn('flex flex-col', center ? 'items-center gap-6' : (dense ? (tight ? 'gap-2.5' : 'gap-4') : 'gap-6'), wide && (dense ? 'gap-5' : 'gap-7'))}>
               {heading}
               {leadEl}
               {ctas}
@@ -428,7 +493,10 @@ export function HeroFrame({
             </div>
           )}
 
-          {factList ? <div className="mt-10">{factList}</div> : null}
+          {/* R70: bei dense 24px statt 40px ueber den Zahlen — sonst schneidet das Foto-Band
+              im 730-Fold die grauen Unterzeilen der Preis-Leiste ab. Nur /preise nutzt
+              dense+facts, alle anderen Achsen unveraendert. */}
+          {factList ? <div className={dense ? 'mt-6' : 'mt-10'}>{factList}</div> : null}
         </motion.div>
       </Shell>
 
@@ -468,6 +536,7 @@ export function SectionHead({
   lead,
   center = false,
   className,
+  tight = false,
 }: {
   eyebrow?: string;
   title: string;
@@ -475,6 +544,10 @@ export function SectionHead({
   lead?: string;
   center?: boolean;
   className?: string;
+  /** R84 (nur /schnupperstunde): kuerzt den Abstand ueber der H2 (mt-5 -> mt-0) und zum
+      Lead (mt-4 -> mt-2), damit #anfrage mit erster Zeile in den 730er-Fold rueckt.
+      Reiner Abstand-Hebel, Default false = alle anderen Seiten unveraendert. */
+  tight?: boolean;
 }) {
   return (
     <div className={cn(center ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl', className)}>
@@ -483,10 +556,10 @@ export function SectionHead({
           <Eyebrow>{eyebrow}</Eyebrow>
         </div>
       ) : null}
-      <h2 className={cn('mt-5', sectionTitle, MEASURE_L, center && 'mx-auto')}>
+      <h2 className={cn(tight ? 'mt-0' : 'mt-5', sectionTitle, MEASURE_L, center && 'mx-auto')}>
         {title} {titleAccent ? <TitleAccent>{titleAccent}</TitleAccent> : null}
       </h2>
-      {lead ? <p className={cn('mt-4 text-pretty', sectionLead)}>{lead}</p> : null}
+      {lead ? <p className={cn(tight ? 'mt-2' : 'mt-4', 'text-pretty', sectionLead)}>{lead}</p> : null}
     </div>
   );
 }
@@ -594,7 +667,7 @@ export function FaqBlock({
                     /tmp/r7-fab-faq.png — auf /privatstunden, /shows-animationen und
                     /kursaufbau gemessen). Nur der Zeileninhalt rueckt ein, Klickflaeche und
                     Trennlinien bleiben voll breit. */}
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left font-display text-lg font-bold text-[var(--color-ink)] marker:content-none lg:pr-32 [&::-webkit-details-marker]:hidden">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left type-h3 text-[var(--color-ink)] marker:content-none lg:pr-32 [&::-webkit-details-marker]:hidden">
                   {f.q}
                   <ChevronDown
                     size={20}
@@ -647,7 +720,7 @@ export function ReassuranceBand({ variant = 'soft' }: { variant?: 'soft' | 'warm
               className="border-b border-[var(--color-line)] py-7 md:border-b-0 md:border-r md:px-7 md:py-8 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
             >
               <BeatMark />
-              <h3 className="mt-4 font-display text-xl font-bold leading-tight text-balance text-[var(--color-ink)]">{t}</h3>
+              <h3 className="type-h3 mt-4 text-[var(--color-ink)]">{t}</h3>
               <p className="mt-3 max-w-[42ch] text-pretty text-[0.96rem] leading-relaxed text-[var(--color-ink-muted)]">{b}</p>
             </motion.div>
           ))}
@@ -786,7 +859,7 @@ export function ClosingInvite({
           <motion.h2
             variants={item}
             className={cn(
-              'mx-auto mt-5 font-display text-3xl font-bold leading-[1.05] tracking-tight text-balance sm:text-4xl md:text-[2.75rem]',
+              'type-h2 mx-auto mt-5',
               night ? 'text-white' : 'text-[var(--color-ink)]',
               MEASURE_L,
             )}

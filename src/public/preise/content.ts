@@ -14,7 +14,7 @@
 import type { Lang } from '@/lib/i18n';
 
 // EIN Schnupper-Ziel sitewide (Master-Plan): Anker auf /kontakt.
-const SCHNUPPER_HREF = '/kontakt#schnupperstunde';
+const SCHNUPPER_HREF = '/schnupperstunde';
 
 export type PriceRow = { label: string; value?: string };
 export type PriceGroup = { label: string; rows: PriceRow[] };
@@ -95,9 +95,8 @@ export type PreiseContent = {
     /** Foto-Anker je Spalte (Kritiker final-1: "Preisstaffel in Karten mit Foto-Anker").
      *  `width`/`height` sind Pflicht: die beiden Spalten tragen unterschiedliche
      *  Dateiformate (hochkant vs quer), ein fester Wert im JSX waere fuer eine falsch (CLS). */
-    workshop: { title: string; body: string; rows: PriceRow[]; image: SizedImg };
-    social: { title: string; body: string; rows: PriceRow[]; foot: string; image: SizedImg };
-    cta: Cta;
+    workshop: { title: string; body: string; rows: PriceRow[]; image: SizedImg; cta: Cta };
+    social: { title: string; body: string; rows: PriceRow[]; foot: string; image: SizedImg; cta: Cta };
   };
   pass: {
     badge: string;
@@ -170,8 +169,12 @@ export const PREISE: Record<Lang, PreiseContent> = {
         // Hoehe stand aber laengst auf 10-12rem (160-192px) — der Mann rechts im weissen
         // Shirt verlor den Kopf. Band jetzt wirklich 18rem wie Salsa/Bachata; Position am
         // gerenderten 1440x288- und 390x160-Ausschnitt neu gemessen (Werte s. unten).
-        position: 'center 24%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[18rem]',
+        // R70-Nachzieh: Band-Hoehe wieder 14rem (224px). Die Luft zwischen Labels und
+        // Bandkante kommt NICHT aus der Band-Hoehe — der Band-Top haengt am Hero-Ende,
+        // nicht an der Hoehe. Die Luft liegt in kit.tsx: Shell pb-2 -> pb-6 bei dense
+        // (R70-Kommentar dort). Live gemessen: Labels enden y572, Band-Top y590.
+        position: 'center 38%',
+        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[14rem]',
       },
       cardLabel: 'Klar und übersichtlich',
       cardText: 'Alle Preise auf einen Blick. Den Rest klärst du im Kursplan oder per Nachricht.',
@@ -313,6 +316,9 @@ export const PREISE: Record<Lang, PreiseContent> = {
           height: 1600,
           position: 'center 20%',
         },
+        // R60: jede Karte traegt ihre eigene Aktion am Ende (statt EINEM Section-Knopf, der
+        // nur unter der linken Karte sass und die rechte ohne Aktion hoeher enden liess).
+        cta: { label: 'Events ansehen', href: '/events' },
       },
       social: {
         title: 'Danceflow Night',
@@ -329,8 +335,9 @@ export const PREISE: Record<Lang, PreiseContent> = {
           height: 1000,
           position: 'center 30%',
         },
+        // Eigene Aktion auf die bestehende Termin-Seite der Danceflow Night.
+        cta: { label: 'Termine ansehen', href: '/events-workshops/danceflow-night' },
       },
-      cta: { label: 'Events ansehen', href: '/events-workshops/danceflow-night' },
     },
     pass: {
       badge: 'Mehr tanzen, ein Preis',
@@ -394,7 +401,8 @@ export const PREISE: Record<Lang, PreiseContent> = {
     faq: [
       {
         q: 'Gibt es Studentenpreise?',
-        a: 'Ja, laut aktueller Preisliste gibt es reduzierte Preise für Schüler und Studenten.',
+        // R66: dieselben Zahlen wie in regular.groups (160/190, 270/320) — keine neue Zahl.
+        a: 'Ja. Die Staffel kostet für Schüler und Studenten CHF 160 statt 190, für Paare CHF 270 statt 320.',
       },
       {
         q: 'Sind Shows und Animationen pauschal bepreist?',
@@ -545,6 +553,7 @@ export const PREISE: Record<Lang, PreiseContent> = {
           height: 1600,
           position: 'center 20%',
         },
+        cta: { label: 'See the events', href: '/events' },
       },
       social: {
         title: 'Danceflow Night',
@@ -561,8 +570,8 @@ export const PREISE: Record<Lang, PreiseContent> = {
           height: 1000,
           position: 'center 30%',
         },
+        cta: { label: 'See the dates', href: '/events-workshops/danceflow-night' },
       },
-      cta: { label: 'See the events', href: '/events-workshops/danceflow-night' },
     },
     pass: {
       badge: 'More dancing, one price',
@@ -610,7 +619,7 @@ export const PREISE: Record<Lang, PreiseContent> = {
     faq: [
       {
         q: 'Are there student prices?',
-        a: 'Yes, according to the current price list there are reduced prices for pupils and students.',
+        a: 'Yes. The term costs CHF 160 instead of 190 for pupils and students, CHF 270 instead of 320 for couples.',
       },
       {
         q: 'Are shows and animations priced as a flat rate?',

@@ -40,6 +40,7 @@ export type SeoKey =
   | 'tanzschuhe'
   | 'partys'
   | 'faq'
+  | 'schnupper'
   | 'admin'
   | 'booking'
   | 'bookingStatus'
@@ -55,7 +56,7 @@ export type SeoRouteConfig = {
   indexable: boolean;
 };
 
-export const SEO_ROUTE_CONFIG: Record<SeoKey, SeoRouteConfig> = {
+export const SEO_ROUTE_CONFIG = {
   home: { canonicalPath: '/', indexable: true },
   courses: { canonicalPath: '/tanzkurse', indexable: true },
   salsa: { canonicalPath: '/tanzkurse/salsa', indexable: true },
@@ -79,6 +80,7 @@ export const SEO_ROUTE_CONFIG: Record<SeoKey, SeoRouteConfig> = {
   tanzschuhe: { canonicalPath: '/mehr/tanzschuhe', indexable: true },
   partys: { canonicalPath: '/mehr/partys', indexable: true },
   faq: { canonicalPath: '/faq', indexable: true },
+  schnupper: { canonicalPath: '/schnupperstunde', indexable: true },
   impressum: { canonicalPath: '/impressum', indexable: true },
   datenschutz: { canonicalPath: '/datenschutz', indexable: true },
   schedule: { canonicalPath: '/kursplan', indexable: true },
@@ -86,7 +88,7 @@ export const SEO_ROUTE_CONFIG: Record<SeoKey, SeoRouteConfig> = {
   booking: { canonicalPath: '/buchung', indexable: false },
   bookingStatus: { canonicalPath: '/buchung', indexable: false },
   notFound: { canonicalPath: '/404', indexable: false },
-};
+} as const satisfies Record<SeoKey, SeoRouteConfig>;
 
 export const DEFAULT_SOCIAL_IMAGE = {
   url: `${ASSET_ORIGIN}/photos/showcase/hp-05.webp`,
@@ -102,7 +104,7 @@ export const DEFAULT_SOCIAL_IMAGE = {
 /** Kompatibler String-Export für bestehende Importe. */
 export const SOCIAL_IMAGE = DEFAULT_SOCIAL_IMAGE.url;
 
-export const SEO_META: Record<SeoKey, Record<Lang, Meta>> = {
+export const SEO_META = {
   home: {
     de: {
       title: 'Tanzschule Basel: Salsa, Bachata & Heels | Salsaflow',
@@ -412,6 +414,18 @@ export const SEO_META: Record<SeoKey, Record<Lang, Meta>> = {
         'Answers about the trial class, dance partner, levels, prices, shoes, how courses run, events and contact at Salsaflow Basel.',
     },
   },
+  schnupper: {
+    de: {
+      title: 'Gratis Schnupperstunde in Basel | Salsaflow',
+      description:
+        'Probier Salsa, Bachata oder Heels gratis bei Salsaflow in Basel. Eine Stunde, ohne Verpflichtung, direkt am Bahnhof SBB.',
+    },
+    en: {
+      title: 'Free Trial Class in Basel | Salsaflow',
+      description:
+        'Try Salsa, Bachata or Heels for free at Salsaflow in Basel. One class, no commitment, right by Basel SBB.',
+    },
+  },
   admin: {
     de: {
       title: 'Admin | Salsaflow Dance Company',
@@ -452,7 +466,7 @@ export const SEO_META: Record<SeoKey, Record<Lang, Meta>> = {
       description: 'This page does not exist. Return home or find the right dance course directly.',
     },
   },
-};
+} as const satisfies Record<SeoKey, Record<Lang, Meta>>;
 
 export function canonicalUrlFor(page: SeoKey): string {
   return `${SITE_ORIGIN}${SEO_ROUTE_CONFIG[page].canonicalPath}`;

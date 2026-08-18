@@ -18,6 +18,7 @@ import type { Faq, Crumb, HeroCta } from '@/public/subpage/kit';
 
 type Img = { src: string; alt: string };
 type Theme = { label: string; hint: string; href: string };
+export type FaqColumn = { title: string; items: Faq[] };
 
 export type FaqPageContent = {
   seo: SeoKey;
@@ -45,6 +46,7 @@ export type FaqPageContent = {
     title: string;
     titleAccent?: string;
     items: Faq[];
+    columns: FaqColumn[];
   };
   closing: {
     title: string;
@@ -58,7 +60,7 @@ export type FaqPageContent = {
 /* Interne Ziel-Routen (echte App-Routen). Plan-Links wie /kursplan-buchung/ mappen auf /kursplan. */
 const R = {
   kontakt: '/kontakt',
-  schnupper: '/kontakt#schnupperstunde',
+  schnupper: '/schnupperstunde',
   kursplan: '/kursplan',
   tanzkurse: '/tanzkurse',
   preise: '/preise',
@@ -67,7 +69,7 @@ const R = {
   standort: '/kontakt/standort-raumvermietung',
 };
 
-export const FAQ_CONTENT: Record<Lang, FaqPageContent> = {
+export const FAQ_CONTENT = {
   de: {
     seo: 'faq',
     crumb: { label: 'FAQ', href: '/faq' },
@@ -100,113 +102,113 @@ export const FAQ_CONTENT: Record<Lang, FaqPageContent> = {
       eyebrow: 'FAQ',
       title: 'Häufige',
       titleAccent: 'Fragen',
-      items: [
+      items: [],
+      columns: [
         {
-          q: 'Kann ich einfach ausprobieren, ob Salsaflow zu mir passt?',
-          a: 'Ja. Die Gratis Schnupperstunde ist genau dafür gedacht. Du bekommst ein Gefühl für Kurs, Level und Atmosphäre, ohne dich direkt festlegen zu müssen.',
+          title: 'Einstieg, Partner, Level',
+          items: [
+            {
+              q: 'Kann ich einfach ausprobieren, ob Salsaflow zu mir passt?',
+              a: 'Ja. Die Gratis Schnupperstunde ist genau dafür gedacht. Du bekommst ein Gefühl für Kurs, Level und Atmosphäre, ohne dich direkt festlegen zu müssen.',
+            },
+            {
+              q: 'Muss ich schon tanzen können?',
+              a: 'Nein. Beginner-Kurse starten ohne Vorkenntnisse. Wichtig ist nur, dass du offen bist, Schritt für Schritt zu lernen.',
+            },
+            {
+              q: 'Wie viele Figuren lerne ich am Anfang?',
+              a: 'Weniger, als du denkst. Und das ist gut so. Am Anfang geht es um Führen und Folgen. Wer das kann, tanzt mit jeder Person, auch ohne eine einzige Figur. Die Figuren kommen dann von selbst.',
+            },
+            {
+              q: 'Wie buche ich eine Schnupperstunde?',
+              a: 'Über den Kursplan oder das Schnupperformular auf der Schnupperseite.',
+            },
+            {
+              q: 'Kann ich ohne Tanzpartner kommen?',
+              a: 'Ja. Du kannst dich auch alleine anmelden. Im Kurs wird auf eine gute Balance geachtet und du lernst mit wechselnden Partner:innen. Fehlt einmal jemand, fragen wir in unseren beiden Aushilfe-Chats: einer für Leader, einer für Follower. Meistens springt schnell jemand ein.',
+            },
+            {
+              q: 'Passe ich da rein, auch von meinem Alter her?',
+              a: 'Ja. Bei uns tanzen Menschen aller Altersgruppen ab etwa 12 Jahren. Du wirst vom ersten Abend an herzlich aufgenommen.',
+            },
+            {
+              q: 'Wie schnell komme ich voran?',
+              a: 'Schon nach einem Kurs spürst du den Fortschritt. Am schnellsten wirst du, wenn du dranbleibst und das Gelernte an den Danceflow Nights anwendest.',
+            },
+            {
+              q: 'Was ist, wenn ich mein Level nicht kenne?',
+              a: 'Dann frag uns kurz oder starte mit einer Schnupperstunde. Wir helfen dir, nicht zu hoch und nicht zu tief einzusteigen.',
+            },
+            {
+              q: 'Kann ich direkt in Intermediate starten?',
+              a: 'Wenn du passende Erfahrung hast, ja. Trotzdem lohnt sich bei Unsicherheit ein kurzer Level-Check.',
+            },
+            {
+              q: 'Wie lange dauert ein Kurs?',
+              a: 'Eine Kursstaffel dauert 8 Wochen mit einer Lektion à 60 Minuten pro Woche. Die aktuellen Staffeln findest du im Kursplan.',
+            },
+            {
+              q: 'Was passiert, wenn ich eine Lektion verpasse?',
+              a: 'Melde dich frühzeitig. Ob du eine Lektion nachholen kannst, hängt von Kurs, Level und freiem Platz ab. Sag uns kurz Bescheid, dann finden wir eine Lösung.',
+            },
+            {
+              q: 'Wo finden die Kurse statt?',
+              a: 'In den Salsaflow-Studios direkt am Bahnhof Basel SBB. Auf der Kurskarte siehst du, in welchem Studio dein Kurs läuft.',
+            },
+          ],
         },
         {
-          q: 'Muss ich schon tanzen können?',
-          a: 'Nein. Beginner-Kurse starten ohne Vorkenntnisse. Wichtig ist nur, dass du offen bist, Schritt für Schritt zu lernen.',
-        },
-        {
-          // Aus dem Kunden-Onboarding, Feld "kundenIrrtum": "Sie denken sie muessen Figuren
-          // lernen, aber eigentlich muessen sie nur fuehren und fuehren lassen lernen. sie denken
-          // man kann es perfekt nach der lektion, aber uebung macht den meister."
-          // Der wichtigste Erwartungs-Irrtum laut Kunde — stand bisher nirgends auf der Seite.
-          q: 'Wie viele Figuren lerne ich am Anfang?',
-          // Em-Dash raus (Projektregel "keine Em-Dashes"; Critic Runde 16, Item 2).
-          a: 'Weniger, als du denkst. Und das ist gut so. Am Anfang geht es um Führen und Folgen. Wer das kann, tanzt mit jeder Person, auch ohne eine einzige Figur. Die Figuren kommen dann von selbst.',
-        },
-        {
-          q: 'Wie buche ich eine Schnupperstunde?',
-          a: 'Über den Kursplan oder das Schnupperformular. Auf der Kurskarte siehst du, wo Schnuppern möglich ist.',
-        },
-        {
-          // "Wir organisieren Aushilfe" stand mehrfach als Behauptung. WIE es laeuft, stand
-          // nirgends. Aus dem Onboarding, Feld "methode": "man hat einen leader aushilfe chat
-          // und einene follower aushilfe chat". Der Beweis macht das Versprechen glaubhaft.
-          q: 'Kann ich ohne Tanzpartner kommen?',
-          a: 'Ja. Du kannst dich auch alleine anmelden. Im Kurs wird auf eine gute Balance geachtet und du lernst mit wechselnden Partner:innen. Fehlt einmal jemand, fragen wir in unseren beiden Aushilfe-Chats: einer für Leader, einer für Follower. Meistens springt schnell jemand ein.',
-        },
-        {
-          // Uebernommen von /kontakt. Beide Bedenken stammen woertlich aus dem Onboarding
-          // (Feld "kundenZurueck") und standen bisher nur auf der Kontaktseite — also nicht im
-          // FAQPage-Schema, das nur /faq ausspielt.
-          q: 'Passe ich da rein, auch von meinem Alter her?',
-          a: 'Ja. Bei uns tanzen Menschen aller Altersgruppen ab etwa 12 Jahren. Du wirst vom ersten Abend an herzlich aufgenommen.',
-        },
-        {
-          q: 'Wie schnell komme ich voran?',
-          a: 'Schon nach einem Kurs spürst du den Fortschritt. Am schnellsten wirst du, wenn du dranbleibst und das Gelernte an den Danceflow Nights anwendest.',
-        },
-        {
-          q: 'Was ist, wenn ich mein Level nicht kenne?',
-          a: 'Dann frag uns kurz oder starte mit einer Schnupperstunde. Wir helfen dir, nicht zu hoch und nicht zu tief einzusteigen.',
-        },
-        {
-          q: 'Kann ich direkt in Intermediate starten?',
-          a: 'Wenn du passende Erfahrung hast, ja. Trotzdem lohnt sich bei Unsicherheit ein kurzer Level-Check.',
-        },
-        {
-          q: 'Wie lange dauert ein Kurs?',
-          a: 'Eine Kursstaffel dauert 8 Wochen mit einer Lektion à 60 Minuten pro Woche. Die aktuellen Staffeln findest du im Kursplan.',
-        },
-        {
-          q: 'Was passiert, wenn ich eine Lektion verpasse?',
-          a: 'Melde dich frühzeitig. Ob du eine Lektion nachholen kannst, hängt von Kurs, Level und freiem Platz ab. Sag uns kurz Bescheid, dann finden wir eine Lösung.',
-        },
-        {
-          q: 'Wo finden die Kurse statt?',
-          a: 'In den Salsaflow-Studios direkt am Bahnhof Basel SBB. Auf der Kurskarte siehst du, in welchem Studio dein Kurs läuft.',
-        },
-        {
-          q: 'Was kostet ein Kurs?',
-          a: 'Alle aktuellen Preise findest du auf der Preisseite.',
-        },
-        {
-          q: 'Gibt es Studentenpreise?',
-          a: 'Ja. Für Schülerinnen, Schüler und Studierende gibt es reduzierte Preise. Die Details stehen auf der Preisseite.',
-        },
-        {
-          q: 'Was kostet die Danceflow Night?',
-          a: 'Für die Danceflow Night gibt es unterschiedliche Preise für Salsaflow-Schüler:innen und Gäste. Die aktuellen Beträge stehen auf der Preisseite.',
-        },
-        {
-          q: 'Brauche ich Tanzschuhe für den Start?',
-          a: 'Nicht zwingend. Für die erste Stunde reichen oft saubere, bequeme Schuhe. Später können Tanzschuhe helfen, besonders bei Drehungen und Heels.',
-        },
-        {
-          q: 'Was ziehe ich zum Kurs an?',
-          a: 'Bequeme Kleidung, in der du dich gut bewegen kannst. Für Heels gelten eigene Hinweise zu Schuhen und Sicherheit.',
-        },
-        {
-          q: 'Kann ich mit Strassenschuhen ins Studio?',
-          a: 'Nur wenn sie sauber und für drinnen geeignet sind. So schützen wir den Tanzboden.',
-        },
-        {
-          q: 'Was ist die Danceflow Night?',
-          a: 'Ein regelmässiger Social-Dance-Abend bei Salsaflow mit Salsa, Bachata und Community.',
-        },
-        {
-          q: 'Sind Events auch für Gäste offen?',
-          a: 'Viele Events sind auch für Gäste offen. Auf der jeweiligen Eventkarte siehst du, ob ein Abend offen ist.',
-        },
-        {
-          q: 'Was ist der Unterschied zwischen Workshop und Kurs?',
-          a: 'Ein Kurs läuft über mehrere Wochen. Ein Workshop fokussiert ein Thema an einem bestimmten Termin.',
-        },
-        {
-          q: 'Wie erreiche ich Salsaflow?',
-          a: 'Über das Kontaktformular, per E-Mail an info@salsaflow-dc.com, telefonisch oder über Social Media. Alle Wege findest du auf der Kontaktseite.',
-        },
-        {
-          q: 'Wo ist Salsaflow?',
-          a: 'Direkt am Bahnhof Basel SBB. Die genaue Anfahrt findest du auf der Standortseite.',
-        },
-        {
-          q: 'Kann ich Räume mieten?',
-          a: 'Ja. Räume kannst du für Tanz, Workshops oder Proben anfragen. Die Details stehen auf der Standort- und Raumvermietungsseite.',
+          title: 'Preise, Schuhe, Events, Kontakt',
+          items: [
+            {
+              q: 'Was kostet ein Kurs?',
+              a: 'Alle aktuellen Preise findest du auf der Preisseite.',
+            },
+            {
+              q: 'Gibt es Studentenpreise?',
+              a: 'Ja. Für Schülerinnen, Schüler und Studierende gibt es reduzierte Preise. Die Details stehen auf der Preisseite.',
+            },
+            {
+              q: 'Was kostet die Danceflow Night?',
+              a: 'Für die Danceflow Night gibt es unterschiedliche Preise für Salsaflow-Schüler:innen und Gäste. Die aktuellen Beträge stehen auf der Preisseite.',
+            },
+            {
+              q: 'Brauche ich Tanzschuhe für den Start?',
+              a: 'Nicht zwingend. Für die erste Stunde reichen oft saubere, bequeme Schuhe. Später können Tanzschuhe helfen, besonders bei Drehungen und Heels.',
+            },
+            {
+              q: 'Was ziehe ich zum Kurs an?',
+              a: 'Bequeme Kleidung, in der du dich gut bewegen kannst. Für Heels gelten eigene Hinweise zu Schuhen und Sicherheit.',
+            },
+            {
+              q: 'Kann ich mit Strassenschuhen ins Studio?',
+              a: 'Nur wenn sie sauber und für drinnen geeignet sind. So schützen wir den Tanzboden.',
+            },
+            {
+              q: 'Was ist die Danceflow Night?',
+              a: 'Ein regelmässiger Social-Dance-Abend bei Salsaflow mit Salsa, Bachata und Community.',
+            },
+            {
+              q: 'Sind Events auch für Gäste offen?',
+              a: 'Viele Events sind auch für Gäste offen. Auf der jeweiligen Eventkarte siehst du, ob ein Abend offen ist.',
+            },
+            {
+              q: 'Was ist der Unterschied zwischen Workshop und Kurs?',
+              a: 'Ein Kurs läuft über mehrere Wochen. Ein Workshop fokussiert ein Thema an einem bestimmten Termin.',
+            },
+            {
+              q: 'Wie erreiche ich Salsaflow?',
+              a: 'Über das Kontaktformular, per E-Mail an info@salsaflow-dc.com, telefonisch oder über Social Media. Alle Wege findest du auf der Kontaktseite.',
+            },
+            {
+              q: 'Wo ist Salsaflow?',
+              a: 'Direkt am Bahnhof Basel SBB. Die genaue Anfahrt findest du auf der Standortseite.',
+            },
+            {
+              q: 'Kann ich Räume mieten?',
+              a: 'Ja. Räume kannst du für Tanz, Workshops oder Proben anfragen. Die Details stehen auf der Standort- und Raumvermietungsseite.',
+            },
+          ],
         },
       ],
     },
@@ -251,102 +253,113 @@ export const FAQ_CONTENT: Record<Lang, FaqPageContent> = {
       eyebrow: 'FAQ',
       title: 'Common',
       titleAccent: 'questions',
-      items: [
+      items: [],
+      columns: [
         {
-          q: 'Can I simply try out whether Salsaflow suits me?',
-          a: 'Yes. The free trial class is made exactly for that. You get a feel for the class, level and atmosphere without having to commit right away.',
+          title: 'Start, partner, level',
+          items: [
+            {
+              q: 'Can I simply try out whether Salsaflow suits me?',
+              a: 'Yes. The free trial class is made exactly for that. You get a feel for the class, level and atmosphere without having to commit right away.',
+            },
+            {
+              q: 'Do I already need to know how to dance?',
+              a: 'No. Beginner courses start with no experience. All that matters is that you are open to learning step by step.',
+            },
+            {
+              q: 'How many figures do I learn at the start?',
+              a: 'Fewer than you expect. And that is a good thing. At the start it is about leading and following. Once that works, you can dance with anyone, without a single figure. The figures follow on their own.',
+            },
+            {
+              q: 'How do I book a trial class?',
+              a: 'Through the schedule or the trial form on the trial-class page.',
+            },
+            {
+              q: 'Can I come without a dance partner?',
+              a: 'Yes. You can sign up on your own. The course keeps a good balance and you learn with changing partners. If someone is missing, we ask in our two stand-in chats: one for leaders, one for followers. Usually someone steps in quickly.',
+            },
+            {
+              q: 'Do I fit in, also in terms of my age?',
+              a: 'Yes. People of all ages from around 12 upwards dance with us. You are welcomed warmly from the very first evening.',
+            },
+            {
+              q: 'How fast do I make progress?',
+              a: 'You feel the progress after a single course. You get fastest by staying with it and using what you learned at the Danceflow Nights.',
+            },
+            {
+              q: 'What if I do not know my level?',
+              a: 'Then ask us briefly or start with a trial class. We help you not to start too high or too low.',
+            },
+            {
+              q: 'Can I start directly in intermediate?',
+              a: 'If you have the right experience, yes. Still, if you are unsure, a quick level check is worth it.',
+            },
+            {
+              q: 'How long does a course last?',
+              a: 'A course term runs for 8 weeks with one 60-minute lesson per week. You find the current terms in the schedule.',
+            },
+            {
+              q: 'What happens if I miss a lesson?',
+              a: 'Let us know early. Whether you can catch up a lesson depends on the course, level and free spots. Send us a quick note and we find a solution.',
+            },
+            {
+              q: 'Where do the courses take place?',
+              a: 'In the Salsaflow studios right by Basel SBB station. The course card shows you which studio your course is in.',
+            },
+          ],
         },
         {
-          q: 'Do I already need to know how to dance?',
-          a: 'No. Beginner courses start with no experience. All that matters is that you are open to learning step by step.',
-        },
-        {
-          q: 'How many figures do I learn at the start?',
-          a: 'Fewer than you expect. And that is a good thing. At the start it is about leading and following. Once that works, you can dance with anyone, without a single figure. The figures follow on their own.',
-        },
-        {
-          q: 'How do I book a trial class?',
-          a: 'Through the schedule or the trial form. The course card shows you where a trial is possible.',
-        },
-        {
-          q: 'Can I come without a dance partner?',
-          a: 'Yes. You can sign up on your own. The course keeps a good balance and you learn with changing partners. If someone is missing, we ask in our two stand-in chats: one for leaders, one for followers. Usually someone steps in quickly.',
-        },
-        {
-          q: 'Do I fit in, also in terms of my age?',
-          a: 'Yes. People of all ages from around 12 upwards dance with us. You are welcomed warmly from the very first evening.',
-        },
-        {
-          q: 'How fast do I make progress?',
-          a: 'You feel the progress after a single course. You get fastest by staying with it and using what you learned at the Danceflow Nights.',
-        },
-        {
-          q: 'What if I do not know my level?',
-          a: 'Then ask us briefly or start with a trial class. We help you not to start too high or too low.',
-        },
-        {
-          q: 'Can I start directly in intermediate?',
-          a: 'If you have the right experience, yes. Still, if you are unsure, a quick level check is worth it.',
-        },
-        {
-          q: 'How long does a course last?',
-          a: 'A course term runs for 8 weeks with one 60-minute lesson per week. You find the current terms in the schedule.',
-        },
-        {
-          q: 'What happens if I miss a lesson?',
-          a: 'Let us know early. Whether you can catch up a lesson depends on the course, level and free spots. Send us a quick note and we find a solution.',
-        },
-        {
-          q: 'Where do the courses take place?',
-          a: 'In the Salsaflow studios right by Basel SBB station. The course card shows you which studio your course is in.',
-        },
-        {
-          q: 'What does a course cost?',
-          a: 'You find all current prices on the prices page.',
-        },
-        {
-          q: 'Are there student prices?',
-          a: 'Yes. Pupils and students get reduced prices. The details are on the prices page.',
-        },
-        {
-          q: 'What does the Danceflow Night cost?',
-          a: 'The Danceflow Night has different prices for Salsaflow students and guests. The current amounts are on the prices page.',
-        },
-        {
-          q: 'Do I need dance shoes to start?',
-          a: 'Not necessarily. For the first class, clean, comfortable shoes are often enough. Later, dance shoes can help, especially with turns and heels.',
-        },
-        {
-          q: 'What do I wear to class?',
-          a: 'Comfortable clothes you can move well in. For heels there are separate notes on shoes and safety.',
-        },
-        {
-          q: 'Can I wear street shoes in the studio?',
-          a: 'Only if they are clean and suitable for indoors. That way we protect the dance floor.',
-        },
-        {
-          q: 'What is the Danceflow Night?',
-          a: 'A regular social-dance evening at Salsaflow with Salsa, Bachata and community.',
-        },
-        {
-          q: 'Are events open to guests too?',
-          a: 'Many events are open to guests too. The event card shows you whether an evening is open.',
-        },
-        {
-          q: 'What is the difference between a workshop and a course?',
-          a: 'A course runs over several weeks. A workshop focuses on one topic on a specific date.',
-        },
-        {
-          q: 'How do I reach Salsaflow?',
-          a: 'Through the contact form, by email at info@salsaflow-dc.com, by phone or via social media. You find all ways on the contact page.',
-        },
-        {
-          q: 'Where is Salsaflow?',
-          a: 'Right by Basel SBB station. You find the exact directions on the location page.',
-        },
-        {
-          q: 'Can I rent rooms?',
-          a: 'Yes. You can request rooms for dance, workshops or rehearsals. The details are on the location and room rental page.',
+          title: 'Prices, shoes, events, contact',
+          items: [
+            {
+              q: 'What does a course cost?',
+              a: 'You find all current prices on the prices page.',
+            },
+            {
+              q: 'Are there student prices?',
+              a: 'Yes. Pupils and students get reduced prices. The details are on the prices page.',
+            },
+            {
+              q: 'What does the Danceflow Night cost?',
+              a: 'The Danceflow Night has different prices for Salsaflow students and guests. The current amounts are on the prices page.',
+            },
+            {
+              q: 'Do I need dance shoes to start?',
+              a: 'Not necessarily. For the first class, clean, comfortable shoes are often enough. Later, dance shoes can help, especially with turns and heels.',
+            },
+            {
+              q: 'What do I wear to class?',
+              a: 'Comfortable clothes you can move well in. For heels there are separate notes on shoes and safety.',
+            },
+            {
+              q: 'Can I wear street shoes in the studio?',
+              a: 'Only if they are clean and suitable for indoors. That way we protect the dance floor.',
+            },
+            {
+              q: 'What is the Danceflow Night?',
+              a: 'A regular social-dance evening at Salsaflow with Salsa, Bachata and community.',
+            },
+            {
+              q: 'Are events open to guests too?',
+              a: 'Many events are open to guests too. The event card shows you whether an evening is open.',
+            },
+            {
+              q: 'What is the difference between a workshop and a course?',
+              a: 'A course runs over several weeks. A workshop focuses on one topic on a specific date.',
+            },
+            {
+              q: 'How do I reach Salsaflow?',
+              a: 'Through the contact form, by email at info@salsaflow-dc.com, by phone or via social media. You find all ways on the contact page.',
+            },
+            {
+              q: 'Where is Salsaflow?',
+              a: 'Right by Basel SBB station. You find the exact directions on the location page.',
+            },
+            {
+              q: 'Can I rent rooms?',
+              a: 'Yes. You can request rooms for dance, workshops or rehearsals. The details are on the location and room rental page.',
+            },
+          ],
         },
       ],
     },
@@ -358,4 +371,4 @@ export const FAQ_CONTENT: Record<Lang, FaqPageContent> = {
       secondary: { label: 'See the schedule', href: R.kursplan },
     },
   },
-};
+} as const satisfies Record<Lang, FaqPageContent>;

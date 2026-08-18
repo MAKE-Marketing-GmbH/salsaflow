@@ -50,9 +50,9 @@ export function StickyCta() {
       style={{ bottom: 'var(--cookie-banner-height, 0px)' }}
     >
       <a
-        href="/kontakt#schnupperstunde"
+        href="/schnupperstunde"
         tabIndex={show ? 0 : -1}
-        className="flex h-[52px] w-full items-center justify-center rounded-full bg-[var(--color-salsa)] text-base font-semibold text-white transition-colors hover:bg-[var(--color-salsa-500)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-paper-warm)]"
+        className="btn-base btn-primary h-[52px] w-full text-base"
       >
         {cta.trial}
       </a>

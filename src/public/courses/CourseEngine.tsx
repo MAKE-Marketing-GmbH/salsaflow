@@ -19,13 +19,35 @@
 //
 // Datenquelle unveraendert: /api/public/schedule (server/public.ts). Kein Preis (Dauerregel),
 // PII tabu (nur Tag/Stil/Level/Zeit/Lehrer-Vorname/Ort). DE+EN immer gemeinsam gepflegt.
+//
+// ---------------------------------------------------------------------------------------------
+// Umbau 2026-08-14 (Welle "geil"): STAFFEL-WECHSLER + WOCHEN-NAVIGATION.
+//
+// Der Kalender kannte bisher genau EINE Ansicht: die Woche, in der `today` liegt, und darin
+// jeden Slot als Faltung aus laufender + kommender Staffel. Was in der Staffel Oktober an einem
+// Dienstag laeuft, war damit nicht zu sehen — die Information stand nur als Badge
+// ("Nächster Start 12. Okt.") an einer Zeile, die die Kurse der AUGUST-Staffel beschreibt.
+//
+// Jetzt zwei echte Achsen ueber den Tages-Tabs:
+//   1. STAFFEL. Ein Umschalter je `terms[]`-Eintrag der API ("Staffel August" laufend,
+//      "Staffel Oktober" kommend). Die Auswahl filtert die Kurse HART auf `course.termId` —
+//      es wird also nicht mehr ueber Staffeln hinweg gefaltet, sondern eine Staffel gezeigt.
+//   2. WOCHE. Innerhalb der gewaehlten Staffel vor und zurueck. Die Wochen kommen aus den
+//      echten `nextDates` der Kurse (server/public.ts:134 liefert alle anstehenden Termine),
+//      hilfsweise aus dem Staffel-Zeitraum. Die Tages-Tabs tragen dadurch die DATEN der
+//      gewaehlten Woche, nicht mehr die der laufenden.
+//
+// Die Faltung bleibt INNERHALB einer Staffel bestehen (ein Slot = ein wiederkehrender Termin),
+// sie faltet nur nicht mehr ueber Staffeln hinweg. Der Buchungs-Flow ist unveraendert: er kennt
+// `/buchung?kurs=<id>`, und weil jede Kurs-ID zu genau einer Staffel gehoert, transportiert
+// schon die ID die gewaehlte Staffel.
 
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang, WEEKDAY_LABEL, formatDateI18n, levelLabelI18n, type Lang } from '@/lib/i18n';
 import {
-  buildScheduleDays,
+  addDaysISO,
   fetchSchedule,
   formatScheduleDay,
   weekdayKeyForISO,
@@ -35,6 +57,7 @@ import {
   embeddedSchedule,
 } from '@/lib/schedule';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
+import { WhatsAppIcon } from '@/public/site/BrandIcons';
 
 const WEEKDAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 type WeekdayKey = (typeof WEEKDAY_ORDER)[number];
@@ -47,8 +70,6 @@ const CAL: Record<Lang, {
   style: string;
   allStyles: string;
   noCoursesDay: string;
-  nextStart: string;
-  startsOn: string;
   lateEntry: string;
   full: string;
   free: string;
@@ -59,14 +80,22 @@ const CAL: Record<Lang, {
   until: string;
   teacherTba: string;
   beginner: string;
+  term: string;
+  termRunning: string;
+  termUpcoming: string;
+  week: string;
+  weekOf: string;
+  prevWeek: string;
+  nextWeek: string;
+  thisWeek: string;
+  termStartsOn: string;
+  noCoursesTerm: string;
 }> = {
   de: {
     day: 'Tag',
     style: 'Stil',
     allStyles: 'Alle Stile',
     noCoursesDay: 'An diesem Tag läuft gerade kein Kurs in dieser Auswahl.',
-    nextStart: 'Nächster Start',
-    startsOn: 'Start',
     lateEntry: 'Quereinstieg möglich',
     full: 'Ausgebucht',
     free: 'Plätze frei',
@@ -77,14 +106,22 @@ const CAL: Record<Lang, {
     until: 'bis',
     teacherTba: 'Lehrer folgt',
     beginner: 'Ideal zum Einsteigen',
+    term: 'Staffel',
+    termRunning: 'läuft',
+    termUpcoming: 'startet bald',
+    week: 'Woche',
+    weekOf: 'Woche ab',
+    prevWeek: 'Vorherige Woche',
+    nextWeek: 'Nächste Woche',
+    thisWeek: 'Aktuelle Woche',
+    termStartsOn: 'Diese Staffel startet am',
+    noCoursesTerm: 'In dieser Staffel steht noch kein Kurs im Plan.',
   },
   en: {
     day: 'Day',
     style: 'Style',
     allStyles: 'All styles',
     noCoursesDay: 'No class runs on this day in this selection.',
-    nextStart: 'Next start',
-    startsOn: 'Starts',
     lateEntry: 'Late entry possible',
     full: 'Fully booked',
     free: 'Spots available',
@@ -95,8 +132,60 @@ const CAL: Record<Lang, {
     until: 'until',
     teacherTba: 'Teacher to be announced',
     beginner: 'Perfect for starting out',
+    term: 'Term',
+    termRunning: 'running',
+    termUpcoming: 'starting soon',
+    week: 'Week',
+    weekOf: 'Week of',
+    prevWeek: 'Previous week',
+    nextWeek: 'Next week',
+    thisWeek: 'Current week',
+    termStartsOn: 'This term starts on',
+    noCoursesTerm: 'No class is scheduled in this term yet.',
   },
 };
+
+/** Kurzname der Staffel fuer den Umschalter. Die API liefert "Staffel August 2026"; im
+ *  Schalter steht die Jahreszahl schon im Datum darunter, sie wuerde die Pille nur breiter
+ *  machen. Englisch bekommt dieselbe Kuerzung ueber den Monatsnamen aus `startDate`. */
+const MONTH_LONG: Record<Lang, string[]> = {
+  de: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+};
+
+function termLabel(term: ScheduleTerm, lang: Lang): string {
+  const month = MONTH_LONG[lang][(Number(term.startDate.slice(5, 7)) - 1 + 12) % 12];
+  return lang === 'de' ? `Staffel ${month}` : `${month} term`;
+}
+
+/** Montag der Woche, in der `iso` liegt. UTC-Rechnung wie in lib/schedule.ts. */
+function mondayOf(iso: string): string {
+  const key = weekdayKeyForISO(iso);
+  const index = key ? WEEKDAY_ORDER.indexOf(key) : 0;
+  return addDaysISO(iso, -index);
+}
+
+/** Alle Kalenderwochen einer Staffel, als Montags-Datum. Basis sind die echten `nextDates`
+ *  der Kurse (die API rechnet sie inklusive Ferien-/Randlogik aus); liefert die Quelle keine —
+ *  z. B. beim eingebetteten Plan aus einem aelteren Deploy —, faellt die Rechnung auf den
+ *  Staffel-Zeitraum zurueck, damit die Navigation nie leer bleibt. */
+function termWeeks(term: ScheduleTerm, courses: ScheduleCourse[]): string[] {
+  const mondays = new Set<string>();
+  for (const course of courses) {
+    for (const date of course.nextDates ?? []) {
+      if (date >= term.startDate && date <= term.endDate) mondays.add(mondayOf(date));
+    }
+  }
+  if (mondays.size === 0) {
+    let cursor = mondayOf(term.startDate);
+    const guard = mondayOf(term.endDate);
+    while (cursor <= guard) {
+      mondays.add(cursor);
+      cursor = addDaysISO(cursor, 7);
+    }
+  }
+  return [...mondays].sort();
+}
 
 const TEACHER_PHOTOS: Record<string, string> = {
   aleks: '/photos/team/teacher-aleksandra.webp',
@@ -122,7 +211,7 @@ function portraitFor(teacher: ScheduleCourse['teachers'][number] | undefined, st
   if (teacher?.photoUrl) return { src: teacher.photoUrl, named: true };
   const name = teacher?.displayName.trim().toLowerCase();
   if (name && TEACHER_PHOTOS[name]) return { src: TEACHER_PHOTOS[name], named: true };
-  return { src: STYLE_PHOTOS[styleKey] ?? '/photos/2026/kurse-classfreude-01.webp', named: false };
+  return { src: STYLE_PHOTOS[styleKey] ?? '/photos/premium/offer-salsa-800.webp', named: false };
 }
 
 /* Kurzes Start-Datum fuer die Badge ("9. Sep." / "Sep 9"). Das lange Format aus
@@ -139,8 +228,11 @@ function shortDate(iso: string, lang: Lang): string {
   return lang === 'de' ? `${d}. ${month}` : `${month} ${d}`;
 }
 
-/** Ein Wochen-Slot: EIN wiederkehrender Termin im Stundenplan, ueber alle Staffeln hinweg.
- *  `instances` sind die konkreten Kurse (laufende + naechste Staffel) desselben Slots. */
+/** Ein Wochen-Slot: EIN wiederkehrender Termin im Stundenplan INNERHALB einer Staffel.
+ *  Bis 2026-08-14 faltete diese Struktur ueber Staffeln hinweg; seit dem Staffel-Wechsler
+ *  gehoert ein Slot genau einer Staffel, und `date` ist der konkrete Termin in der
+ *  gewaehlten Woche. Der doppelte Eintrag pro Slot (running + upcoming) verschwindet
+ *  dadurch weiterhin, nur eben ueber den Filter statt ueber die Faltung. */
 type WeekSlot = {
   key: string;
   weekday: string;
@@ -152,8 +244,9 @@ type WeekSlot = {
   phase: ScheduleCourse['phase'];
   full: boolean;
   lateEntry: boolean;
-  nextTerm: ScheduleTerm | undefined;
-  nextIsFirstStart: boolean;
+  /** Konkreter Termin dieses Slots in der gewaehlten Woche (ISO), sofern die Staffel dort
+   *  laeuft. Traegt das Datum, das der Besucher im Tages-Tab angeklickt hat. */
+  date: string | null;
 };
 
 /** Slot-Identitaet: gleicher Tag + gleiche Zeit + gleicher Stil + gleiches Level + gleiches
@@ -170,11 +263,15 @@ function slotKey(c: ScheduleCourse): string {
   ].join('|');
 }
 
-/** Faltet die 74 API-Kurse zu den ~37 Wochen-Slots. Der laufende Kurs ist die Anzeige-Basis
- *  (er beschreibt, was diese Woche im Studio passiert); die naechste Staffel liefert das
- *  Start-Datum. Ziel des CTA ist der Kurs, in den man wirklich einsteigen kann: der erste
- *  Termin mit freien Plaetzen, sonst der laufende (dann Warteliste). */
-function buildSlots(courses: ScheduleCourse[], termById: Map<string, ScheduleTerm>): WeekSlot[] {
+/** Faltet die Kurse EINER Staffel zu ihren Wochen-Slots und haengt an jeden Slot den
+ *  konkreten Termin der gewaehlten Woche.
+ *
+ *  `weekStart` ist der Montag der gewaehlten Woche. Der Termin gilt als echt, wenn er in
+ *  `nextDates` des Kurses steht (die API rechnet die Reihe in server/public.ts:134 aus).
+ *  Liefert die Quelle kein `nextDates`, faellt die Rechnung auf Montag + Wochentag-Offset
+ *  zurueck und prueft nur noch den Staffel-Zeitraum — so bleibt der Plan auch mit einem
+ *  aelteren eingebetteten Stand bedienbar. */
+function buildSlots(courses: ScheduleCourse[], term: ScheduleTerm | null, weekStart: string | null): WeekSlot[] {
   const groups = new Map<string, ScheduleCourse[]>();
   for (const c of courses) {
     const k = slotKey(c);
@@ -183,13 +280,23 @@ function buildSlots(courses: ScheduleCourse[], termById: Map<string, ScheduleTer
     else groups.set(k, [c]);
   }
 
+  const dateInWeek = (course: ScheduleCourse): string | null => {
+    if (!weekStart) return null;
+    const offset = WEEKDAY_ORDER.indexOf(course.weekday as WeekdayKey);
+    if (offset < 0) return null;
+    const iso = addDaysISO(weekStart, offset);
+    const dates = course.nextDates;
+    if (dates && dates.length) return dates.includes(iso) ? iso : null;
+    if (!term) return null;
+    return iso >= term.startDate && iso <= term.endDate ? iso : null;
+  };
+
   const slots: WeekSlot[] = [];
   for (const [key, list] of groups) {
-    const running = list.find((c) => c.phase === 'running');
-    const upcoming = list
-      .filter((c) => c.phase === 'upcoming')
-      .sort((a, b) => (termById.get(a.termId)?.startDate ?? '').localeCompare(termById.get(b.termId)?.startDate ?? ''))[0];
-    const primary = running ?? upcoming ?? list[0];
+    const primary = list[0];
+    if (!primary) continue;
+    // Ziel des CTA ist der Kurs, in den man wirklich einsteigen kann: freie Plaetze zuerst,
+    // sonst der Slot selbst (dann Warteliste).
     const cta = list.find((c) => c.status === 'open') ?? primary;
     slots.push({
       key,
@@ -203,10 +310,8 @@ function buildSlots(courses: ScheduleCourse[], termById: Map<string, ScheduleTer
       full: list.every((c) => c.status === 'full'),
       // Quereinstieg zaehlt nur fuer die LAUFENDE Staffel — bei einem Kurs, der erst startet,
       // ist "Quereinstieg" keine Information, da ist der Start das Argument.
-      lateEntry: !!running && running.allowsLateEntry,
-      nextTerm: upcoming ? termById.get(upcoming.termId) : undefined,
-      // Ohne laufende Staffel ist das Datum der erste Start, nicht der "naechste".
-      nextIsFirstStart: !running,
+      lateEntry: primary.phase === 'running' && list.some((c) => c.allowsLateEntry),
+      date: dateInWeek(primary),
     });
   }
 
@@ -233,6 +338,12 @@ function readDayParam(): string | null {
   return first && (WEEKDAY_ORDER as readonly string[]).includes(first) ? first : null;
 }
 
+/** ?staffel=<termId> macht eine Staffel-Ansicht teilbar (gleiche Idee wie ?tag= und ?stil=). */
+function readTermParam(): string | null {
+  if (typeof window === 'undefined') return null;
+  return new URLSearchParams(window.location.search).get('staffel')?.trim() || null;
+}
+
 export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void }) {
   const { lang } = useLang();
   const c = CAL[lang];
@@ -249,6 +360,11 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
   // der Tab sprang zurueck, ohne dass irgendetwas passierte (gemessen bei ?stil=heels +
   // Klick auf Montag: aria-selected blieb false, keine Meldung).
   const [dayPicked, setDayPicked] = useState(false);
+  // Gewaehlte Staffel. null = noch nicht gewaehlt, dann greift die laufende Staffel.
+  const [termId, setTermId] = useState<string | null>(() => readTermParam());
+  // Gewaehlte Woche als Montags-Datum. null = noch nicht gewaehlt, dann greift die Woche,
+  // in der `today` liegt (bzw. die erste Woche einer kommenden Staffel).
+  const [weekStart, setWeekStart] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -269,14 +385,47 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     load();
   }, []);
 
-  const termById = useMemo(
-    () => new Map((data?.terms ?? []).map((tm) => [tm.id, tm])),
-    [data],
+  /* ---------------------------------------------------------------- Staffel (Achse 1) */
+  // Sichtbare Staffeln in Startreihenfolge. Die API liefert sie bereits sortiert und
+  // gefiltert (nur published + nicht vorbei, server/public.ts:59).
+  const terms = useMemo(() => data?.terms ?? [], [data]);
+
+  // Gewaehlte Staffel: Auswahl des Besuchers, sonst die laufende, sonst die erste.
+  const activeTerm = useMemo(
+    () => terms.find((tm) => tm.id === termId)
+      ?? terms.find((tm) => tm.phase === 'running')
+      ?? terms[0]
+      ?? null,
+    [terms, termId],
   );
 
+  const termCourses = useMemo(
+    () => (data && activeTerm ? data.courses.filter((co) => co.termId === activeTerm.id) : []),
+    [data, activeTerm],
+  );
+
+  /* ---------------------------------------------------------------- Woche (Achse 2) */
+  // Die Wochen der gewaehlten Staffel, als Montags-Daten.
+  const weeks = useMemo(
+    () => (activeTerm ? termWeeks(activeTerm, termCourses) : []),
+    [activeTerm, termCourses],
+  );
+
+  // Aktive Woche: Auswahl des Besuchers, sonst die Woche von HEUTE (laufende Staffel),
+  // sonst die erste Woche der Staffel (kommende Staffel — dort liegt "heute" davor).
+  const activeWeek = useMemo(() => {
+    if (weekStart && weeks.includes(weekStart)) return weekStart;
+    if (!weeks.length) return null;
+    const todayMonday = data ? mondayOf(data.today) : null;
+    if (todayMonday && weeks.includes(todayMonday)) return todayMonday;
+    return weeks.find((w) => !todayMonday || w >= todayMonday) ?? weeks[0];
+  }, [weekStart, weeks, data]);
+
+  const weekIndex = activeWeek ? weeks.indexOf(activeWeek) : -1;
+
   const allSlots = useMemo(
-    () => (data ? buildSlots(data.courses, termById) : []),
-    [data, termById],
+    () => buildSlots(termCourses, activeTerm, activeWeek),
+    [termCourses, activeTerm, activeWeek],
   );
 
   // Gesamtzahl = Kurse pro Woche (Slots), nicht Staffel-Instanzen. Sonst steht im Hero "74 Kurse",
@@ -290,19 +439,19 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     [allSlots, styleKeys],
   );
 
-  // Tages-Leiste: jeder vorhandene Wochentag bekommt das naechste konkrete Datum innerhalb
-  // einer sichtbaren Staffel. So bleibt auch Samstag eindeutig, selbst wenn die API nur
-  // weekday + Staffel-Zeitraum liefert.
+  // Tages-Leiste: die sieben Kalendertage der GEWAEHLTEN Woche. Damit tragen die Tabs echte
+  // Daten der gewaehlten Staffel statt immer der laufenden. Tage ohne Kurs in dieser Staffel
+  // bekommen keinen Tab.
   const days = useMemo(() => {
-    if (!data) return [];
-    return buildScheduleDays(data.today)
-      .filter((d) => allSlots.some((s) => s.weekday === d.key))
-      .map((d) => ({
-        key: d.key as string,
-        count: byStyle.filter((s) => s.weekday === d.key).length,
-        date: d.date,
+    if (!data || !activeWeek) return [];
+    return WEEKDAY_ORDER
+      .filter((key) => allSlots.some((s) => s.weekday === key))
+      .map((key) => ({
+        key: key as string,
+        count: byStyle.filter((s) => s.weekday === key).length,
+        date: addDaysISO(activeWeek, WEEKDAY_ORDER.indexOf(key)),
       }));
-  }, [allSlots, byStyle, data]);
+  }, [allSlots, byStyle, data, activeWeek]);
 
   // Aktiver Tag.
   //  - Selbst angeklickter Tag gewinnt IMMER, auch wenn er leer ist (dann steht dort die
@@ -324,11 +473,12 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     return day ?? days[0]?.key ?? null;
   }, [day, dayPicked, days, data]);
 
-  // Aktiven Tag + Stil in die URL schreiben (teilbarer Plan), ohne History-Eintrag.
+  // Aktiven Tag + Stil + Staffel in die URL schreiben (teilbarer Plan), ohne History-Eintrag.
   useEffect(() => {
     if (typeof window === 'undefined' || !activeDay) return;
     const params = new URLSearchParams(window.location.search);
     params.set('tag', activeDay);
+    if (activeTerm) params.set('staffel', activeTerm.id);
     if (styleKeys.length) params.set('stil', styleKeys.join(','));
     else params.delete('stil');
     // Alt-Parameter aus der Filter-Sidebar-Zeit entfernen, damit keine toten Links entstehen.
@@ -336,7 +486,11 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     params.delete('level');
     const qs = params.toString();
     window.history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash);
-  }, [activeDay, styleKeys]);
+    // `activeTerm` gehoert in die Abhaengigkeiten, sonst schreibt der Effekt nach einem
+    // Staffel-Wechsel die ALTE Staffel-ID zurueck in die URL (gemessen: Klick auf
+    // "Staffel Oktober" liess ?staffel= auf der August-ID stehen, der geteilte Link
+    // oeffnete dann wieder August).
+  }, [activeDay, styleKeys, activeTerm]);
 
   const daySlots = useMemo(
     () => byStyle.filter((s) => s.weekday === activeDay),
@@ -356,21 +510,36 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     return [...map.entries()].map(([k, list]) => ({ key: k, start: list[0].startTime, end: list[0].endTime, slots: list }));
   }, [daySlots]);
 
-  // Staffel-Zeile: fast immer starten ALLE Kurse eines Tages am selben Datum (eine Staffel).
-  // Dann gehoert das Datum einmal ueber den Plan und nicht neunmal als Badge in jede Zeile
-  // ("Nächster Start 9. Sep." x9 war die monotonste Stelle der alten Liste). Nur wenn ein Kurs
-  // aus der Reihe faellt, traegt genau dieser weiterhin seine eigene Badge.
-  const commonStart = useMemo(() => {
-    const dates = daySlots.map((s) => s.nextTerm?.startDate).filter((d): d is string => !!d);
-    if (dates.length < 2 || dates.length !== daySlots.length) return null;
-    return dates.every((d) => d === dates[0]) ? dates[0] : null;
-  }, [daySlots]);
+  // Datum des aktiven Tages in der gewaehlten Woche — das ist der Termin, den die Kurszeilen
+  // dieses Tages tragen.
+  const activeDate = useMemo(
+    () => days.find((d) => d.key === activeDay)?.date ?? null,
+    [days, activeDay],
+  );
 
   if (loading) return <SkeletonCalendar />;
   if (error) return <ErrorState onRetry={load} />;
 
   return (
     <div>
+      {/* Achse 1 + 2 ueber den Tages-Tabs: erst welche Staffel, dann welche Woche. */}
+      <TermBar
+        terms={terms}
+        activeTerm={activeTerm}
+        onTerm={(id) => {
+          setTermId(id);
+          // Neue Staffel = neue Zeitachse. Woche und Tag werden wieder zum Vorschlag, sonst
+          // bliebe der Kalender auf einer Woche stehen, die es in der neuen Staffel nicht gibt.
+          setWeekStart(null);
+          setDayPicked(false);
+        }}
+        weeks={weeks}
+        weekIndex={weekIndex}
+        activeWeek={activeWeek}
+        onWeek={(iso) => setWeekStart(iso)}
+        today={data?.today ?? null}
+      />
+
       <DayBar
         days={days}
         active={activeDay}
@@ -395,24 +564,33 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
             : c.noCoursesDay}
         </h2>
 
-        {allSlots.length > 0 && byStyle.length === 0 ? (
+        {allSlots.length === 0 ? (
+          <TermEmpty term={activeTerm} />
+        ) : byStyle.length === 0 ? (
           <EmptyState onReset={() => setStyleKeys([])} />
         ) : blocks.length === 0 ? (
           <DayEmpty showReset={styleKeys.length > 0} onReset={() => setStyleKeys([])} />
         ) : (
           <>
-            {commonStart && (
-              <p className="mb-2 text-sm font-semibold text-[var(--color-ink-muted)]">
-                {lang === 'de'
-                  ? `Alle Kurse an diesem Tag laufen 8 Wochen · nächste Staffel startet am ${formatDateI18n(commonStart, lang)}`
-                  : `Every class on this day runs for 8 weeks · next term starts on ${formatDateI18n(commonStart, lang)}`}
-              </p>
-            )}
+            {/* EINE Zeile ueber dem Plan statt derselben Badge in jeder Kurszeile: welcher
+                konkrete Termin hier steht, und wann die gewaehlte Staffel laeuft. */}
+            <p className="mb-2 text-sm font-semibold text-[var(--color-ink-muted)]">
+              {activeDate ? formatDateI18n(activeDate, lang) : ''}
+              {activeTerm ? (
+                <>
+                  {activeDate ? ' · ' : ''}
+                  {termLabel(activeTerm, lang)}
+                  {activeTerm.phase === 'upcoming'
+                    ? ` · ${c.termStartsOn} ${formatDateI18n(activeTerm.startDate, lang)}`
+                    : ''}
+                </>
+              ) : null}
+            </p>
             <div className="border-t border-[var(--color-line)]">
               {blocks.map((b) => (
                 <TimeBlock key={b.key} start={b.start} end={b.end}>
                   {b.slots.map((s) => (
-                    <SlotRow key={s.key} slot={s} hideStart={!!commonStart} />
+                    <SlotRow key={s.key} slot={s} />
                   ))}
                 </TimeBlock>
               ))}
@@ -420,9 +598,130 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
           </>
         )}
       </section>
-      <ScheduleBottomCta
-        nextStart={commonStart ?? daySlots.find((slot) => slot.nextTerm)?.nextTerm?.startDate ?? null}
-      />
+      <ScheduleBottomCta nextStart={activeTerm?.phase === 'upcoming' ? activeTerm.startDate : null} />
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------------------------
+ * Staffel-Wechsler + Wochen-Navigation. Zwei Zeilen ueber den Tages-Tabs:
+ * "welche Staffel" ist die groebere Frage und steht darum oben, "welche Woche"
+ * darunter. Der aktive Staffel-Schalter traegt bg-salsa + text-white (DESIGN.md:
+ * Rot ist die Aktionsfarbe, kein Pastell).
+ * -------------------------------------------------------------------------- */
+function TermBar({
+  terms,
+  activeTerm,
+  onTerm,
+  weeks,
+  weekIndex,
+  activeWeek,
+  onWeek,
+  today,
+}: {
+  terms: ScheduleTerm[];
+  activeTerm: ScheduleTerm | null;
+  onTerm: (id: string) => void;
+  weeks: string[];
+  weekIndex: number;
+  activeWeek: string | null;
+  onWeek: (iso: string) => void;
+  today: string | null;
+}) {
+  const { lang } = useLang();
+  const c = CAL[lang];
+  const hasPrev = weekIndex > 0;
+  const hasNext = weekIndex >= 0 && weekIndex < weeks.length - 1;
+  const todayMonday = today ? mondayOf(today) : null;
+  const isCurrentWeek = !!activeWeek && activeWeek === todayMonday;
+
+  return (
+    <div className="mb-4 flex flex-col gap-3 sm:mb-5">
+      {terms.length > 1 ? (
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+          <span className="mr-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+            {c.term}
+          </span>
+          {terms.map((term) => {
+            const on = term.id === activeTerm?.id;
+            return (
+              <button
+                key={term.id}
+                type="button"
+                onClick={() => onTerm(term.id)}
+                aria-pressed={on}
+                data-testid={`term-${term.id}`}
+                className={cn(
+                  // min-h-11: gleiches Tap-Ziel wie die Stil-Chips darunter.
+                  'inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-1.5 text-[0.8rem] font-semibold transition-colors',
+                  on
+                    ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white'
+                    : 'border-[var(--color-line)] bg-white text-[var(--color-ink-muted)] hover:border-[var(--color-salsa)] hover:text-[var(--color-ink)]',
+                )}
+              >
+                {termLabel(term, lang)}
+                <span className={cn('text-[0.7rem] font-medium', on ? 'text-white/75' : 'text-[var(--color-ink-muted)]')}>
+                  {term.phase === 'running' ? c.termRunning : c.termUpcoming}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
+      {/* Wochen-Navigation. Mobil: Pfeile unter «Woche ab», links — sonst liegen sie
+          unter dem WhatsApp-Kreis. Ab sm: Text links, Pfeile rechts wie zuvor. */}
+      {weeks.length > 1 && activeWeek ? (
+        <div className="flex flex-col items-start gap-2 border-y border-[var(--color-line)] py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <p className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-[var(--color-ink)]">
+              {c.weekOf} {formatDateI18n(activeWeek, lang)}
+            </span>
+            <span className="mt-0.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-ink-muted)]">
+              {isCurrentWeek ? c.thisWeek : `${c.week} ${weekIndex + 1}/${weeks.length}`}
+            </span>
+          </p>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => hasPrev && onWeek(weeks[weekIndex - 1])}
+              disabled={!hasPrev}
+              aria-label={c.prevWeek}
+              data-testid="week-prev"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-line)] bg-white text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[var(--color-line)]"
+            >
+              <ChevronLeft size={18} strokeWidth={2} aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => hasNext && onWeek(weeks[weekIndex + 1])}
+              disabled={!hasNext}
+              aria-label={c.nextWeek}
+              data-testid="week-next"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--color-line)] bg-white text-[var(--color-ink)] transition-colors hover:border-[var(--color-ink)] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[var(--color-line)]"
+            >
+              <ChevronRight size={18} strokeWidth={2} aria-hidden />
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** Staffel ohne Kurse. Eigener Zustand statt DayEmpty: hier hilft kein Stil-Reset, weil
+ *  nicht der Filter leer ist, sondern die Staffel. */
+function TermEmpty({ term }: { term: ScheduleTerm | null }) {
+  const { lang } = useLang();
+  const c = CAL[lang];
+  return (
+    <div data-testid="schedule-term-empty" className="border-y border-[var(--color-line)] py-10">
+      <p className="text-base text-[var(--color-ink-muted)]">{c.noCoursesTerm}</p>
+      {term ? (
+        <p className="mt-1.5 text-sm text-[var(--color-ink-muted)]">
+          {termLabel(term, lang)} · {formatDateI18n(term.startDate, lang)}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -496,9 +795,10 @@ function DayBar({
                   on ? 'text-white/70' : 'text-[var(--color-ink-muted)]',
                 )}
               >
-                {/* Mobil nur "10.08.": das lange "Montag, 10. August · 9 Kurse" brach in
-                    der 3er-Spalte um (Critic 13.08.2026). */}
-                <span className="lg:hidden">{d.date.slice(8, 10)}.{d.date.slice(5, 7)}.</span>
+                {/* Mobil "10.08. · 9": das lange "Montag, 10. August · 9 Kurse" brach in der
+                    3er-Spalte um (Critic 13.08.2026). R55: die Kurszahl fehlte auf 390 ganz —
+                    leere und volle Tage sahen gleich aus. Kompakt als Zahl hinter dem Datum. */}
+                <span className="lg:hidden">{d.date.slice(8, 10)}.{d.date.slice(5, 7)}. · {d.count}</span>
                 <span className="hidden lg:inline">{d.count} {d.count === 1 ? c.classOne : c.classMany}</span>
               </span>
             </button>
@@ -598,7 +898,7 @@ function TimeBlock({ start, end, children }: { start: string; end: string; child
  * ein <span> (kein verschachtelter Link/Button). Der kleine Lehrpersonen-/Stil-Marker gibt
  * jeder Zeile einen eigenen visuellen Anker, auch wenn die API kein Foto liefert.
  * -------------------------------------------------------------------------- */
-function SlotRow({ slot, hideStart = false }: { slot: WeekSlot; hideStart?: boolean }) {
+function SlotRow({ slot }: { slot: WeekSlot }) {
   const { lang } = useLang();
   const c = CAL[lang];
   const course = slot.primary;
@@ -609,6 +909,12 @@ function SlotRow({ slot, hideStart = false }: { slot: WeekSlot; hideStart?: bool
   const beginner = course.levelCategory === 'beginner';
 
   return (
+    /* Der Buchungs-Flow ist bewusst UNVERAENDERT: /buchung liest genau einen Parameter
+       (`kurs`, BookingPanel.tsx:125). Eine eigene Termin-Uebergabe waere ein Umbau dieses
+       Flows und ist hier nicht beauftragt — sie ist auch nicht noetig, weil jede Kurs-ID zu
+       genau EINER Staffel gehoert (server/public.ts:119 setzt `termId` je Kurs). Der Klick
+       aus der Oktober-Ansicht traegt also die Oktober-Kurs-ID und damit die richtige Staffel.
+       Was der Flow heute nicht kennt, ist die einzelne Lektion innerhalb der Staffel. */
     <a
       href={`/buchung?kurs=${encodeURIComponent(slot.cta.id)}`}
       data-testid="course-card"
@@ -616,11 +922,12 @@ function SlotRow({ slot, hideStart = false }: { slot: WeekSlot; hideStart?: bool
       data-cta-course-id={slot.cta.id}
       data-phase={slot.phase}
       data-weekday={slot.weekday}
+      data-date={slot.date ?? undefined}
       data-style={slot.styleKey}
       className={cn(
         'group flex flex-col gap-2 border-b border-[var(--color-line)] px-4 py-3 transition-colors last:border-b-0 sm:flex-row sm:items-center sm:gap-5 sm:px-5 sm:py-3.5',
         beginner
-          ? 'bg-[var(--color-paper-warm)] hover:bg-[var(--color-salsa-50)]'
+          ? 'bg-[var(--color-paper-warm)] hover:border-[var(--color-salsa)]'
           : 'bg-white hover:bg-[var(--color-bg-soft)]',
       )}
     >
@@ -638,11 +945,10 @@ function SlotRow({ slot, hideStart = false }: { slot: WeekSlot; hideStart?: bool
             <Badge tone={slot.full ? 'muted' : 'strong'}>{slot.full ? c.full : c.free}</Badge>
             {beginner && <Badge tone="outline">{c.beginner}</Badge>}
             {slot.lateEntry && <Badge tone="outline">{c.lateEntry}</Badge>}
-            {slot.nextTerm && !hideStart && (
-              <Badge tone="outline">
-                {`${slot.nextIsFirstStart ? c.startsOn : c.nextStart} ${shortDate(slot.nextTerm.startDate, lang)}`}
-              </Badge>
-            )}
+            {/* Termin dieser Zeile in der gewaehlten Woche. Er ersetzt die alte
+                "Nächster Start"-Badge: die stand neunmal identisch untereinander und
+                beschrieb eine ANDERE Staffel als die Zeile, an der sie hing. */}
+            {slot.date && <Badge tone="outline">{shortDate(slot.date, lang)}</Badge>}
           </span>
         </span>
       </span>
@@ -727,7 +1033,7 @@ function ScheduleBottomCta({ nextStart }: { nextStart: string | null }) {
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-salsa-300)]">
           {lang === 'de' ? 'Dein Einstieg bei Salsaflow' : 'Your start at Salsaflow'}
         </p>
-        <h2 className="mt-3 max-w-xl font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">
+        <h2 className="type-h2 mt-3 max-w-xl">
           {lang === 'de' ? 'Nicht länger suchen. Deinen Platz sichern.' : 'Stop searching. Save your spot.'}
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
@@ -748,13 +1054,13 @@ function ScheduleBottomCta({ nextStart }: { nextStart: string | null }) {
         <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
           <a
             href="/buchung"
-            className="group inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-salsa)] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-500)]"
+            className="btn-base btn-primary group px-6 py-2.5 text-sm"
           >
             {lang === 'de' ? 'Platz sichern' : 'Book your spot'}
             <ArrowRight size={16} strokeWidth={2} aria-hidden className="ml-1.5 transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
           </a>
           <a
-            href="/kontakt#schnupperstunde"
+            href="/schnupperstunde"
             className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/25 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:border-white"
           >
             {lang === 'de' ? 'Gratis Schnupperstunde' : 'Free trial class'}
@@ -821,7 +1127,7 @@ function DayEmpty({ showReset, onReset }: { showReset: boolean; onReset: () => v
       {showReset && (
         <button
           onClick={onReset}
-          className="mt-4 rounded-full border border-[var(--color-ink)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-ink)] hover:text-white"
+          className="btn-base btn-outline mt-4 px-5 py-2.5 text-sm"
         >
           {CAL[lang].allStyles}
         </button>
@@ -841,7 +1147,7 @@ function EmptyState({ onReset }: { onReset: () => void }) {
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         <button
           onClick={onReset}
-          className="t-hover rounded-full border border-[var(--color-ink)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-ink)] hover:text-white"
+          className="btn-base btn-outline px-5 py-2.5 text-sm"
         >
           {t.reset}
         </button>
@@ -871,7 +1177,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
             <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[var(--color-salsa)]" />
             {eyebrow}
           </span>
-          <h3 id="schedule-error-title" className="mt-4 font-display text-2xl leading-tight text-[var(--color-ink)] sm:text-[1.7rem]">
+          <h3 id="schedule-error-title" className="mt-4 type-h3 text-[var(--color-ink)]">
             {headline}
           </h3>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-[var(--color-ink-muted)]">
@@ -905,8 +1211,9 @@ function WhatsappLink({ children }: { children: React.ReactNode }) {
       href={WHATSAPP_HREF}
       target="_blank"
       rel="noreferrer"
-      className="t-hover inline-flex items-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)]"
+      className="btn-base btn-primary gap-2 px-5 py-2.5 text-sm"
     >
+      <WhatsAppIcon className="h-4 w-4 shrink-0" />
       {children}
     </a>
   );

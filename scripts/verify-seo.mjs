@@ -16,7 +16,7 @@ function read(file) {
 
 const sitemap = read(path.join(dist, 'sitemap.xml'));
 const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
-check(urls.length === 26, `Sitemap hat ${urls.length} statt 26 kanonischen Routen.`);
+check(urls.length === 27, `Sitemap hat ${urls.length} statt 27 kanonischen Routen.`);
 check(new Set(urls).size === urls.length, 'Sitemap enthält doppelte URLs.');
 
 for (const rawUrl of urls) {

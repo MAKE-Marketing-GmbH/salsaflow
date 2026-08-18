@@ -81,7 +81,6 @@ export type CollabsContent = {
 export const COLLABS: Record<Lang, CollabsContent> = {
   de: {
     crumbs: [
-      { label: 'Mehr', href: '/mehr' },
       { label: 'Collabs', href: '/mehr/collabs' },
     ],
     hero: {
@@ -173,7 +172,6 @@ export const COLLABS: Record<Lang, CollabsContent> = {
   },
   en: {
     crumbs: [
-      { label: 'More', href: '/mehr' },
       { label: 'Collabs', href: '/mehr/collabs' },
     ],
     hero: {

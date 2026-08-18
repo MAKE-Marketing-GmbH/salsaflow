@@ -81,7 +81,7 @@ const R = {
   heelsPlan: '/kursplan?stil=heels',
   tanzschuhe: '/mehr/tanzschuhe',
   kontakt: '/kontakt',
-  schnupper: '/kontakt#schnupperstunde',
+  schnupper: '/schnupperstunde',
   heelsPage: '/tanzkurse/heels',
 };
 
@@ -114,7 +114,13 @@ export const HEELS: Record<Lang, HeelsContent> = {
         // 0% statt 15%: auch 15% kappte der Frau rechts (weisse Bluse) noch den
         // Oberkopf; bei 0% sind Pony und Stirn ganz (Critic Runde 12, Item 1 — am
         // 1440x480-Ausschnitt geprueft).
-        position: 'center 0%',
+        // R74 (Fold 1440x730): 0% zeigte im 217px-Streifen (bandTop 513) nur Haar und
+        // Stirn, die Gesichter lagen UNTER dem Fold. Live-Reihe 0/8/12/14/20: erst ab
+        // ~12% tragen die Koepfe Kinn mit Luft — bei 12% zeigen Frontfrau (orange),
+        // Frau schwarz und Frau weiss alle Auge/Nase/Mund/Kinn mit Hals, kein Kinn auf
+        // der 730er-Kante. 14% rutscht die weisse Bluse oben schon wieder ran, 20%
+        // kappt sie. Motiv, Hoehe (30rem Default), Copy, Chips, Knoepfe unberuehrt.
+        position: 'center 12%',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Sicher stehen, Haltung finden, freier bewegen.',
@@ -226,7 +232,11 @@ export const HEELS: Record<Lang, HeelsContent> = {
         // 0% statt 15%: auch 15% kappte der Frau rechts (weisse Bluse) noch den
         // Oberkopf; bei 0% sind Pony und Stirn ganz (Critic Runde 12, Item 1 — am
         // 1440x480-Ausschnitt geprueft).
-        position: 'center 0%',
+        // R74 (Fold 1440x730): 0% zeigte im 217px-Streifen (bandTop 513) nur Haar und
+        // Stirn. Live-Reihe: erst ab ~12% tragen die Koepfe Kinn mit Luft (Frontfrau,
+        // Frau schwarz, Frau weiss alle mit Hals, kein Kinn auf der Kante). Motiv,
+        // Hoehe, Copy, Chips unberuehrt. DE/EN identisch gesetzt (gleiche Geometrie).
+        position: 'center 12%',
       },
       cardLabel: 'Your start',
       cardText: 'Stand safely, find posture, move more freely.',

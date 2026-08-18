@@ -65,7 +65,7 @@ export function WhyGrid() {
           <motion.h2
             variants={item}
             className={cn(
-              'font-display text-[2.35rem] leading-[0.98] tracking-[-0.025em] text-[var(--color-ink)] sm:text-[3.25rem]',
+              'type-h2 text-[var(--color-ink)]',
               MEASURE_L,
             )}
           >
@@ -88,16 +88,16 @@ export function WhyGrid() {
               30..50 % der Hoehe, oben ist Decke/Licht, unten Parkett. */}
           <motion.img
             variants={item}
-            src="/photos/2026/community-diversitaet-01.webp"
+            src="/photos/2026/kurse-classfreude-01.webp"
             alt={
               de
-                ? 'Tanzende unterschiedlichen Alters auf der Fläche an einem Salsaflow-Abend'
-                : 'Dancers of different ages on the floor at a Salsaflow evening'
+                ? 'Beginner-Kurs im hellen Salsaflow-Studio, Gruppe tanzt gemeinsam'
+                : 'Beginner class in the bright Salsaflow studio, group dancing together'
             }
             width={1920}
             height={1280}
             loading="lazy"
-            className="mt-10 h-56 w-full rounded-[var(--radius-media)] object-cover object-[50%_42%] sm:h-72 lg:mt-12"
+            className="mt-5 h-56 w-full rounded-[var(--radius-media)] object-cover object-[center_42%] sm:h-72"
           />
         </Reveal>
 
@@ -105,15 +105,9 @@ export function WhyGrid() {
             zwischen den Spalten), nicht als vier volle Zeilen — dieselbe Trenner-Sprache wie
             in #community, aber ein anderes Feld. Unter sm bleibt der Stapel mit Zeilen-Trennern,
             weil zwei Spalten auf 390px die Headline zersaegen wuerden. */}
-        {/* Die zwei Zeilen teilen sich die Hoehe der linken Spalte (gemessen 592px), statt nach
-            Inhalt zu wachsen. `content-start` waere hier ein Verschlimmbessern und ist bewusst
-            NICHT gesetzt: mit der Regel endet das Paarfeld bei rund 340px, waehrend die linke
-            Spalte mit ihrem Foto bis 592px laeuft — am Crop nachgesehen entstand dadurch ein
-            rund 250px hohes, nach unten offenes Loch rechts, also genau die Art toter Flaeche,
-            die in dieser Datei schon mehrfach Befund war. Gestreckt liegen die beiden Reihen
-            zwischen Haarlinien, das Feld schliesst auf derselben Grundlinie wie das Foto ab,
-            und die Sektionshoehe bleibt unveraendert bei 720px. */}
-        <Reveal className="grid border-t border-[var(--color-line)] sm:grid-cols-2" stagger={0.07}>
+        {/* 2x2 waechst mit dem Text (content-start). Die Zellen nicht auf die Foto-Spalte
+            strecken — das zog die oberen Zellen in die Hoehe und liess Luft unter dem Text. */}
+        <Reveal className="grid content-start border-t border-[var(--color-line)] sm:grid-cols-2" stagger={0.07}>
           {w.items.map((point, index) => (
             <motion.article
               key={point.title}
@@ -126,7 +120,7 @@ export function WhyGrid() {
             >
               <h3
                 className={cn(
-                  'font-display text-[1.55rem] leading-[1.02] tracking-[-0.02em] text-[var(--color-ink)] sm:text-[1.7rem]',
+                  'type-h3 text-[var(--color-ink)]',
                   MEASURE_M,
                 )}
               >

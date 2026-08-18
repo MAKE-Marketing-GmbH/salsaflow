@@ -23,6 +23,37 @@ import { InstagramShowcase } from '@/public/social/InstagramShowcase';
 
 type Photo = { albumId: AlbumId; src: string; alt: string; width?: number; height?: number };
 type Filter = AlbumId | 'all';
+type Packed = { photo: Photo; index: number };
+
+function packColumns(items: Packed[], n: number): Packed[][] {
+  const cols: Packed[][] = Array.from({ length: n }, () => []);
+  const heights = Array.from({ length: n }, () => 0);
+  for (const item of items) {
+    const ratio = (item.photo.height ?? 1350) / (item.photo.width ?? 1080);
+    let slot = 0;
+    for (let i = 1; i < n; i++) if (heights[i] < heights[slot]) slot = i;
+    cols[slot].push(item);
+    heights[slot] += ratio;
+  }
+  return cols;
+}
+
+function useGalleryCols() {
+  const [n, setN] = useState(2);
+  useEffect(() => {
+    const lg = window.matchMedia('(min-width: 64rem)');
+    const sm = window.matchMedia('(min-width: 40rem)');
+    const apply = () => setN(lg.matches ? 4 : sm.matches ? 3 : 2);
+    apply();
+    lg.addEventListener('change', apply);
+    sm.addEventListener('change', apply);
+    return () => {
+      lg.removeEventListener('change', apply);
+      sm.removeEventListener('change', apply);
+    };
+  }, []);
+  return n;
+}
 
 export function PhotosPage() {
   const { lang } = useLang();
@@ -35,10 +66,26 @@ export function PhotosPage() {
   // Sichtbare Fotos aus der kuratierten Liste, gefiltert. "Alle" behaelt die gemischte
   // Reihenfolge (Abende, Kurse, Team, Shows im Wechsel); ein Filter zeigt nur sein Album.
   // Jedes Foto bringt seine eigene, echte Alt-Zeile mit (aus gallery/content.ts).
+  const colCount = useGalleryCols();
   const photos = useMemo<Photo[]>(() => {
     const base = filter === 'all' ? GALLERY_PHOTOS : GALLERY_PHOTOS.filter((p) => p.albumId === filter);
     return base.map((p) => ({ albumId: p.albumId, src: p.src, alt: lang === 'en' ? (p.altEn ?? p.alt) : p.alt, width: p.width, height: p.height }));
   }, [filter, lang]);
+  const packed = useMemo(
+    () => packColumns(photos.map((photo, index) => ({ photo, index })), colCount),
+    [photos, colCount],
+  );
+  const firstOfAlbum = useMemo(() => {
+    const seen = new Set<AlbumId>();
+    const first = new Set<string>();
+    for (const p of photos) {
+      if (!seen.has(p.albumId)) {
+        seen.add(p.albumId);
+        first.add(p.src);
+      }
+    }
+    return first;
+  }, [photos]);
 
   // Filterwechsel schliesst eine offene Lightbox (sonst zeigt der Index auf ein falsches Foto).
   function changeFilter(next: Filter) {
@@ -53,7 +100,7 @@ export function PhotosPage() {
       <main id="main" tabIndex={-1}>
         <GalleryHero />
 
-        <section className="bg-[var(--color-bg-soft)] pb-12 pt-12 sm:pb-14 sm:pt-16 lg:pb-16 lg:pt-20">
+        <section id="galerie" className="scroll-mt-24 bg-[var(--color-bg-soft)] pb-12 pt-12 sm:pb-14 sm:pt-16 lg:pb-16 lg:pt-20">
           <Shell>
             {/* Album-Filter */}
             <Reveal>
@@ -63,7 +110,7 @@ export function PhotosPage() {
                   variants={item}
                   // sm:pr-32: der fixe WhatsApp-FAB (rechte 140px-Zone) lag auf dem
                   // "Shows"-Chip (Critic Runde 6, Item 4).
-                  className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:flex sm:flex-wrap sm:justify-end sm:pr-32"
+                  className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end sm:pr-32"
                   role="group"
                   aria-label={lang === 'de' ? 'Album-Filter' : 'Album filter'}
                 >
@@ -102,55 +149,50 @@ export function PhotosPage() {
                   variants={item}
                   className="rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-3 shadow-[0_18px_55px_rgba(17,17,17,0.06)] sm:p-4"
                 >
-                  <ul className="columns-2 gap-3 sm:columns-3 sm:gap-4 lg:columns-4 xl:columns-5">
-                    {photos.map((p, i) => (
-                      <li key={`${filter}-${p.src}`} className="mb-3 break-inside-avoid sm:mb-4">
-                        <button
-                          type="button"
-                          onClick={() => setLightboxIndex(i)}
-                          aria-label={p.alt}
-                          data-testid="gallery-photo"
-                          className="group relative block w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] shadow-sm transition-shadow duration-[var(--dur-base)] hover:shadow-[0_16px_40px_-16px_rgba(17,17,17,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
-                        >
-                          <img
-                            src={p.src}
-                            alt={p.alt}
-                            /* Kein Zuschnitt mehr (13.08.2026). Vorher gab galleryTileAspect(i)
-                               jeder Kachel ein Format nach ihrer Position im Raster — ein
-                               Hochformat-Portraet konnte in einer 3:2-Kachel landen und verlor
-                               dort 53 % seiner Hoehe. Der Ausgleich `object-[center_30%]` half
-                               nur halb: gemessen klebte der Scheitel an der Oberkante.
-                               Die Galerie ist ein Masonry-Raster (columns), es braucht gar keine
-                               feste Kachelhoehe. Jedes Bild laeuft jetzt in seinem eigenen
-                               Format. Darum tragen alle 88 Eintraege in gallery/content.ts ihre
-                               echten Masse — ohne sie koennte der Browser die Hoehe nicht
-                               reservieren und das Raster wuerde beim Laden springen. */
-                            className="block h-auto w-full transition-transform duration-[var(--dur-slow)] ease-out group-hover:scale-[1.04]"
-                            width={p.width ?? 1080}
-                            height={p.height ?? 1350}
-                            loading="lazy"
-                          />
-                          {/* Klick-Affordance: leichtes Abdunkeln + Vergroessern-Chip signalisieren,
-                              dass die Kachel die Lightbox oeffnet (State-Signal, nicht nur Zoom). */}
-                          <span
-                            aria-hidden
-                            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/0 opacity-0 transition-opacity duration-[var(--dur-base)] group-hover:opacity-100"
-                          />
-                          <span
-                            aria-hidden
-                            className="pointer-events-none absolute bottom-2.5 right-2.5 flex h-8 w-8 translate-y-1 items-center justify-center rounded-full bg-white/90 text-[var(--color-ink)] opacity-0 shadow-sm backdrop-blur-sm transition-[transform,opacity] duration-[var(--dur-base)] ease-out group-hover:translate-y-0 group-hover:opacity-100"
-                          >
-                            <Maximize2 size={15} strokeWidth={2} />
-                          </span>
-                          {i < 2 && (
-                            <span className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-[var(--color-ink)] shadow-sm backdrop-blur">
-                              {g.albums[p.albumId].title}
-                            </span>
-                          )}
-                        </button>
-                      </li>
+                  <div className="grid grid-cols-2 items-end gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                    {packed.map((col, ci) => (
+                      <ul key={ci} className="flex flex-col gap-3 sm:gap-4">
+                        {col.map(({ photo: p, index: i }) => (
+                          <li key={`${filter}-${p.src}`}>
+                            <button
+                              type="button"
+                              onClick={() => setLightboxIndex(i)}
+                              aria-label={p.alt}
+                              data-testid="gallery-photo"
+                              className="group relative block w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] shadow-sm transition-shadow duration-[var(--dur-base)] hover:shadow-[0_16px_40px_-16px_rgba(17,17,17,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
+                            >
+                              <img
+                                src={p.src}
+                                alt={p.alt}
+                                className="block h-auto w-full transition-transform duration-[var(--dur-slow)] ease-out group-hover:scale-[1.04]"
+                                width={p.width ?? 1080}
+                                height={p.height ?? 1350}
+                                loading="lazy"
+                              />
+                              <span
+                                aria-hidden
+                                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-black/0 opacity-0 transition-opacity duration-[var(--dur-base)] group-hover:opacity-100"
+                              />
+                              <span
+                                aria-hidden
+                                className="pointer-events-none absolute bottom-2.5 right-2.5 flex h-8 w-8 translate-y-1 items-center justify-center rounded-full bg-white/90 text-[var(--color-ink)] opacity-0 shadow-sm backdrop-blur-sm transition-[transform,opacity] duration-[var(--dur-base)] ease-out group-hover:translate-y-0 group-hover:opacity-100"
+                              >
+                                <Maximize2 size={15} strokeWidth={2} />
+                              </span>
+                              {firstOfAlbum.has(p.src) && (
+                                <span className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-[var(--color-ink)] shadow-sm backdrop-blur">
+                                  {g.albums[p.albumId].title}
+                                </span>
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
                     ))}
-                  </ul>
+                  </div>
+                  <p className="mt-2 border-t border-[var(--color-line)] pt-3 text-center text-sm text-[var(--color-ink-muted)]">
+                    {photos.length} {lang === 'de' ? 'Fotos' : 'photos'}
+                  </p>
                 </motion.div>
               </Reveal>
             )}
@@ -193,12 +235,12 @@ function GalleryHero() {
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.06)_0%,transparent_68%)]"
       />
 
-      <Shell className="grid grid-cols-1 items-center gap-10 pb-12 pt-[calc(var(--nav-h)+2.25rem)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pb-16 lg:pt-[calc(var(--nav-h)+3rem)]">
+      <Shell className="grid grid-cols-1 items-start gap-10 pb-12 pt-[calc(var(--nav-h)+2.25rem)] lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:pb-16 lg:pt-[calc(var(--nav-h)+3rem)]">
         <Reveal className="max-w-2xl">
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
           <motion.h1
             variants={item}
-            className="mt-5 font-display text-[2.6rem] font-extrabold leading-[0.98] tracking-[-0.025em] text-balance sm:text-[3.3rem] lg:text-[3.9rem]"
+            className="type-h1 mt-5"
           >
             {h.titleA} <TitleAccent>{h.titleAccent}</TitleAccent>
             {h.titleB ? ` ${h.titleB}` : ''}
@@ -211,6 +253,9 @@ function GalleryHero() {
           </motion.p>
           <motion.div variants={item} className="mt-7">
             <GoogleRating />
+          </motion.div>
+          <motion.div variants={item} className="mt-8">
+            <CtaPill href="#galerie">{lang === 'de' ? 'Fotos ansehen' : 'See the photos'}</CtaPill>
           </motion.div>
         </Reveal>
 
@@ -287,7 +332,7 @@ function GalleryClosing() {
         <Reveal>
           <motion.h2
             variants={item}
-            className="font-display text-3xl font-bold leading-[1.08] tracking-tight text-[var(--color-ink)] sm:text-4xl"
+            className="type-h2 text-[var(--color-ink)]"
           >
             {c.title} {c.titleAccent}
           </motion.h2>
@@ -299,7 +344,7 @@ function GalleryClosing() {
           </motion.p>
           {/* Runde 2, Issue 2: Glow-Halo raus, EINE Button-Definition (CtaPill). */}
           <motion.div variants={item} className="mt-8 flex justify-center">
-            <CtaPill href="/kontakt#schnupperstunde">{c.cta}</CtaPill>
+            <CtaPill href="/schnupperstunde">{c.cta}</CtaPill>
           </motion.div>
         </Reveal>
       </Shell>

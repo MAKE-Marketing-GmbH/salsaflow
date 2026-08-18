@@ -141,7 +141,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
           <motion.a
             variants={item}
             href="/kursplan"
-            className="group inline-flex w-fit min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--color-salsa)] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-salsa-700)]"
+            className="btn-base btn-primary group w-fit gap-2 px-5 py-3 text-sm"
           >
             {s.all}
             <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2.25} />
@@ -172,7 +172,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                       className="group flex min-h-28 flex-col justify-between gap-4 px-5 py-5 transition-colors hover:bg-[var(--color-bg-soft)] sm:px-6"
                     >
                       <span>
-                        <span className="block font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{style.label}</span>
+                        <span className="block type-h3 text-[var(--color-ink)]">{style.label}</span>
                         <span className="mt-1 block text-sm leading-relaxed text-[var(--color-ink-muted)]">{de ? style.de : style.en}</span>
                       </span>
                       <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-salsa)]">
@@ -269,7 +269,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                 id="kurse-tagesliste-label"
                 className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-[var(--color-line)] pt-4 text-sm"
               >
-                <span className="font-display text-lg font-bold text-[var(--color-ink)]">
+                <span className="type-h3 text-[var(--color-ink)]">
                   {activeLabel ? (de ? activeLabel.labelDe : activeLabel.labelEn) : ''}
                 </span>
                 <span className="text-[var(--color-ink-muted)]">
@@ -349,7 +349,7 @@ export function TeaserCard({
     return (
       <a
         href={href}
-        className="group flex flex-col gap-3 border-b border-[var(--color-line)] px-1 py-5 transition-colors last:border-b-0 hover:bg-[var(--color-bg-soft)] sm:flex-row sm:items-center sm:gap-6 sm:px-4"
+        className="group flex flex-col gap-3 border-b border-[var(--color-line)] px-1 py-5 transition-colors last:border-b-0 hover:bg-[var(--color-bg-soft)] sm:flex-row sm:items-center sm:gap-6 sm:px-4 lg:pr-36"
       >
         <span className="flex shrink-0 items-baseline gap-2 sm:w-32 sm:flex-col sm:items-start sm:gap-1">
           {/* Ohne tabular-nums: Cal Sans machte aus der Uhr "18 : 30" mit Loechern um den
@@ -401,6 +401,9 @@ export function TeaserCard({
             </span>
           </span>
         </span>
+        {/* lg:pr-36 an der Zeile: der fixe WhatsApp-Float (right-5/6, h-14) lag auf
+            «Termine ansehen» (S7-Shot home-desktop-03-y1500). Kopf und Tages-Tabs
+            nutzen dieselbe Naht. Float bleibt. */}
         <span className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start rounded-full bg-[var(--color-salsa)] px-5 py-2.5 text-sm font-semibold text-white transition-colors group-hover:bg-[var(--color-salsa-700)] sm:self-center">
           {lang === 'de' ? 'Termine ansehen' : 'View dates'}
           <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2} />
@@ -421,7 +424,7 @@ export function TeaserCard({
         </span>
       </div>
       <div className="min-w-0">
-        <p className="font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{style}</p>
+        <p className="type-h3 text-[var(--color-ink)]">{style}</p>
         {level && <p className="mt-0.5 text-sm text-[var(--color-salsa)]">{level}</p>}
       </div>
       <span className="mt-auto flex items-center gap-2 border-t border-[var(--color-line)] pt-3 text-xs font-semibold">

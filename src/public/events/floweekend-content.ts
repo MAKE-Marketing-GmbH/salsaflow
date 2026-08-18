@@ -75,7 +75,7 @@ export type FloweekendContent = {
 const R = {
   eventkalender: '/events-workshops/eventkalender',
   kontakt: '/kontakt',
-  schnupper: '/kontakt#schnupperstunde',
+  schnupper: '/schnupperstunde',
   tanzkurse: '/tanzkurse',
   tanzschuhe: '/mehr/tanzschuhe',
 };

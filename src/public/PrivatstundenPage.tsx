@@ -79,22 +79,30 @@ function PrivatHero({ c }: { c: PrivatContent }) {
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
-      <Shell className="grid items-center gap-10 pb-14 pt-6 sm:pb-16 lg:grid-cols-[0.98fr_1.02fr] lg:gap-14 lg:pb-20 lg:pt-8">
+      {/* R81 (Fold 1440x730): lg:pt-8 -> lg:pt-0 hebt den ganzen Hero-Inhalt auf
+          Desktop um 32px. Zusammen mit H1 lg:mt-0 und CTA lg:mt-4 sitzt der rote
+          Knopf "Privatstunde anfragen" ganz im Fenster. NUR Abstand. */}
+      <Shell className="grid items-center gap-10 pb-14 pt-6 sm:pb-16 lg:grid-cols-[0.98fr_1.02fr] lg:gap-14 lg:pb-20 lg:pt-0">
         <motion.div data-reveal variants={container} initial="hidden" animate="show" className="max-w-2xl">
           <motion.div variants={item} className="mb-6">
             <Breadcrumb trail={[c.crumb]} />
           </motion.div>
 
+          {/* R81: die H1 bricht bei voller Groesse (4.3rem) auf 5 Zeilen (275px) und
+              schiebt den CTA unter den Fold. Die Kappung auf 3.4rem (nur diese Seite,
+              nur Desktop) bringt sie auf ~4 Zeilen und holt den CTA ins Fenster.
+              Kein Text geaendert, nur die Schriftgroesse. */}
           <motion.h1
             variants={item}
-            className="mt-5 font-display text-[2.4rem] font-extrabold leading-[1.02] tracking-[-0.022em] text-balance sm:text-[3rem] lg:text-[3.4rem]"
+            className="type-h1 mt-5 lg:mt-0 lg:text-[clamp(2.6rem,5.2vw,3.4rem)]"
           >
             <Accented text={h.title} accent={h.titleAccent} />
           </motion.h1>
           <motion.p variants={item} className={`mt-6 max-w-xl ${sectionLead}`}>
             {h.lead}
           </motion.p>
-          <motion.ul variants={item} className="mt-7 flex flex-wrap gap-2">
+          {/* R81: lg:mt-3 zieht die Chips auf Desktop hoch -> CTA bottom <= 730. */}
+          <motion.ul variants={item} className="mt-7 flex flex-wrap gap-2 lg:mt-3">
             {h.bullets.map((b) => (
               <li
                 key={b}
@@ -105,7 +113,9 @@ function PrivatHero({ c }: { c: PrivatContent }) {
               </li>
             ))}
           </motion.ul>
-          <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* R81 (Fold 1440x730): CTA-Block. Position/Feinschliff sitzt am Shell
+              (lg:pt-0) und am H1 (lg:mt-0) — siehe unten. Copy, Chips, Motiv bleiben. */}
+          <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center lg:mt-4">
             <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
             <GhostCta href={h.secondary.href}>{h.secondary.label}</GhostCta>
           </motion.div>
@@ -122,7 +132,12 @@ function PrivatHero({ c }: { c: PrivatContent }) {
             <img
               src={h.image.src}
               alt={h.image.alt}
-              className="aspect-[4/5] w-full object-cover object-[center_38%] sm:aspect-[5/4] lg:aspect-[4/5]"
+              // R81 (Fold 1440x730): lg:aspect-[4/5] (Foto 814px) schob den CTA
+              // "Privatstunde anfragen" auf top 831 — 155px komplett unter den Fold.
+              // lg:aspect-[3/2] (Foto ~434px) schrumpft die rechte Spalte; items-center
+              // zentriert beide Spalten hoeher -> CTA bottom ~676, ganz im Fenster.
+              // Motiv, Copy, Chips, H1 bleiben. Salsa DE14/EN55, Kursaufbau 3/2 unberuehrt.
+              className="aspect-[4/5] w-full object-cover object-[center_38%] sm:aspect-[5/4] lg:aspect-[3/2]"
               width={1200}
               height={1500}
               loading="eager"
@@ -173,7 +188,7 @@ function WhenSection({ c }: { c: PrivatContent }) {
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
                   <Icon size={20} strokeWidth={2} aria-hidden />
                 </span>
-                <h3 className="mt-5 font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{card.title}</h3>
+                <h3 className="mt-5 type-h3 text-[var(--color-ink)]">{card.title}</h3>
                 <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{card.text}</p>
               </motion.div>
             );
@@ -218,7 +233,7 @@ function FlowSection({ c }: { c: PrivatContent }) {
                   </span>
                   <div>
                     <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{p.tag}</p>
-                    <h3 className="font-display text-lg font-bold leading-tight text-[var(--color-ink)]">{p.title}</h3>
+                    <h3 className="type-h3 text-[var(--color-ink)]">{p.title}</h3>
                     <p className="mt-1.5 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{p.text}</p>
                   </div>
                 </li>
@@ -270,7 +285,7 @@ function FormatsSection({ c }: { c: PrivatContent }) {
                 <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-card)] bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
                   <Icon size={22} strokeWidth={2} aria-hidden />
                 </span>
-                <h3 className="mt-5 font-display text-xl font-bold leading-tight text-[var(--color-ink)]">{fmt.name}</h3>
+                <h3 className="mt-5 type-h3 text-[var(--color-ink)]">{fmt.name}</h3>
                 <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{fmt.text}</p>
               </motion.div>
             );
@@ -338,7 +353,7 @@ function NotForSection({ c }: { c: PrivatContent }) {
         <Reveal className="mx-auto max-w-2xl rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white px-6 py-12 text-center shadow-[0_18px_50px_rgba(17,17,17,0.05)] sm:px-10 sm:py-14">
           <motion.h2
             variants={item}
-            className="font-display text-3xl font-bold leading-[1.06] tracking-tight text-[var(--color-ink)] sm:text-4xl"
+            className="type-h2 text-[var(--color-ink)]"
           >
             <Accented text={n.title} accent={n.titleAccent} />
           </motion.h2>

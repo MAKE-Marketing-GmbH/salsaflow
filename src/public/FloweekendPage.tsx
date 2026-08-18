@@ -47,8 +47,13 @@ export function FloweekendPage() {
         media={{
           src: c.hero.image.src,
           alt: c.hero.image.alt,
-          position: 'center 32%',
-          heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+          // R83: 16rem + Crop 34%. Band-Fenster 226px (bandTop 504, Fold 730). Anker-Modell:
+          // Translation = Y% x (scaledH-bandH) = Y% x 704. Bei 27% sass das Kinn der tanzenden
+          // Frau (weisses Shirt) an der 730er-Unterkante (FAIL), bei 37% rutschte ihr Haaransatz
+          // an die Oberkante. 34% hebt das Motiv so, dass die tanzende Frau Kinn+Hals mit Luft
+          // UND die lila-Top-Frau dahinter ganz mit Kinn zeigen. Motiv party-29 bleibt.
+          position: 'center 34%',
+          heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[16rem]',
         }}
       />
       <WhatSection c={c} />
@@ -105,7 +110,7 @@ function WhatSection({ c }: { c: FloweekendContent }) {
                       <Icon size={20} strokeWidth={2} aria-hidden />
                     </span>
                     <div>
-                      <h3 className="font-display text-lg font-bold leading-tight text-[var(--color-ink)]">
+                      <h3 className="type-h3 text-[var(--color-ink)]">
                         {el.title}
                       </h3>
                       <p className="mt-1 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{el.text}</p>
@@ -145,7 +150,7 @@ function ProgramSection({ c }: { c: FloweekendContent }) {
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
                   <Icon size={20} strokeWidth={2} aria-hidden />
                 </span>
-                <h3 className="mt-4 font-display text-xl font-bold leading-tight text-[var(--color-ink)]">
+                <h3 className="mt-4 type-h3 text-[var(--color-ink)]">
                   {b.title}
                 </h3>
                 <p className="mt-2 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{b.text}</p>

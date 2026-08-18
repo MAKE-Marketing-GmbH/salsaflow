@@ -13,6 +13,8 @@ import { CookieBanner } from '@/public/site/CookieBanner';
 // Design-Kritik Runde 2: der Footer lief auf max-w-6xl (1152px) waehrend Header und Content
 // auf 1400px liefen — Footer-Inhalt startete bei x=168, die H1 darueber bei x=55. Jetzt EINE Shell.
 import { Shell } from '@/public/site/primitives';
+import { GoogleIcon, InstagramIcon, WhatsAppIcon } from '@/public/site/BrandIcons';
+import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 
 export const CONTACT = {
   email: 'info@salsaflow-dc.com',
@@ -20,13 +22,29 @@ export const CONTACT = {
   phoneHref: 'tel:+41764788411',
   whatsapp: 'https://wa.me/41764788411',
   instagram: 'https://www.instagram.com/salsaflowdc/',
-  googleReviews: 'https://www.google.com/maps/search/?api=1&query=Salsaflow+Dance+Company+Basel',
+  // Watchdog R65: Anfahrt und Google-Bewertung waren dieselbe Maps-SUCHE. Jetzt zwei
+  // getrennte Ziele — Anfahrt oeffnet die Route zur Adresse, Bewertung die Place-Seite.
+  // Die alte generische Suche (maps/search?query=) bleibt keinem sichtbaren Knopf mehr.
+  anfahrt: 'https://www.google.com/maps/dir/?api=1&destination=Elisabethenanlage+7,+4051+Basel',
+  googleReviews: GOOGLE_REVIEWS.url,
+  mapsEmbed:
+    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2692.8!2d7.5895042!3d47.548917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f16!3m3!1m2!1s0x4791b9bbe6210ca7%3A0xe24471415832cb62!2sSalsaflow%20Dance%20Company%20GmbH!5e0!3m2!1sde!2sch',
 };
 
 // entryCta: der "Dein Einstieg"-Block ueber den Footer-Spalten. Sitewide an, auf der
 // Startseite aus (dort schliesst schon der dunkle Fullbleed-Closer mit demselben CTA,
 // zwei Abschluss-CTAs direkt nacheinander waeren doppelt).
-export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boolean; float?: boolean }) {
+export function SiteFooter({
+  entryCta = true,
+  float = true,
+  floatClass = '',
+}: {
+  entryCta?: boolean;
+  float?: boolean;
+  // R101: optionale Positions-Korrektur des WhatsApp-Floats pro Seite. /kursplan nutzt sie,
+  // damit der Float mobil nicht auf den Tages-Chips Mo–Sa liegt. Copy/Raster unveraendert.
+  floatClass?: string;
+}) {
   const { lang } = useLang();
   const c = HOME[lang].footer;
   const nav = HOME[lang].nav;
@@ -69,10 +87,18 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
 
   // Spalte 4 "Folg uns": beschriftete Liste (Icon + Label) im selben Rhythmus wie "Entdecken",
   // damit die Spalte vertikal traegt und kein nacktes Icon als Platzhalter wirkt.
+  // Icons: echte Markenzeichen (BrandIcons) statt Strichzeichnung. Die alten Eigenbau-SVGs
+  // waren ein Rechteck mit Kreisen fuer Instagram, eine Sprechblase fuer WhatsApp und ein
+  // Stern fuer Google — nur der Stern log am deutlichsten: er stand fuer "Google", nicht fuer
+  // ein Sterne-Rating. Groesse und Farbe bleiben wie bisher (16px, currentColor).
   const social = [
-    { label: 'Instagram', href: CONTACT.instagram, icon: <InstagramIcon /> },
-    { label: 'WhatsApp', href: CONTACT.whatsapp, icon: <WhatsappIcon /> },
-    { label: lang === 'de' ? 'Google-Bewertung' : 'Google reviews', href: CONTACT.googleReviews, icon: <StarIcon /> },
+    { label: 'Instagram', href: CONTACT.instagram, icon: <InstagramIcon className="h-4 w-4" /> },
+    { label: 'WhatsApp', href: CONTACT.whatsapp, icon: <WhatsAppIcon className="h-4 w-4" /> },
+    {
+      label: lang === 'de' ? 'Google-Bewertung' : 'Google reviews',
+      href: CONTACT.googleReviews,
+      icon: <GoogleIcon className="h-4 w-4" />,
+    },
   ];
   return (
     <>
@@ -115,8 +141,8 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
           {/* CTA-Dock: ein klarer Abschluss, kein zweiter Hero. */}
           <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
             <a
-              href="/kontakt#schnupperstunde"
-              className="t-hover inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-salsa)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-salsa-700)]"
+              href="/schnupperstunde"
+              className="btn-base btn-primary px-5 py-2.5 text-sm"
             >
               {lang === 'de' ? 'Gratis Schnupperstunde' : 'Free trial class'}
             </a>
@@ -124,8 +150,9 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
               href={CONTACT.whatsapp}
               target="_blank"
               rel="noreferrer"
-              className="t-hover inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--color-ink)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-ink)] hover:text-white"
+              className="btn-base btn-outline gap-2 px-5 py-2.5 text-sm"
             >
+              <WhatsAppIcon className="h-4 w-4 shrink-0" />
               WhatsApp
             </a>
           </div>
@@ -164,7 +191,7 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
                 (effektiv rgb(36,36,36)) bei 2.7:1 — die einzige echte Kontrast-Verletzung,
                 die sitewide auf JEDER Seite auftrat. Rot bleibt die Farbe der Marke, traegt
                 hier aber die Flaeche statt den Text. */}
-            <p className="inline-flex rounded-full bg-[var(--color-salsa)] px-4 py-2 font-display text-lg font-semibold italic text-white">
+            <p className="font-display text-lg font-semibold italic text-white">
               {c.claim}
             </p>
           </div>
@@ -252,7 +279,7 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
 
     {/* Sitewide-Floats: liegen position:fixed ueber dem Layout, darum als Geschwister neben dem
         Footer (nicht im Footer-Fluss). Erscheinen damit auf jeder Seite (sitewide.md §7/§8). */}
-    {float && <WhatsAppFloat raised={cookieVisible} />}
+    {float && <WhatsAppFloat raised={cookieVisible} className={floatClass} />}
     <CookieBanner onVisibleChange={setCookieVisible} />
     </>
   );
@@ -265,7 +292,7 @@ export function SiteFooter({ entryCta = true, float = true }: { entryCta?: boole
  *  nur die Signatur. Der Titel traegt sich hier ueber Grossbuchstaben und Sperrung allein. */
 function FooterHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-white/85">{children}</h3>
+    <h3 className="type-h4 text-white/85">{children}</h3>
   );
 }
 
@@ -291,24 +318,7 @@ function PinIcon() {
     </svg>
   );
 }
-export function InstagramIcon({ className }: { className?: string } = {}) {
-  return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
-      <rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-function WhatsappIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M3 21l1.6-4.5A8 8 0 1 1 8 19.5z" /><path d="M8.5 8.5c-.3 1 .2 2.3 1.2 3.4s2.4 1.6 3.4 1.3c.5-.1.9-.6.9-1.1l-.1-.9-1.6-.5-.8.7c-.6-.3-1.2-.8-1.5-1.5l.7-.8-.5-1.6-.9-.1c-.5 0-1 .3-1.1.8z" />
-    </svg>
-  );
-}
-function StarIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" aria-hidden>
-      <path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" />
-    </svg>
-  );
-}
+/* Marken-Glyphen (Instagram, WhatsApp, Google) stehen jetzt in site/BrandIcons.tsx.
+   `InstagramIcon` wird hier weiter-exportiert: InstagramShowcase importiert es sitewide
+   von hier, und der Pfad soll durch den Icon-Tausch nicht brechen. */
+export { InstagramIcon };

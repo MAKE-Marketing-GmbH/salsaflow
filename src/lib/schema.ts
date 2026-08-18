@@ -1,7 +1,9 @@
 // Strukturierte Daten (P1.9, Teil 1): Organisations-Schema fuer die Home.
 // schema.org kennt KEIN "DanceSchool" (404) - korrekt ist LocalBusiness.
-// Nur belegte Fakten aus INVARIANTS.json (Kontakt, Standort, Recht). Keine erfundenen
-// Oeffnungszeiten, keine erfundenen Bewertungen.
+// Nur belegte Fakten: Kontakt, Standort und Recht stehen im Impressum, die Preisspanne in
+// src/public/preise/content.ts. Keine erfundenen Oeffnungszeiten, keine erfundenen Bewertungen.
+// priceRange spannt den kleinsten und groessten Preis der Preisseite: CHF 5.- (Danceflow Night
+// fuer Salsaflow-Schueler, content.ts:321) bis CHF 600.- (5 Privatstunden Paar, content.ts:268).
 
 import { createElement } from 'react';
 
@@ -16,7 +18,7 @@ const LOCAL_BUSINESS = {
   url: 'https://www.salsaflow-dc.com',
   telephone: '+41764788411',
   email: 'info@salsaflow-dc.com',
-  priceRange: 'CHF 10–340',
+  priceRange: 'CHF 5–600',
   address: {
     '@type': 'PostalAddress',
     streetAddress: 'Elisabethenanlage 7',

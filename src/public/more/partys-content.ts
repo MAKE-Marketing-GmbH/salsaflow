@@ -70,7 +70,6 @@ export type PartysContent = {
 export const PARTYS: Record<Lang, PartysContent> = {
   de: {
     crumbs: [
-      { label: 'Mehr', href: '/mehr' },
       { label: 'Partys', href: '/mehr/partys' },
     ],
     hero: {
@@ -158,7 +157,6 @@ export const PARTYS: Record<Lang, PartysContent> = {
   },
   en: {
     crumbs: [
-      { label: 'More', href: '/mehr' },
       { label: 'Parties', href: '/mehr/partys' },
     ],
     hero: {
