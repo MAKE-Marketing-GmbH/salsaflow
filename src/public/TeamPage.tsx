@@ -53,6 +53,12 @@ export function TeamPage() {
     <>
       <Seo page="team" />
       <SiteHeader />
+      {/* R144: Der WhatsApp-Float ist sitewide eine Pille mit Label (im Vorher-Shot
+          worklog/shots/S7-ux144/vorher/team-desktop-1440.png als 121x56 gemessen). Auf
+          dieser Route soll er ab sm ein Kreis ohne Text sein. Eigener Marker analog
+          R142 (/events), damit WhatsAppFloat.tsx und die Marker der anderen Routen
+          unberuehrt bleiben. Die Regel dazu steht in index.css. */}
+      <div data-team-page="" />
       <main
         id="main"
         tabIndex={-1}
@@ -192,12 +198,30 @@ function TeachingLine({ teaching, lang }: { teaching: Teaching | undefined; lang
  *    130px nach unten, sodass im Fold nur noch der oberste Streifen sichtbar war — und
  *    `center 35%` legte das Crop-Fenster zu hoch ins Motiv (leere Studiowand oben, Fuesse
  *    unten abgeschnitten). Ohne die Reihe startet das Band frueher.
+ */
+/* R144, /team Desktop-Fold: "Video 06:57, Koepfe nicht abschneiden".
  *
- *    Der neue Wert ist gemessen, nicht geschaetzt (Raster-Overlay /tmp/hp03-grid.jpg):
- *    in hp-03 (1800x1115) liegt die Gruppe zwischen 30% (Kopflinie) und 80% (Schuhe).
- *    Bei 1440px Viewport rendert das Motiv 892px hoch, das Band (lg:h-30rem) zeigt 480px,
- *    es werden also 412px weggeschnitten. `center 58%` legt das Fenster auf 239..719px —
- *    die Gruppe (268..714px) liegt komplett drin, mit 29px Luft ueber den Koepfen.
+ * Zwei Messungen tragen die Werte unten. Beide gegen die laufende Seite bei 1440x730.
+ *
+ * a) DAS MOTIV. hp-03 ist 1800x1115 und rendert bei 1440px Viewport 892px hoch
+ *    (object-cover, Breite fuellt). Raster-Overlay auf der Quelldatei:
+ *      30% = Scheitel der STEHENDEN hinteren Reihe
+ *      56% = tiefstes Kinn der KNIENDEN vorderen Reihe
+ *    Das Kopfband ist damit 232px hoch (0.26 x 892). Alles unter 56% ist Hose, Boden
+ *    und Salsaflow-Wand — es traegt kein Gesicht. Der alte Kommentar rechnete mit
+ *    "Gruppe 30..80%", also inklusive Schuhe; darum war das Fenster zu tief gesetzt.
+ *
+ * b) DIE BANDKANTE. Mit `dense` sitzt der Band-Top live bei y=385. Bis zur Falz bleiben
+ *    345px. Ein 22rem-Band (352px) endet folglich bei y=737 und laeuft 7px UEBER die
+ *    Falz — genau der Anschnitt, der weg soll. 21rem (336px) endet bei y=721 und liegt
+ *    mit 9px Luft komplett im Fold.
+ *
+ * Aus (a) und (b) folgt das Fenster: 336px von 892px, es werden 556px weggeschnitten.
+ * Damit Scheitel (268px) UND Kinn (500px) drin liegen, muss die Y-Position zwischen
+ * 29.4% und 48.1% liegen. `center 39%` ist die Mitte dieses Bandes und legt das Fenster
+ * auf 216..552px: 52px Luft ueber dem Scheitel, 52px unter dem tiefsten Kinn.
+ * `center 58%` lag AUSSERHALB dieses Bandes (Fenster 313..649px) und kappte die hintere
+ * Reihe an der Stirn — belegt im Fold-Shot des ersten Durchgangs.
  */
 function TeamHero() {
   const { lang } = useLang();
@@ -206,6 +230,7 @@ function TeamHero() {
   return (
     <HeroFrame
       axis="wide"
+      dense
       title={
         <>
           {h.titleA} {h.titleAccent}
@@ -218,7 +243,9 @@ function TeamHero() {
       media={{
         src: '/photos/showcase/hp-03.webp',
         alt: 'Das Salsaflow-Team gemeinsam im hellen Studio',
-        position: 'center 58%',
+        // Beide Werte gemessen, siehe Kopfkommentar (a) Motiv und (b) Bandkante.
+        position: 'center 39%',
+        heightClass: 'h-[16rem] sm:h-[18rem] lg:h-[21rem]',
       }}
     />
   );
@@ -260,10 +287,10 @@ function FounderSection() {
             <motion.div variants={item}>
               <Eyebrow>{g.eyebrow}</Eyebrow>
             </motion.div>
-            <motion.h2 variants={item} className={cn(g.eyebrow ? 'mt-5' : 'mt-0', sectionTitle, MEASURE_L)}>
+            <motion.h2 variants={item} className={cn(g.eyebrow ? 'mt-5' : 'mt-0', sectionTitle, MEASURE_L, 'pr-16 sm:pr-0')}>
               {g.title}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
+            <motion.p variants={item} className={`mt-4 pr-16 text-pretty sm:pr-0 ${sectionLead}`}>
               {g.lead}
             </motion.p>
           </Reveal>
@@ -303,8 +330,8 @@ function FounderSection() {
                       className="absolute max-w-none transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.02]"
                       style={{ width: founder.bust.w, left: founder.bust.l, top: founder.bust.t }}
                       loading="lazy"
-                      width={1000}
-                      height={1414}
+                      width={1414}
+                      height={2000}
                     />
                   </div>
                   {/* Runde 1 (2026-08-07), Kritiker-Befund d-02 ("Cookie-Banner schneidet
@@ -505,7 +532,7 @@ function TrialBand() {
 /** Rollen-Zeile -> Sektion auf dieser Seite, in der die Gesichter dazu wirklich stehen.
  *  Nur die zwei Rollen, fuer die es belegte Portraits gibt (FOUNDERS / FACES aus
  *  team/content.ts). Alle anderen Rollen-IDs fehlen bewusst: fuer sie liegen keine Fotos vor. */
-const ROLE_ANCHOR: Record<string, { href: string; photos: string[] }> = {
+const ROLE_ANCHOR = {
   owners: { href: '#founders', photos: FOUNDERS.map((f) => f.photo) },
   teachers: { href: '#gesichter', photos: FACES.map((f) => f.photo).filter((p): p is string => !!p) },
 };
@@ -638,7 +665,7 @@ function RolesSection() {
                Satz direkt unter der Ziffer. */}
         <Reveal className="mt-12 border-t border-[var(--color-line)]" stagger={0.06}>
           {r.groups.map((grp) => {
-            const anchor = ROLE_ANCHOR[grp.id];
+            const anchor = grp.id === 'owners' || grp.id === 'teachers' ? ROLE_ANCHOR[grp.id] : undefined;
             return (
               <motion.article
                 key={grp.id}
@@ -706,7 +733,7 @@ function RolesSection() {
  *  DESKTOP-Problem (das gleichfoermige Fuenfer-Band), auf Mobil erzeugt er nur eine
  *  ausgerissene Reihe. Die Formatvariation gilt darum ab `lg`, unterhalb tragen alle
  *  Kacheln dasselbe 4/5-Fenster. `pos`/`zoom` bleiben je Person unveraendert gueltig. */
-const FACE_SHAPE: { pos: string; ratio: string }[] = [
+const FACE_TILE: { pos: string; ratio: string }[] = [
   { ratio: 'aspect-[4/5]', pos: 'object-[48%_2%]' },
   { ratio: 'aspect-[4/5]', pos: 'object-[52%_8%]' },
   { ratio: 'aspect-[4/5]', pos: 'object-[54%_1%]' },
@@ -782,7 +809,7 @@ function FacesSection() {
                 5 von 5 ohnehin auf. */}
         <Reveal className="mt-12 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-5 lg:gap-5" stagger={0.06}>
           {FACES.map((face, i) => {
-            const shape = FACE_SHAPE[i] ?? FACE_SHAPE[FACE_SHAPE.length - 1];
+            const tile = FACE_TILE[i] ?? FACE_TILE[FACE_TILE.length - 1];
             // Letzte Karte: liegende Bauform, solange das Raster 2-spaltig ist.
             const banner = i === FACES.length - 1 && FACES.length % 2 === 1;
             return (
@@ -815,10 +842,10 @@ function FacesSection() {
                           ? 'Mitglied des Salsaflow-Teams'
                           : 'Member of the Salsaflow team'
                     }
-                    className={cn('relative w-full object-cover', shape.ratio, shape.pos)}
+                    className={cn('relative w-full object-cover', tile.ratio, tile.pos)}
                     loading="lazy"
-                    width={1000}
-                    height={1414}
+                    width={1414}
+                    height={2000}
                   />
                 </div>
                 {/* `p` statt `span` aus demselben Grund wie bei den Gruender-Karten: nur so

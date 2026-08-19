@@ -92,6 +92,11 @@ export function Offer() {
   const { lang } = useLang();
   const o = HOME[lang].offer;
   const { item } = useReveal({ stagger: 0.07 });
+  // R134/9: Die Privatstunden-Karte ("1:1 Coaching") faellt auf der Startseite weg
+  // (Raphael-Video 01:54). Sie bleibt in content.ts und auf /privatstunden erhalten —
+  // hier ist sie nur die vierte Karte in einer Stil-Reihe und lenkt vom Kursweg ab.
+  // Gefiltert statt geloescht, weil content.ts auch die englische Fassung traegt.
+  const cards = o.cards.filter((card) => card.key !== 'privat');
 
   return (
     <section id="angebot" className={cn('relative scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}>
@@ -115,13 +120,18 @@ export function Offer() {
 
         <Reveal className="mt-10 grid gap-8 lg:mt-14 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12" stagger={0.07}>
           <motion.div variants={item} className="min-w-0 lg:-mb-8">
-            <FeaturedStyle card={o.cards[0]} />
+            <FeaturedStyle card={cards[0]} />
           </motion.div>
           {/* lg:pr-36: der fixe WhatsApp-FAB (x ab 1294) lag beim Scrollen auf dem rechten
               Zeilenende (right=1388, Pfeil + Textende) — Muster ScheduleTeaser
-              (Critic Runde 12, Item 5). */}
-          <motion.div variants={item} className="border-t border-[var(--color-line)] lg:pr-36 lg:pt-2">
-            {o.cards.slice(1).map((card, index) => (
+              (Critic Runde 12, Item 5).
+              R134/9: Mit der weggefallenen Privatstunden-Karte trugen hier nur noch zwei
+              Zeilen (zusammen 338px) neben einer 672px hohen Featured-Karte — gemessen
+              blieben 325px leere Flaeche unter der letzten Zeile. Die Spalte verteilt ihre
+              Hoehe jetzt auf die verbliebenen Zeilen (flex + flex-1), damit rechts und
+              links auf derselben Linie enden. Unter lg bleibt der normale Fluss. */}
+          <motion.div variants={item} className="border-t border-[var(--color-line)] lg:flex lg:flex-col lg:justify-center lg:pr-36 lg:pt-2">
+            {cards.slice(1).map((card, index) => (
               <StyleRow key={card.key} card={card} index={index + 1} />
             ))}
           </motion.div>

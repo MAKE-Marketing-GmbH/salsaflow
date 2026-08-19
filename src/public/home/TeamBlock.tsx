@@ -147,8 +147,19 @@ export function TeamBlock() {
         </Reveal>
       </Shell>
 
-      {/* 3) Das Teamfoto als full-bleed Band: randlos, ohne Radius, ohne Rahmen, ohne Chip —
-          nichts liegt mehr darauf (das war die Kritik). Dieselbe Geste wie die Foto-Baender
+      {/* 3) Das Teamfoto als breites Band: ohne Rahmen, ohne Chip — nichts liegt mehr
+          darauf (das war die Kritik).
+          R134/7: Das Band lief vorher hart bis x=0 durch, waehrend Preis-Karte, Offer-Karten
+          und Hero-Foto auf derselben Seite 24px Radius tragen. Raphael-Video 01:32: "ueberall
+          abgerundet, ein Vollbreiten-Bild ist eckig." Das Band traegt jetzt denselben
+          --radius-media-Token wie jede andere Medienflaeche.
+          Der Auftrag war GENAU der Radius. Ein zwischenzeitlicher `<Shell>`-Wrapper hat mehr
+          geaendert als das: Shell erzwingt max-w-[1400px] und px-5 sm:px-8, das Band verlor
+          also Viewport-Breite — und weil die Hoehe ab sm ueber `sm:aspect-[9/4]` aus der
+          Breite folgt, wurde es zugleich niedriger. Der Wrapper ist wieder weg. Das Band
+          bleibt full-bleed; nur die vier Ecken sind rund. Motiv, Hoehe, Seitenverhaeltnis und
+          object-position sind damit unveraendert.
+          Dieselbe Geste wie die Foto-Baender
           der Unterseiten-Heroes (subpage/kit.tsx), damit die Sprache sitewide dieselbe ist.
           Feste Bandhoehen statt `h-auto`: sonst waere das 1800x1200-Motiv auf 1440px ueber
           950px hoch und wuerde die Sektion allein tragen.
@@ -174,7 +185,7 @@ export function TeamBlock() {
           Band zeigt ohnehin 92% — nichts ist angeschnitten. */}
       <motion.figure
         data-reveal
-        className="relative mt-12 w-full overflow-hidden bg-[var(--color-bg-soft)] lg:mt-16"
+        className="relative mt-12 w-full overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] lg:mt-16"
         variants={imgReveal}
         initial="hidden"
         whileInView="show"

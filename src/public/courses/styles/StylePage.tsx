@@ -6,9 +6,12 @@ import { cn } from '@/lib/utils';
 import type { StyleContent } from '@/public/courses/styles/content';
 import {
   MEASURE_L,
+  MEASURE_XL,
   SubPageShell,
   HeroFrame,
+  Breadcrumb,
   PrimaryCta,
+  GhostCta,
   SectionHead,
   FaqBlock,
   ClosingInvite,
@@ -27,9 +30,16 @@ export function StylePage({ data }: { data: Record<'de' | 'en', StyleContent> })
   const { lang } = useLang();
   const c = data[lang];
   const isSalsa = c.seo === 'salsa';
+  /* R138: Split-Hero-Routen. Beide brauchen den WhatsApp-Kreis auf Desktop; die
+     Cookie-Banner-Korrektur unten bleibt der Salsa-Sonderfall aus R137. */
+  const isSplitHeroRoute = isSalsa || c.seo === 'bachata';
   return (
     <SubPageShell seo={c.seo}>
-      <div data-salsa-style-page={isSalsa ? '' : undefined}>
+      <div
+        data-salsa-style-page={isSalsa ? '' : undefined}
+        data-bachata-style-page={c.seo === 'bachata' ? '' : undefined}
+        data-split-hero-page={isSplitHeroRoute ? '' : undefined}
+      >
         {isSalsa ? (
           <style>{`
             body:has([data-salsa-style-page]) [role="region"]:has([data-testid="cookie-accept"]) {
@@ -40,6 +50,28 @@ export function StylePage({ data }: { data: Record<'de' | 'en', StyleContent> })
             @media (max-width: 639px) {
               body:has([data-salsa-style-page]) [role="region"]:has([data-testid="cookie-accept"]) > div {
                 padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+              }
+            }
+          `}</style>
+        ) : null}
+        {isSplitHeroRoute ? (
+          <style>{`
+            /* R137-Fix, R138 auf Bachata ausgeweitet: der Desktop-Float ist sonst eine
+               Pille (Label sm:inline). Auf diesen Routen Kreis wie Mobil — der Fix haengt
+               am Marker, nicht an WhatsAppFloat.tsx (sitewide tabu).
+               Kritik R138: der Selektor las [data-salsa-style-page] und griff darum auf
+               Bachata nie; im Desktop-Shot stand «WhatsApp» weiss auf gruen in einer
+               laenglichen Schaltflaeche statt im Kreis. */
+            @media (min-width: 640px) {
+              body:has([data-split-hero-page]) a.whatsapp-float {
+                width: 3.5rem;
+                padding-left: 0;
+                padding-right: 0;
+                justify-content: center;
+                gap: 0;
+              }
+              body:has([data-split-hero-page]) a.whatsapp-float span {
+                display: none;
               }
             }
           `}</style>
@@ -69,9 +101,219 @@ export function StylePage({ data }: { data: Record<'de' | 'en', StyleContent> })
 
 /* -------------------------------------------------------------------- Hero */
 
+/* R137 (Raphael-Video 02:11–02:21, 18.08.): «Mach so einfach links, rechts.» Der
+   Salsa-Hero stapelte Typo ueber einem Full-Bleed-Band; im Fold stand Schrift oben,
+   Foto unten, kein Nebeneinander. Dazu 02:21 zum Band-Motiv: «schlechte Aufloesung,
+   schlechtes Licht» (offer-salsa-hero: Frau im Profil, Mann verwaschen).
+
+   Loesung ohne kit.tsx anzufassen: Salsa bekommt hier eine eigene, flache Bauform.
+   Desktop lg = zwei Spalten (Text links, Foto rechts). Mobil = gestapelt, Foto direkt
+   unter der Microcopy, damit die Gesichter inkl. Kinn im 390x844-Fold liegen.
+   Bachata und Heels laufen unveraendert weiter durch HeroFrame.
+
+   Motiv: /photos/kurse/kurs-03.jpg — per Read: helles Studio-Tageslicht, scharf,
+   volles Gesicht, weisse Waende. 05.jpg war Club-Nacht (schwarz hinter dem Paar).
+   gallery/kurse/03.jpg bleibt Bachata-Why und wird hier nicht genutzt.
+   Das Band-Motiv offer-salsa-hero-2100 und sein Crop 'center 14%' bleiben in
+   content.ts woertlich stehen (P85-Lock) — der Salsa-Hero rendert das Band nur
+   nicht mehr. */
+/* Was der Split-Hero pro Stilseite ueber sein Foto wissen muss.
+
+   `imgClass` traegt den KOMPLETTEN Klassenstring des Bild-Elements, nicht Bausteine,
+   aus denen der Hero ihn zusammensetzt. Grund (Kritik R138): die vorherige Fassung baute
+   ihn per cn('w-full object-cover', ratio, …) und drehte damit die Reihenfolge gegen
+   das R137-Original 'aspect-[3/2] w-full object-cover object-center lg:aspect-[5/4]'
+   (GATES.md G1, EVIDENCE Zeile 8). Optisch gleich, aber nicht byte-fuer-byte — und
+   damit kein belastbarer Salsa-Regressionsbeweis mehr. Jetzt steht pro Route genau
+   der String, der im DOM landet. */
+type SplitHeroPhoto = {
+  src: string;
+  de: string;
+  en: string;
+  imgClass: string;
+  columns: string;
+  /** Setzt objectPosition aus `hero.band.position` (content.ts) statt aus einem
+      zweiten, hier eingefrorenen Wert. Ohne Flag bleibt der Crop in `imgClass`. */
+  usesBandPosition?: boolean;
+};
+
+const SALSA_HERO_PHOTO: SplitHeroPhoto = {
+  src: '/photos/kurse/kurs-03.jpg',
+  de: 'Laechelnde Taenzerin im hellen Salsaflow Studio vor dem Spiegel',
+  en: 'Smiling dancer in the bright Salsaflow studio in front of the mirror',
+  /* R137-Original, woertlich aus GATES.md G1 uebernommen. Nicht anfassen, nicht
+     umsortieren — sonst reisst der Vergleich gegen S7-ux137/salsa-desktop-1440.png. */
+  imgClass: 'aspect-[3/2] w-full object-cover object-center lg:aspect-[5/4]',
+  /* R137-Werte: Spalten mittig zueinander, Textspalte 1.05fr. */
+  columns: 'lg:grid-cols-[1.05fr_0.95fr] lg:items-center',
+};
+
+/* R138 (Raphael-Video 02:56 + 03:05, 18.08.): «Warum ist das so zu dunkel?» und
+   «uebelst lost … viel zu gequetscht». Der Bachata-Hero lief noch ueber HeroFrame:
+   Typo-Block gestapelt, darunter ein 10rem-Full-Bleed-Band mit hartem 20%-Crop.
+   Das Band schnitt die Koepfe an und zeigte nur den dunkelsten Streifen des Motivs.
+
+   Bachata bekommt jetzt dieselbe flache Bauform wie Salsa: Desktop lg zwei Spalten
+   (Text links, Foto rechts), mobil gestapelt mit dem Foto direkt unter der Microcopy.
+   Der Split-Hero ist parametrisiert statt kopiert; SALSA_HERO_PHOTO traegt die
+   R137-Werte unveraendert weiter, der Salsa-Zweig rendert Byte fuer Byte gleich.
+
+   Motiv: /photos/premium/offer-bachata-1200.webp (1200x1600).
+
+   KORREKTUR R138 (Kritik nach dem ersten Bau): Der Hero lief zwischenzeitlich auf
+   offer-bachata-wide-v2.webp. Das ist ein KI-Auszug desselben Motivs, kein Foto —
+   Zoom auf Crop (1620,230)-(1980,560) zeigt eine haarduenne, gleichmaessig weisse
+   Linie exakt entlang Haaransatz, Ohr und Wange (Matte-Kante, kein Rim-Light), dazu
+   hinter der Schulter einen kopflosen Koerper-Rest. Als 10rem-Streifen fiel das nicht
+   auf, als grosses Hero war es der Blickfang. Brief Punkt 2 verbietet KI-Bilder.
+   offer-bachata-1200.webp ist die unretuschierte Quelle desselben Paares: derselbe
+   Crop-Bereich per Read geprueft, natuerliche Hautkante, keine Umriss-Linie, kein
+   Geister-Koerper. Warmes Studiolicht, scharf, beide Gesichter inkl. Kinn ganz im
+   Bild, Bachata-Naehe statt Heels/Fitness.
+   kurs-03.jpg (Salsa) und gallery/kurse/03.jpg (Bachata-Why) sind hier verboten. */
+const BACHATA_HERO_PHOTO: SplitHeroPhoto = {
+  src: '/photos/premium/offer-bachata-1200.webp',
+  de: 'Bachata-Paar im warmen Salsaflow Studio, Fuehrung aus der Nahdistanz',
+  en: 'Bachata couple in the warm Salsaflow studio, leading from close connection',
+  /* Klassenstring vollstaendig, in derselben Reihenfolge wie die Salsa-Variante.
+     Mobil 4/3 statt 16/10: das Quellbild ist Hochformat, und der flachere Rahmen
+     zog den Hero-Block soweit nach unten, dass der zweite Chip im 844er-Fold
+     mittendurch geschnitten wurde. lg 4/3 fuellt die rechte Spalte bis knapp unter
+     den 730er-Fold. photo-grade-bachata-hero: Video 09:08 «das war auch falsch
+     eingefaerbt» — photo-grade-bachata haengt auch an Offer.tsx:67 und bleibt darum
+     unangetastet, diese Route bekommt ihre eigene, ruhigere Klasse (index.css). */
+  imgClass: 'aspect-[16/9] w-full object-cover lg:aspect-[4/3] photo-grade-bachata-hero',
+  /* Crop kommt aus content.ts `hero.band.position` ('center 20%', Brief Punkt 3).
+     Das Quellbild ist Hochformat mit beiden Koepfen im oberen Drittel; 20% legt das
+     4/3-Fenster auf den Gesichtsblock statt auf Boden. Der Lock wirkt jetzt wirklich. */
+  usesBandPosition: true,
+  /* Bachata hat fuenf Bullets (Salsa vier) und laengere Labels. Mit Salsas 1.05fr
+     blieben der Textspalte 672px, die Chips brachen auf drei Zeilen und der Block
+     endete bei y=707, das Foto schon bei 649 — genau das «gequetscht» aus 03:05.
+     1.12fr gibt der Spalte Luft, items-start setzt beide Spalten auf dieselbe
+     Oberkante statt das Foto in die Mitte zu haengen. */
+  columns: 'lg:grid-cols-[1.12fr_0.88fr] lg:items-start',
+};
+
+function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
+  const { lang } = useLang();
+  const { container, item } = useReveal();
+  const h = c.hero;
+  /* Crop-Lock aus dem LIVE-Content, nicht aus einer toten Konfiguration.
+     Kritik R138: `position` lag nur noch im `hero.band`-Objekt, das dieser Hero gar
+     nicht mehr rendert — der Gate-Treffer auf 'center 20%' war damit Buchstabe ohne
+     Wirkung, waehrend der Hero hart 'center 30%' setzte. `usesBandPosition` schaltet
+     den Wert aus content.ts scharf: aendert ihn dort jemand, aendert sich das Bild.
+     Salsa laesst das Flag weg und bleibt bei object-center aus dem R137-String. */
+  const objectPosition = photo.usesBandPosition ? h.band.position : undefined;
+  return (
+    <section
+      className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
+      style={{ paddingTop: 'var(--nav-h)' }}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
+      />
+      <Shell className="pt-2 pb-10 lg:pt-6 lg:pb-16">
+        <motion.div data-reveal variants={container} initial="hidden" animate="show">
+          <motion.div variants={item} className="mb-2 lg:mb-4">
+            <Breadcrumb trail={[{ label: 'Tanzkurse', href: '/tanzkurse' }, c.crumb]} compact />
+          </motion.div>
+
+          {/* Die eine Achse dieser Seite: Text links, Foto rechts. Unter lg stapelt es,
+              Foto zuerst nach der Microcopy — mobil zaehlt der Fold, nicht die Spalte.
+              gap-5 mobil statt gap-7: mit gap-7 endete die Bildkante bei y=850, also
+              6px unter dem 844er-Fold; die untere Rundung war angeschnitten. */}
+          <div className={cn('grid gap-5 lg:gap-14', photo.columns)}>
+            <div className="flex flex-col gap-4">
+              <motion.h1 variants={item} className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
+                {h.title} {h.titleAccent ? <TitleAccent>{h.titleAccent}</TitleAccent> : null}
+              </motion.h1>
+              <motion.p
+                variants={item}
+                className={cn('text-pretty max-w-xl', sectionLead)}
+                style={{ lineHeight: 1.4 }}
+              >
+                {h.lead}
+              </motion.p>
+              <motion.div variants={item} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
+                <GhostCta href={h.secondary.href} down={h.secondary.href.startsWith('#')}>
+                  {h.secondary.label}
+                </GhostCta>
+              </motion.div>
+              <motion.p variants={item} className="text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                {h.microcopy}
+              </motion.p>
+              {h.bullets.length ? (
+                <motion.ul variants={item} className="hidden flex-wrap gap-1.5 sm:gap-2 lg:flex">
+                  {h.bullets.map((b) => (
+                    <li
+                      key={`lg-${b}`}
+                      className="inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--color-line)] bg-white px-2.5 py-1 text-[0.72rem] font-semibold leading-tight text-[var(--color-ink)] sm:gap-2 sm:px-3.5 sm:py-1.5 lg:px-3 lg:text-[0.8rem]"
+                    >
+                      <Check size={13} strokeWidth={3} aria-hidden className="text-[var(--color-salsa)]" />
+                      {b}
+                    </li>
+                  ))}
+                </motion.ul>
+              ) : null}
+            </div>
+
+            <motion.div
+              variants={item}
+              className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]"
+            >
+              {/* Fold-kalibriert pro Route. Der Klassenstring kommt VOLLSTAENDIG aus
+                  photo.imgClass — kein cn()-Zusammenbau mehr, damit Salsa exakt den
+                  R137-String rendert (GATES.md G1). */}
+              <img
+                src={photo.src}
+                alt={lang === 'de' ? photo.de : photo.en}
+                style={objectPosition ? { objectPosition } : undefined}
+                className={photo.imgClass}
+                width={1600}
+                height={1066}
+                loading="eager"
+                fetchPriority="high"
+              />
+            </motion.div>
+            {h.bullets.length ? (
+              /* gap-2.5 statt gap-1.5 unter sm ist der Fold-Hebel: mit 6px Abstand begann
+                 der dritte Chip bei y839 und stand als 5px-Sliver mit halber Rundung auf
+                 der 844er-Kante — genau das Muster «angeschnittener Chip». 10px schieben
+                 ihn auf y847, also ganz unter den Fold, waehrend Chip 2 bei y837 endet und
+                 vollstaendig sichtbar bleibt. Am Live-Render gemessen.
+                 Die Ueberdeckung durch den WhatsApp-Knopf loest NICHT ein pr-* hier: das
+                 Padding zaehlt zur min-content-Breite der Flex-Zeile, weitete die
+                 Grid-Spalte und schob den ganzen Hero auf x20-395, also 5px aus dem
+                 390er-Viewport. Der Knopf weicht stattdessen aus (--whatsapp-lift in
+                 index.css, Marker data-bachata-style-page). */
+              <motion.ul variants={item} className="flex flex-wrap gap-2.5 sm:gap-2 lg:hidden">
+                {h.bullets.map((b) => (
+                  <li
+                    key={`sm-${b}`}
+                    className="inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--color-line)] bg-white px-2.5 py-1 text-[0.72rem] font-semibold leading-tight text-[var(--color-ink)] sm:gap-2 sm:px-3.5 sm:py-1.5"
+                  >
+                    <Check size={13} strokeWidth={3} aria-hidden className="text-[var(--color-salsa)]" />
+                    {b}
+                  </li>
+                ))}
+              </motion.ul>
+            ) : null}
+          </div>
+        </motion.div>
+      </Shell>
+    </section>
+  );
+}
+
 function StyleHero({ c }: { c: StyleContent }) {
   const h = c.hero;
   const isSalsa = c.seo === 'salsa';
+  if (isSalsa) return <SplitHero c={c} photo={SALSA_HERO_PHOTO} />;
+  if (c.seo === 'bachata') return <SplitHero c={c} photo={BACHATA_HERO_PHOTO} />;
   return (
     <HeroFrame
       // axis="left" auch fuer Bachata: split + lg:items-end liess die linke Spalte leer
@@ -80,10 +322,6 @@ function StyleHero({ c }: { c: StyleContent }) {
       // dense: das Hero-Band lag auf beiden Stilseiten komplett unter dem 730er-Fold und
       // bei 390 war der letzte Bullet-Chip angeschnitten (Critic Runde 11, Item 1).
       dense
-      // R73-Nachzieh: nur Salsa hebt den Band-Top ueber den gestrafften Typo-Block,
-      // damit im 1440x730-Fold zwei Gesichter inkl. Kinn mit Luft liegen. Bachata
-      // (eigener tight-Hebel), Heels, Preise, R72-Wrap bleiben unberuehrt.
-      liftMedia={isSalsa}
       crumbs={[{ label: 'Tanzkurse', href: '/tanzkurse' }, c.crumb]}
       title={h.title}
       titleAccent={h.titleAccent}
@@ -122,11 +360,19 @@ function WhySection({ c }: { c: StyleContent }) {
   const { item } = useReveal();
   const w = c.why;
   const isSalsa = c.seo === 'salsa';
+  /* R137 nur Salsa: 1fr_1fr statt 0.85fr_1.15fr und die linke Spalte ohne
+     max-w-md-Deckel. Mit dem Deckel blieb das Foto 448px schmal, waehrend die
+     rechte Blockliste bis 1387 lief — unter den drei Blocks stand ein leeres
+     Feld von ~250px Hoehe. Gleich breite Spalten lesen als «links, rechts».
+     R138: derselbe Befund auf Bachata (gemessen linke Spalte 448px, rechte 731px,
+     Leerfeld unter Block 03) — Raphael 03:05 «uebelst lost». Bachata bekommt
+     dieselbe Aufteilung. Heels behaelt seine. */
+  const wideWhy = isSalsa || c.seo === 'bachata';
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
-        <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
-          <Reveal className="max-w-md">
+        <div className={cn('grid gap-10 lg:gap-16', wideWhy ? 'lg:grid-cols-2' : 'lg:grid-cols-[0.85fr_1.15fr]')}>
+          <Reveal className={wideWhy ? undefined : 'max-w-md'}>
 
             <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
               {w.title} {w.titleAccent ? <TitleAccent>{w.titleAccent}</TitleAccent> : null}
@@ -134,21 +380,32 @@ function WhySection({ c }: { c: StyleContent }) {
             <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
               {w.body}
             </motion.p>
-            {!isSalsa ? (
-              <motion.div variants={item} className="mt-8 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]">
-                <img
-                  src={w.image.src}
-                  alt={w.image.alt}
-                  className={cn(
-                    'aspect-[4/3] w-full object-cover object-[center_42%]',
-                    c.seo === 'bachata' ? 'photo-grade-bachata' : undefined,
-                  )}
-                  width={1200}
-                  height={900}
-                  loading="lazy"
-                />
-              </motion.div>
-            ) : null}
+            {/* R137: Salsa hatte das Bild als 16/7-Streifen UNTER dem Grid — wieder
+                gestapelt, genau die Bauform aus Raphaels Kritik. Es steht jetzt wie auf
+                Bachata und Heels in der linken Textspalte, also neben den Blocks
+                («links, rechts»). Der Sonderzweig unten faellt damit weg. */}
+            <motion.div variants={item} className="mt-8 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]">
+              <img
+                src={w.image.src}
+                alt={w.image.alt}
+                style={isSalsa && w.image.position ? { objectPosition: w.image.position } : undefined}
+                className={cn(
+                  'w-full object-cover',
+                  // Salsa und Bachata: die breitere Spalte traegt ab lg ein 3/2-Fenster,
+                  // damit das Foto neben der Blockliste steht statt als flacher Rest
+                  // darunter. Heels behaelt 4/3 in der schmalen Spalte.
+                  wideWhy ? 'aspect-[4/3] lg:aspect-[3/2]' : 'aspect-[4/3]',
+                  isSalsa && w.image.position ? undefined : 'object-[center_42%]',
+                  // R138 Video 09:08: photo-grade-bachata (sat 0.82) entfaerbte dieses
+                  // Foto. Route-lokale Klasse statt die geteilte umzubiegen — sie haengt
+                  // auch an Offer.tsx:67.
+                  c.seo === 'bachata' ? 'photo-grade-bachata-why' : undefined,
+                )}
+                width={1200}
+                height={900}
+                loading="lazy"
+              />
+            </motion.div>
           </Reveal>
 
           <Reveal className="grid content-start border-t border-[var(--color-line)]" stagger={0.08}>
@@ -169,13 +426,6 @@ function WhySection({ c }: { c: StyleContent }) {
             ))}
           </Reveal>
         </div>
-        {isSalsa ? (
-          <Reveal className="mt-10 lg:mt-14">
-            <motion.div variants={item} className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]">
-              <img src={w.image.src} alt={w.image.alt} style={w.image.position ? { objectPosition: w.image.position } : undefined} className="aspect-[16/7] w-full object-cover object-[center_42%]" width={1400} height={613} loading="lazy" />
-            </motion.div>
-          </Reveal>
-        ) : null}
       </Shell>
     </section>
   );
@@ -300,6 +550,7 @@ function LevelsSection({ c }: { c: StyleContent }) {
           <div className="border-t border-[var(--color-line)]">
             <ol
               className="grid sm:grid-cols-2 lg:[grid-template-columns:repeat(var(--rungs),minmax(0,1fr))]"
+              /* SAFETY: CSS custom property --rungs is not in CSSProperties; length is a number. */
               style={{ '--rungs': l.rungs.length } as React.CSSProperties}
             >
               {l.rungs.map((r, i) => (

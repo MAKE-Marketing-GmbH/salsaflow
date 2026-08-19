@@ -28,7 +28,7 @@ export type GalleryStrings = {
   closing: { title: string; titleAccent: string; body: string; cta: string };
 };
 
-export const GALLERY: Record<Lang, GalleryStrings> = {
+export const GALLERY = {
   de: {
     hero: {
       eyebrow: 'Galerie',
@@ -52,7 +52,7 @@ export const GALLERY: Record<Lang, GalleryStrings> = {
       team: {
         id: 'team',
         title: 'Team',
-        desc: 'Die Menschen hinter Salsaflow. Gründer, Lehrer und die ganze Crew.',
+        desc: 'Die Crew zusammen. Gruppenfotos aus dem Studio, keine Einzelporträts.',
       },
       shows: {
         id: 'shows',
@@ -94,7 +94,7 @@ export const GALLERY: Record<Lang, GalleryStrings> = {
       team: {
         id: 'team',
         title: 'Team',
-        desc: 'The people behind Salsaflow. Founders, teachers and the whole crew.',
+        desc: 'The crew together. Group photos from the studio, no single portraits.',
       },
       shows: {
         id: 'shows',
@@ -113,7 +113,7 @@ export const GALLERY: Record<Lang, GalleryStrings> = {
       cta: 'Book a trial class',
     },
   },
-};
+} satisfies Record<Lang, GalleryStrings>;
 
 // Reihenfolge der Alben in der Galerie (bestimmt auch die Filter-Chip-Reihenfolge).
 export const ALBUM_ORDER: AlbumId[] = ['danceflow', 'kurse', 'team', 'shows'];
@@ -123,8 +123,8 @@ export type GalleryPhoto = { albumId: AlbumId; src: string; alt: string; altEn?:
 // Kuratierter Grundbestand, in sich geschlossen (kein Laufzeit-Manifest noetig).
 // Nur echte Fotos aus public/photos/ (jeder Pfad gegen den echten Foto-Export geprueft),
 // kein Duoton, keine KI-Personen, keine Logo- oder Promo-Kacheln, keine leeren Dateien.
-// Vier Alben: Danceflow Nights (Party-Fotos), Kurse und Unterricht, Unser Team (Gruender,
-// Lehrer, Crew) und Shows (Buehnenauftritte). Reihenfolge ist bewusst gemischt: die Ansicht
+// Vier Alben: Danceflow Nights (Party-Fotos), Kurse und Unterricht, Team als Gruppe
+// (keine Einzelportraets) und Shows (Buehnenauftritte). Reihenfolge ist bewusst gemischt: die Ansicht
 // "Alle" zeigt sofort Abende, Kurse, Team und Shows im Wechsel; ein Filter zeigt nur sein Album.
 // Jedes Foto hat eine echte, beschreibende Alt-Zeile (Deutsch, echte Umlaute, CH-ss).
 export const GALLERY_PHOTOS: GalleryPhoto[] = [
@@ -134,66 +134,66 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
   { albumId: 'kurse', src: '/photos/instagram/lady-style-v2.webp', alt: 'Lady-Style-Gruppe bei einer Choreografie im Studio', altEn: 'Lady Style group performing choreography in the studio', width: 640, height: 1136 },
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/01-v3.webp', alt: 'Tanzpaar dreht sich eng bei einer Danceflow Night', width: 2048, height: 1360 },
   { albumId: 'kurse', src: '/photos/gallery/kurse/01.jpg', alt: 'Tanzpaar übt einen neuen Schritt im Kurs', width: 1600, height: 1066 },
-  { albumId: 'team', src: '/photos/founders/fabio.webp', alt: 'Fabio Branco, Mitgründer von Salsaflow', width: 1000, height: 1414 },
+  { albumId: 'danceflow', src: '/photos/party/party-03.webp', alt: 'Tänzerin in Blau zeigt vor klatschendem Publikum', altEn: 'Dancer in blue performing for a clapping audience', width: 1500, height: 1000 },
   { albumId: 'shows', src: '/photos/shows/show-02.webp', alt: 'Ensemble tanzt eine Choreografie in grünen Kostümen', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/02-v3.webp', alt: 'Paare tanzen dicht an dicht auf der vollen Tanzfläche', width: 2048, height: 1360 },
 
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/03-v3.webp', alt: 'Zwei Tanzende lachen mitten im Salsa-Takt', width: 2048, height: 1360 },
   { albumId: 'kurse', src: '/photos/gallery/kurse/02.jpg', alt: 'Zwei Lernende folgen der Anleitung im Studio', width: 1600, height: 1067 },
-  { albumId: 'team', src: '/photos/founders/claudia.webp', alt: 'Claudia Branco, Mitgründerin von Salsaflow', width: 1000, height: 1414 },
+  { albumId: 'danceflow', src: '/photos/party/party-05.webp', alt: 'Paar übt eine Figur vor der Salsaflow-Wand', altEn: 'Couple practising a figure in front of the Salsaflow wall', width: 1500, height: 1000 },
   { albumId: 'shows', src: '/photos/shows/show-03.webp', alt: 'Show-Nummer mit funkelnden Fransenkostümen', width: 600, height: 400 },
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/04.jpg', alt: 'Paar tanzt Bachata im warmen Licht des Abends', width: 1600, height: 1066 },
 
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/05-v3.webp', alt: 'Tanzende bewegen sich zur Musik durch den Saal', width: 1360, height: 2048 },
   { albumId: 'kurse', src: '/photos/gallery/kurse/03.jpg', alt: 'Paar arbeitet an der Haltung im Salsa-Kurs', width: 1600, height: 1066 },
-  { albumId: 'team', src: '/photos/founders/sebastian.webp', alt: 'Sebastian Carballo, Mitgründer von Salsaflow', width: 1000, height: 1414 },
+  { albumId: 'danceflow', src: '/photos/party/party-09.webp', alt: 'Paar lacht beim Tanzen im warmen Abendlicht', altEn: 'Couple laughing while dancing in warm evening light', width: 1500, height: 1000 },
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/06.jpg', alt: 'Voller Saal an einer Danceflow Night in Basel', width: 1066, height: 1600 },
 
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/07.jpg', alt: 'Paar in geschlossener Tanzhaltung auf der Fläche', width: 1600, height: 1067 },
   { albumId: 'kurse', src: '/photos/gallery/kurse/04.jpg', alt: 'Gruppe übt gemeinsam die Grundschritte', width: 1600, height: 1066 },
-  { albumId: 'team', src: '/photos/founders/vanessa.webp', alt: 'Vanessa Costante, Mitgründerin von Salsaflow', width: 1000, height: 1414 },
+  { albumId: 'danceflow', src: '/photos/events/event-02.jpg', alt: 'Paar tanzt vor der Salsaflow-Wand im grünen Licht', altEn: 'Couple dancing in front of the Salsaflow wall in green light', width: 2000, height: 1333 },
   { albumId: 'shows', src: '/photos/shows/show-07.webp', alt: 'Ensemble posiert am Ende der Show mit erhobenen Armen', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/08.jpg', alt: 'Gruppe tanzt ausgelassen bis in die Nacht', width: 1600, height: 1066 },
 
   { albumId: 'danceflow', src: '/photos/events/event-01.jpg', alt: 'Gäste tanzen Salsa bei einem Salsaflow-Abend', width: 1600, height: 1067 },
   { albumId: 'kurse', src: '/photos/gallery/kurse/05.jpg', alt: 'Tanzpaar im Kurs bei heller Studio-Atmosphäre', width: 1600, height: 1066 },
-  { albumId: 'team', src: '/photos/team/teacher-aleksandra.webp', alt: 'Aleksandra, Tanzlehrerin bei Salsaflow', width: 1000, height: 1414 },
+  { albumId: 'danceflow', src: '/photos/events/event-05.jpg', alt: 'Paar tanzt auf voller Fläche im grünen Saallicht', altEn: 'Couple dancing on a full floor in green hall light', width: 1600, height: 1067 },
   { albumId: 'shows', src: '/photos/shows/show-08.webp', alt: 'Weihnachts-Show mit Santa und Tänzerin auf der Bühne', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/events/event-04.jpg', alt: 'Stimmungsvoller Abend mit vielen Tanzpaaren', width: 1600, height: 1067 },
 
   { albumId: 'danceflow', src: '/photos/events/event-06-v3.webp', alt: 'Menschen feiern und tanzen im warmen Saallicht', width: 2048, height: 1360 },
   { albumId: 'kurse', src: '/photos/gallery/kurse/06.jpg', alt: 'Lehrer zeigt vorne den Schritt, die Gruppe macht mit', width: 1066, height: 1600 },
-  { albumId: 'team', src: '/photos/team/teacher-anina.webp', alt: 'Anina, Tanzlehrerin bei Salsaflow', width: 1000, height: 1414 },
+  { albumId: 'danceflow', src: '/photos/events/event-07.jpg', alt: 'Paar tanzt lachend im rosa Partylicht', altEn: 'Couple dancing and laughing in pink party light', width: 1067, height: 1600 },
   { albumId: 'shows', src: '/photos/shows/show-09.webp', alt: 'Tänzerinnen in lila Kostümen bei der Bühnenshow', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/events/event-08.jpg', alt: 'Volle Tanzfläche bei einer langen Party-Nacht', width: 1400, height: 2095 },
 
   { albumId: 'danceflow', src: '/photos/premium/danceflow-home-2000.webp', alt: 'Paar tanzt eng umschlungen bei gedämpftem Licht', width: 2000, height: 1334 },
   { albumId: 'kurse', src: '/photos/gallery/kurse/07.jpg', alt: 'Paar tanzt im Kurs vor den grossen Fenstern', width: 1600, height: 1067 },
-  { albumId: 'team', src: '/photos/team/teacher-jelena.webp', alt: 'Jelena, Tanzlehrerin bei Salsaflow', width: 1000, height: 1414 },
+  { albumId: 'danceflow', src: '/photos/party/party-12.webp', alt: 'Frau im roten Kleid tanzt mit ihrem Partner im vollen Saal', altEn: 'Woman in a red dress dancing with her partner on a full floor', width: 1500, height: 1000 },
   { albumId: 'shows', src: '/photos/shows/show-11.webp', alt: 'Choreografie in lila Kostümen auf dunkler Bühne', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/premium/events-hero-2000.webp', alt: 'Grosse Runde tanzt gemeinsam bei einem Salsaflow-Abend', width: 2000, height: 1125 },
 
   { albumId: 'danceflow', src: '/photos/party/party-01.webp', alt: 'Paar tanzt eng und lächelt im warmen Abendlicht', width: 1500, height: 1000 },
   { albumId: 'kurse', src: '/photos/kurse/kurs-01.jpg', alt: 'Teilnehmende üben Bachata im Studio', width: 1600, height: 1067 },
-  { albumId: 'team', src: '/photos/team/teacher-maarten.webp', alt: 'Maarten, Tanzlehrer bei Salsaflow', width: 1000, height: 1414 },
+  { albumId: 'danceflow', src: '/photos/party/party-16.webp', alt: 'Zwei Frauen tanzen zusammen unter Partylicht', altEn: 'Two women dancing together under party lights', width: 1500, height: 1000 },
   { albumId: 'shows', src: '/photos/shows/show-12.webp', alt: 'Formation tanzt synchron im Bühnenlicht', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/party/party-02.webp', alt: 'Zwei Tanzende vor der Salsaflow-Wand im Studio', width: 1500, height: 1000 },
 
   { albumId: 'danceflow', src: '/photos/party/party-04.webp', alt: 'Paar in enger Haltung vor der Salsaflow-Kulisse', width: 1500, height: 1000 },
   { albumId: 'kurse', src: '/photos/kurse/kurs-03.jpg', alt: 'Paar übt eine Drehung während der Lektion', width: 1600, height: 1064 },
-  { albumId: 'team', src: '/photos/team/teacher-tobias.webp', alt: 'Tobias, Tanzlehrer bei Salsaflow', width: 1000, height: 1414 },
+  { albumId: 'danceflow', src: '/photos/events/event-03.jpg', alt: 'Paar tanzt eng in geschlossener Haltung', altEn: 'Couple dancing close in closed hold', width: 1600, height: 1067 },
   { albumId: 'shows', src: '/photos/shows/show-13.webp', alt: 'Auftritt beim festlichen Event mit vollem Saal', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/party/party-06-v3.webp', alt: 'Frau im roten Top tanzt mit ihrem Partner', width: 2048, height: 1360 },
 
   { albumId: 'danceflow', src: '/photos/party/party-07-v3.webp', alt: 'Paar streckt die Arme hoch mitten in der Drehung', width: 2048, height: 1360 },
   { albumId: 'kurse', src: '/photos/kurse/kurs-05.jpg', alt: 'Kursgruppe tanzt konzentriert im Takt', width: 1600, height: 1065 },
-  { albumId: 'team', src: '/photos/team/team-01.jpg', alt: 'Das Salsaflow-Team zusammen im Studio', width: 1103, height: 1560 },
+  { albumId: 'danceflow', src: '/photos/party/party-18.webp', alt: 'Paar dreht unter dem Arm bei einer Danceflow Night', altEn: 'Couple turning under the arm at a Danceflow Night', width: 1500, height: 1000 },
   { albumId: 'shows', src: '/photos/shows/show-14.webp', alt: 'Paar tanzt eine elegante Show-Figur in Weiss und Schwarz', width: 310, height: 470 },
   { albumId: 'danceflow', src: '/photos/party/party-08.webp', alt: 'Gruppe tanzt im hellen Studio zur Musik', width: 1500, height: 1000 },
 
   { albumId: 'danceflow', src: '/photos/party/party-10.webp', alt: 'Tanzender hält lachend ein Kind im Arm', width: 1500, height: 1000 },
   { albumId: 'kurse', src: '/photos/premium/offer-salsa-1200.webp', alt: 'Salsa-Kurs im vollen Studio in Bewegung', width: 1200, height: 1600 },
-  { albumId: 'team', src: '/photos/team/team-03.jpg', alt: 'Ein Teil der Crew posiert gut gelaunt', width: 1103, height: 1560 },
+  { albumId: 'danceflow', src: '/photos/party/party-22.webp', alt: 'Paar lacht auf der vollen Tanzfläche im Partylicht', altEn: 'Couple smiling on a packed dance floor in party light', width: 1500, height: 1000 },
   { albumId: 'shows', src: '/photos/shows/show-16.webp', alt: 'Paare tanzen eine Show-Choreografie auf der Bühne', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/party/party-11.webp', alt: 'Paar tanzt dicht umringt von weiteren Gästen', width: 1500, height: 1000 },
 
@@ -205,7 +205,7 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
 
   { albumId: 'danceflow', src: '/photos/party/party-17-v3.webp', alt: 'Zwei Frauen tanzen zusammen und haben Spass', width: 2048, height: 1360 },
   { albumId: 'kurse', src: '/photos/premium/offer-heels-1200.webp', alt: 'Heels-Kurs mit ausdrucksstarker Pose', width: 1200, height: 1600 },
-  { albumId: 'team', src: '/photos/showcase/hp-06.webp', alt: 'Fünf aus dem Team posieren im hellen Studio', width: 1200, height: 1800 },
+  { albumId: 'team', src: '/photos/showcase/hp-06.webp', alt: 'Vier aus dem Team posieren im hellen Studio', width: 1200, height: 1800 },
   { albumId: 'shows', src: '/photos/shows/show-19.webp', alt: 'Ensemble tanzt eine Nummer im grünen Bühnenlicht', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/party/party-21.webp', alt: 'Paar posiert eng vor rotem Hintergrund', width: 1500, height: 1000 },
 
@@ -223,7 +223,7 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
 
   { albumId: 'danceflow', src: '/photos/party/party-35-v3.webp', alt: 'Frau im geblümten Top tanzt mit ihrem Partner', width: 2048, height: 1360 },
   { albumId: 'kurse', src: '/photos/kurse/kurs-06.jpg', alt: 'Gruppe von Tänzerinnen im Ladies-Styling-Kurs', width: 1067, height: 1600 },
-  { albumId: 'team', src: '/photos/showcase/hp-22.webp', alt: 'Zwei Tänzerinnen des Teams im Studioportrait', width: 1200, height: 1800 },
+  { albumId: 'team', src: '/photos/showcase/hp-22.webp', alt: 'Zwei Tänzerinnen des Teams posieren im Studio', width: 1200, height: 1800 },
   { albumId: 'danceflow', src: '/photos/party/party-44.webp', alt: 'Frau streckt den Arm hoch mitten in der Drehung', width: 1500, height: 1000 },
 
   { albumId: 'danceflow', src: '/photos/party/party-52.webp', alt: 'Gruppe springt jubelnd mit erhobenen Armen', width: 1500, height: 1000 },

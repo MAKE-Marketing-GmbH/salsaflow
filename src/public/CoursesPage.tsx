@@ -9,7 +9,7 @@
 // - Icons: NUR Lucide (ArrowRight/ArrowDown/Check), keine Unicode-/Kreis-Pfeile.
 // - Motion: ruhiger Reveal-Takt (Reveal/useReveal), gleicher Fade-up wie die Startseite.
 // - Rot #AD1827 strikt sparsam (~90/10): CTAs, Marker, aktive Leiter-Stufe, ein Script-Akzentwort.
-//   Keine Pastell-Flaechen (kein salsa-50/100 als Fuellung). Hover aendert den Zustand echt
+//   Keine Pastell-Flaechen. Hover aendert den Zustand echt
 //   (Rot -> Ink invertieren + Pfeil-Slide), nicht nur dunkler.
 //
 // Inhalt + Fakten kommen 1:1 aus courses/overview-content.ts (COURSES_OVERVIEW), nichts erfunden.

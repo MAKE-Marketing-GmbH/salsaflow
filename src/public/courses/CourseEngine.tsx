@@ -1030,7 +1030,11 @@ function ScheduleBottomCta({ nextStart }: { nextStart: string | null }) {
       className="mt-4 overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-surface-dark)] text-white sm:mt-8"
     >
       <div className="px-5 py-6 sm:px-8 sm:py-8 lg:px-10">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-salsa-300)]">
+        {/* R134/5: Das Eyebrow lief auf einer hellen Rosa-Stufe auf Schwarz.
+            Raphael-Lock 17.08.: kein Pastellrot, nirgends. Auf der dunklen Flaeche
+            traegt jetzt Weiss/70 die Zeile (Kontrast 9.2:1), das Rot bleibt dem
+            Knopf darunter. Die Farbstufe selbst ist aus index.css entfernt. */}
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">
           {lang === 'de' ? 'Dein Einstieg bei Salsaflow' : 'Your start at Salsaflow'}
         </p>
         <h2 className="type-h2 mt-3 max-w-xl">

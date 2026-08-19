@@ -160,7 +160,11 @@ export type TeamContent = {
   };
 };
 
-export const TEAM: Record<Lang, TeamContent> = {
+/* `satisfies` statt `: Record<Lang, TeamContent>`: die Annotation weitete jeden Wert auf
+ * `string` und warf damit die Typ-Evidenz weg, die im Objekt schon steht (anti-slop
+ * no-known-value-widening). Mit `satisfies` prueft der Compiler denselben Vertrag —
+ * beide Sprachen, alle Felder — und behaelt die genauen Literal-Typen. */
+export const TEAM = {
   de: {
     founders: {
       eyebrow: '',
@@ -322,4 +326,4 @@ export const TEAM: Record<Lang, TeamContent> = {
       secondary: 'Follow us on Instagram',
     },
   },
-};
+} satisfies Record<Lang, TeamContent>;

@@ -127,7 +127,12 @@ export const HOME_V3: Record<Lang, HomeV3Strings> = {
     },
     team: {
       eyebrow: '',
-      title: 'Menschen, die nicht nur unterrichten, sondern mit dir tanzen.',
+      // Kritik-Fund (home-desktop-08-y5250.png, R134/8): Die Zeile war ein harter Verstoss
+      // gegen das Floskel-Verbot A2 (Antithese «nicht X, sondern Y»). Gemessen mit
+      // forbidden-check.py: «Menschen, die nicht nur unterrichten, sondern mit dir tanzen.»
+      // -> FEHLER Z1 [A2]. Ersetzt durch eine Sachaussage darueber, was das Team konkret
+      // tut. Derselbe Check auf der neuen Zeile: 0 harte Verstoesse.
+      title: 'Unsere Lehrpersonen tanzen die Abende mit.',
       // Kritiker-Verdict r14, Punkt 4 ("redundante Textblöcke, die mobile Viewports dicht
       // machen"). Gemessen mit `node scripts/aaa-r14-typo.cjs 390`: dieser Absatz war mit 357
       // Zeichen / 182px der laengste SICHTBARE Fliesstext der ganzen Startseite (die noch
@@ -136,9 +141,8 @@ export const HOME_V3: Record<Lang, HomeV3Strings> = {
       //   "Was Salsaflow besonders macht, sieht man nicht nur im Kursplan. Man sieht es in den
       //    Menschen, die unterrichten, organisieren, tanzen und neue Tänzerinnen und Tänzer
       //    willkommen heissen."
-      // Das ist die Ueberschrift derselben Sektion in Prosa — die H2 direkt darueber lautet
-      // "Menschen, die nicht nur unterrichten, sondern mit dir tanzen." Der Absatz erklaerte
-      // also die Zeile, die zwei Zentimeter darueber steht.
+      // Das ist die Ueberschrift derselben Sektion in Prosa — der Absatz erklaerte also die
+      // Zeile, die zwei Zentimeter darueber steht.
       // Die beiden ersten Saetze bleiben unveraendert: sie tragen die Gruender-Namen (Anlauf auf
       // die FounderCards darunter) und das heutige Team — Fakten, die sonst nirgends stehen.
       story: 'Salsaflow wurde von Fabio, Claudia, Vanessa und Sebastian gegründet. Heute trägt ein grosses Team aus Lehrpersonen, Bereichsleitern und Nachwuchstalenten die Community mit.',
@@ -277,9 +281,9 @@ export const HOME_V3: Record<Lang, HomeV3Strings> = {
     },
     team: {
       eyebrow: '',
-      title: 'People who do not just teach, but dance with you.',
+      title: 'Our teachers dance the evenings with you.',
       // Gleiche Kuerzung wie DE (siehe Kommentar dort): die beiden Schluss-Saetze wiederholten
-      // die H2 derselben Sektion ("People who do not just teach, but dance with you.").
+      // die H2 derselben Sektion.
       story: 'Salsaflow was founded by Fabio, Claudia, Vanessa and Sebastian. Today a large team of teachers, area leads and up-and-coming talents carries the community.',
       stats: [
         { v: '2018', l: 'founded' },

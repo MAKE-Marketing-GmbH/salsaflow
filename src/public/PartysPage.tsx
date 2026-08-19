@@ -30,9 +30,16 @@ export function PartysPage() {
   const c = PARTYS[lang];
   return (
     <SubPageShell seo="partys">
+      <div data-partys-page="">
       {/* Runde 2, Issue 1: Typo-Hero statt Foto-Split. Achse 'wide' + full-bleed Partyband
           unter der Headline — das Motiv traegt hier inhaltlich, aber randlos statt als
-          gerahmte Kachel neben dem Text. */}
+          gerahmte Kachel neben dem Text.
+          R150: 14rem + center 30% schnitt den hinteren Scheitel. Band-Top sitzt
+          bei y484, Fold 730 — mehr als 15rem ragt unter den Fold und schneidet Kinn.
+          15rem + center 18% haelt das ganze Band im Fold und die Koepfe im Fenster.
+          Mobil 13rem/18% bleibt. Desktop-WA Kreis ueber den Marker.
+          R151: Crop 10 %, Band 20rem. Quelle Y 90–544: hinterer Scheitel und Kinn.
+          Desktop-CSS blendet Microcopy aus, damit das Band im 730-Fold endet. */}
       <SubHero
         axis="wide"
         dense
@@ -43,13 +50,11 @@ export function PartysPage() {
         primary={c.hero.primary}
         secondary={c.hero.secondary}
         microcopy={c.hero.microcopy}
-        // Desktop-Fold zeigt nur den oberen Streifen. 12% + hohes Default-Band = Stirn/Augen.
-        // Wie Events R50: 14rem ganz im Fold, 30% auf die zwei Gesichter (Paar vorn).
         media={{
           src: c.hero.image.src,
           alt: c.hero.image.alt,
-          positionClass: 'object-[center_18%] lg:object-[center_30%]',
-          heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[14rem]',
+          positionClass: 'object-[center_10%]',
+          heightClass: 'h-[16rem] sm:h-[18rem] lg:h-[20rem]',
         }}
       />
       <DanceflowSection c={c} />
@@ -57,18 +62,21 @@ export function PartysPage() {
       <FirstTimeSection c={c} />
       <FaqBlock title={c.faqTitle} items={c.faq} />
       <FinalCta c={c} />
+      </div>
     </SubPageShell>
   );
 }
 
 /* ------------------------------------------------------------------ Danceflow Night als Start */
 function DanceflowSection({ c }: { c: (typeof PARTYS)['de'] }) {
-  const { item } = useReveal();
+  // R151: weicherer Takt nur auf dieser Seite — 0.7s statt 0.45s, 8px statt 14px
+  // Versatz, Stagger 0.1. Der Default in kit.tsx/motion.tsx bleibt unberuehrt.
+  const { item } = useReveal({ duration: 0.7, distance: 8, stagger: 0.1 });
   const d = c.danceflow;
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
-        <Reveal className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+        <Reveal className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14" stagger={0.1}>
           <motion.div variants={item} className="relative order-2 lg:order-1">
             <div className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_30px_70px_-30px_rgba(17,17,17,0.42)]">
               <img
@@ -109,13 +117,14 @@ function DanceflowSection({ c }: { c: (typeof PARTYS)['de'] }) {
 
 /* ------------------------------------------------------------------ Weitere Orte (kuratiert) */
 function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
-  const { item } = useReveal();
+  // R151: gleicher weicher Takt wie im Danceflow-Block.
+  const { item } = useReveal({ duration: 0.7, distance: 8, stagger: 0.1 });
   const m = c.more;
   return (
     <section className="bg-[var(--color-paper-warm)] py-16 lg:py-24">
       <Shell>
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-          <Reveal className="max-w-md lg:sticky lg:top-28 lg:self-start">
+          <Reveal className="max-w-md lg:sticky lg:top-28 lg:self-start" stagger={0.1}>
             <motion.div variants={item}>
               <Eyebrow>{m.eyebrow}</Eyebrow>
             </motion.div>
@@ -163,13 +172,14 @@ function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
 
 /* ------------------------------------------------------------------ Zum ersten Mal (Tipps) */
 function FirstTimeSection({ c }: { c: (typeof PARTYS)['de'] }) {
-  const { item } = useReveal();
+  // R151: gleicher weicher Takt wie im Danceflow-Block.
+  const { item } = useReveal({ duration: 0.7, distance: 8, stagger: 0.1 });
   const f = c.firstTime;
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start lg:gap-16">
-          <Reveal className="max-w-xl">
+          <Reveal className="max-w-xl" stagger={0.1}>
             <motion.div variants={item}>
               <Eyebrow>{f.eyebrow}</Eyebrow>
             </motion.div>
@@ -196,7 +206,7 @@ function FirstTimeSection({ c }: { c: (typeof PARTYS)['de'] }) {
               <PrimaryCta href={f.cta.href}>{f.cta.label}</PrimaryCta>
             </motion.div>
           </Reveal>
-          <Reveal className="lg:sticky lg:top-28">
+          <Reveal className="lg:sticky lg:top-28" stagger={0.1}>
             <motion.div variants={item} className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]">
               <img
                 src={f.image.src}

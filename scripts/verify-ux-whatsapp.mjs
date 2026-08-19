@@ -40,6 +40,18 @@ async function measure(page, foldH) {
     const heroImg = document.querySelector('section img[fetchpriority="high"], section picture img');
     const heroImgR = heroImg ? heroImg.getBoundingClientRect() : null;
     const heroObjectPos = heroImg ? getComputedStyle(heroImg).objectPosition : null;
+    const heroSrc = heroImg ? (heroImg.currentSrc || heroImg.src || '').replace(location.origin, '') : null;
+    const contentImgs = [...document.querySelectorAll('img')].filter((el) => {
+      const src = el.currentSrc || el.src || '';
+      return !/logo\//.test(src);
+    }).map((el) => {
+      const r = el.getBoundingClientRect();
+      return {
+        src: (el.currentSrc || el.src || '').replace(location.origin, ''),
+        x: r.x, y: r.y, width: r.width, height: r.height,
+      };
+    });
+    const foldContentImg = contentImgs.find((i) => i.y < fold && i.y + i.height > 0 && i.width > 0 && i.height > 0) || null;
     const frei = [...document.querySelectorAll('span, a, button')].filter((el) => {
       const t = (el.textContent || '').trim();
       return t === 'frei' || t === 'Plätze frei';
@@ -76,7 +88,16 @@ async function measure(page, foldH) {
       const r = el.getBoundingClientRect();
       return { x: r.x, y: r.y, width: r.width, height: r.height, text: (el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 24) };
     });
+    // R139 /tanzkurse/heels: die Hero-Bullet-Chips stehen mobil UNTER dem Foto und
+    // laufen in die Knopf-Spalte. Ohne diese Liste sieht der Verifier weder die
+    // Chip- noch die Foto-Ueberdeckung auf dieser Route.
+    const heroBullets = [...document.querySelectorAll('section ul li')].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height, text: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 32) };
+    }).filter((r) => r.width > 0 && r.height > 0);
     return {
+      heroBullets,
+      waLabelVisible: waEl ? [...waEl.querySelectorAll('span')].some((s) => getComputedStyle(s).display !== 'none' && (s.textContent || '').trim().length > 0) : null,
       wa: wa ? { x: wa.x, y: wa.y, width: wa.width, height: wa.height, display: waDisplay } : null,
       h1: h1r ? { x: h1r.x, y: h1r.y, width: h1r.width, height: h1r.height, text: (h1.textContent || '').trim().slice(0, 80) } : null,
       frei,
@@ -85,8 +106,9 @@ async function measure(page, foldH) {
       leads,
       planCtas,
       heroPhoto: heroImgR
-        ? { x: heroImgR.x, y: heroImgR.y, width: heroImgR.width, height: heroImgR.height, objectPosition: heroObjectPos }
+        ? { x: heroImgR.x, y: heroImgR.y, width: heroImgR.width, height: heroImgR.height, objectPosition: heroObjectPos, src: heroSrc }
         : null,
+      foldContentImg,
       fold,
       vw: window.innerWidth,
     };
@@ -99,21 +121,43 @@ function check(name, ok, detail) {
   console.log(ok ? `PASS ${name}` : `FAIL ${name} ${detail}`);
 }
 
-const browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+const launchOpts = { headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] };
+let browser = await chromium.launch(launchOpts);
 
 async function shot(name, w, h, path) {
-  const page = await browser.newPage({ viewport: { width: w, height: h } });
-  await page.goto(BASE + path, { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForSelector('#main h1', { timeout: 15000 });
-  await dismissCookie(page);
-  await page.waitForTimeout(400);
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.waitForTimeout(200);
-  const info = await measure(page, h);
-  const file = `${OUT}/${name}.png`;
-  await page.screenshot({ path: file, animations: 'disabled', caret: 'hide' });
-  await page.close();
-  return { info, file };
+  let last;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    let page;
+    try {
+      if (!browser.isConnected()) browser = await chromium.launch(launchOpts);
+      page = await browser.newPage({ viewport: { width: w, height: h } });
+      await page.goto(BASE + path, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForSelector('#main h1', { timeout: 45000 });
+      await dismissCookie(page);
+      await page.waitForTimeout(400);
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(200);
+      const info = await measure(page, h);
+      const file = `${OUT}/${name}.png`;
+      await page.screenshot({ path: file, animations: 'disabled', caret: 'hide' });
+      await page.close();
+      return { info, file };
+    } catch (err) {
+      last = err;
+      try {
+        await page?.close();
+      } catch {
+        /* ignore */
+      }
+      try {
+        await browser.close();
+      } catch {
+        /* ignore */
+      }
+      browser = await chromium.launch(launchOpts);
+    }
+  }
+  throw last;
 }
 
 const buchungMob = await shot('buchung-mobil-390', 390, 844, '/buchung');
@@ -187,6 +231,91 @@ check(
 const hd = homeDsk.info;
 check('home-dsk-wa-right', Boolean(hd.wa && hd.wa.x > 720), JSON.stringify(hd.wa));
 
+/* R139 /tanzkurse/heels. Diese Route fehlte hier komplett — der Lauf gab 28x PASS,
+   keiner davon auf heels, und liess dadurch eine Foto-Ueberdeckung durch
+   (Sol-Fund R139). Zwei Faelle, mobil hart auf Ueberdeckung, desktop auf den Kreis. */
+const heelsMob = await shot('heels-mobil-390', 390, 844, '/tanzkurse/heels');
+const heelsDsk = await shot('heels-desktop-1440', 1440, 730, '/tanzkurse/heels');
+const hem = heelsMob.info;
+check('heels-wa-right', Boolean(hem.wa && hem.wa.x > 195 && hem.wa.display !== 'none'), JSON.stringify(hem.wa));
+// Der Knopf darf das Hero-Foto nicht beruehren: er sass bei 3/2 mitten auf der
+// zweiten Taenzerin. Geloest ueber die mobile Bild-Ratio 21/9 in HeelsView.tsx.
+const heelsPhotoHit = hem.heroPhoto && overlaps(hem.heroPhoto, hem.wa);
+check('heels-foto-frei', heelsPhotoHit === false, JSON.stringify({ wa: hem.wa, heroPhoto: hem.heroPhoto }));
+// Und er darf keinen Bullet-Chip im Fold ueberdecken (R138 Fund 8).
+const heelsChipHits = (hem.heroBullets || []).filter((c) => c.y < 844 && overlaps(c, hem.wa));
+check('heels-chips-frei', heelsChipHits.length === 0, JSON.stringify({ wa: hem.wa, heelsChipHits, heroBullets: hem.heroBullets }));
+// Crop-Lock aus heels-content.ts muss am gerenderten Bild ankommen (Brief Punkt 3).
+check(
+  'heels-crop-wirkt',
+  Boolean(hem.heroPhoto && /12%/.test(String(hem.heroPhoto.objectPosition || ''))),
+  JSON.stringify(hem.heroPhoto),
+);
+const hed = heelsDsk.info;
+check('heels-dsk-wa-right', Boolean(hed.wa && hed.wa.x > 720), JSON.stringify(hed.wa));
+// Desktop auf dieser Route: Kreis ohne Text (Brief Punkt 4). Die Pille war 121px breit.
+check('heels-dsk-wa-kreis', Boolean(hed.wa && hed.wa.width < 70 && hed.waLabelVisible === false), JSON.stringify({ wa: hed.wa, labelVisible: hed.waLabelVisible }));
+
+function checkMoreRoute(slug, mob, dsk, srcNeedle) {
+  checkSitewide(slug, mob, dsk);
+  check(
+    `${slug}-dsk-wa-kreis`,
+    Boolean(dsk.wa && Math.abs(dsk.wa.width - dsk.wa.height) < 2 && dsk.wa.width < 70 && dsk.waLabelVisible === false),
+    JSON.stringify({ wa: dsk.wa, labelVisible: dsk.waLabelVisible }),
+  );
+  const dskImg = dsk.foldContentImg || dsk.heroPhoto;
+  const mobImg = mob.foldContentImg || mob.heroPhoto;
+  check(
+    `${slug}-dsk-fold-img`,
+    Boolean(dskImg && dskImg.width > 0 && dskImg.height > 0 && dskImg.y < 730 && (srcNeedle ? String(dskImg.src || '').includes(srcNeedle) : true)),
+    JSON.stringify(dskImg),
+  );
+  check(
+    `${slug}-mob-fold-img`,
+    Boolean(mobImg && mobImg.width > 0 && mobImg.height > 0 && mobImg.y < 844),
+    JSON.stringify(mobImg),
+  );
+}
+
+const collabsMob = await shot('collabs-mobil-390', 390, 844, '/mehr/collabs');
+const collabsDsk = await shot('collabs-desktop-1440', 1440, 730, '/mehr/collabs');
+checkMoreRoute('collabs', collabsMob.info, collabsDsk.info, 'hp-27');
+
+const tanzschuheMob = await shot('tanzschuhe-mobil-390', 390, 844, '/mehr/tanzschuhe');
+const tanzschuheDsk = await shot('tanzschuhe-desktop-1440', 1440, 730, '/mehr/tanzschuhe');
+checkMoreRoute('tanzschuhe', tanzschuheMob.info, tanzschuheDsk.info, 'heels-shoes');
+
+const partysMob = await shot('partys-mobil-390', 390, 844, '/mehr/partys');
+const partysDsk = await shot('partys-desktop-1440', 1440, 730, '/mehr/partys');
+checkMoreRoute('partys', partysMob.info, partysDsk.info, 'party-31');
+const partysHero = partysDsk.info.heroPhoto || partysDsk.info.foldContentImg;
+check(
+  'partys-dsk-band-in-fold',
+  Boolean(partysHero && partysHero.y + partysHero.height <= 731 && partysHero.height >= 300),
+  JSON.stringify(partysHero),
+);
+{
+  const NAT_W = 2048;
+  const NAT_H = 1360;
+  const VIEW_W = 1440;
+  const CROWN_Y = 95;
+  const CHIN_Y = 540;
+  const pos = String(partysHero?.objectPosition || '');
+  const pct = pos.match(/([\d.]+)%\s+([\d.]+)%/);
+  const yPct = pct ? Number(pct[2]) / 100 : 0.5;
+  const scale = VIEW_W / NAT_W;
+  const scaledH = NAT_H * scale;
+  const boxH = partysHero ? partysHero.height : 0;
+  const overflow = Math.max(0, scaledH - boxH);
+  const srcTop = overflow * yPct / scale;
+  const srcBottom = srcTop + boxH / scale;
+  check(
+    'partys-dsk-heads-in-window',
+    Boolean(partysHero && srcTop <= CROWN_Y && srcBottom >= CHIN_Y),
+    JSON.stringify({ srcTop, srcBottom, yPct, boxH, pos, y: partysHero?.y }),
+  );
+}
+
 const report = {
   fails,
   buchungMob: bm,
@@ -203,11 +332,18 @@ const report = {
   schnupperDsk: sd,
   homeMob: hm,
   homeDsk: hd,
+  collabsMob: collabsMob.info,
+  collabsDsk: collabsDsk.info,
+  tanzschuheMob: tanzschuheMob.info,
+  tanzschuheDsk: tanzschuheDsk.info,
+  partysMob: partysMob.info,
+  partysDsk: partysDsk.info,
   files: [
     buchungMob.file, buchungDsk.file, kursplanMob.file, kursplanDsk.file,
     tanzMob.file, tanzDsk.file, salsaMob.file, salsaDsk.file, preiseMob.file, preiseDsk.file,
     schnupperMob.file, schnupperDsk.file,
     homeMob.file, homeDsk.file,
+    collabsMob.file, collabsDsk.file, tanzschuheMob.file, tanzschuheDsk.file, partysMob.file, partysDsk.file,
   ],
 };
 const reportPath = `${OUT}/verify-report.json`;

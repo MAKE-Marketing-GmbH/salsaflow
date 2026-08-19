@@ -154,6 +154,8 @@ export type BookingDict = {
   cancel: string;
   close: string;
   requiredHint: string;
+  fieldRequired: string;
+  emailInvalid: string;
   errorGeneric: string;
   successConfirmedTitle: string;
   successConfirmedBody: string;
@@ -221,6 +223,8 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     cancel: 'Abbrechen',
     close: 'Schliessen',
     requiredHint: 'Bitte fülle die Pflichtfelder aus.',
+    fieldRequired: 'Dieses Feld ist Pflicht.',
+    emailInvalid: 'Diese E-Mail-Adresse stimmt nicht.',
     errorGeneric: 'Buchung fehlgeschlagen. Bitte versuche es erneut.',
     successConfirmedTitle: 'Dein Platz ist reserviert',
     // Ehrlich: es geht KEINE automatische Bestaetigungs-Mail raus. Die Reservierung
@@ -234,8 +238,11 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     priceOnRequest: 'Preis auf Anfrage',
     pricePerCourse: 'für 8 Wochen',
     priceFree: 'kostenlos',
-    stepRegister: '1 · Anmeldung',
-    stepData: '2 · Deine Daten',
+    // Ohne eigene Nummer: der Buchungs-Flow zaehlt EINMAL, in der Leiste der Seite
+    // (1 · Kurs -> 2 · Anmeldung -> 3 · Fertig). Diese Ueberschriften benennen nur noch,
+    // was gerade dran ist.
+    stepRegister: 'Anmeldung',
+    stepData: 'Deine Daten',
     reserveCta: 'Platz reservieren',
     payOnSiteNote: 'Zahlung vor Ort mit TWINT oder bar.',
     weeksNote: '8 Wochen · 1 Lektion pro Woche',
@@ -287,6 +294,8 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     cancel: 'Cancel',
     close: 'Close',
     requiredHint: 'Please fill in the required fields.',
+    fieldRequired: 'This field is required.',
+    emailInvalid: 'This email address is not valid.',
     errorGeneric: 'Booking failed. Please try again.',
     successConfirmedTitle: 'Your spot is reserved',
     successConfirmedBody: 'We have your sign-up. The studio looks at it and confirms your spot, usually the same day.',
@@ -298,8 +307,8 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     priceOnRequest: 'Price on request',
     pricePerCourse: 'for 8 weeks',
     priceFree: 'free',
-    stepRegister: '1 · Registration',
-    stepData: '2 · Your details',
+    stepRegister: 'Registration',
+    stepData: 'Your details',
     reserveCta: 'Reserve my spot',
     payOnSiteNote: 'Pay on site with TWINT or cash.',
     weeksNote: '8 weeks · 1 class per week',

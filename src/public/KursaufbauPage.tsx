@@ -8,7 +8,7 @@
 // Script-Akzentwort pro Headline). Echte Bilder, echte Umlaute, CH-ss, keine Em-Dashes.
 
 import { motion } from 'framer-motion';
-import { Check, CalendarDays, Clock, DoorOpen, Ticket, Quote } from 'lucide-react';
+import { Check, CalendarDays, Clock, DoorOpen, Ticket, Quote, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 import { KURSAUFBAU, type KursaufbauContent } from '@/public/kursaufbau/content';
@@ -36,13 +36,21 @@ export function KursaufbauPage() {
   const c = KURSAUFBAU[lang];
   return (
     <SubPageShell seo={c.seo}>
-      <KursaufbauHero c={c} />
-      <LevelsLadder c={c} />
-      <DoubtSection c={c} />
-      <TermSection c={c} />
-      <MissSection c={c} />
-      <ClosingSection c={c} />
-      <FaqBlock title={c.faqTitle} items={c.faq} />
+      {/* R141: Marker dieser Route, Muster aus R139 (HeelsView) / R140 (Privatstunden).
+          Traegt EINE route-lokale Korrektur, ohne WhatsAppFloat.tsx anzufassen (sitewide/tabu):
+          Der Desktop-Float ist sonst eine Pille mit Label «WhatsApp» (im Vorher-Shot
+          1440x730 gemessen, worklog/shots/S7-ux141/vorher/kursaufbau-desktop-1440-vorher.png).
+          Hier Kreis wie mobil. Eigenes Attribut statt [data-privat-page]: das haengt an
+          /privatstunden und wuerde diese Route mitziehen. */}
+      <div data-kursaufbau-page="">
+        <KursaufbauHero c={c} />
+        <LevelsLadder c={c} />
+        <DoubtSection c={c} />
+        <TermSection c={c} />
+        <MissSection c={c} />
+        <ClosingSection c={c} />
+        <FaqBlock title={c.faqTitle} items={c.faq} />
+      </div>
     </SubPageShell>
   );
 }
@@ -140,9 +148,19 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
         <Reveal className="overflow-hidden rounded-[2rem] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_rgba(17,17,17,0.07)]">
           <div className="grid lg:grid-cols-[0.92fr_1.08fr]">
             {/* Linke Spalte: Kopf + Legende + Stil-Verweise */}
+            {/* R141 Nachtrag: Unter der Schritt-Grafik standen rund 330 CSS-px leer
+                (gemessen in levels-desktop-1440-nachher.png), weil die Spalte sich auf
+                die volle Zeilenhoehe der Leiter streckte, ihr Inhalt aber oben klebte.
+                Die Spalte streckt sich weiter — nur so laeuft die Trennlinie (lg:border-r)
+                ueber die ganze Kartenhoehe. Stattdessen schiebt lg:mt-auto an der Grafik
+                allein sie an den unteren Rand: Kopf, Legende und Stil-Knoepfe behalten
+                oben ihren gewohnten Rhythmus, die Grafik schliesst die Spalte unten ab.
+                Kein lg:justify-between (das reisst zwischen JEDEN Block eine Luecke) und
+                kein lg:sticky (das versetzte die Spalte um den Nav-Offset und riss oben
+                100px, unten 241px neu auf — beides gemessen). */}
             <motion.div
               variants={item}
-              className="border-b border-[var(--color-line)] p-7 sm:p-10 lg:border-b-0 lg:border-r lg:p-12"
+              className="flex flex-col border-b border-[var(--color-line)] p-7 sm:p-10 lg:border-b-0 lg:border-r lg:p-12"
             >
               <Eyebrow>{l.eyebrow}</Eyebrow>
               <h2 className={`mt-5 ${sectionTitle}`}>
@@ -186,6 +204,27 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
                   ))}
                 </div>
               </div>
+
+              {/* R141: Die Leiter-Grafik stand unter der Leiter in der rechten Spalte. Weil
+                  die Stufen jetzt einklappen, wurde die rechte Spalte kuerzer und links
+                  blieben ab den Stil-Knoepfen rund 1000px leere Flaeche stehen (im Shot
+                  levels-desktop-1440-nachher.png gemessen). Die Grafik fuellt genau diese
+                  Luecke und steht inhaltlich richtig: sie zeigt dieselbe Stufenfolge wie
+                  die Legende darueber. Nur ab lg, mobil bleibt sie unter der Leiter. */}
+              <figure className="mt-10 hidden lg:mt-auto lg:block lg:pt-12">
+                <img
+                  src="/composites/graphic-world/step-salsa-line.webp"
+                  alt=""
+                  aria-hidden
+                  width={2048}
+                  height={760}
+                  loading="lazy"
+                  className="pointer-events-none w-full opacity-75"
+                />
+                <figcaption className="mt-3 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[var(--color-ink-muted)]">
+                  {l.graphicCaption}
+                </figcaption>
+              </figure>
             </motion.div>
 
             {/* Rechte Spalte: die Leiter */}
@@ -200,8 +239,13 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
                       {de ? 'Salsa & Bachata: Stufe für Stufe' : 'Salsa & Bachata: stage by stage'}
                     </h3>
                   </div>
-                  <span className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[var(--color-ink-muted)] shadow-sm">
-                    {de ? 'Stufe für Stufe' : 'Level by level'}
+                  {/* R141 Nachtrag: Die Pille trug woertlich denselben Text wie die H3
+                      daneben («Stufe fuer Stufe»), also dieselben drei Woerter zweimal in
+                      EINER Zeile — genau die Redundanz, die Raphael bei 04:46 beklagt.
+                      Mobil brach die H3 dadurch dreizeilig gegen die Pille. Jetzt nennt
+                      sie die Anzahl der Stufen und orientiert damit wirklich. */}
+                  <span className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-semibold tabular-nums text-[var(--color-ink-muted)] shadow-sm">
+                    {l.rungs.length} {de ? 'Stufen' : 'stages'}
                   </span>
                 </div>
 
@@ -251,18 +295,54 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
                           </div>
                         </div>
 
-                        <dl className="mt-4 grid gap-2.5 sm:pl-[3.75rem]">
-                          <RungRow label={l.forYouLabel} value={rung.forYou} />
-                          <RungRow label={l.youLearnLabel} value={rung.youLearn} />
-                          <RungRow label={l.nextLabel} value={rung.next} />
-                        </dl>
+                        {/* R141 (Video 04:46 «Ich versteh nicht, was hier mit den ganzen
+                            Texten ist», 04:52 «dass es hier ein bisschen aufgeht»):
+                            Vorher trug JEDE der fuenf Stufen drei gleich laute Zeilen —
+                            15 Textbloecke gleichzeitig, mobil rund fuenf Bildschirme.
+                            Jetzt traegt jede Stufe nur ihre Kernzeile («Fuer dich, wenn»).
+                            Inhalte und Wechsel-Kriterium liegen in einer nativen
+                            <details>-Klappe, also Detail auf Wunsch statt fuenf Waende.
+                            Stufe 01 ist offen: die Einstiegs-Stufe zeigt weiter, wie die
+                            Leiter zu lesen ist, ohne dass jemand erst klicken muss. */}
+                        <div className="mt-3 sm:pl-[3.75rem]">
+                          {/* Die Kernzeile traegt die Stufe. Sie steht als normaler Satz da,
+                              nicht als Label-Wert-Paar: das Label «Fuer dich, wenn» wuerde
+                              als vierte Grossbuchstaben-Zeile die Ruhe wieder zerstoeren,
+                              die der Umbau gerade gebracht hat. */}
+                          <p className="text-[0.95rem] leading-relaxed text-[var(--color-ink)]">{rung.forYou}</p>
+                          <details className="group/rung mt-2.5" open={active}>
+                            <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-full text-xs font-semibold text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-salsa)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-salsa)] [&::-webkit-details-marker]:hidden">
+                              {/* R141 Nachtrag: Ohne den Stufennamen tragen alle fuenf
+                                  Klapp-Schalter denselben zugaenglichen Namen. In der
+                                  Elementliste eines Screenreaders stand fuenfmal
+                                  «Inhalte und Wechsel». Der Name davor macht sie
+                                  unterscheidbar. Natives summary liefert Rolle, Tastatur
+                                  und Auf/Zu-Zustand selbst, mehr ARIA braucht es nicht. */}
+                              <span className="sr-only">{rung.name}: </span>
+                              {l.detailsLabel}
+                              <ChevronDown
+                                size={14}
+                                strokeWidth={2.5}
+                                aria-hidden
+                                className="transition-transform duration-[var(--dur-fast)] ease-out group-open/rung:rotate-180"
+                              />
+                            </summary>
+                            <dl className="mt-3 grid gap-2.5">
+                              <RungRow label={l.youLearnLabel} value={rung.youLearn} />
+                              <RungRow label={l.nextLabel} value={rung.next} />
+                            </dl>
+                          </details>
+                        </div>
                       </li>
                     );
                   })}
                 </ol>
 
-                {/* Simple Level-Grafik (bestehendes Asset, dekorativ). */}
-                <figure className="mt-7">
+                {/* Simple Level-Grafik (bestehendes Asset, dekorativ).
+                    R141: ab lg steht sie in der linken Spalte und fuellt dort den
+                    Leerraum. Hier bleibt sie nur unter lg, damit sie nicht doppelt
+                    erscheint. */}
+                <figure className="mt-7 lg:hidden">
                   <img
                     src="/composites/graphic-world/step-salsa-line.webp"
                     alt=""
@@ -285,10 +365,13 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
   );
 }
 
-/* Eine Zeile innerhalb einer Leiter-Stufe: kleines Label + Text. */
+/* Eine Zeile innerhalb der aufgeklappten Detail-Liste: kleines Label ueber dem Text.
+ * R141: vorher zweispaltig (sm:grid-cols-[7.5rem_1fr]). Das Label stand dann neben
+ * dem Satz und riss eine zweite Textkante auf. Gestapelt liest die Stufe wie ein
+ * Block: Kernzeile, Label, Satz. */
 function RungRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-1 sm:grid-cols-[7.5rem_1fr] sm:gap-4">
+    <div className="grid gap-1">
       <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-salsa)]">{label}</dt>
       <dd className="text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{value}</dd>
     </div>
@@ -397,28 +480,51 @@ function MissSection({ c }: { c: KursaufbauContent }) {
   return (
     <section className="bg-[var(--color-paper-warm)] py-20 lg:py-32">
       <Shell>
-        <Reveal className="overflow-hidden rounded-[1.75rem] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.08)] lg:grid lg:grid-cols-[0.95fr_1.05fr]">
-          <motion.div variants={item} className="relative">
+        {/* R141 (Video 04:58 «Hier ist so viel Freiraum»): Raphael nennt zwei Dinge in
+            einem Satz. Das dunkle Foto ist getauscht (content.ts). Der Freiraum war
+            zuerst nur vertikal behandelt, die eigentliche Klage ist aber die Flaeche
+            NEBEN dem Text: rechts von Eyebrow, H2 und zwei Zeilen Fliesstext stand die
+            halbe Blockbreite leer.
+            Zwei Aenderungen loesen das, ohne neue Dichte:
+            1. Das Grid dreht zugunsten des Bildes (1.15fr zu 0.85fr statt 0.95 zu 1.05).
+               Die Textspalte wird schmaler, die Zeilen laufen dichter an ihre Kante.
+            2. Die «Dein Tempo»-Karte parkte als Overlay auf dem Foto und verdeckte dort
+               Tanzende. Sie steht jetzt als eigener Block unter dem Fliesstext und fuellt
+               die Restflaeche mit dem Inhalt, der ohnehin zur Sektion gehoert.
+            Ein frueherer Kommentar an dieser Stelle behauptete ein festes lg:aspect-[4/5]
+            am Foto. Die Klasse trug nie ein aspect-Utility, sondern lg:h-full plus
+            min-h — damit konnte das Bild die Grid-Spur weiter mitbestimmen. Das Foto
+            liegt jetzt absolut in einem Wrapper ohne Eigenhoehe, also bestimmt allein
+            die Textspalte die Zeilenhoehe. */}
+        <Reveal className="overflow-hidden rounded-[1.75rem] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.08)] lg:grid lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch">
+          <motion.div variants={item} className="relative lg:h-full">
             <img
               src={m.image.src}
               alt={m.image.alt}
-              className="h-72 w-full object-cover object-[center_42%] sm:h-80 lg:h-full"
-              width={1066}
-              height={1600}
+              // kurs-05.jpg ist Querformat (1600x1065). object-[center_38%] wie im
+              // /preise-Band: die Koepfe der Klasse liegen im oberen Drittel und bleiben
+              // im hohen Ausschnitt ganz im Bild (Kopf-Schnitt-Pruefung R141).
+              // Ab lg absolut positioniert: das Bild fuellt die Spur, die der Text
+              // aufspannt, und traegt selbst keine Hoehe in das Grid hinein.
+              className="h-72 w-full object-cover object-[center_38%] sm:h-80 lg:absolute lg:inset-0 lg:h-full"
+              width={1600}
+              height={1065}
               loading="lazy"
             />
-            {/* Festes Papier statt Glas (Sweep 14.08.2026). */}
-            <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-black/5 bg-[var(--color-paper-warm)] p-4 text-[var(--color-ink)] shadow-[0_18px_44px_-18px_rgba(17,17,17,0.5)] sm:right-auto sm:max-w-[17rem]">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ink-muted)]">{m.cardLabel}</p>
-              <p className="mt-1 font-display text-lg font-bold leading-tight">{m.cardText}</p>
-            </div>
           </motion.div>
-          <motion.div variants={item} className="p-8 sm:p-10 lg:p-12">
+          <motion.div variants={item} className="flex flex-col justify-center p-8 sm:p-10 lg:p-12">
             <Eyebrow>{m.eyebrow}</Eyebrow>
             <h2 className={`mt-5 ${sectionTitle}`}>
               {m.title} {m.titleAccent ? <TitleAccent>{m.titleAccent}</TitleAccent> : null}
             </h2>
             <p className={`mt-4 ${sectionLead}`}>{m.body}</p>
+            {/* Festes Papier statt Glas (Sweep 14.08.2026). Aus dem Foto-Overlay in die
+                Textspalte gezogen: dort verdeckte die Karte Tanzende, hier fuellt sie den
+                Rest der Spalte mit Inhalt, der ohnehin zur Sektion gehoert. */}
+            <div className="mt-7 rounded-2xl border border-black/5 bg-[var(--color-paper-warm)] p-4 text-[var(--color-ink)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ink-muted)]">{m.cardLabel}</p>
+              <p className="mt-1 font-display text-lg font-bold leading-tight">{m.cardText}</p>
+            </div>
           </motion.div>
         </Reveal>
       </Shell>

@@ -139,7 +139,12 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
     offer: {
       eyebrow: 'Unser Angebot',
       title: 'Welcher Tanz passt zu dir?',
-      lead: 'Salsa, Bachata und Heels fühlen sich unterschiedlich an. Entdecke die Stile oder wähle Privatstunden, Workshops und Shows passend zu deinem Ziel.',
+      // R134/9: Nur der Privatstunden-Verweis faellt weg — die Karte dazu steht seit
+      // R134 nicht mehr auf der Startseite. Workshops, Shows UND «passend zu deinem Ziel»
+      // bleiben stehen, weil der Lock 13.08. das Kuerzen der Startseite verbietet
+      // (Ausnahme: nur der 1:1-Block). Vorher: «... oder wähle Privatstunden, Workshops
+      // und Shows passend zu deinem Ziel.»
+      lead: 'Salsa, Bachata und Heels fühlen sich unterschiedlich an. Entdecke die Stile oder komm zu Workshops und Shows passend zu deinem Ziel.',
       cards: [
         { key: 'salsa', title: 'Salsa tanzen in Basel', hint: 'Beginner bis Advanced', text: 'Für alle, die Rhythmus, Technik und Social Dancing verbinden wollen. Von den ersten Basics bis zu fliessenden Kombinationen.', photo: offerPhotos.salsa, alt: 'Tanzpaar dreht sich beim Salsa im Salsaflow Studio', href: '/tanzkurse/salsa' },
         { key: 'bachata', title: 'Bachata mit Verbindung und Flow', hint: 'Bachata Sensual', text: 'Für weiche Bewegungen und Paartanz mit Gefühl. Ideal, wenn du an Technik und Connection arbeiten willst. Also daran, wie gut ihr euch beim Führen und Folgen spürt.', photo: offerPhotos.bachata, alt: 'Bachata-Paar beim Üben', href: '/tanzkurse/bachata' },
@@ -162,7 +167,15 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
     },
     events: {
       eyebrow: 'Events & Workshops',
-      title: 'Lernen ist der Anfang. Tanzen passiert in der Community.',
+      // Kritik-Fund (home-desktop-08-y5250.png, R134/8): «Lernen ist der Anfang. Tanzen
+      // passiert in der Community.» waren zwei Slogan-Zeilen statt Information.
+      // forbidden-check.py meldete dazu [A1] Staccato-Verdacht (4+5 Woerter).
+      // Die Zeile sagt jetzt, was nach dem Kurs konkret passiert. Der Satz darunter nennt
+      // die Danceflow Night ohnehin schon — die H2 fuehrt jetzt darauf hin, statt eine
+      // Stimmung zu behaupten. Check auf der neuen Zeile: 0 harte Verstoesse.
+      // Die /events-Seite traegt ihre eigene Zeile (events/content.ts) und ist nicht Teil
+      // von Welle 1 (Route / + Buchungs-Flow).
+      title: 'Nach dem Kurs geht es auf der Danceflow Night weiter.',
       body: 'Bei der Danceflow Night triffst du Freunde, übst das Gelernte und tanzt in entspannter Atmosphäre. Vor ausgewählten Abenden finden Workshops statt.',
       cta: 'Alle Events ansehen',
     },
@@ -250,7 +263,7 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
     offer: {
       eyebrow: 'What we offer',
       title: 'Which dance style suits you?',
-      lead: 'Salsa, Bachata and Heels each feel different. Explore the styles or choose private lessons, workshops and shows based on your goal.',
+      lead: 'Salsa, Bachata and Heels each feel different. Explore the styles or join workshops and shows based on your goal.',
       cards: [
         { key: 'salsa', title: 'Dance Salsa in Basel', hint: 'Beginner to advanced', text: 'For everyone who wants to connect rhythm, technique and social dancing. From the first basics to flowing combinations.', photo: offerPhotos.salsa, alt: 'Dance couple turning while dancing salsa at the Salsaflow studio', href: '/tanzkurse/salsa' },
         { key: 'bachata', title: 'Bachata with connection and flow', hint: 'Bachata Sensual', text: 'For soft movement and partner dancing with feeling. Ideal if you want to work on technique and connection. How well you sense each other while leading and following.', photo: offerPhotos.bachata, alt: 'Bachata couple practising', href: '/tanzkurse/bachata' },
@@ -273,7 +286,7 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
     },
     events: {
       eyebrow: 'Events & workshops',
-      title: 'Learning is the beginning. Dancing happens in the community.',
+      title: 'After class the Danceflow Night keeps going.',
       body: 'At the Danceflow Night you meet friends, practise what you learned and dance in a relaxed atmosphere. Workshops take place before selected evenings.',
       cta: 'See all events',
     },

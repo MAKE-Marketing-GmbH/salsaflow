@@ -445,7 +445,12 @@ const bachata: Record<Lang, StyleContent> = {
         { title: 'Was du lernst', text: 'Basics, Gewicht, Führung und Folgen, Körperkontrolle, sichere Bewegungsqualität.' },
         { title: 'Was sich ändert', text: 'Deine Bewegungen sehen weich aus, weil sie kontrolliert sind: Das Timing sitzt, Signale sind klar, Nähe bleibt respektvoll.' },
       ],
-      image: { src: '/photos/gallery/kurse/03.jpg', alt: 'Lachendes Bachata-Paar im Unterricht, Köpfe vollständig' },
+      // R138, Raphael-Video 09:08: «Genauso hier bei Bachata, das war auch falsch
+      // eingefaerbt.» gallery/kurse/03.jpg ist eine Club-Nacht-Aufnahme mit rotem
+      // Bodenlicht; jede Gradation zog sie entweder grau oder rot. Ersetzt durch
+      // gallery/kurse/01.jpg — per Read geprueft: Tageslicht, scharf, Paar in
+      // Fuehrungshaltung, passt zum Blocktext «Fuehrung und Folgen».
+      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Bachata-Paar übt eine geführte Drehung im hellen Unterrichtsraum' },
     },
     fit: {
       title: 'Bachata passt, wenn du Flow suchst, aber trotzdem Struktur brauchst',
@@ -575,7 +580,8 @@ const bachata: Record<Lang, StyleContent> = {
         { title: 'What you learn', text: 'Basics, weight transfer, leading and following, body control and safe technique.' },
         { title: 'What changes', text: 'Your movement looks soft because it is controlled: the timing sits, signals are clear, closeness stays respectful.' },
       ],
-      image: { src: '/photos/gallery/kurse/03.jpg', alt: 'Smiling Bachata couple in class, heads fully visible' },
+      // R138: gleiches Motiv wie DE, siehe Begruendung dort.
+      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Bachata couple practising a led turn in the bright studio' },
     },
     fit: {
       title: 'Bachata suits you if you want flow, but still need structure',

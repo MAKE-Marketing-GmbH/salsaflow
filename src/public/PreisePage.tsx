@@ -39,7 +39,11 @@ export function PreisePage() {
   }, []);
   return (
     <SubPageShell seo="preise">
-      <div className="preise-page" data-cookie-clear={cookieClear ? 'true' : undefined} />
+      <div
+        data-preise-page=""
+        className="preise-page"
+        data-cookie-clear={cookieClear ? 'true' : undefined}
+      />
       {/* Kein Eyebrow: "Preise & Optionen" stand direkt ueber der H1 "Preise fuer Kurse,
           Workshops und Privatstunden." und wiederholte nur deren erstes Wort. Die Breadcrumb
           darueber sagt bereits "Preise" — dreimal dasselbe Wort in 40px Hoehe. */}
@@ -218,12 +222,17 @@ function RegularSection({ c }: { c: PreiseContent }) {
 
         <Reveal className="mt-12 lg:mt-16">
           <motion.figure variants={item}>
+            {/* objectPosition kommt aus dem Content (wie in PassSection), sonst
+                waere `regular.image.position` still wirkungslos. Ohne Angabe bleibt es
+                bei den bisherigen 45%. width/height melden die echten Masse der Datei
+                (gallery/kurse/01.jpg = 1600x1066). */}
             <img
               src={r.image.src}
               alt={r.image.alt}
-              className="aspect-[21/9] w-full rounded-[var(--radius-media)] object-cover object-[center_45%]"
-              width={1500}
-              height={1000}
+              style={{ objectPosition: r.image.position ?? 'center 45%' }}
+              className="aspect-[21/9] w-full rounded-[var(--radius-media)] object-cover"
+              width={1600}
+              height={1066}
               loading="lazy"
             />
             <figcaption className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-[var(--color-line)] pt-3">
@@ -437,8 +446,8 @@ function PassSection({ c }: { c: PreiseContent }) {
               // content darf den Ausschnitt vorgeben (Hochformat-Motive); ohne Angabe bleibt 45%.
               style={p.image.position ? { objectPosition: p.image.position } : undefined}
               className="order-2 mt-8 aspect-[16/9] w-full rounded-[var(--radius-media)] object-cover object-[center_45%] lg:order-none lg:mb-7 lg:mt-0"
-              width={1920}
-              height={1280}
+              width={1400}
+              height={1000}
               loading="lazy"
             />
             <div className="order-1 lg:order-none">

@@ -63,8 +63,11 @@ export function FounderCards({ className = '' }: { className?: string }) {
             <figure className="group flex h-full flex-col">
               {/* Quadrat auf Mobil (Kritik-Vorgabe), 4:5-Panel ab sm. Der Freisteller sitzt
                   in seinem normierten Fenster; `bust` bringt Scheitel und Schulter aller
-                  vier auf dieselbe Hoehe. */}
-              <div className="relative aspect-square overflow-hidden bg-[var(--color-bg-soft)] sm:aspect-[4/5]">
+                  vier auf dieselbe Hoehe.
+                  R134/7: Die vier Fenster standen als scharfkantige Rechtecke (Radius 0)
+                  in einer Seite, die sonst durchgehend rund ist — die Preis-Karte daneben
+                  traegt 24px. Jetzt derselbe Token wie jede andere Medienflaeche. */}
+              <div className="relative aspect-square overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] sm:aspect-[4/5]">
                 <img
                   src={founder.photo}
                   alt={`${founder.name} ${founder.last}, ${role} ${lang === 'de' ? 'von' : 'at'} Salsaflow`}

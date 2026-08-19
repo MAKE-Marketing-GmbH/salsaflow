@@ -7,13 +7,15 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
-import { HEELS } from '@/public/courses/styles/heels-content';
+import { HEELS, type HeelsContent } from '@/public/courses/styles/heels-content';
 import {
   MEASURE_L,
+  MEASURE_XL,
   ClosingInvite,
   SubPageShell,
-  HeroFrame,
+  Breadcrumb,
   PrimaryCta,
+  GhostCta,
   SectionHead,
   CheckList,
   FaqBlock,
@@ -33,58 +35,200 @@ export function HeelsPage() {
   const c = HEELS[lang];
   return (
     <SubPageShell seo={c.seo}>
-      <HeelsHero c={c} />
-      <MythSection c={c} />
-      <TrainingSection c={c} />
-      <ShoesSection c={c} />
-      <AtmosphereSection c={c} />
-      <ClosingSection c={c} />
-      <FaqBlock title={c.faqTitle} items={c.faq} />
+      {/* R139: Marker dieser Route. Traegt EINE route-lokale Korrektur, ohne
+          WhatsAppFloat.tsx oder StylePage.tsx anzufassen (beide sitewide/tabu):
+          Der Desktop-Float ist sonst eine Pille mit Label «WhatsApp» (im Vorher-Shot
+          1440x730 gemessen: 121px breit, span display:block). Hier Kreis wie mobil.
+          Mobil braucht der Knopf KEINEN Lift — die Freistellung laeuft ueber die
+          Bild-Ratio unten (siehe HEELS_HERO_IMG_CLASS), nicht ueber --whatsapp-lift.
+          [data-split-hero-page] waere falsch: der haengt an StylePage und wuerde
+          Salsa/Bachata mitziehen; dieser Marker gilt nur fuer /tanzkurse/heels. */}
+      <div data-heels-style-page="">
+        <style>{`
+          @media (min-width: 640px) {
+            body:has([data-heels-style-page]) a.whatsapp-float {
+              width: 3.5rem;
+              padding-left: 0;
+              padding-right: 0;
+              justify-content: center;
+              gap: 0;
+            }
+            body:has([data-heels-style-page]) a.whatsapp-float span {
+              display: none;
+            }
+          }
+        `}</style>
+        <HeelsHero c={c} />
+        <MythSection c={c} />
+        <TrainingSection c={c} />
+        <ShoesSection c={c} />
+        <AtmosphereSection c={c} />
+        <ClosingSection c={c} />
+        <FaqBlock title={c.faqTitle} items={c.faq} />
+      </div>
     </SubPageShell>
   );
 }
 
-type C = (typeof HEELS)['de'];
+/* Vom Vertrag, nicht vom Literal. `HEELS` traegt seit R139 ein `satisfies` statt einer
+   Typ-Annotation (oxlint anti-slop/no-known-value-widening). Damit narrowt
+   (typeof HEELS)['de'] auf die konkreten DE-Daten und verliert jedes optionale Feld,
+   das dort zufaellig fehlt — z. B. myth.titleAccent. */
+type C = HeelsContent;
 
 /* -------------------------------------------------------------------- Hero */
-/* Design-Kritik Runde 2, Issue 1: die sechste Kopie derselben Bauform. Jetzt Achse 'center'
-   (im Kritik-Fix als Beispiel genannt) — die Headline steht zentriert ueber dem Inhalt.
-   Runde 1 (2026-08): das Charakter-Foto der Seite (energiegeladene Heels-Klasse vor der
-   Salsaflow-Wand) laeuft als full-bleed Band UNTER dem Typo-Block — gleiche Geste wie Salsa
-   und Bachata, anderes Motiv, anderer Charakter (Ausdruck/Empowerment). */
+/* R139 (Raphael-Video Punkt 7, 18.08.): «Mach so einfach links, rechts.» — dieselbe
+   Ansage, die R137 auf Salsa und R138 auf Bachata umgesetzt haben. Heels lief bis hier
+   noch ueber HeroFrame axis="center": zentrierter Typo-Block, darunter ein Full-Bleed-
+   Band. Am 1440x730-Fold gemessen (worklog/shots/S7-ux139/vorher/heels-desktop-1440.png)
+   begann das Band erst bei y=545 und die Gesichter lagen komplett unter der Foldkante —
+   im Fold stand nur Schrift, kein Nebeneinander.
+
+   Diese Bauform steht bewusst HIER und nicht in StylePage.tsx (tabu, Brief Punkt 5).
+   Strukturell aehnlich, nicht importiert: eigene Konstante, eigener Klassenstring,
+   eigene Fold-Kalibrierung. Salsa und Bachata bleiben Byte fuer Byte unberuehrt.
+
+   Motiv und Alt-Text kommen aus heels-content.ts `hero.band` (DE und EN) — EIN
+   Objekt, alle drei Felder live: `src`, `alt` und `position` gehen direkt in das
+   Bild-Element unten. Bis R139 rendete hier eine zweite, hartkodierte Konstante, waehrend
+   `band.src`/`band.alt` ignoriert wurden; wer die Content-Datei aenderte, sah keine
+   Wirkung (Sol-Fund R139). Diese Aufspaltung ist weg.
+
+   Das Asset (/photos/2026/kurse-heels-energie-card-960.webp, 960x1200) ist der
+   Hochformat-Zuschnitt desselben Shots wie das fruehere 21:9-Band — helle
+   Heels-Klasse vor der Salsaflow-Wand, Frauen, Energie. Vor dem Einbau per Read
+   geprueft: echtes Foto, natuerliche Haut- und Haarkanten, keine Matte-Linie und
+   kein kopfloser Koerper-Rest (R138 Fund 6), scharf, Tageslicht-Studio.
+   Hochformat ist Pflicht, damit object-cover vertikalen Ueberhang hat — sonst
+   waere 'center 12%' ein totes Feld (R138 Fund 2). */
+
+/* Mobil 21/9, ab lg 4/3. Der Crop kommt NICHT aus dieser Klasse, sondern per
+   objectPosition aus heels-content.ts hero.band.position — sonst haette die Klasse
+   den Content-Wert still ueberstimmt.
+
+   Warum mobil so flach: der WhatsApp-Float ist fixed und sitzt bei 390x844 auf
+   y768-824 (x314-370). Mit dem vorherigen 3/2 endete das Foto bei y773 und lief bis
+   x369 — der Knopf steckte mitten im Motiv auf der zweiten Taenzerin (Sol-Fund R139,
+   live gemessen). Ein Lift half nicht: zwischen Bildunterkante und Chip-Oberkante
+   liegen strukturell nur 21px (grid gap-5), der Knopf ist 56px hoch.
+   21/9 (348x149) zieht die Bildkante auf y690. Chip-Zeile 1 laeuft dann y711-755 und
+   endet bei x172, die Knopf-Spalte ab x314 ist dort frei. Der Float bleibt bei
+   --whatsapp-lift 0 auf y768-824 und beruehrt weder Foto noch Chip.
+   Bei 360x800 gilt dasselbe: Bild endet y700, Float y724-780, kein Kontakt.
+
+   Beide Verhaeltnisse behalten bei 12% alle Gesichter inkl. Kinn — per Read am
+   simulierten Ausschnitt geprueft: 21/9 zeigt Quell-Y 95-506 von 1200, 4/3 zeigt
+   58-777. Die Kopfreihe liegt zwischen Y 90 und 400. */
+const HEELS_HERO_IMG_CLASS = 'aspect-[21/9] w-full object-cover lg:aspect-[4/3]';
+
 function HeelsHero({ c }: { c: C }) {
+  const { container, item } = useReveal();
   const h = c.hero;
+  /* Crop-Lock aus dem LIVE-Content (Brief Punkt 3): `position` steuert das Hero-Foto —
+     der Gate-Treffer auf 'center 12%' ist damit Buchstabe MIT Wirkung. Aendert jemand
+     den Wert in heels-content.ts, wandert der Bildausschnitt mit. */
+  const objectPosition = h.band.position;
   return (
-    <HeroFrame
-      axis="center"
-      // dense wie Salsa/Bachata: auf 390 war der letzte Chip im Fold abgeschnitten
-      // (Critic Runde 12, Item 4).
-      dense
-      crumbs={[{ label: 'Tanzkurse', href: '/tanzkurse' }, c.crumb]}
-      title={h.title}
-      titleAccent={h.titleAccent}
-      lead={h.lead}
-      primary={h.primary}
-      secondary={h.secondary}
-      microcopy={h.microcopy}
-      media={h.band}
+    <section
+      className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
+      style={{ paddingTop: 'var(--nav-h)' }}
     >
-      {/* Chip-Bauform wie StylePage (Salsa/Bachata, Critic Runde 9), mobil eine Stufe
-          enger (px-2, gap-x-1): den Heels-Texten fehlten exakt 3px zum Zweier-Wrap
-          (157+190+6 = 353 bei 350 verfuegbar) — einzeilig gestapelt lag der letzte Chip
-          35px unter dem 390er-Fold (Critic Runde 12, Item 4). min-h-11 bleibt (Runde 9). */}
-      <ul className="flex flex-wrap justify-center gap-x-1 gap-y-1.5 sm:gap-2">
-        {h.bullets.map((b) => (
-          <li
-            key={b}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-2 py-1 text-[0.72rem] font-semibold leading-tight text-[var(--color-ink)] sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm"
-          >
-            <Check size={13} strokeWidth={3} aria-hidden className="text-[var(--color-salsa)]" />
-            {b}
-          </li>
-        ))}
-      </ul>
-    </HeroFrame>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
+      />
+      <Shell className="pt-2 pb-10 lg:pt-6 lg:pb-16">
+        <motion.div data-reveal variants={container} initial="hidden" animate="show">
+          <motion.div variants={item} className="mb-2 lg:mb-4">
+            <Breadcrumb trail={[{ label: 'Tanzkurse', href: '/tanzkurse' }, c.crumb]} compact />
+          </motion.div>
+
+          {/* Die eine Achse: Text links, Foto rechts. Unter lg stapelt es, Foto direkt
+              nach der Microcopy — mobil zaehlt der Fold, nicht die Spalte.
+              1.05fr/items-center: Heels hat fuenf Chips wie Bachata, aber kuerzere
+              Labels (laengster 190px gegen Bachatas Zeile); mit 1.05fr bleiben der
+              Textspalte 672px und die Chips brechen auf zwei Zeilen statt drei. */}
+          <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14">
+            <div className="flex flex-col gap-4">
+              <motion.h1 variants={item} className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
+                {h.title} {h.titleAccent ? <TitleAccent>{h.titleAccent}</TitleAccent> : null}
+              </motion.h1>
+              <motion.p
+                variants={item}
+                className={cn('text-pretty max-w-xl', sectionLead)}
+                style={{ lineHeight: 1.4 }}
+              >
+                {h.lead}
+              </motion.p>
+              <motion.div variants={item} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
+                <GhostCta href={h.secondary.href} down={h.secondary.href.startsWith('#')}>
+                  {h.secondary.label}
+                </GhostCta>
+              </motion.div>
+              <motion.p variants={item} className="text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                {h.microcopy}
+              </motion.p>
+              <motion.ul variants={item} className="hidden flex-wrap gap-1.5 sm:gap-2 lg:flex">
+                {h.bullets.map((b) => (
+                  <li
+                    key={`lg-${b}`}
+                    className="inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--color-line)] bg-white px-2.5 py-1 text-[0.72rem] font-semibold leading-tight text-[var(--color-ink)] sm:gap-2 sm:px-3.5 sm:py-1.5 lg:px-3 lg:text-[0.8rem]"
+                  >
+                    <Check size={13} strokeWidth={3} aria-hidden className="text-[var(--color-salsa)]" />
+                    {b}
+                  </li>
+                ))}
+              </motion.ul>
+            </div>
+
+            <motion.div
+              variants={item}
+              className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]"
+            >
+              <img
+                src={h.band.src}
+                alt={h.band.alt}
+                style={{ objectPosition }}
+                className={HEELS_HERO_IMG_CLASS}
+                width={960}
+                height={1200}
+                loading="eager"
+                fetchPriority="high"
+              />
+            </motion.div>
+
+            {/* Die Chip-Reihe steht mobil UNTER dem Foto, damit die Gesichter im
+                390x844-Fold liegen.
+
+                px-2 und gap-x-1 statt px-2.5/gap-2.5: die Heels-Labels sind laenger als
+                Bachatas. Mit px-2.5 messen Chip 1 und 2 zusammen 156+10+195 = 361px bei
+                348px Spaltenbreite — jeder Chip bekam eine eigene Zeile, Zeile 2 lag bei
+                y=812 und wurde von der 844er-Kante durchgeschnitten. Die engere Stufe
+                nimmt jedem Chip 4px und dem Abstand 6px: 152+4+191 = 347px, beide passen
+                in Zeile 1. Dieselbe Rechnung stand schon in der HeroFrame-Fassung dieser
+                Route (Critic Runde 12, Item 4). Ab sm greifen wieder die Normalwerte.
+
+                Die Ueberdeckung durch den WhatsApp-Knopf loest KEIN pr-* hier: das
+                Padding zaehlt zur min-content-Breite der Flex-Zeile, weitet die
+                Grid-Spalte und schiebt den Hero aus dem 390er-Viewport (R138 Fund 8).
+                Der Knopf weicht stattdessen aus — --whatsapp-lift in index.css am
+                Marker [data-heels-style-page]. */}
+            <motion.ul variants={item} className="flex flex-wrap gap-x-1 gap-y-2.5 sm:gap-2 lg:hidden">
+              {h.bullets.map((b) => (
+                <li
+                  key={`sm-${b}`}
+                  className="inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--color-line)] bg-white px-2 py-1 text-[0.72rem] font-semibold leading-tight text-[var(--color-ink)] sm:gap-2 sm:px-3.5 sm:py-1.5"
+                >
+                  <Check size={13} strokeWidth={3} aria-hidden className="text-[var(--color-salsa)]" />
+                  {b}
+                </li>
+              ))}
+            </motion.ul>
+          </div>
+        </motion.div>
+      </Shell>
+    </section>
   );
 }
 

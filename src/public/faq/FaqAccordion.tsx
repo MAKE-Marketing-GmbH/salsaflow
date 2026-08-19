@@ -35,11 +35,11 @@ export function FaqItem({ q, a, defaultOpen = false }: Faq & { defaultOpen?: boo
   }, []);
 
   return (
-    <details ref={detailsRef} open={defaultOpen || undefined} className="group py-1">
-      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 rounded-[var(--radius-chip)] py-5 text-left font-display text-lg font-bold leading-snug text-[var(--color-ink)] marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-4 sm:text-xl [&::-webkit-details-marker]:hidden">
+    <details ref={detailsRef} open={defaultOpen || undefined} className="group py-3">
+      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-6 rounded-[var(--radius-chip)] py-6 text-left font-display text-lg font-bold leading-snug text-[var(--color-ink)] marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-4 sm:text-xl [&::-webkit-details-marker]:hidden">
         {q}
         <ChevronDown
-          size={20}
+          size={22}
           strokeWidth={2}
           aria-hidden
           // Gleiche Drehgeschwindigkeit wie der Chevron im mobilen Menue (--acc-chevron).

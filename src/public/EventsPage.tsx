@@ -31,6 +31,11 @@ export function EventsPage() {
     <>
       <Seo page="events" />
       <SiteHeader />
+      {/* R142: der WhatsApp-Float ist sitewide eine Pille mit Label (belegt im Vorher-Shot
+          worklog/shots/S7-ux142/vorher/events-desktop-00-fold.png). Auf dieser Route soll er
+          ab sm ein Kreis ohne Text sein. Eigener Marker analog R140/R141, damit
+          WhatsAppFloat.tsx und die Marker der anderen Routen unberuehrt bleiben. */}
+      <div data-events-page="" />
       <main id="main" tabIndex={-1}>
         <EventsHero />
         <DanceflowSection />
@@ -143,6 +148,7 @@ function EventsHero() {
   return (
     <HeroFrame
       axis="wide"
+      dense
       title={
         <>
           {h.titleA} {h.titleAccent}
@@ -152,22 +158,24 @@ function EventsHero() {
       lead={h.lead}
       facts={facts}
       media={{
-        src: '/photos/party/party-52.webp',
+        src: '/photos/party/party-47.webp',
         alt:
           lang === 'de'
-            ? 'Tanzteam auf der Danceflow Night, alle Köpfe sichtbar'
-            : 'Dance team at the Danceflow Night, all heads visible',
-        // Mobil 18%: Band nimmt genug Hoehe, Köpfe sitzen. Desktop-Band war 12rem + 13%
-        // und zeigte nur Arme. lg: 16rem plus 32% legt das Fenster auf die vordere Reihe.
-        // R76 (Fold 1440x730): 14rem + 40% zeigte im 97px-Streifen (bandTop 633) nur
-        // Stirn und Augen — die Kinne lagen UNTER dem Fold. Live-Reihe (Anker-Modell,
-        // Motiv 1500x1000, scaledH 960): bei lg:h-[21rem] + object-[center_42%] deckt
-        // der sichtbare Streifen nat. Y~526-623 ab — fuenf Frauen (lachend, schwarzes
-        // Top, dunkles Haar, zwei rechts) plus der Bart-Mann zeigen alle Auge/Nase/Mund/
-        // Kinn mit Luft, kein Kinn auf der 730er-Kante. 20rem kappt den Bart-Mann oben,
-        // 22rem kappt ihn unten. Nur positionClass + heightClass (Mobil 18% / h-[10rem]
-        // unberuehrt), Motiv party-52, H1, Lead, Knoepfe, Zahlenzeile bleiben.
-        positionClass: 'object-[center_55%] lg:object-[center_42%]',
+            ? 'Vier Tänzerinnen in Lila zeigen eine Choreografie im Salsaflow-Saal'
+            : 'Four dancers in purple performing a choreography in the Salsaflow studio',
+        // R143: das alte Gruppenfoto ist als Motiv raus. Ersatz ist party-47 (1500x1000, vor dem Einbau
+        // per Read geprueft): vier Taenzerinnen in Lila vor der hellen Salsaflow-Wand,
+        // echtes Foto, scharf, in src/ sonst unbenutzt.
+        // Crop nachgerechnet, Band-Hoehen bleiben unveraendert (lg:h-[21rem] = 336px):
+        //   1440px breit -> scale 0.96, scaledH 960, Ueberhang 624px.
+        //   object-[center_30%] -> sichtbar nat. Y 195-545.
+        // Die hoechste Frisur beginnt bei nat. Y~225, die tiefsten Kinne liegen bei ~330:
+        // alle vier Koepfe stehen komplett im Band, mit ~30px Luft ueber dem Haar. Bei 40%
+        // (nat. Y 260-610) kappt die Bandkante alle vier Scheitel — belegt am Crop
+        // /tmp/p47_band40.png. Ein Wert fuer alle Breiten reicht hier: bei sm (426px scaledH,
+        // Fenster nat. Y 176-589) und mobil (Fenster nat. Y 69-685) liegen die Koepfe
+        // ebenfalls vollstaendig innen. Deshalb keine lg-Sondervariante mehr.
+        positionClass: 'object-[center_30%]',
         heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[21rem]',
       }}
     >
@@ -195,29 +203,49 @@ function DanceflowSection() {
       <Shell className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
         {/* LINKS: Foto-Komposition aus echten Danceflow-Fotos. Ein grosses Gruppen-Foto oben,
             darunter zwei echte Tanz-Momente. Ersetzt die drei entfernten Duotone-Kacheln. */}
-        <PhotoFade className="order-1">
+        {/* R142 Reveal (Video 05:32 "mach so Reveal Animations"): die drei Fotos stiegen
+            als EIN Block ein (PhotoFade). Jetzt staffelt der vorhandene Reveal aus
+            home/motion.tsx sie nacheinander — grosses Foto zuerst, dann die zwei kleinen.
+            Kein neues Motion-Primitiv, keine zweite Marquee. `item` haengt in useReveal an
+            useReducedMotion: ohne Bewegung bleibt nur der Fade, kein Versatz. */}
+        <Reveal className="order-1" stagger={0.12} distance={18}>
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <figure className="col-span-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-black/5 shadow-[0_24px_60px_-28px_rgba(17,17,17,0.5)]">
+            <motion.figure variants={item} className="col-span-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-black/5 shadow-[0_24px_60px_-28px_rgba(17,17,17,0.5)]">
+              {/* R143: hier lag `danceflow/02-v3` — dort schnitt der 16/10-Rahmen die
+                  hinteren Koepfe und den rechten Rand an. Ersatz ist `party/party-35-v3`
+                  (2048x1360, vor dem Einbau per Read geprueft): echtes Party-Foto, hell,
+                  scharf, Paar frontal. Nachgerechnet: 2048/1360 = 1.506 ist flacher als
+                  16/10 = 1.6, es fallen also nur 80px Hoehe weg (sichtbar 1280 von 1360).
+                  Bei object-[center_30%] liegen 24px davon oben — das Fenster deckt nat.
+                  Y 24-1304 ab. Die hoechste Frisur (Mann) beginnt bei nat. Y~95, beide
+                  Hauptkoepfe und die Gaeste im Hintergrund bleiben komplett, der rechte
+                  Rand laeuft ungeschnitten durch (Beleg /tmp/p35_df30.png). */}
               <img
-                src="/photos/gallery/danceflow/02-v3.webp"
-                alt={de ? 'Volle Tanzfläche bei einer Danceflow Night, viele lachende Gäste' : 'Packed dance floor at a Danceflow Night with many laughing guests'}
-                className="aspect-[16/10] w-full object-cover object-[center_35%]"
+                src="/photos/party/party-35-v3.webp"
+                alt={de ? 'Paar tanzt lachend auf einer Danceflow Night, weitere Gäste im Hintergrund' : 'Couple dancing and laughing at a Danceflow Night with more guests behind them'}
+                className="aspect-[16/10] w-full object-cover object-[center_30%]"
                 width={2048}
                 height={1360}
                 loading="lazy"
               />
-            </figure>
-            <figure className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
+            </motion.figure>
+            {/* R142: hier lag `danceflow/01-v3` — das ist der Hero von /tanzkurse und damit
+                laut Brief ein Fremd-Motiv auf dieser Route. Ersatz ist `party/party-23-v3`
+                (2048x1360): echtes Party-Foto, hell und
+                scharf, beide Koepfe komplett im Bild, nirgends sonst in src/ verwendet.
+                object-[center_30%] statt 22%: das Motiv traegt die Gesichter mittig, bei 22%
+                schnitte der 4/3-Rahmen die Stirn der Frau an. */}
+            <motion.figure variants={item} className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
               <img
-                src="/photos/gallery/danceflow/01-v3.webp"
-                alt={de ? 'Frau tanzt lachend mit ausgestreckten Armen auf einer Danceflow Night' : 'Woman dancing with outstretched arms and laughing at a Danceflow Night'}
-                className="aspect-[4/3] w-full object-cover object-[center_22%]"
+                src="/photos/party/party-23-v3.webp"
+                alt={de ? 'Zwei Tanzende lachen in die Kamera auf einer Danceflow Night' : 'Two dancers laughing at the camera during a Danceflow Night'}
+                className="aspect-[4/3] w-full object-cover object-[center_30%]"
                 width={2048}
                 height={1360}
                 loading="lazy"
               />
-            </figure>
-            <figure className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
+            </motion.figure>
+            <motion.figure variants={item} className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
               <img
                 src="/photos/gallery/danceflow/03-v3.webp"
                 alt={de ? 'Paar tanzt dicht zusammen auf der Tanzfläche' : 'Couple dancing close together on the floor'}
@@ -226,9 +254,9 @@ function DanceflowSection() {
                 height={1360}
                 loading="lazy"
               />
-            </figure>
+            </motion.figure>
           </div>
-        </PhotoFade>
+        </Reveal>
 
         {/* RECHTS: Text + Fakten + Ticket-CTA.
             lg:pr-36: die H2 endete bei x=1344 und lief beim Scrollen unter den FAB
@@ -251,13 +279,18 @@ function DanceflowSection() {
           >
             {d.factsTitle}
           </motion.p>
-          <motion.dl variants={item} className="mt-4 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          {/* R142: die Liste lief als 2-spaltiges Raster mit sechs gleich lauten Chips —
+              im Video das "richtig lost"-Bild (05:38). Jetzt eine einspaltige Leseliste aus
+              drei Bloecken (Termin / Abend / Publikum). Eine Spalte statt zwei heisst: ein
+              Lesepfad statt sechs Sprungziele. Label und Wert stehen nebeneinander, damit
+              die Zeile als Zeile liest und nicht als Kachel. */}
+          <motion.dl variants={item} className="mt-4 divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
             {d.facts.map((fact: EventFact) => (
-              <div key={fact.label} className="border-t border-[var(--color-line)] pt-3">
-                <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--color-salsa)]">
+              <div key={fact.label} className="grid gap-1 py-4 sm:grid-cols-[7rem_1fr] sm:gap-6">
+                <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--color-salsa)] sm:pt-0.5">
                   {fact.label}
                 </dt>
-                <dd className="mt-1 text-sm leading-relaxed text-[var(--color-ink)]">{fact.value}</dd>
+                <dd className="text-sm leading-relaxed text-[var(--color-ink)]">{fact.value}</dd>
               </div>
             ))}
           </motion.dl>

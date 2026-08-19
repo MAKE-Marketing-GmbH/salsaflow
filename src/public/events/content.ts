@@ -54,15 +54,13 @@ export const EVENTS: Record<Lang, EventsContent> = {
       title: 'Lernen ist der Anfang. Tanzen passiert in der Community.',
       body: 'Ein Kurs gibt dir Struktur. Ein Event gibt dir Wiederholung, Begegnung und echte Tanzsituationen. Du übst, was du gelernt hast, lernst neue Menschen kennen und bleibst leichter dran, weil Tanzen sozial wird.',
       factsTitle: 'Gut zu wissen',
+      // R142: vorher sechs gleich laute Fact-Chips ("richtig lost", Video 05:38). Jetzt drei
+      // Bloecke: Termin, Abend, Publikum. Die Pflicht-Fakten bleiben wortgleich drin —
+      // 1./3./5. Freitag im ersten Wert, CHF 5.-/10.- im zweiten.
       facts: [
-        { label: 'Wann', value: 'Jeden 1., 3. und 5. Freitag' },
-        { label: 'Was', value: 'Social Dancing mit eigenen DJs' },
-        { label: 'Wo', value: 'Am Bahnhof Basel SBB' },
-        // "Gute Taenzer aus FR, DE und CH" aus dem Onboarding (leistungen[2].resultat) —
-        // erklaert das Niveau der Abende und stand nirgends.
-        { label: 'Für wen', value: 'Alle Levels, allein oder zu zweit' },
-        { label: 'Wer kommt', value: 'Tanzende aus der Schweiz, Frankreich und Deutschland' },
-        { label: 'Eintritt', value: 'Schüler CHF 5.-, Gäste CHF 10.-' },
+        { label: 'Termin', value: 'Jeden 1., 3. und 5. Freitag am Bahnhof Basel SBB' },
+        { label: 'Abend', value: 'Social Dancing mit eigenen DJs. Schüler CHF 5.-, Gäste CHF 10.-' },
+        { label: 'Publikum', value: 'Alle Levels, allein oder zu zweit. Tanzende aus der Schweiz, Frankreich und Deutschland' },
       ],
       ctaTickets: 'Nächste Danceflow Night ansehen',
       note: 'Oft gibt es vor der Night einen kurzen Workshop. Den genauen Plan findest du auf Eventfrog.',
@@ -125,13 +123,11 @@ export const EVENTS: Record<Lang, EventsContent> = {
       title: 'Learning is the start. Dancing happens in the community.',
       body: 'A course gives you structure. An event gives you repetition, real encounters and real dance situations. You practise what you learned, meet new people and stay on it more easily, because dancing becomes social.',
       factsTitle: 'Good to know',
+      // R142: same three-block grouping as DE. 1st/3rd/5th Friday and CHF 5.-/10.- stay.
       facts: [
-        { label: 'When', value: 'Every 1st, 3rd and 5th Friday' },
-        { label: 'What', value: 'Social dancing with our own DJs' },
-        { label: 'Where', value: 'At Basel SBB station' },
-        { label: 'For whom', value: 'All levels, alone or as a pair' },
-        { label: 'Who comes', value: 'Dancers from Switzerland, France and Germany' },
-        { label: 'Entry', value: 'Students CHF 5.-, guests CHF 10.-' },
+        { label: 'Date', value: 'Every 1st, 3rd and 5th Friday at Basel SBB station' },
+        { label: 'Evening', value: 'Social dancing with our own DJs. Students CHF 5.-, guests CHF 10.-' },
+        { label: 'Crowd', value: 'All levels, alone or as a pair. Dancers from Switzerland, France and Germany' },
       ],
       ctaTickets: 'See the next Danceflow Night',
       note: 'There is often a short workshop before the night. You find the exact plan on Eventfrog.',

@@ -7,7 +7,7 @@
 // sind Anweisungen an die Redaktion, kein Kunden-Text, und wuerden live peinlich wirken. Sie
 // sind hier zur sauberen Kunden-Antwort umgeschrieben. Dabei nur GESICHERTE Fakten aus dem
 // Bau-Brief (Kursstaffel 8 Wochen, 1 Lektion a 60 Minuten pro Woche, 3 Studios am Bahnhof
-// Basel SBB, info@salsaflow-dc.com). Keine erfundenen Zahlen, keine Preise.
+// Basel SBB, info@salsaflow-dc.com). Zahlen und Preise nur aus dem Bau-Brief.
 //
 // Echte Umlaute (ae/oe/ue -> ä/ö/ü), CH-ss (kein Eszett), keine Em-Dashes.
 // Alle FAQ-Fragen/Antworten landen in EINEM FaqBlock (setzt die vollstaendige FAQPage-JSON-LD).
@@ -85,8 +85,8 @@ export const FAQ_CONTENT = {
       cardText: 'Die häufigsten Fragen, direkt beantwortet.',
     },
     themes: {
-      title: 'Spring direkt zu deiner',
-      titleAccent: 'Frage',
+      title: 'Weiter zu den',
+      titleAccent: 'Seiten',
       lead: 'Unten findest du alle Antworten. Willst du gleich tiefer, führt dich jedes Thema zur passenden Seite.',
       items: [
         { label: 'Einstieg & Schnupperstunde', hint: 'Ausprobieren ohne Risiko', href: R.schnupper },
@@ -105,7 +105,7 @@ export const FAQ_CONTENT = {
       items: [],
       columns: [
         {
-          title: 'Einstieg, Partner, Level',
+          title: 'Einstieg',
           items: [
             {
               q: 'Kann ich einfach ausprobieren, ob Salsaflow zu mir passt?',
@@ -116,20 +116,29 @@ export const FAQ_CONTENT = {
               a: 'Nein. Beginner-Kurse starten ohne Vorkenntnisse. Wichtig ist nur, dass du offen bist, Schritt für Schritt zu lernen.',
             },
             {
-              q: 'Wie viele Figuren lerne ich am Anfang?',
-              a: 'Weniger, als du denkst. Und das ist gut so. Am Anfang geht es um Führen und Folgen. Wer das kann, tanzt mit jeder Person, auch ohne eine einzige Figur. Die Figuren kommen dann von selbst.',
-            },
-            {
               q: 'Wie buche ich eine Schnupperstunde?',
               a: 'Über den Kursplan oder das Schnupperformular auf der Schnupperseite.',
             },
             {
               q: 'Kann ich ohne Tanzpartner kommen?',
-              a: 'Ja. Du kannst dich auch alleine anmelden. Im Kurs wird auf eine gute Balance geachtet und du lernst mit wechselnden Partner:innen. Fehlt einmal jemand, fragen wir in unseren beiden Aushilfe-Chats: einer für Leader, einer für Follower. Meistens springt schnell jemand ein.',
+              a: 'Ja. Du kannst dich auch alleine anmelden. Im Kurs wird auf eine gute Balance geachtet und du lernst mit wechselnden Partner:innen.',
             },
             {
               q: 'Passe ich da rein, auch von meinem Alter her?',
-              a: 'Ja. Bei uns tanzen Menschen aller Altersgruppen ab etwa 12 Jahren. Du wirst vom ersten Abend an herzlich aufgenommen.',
+              a: 'Ja. Bei uns tanzen Menschen aller Altersgruppen. Du wirst vom ersten Abend an herzlich aufgenommen.',
+            },
+            {
+              q: 'Wo buche ich den Heels-Kurs?',
+              a: 'Unter Tanzkurse, Seite Heels.',
+            },
+          ],
+        },
+        {
+          title: 'Kurs, Partner, Level',
+          items: [
+            {
+              q: 'Wie viele Figuren lerne ich am Anfang?',
+              a: 'Weniger, als du denkst. Und das ist gut so. Am Anfang geht es um Führen und Folgen. Wer das kann, tanzt mit jeder Person, auch ohne eine einzige Figur. Die Figuren kommen dann von selbst.',
             },
             {
               q: 'Wie schnell komme ich voran?',
@@ -155,10 +164,14 @@ export const FAQ_CONTENT = {
               q: 'Wo finden die Kurse statt?',
               a: 'In den Salsaflow-Studios direkt am Bahnhof Basel SBB. Auf der Kurskarte siehst du, in welchem Studio dein Kurs läuft.',
             },
+            {
+              q: 'Wie komme ich mit dem Zug zum Studio?',
+              a: 'Die Studios liegen direkt am Bahnhof Basel SBB. Die Anfahrt steht auf der Standortseite.',
+            },
           ],
         },
         {
-          title: 'Preise, Schuhe, Events, Kontakt',
+          title: 'Preise, Events, Kontakt',
           items: [
             {
               q: 'Was kostet ein Kurs?',
@@ -236,8 +249,8 @@ export const FAQ_CONTENT = {
       cardText: 'The most common questions, answered honestly.',
     },
     themes: {
-      title: 'Jump straight to your',
-      titleAccent: 'question',
+      title: 'Go to the',
+      titleAccent: 'pages',
       lead: 'All answers are just below. If you want to go deeper right away, each topic takes you to the matching page.',
       items: [
         { label: 'Getting started & trial class', hint: 'Try it without risk', href: R.schnupper },
@@ -256,7 +269,7 @@ export const FAQ_CONTENT = {
       items: [],
       columns: [
         {
-          title: 'Start, partner, level',
+          title: 'Getting started',
           items: [
             {
               q: 'Can I simply try out whether Salsaflow suits me?',
@@ -267,20 +280,29 @@ export const FAQ_CONTENT = {
               a: 'No. Beginner courses start with no experience. All that matters is that you are open to learning step by step.',
             },
             {
-              q: 'How many figures do I learn at the start?',
-              a: 'Fewer than you expect. And that is a good thing. At the start it is about leading and following. Once that works, you can dance with anyone, without a single figure. The figures follow on their own.',
-            },
-            {
               q: 'How do I book a trial class?',
               a: 'Through the schedule or the trial form on the trial-class page.',
             },
             {
               q: 'Can I come without a dance partner?',
-              a: 'Yes. You can sign up on your own. The course keeps a good balance and you learn with changing partners. If someone is missing, we ask in our two stand-in chats: one for leaders, one for followers. Usually someone steps in quickly.',
+              a: 'Yes. You can sign up on your own. The course keeps a good balance and you learn with changing partners.',
             },
             {
               q: 'Do I fit in, also in terms of my age?',
-              a: 'Yes. People of all ages from around 12 upwards dance with us. You are welcomed warmly from the very first evening.',
+              a: 'Yes. People of all ages dance with us. You are welcomed warmly from the very first evening.',
+            },
+            {
+              q: 'Where do I book the Heels course?',
+              a: 'Under courses, on the Heels page.',
+            },
+          ],
+        },
+        {
+          title: 'Course, partner, level',
+          items: [
+            {
+              q: 'How many figures do I learn at the start?',
+              a: 'Fewer than you expect. And that is a good thing. At the start it is about leading and following. Once that works, you can dance with anyone, without a single figure. The figures follow on their own.',
             },
             {
               q: 'How fast do I make progress?',
@@ -306,10 +328,14 @@ export const FAQ_CONTENT = {
               q: 'Where do the courses take place?',
               a: 'In the Salsaflow studios right by Basel SBB station. The course card shows you which studio your course is in.',
             },
+            {
+              q: 'How do I get to the studio by train?',
+              a: 'The studios sit right by Basel SBB station. Directions are on the location page.',
+            },
           ],
         },
         {
-          title: 'Prices, shoes, events, contact',
+          title: 'Prices, events, contact',
           items: [
             {
               q: 'What does a course cost?',
