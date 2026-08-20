@@ -23,7 +23,7 @@ export type LegalDoc = {
   sections: LegalSection[];
 };
 
-export const IMPRESSUM: Record<Lang, LegalDoc> = {
+export const IMPRESSUM = {
   de: {
     pageTitle: 'Impressum',
     intro: 'Angaben zur Betreiberin dieser Website.',
@@ -122,9 +122,9 @@ export const IMPRESSUM: Record<Lang, LegalDoc> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, LegalDoc>;
 
-export const DATENSCHUTZ: Record<Lang, LegalDoc> = {
+export const DATENSCHUTZ = {
   de: {
     pageTitle: 'Datenschutzerklärung',
     intro:
@@ -289,4 +289,4 @@ export const DATENSCHUTZ: Record<Lang, LegalDoc> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, LegalDoc>;

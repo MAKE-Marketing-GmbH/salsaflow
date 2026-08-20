@@ -94,7 +94,7 @@ const CRUMBS: Crumb[] = [
   { label: 'Anniversary Weekend', href: R.self },
 ];
 
-export const ANNIVERSARY: Record<Lang, AnniversaryContent> = {
+export const ANNIVERSARY = {
   de: {
     seo: 'anniversary',
     crumbs: CRUMBS,
@@ -110,7 +110,7 @@ export const ANNIVERSARY: Record<Lang, AnniversaryContent> = {
       secondary: { label: 'Interesse anmelden', href: R.kontakt },
       microcopy: 'Neue Termine, Line-up und Preise veröffentlichen wir nach Bestätigung.',
       image: {
-        src: '/photos/premium/events-hero-1400.webp',
+        src: '/photos/premium/events-hero-1998.webp',
         alt: 'Ausgelassene Salsaflow-Community bei einem grossen Wochenende in Basel',
       },
       cardLabel: 'Community Weekend',
@@ -127,7 +127,7 @@ export const ANNIVERSARY: Record<Lang, AnniversaryContent> = {
         { title: 'Verbinden', text: 'Socials, Begegnungen und Community.' },
       ],
       image: {
-        src: '/photos/premium/community-story-1600.webp',
+        src: '/photos/premium/community-story-2634.webp',
         alt: 'Salsaflow-Tänzer:innen und Gäste in warmer Community-Stimmung',
       },
     },
@@ -163,7 +163,7 @@ export const ANNIVERSARY: Record<Lang, AnniversaryContent> = {
       newBody: 'Starte über eine beginner-freundliche Session oder frage vorab, welche Programmpunkte passen.',
       cta: { label: 'Frage zum Level stellen', href: R.kontakt },
       image: {
-        src: '/photos/events/event-03.jpg',
+        src: '/photos/events/event-03-2634.webp',
         alt: 'Gruppe aus der Salsaflow-Szene beim gemeinsamen Tanzen',
       },
     },
@@ -225,7 +225,7 @@ export const ANNIVERSARY: Record<Lang, AnniversaryContent> = {
       secondary: { label: 'Register interest', href: R.kontakt },
       microcopy: 'We publish new dates, the line-up and prices once they are confirmed.',
       image: {
-        src: '/photos/premium/events-hero-1400.webp',
+        src: '/photos/premium/events-hero-1998.webp',
         alt: 'Joyful Salsaflow community at a big weekend in Basel',
       },
       cardLabel: 'Community weekend',
@@ -242,7 +242,7 @@ export const ANNIVERSARY: Record<Lang, AnniversaryContent> = {
         { title: 'Connect', text: 'Socials, encounters and community.' },
       ],
       image: {
-        src: '/photos/premium/community-story-1600.webp',
+        src: '/photos/premium/community-story-2634.webp',
         alt: 'Salsaflow dancers and guests in a warm community mood',
       },
     },
@@ -278,7 +278,7 @@ export const ANNIVERSARY: Record<Lang, AnniversaryContent> = {
       newBody: 'Start with a beginner-friendly session or ask in advance which programme items suit you.',
       cta: { label: 'Ask about your level', href: R.kontakt },
       image: {
-        src: '/photos/events/event-03.jpg',
+        src: '/photos/events/event-03-2634.webp',
         alt: 'A group from the Salsaflow scene dancing together',
       },
     },
@@ -325,4 +325,4 @@ export const ANNIVERSARY: Record<Lang, AnniversaryContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, AnniversaryContent>;

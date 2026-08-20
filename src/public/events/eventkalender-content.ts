@@ -14,7 +14,9 @@ import type { Faq, Crumb } from '@/public/subpage/kit';
 import { CONTACT } from '@/public/site/SiteFooter';
 
 type Cta = { label: string; href: string };
-type Img = { src: string; alt: string };
+// `position` reicht den object-position-Wert an HeroFrame durch. Ohne Angabe
+// gilt der Browser-Default `center 50%`.
+type Img = { src: string; alt: string; position?: string };
 type Link = { label: string; href: string };
 
 export type EventkalenderContent = {
@@ -84,7 +86,7 @@ const R = {
   kalender: '#kalender',
 };
 
-export const EVENTKALENDER: Record<Lang, EventkalenderContent> = {
+export const EVENTKALENDER = {
   de: {
     seo: 'eventkalender',
     crumbs: [
@@ -100,8 +102,14 @@ export const EVENTKALENDER: Record<Lang, EventkalenderContent> = {
       secondary: { label: 'Danceflow Night ansehen', href: R.danceflow },
       microcopy: 'Bestätigte Daten und Anmeldelinks folgen mit dem jeweiligen Event.',
       image: {
-        src: '/photos/premium/danceflow-home-1400.webp',
+        src: '/photos/premium/danceflow-home-3840.webp',
         alt: 'Tanzende Menschen bei einer Salsaflow Danceflow Night in Basel',
+        // R187: ohne Angabe galt `center 50%`, das kappte die erhobenen Hände.
+        // Das Band zeigt bei 1440 nur 555 von 2560 Bildpixeln;
+        // bei 50 % fielen 1003 Pixel oben weg. 22 % laesst jede Hand ganz und
+        // haelt die Gesichter im Bild. Altfehler, nicht vom R187-Bildtausch:
+        // alt und neu haben dasselbe Seitenverhaeltnis (1,4989 zu 1,5000).
+        position: 'center 22%',
       },
       cardLabel: 'Aktueller Stand',
       cardText: 'Neue Einzeltermine folgen.',
@@ -164,7 +172,7 @@ export const EVENTKALENDER: Record<Lang, EventkalenderContent> = {
       primary: { label: 'Eventformate ansehen', href: R.events },
       secondary: { label: 'Instagram öffnen', href: CONTACT.instagram },
       image: {
-        src: '/photos/premium/events-hero-1400.webp',
+        src: '/photos/premium/events-hero-1998.webp',
         alt: 'Tanzende Menschen bei einem Salsaflow Event in Basel',
       },
     },
@@ -211,8 +219,10 @@ export const EVENTKALENDER: Record<Lang, EventkalenderContent> = {
       secondary: { label: 'See the Danceflow Night', href: R.danceflow },
       microcopy: 'Confirmed dates and registration links are published with each event.',
       image: {
-        src: '/photos/premium/danceflow-home-1400.webp',
+        src: '/photos/premium/danceflow-home-3840.webp',
         alt: 'People dancing at a Salsaflow Danceflow Night in Basel',
+        // Gleicher Zuschnitt wie in der deutschen Fassung, siehe dort.
+        position: 'center 22%',
       },
       cardLabel: 'Current status',
       cardText: 'More individual dates to come.',
@@ -273,7 +283,7 @@ export const EVENTKALENDER: Record<Lang, EventkalenderContent> = {
       primary: { label: 'Explore event formats', href: R.events },
       secondary: { label: 'Open Instagram', href: CONTACT.instagram },
       image: {
-        src: '/photos/premium/events-hero-1400.webp',
+        src: '/photos/premium/events-hero-1998.webp',
         alt: 'People dancing at a Salsaflow event in Basel',
       },
     },
@@ -305,4 +315,4 @@ export const EVENTKALENDER: Record<Lang, EventkalenderContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, EventkalenderContent>;

@@ -150,10 +150,14 @@ function WhySection({ c }: { c: DanceflowContent }) {
               variants={item}
               className="mt-8 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]"
             >
+              {/* 05-v3.webp ist 1360x2048 (Hochformat). Ein erzwungenes 4/3 zeigte nur
+                  y 21%..71% der Quelle und schnitt den Scheitel der Taenzerin ab
+                  (Raphael 20.08.). 4/5 folgt dem Hochformat und zeigt y 3.4%..86.4%:
+                  Scheitel (9.5%) und Kinn (30%) liegen beide im Bild. */}
               <img
                 src={w.image.src}
                 alt={w.image.alt}
-                className="aspect-[4/3] w-full object-cover object-[center_42%]"
+                className="aspect-[4/5] w-full object-cover object-[center_20%]"
                 width={w.image.width}
                 height={w.image.height}
                 loading="lazy"

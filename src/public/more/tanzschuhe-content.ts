@@ -79,7 +79,7 @@ export type TanzschuheContent = {
   };
 };
 
-export const TANZSCHUHE: Record<Lang, TanzschuheContent> = {
+export const TANZSCHUHE = {
   de: {
     crumbs: [
       { label: 'Tanzschuhe', href: '/mehr/tanzschuhe' },
@@ -303,4 +303,4 @@ export const TANZSCHUHE: Record<Lang, TanzschuheContent> = {
       secondary: { label: 'Ask about shoes', href: '/kontakt' },
     },
   },
-};
+} satisfies Record<Lang, TanzschuheContent>;

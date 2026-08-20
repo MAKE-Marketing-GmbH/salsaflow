@@ -74,7 +74,6 @@
 // wandern ins Overlay: Sterne + 4,9 + Anzahl als eine Zeile, "Kursplan ansehen" als sichtbarer
 // heller Link neben dem roten Pill statt als grauer Text-Link unter dem Banner-Rand.
 
-import { ArrowUpRight } from 'lucide-react';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
@@ -118,8 +117,12 @@ export function Hero() {
     ? 'Tanzpaar in der Drehung im Salsaflow-Studio Basel, beide lachen'
     : 'A couple mid-turn at the Salsaflow studio in Basel, both laughing';
 
+  // --hero-photo-h: EINE Zahl fuer die mobile Fotohoehe UND den Textversatz darunter
+  // (Rechenweg im Kommentar am Grid). Steht als Arbitrary Property auf der Section, weil
+  // Foto und Textblock sie beide als calc()-Basis lesen — laufen die zwei Werte
+  // auseinander, zerschneidet die Fotokante die H1.
   return (
-    <section className="relative w-full bg-[var(--color-paper-warm)] text-[var(--color-ink)]">
+    <section className="relative w-full bg-[var(--color-paper-warm)] text-[var(--color-ink)] [--hero-photo-h:68svh]">
       <motion.div data-reveal variants={container} initial="hidden" animate="show">
         {/* Zwei Spalten erst ab lg. Die Section-Mindesthoehe bindet den Fold an den Viewport,
             damit das Foto oben mitspielt statt darunter zu rutschen (Kopfkommentar Ursache A).
@@ -135,31 +138,55 @@ export function Hero() {
             bekommt das Shell-Gutter nachgebaut: pl = max(gutter, (100vw-1400px)/2 + gutter).
             Damit steht die H1 exakt auf der Shell-Textkante (auf 1440px x=52) und das Foto
             endet ohne Rechenweg an der Fensterkante. */}
-        {/* MOBIL (< sm): das Foto liegt absolut ab Fensterkante (full-bleed, ohne Radius, ohne
-            Nav-Headroom) und der Textblock beginnt 12rem VOR seiner Unterkante — dadurch liegen
-            Script-Zeile und H1 auf dem Foto, Lead/CTA/Trust laufen darunter auf Papier weiter.
-            HERO_PHOTO_H und der pt des Textes muessen zusammen bleiben; beide leiten sich von
-            derselben Zahl (58svh) ab, darum steht sie hier einmal im Kommentar statt zweimal
-            unkommentiert im Code.
+        {/* MOBIL (< sm): das Foto liegt absolut ab Fensterkante und der Textblock beginnt
+            eine feste Strecke VOR seiner Unterkante — dadurch liegen Script-Zeile, Stil-Pills
+            und H1 auf dem Foto, Lead/CTA/Trust laufen darunter auf Papier weiter.
+            Fotohoehe und der pt des Textes haengen an EINER Zahl: --hero-photo-h. Wer sie
+            aendert, verschiebt beide zusammen. Vorher standen zwei abgeleitete Werte im Code,
+            und ein Eingriff an einem der beiden verschob die Naht.
 
-            Warum 58svh: auf 390x844 sind das 489px, und der 4:5-Portraitschnitt rendert bei
-            390px Breite exakt 487.5px hoch (1080/1350 = 0.800 vs. Box 390/489 = 0.797).
-            object-cover schneidet dort also praktisch NICHTS weg — beide Gesichter sind
-            vollstaendig im Fold. Auf kuerzeren Geraeten beschneidet die Box oben/unten
-            (Gesichter liegen bei 13..41 % der Bildhoehe, object-y 38 % haelt sie drin), auf
-            laengeren seitlich um wenige Prozent (Koepfe liegen bei x 14..76 %). In keiner
-            der drei Lagen faellt ein Kopf aus dem Bild. */}
+            R134/11+12: Die Naht lag bei 58svh (= 490px auf 390x844) mitten IN der H1 —
+            gemessen: Zeile 1 "Salsa, Bachata" endete bei y=481, Zeile 2 "und Heels." begann
+            bei y=481, die Fotokante lag bei y=490. Ergebnis: eine Ueberschrift in zwei Farben,
+            weiss oben auf dem Foto, schwarz unten auf Papier, mit harter Kante quer durch den
+            Satz. Das las sich als Layout-Unfall, nicht als Entscheidung (Raphael-Video).
+            Die H1 misst vom Anfang bis zum Ende 125px (439..564). Bei 68svh liegt die
+            Fotokante auf 574px — also 10px UNTER der letzten H1-Zeile. Die ganze Ueberschrift
+            steht damit weiss auf dem Foto, in einer Farbe, und die Kante trennt Ueberschrift
+            von Lead statt Wort von Wort. Der Text startet unveraendert 10rem vor der
+            Fotokante, also faellt er in derselben Bewegung mit nach unten.
+
+            Warum das Motiv das traegt: der 4:5-Portraitschnitt rendert bei 390px Breite
+            487.5px hoch. Bei 574px Boxhoehe (390/574 = 0.679 gegen 0.800) schneidet
+            object-cover links und rechts, nicht oben und unten — die Koepfe liegen bei
+            x 14..76 % und bleiben drin. object-position 26 % haelt beide Gesichter im Bild
+            (Lock R126, unveraendert). */}
         <div className="grid w-full grid-cols-1 items-stretch gap-y-10 pb-0 pt-0 sm:pt-[calc(var(--nav-h)+2.5rem)] lg:min-h-[calc(100svh-var(--nav-h))] lg:grid-cols-2 lg:gap-x-14 lg:pb-14 lg:pt-[calc(var(--nav-h)+3rem)]">
           {/* `data-hero-fold`: Haken fuer die Bodenluft gegen die fixe Cookie-Leiste
               (Befund m-01, Regel in index.css). Der Fold ist viewportgebunden, das
               Dokument-Polster greift hier also nicht. */}
-          {/* R100 Nachzieh: die Foto-Naht sass auf 390 mitten durch «und Heels.». Der erste
-              Bau drehte nur die Farbe — die Lage blieb, schwarz lag auf dunklem Foto (FAIL).
-              Hebel ist LAGE, nicht Farbe: der Textblock startet jetzt 8rem statt 12rem vor
-              der Foto-Unterkante (58svh). Damit liegt die Naht zwischen «Salsa, Bachata»
-              (weiss, oben auf dem Foto) und «und Heels.» (erste Zeile UNTER der Naht, auf
-              Papier) — mit Luft. sm+ unveraendert (pt-0). Foto 58svh bleibt, Crop bleibt. */}
-          <div data-hero-fold className="relative z-10 self-center px-5 pt-[calc(58svh-10rem)] sm:px-8 sm:pt-0 lg:py-10 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-0">
+          {/* Der Textblock startet so weit vor der Foto-Unterkante, dass die KOMPLETTE H1
+              darueber Platz hat. Gemessen auf 390/360/430: vom Blockanfang bis zum H1-Beginn
+              lagen 110px (Script-Zeile + Stil-Pills), die H1 selbst misst 124px. 110+124 =
+              234px, plus 16px Luft = 250px = 15.625rem. Der Wert ist der einzige Grund, warum
+              die Naht unter dem Satz liegt und nicht in ihm — er darf nicht kleiner werden,
+              ohne die H1 neu zu messen. sm+ unveraendert (pt-0).
+
+              R185 (20.08.): Die Stil-Pills sind raus (Begruendung am entfernten Block), damit
+              faellt ihr Anteil aus dem Vorlauf. Folge im Screenshot: die ersten zwei
+              Lead-Zeilen standen dunkelgrau auf dem dunklen Foto und waren nicht lesbar.
+              Gemessen auf 360/390/430 identisch: Lead ragte 48px ins Foto, waehrend die H1
+              76px Luft zur Kante hatte.
+
+              Achtung auf das Vorzeichen: der Wert wird von --hero-photo-h ABGEZOGEN. Ein
+              groesserer pt schiebt den Block also nach OBEN, nicht nach unten. Erster Versuch
+              mit 18.625rem machte es darum schlimmer (96px statt 48px im Foto). Richtig ist
+              250px - 48px = 202px = 12.625rem. Die Naht liegt damit wieder zwischen H1 und
+              Lead. Wer die Pills je zurueckholt, rechnet zurueck auf 15.625rem. */}
+          <div
+            data-hero-fold
+            className="relative z-10 self-center px-5 pt-[calc(var(--hero-photo-h)-12.625rem)] sm:px-8 sm:pt-0 lg:py-10 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-0"
+          >
             {/* leading-[1.3] statt leading-none: Alex Brush setzt Ober- und Unterlaengen
                 ausserhalb einer 1.0-Zeilenbox, dadurch stimmten die Abstaende nicht. */}
             {/* Auf dem Foto traegt Salsa-Rot nicht: gegen das warme Studiolicht (Luminanz ~0.35)
@@ -173,27 +200,20 @@ export function Hero() {
               {h.claim}
             </motion.p>
 
-            <motion.nav
-              variants={item}
-              aria-label={de ? 'Tanzstil wählen' : 'Choose a dance style'}
-              className="mt-4 flex flex-wrap gap-2"
-            >
-              {[
-                { label: 'Salsa', href: '/tanzkurse/salsa' },
-                { label: 'Bachata', href: '/tanzkurse/bachata' },
-                { label: 'Heels', href: '/tanzkurse/heels' },
-              ].map((style) => (
-                <a
-                  key={style.label}
-                  href={style.href}
-                  className="t-hover-move group inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-paper-warm)]/90 px-4 py-2 text-sm font-semibold text-[var(--color-ink-muted)] shadow-sm backdrop-blur-sm hover:-translate-y-0.5 hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)] max-sm:border-white/30 max-sm:bg-black/20 max-sm:text-white max-sm:hover:border-[var(--color-script-cream)] max-sm:hover:text-[var(--color-script-cream)]"
-                >
-                  <span>{style.label}</span>
-                  <ArrowUpRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-[var(--ease-sf)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.25} />
-                </a>
-              ))}
-            </motion.nav>
+            {/* R185 (20.08.): Hier standen drei Stil-Pillen Salsa/Bachata/Heels auf
+                /tanzkurse/salsa|bachata|heels. Sie sind raus, weil die naechste Sektion
+                dieselbe Frage stellt: "Welcher Tanz passt zu dir?" fuehrt auf exakt
+                dieselben drei Ziele — dort aber mit Foto, Erklaertext und Niveau, also
+                mit echter Entscheidungshilfe.
 
+                Gemessen vorher (live, 5175): Pillen bei y=230, H1 erst y=282, der
+                Kursplan-CTA bei y=613. Mobil y=382 gegen y=698. Die erste Aktion im
+                Fold war damit eine Stilwahl ohne Hilfe statt des Kursplans. Genau das
+                schliesst das Fold-Gate aus: im Fold fuehrt der Kursplan, die Stilwahl
+                gehoert in den naechsten Abschnitt.
+
+                Kein Weg geht verloren. Die drei Ziele stehen in der Offer-Sektion und
+                zusaetzlich im Header-Dropdown "Tanzkurse". */}
             {/* Zeilenmass am Heading selbst (kit.tsx MEASURE_XL), nicht am Wrapper: ein
                 em-Mass auf einem 16px-Wrapper wuerde die grosse H1 zersaegen.
 
@@ -219,14 +239,15 @@ export function Hero() {
                 MEASURE_XL,
               )}
             >
+              {/* R134/11: Die drei Zeilen liefen mobil in ZWEI Farben — Zeile 1 weiss auf dem
+                  Foto, Zeile 2 und 3 schwarz auf Papier, weil die Fotokante bei y=490 mitten
+                  durch den Satz lief. Eine Ueberschrift, zwei Farben, harte Kante quer durch.
+                  Die Kante liegt jetzt bei y=574, also 16px UNTER der letzten Zeile (gemessen
+                  auf 390/360/430). Alle drei Zeilen stehen damit auf dem Foto und tragen
+                  dieselbe Farbe — die H1 der Klasse gibt sie vor (max-sm:text-white). */}
               <span className="block">{de ? 'Salsa, Bachata' : 'Salsa, bachata'}</span>
-              {/* R100 Nachzieh: Lage statt Farbe. Der Textblock sitzt jetzt so, dass die
-                  Foto-Naht zwischen «Salsa, Bachata» (oben, weiss auf Foto) und dieser Zeile
-                  liegt. «und Heels.» steht ganz auf Papier — mit Ink, sonst weiss auf Papier. */}
-              <span className="block max-sm:text-[var(--color-ink)]">{de ? 'und Heels.' : 'and heels.'}</span>
-              {/* Mobil in Ink: das Foto endet bei ~y490, diese Zeile steht sonst
-                  weiss auf paper-warm — Kontrast ~1:1 (Critic Runde 6, Item 1). */}
-              <span className="block max-sm:text-[var(--color-ink)]">{de ? 'Mitten in Basel.' : 'Here in Basel.'}</span>
+              <span className="block">{de ? 'und Heels.' : 'and heels.'}</span>
+              <span className="block">{de ? 'Mitten in Basel.' : 'Here in Basel.'}</span>
             </motion.h1>
 
             {/* Der Lead sagte vorher woertlich dasselbe wie die neue H1
@@ -251,23 +272,28 @@ export function Hero() {
                 : 'Three studios right by Basel SBB. Come alone or as a pair, your first class is free.'}
             </motion.p>
 
-            {/* Kritikpunkt 5: der Secondary "Kursplan ansehen" stand mobil als nackter roter
-                Textlink unter dem Pill und war dort der schwaechste Reiz im Fold — obwohl der
-                Kursplan der zweitwichtigste Weg der Seite ist (er traegt den Terminbeweis).
-                Neu unter sm: eigene Zeile ueber die volle Breite als Umriss-Pill, damit er
-                dieselbe Trefferflaeche wie der Primary hat. Rot auf Papier bleibt (Kontrast
-                7.4:1); nur der Rahmen kommt dazu. Kein zweiter GEFUELLTER Button — DESIGN.md
-                erlaubt genau einen Primary pro Sektion. Ab sm unveraendert der Textlink.
-                Beide liegen laut Sonde auf Papier, nicht auf dem Foto (Messung unten). */}
+            {/* Raphael 20.08.: "Kursplan isch s wichtigschte, Gratis Schnupperstund söll
+                absolut im Hintergrund si, schliesslich zahle d lüdd wenn sie wittermache."
+                Darum traegt jetzt der KURSPLAN die gefuellte Pille, nicht mehr die
+                Schnupperstunde. Das dreht die frueher hier begruendete Reihenfolge um.
+
+                Die Schnupperstunde verschwindet nicht, sie wird leiser: reiner Textlink,
+                auch auf Mobil. Die frueher noetige Umriss-Pille unter sm faellt weg — sie
+                haette dem sekundaeren Weg dieselbe Flaeche gegeben wie dem primaeren und
+                genau die Hierarchie zerstoert, um die es hier geht.
+
+                Trefferflaeche bleibt: min-h-11 (44px) haelt das Tap-Ziel auf Mobil, ohne
+                dass der Link wie ein zweiter Button aussieht. DESIGN.md erlaubt genau
+                einen gefuellten Primary pro Sektion — der gehoert dem Kursplan. */}
             <motion.div variants={item} className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 max-sm:mt-6 max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2">
-              <CtaPill href="/schnupperstunde" className="max-sm:w-full">
-                {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
+              <CtaPill href="/kursplan" className="max-sm:w-full">
+                {cta.plan}
               </CtaPill>
               <CtaText
-                href="/kursplan"
-                className="max-sm:justify-center max-sm:rounded-full max-sm:border max-sm:border-[var(--color-line)] max-sm:px-6"
+                href="/schnupperstunde"
+                className="min-h-11 max-sm:justify-center"
               >
-                {cta.plan}
+                {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
               </CtaText>
             </motion.div>
 
@@ -323,9 +349,26 @@ export function Hero() {
               selbst an der Fensterkante endet. Feste Hoehe bzw. Seitenverhaeltnis: kein CLS.
               `order-first` waere hier wirkungslos, weil der Block absolut aus dem Fluss faellt;
               die Reihenfolge macht die Positionierung, nicht die Grid-Order. */}
+          {/* R134/7+12: Das Foto war auf 1440 links rund und lief rechts hart aus dem
+              Viewport — eine Kante rund, die andere abgeschnitten, innerhalb EINES Elements.
+              Das ist dieselbe Radius-Inkonsistenz wie beim Teambild, nur enger.
+              Entscheidung: eine Linie, nicht zwei. Das Foto traegt ab lg auf allen vier Ecken
+              --radius-media und endet in seiner Grid-Spalte, statt an der Fensterkante
+              auszulaufen. Damit liegt es auf derselben Radius-Linie wie Offer-Karten,
+              Preis-Karte und Teambild.
+              Kritik-Fund (home-mobil-390.png gegen home-mobile-04-y1266.png): Auf dem Handy
+              war die Radius-Linie damit an der auffaelligsten Stelle der Seite gebrochen —
+              das Hero-Foto lief mit harten 90-Grad-Ecken bis an alle vier Bildschirmkanten,
+              waehrend Salsa-Karte und Listenbilder darunter klar gerundet sind. Auf dem
+              Desktop stimmte es (alle vier Ecken --radius-media).
+              Behoben an der Kante, an der der Bruch sichtbar ist: das Foto laeuft oben
+              weiter randlos unter Header und Statusleiste durch (dort gibt es keine Ecke,
+              nur die Geraetekante), und schliesst UNTEN mit --radius-media gegen das Papier
+              ab — dieselbe Rundung wie die Karten darunter. Es bleibt full-bleed und traegt
+              weiter die H1; nur die zwei sichtbaren Ecken folgen jetzt der Linie. */}
           <motion.div
             variants={photoItem}
-            className="absolute inset-x-0 top-0 z-0 h-[58svh] overflow-hidden sm:relative sm:mx-8 sm:h-auto sm:aspect-[16/9] sm:rounded-[var(--radius-media)] lg:mx-0 lg:aspect-auto lg:h-full lg:min-h-[32rem] lg:rounded-l-[var(--radius-media)] lg:rounded-r-none"
+            className="absolute inset-x-0 top-0 z-0 h-[var(--hero-photo-h)] overflow-hidden rounded-b-[var(--radius-media)] sm:relative sm:mx-8 sm:h-auto sm:aspect-[16/9] sm:rounded-[var(--radius-media)] lg:mr-8 lg:aspect-auto lg:h-full lg:min-h-[32rem] lg:rounded-[var(--radius-media)]"
           >
             {/* Lesbarkeits-Verlauf, NUR unter sm (ab sm liegt kein Text auf dem Foto und ein
                 Verlauf waere reine Deko). Fuss #0A0A0A/92 -> transparent bei 52 %: die
@@ -346,9 +389,11 @@ export function Hero() {
               <img
                 src="/photos/2026/hero-paar-dreh-01.webp"
                 alt={alt}
+                // R126: mobil 38% schnitt Mund/Kinn der Frau. 26% dreht den Crop nach oben
+                // (Koepfe bei y 12..50 %, weniger Hals). sm+ unveraendert.
                 // lg:object-top statt 18%: bei 1440 sass der Scheitel des Mannes an der
                 // Foto-Kante (Critic 13.08.2026).
-                className="h-full w-full object-cover object-[50%_38%] sm:object-[50%_32%] lg:object-top"
+                className="h-full w-full object-cover object-[50%_26%] sm:object-[50%_32%] lg:object-top"
                 width={1600}
                 height={1066}
                 loading="eager"

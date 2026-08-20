@@ -5,6 +5,13 @@
 // Mount (Route-Wechsel) wieder, solange scrollY === 0. Unter einem offenen Dialog
 // (Buchung) ist sie komplett aus dem DOM und nicht klickbar.
 
+/* oxlint-disable anti-slop/no-runtime-typeof --
+ * Die drei `typeof`-Pruefungen in dieser Datei (IntersectionObserver, MutationObserver,
+ * ResizeObserver) sind Feature-Erkennung fuer Browser-APIs, keine Typ-Verengung an einer
+ * I/O-Grenze. Beim Server-Rendern existieren diese Konstruktoren nicht; ohne die Pruefung
+ * wirft `new IntersectionObserver(...)` und die Seite rendert gar nicht. Es gibt hier keinen
+ * Domaenenwert zum Parsen — die Frage ist allein, ob die Laufzeit die API mitbringt. */
+
 import { useEffect, useRef, useState } from 'react';
 import { useLang } from '@/lib/i18n';
 
@@ -140,11 +147,23 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
       role="region"
       data-cookie-banner
       aria-label={lang === 'de' ? 'Cookie-Hinweis' : 'Cookie notice'}
-      className="fixed inset-x-0 bottom-0 z-40 border-y border-[var(--color-line)] bg-[var(--color-paper-warm)]"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      // R134/10: Vorher eine randlose Leiste ueber die volle Fensterbreite mit harter
+      // Oberkante — sie las sich wie ein Systembanner, nicht wie Teil der Seite. Jetzt
+      // eine schwebende Karte: eingerueckt, gerundet wie jede andere Flaeche auf der
+      // Seite, mit weichem Schatten statt Trennlinie. Der Text darf umbrechen
+      // (kein whitespace-nowrap mehr), damit auf 390px nichts abgeschnitten wird.
+      // R153: Der WhatsApp-Float steht fix unten rechts. Vorher lief die Karte bis an den
+      // rechten Fensterrand und der Knopf lag in derselben Zeile darauf. Der Hebel sitzt am
+      // Banner-Wrapper, nicht am Float: rechts bleibt eine freie Spalte fuer den Knopf, also
+      // liegen Karte und Knopf nebeneinander statt uebereinander. Mobil ist der Float ein
+      // Kreis (3.5rem) bei right-5 (1.25rem) plus 0.75rem Luft = 5.5rem. Ab sm ist er eine
+      // Pille mit Label «WhatsApp» bei right-6 und braucht mehr: 10.5rem.
+      // Kein `left` am Float — der Knopf bleibt sitewide rechts unten im Gutter.
+      className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pr-[5.5rem] sm:px-5 sm:pb-5"
+      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
     >
-      <div className="mx-auto flex min-h-12 w-full max-w-[1080px] items-center gap-2 px-5 py-2 sm:gap-3 sm:px-8">
-        <div className="min-w-0 flex-1 whitespace-nowrap text-xs font-medium leading-none text-[var(--color-ink)] sm:text-sm">
+      <div className="mx-auto flex w-full max-w-[640px] items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)]/95 px-4 py-2.5 shadow-[0_10px_30px_rgba(17,17,17,0.14)] backdrop-blur-sm sm:px-5">
+        <div className="min-w-0 flex-1 text-xs font-medium leading-snug text-[var(--color-ink)] sm:text-sm">
           <span>{c.text}</span>
           <a
             href="/datenschutz"

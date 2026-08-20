@@ -85,7 +85,7 @@ export function EventsTeaser() {
             </figure>
             <figure className="overflow-hidden rounded-[1.25rem] shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
               <img
-                src="/photos/party/party-50-v3.webp"
+                src="/photos/party/party-50-v4.webp"
                 alt={de ? 'Paar tanzt Hand in Hand auf voller Tanzfläche' : 'Couple dancing hand in hand on a packed floor'}
                 className="aspect-[4/3] w-full object-cover object-center"
                 width={2048}

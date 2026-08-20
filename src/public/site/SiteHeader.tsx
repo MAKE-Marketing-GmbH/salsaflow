@@ -5,7 +5,7 @@
 // Keine Animationen (statisch). Pfeile/Chevrons via Lucide.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, ChevronDown, Languages, Menu } from 'lucide-react';
+import { ArrowRight, ChevronDown, Languages, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
@@ -213,12 +213,24 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
             <div className="hidden lg:block">
               <LangToggle lang={lang} setLang={setLang} />
             </div>
+            {/* Raphael 20.08.: der Kursplan ist die wichtigste Aktion, die Schnupperstunde
+                gehoert in den Hintergrund. Die gefuellte rote Pille traegt darum den
+                Kursplan. Vorher stand hier die Schnupperstunde — zusammen mit der
+                Hero-Pille waren das ZWEI gefuellte Rote, die um denselben Blick kaempften.
+                Jetzt gibt es im Header/Hero-System genau einen gefuellten CTA.
+                Die Schnupperstunde bleibt als ruhiger Textlink erreichbar.
+                min-h-11: beide Ziele halten 44px Trefferflaeche (Critic Runde 7, Item 5). */}
             <a
               href="/schnupperstunde"
-              // min-h-11: der CTA mass 38px (Critic Runde 7, Item 5).
-              className="hidden min-h-11 items-center gap-1.5 rounded-full border border-[var(--color-salsa)] bg-[var(--color-salsa)] px-3 py-2 text-sm font-semibold text-white transition-colors hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)] sm:inline-flex sm:px-4"
+              className="hidden min-h-11 items-center text-sm font-semibold text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-ink)] lg:inline-flex"
             >
               {c.cta.trial}
+            </a>
+            <a
+              href="/kursplan"
+              className="hidden min-h-11 items-center gap-1.5 rounded-full border border-[var(--color-salsa)] bg-[var(--color-salsa)] px-3 py-2 text-sm font-semibold text-white transition-colors hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)] sm:inline-flex sm:px-4"
+            >
+              {c.cta.plan}
               <ArrowRight size={16} strokeWidth={2.25} aria-hidden />
             </a>
             <button
@@ -227,13 +239,19 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
               onClick={() => (open ? closeMenu() : setOpen(true))}
               aria-expanded={open}
               aria-controls="mobile-navigation"
-              aria-label={de ? 'Menü' : 'Menu'}
+              aria-label={open ? (de ? 'Menü schliessen' : 'Close menu') : de ? 'Menü' : 'Menu'}
               // min-h-11 statt h-10: 40px Menue-Knopf unter dem Tap-Ziel (Critic Runde 7, Item 5).
               className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-3 text-[var(--color-ink)] shadow-sm lg:hidden"
             >
-              <Menu size={18} strokeWidth={2} aria-hidden />
+              {/* Raphael 20.08.: EIN Knopf im Header. Offen = X + "Schliessen", zu = Burger
+                  + "Menü". Das frühere Chevron daneben war ein zweites Zeichen für denselben
+                  Zustand — der Knopf sagte "Schliessen" und der Pfeil zeigte nach oben. */}
+              {open ? (
+                <X size={18} strokeWidth={2} aria-hidden />
+              ) : (
+                <Menu size={18} strokeWidth={2} aria-hidden />
+              )}
               <span className="text-xs font-semibold">{open ? (de ? 'Schliessen' : 'Close') : (de ? 'Menü' : 'Menu')}</span>
-              <ChevronDown className="t-acc-chevron" size={15} strokeWidth={2.2} aria-hidden />
             </button>
           </div>
           </div>
@@ -308,13 +326,24 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
               </span>
               <LangToggle lang={lang} setLang={setLang} />
             </div>
+            {/* Gleiche Hierarchie wie im Desktop-Header (Raphael 20.08.): der rote
+                Full-Width-Knopf gehoert dem Kursplan. Die Schnupperstunde steht darunter
+                als ruhiger Link — sie bleibt voll erreichbar und behaelt mit py-3 ihre
+                44px-Trefferflaeche, konkurriert aber nicht mehr um denselben Blick. */}
             <a
-              href="/schnupperstunde"
+              href="/kursplan"
               onClick={closeMenu}
               className="btn-base btn-primary mt-2 px-4 py-3 text-base"
             >
-              {c.cta.trial}
+              {c.cta.plan}
               <ArrowRight size={18} strokeWidth={2.25} aria-hidden />
+            </a>
+            <a
+              href="/schnupperstunde"
+              onClick={closeMenu}
+              className="mt-1 inline-flex items-center justify-center px-4 py-3 text-base font-semibold text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-ink)]"
+            >
+              {c.cta.trial}
             </a>
           </nav>
             </div>
@@ -485,9 +514,18 @@ function DesktopDropdown({
         // `inert` statt nur `invisible`: ohne das bleiben die Kindlinks im Tab-Pfad und
         // im Accessibility-Tree, obwohl nichts zu sehen ist.
         inert={!open}
+        /* Raphael 20.08.: das Panel öffnet nach RECHTS, nicht mittig nach unten.
+           Vorher `left-1/2 -translate-x-1/2`: das Menu hing zentriert unter dem Trigger
+           und lief beim linken Nav-Rand über die Logo-Kante hinaus. Jetzt beginnt die
+           linke Panel-Kante exakt an der linken Trigger-Kante (`left-0`), das Menu
+           wächst von dort nach rechts. Die Ankerachse ist links, nicht unten-mittig.
+           Motion: Ursprung links oben, Eintritt darum aus der Richtung, in die das
+           Panel wächst (x statt y), Dauer `--dur-fast`, Kurve `cubic-bezier(0.23,1,0.32,1)`
+           = der starke Ease-Out der Motion-Doktrin. `scale(0.98)` statt `scale(0)`. */
+        style={{ top: 'calc(100% - 2px)', transformOrigin: 'top left' }}
         className={cn(
-          'absolute left-1/2 top-full z-50 w-60 -translate-x-1/2 pt-3 transition-[opacity,transform] duration-[var(--dur-fast)] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
-          open ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-1 opacity-0',
+          'absolute left-0 z-50 w-60 pt-3 transition-[opacity,transform] duration-[var(--dur-fast)] ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
+          open ? 'visible translate-x-0 scale-100 opacity-100' : 'invisible -translate-x-1 scale-[0.98] opacity-0',
         )}
       >
         <div className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] p-2 shadow-[0_12px_32px_rgba(17,17,17,0.12)]">
@@ -539,8 +577,12 @@ function LangToggle({
   setLang: (l: 'de' | 'en') => void;
 }) {
   return (
+    /* Raphael 20.08.: je Sprache EIN echter Kreis. Die frühere Umrandung um beide
+       Knöpfe machte aus zwei Kreisen optisch eine breite Ovalpille — der Rahmen ist
+       darum weg, die Gruppe ist nur noch ein Abstandshalter. Höhe = Breite = 44px
+       (h-11 w-11), damit das Tap-Ziel steht und der Kreis kein Ei wird. */
     <div
-      className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] p-0.5 text-xs font-semibold shadow-sm"
+      className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold"
       role="group"
       aria-label="Sprache / Language"
     >
@@ -552,12 +594,12 @@ function LangToggle({
           aria-pressed={lang === l}
           data-testid={`lang-${l}`}
           className={cn(
-            // min-h-11 auf dem Button selbst: das Tap-Ziel ist der Knopf, nicht die Pille
-            // drumherum (Critic Runde 7, Item 5 — vorher 36px).
-            'inline-flex min-h-11 min-w-10 items-center justify-center rounded-full px-2.5 uppercase transition-colors',
+            // h-11 w-11 statt min-h-11/min-w-10 + px: nur gleiche Höhe UND Breite ergibt
+            // einen Kreis. Padding wuerde die Breite wieder aufziehen, darum keins.
+            'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full uppercase transition-colors duration-[var(--dur-fast)] ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
             lang === l
-              ? 'bg-[var(--color-ink)] text-white'
-              : 't-hover text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]',
+              ? 'border border-[var(--color-ink)] bg-[var(--color-ink)] text-white'
+              : 't-hover border border-[var(--color-line)] bg-[var(--color-paper)] text-[var(--color-ink-muted)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]',
           )}
         >
           {l}

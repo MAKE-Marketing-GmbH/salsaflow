@@ -38,7 +38,7 @@ export type EventsContent = {
   closing: { title: string; body: string; cta: string; secondary: string };
 };
 
-export const EVENTS: Record<Lang, EventsContent> = {
+export const EVENTS = {
   de: {
     hero: {
       eyebrow: 'Danceflow Night · Workshops · Weekends',
@@ -54,15 +54,13 @@ export const EVENTS: Record<Lang, EventsContent> = {
       title: 'Lernen ist der Anfang. Tanzen passiert in der Community.',
       body: 'Ein Kurs gibt dir Struktur. Ein Event gibt dir Wiederholung, Begegnung und echte Tanzsituationen. Du übst, was du gelernt hast, lernst neue Menschen kennen und bleibst leichter dran, weil Tanzen sozial wird.',
       factsTitle: 'Gut zu wissen',
+      // R142: vorher sechs gleich laute Fact-Chips ("richtig lost", Video 05:38). Jetzt drei
+      // Bloecke: Termin, Abend, Publikum. Die Pflicht-Fakten bleiben wortgleich drin —
+      // 1./3./5. Freitag im ersten Wert, CHF 5.-/10.- im zweiten.
       facts: [
-        { label: 'Wann', value: 'Jeden 1., 3. und 5. Freitag' },
-        { label: 'Was', value: 'Social Dancing mit eigenen DJs' },
-        { label: 'Wo', value: 'Am Bahnhof Basel SBB' },
-        // "Gute Taenzer aus FR, DE und CH" aus dem Onboarding (leistungen[2].resultat) —
-        // erklaert das Niveau der Abende und stand nirgends.
-        { label: 'Für wen', value: 'Alle Levels, allein oder zu zweit' },
-        { label: 'Wer kommt', value: 'Tanzende aus der Schweiz, Frankreich und Deutschland' },
-        { label: 'Eintritt', value: 'Schüler CHF 5.-, Gäste CHF 10.-' },
+        { label: 'Termin', value: 'Jeden 1., 3. und 5. Freitag am Bahnhof Basel SBB' },
+        { label: 'Abend', value: 'Social Dancing mit eigenen DJs. Schüler CHF 5.-, Gäste CHF 10.-' },
+        { label: 'Publikum', value: 'Alle Levels, allein oder zu zweit. Tanzende aus der Schweiz, Frankreich und Deutschland' },
       ],
       ctaTickets: 'Nächste Danceflow Night ansehen',
       note: 'Oft gibt es vor der Night einen kurzen Workshop. Den genauen Plan findest du auf Eventfrog.',
@@ -76,13 +74,12 @@ export const EVENTS: Record<Lang, EventsContent> = {
       eyebrow: 'Workshops',
       title: 'Ein Workshop gibt einem Thema einen ganzen Abend.',
       body: 'Du konzentrierst dich auf Technik, Figuren, Musikalität oder Styling und kannst das Gelernte danach direkt auf Events anwenden.',
+      // R155: vorher vier kleine Punkte (Video 05:40, "Mini-Sachen lost"). Jetzt zwei
+      // Bloecke, je ein Gedanke pro Satz: Punkt 1 traegt Technik, Styling und
+      // Musikalitaet, Punkt 2 die Gastlehrer:innen. Keine neue Aussage.
       points: [
-        'Technik: saubere Bewegung statt nur mehr Figuren',
-        'Styling: bewusster Ausdruck in Salsa, Bachata oder Heels',
-        'Musikalität: besser hören, besser reagieren',
-        // Konkretisiert aus dem Onboarding: "Artisten aus ganz Europa kommen monatlich zu
-        // Salsaflow" (leistungen[2].besonders). Vorher stand hier nur "je nach Gastlehrer:innen".
-        'Special Topics: mit Gastlehrer:innen, die monatlich aus ganz Europa anreisen',
+        'Dein Handwerk. Du lernst saubere Bewegung statt nur mehr Figuren. Du findest bewussten Ausdruck in Salsa, Bachata oder Heels. Du hörst die Musik besser und reagierst besser auf sie.',
+        'Deine Special Topics. Dafür reisen Gastlehrer:innen monatlich aus ganz Europa an.',
       ],
     },
     anniversary: {
@@ -125,13 +122,11 @@ export const EVENTS: Record<Lang, EventsContent> = {
       title: 'Learning is the start. Dancing happens in the community.',
       body: 'A course gives you structure. An event gives you repetition, real encounters and real dance situations. You practise what you learned, meet new people and stay on it more easily, because dancing becomes social.',
       factsTitle: 'Good to know',
+      // R142: same three-block grouping as DE. 1st/3rd/5th Friday and CHF 5.-/10.- stay.
       facts: [
-        { label: 'When', value: 'Every 1st, 3rd and 5th Friday' },
-        { label: 'What', value: 'Social dancing with our own DJs' },
-        { label: 'Where', value: 'At Basel SBB station' },
-        { label: 'For whom', value: 'All levels, alone or as a pair' },
-        { label: 'Who comes', value: 'Dancers from Switzerland, France and Germany' },
-        { label: 'Entry', value: 'Students CHF 5.-, guests CHF 10.-' },
+        { label: 'Date', value: 'Every 1st, 3rd and 5th Friday at Basel SBB station' },
+        { label: 'Evening', value: 'Social dancing with our own DJs. Students CHF 5.-, guests CHF 10.-' },
+        { label: 'Crowd', value: 'All levels, alone or as a pair. Dancers from Switzerland, France and Germany' },
       ],
       ctaTickets: 'See the next Danceflow Night',
       note: 'There is often a short workshop before the night. You find the exact plan on Eventfrog.',
@@ -145,11 +140,10 @@ export const EVENTS: Record<Lang, EventsContent> = {
       eyebrow: 'Workshops',
       title: 'A workshop gives one topic a full evening.',
       body: 'You focus on technique, figures, musicality or styling and can apply what you learned directly at the next event.',
+      // R155: same two-block grouping as DE, one thought per sentence.
       points: [
-        'Technique: clean movement instead of just more figures',
-        'Styling: conscious expression in Salsa, Bachata or Heels',
-        'Musicality: hear better, react better',
-        'Special topics: with guest teachers who travel in from across Europe every month',
+        'Your craft. You learn clean movement instead of just more figures. You find conscious expression in Salsa, Bachata or Heels. You hear the music better and react to it better.',
+        'Your special topics. For these, guest teachers travel in from across Europe every month.',
       ],
     },
     anniversary: {
@@ -177,7 +171,7 @@ export const EVENTS: Record<Lang, EventsContent> = {
       secondary: 'Write to us',
     },
   },
-};
+} satisfies Record<Lang, EventsContent>;
 
 // Eventfrog-Ziel fuer alle Ticket-Buttons + den Eventkalender. Eine Swap-Stelle: vor Launch
 // VITE_EVENTFROG_URL mit dem echten Salsaflow-Eventfrog-Link fuellen (.env).
@@ -185,7 +179,7 @@ export const EVENTS: Record<Lang, EventsContent> = {
 // Fallback ist das eigene Kontaktformular, nicht mehr eventfrog.ch. Grund: die nackte Domain
 // leitet auf die Eventfrog-Startseite weiter. Wer dort ankommt, muss Salsaflow erst suchen und
 // hat keinen Weg zurueck. Das eigene Formular beantwortet dieselbe Frage und die Anfrage kommt an.
-const EVENTFROG_ENV = (import.meta.env.VITE_EVENTFROG_URL as string | undefined)?.trim();
+const EVENTFROG_ENV = import.meta.env.VITE_EVENTFROG_URL?.trim();
 export const EVENTFROG_URL = EVENTFROG_ENV || '/kontakt#events';
 
 /** Zeigt der Ticket-Weg nach draussen? Steuert target/rel und die Button-Beschriftung. */

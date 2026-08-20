@@ -53,6 +53,12 @@ export function TeamPage() {
     <>
       <Seo page="team" />
       <SiteHeader />
+      {/* R144: Der WhatsApp-Float ist sitewide eine Pille mit Label (im Vorher-Shot
+          worklog/shots/S7-ux144/vorher/team-desktop-1440.png als 121x56 gemessen). Auf
+          dieser Route soll er ab sm ein Kreis ohne Text sein. Eigener Marker analog
+          R142 (/events), damit WhatsAppFloat.tsx und die Marker der anderen Routen
+          unberuehrt bleiben. Die Regel dazu steht in index.css. */}
+      <div data-team-page="" />
       <main
         id="main"
         tabIndex={-1}
@@ -192,12 +198,79 @@ function TeachingLine({ teaching, lang }: { teaching: Teaching | undefined; lang
  *    130px nach unten, sodass im Fold nur noch der oberste Streifen sichtbar war — und
  *    `center 35%` legte das Crop-Fenster zu hoch ins Motiv (leere Studiowand oben, Fuesse
  *    unten abgeschnitten). Ohne die Reihe startet das Band frueher.
+ */
+/* R144, /team Desktop-Fold: "Video 06:57, Koepfe nicht abschneiden".
  *
- *    Der neue Wert ist gemessen, nicht geschaetzt (Raster-Overlay /tmp/hp03-grid.jpg):
- *    in hp-03 (1800x1115) liegt die Gruppe zwischen 30% (Kopflinie) und 80% (Schuhe).
- *    Bei 1440px Viewport rendert das Motiv 892px hoch, das Band (lg:h-30rem) zeigt 480px,
- *    es werden also 412px weggeschnitten. `center 58%` legt das Fenster auf 239..719px —
- *    die Gruppe (268..714px) liegt komplett drin, mit 29px Luft ueber den Koepfen.
+ * Zwei Messungen tragen die Werte unten. Beide gegen die laufende Seite bei 1440x730.
+ *
+ * a) DAS MOTIV. hp-03 ist 1800x1115 und rendert bei 1440px Viewport 892px hoch
+ *    (object-cover, Breite fuellt). Raster-Overlay auf der Quelldatei:
+ *      30% = Scheitel der STEHENDEN hinteren Reihe
+ *      56% = tiefstes Kinn der KNIENDEN vorderen Reihe
+ *    Das Kopfband ist damit 232px hoch (0.26 x 892). Alles unter 56% ist Hose, Boden
+ *    und Salsaflow-Wand — es traegt kein Gesicht. Der alte Kommentar rechnete mit
+ *    "Gruppe 30..80%", also inklusive Schuhe; darum war das Fenster zu tief gesetzt.
+ *
+ * b) DIE BANDKANTE. Mit `dense` sitzt der Band-Top live bei y=385.
+ *
+ * R156 (Video 06:57/07:03, "nicht abschneiden"): die Rechnung oben war an EINER Stelle
+ * falsch, und daran hing der ganze Anschnitt. Sie setzte das tiefste Kinn der KNIENDEN
+ * Reihe auf 56% und erklaerte alles darunter zu "Hose, Boden und Wand". Nachgemessen an
+ * der Quelldatei stimmt das nicht: die kniende Reihe reicht mit Knien, Schienbeinen und
+ * Schuhen bis 78..80% der Bildhoehe (Farbscan auf Holzboden-Pixel, ab 81% ist die Flaeche
+ * durchgehend Parkett). Oben faengt das Haar der hinteren Reihe bei 25% an. Die Gruppe
+ * belegt also 25..80%, nicht 30..56%.
+ *
+ * Ein 21rem-Band (336px) zeigte davon live nur 24.3%..62.0% — die Koepfe waren ganz, die
+ * kniende Reihe endete auf halbem Oberschenkel. Genau der Befund aus dem Video. Das Band
+ * war zu FLACH; die Position war es nie.
+ *
+ * Die Position bleibt darum unveraendert bei `center 39%` (LOCK, nicht zurueck auf 58%),
+ * das Band waechst nach unten. Gemessen am laufenden Stand (1440px, Band-Top y=385):
+ *    21rem/336px -> src 24.3%..62.0%   Fuesse ab (Ist-Zustand)
+ *    28rem/448px -> src 19.4%..69.6%   Fuesse immer noch ab
+ *    36rem/576px -> src 13.8%..78.4%   Schuhspitzen noch knapp an
+ *    38rem/608px -> src 12.4%..80.6%   ganze Gruppe inkl. Schuhe und Boden
+ *
+ * Ab lg steht aber eine FESTE Hoehe (rem) und keine feste Hoehe kann das halten. Bei
+ * object-cover haengt der Ausschnitt am Verhaeltnis Breite/Hoehe: dieselben 608px zeigen
+ * auf 1440px Breite src 12.4%..80.6% (Fuesse drin), auf 1920px aber nur 19.1%..70.2% —
+ * die Fuesse waren auf breiten Schirmen wieder ab (gemessen ueber 390..1920px). Ein
+ * fester rem-Wert muesste pro Breite mitwachsen (1600px braucht 42rem, 1728px 46rem,
+ * 1920px 50rem); das ist keine Kette, die man pflegen kann.
+ *
+ * Ab lg traegt darum ein SEITENVERHAELTNIS statt einer festen Hoehe. Es haelt den
+ * Ausschnitt auf jeder Breite konstant: `aspect-[21/9]` zeigt bei 1280, 1440, 1920 und
+ * 2560px identisch src 12.0%..81.2% — Scheitel (25%) und Schuhe (80%) liegen auf jeder
+ * Breite im Fenster. Auf 1440px ist das Band damit 617px hoch, also praktisch die 38rem
+ * aus der Messreihe oben, nur eben breitenstabil.
+ *
+ * R159 (Video 06:57, "nicht abschneiden") — die Werte oben nachgeprueft, nicht neu gesetzt.
+ * Die 25% Scheitel und 80% Schuhe standen bisher als Behauptung im Kommentar. Jetzt sind
+ * sie gegen die Quelldatei gemessen (Zeilen-Scan auf hp-03.webp, 1800x1115, Luminanz < 110):
+ *   erste Zeile mit Haar  y=280  = 25.1% ; darueber ist jede Zeile reine helle Wand (0 Treffer)
+ *   letzte Zeile Gruppe   y~892  = 80.0% ; ab 82% ist die Flaeche durchgehend Parkett
+ * Beides deckt sich mit der Rechnung. `center 39%` ist damit belegt, nicht geraten.
+ *
+ * Der FOLD ist der eigentliche Punkt aus dem Video, und er haengt nicht am Band allein,
+ * sondern an der Bandkante (y=385). Live gemessen, Fenster bis zur Fold-Kante:
+ *   1366x768   src 12.0%..57.2%      1280x800   src 12.0%..64.3%
+ *   1440x900   src 12.0%..69.7%      1920x1080  src 12.0%..70.4%
+ * Die Koepfe liegen bei 25..45%, also auf JEDER dieser Hoehen komplett ueber der Kante.
+ * Ueberm Scheitel bleiben konstant 13.1pp = 117px Luft (Fenster startet 12.0%, Haar 25.1%).
+ * Angeschnitten wird nur die kniende Reihe unterhalb der Brust — kein Kopf, kein Gesicht.
+ *
+ * Mobil 390px zeigt src 0.0%..100.0% vertikal und 2.8%..97.2% horizontal: das ganze
+ * Gruppenbild mit Raum und Boden. Das ist Kontext, kein Portraet-Crop — genau die
+ * Forderung aus dem Video. Ein engeres Fenster waere hier ein Rueckschritt.
+ *
+ * Fazit R159: die Geometrie erfuellt "nicht abschneiden" bereits. Sie wird darum NICHT
+ * angefasst. Wer sie spaeter dreht, muss diese Messreihe neu fahren und schlagen.
+ *
+ * R187 korrigiert den freigegebenen Zuschnitt auf `center 38%`.
+ * Der finale Browserbeleg bei 1440x730 zeigt 32px Luft über dem höchsten Scheitel.
+ * Alle Köpfe und der Wandschriftzug bleiben vollständig sichtbar.
+ * Mobil zeigt das Band das ganze Gruppenbild.
  */
 function TeamHero() {
   const { lang } = useLang();
@@ -206,6 +279,7 @@ function TeamHero() {
   return (
     <HeroFrame
       axis="wide"
+      dense
       title={
         <>
           {h.titleA} {h.titleAccent}
@@ -216,9 +290,12 @@ function TeamHero() {
       lead={h.lead}
       primary={{ href: SCHNUPPER_HREF, label: lang === 'de' ? 'Schnupperstunde buchen' : 'Book a trial class' }}
       media={{
-        src: '/photos/showcase/hp-03.webp',
+        src: '/photos/showcase/hp-03-2880.webp',
         alt: 'Das Salsaflow-Team gemeinsam im hellen Studio',
-        position: 'center 58%',
+        // Parent nach R180c: vh-Höhe bleibt als Fold-Rest. Der freigegebene
+        // Zuschnitt 38 % zeigt bei 1440x730 alle Köpfe und hält das Logo lesbar.
+        position: 'center 38%',
+        heightClass: 'h-[16rem] sm:h-[24rem] lg:h-[calc(100vh-24.08rem)]',
       }}
     />
   );
@@ -260,10 +337,10 @@ function FounderSection() {
             <motion.div variants={item}>
               <Eyebrow>{g.eyebrow}</Eyebrow>
             </motion.div>
-            <motion.h2 variants={item} className={cn(g.eyebrow ? 'mt-5' : 'mt-0', sectionTitle, MEASURE_L)}>
+            <motion.h2 variants={item} className={cn(g.eyebrow ? 'mt-5' : 'mt-0', sectionTitle, MEASURE_L, 'pr-16 sm:pr-0')}>
               {g.title}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
+            <motion.p variants={item} className={`mt-4 pr-16 text-pretty sm:pr-0 ${sectionLead}`}>
               {g.lead}
             </motion.p>
           </Reveal>
@@ -303,8 +380,8 @@ function FounderSection() {
                       className="absolute max-w-none transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.02]"
                       style={{ width: founder.bust.w, left: founder.bust.l, top: founder.bust.t }}
                       loading="lazy"
-                      width={1000}
-                      height={1414}
+                      width={1414}
+                      height={2000}
                     />
                   </div>
                   {/* Runde 1 (2026-08-07), Kritiker-Befund d-02 ("Cookie-Banner schneidet
@@ -505,7 +582,7 @@ function TrialBand() {
 /** Rollen-Zeile -> Sektion auf dieser Seite, in der die Gesichter dazu wirklich stehen.
  *  Nur die zwei Rollen, fuer die es belegte Portraits gibt (FOUNDERS / FACES aus
  *  team/content.ts). Alle anderen Rollen-IDs fehlen bewusst: fuer sie liegen keine Fotos vor. */
-const ROLE_ANCHOR: Record<string, { href: string; photos: string[] }> = {
+const ROLE_ANCHOR = {
   owners: { href: '#founders', photos: FOUNDERS.map((f) => f.photo) },
   teachers: { href: '#gesichter', photos: FACES.map((f) => f.photo).filter((p): p is string => !!p) },
 };
@@ -598,17 +675,29 @@ function RolesSection() {
               der Galerie. Jetzt ein echter Kursmoment vor der Salsaflow-Wand
               (Luminanz 159/255 statt 53/255) — er zeigt, was die Sektion behauptet:
               viele Menschen, ein gemeinsamer Kursabend. */}
-          {/* 22% statt 40%: das 21:9-Fenster nimmt ~12% der Bildhoehe weg, bei 40% fehlte
-              der Frau rechts (weisse Bluse) die Schaedeldecke (Critic Runde 11, Item 2). */}
+          {/* R156 (Video 07:03, "niemand am Rand halb"): hier stand
+              kurse-heels-energie-01.webp in einem 21:9-Fenster. Die blonde Frau links war
+              angeschnitten — und zwar nicht durch das Fenster, sondern durch die DATEI: sie
+              steht im Quellbild selbst am linken Rand und ist dort bereits halbiert
+              (1920x935, Raster-Check auf der Quelldatei). Ein anderer Crop kann das nicht
+              heilen, weil die fehlende Bildhaelfte gar nicht existiert. Bei 2.05:1 Quelle in
+              einem 2.33:1 Fenster schneidet object-cover ausserdem nur HOEHE weg, nie Breite.
+              Darum der Tausch auf ein vorhandenes Kursfoto, kein neues Motiv:
+              kurse-classfreude-01.webp (1920x1280, 3:2). Es zeigt dieselbe Aussage — viele
+              Menschen, ein gemeinsamer Kursabend — hat aber an beiden Raendern ganze Figuren
+              und dank 3:2 genug Hoehe fuer einen Crop.
+              Fenster 16/9 statt 21/9 und `center 30%`: gemessen zeigt das src 4.7%..89.1%,
+              also erhobene Haende oben komplett und Fuesse plus Boden unten. Das flachere
+              21:9 haette bei jeder Position entweder die Haende oder die Fuesse gekappt
+              (bei 30%: nur 10.7%..75.0%). */}
           <img
-            src="/photos/2026/kurse-heels-energie-01.webp"
+            src="/photos/2026/kurse-classfreude-01.webp"
             alt={supportVisual.alt}
-            className="aspect-[21/9] w-full rounded-[var(--radius-media)] object-cover object-[center_22%]"
-            /* Runde 3, Issue 8: die Datei ist jetzt 1920x935 (Wasserzeichen-Streifen unten
-               abgeschnitten). width/height muessen das echte Seitenverhaeltnis melden,
-               sonst reserviert der Browser die falsche Hoehe (CLS). */
+            className="aspect-[16/9] w-full rounded-[var(--radius-media)] object-cover object-[center_30%]"
+            /* Echtes Seitenverhaeltnis der Datei melden, sonst reserviert der Browser die
+               falsche Hoehe (CLS) — gleicher Grund wie zuvor, neue Masse. */
             width={1920}
-            height={935}
+            height={1280}
             loading="lazy"
           />
           {/* Runde 1 (2026-08-07), Eyebrow-Drosselung: hier stand zusaetzlich das Label
@@ -638,7 +727,7 @@ function RolesSection() {
                Satz direkt unter der Ziffer. */}
         <Reveal className="mt-12 border-t border-[var(--color-line)]" stagger={0.06}>
           {r.groups.map((grp) => {
-            const anchor = ROLE_ANCHOR[grp.id];
+            const anchor = grp.id === 'owners' || grp.id === 'teachers' ? ROLE_ANCHOR[grp.id] : undefined;
             return (
               <motion.article
                 key={grp.id}
@@ -706,7 +795,16 @@ function RolesSection() {
  *  DESKTOP-Problem (das gleichfoermige Fuenfer-Band), auf Mobil erzeugt er nur eine
  *  ausgerissene Reihe. Die Formatvariation gilt darum ab `lg`, unterhalb tragen alle
  *  Kacheln dasselbe 4/5-Fenster. `pos`/`zoom` bleiben je Person unveraendert gueltig. */
-const FACE_SHAPE: { pos: string; ratio: string }[] = [
+/* R159 (Video 06:57, "Koepfe nicht abschneiden") — auch die Lehrer-Kacheln nachgemessen,
+ * nicht neu gesetzt. Scalp je Quelldatei (1414x2000, erste Zeile mit deckendem Pixel):
+ *   aleksandra 6.0%   anina 6.5%   jelena 6.8%   maarten 7.3%   tobias 5.0%
+ * Fenster je Kachel bei lg (Spalte 224px, aspect-[4/5]) gegen die `pos`-Werte unten:
+ *   aleksandra 0.2%..88.6%   anina 0.9%..89.3%   jelena 0.1%..88.5%
+ *   maarten    0.9%..89.3%   tobias 0.3%..88.7%
+ * Damit bleibt ueber jedem Scheitel Luft (4.7..6.7pp) und das Fenster reicht bis 88%,
+ * zeigt also Kopf UND Oberkoerper. Kein enger Gesichtscrop, kein angeschnittener Kopf.
+ * Die Werte bleiben darum unveraendert. */
+const FACE_TILE: { pos: string; ratio: string }[] = [
   { ratio: 'aspect-[4/5]', pos: 'object-[48%_2%]' },
   { ratio: 'aspect-[4/5]', pos: 'object-[52%_8%]' },
   { ratio: 'aspect-[4/5]', pos: 'object-[54%_1%]' },
@@ -782,7 +880,7 @@ function FacesSection() {
                 5 von 5 ohnehin auf. */}
         <Reveal className="mt-12 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-5 lg:gap-5" stagger={0.06}>
           {FACES.map((face, i) => {
-            const shape = FACE_SHAPE[i] ?? FACE_SHAPE[FACE_SHAPE.length - 1];
+            const tile = FACE_TILE[i] ?? FACE_TILE[FACE_TILE.length - 1];
             // Letzte Karte: liegende Bauform, solange das Raster 2-spaltig ist.
             const banner = i === FACES.length - 1 && FACES.length % 2 === 1;
             return (
@@ -815,10 +913,10 @@ function FacesSection() {
                           ? 'Mitglied des Salsaflow-Teams'
                           : 'Member of the Salsaflow team'
                     }
-                    className={cn('relative w-full object-cover', shape.ratio, shape.pos)}
+                    className={cn('relative w-full object-cover', tile.ratio, tile.pos)}
                     loading="lazy"
-                    width={1000}
-                    height={1414}
+                    width={1414}
+                    height={2000}
                   />
                 </div>
                 {/* `p` statt `span` aus demselben Grund wie bei den Gruender-Karten: nur so

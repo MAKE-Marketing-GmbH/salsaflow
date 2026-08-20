@@ -26,7 +26,12 @@ export type HeelsContent = {
     secondary: Cta;
     microcopy: string;
     image: Img;
-    /** Full-bleed Charakter-Band unter dem Typo-Hero (21:9 Polished-Hero, Foto-Pipeline 2026-08-06). */
+    /**
+     * Hero-Motiv der rechten Split-Spalte (HeelsView.tsx). EINE Wahrheit:
+     * `src`, `alt` und `position` gehen alle drei live in das gerenderte Bild.
+     * R139: vorher stand hier ein Full-Bleed-Band, dessen `src`/`alt` das
+     * Rendering ignorierte — wer sie aenderte, sah keine Wirkung.
+     */
     band: HeroBand;
     cardLabel: string;
     cardText: string;
@@ -85,7 +90,7 @@ const R = {
   heelsPage: '/tanzkurse/heels',
 };
 
-export const HEELS: Record<Lang, HeelsContent> = {
+export const HEELS = {
   de: {
     seo: 'heels',
     crumb: { label: 'Heels', href: R.heelsPage },
@@ -106,20 +111,19 @@ export const HEELS: Record<Lang, HeelsContent> = {
       microcopy: 'Level, Schuhe und Vorbereitung klären wir vor dem Start.',
       image: { src: '/photos/premium/offer-heels-1200.webp', alt: 'Heels-Tänzerin mit klarer Linie und Präsenz im Salsaflow Studio' },
       band: {
-        src: '/photos/2026/kurse-heels-energie-hero-2100.webp',
+        // Hochformat-Zuschnitt (960x1200) desselben Shots wie das fruehere
+        // 21:9-Band. object-cover braucht vertikalen Ueberhang, sonst waere
+        // `position` unten ein totes Feld (R138 Fund 2).
+        src: '/photos/2026/kurse-heels-energie-card-960.webp',
         alt: 'Heels-Kurs im hellen Studio, energiegeladene Gruppe vor der Salsaflow-Wand',
-        // Kein heightClass mehr: das flache 10-12rem-Band (192px auf 1440) schnitt
-        // Stirn und Scheitel der Gruppe (Critic Runde 8, Item 1) — es gilt wieder die
-        // HeroFrame-Default-Hoehe h-[16rem] sm:h-[22rem] lg:h-[30rem].
-        // 0% statt 15%: auch 15% kappte der Frau rechts (weisse Bluse) noch den
-        // Oberkopf; bei 0% sind Pony und Stirn ganz (Critic Runde 12, Item 1 — am
-        // 1440x480-Ausschnitt geprueft).
-        // R74 (Fold 1440x730): 0% zeigte im 217px-Streifen (bandTop 513) nur Haar und
-        // Stirn, die Gesichter lagen UNTER dem Fold. Live-Reihe 0/8/12/14/20: erst ab
-        // ~12% tragen die Koepfe Kinn mit Luft — bei 12% zeigen Frontfrau (orange),
-        // Frau schwarz und Frau weiss alle Auge/Nase/Mund/Kinn mit Hals, kein Kinn auf
-        // der 730er-Kante. 14% rutscht die weisse Bluse oben schon wieder ran, 20%
-        // kappt sie. Motiv, Hoehe (30rem Default), Copy, Chips, Knoepfe unberuehrt.
+        // R74 (Fold 1440x730): 0% zeigte im 217px-Streifen nur Haar und Stirn, die
+        // Gesichter lagen UNTER dem Fold. Live-Reihe 0/8/12/14/20: erst ab ~12% tragen
+        // die Koepfe Kinn mit Luft — bei 12% zeigen Frontfrau (orange), Frau schwarz und
+        // Frau weiss alle Auge/Nase/Mund/Kinn mit Hals. 14% rutscht die weisse Bluse
+        // oben schon wieder ran, 20% kappt sie.
+        //
+        // R139: Alle drei Felder sind live. HeelsView setzt src, alt und
+        // objectPosition direkt aus diesem Objekt.
         position: 'center 12%',
       },
       cardLabel: 'Dein Einstieg',
@@ -224,18 +228,13 @@ export const HEELS: Record<Lang, HeelsContent> = {
       microcopy: 'We sort out level, shoes and preparation before you start.',
       image: { src: '/photos/premium/offer-heels-1200.webp', alt: 'Heels dancer with a clear line and presence in the Salsaflow studio' },
       band: {
-        src: '/photos/2026/kurse-heels-energie-hero-2100.webp',
+        src: '/photos/2026/kurse-heels-energie-card-960.webp',
         alt: 'Heels class in the bright studio, energetic group in front of the Salsaflow wall',
-        // Kein heightClass mehr: das flache 10-12rem-Band (192px auf 1440) schnitt
-        // Stirn und Scheitel der Gruppe (Critic Runde 8, Item 1) — es gilt wieder die
-        // HeroFrame-Default-Hoehe h-[16rem] sm:h-[22rem] lg:h-[30rem].
-        // 0% statt 15%: auch 15% kappte der Frau rechts (weisse Bluse) noch den
-        // Oberkopf; bei 0% sind Pony und Stirn ganz (Critic Runde 12, Item 1 — am
-        // 1440x480-Ausschnitt geprueft).
-        // R74 (Fold 1440x730): 0% zeigte im 217px-Streifen (bandTop 513) nur Haar und
-        // Stirn. Live-Reihe: erst ab ~12% tragen die Koepfe Kinn mit Luft (Frontfrau,
-        // Frau schwarz, Frau weiss alle mit Hals, kein Kinn auf der Kante). Motiv,
-        // Hoehe, Copy, Chips unberuehrt. DE/EN identisch gesetzt (gleiche Geometrie).
+        // R74 (Fold 1440x730): 0% zeigte nur Haar und Stirn. Live-Reihe: erst ab ~12%
+        // tragen die Koepfe Kinn mit Luft (Frontfrau, Frau schwarz, Frau weiss alle mit
+        // Hals, kein Kinn auf der Kante). DE/EN identisch gesetzt (gleiche Geometrie).
+        //
+        // R139: src, alt und position sind alle drei live. Details beim DE-Pendant oben.
         position: 'center 12%',
       },
       cardLabel: 'Your start',
@@ -315,4 +314,4 @@ export const HEELS: Record<Lang, HeelsContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, HeelsContent>;

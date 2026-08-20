@@ -218,8 +218,18 @@ export function InstagramShowcase({ compact = false, 'data-design-unit': designU
                 war 44px auf der Home gegen 56px auf /fotos, dieselbe Ebene in zwei Groessen,
                 genau der Befund dieser Scheibe. Leiser wird die Sektion ueber ihre Position
                 und den Weissraum, nicht ueber eine eigene Schriftgroesse. */}
+            {/* R134/8: Auf der Startseite stand hier "Siempre con Flow." — eine
+                Stimmungszeile, die nicht sagt, was darunter kommt. Der Brief verlangt auf
+                Route / keine poetische Zeile. Die Ueberschrift nennt jetzt den Inhalt, der
+                erklaerende Satz darunter entfaellt dort (er sagte dasselbe zweimal).
+                Auf /fotos bleibt die Zeile: dort ist sie der Sektions-Titel einer
+                Bildergalerie, nicht der Ersatz fuer eine Aussage. */}
             <h2 className="type-h2 mt-5">
-              Siempre con Flow.
+              {onHome
+                ? lang === 'de'
+                  ? 'Kurse und Abende aus dem Studio.'
+                  : 'Classes and nights from the studio.'
+                : 'Siempre con Flow.'}
             </h2>
             <p className={cn('mt-5 max-w-lg text-pretty text-base leading-relaxed sm:text-lg', compact ? 'text-[var(--color-ink-muted)]' : 'text-white/75')}>
               {lang === 'de'

@@ -36,7 +36,7 @@ export type ShowsContent = {
   closing: { title: string; body: string; cta: string; secondary: string };
 };
 
-export const SHOWS: Record<Lang, ShowsContent> = {
+export const SHOWS = {
   de: {
     hero: {
       eyebrow: 'Shows & Animationen',
@@ -131,4 +131,4 @@ export const SHOWS: Record<Lang, ShowsContent> = {
       secondary: 'Meet the team',
     },
   },
-};
+} satisfies Record<Lang, ShowsContent>;

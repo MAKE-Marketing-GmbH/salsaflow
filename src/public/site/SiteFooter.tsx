@@ -76,6 +76,7 @@ export function SiteFooter({
     { label: nav.team, href: '/team' },
     { label: nav.fotos, href: '/fotos' },
     { label: nav.faq, href: '/faq' },
+    { label: nav.tanzschuhe, href: '/mehr/tanzschuhe' },
     { label: nav.kontakt, href: '/kontakt' },
     // Runde 2, Issue 9: Gutschein und Shows/Animationen standen als eigenes Zwei-Karten-Band
     // auf der Startseite (src/public/home/Offer.tsx). Beides sind Nebenwege, keine

@@ -6,9 +6,6 @@ import {
   Heart,
   Target,
   TrendingUp,
-  RotateCcw,
-  Users,
-  Sparkles,
   User,
   UsersRound,
 } from 'lucide-react';
@@ -20,7 +17,6 @@ import {
   Breadcrumb,
   PrimaryCta,
   GhostCta,
-  SectionHead,
   FaqBlock,
   Shell,
   Eyebrow,
@@ -38,14 +34,21 @@ export function PrivatstundenPage() {
   const c = PRIVAT[lang];
   return (
     <SubPageShell seo={c.seo}>
-      <PrivatHero c={c} />
-      <WhenSection c={c} />
-      <FlowSection c={c} />
-      <FormatsSection c={c} />
-      <PricesSection c={c} />
-      <NotForSection c={c} />
-      <FinalCta c={c} />
-      <FaqBlock title={c.faqTitle} items={c.faq} />
+      {/* R140: Marker dieser Route, Muster aus R139 (HeelsView). Traegt EINE
+          route-lokale Korrektur, ohne WhatsAppFloat.tsx anzufassen (sitewide/tabu):
+          Der Desktop-Float ist sonst eine Pille mit Label «WhatsApp» (im Vorher-Shot
+          1440x730 gemessen). Hier Kreis wie mobil.
+          Eigenes Attribut statt [data-heels-style-page] oder [data-split-hero-page]:
+          die haengen an anderen Routen und wuerden diese mitziehen. */}
+      <div data-privat-page="">
+        <PrivatHero c={c} />
+        <WhenSection c={c} />
+        <FlowSection c={c} />
+        <FormatsSection c={c} />
+        <PricesSection c={c} />
+        <FinalCta c={c} />
+        <FaqBlock title={c.faqTitle} items={c.faq} />
+      </div>
     </SubPageShell>
   );
 }
@@ -92,17 +95,34 @@ function PrivatHero({ c }: { c: PrivatContent }) {
               schiebt den CTA unter den Fold. Die Kappung auf 3.4rem (nur diese Seite,
               nur Desktop) bringt sie auf ~4 Zeilen und holt den CTA ins Fenster.
               Kein Text geaendert, nur die Schriftgroesse. */}
+          {/* R140-Fix Mobil-Fold (Brief Punkt 4): Die H1 lief in die FAB-Spalte.
+              Gemessen bei 390x844 mit sichtbarem Cookie-Banner (der hebt den Float
+              um 78px auf y690-746, genau in die H1-Zeile): «genau dein Ziel.» endete
+              bei x303, der Knopf beginnt bei x314 — 11px Luft, optisch sass der
+              gruene Kreis direkt am Punkt hinter «Ziel». Bei 360x800 war es ein
+              echter Rect-Overlap («dein Ziel» x144-295 gegen Float x284-340).
+              max-w-[17rem] gilt nur unter sm und zwingt den Umbruch auf
+              «Unterricht / für genau / dein Ziel.» — die laengste Zeile endet bei
+              x201, die Knopf-Spalte ab x314 ist frei (113px Luft ohne Banner-Fall,
+              135px danach). Kein pr-* auf einer Flex-Zeile (R138 Fund 7/8), keine
+              Copy-Aenderung, kein --whatsapp-lift: der Float schwebt ueber der
+              ganzen Seite, jede Hoehe traefe einen anderen Absatz (R139).
+              Ab sm faellt die Kappung weg, Desktop bleibt bei 627px H1-Breite. */}
           <motion.h1
             variants={item}
-            className="type-h1 mt-5 lg:mt-0 lg:text-[clamp(2.6rem,5.2vw,3.4rem)]"
+            className="type-h1 mt-5 max-w-[17rem] sm:max-w-none lg:mt-0 lg:text-[clamp(2.6rem,5.2vw,3.4rem)]"
           >
             <Accented text={h.title} accent={h.titleAccent} />
           </motion.h1>
-          <motion.p variants={item} className={`mt-6 max-w-xl ${sectionLead}`}>
+          {/* R140 Mobil-Fold: der Lead sitzt auf 390x844 in der FAB-Spalte
+              (Vorher-Shot: FAB deckte «genau das, was du»; Nachher-Shot 1:
+              FAB deckte «näch» in «nächste Level»). pr-20 gilt nur unter sm,
+              nicht auf einer Flex-Zeile (R138 Fund 7/8). Ab sm faellt der
+              Abstand, weil der Desktop-Float ein Kreis rechts unten ist. */}
+          <motion.p variants={item} className={`mt-8 max-w-xl pr-20 sm:pr-0 ${sectionLead}`}>
             {h.lead}
           </motion.p>
-          {/* R81: lg:mt-3 zieht die Chips auf Desktop hoch -> CTA bottom <= 730. */}
-          <motion.ul variants={item} className="mt-7 flex flex-wrap gap-2 lg:mt-3">
+          <motion.ul variants={item} className="mt-8 hidden flex-wrap gap-2 lg:flex">
             {h.bullets.map((b) => (
               <li
                 key={b}
@@ -113,15 +133,10 @@ function PrivatHero({ c }: { c: PrivatContent }) {
               </li>
             ))}
           </motion.ul>
-          {/* R81 (Fold 1440x730): CTA-Block. Position/Feinschliff sitzt am Shell
-              (lg:pt-0) und am H1 (lg:mt-0) — siehe unten. Copy, Chips, Motiv bleiben. */}
-          <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center lg:mt-4">
+          <motion.div variants={item} className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
             <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
             <GhostCta href={h.secondary.href}>{h.secondary.label}</GhostCta>
           </motion.div>
-          <motion.p variants={item} className="mt-4 text-sm leading-relaxed text-[var(--color-ink-muted)]">
-            {h.microcopy}
-          </motion.p>
         </motion.div>
 
         {/* Mobil steht das Foto VOR dem Textblock (Critic Runde 11, Item 3): einspaltig lag
@@ -137,21 +152,14 @@ function PrivatHero({ c }: { c: PrivatContent }) {
               // lg:aspect-[3/2] (Foto ~434px) schrumpft die rechte Spalte; items-center
               // zentriert beide Spalten hoeher -> CTA bottom ~676, ganz im Fenster.
               // Motiv, Copy, Chips, H1 bleiben. Salsa DE14/EN55, Kursaufbau 3/2 unberuehrt.
-              className="aspect-[4/5] w-full object-cover object-[center_38%] sm:aspect-[5/4] lg:aspect-[3/2]"
+              // R160: object-[center_38%] schnitt am 3/2-Desktop den Scheitel.
+              // center_24% schiebt den Fokus nach oben, Koepfe bleiben ganz im Bild.
+              className="aspect-[5/4] w-full object-cover object-[center_42%] sm:aspect-[5/4] lg:aspect-[3/2]"
               width={1200}
               height={1500}
               loading="eager"
               fetchPriority="high"
             />
-          </div>
-          {/* Links angedockt statt rechts: der fixe WhatsApp-FAB lag im Erst-Viewport auf
-              der Kartenecke (Sweep 14.08.2026). Festes Papier statt Glas (bg-white/92 +
-              backdrop-blur) — Glas auf Fotos ist seit Critic-Runde 4/5 verboten. */}
-          {/* bottom-4 statt -bottom-5: die herausragende Karte wurde am Fold/Cookie-Banner
-              abgeschnitten und riss aus dem Foto (Critic Runde 11, Item 3). */}
-          <div className="absolute bottom-4 left-5 right-5 rounded-[var(--radius-card)] border border-black/5 bg-[var(--color-paper-warm)] p-4 text-[var(--color-ink)] shadow-[0_18px_44px_-18px_rgba(17,17,17,0.5)] sm:right-auto sm:max-w-[18rem]">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{h.cardLabel}</p>
-            <p className="mt-1 font-display text-lg font-bold leading-tight">{h.cardText}</p>
           </div>
         </motion.div>
       </Shell>
@@ -160,7 +168,8 @@ function PrivatHero({ c }: { c: PrivatContent }) {
 }
 
 /* ---------------------------------------------------- Wann Privatstunden Sinn machen */
-const WHEN_ICONS = [Heart, Target, TrendingUp, RotateCcw, Users, Sparkles];
+/* R140: drei Karten, drei Icons. Hochzeitstanz, Technik, Levelwechsel. */
+const WHEN_ICONS = [Heart, Target, TrendingUp];
 
 function WhenSection({ c }: { c: PrivatContent }) {
   const { item } = useReveal();
@@ -176,7 +185,11 @@ function WhenSection({ c }: { c: PrivatContent }) {
             {w.intro}
           </motion.p>
         </Reveal>
-        <Reveal className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" stagger={0.07}>
+        {/* R140 (Video 04:21, Frame p-08): Vorher standen hier sechs gleich laute Karten
+            in zwei Reihen. Jetzt tragen die drei haeufigsten Anlaesse den Block, die
+            drei selteneren stehen als leise Zeile darunter. Eine Reihe statt zwei,
+            und der Blick hat eine Rangfolge. mt-14 statt mt-12: mehr Luft zum Lead. */}
+        <Reveal className="mt-14 grid gap-4 sm:grid-cols-3" stagger={0.07}>
           {w.cards.map((card, i) => {
             const Icon = WHEN_ICONS[i % WHEN_ICONS.length];
             return (
@@ -194,7 +207,24 @@ function WhenSection({ c }: { c: PrivatContent }) {
             );
           })}
         </Reveal>
-        <Reveal className="mt-10">
+        {/* Kein Kasten, kein Icon, kein Schatten: diese drei Anlaesse sollen lesbar sein,
+            aber nicht mit den Karten darueber um Aufmerksamkeit kaempfen. */}
+        <Reveal className="mt-8">
+          <motion.div variants={item} className="flex flex-col gap-x-8 gap-y-2 sm:flex-row sm:flex-wrap sm:items-baseline">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+              {w.moreLabel}
+            </p>
+            <ul className="flex flex-col gap-x-7 gap-y-2 text-[0.98rem] text-[var(--color-ink-muted)] sm:flex-row sm:flex-wrap">
+              {w.more.map((entry) => (
+                <li key={entry} className="flex items-start gap-2">
+                  <Check size={13} strokeWidth={3} aria-hidden className="mt-1.5 shrink-0 text-[var(--color-salsa)]" />
+                  {entry}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        </Reveal>
+        <Reveal className="mt-12">
           <motion.div variants={item}>
             <PrimaryCta href={w.cta.href}>{w.cta.label}</PrimaryCta>
           </motion.div>
@@ -232,7 +262,6 @@ function FlowSection({ c }: { c: PrivatContent }) {
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <div>
-                    <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{p.tag}</p>
                     <h3 className="type-h3 text-[var(--color-ink)]">{p.title}</h3>
                     <p className="mt-1.5 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{p.text}</p>
                   </div>
@@ -245,12 +274,18 @@ function FlowSection({ c }: { c: PrivatContent }) {
           </Reveal>
           <Reveal className="lg:sticky lg:top-28">
             <motion.div variants={item} className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]">
+              {/* R140-Fix: Bild getauscht (Begruendung + Messwerte in privat/content.ts
+                  am flow.image). Vorher lag hier derselbe Studio-Schnitt wie im Hero,
+                  nur naeher, und der Crop schnitt links ein Gesicht an.
+                  Die Quelle ist hochkant 1066x1600; bei 1:1 bleibt der Lehrer ganz im
+                  Ausschnitt. object-[center_28%] haelt Koepfe und Arme im Bild.
+                  photo-grade-private bleibt weg: kein CSS-Filter als Bildersatz. */}
               <img
                 src={f.image.src}
                 alt={f.image.alt}
-                className="photo-grade-private aspect-[3/2] w-full object-cover object-[center_40%]"
-                width={1800}
-                height={1200}
+                className="aspect-square w-full object-cover object-[center_28%]"
+                width={1066}
+                height={1600}
                 loading="lazy"
               />
             </motion.div>
@@ -270,26 +305,38 @@ function FormatsSection({ c }: { c: PrivatContent }) {
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
+        {/* R140-Fix: SectionHead haengt titleAccent HINTEN an den Titel an
+            (kit.tsx: `{title} {titleAccent ? <TitleAccent>…`). Dadurch stand hier
+            «Allein, zu zweit oder zu dritt. zu dritt» doppelt im Shot. Accented
+            setzt das Wort inline, wie in allen anderen Sektionen dieser Seite. */}
         <Reveal className="max-w-2xl">
-          <SectionHead title={f.title} titleAccent={f.titleAccent} />
+          <motion.h2 variants={item} className={sectionTitle}>
+            <Accented text={f.title} accent={f.titleAccent} />
+          </motion.h2>
         </Reveal>
-        <Reveal className="mt-12 grid gap-4 sm:grid-cols-3" stagger={0.08}>
-          {f.items.map((fmt, i) => {
-            const Icon = FORMAT_ICONS[i % FORMAT_ICONS.length];
-            return (
-              <motion.div
-                key={fmt.name}
-                variants={item}
-                className="flex h-full flex-col rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-7 shadow-[0_18px_50px_rgba(17,17,17,0.05)] sm:p-8"
-              >
-                <span className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-card)] bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
-                  <Icon size={22} strokeWidth={2} aria-hidden />
-                </span>
-                <h3 className="mt-5 type-h3 text-[var(--color-ink)]">{fmt.name}</h3>
-                <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{fmt.text}</p>
-              </motion.div>
-            );
-          })}
+        {/* R140-Fix (Video 04:21 «viel zu viel», zielt genau auf diese Karten):
+            vorher drei gleich laute weisse Icon-Karten mit Rahmen und Schatten,
+            genauso laut wie das alte When-Grid. Jetzt eine Liste mit Trennlinien:
+            das Format ist eine Nebeninfo, kein eigener Block. Kein Rahmen, kein
+            Schatten, keine Karte. Copy unveraendert. */}
+        <Reveal className="mt-10" stagger={0.08}>
+          <motion.ul variants={item} className="divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
+            {f.items.map((fmt, i) => {
+              const Icon = FORMAT_ICONS[i % FORMAT_ICONS.length];
+              return (
+                <li
+                  key={fmt.name}
+                  className="flex flex-col gap-1 py-5 sm:flex-row sm:items-baseline sm:gap-6 sm:py-6"
+                >
+                  <span className="flex items-center gap-3 sm:w-56 sm:shrink-0">
+                    <Icon size={18} strokeWidth={2} aria-hidden className="shrink-0 text-[var(--color-salsa)]" />
+                    <span className="font-display text-lg font-bold text-[var(--color-ink)]">{fmt.name}</span>
+                  </span>
+                  <span className="text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{fmt.text}</span>
+                </li>
+              );
+            })}
+          </motion.ul>
         </Reveal>
       </Shell>
     </section>
@@ -338,32 +385,6 @@ function PricesSection({ c }: { c: PrivatContent }) {
             </motion.ul>
           </Reveal>
         </div>
-      </Shell>
-    </section>
-  );
-}
-
-/* ----------------------------------------------------------------- Fuer wen nicht */
-function NotForSection({ c }: { c: PrivatContent }) {
-  const { item } = useReveal();
-  const n = c.notFor;
-  return (
-    <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
-      <Shell>
-        <Reveal className="mx-auto max-w-2xl rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white px-6 py-12 text-center shadow-[0_18px_50px_rgba(17,17,17,0.05)] sm:px-10 sm:py-14">
-          <motion.h2
-            variants={item}
-            className="type-h2 text-[var(--color-ink)]"
-          >
-            <Accented text={n.title} accent={n.titleAccent} />
-          </motion.h2>
-          <motion.p variants={item} className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
-            {n.body}
-          </motion.p>
-          <motion.div variants={item} className="mt-8 flex justify-center">
-            <PrimaryCta href={n.cta.href}>{n.cta.label}</PrimaryCta>
-          </motion.div>
-        </Reveal>
       </Shell>
     </section>
   );

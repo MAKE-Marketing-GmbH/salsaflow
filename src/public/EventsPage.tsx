@@ -31,6 +31,11 @@ export function EventsPage() {
     <>
       <Seo page="events" />
       <SiteHeader />
+      {/* R142: der WhatsApp-Float ist sitewide eine Pille mit Label (belegt im Vorher-Shot
+          worklog/shots/S7-ux142/vorher/events-desktop-00-fold.png). Auf dieser Route soll er
+          ab sm ein Kreis ohne Text sein. Eigener Marker analog R140/R141, damit
+          WhatsAppFloat.tsx und die Marker der anderen Routen unberuehrt bleiben. */}
+      <div data-events-page="" />
       <main id="main" tabIndex={-1}>
         <EventsHero />
         <DanceflowSection />
@@ -56,10 +61,12 @@ function PhotoFade({ children, className }: { children: ReactNode; className?: s
     <motion.div
       data-reveal
       className={className}
-      initial={hydrated ? { opacity: 0, y: reduced ? 0 : 16 } : false}
+      // R155: 16px -> 22px Versatz, damit die Einzelfotos denselben spuerbaren Takt haben
+      // wie die gestaffelten Reveal-Gruppen. Reduced-motion bleibt bei y:0 (nur Fade).
+      initial={hydrated ? { opacity: 0, y: reduced ? 0 : 22 } : false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={VIEWPORT}
-      transition={{ duration: reduced ? 0.32 : 0.55, ease: EASE_OUT }}
+      transition={{ duration: reduced ? 0.32 : 0.6, ease: EASE_OUT }}
     >
       {children}
     </motion.div>
@@ -140,9 +147,33 @@ function EventsHero() {
      folgt darunter als full-bleed Band bis an beide Viewport-Kanten. Das ist die im
      Kritik-Fix genannte Loesung ("Events: Headline ueber dem Foto-Grid") und zugleich der
      klare Abstand zum Home-Hero, der als einziger Text AUF dem Bild traegt. */
+  /* R174, Video 05:26 ("Leute abgeschnitten"). Gemessen bei 1440x900:
+     Band-Top 533, Hoehe 448 -> Ende 981. Die Viewport-Kante 900 lag MITTEN im Band
+     und kappte die Koerper auf Huefthoehe.
+
+     Der Hebel ist der Platz UEBER dem Band, nicht der Crop. Die drei Fakten sassen
+     im HeroFrame zwischen CTA und Band und kosteten dort 104px plus 24px Abstand.
+     Sie laufen jetzt UNTER dem Band: dieselbe Information, dieselbe Reihenfolge im
+     Lesefluss, aber der Platz kommt dem Foto zugute.
+
+     Nachgerechnet mit der finalen Staffelung (Werte live gemessen):
+       H1-Top 96 (Nav-Freiraum, siehe pt-5 unten) -> Band-Top 405
+       Band 25rem = 400px            -> Band-Ende 805
+       Fakten py-4 = 88px            -> Fakten-Ende 893
+     Damit liegt das ganze Band im Fold (805 <= 900) UND die Fakten stehen
+     vollstaendig darueber lesbar, statt an der Falz abzureissen. */
   return (
+    <>
+    {/* R174: ohne `facts` schaltet HeroFrame auf tight (dense+media+!facts+!split) und
+        setzt den Section-Top auf var(--nav-h) mit pt-0. Gemessen stand die H1 damit
+        exakt auf y76 = Unterkante des Headers — die Nav-Pille (gerundete Leiste, optisch
+        bis ~y100) lag auf der Versalhoehe von "Dein Kurs". Diese 20px Papier-Luft geben
+        der H1 ihren alten Start bei y96 zurueck. Reiner Abstand, kein Eingriff in
+        kit.tsx (dort haengen bachata/salsa/partys am selben tight-Zweig). */}
+    <div className="bg-[var(--color-paper-warm)] pt-5" />
     <HeroFrame
       axis="wide"
+      dense
       title={
         <>
           {h.titleA} {h.titleAccent}
@@ -150,25 +181,41 @@ function EventsHero() {
         </>
       }
       lead={h.lead}
-      facts={facts}
       media={{
-        src: '/photos/party/party-52.webp',
+        src: '/photos/party/party-47.webp',
         alt:
           lang === 'de'
-            ? 'Tanzteam auf der Danceflow Night, alle Köpfe sichtbar'
-            : 'Dance team at the Danceflow Night, all heads visible',
-        // Mobil 18%: Band nimmt genug Hoehe, Köpfe sitzen. Desktop-Band war 12rem + 13%
-        // und zeigte nur Arme. lg: 16rem plus 32% legt das Fenster auf die vordere Reihe.
-        // R76 (Fold 1440x730): 14rem + 40% zeigte im 97px-Streifen (bandTop 633) nur
-        // Stirn und Augen — die Kinne lagen UNTER dem Fold. Live-Reihe (Anker-Modell,
-        // Motiv 1500x1000, scaledH 960): bei lg:h-[21rem] + object-[center_42%] deckt
-        // der sichtbare Streifen nat. Y~526-623 ab — fuenf Frauen (lachend, schwarzes
-        // Top, dunkles Haar, zwei rechts) plus der Bart-Mann zeigen alle Auge/Nase/Mund/
-        // Kinn mit Luft, kein Kinn auf der 730er-Kante. 20rem kappt den Bart-Mann oben,
-        // 22rem kappt ihn unten. Nur positionClass + heightClass (Mobil 18% / h-[10rem]
-        // unberuehrt), Motiv party-52, H1, Lead, Knoepfe, Zahlenzeile bleiben.
-        positionClass: 'object-[center_55%] lg:object-[center_42%]',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[21rem]',
+            ? 'Vier Tänzerinnen in Lila zeigen eine Choreografie im Salsaflow-Saal'
+            : 'Four dancers in purple performing a choreography in the Salsaflow studio',
+        // R143: das alte Gruppenfoto ist als Motiv raus. Ersatz ist party-47 (1500x1000, vor dem Einbau
+        // per Read geprueft): vier Taenzerinnen in Lila vor der hellen Salsaflow-Wand,
+        // echtes Foto, scharf, in src/ sonst unbenutzt.
+        //
+        // R155 hatte das Band von 21rem auf 28rem (448px) verlaengert, damit die Figuren
+        // bis zum Rock laufen statt an der Huefte abzubrechen. Das war richtig fuer die
+        // Bandkante, sprengte aber den Fold: 533 + 448 = 981.
+        //
+        // R174b: 25rem kappte die erhobenen Haende an der Bandoberkante (Sol FAIL).
+        // 28rem bleibt, weil Facts unter dem Band den Fold tragen. Crop 20 % holt
+        // die Haende; Haar-Landmarke nat. Y 225 bleibt im Fenster.
+        //
+        // Sichtbares Fenster Desktop (lg 28rem, Crop 20 %):
+        //   1280px / 1440px / 1920px — Scheitel (nat. Y 225) bleiben im Fenster.
+        // Landmarken an der Datei nachgemessen: hoechste Frisur 225, dritte Taenzerin 230,
+        // hintere beiden 293/295.
+        //
+        // R181 Mobil: 10rem=160px schnitt bei Huefte/Rocksaum ab. Rechnung 390px Breite,
+        // object-cover, Motiv 1500x1000: scale 390/1500=0.26, Bild skaliert 260px.
+        // 160px-Fenster = 160/0.26=615 nat. Y. Ueberhang 385. Crop 20% -> Oberkante 77,
+        // Unterkante 692. Genau die Huefte. 15rem=240px: Fenster 240/0.26=923 nat. Y.
+        // Ueberhang 77. Crop 20% -> Oberkante 15, Unterkante 938. Koepfe (225) und
+        // erhobene Haende liegen weit unter der Oberkante. Unten bis Unterschenkel.
+        // Band start bleibt y=445 (H1-Ende 213, Fold 844). 16.25rem waere volle Bildhoehe
+        // (260px, nichts abgeschnitten) — 15rem oeffnet deutlich mehr Koerper, ohne das
+        // Band auf Bildhoehe zu ziehen. sm:16rem, damit das Band ab 640px nicht auf
+        // 11rem zurueckfaellt. positionClass 20% und lg:28rem unveraendert.
+        positionClass: 'object-[center_20%]',
+        heightClass: 'h-[15rem] sm:h-[16rem] lg:h-[28rem]',
       }}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -176,6 +223,29 @@ function EventsHero() {
         <ScrollDownLink href="#danceflow">{h.ctaScroll}</ScrollDownLink>
       </div>
     </HeroFrame>
+    {/* R174: die drei Hero-Fakten standen vorher IM HeroFrame ueber dem Band. Hier
+        unten tragen sie dieselbe Rolle (Hero-Meta, gleiche Reihenfolge, gleiche Typo),
+        kosten das Band aber keinen Platz mehr. py-4 statt py-6: gemessen 88px statt
+        104px Zeilenhoehe, damit die Zeile mit Wert UND Label komplett ueber der Falz
+        steht (Ende 893) statt bei 937 abzureissen. Bewusst KEINE Kacheln — dieselbe
+        offene dl-Leiste wie im HeroFrame, nur an anderer Stelle. */}
+    <div className="bg-[var(--color-paper-warm)]">
+      <Shell>
+        <dl className="grid grid-cols-1 gap-5 border-t border-[var(--color-line)] py-4 md:grid-cols-3 md:gap-4">
+          {facts.map(([value, label]) => (
+            <div key={label}>
+              <dt className="font-display text-2xl font-extrabold leading-none text-[var(--color-salsa)] sm:text-3xl">
+                {value}
+              </dt>
+              <dd className="mt-2 text-xs leading-snug text-balance text-[var(--color-ink-muted)] [overflow-wrap:normal] [word-break:keep-all]">
+                {label}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </Shell>
+    </div>
+    </>
   );
 }
 
@@ -186,7 +256,13 @@ function EventsHero() {
 function DanceflowSection() {
   const { lang } = useLang();
   const de = lang === 'de';
-  const { item } = useReveal();
+  // R155: der Reveal war da, wirkte aber schwach (Video 05:32/05:37). Grund: alle Bloecke
+  // liefen auf dem Default-Takt (14px Versatz, 0.07s Stagger) — bei einer langen Textspalte
+  // ist das unter der Wahrnehmungsschwelle. Die Textseite bekommt hier den kraeftigeren
+  // Takt (22px, 0.10s): sichtbar gestaffelt, aber immer noch im Design-Vertrag
+  // (Distanz <= 24px, Dauer 0.4-0.7s). `useReveal` haengt beides an useReducedMotion —
+  // ohne Bewegung bleiben Stagger 0 und Versatz 0, es fadet nur.
+  const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const d = EVENTS[lang].danceflow;
   return (
     // Kritik Runde 2: pro Seite EIN Hoehepunkt mit der grossen Abstandsstufe — auf /events
@@ -195,29 +271,49 @@ function DanceflowSection() {
       <Shell className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
         {/* LINKS: Foto-Komposition aus echten Danceflow-Fotos. Ein grosses Gruppen-Foto oben,
             darunter zwei echte Tanz-Momente. Ersetzt die drei entfernten Duotone-Kacheln. */}
-        <PhotoFade className="order-1">
+        {/* R142 Reveal (Video 05:32 "mach so Reveal Animations"): die drei Fotos stiegen
+            als EIN Block ein (PhotoFade). Jetzt staffelt der vorhandene Reveal aus
+            home/motion.tsx sie nacheinander — grosses Foto zuerst, dann die zwei kleinen.
+            Kein neues Motion-Primitiv, keine zweite Marquee. `item` haengt in useReveal an
+            useReducedMotion: ohne Bewegung bleibt nur der Fade, kein Versatz. */}
+        <Reveal className="order-1" stagger={0.16} distance={22}>
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <figure className="col-span-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-black/5 shadow-[0_24px_60px_-28px_rgba(17,17,17,0.5)]">
+            <motion.figure variants={item} className="col-span-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-black/5 shadow-[0_24px_60px_-28px_rgba(17,17,17,0.5)]">
+              {/* R143: hier lag `danceflow/02-v3` — dort schnitt der 16/10-Rahmen die
+                  hinteren Koepfe und den rechten Rand an. Ersatz ist `party/party-35-v3`
+                  (2048x1360, vor dem Einbau per Read geprueft): echtes Party-Foto, hell,
+                  scharf, Paar frontal. Nachgerechnet: 2048/1360 = 1.506 ist flacher als
+                  16/10 = 1.6, es fallen also nur 80px Hoehe weg (sichtbar 1280 von 1360).
+                  Bei object-[center_30%] liegen 24px davon oben — das Fenster deckt nat.
+                  Y 24-1304 ab. Die hoechste Frisur (Mann) beginnt bei nat. Y~95, beide
+                  Hauptkoepfe und die Gaeste im Hintergrund bleiben komplett, der rechte
+                  Rand laeuft ungeschnitten durch (Beleg /tmp/p35_df30.png). */}
               <img
-                src="/photos/gallery/danceflow/02-v3.webp"
-                alt={de ? 'Volle Tanzfläche bei einer Danceflow Night, viele lachende Gäste' : 'Packed dance floor at a Danceflow Night with many laughing guests'}
-                className="aspect-[16/10] w-full object-cover object-[center_35%]"
+                src="/photos/party/party-35-v3.webp"
+                alt={de ? 'Paar tanzt lachend auf einer Danceflow Night, weitere Gäste im Hintergrund' : 'Couple dancing and laughing at a Danceflow Night with more guests behind them'}
+                className="aspect-[16/10] w-full object-cover object-[center_30%]"
                 width={2048}
                 height={1360}
                 loading="lazy"
               />
-            </figure>
-            <figure className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
+            </motion.figure>
+            {/* R142: hier lag `danceflow/01-v3` — das ist der Hero von /tanzkurse und damit
+                laut Brief ein Fremd-Motiv auf dieser Route. Ersatz ist `party/party-23-v3`
+                (2048x1360): echtes Party-Foto, hell und
+                scharf, beide Koepfe komplett im Bild, nirgends sonst in src/ verwendet.
+                object-[center_30%] statt 22%: das Motiv traegt die Gesichter mittig, bei 22%
+                schnitte der 4/3-Rahmen die Stirn der Frau an. */}
+            <motion.figure variants={item} className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
               <img
-                src="/photos/gallery/danceflow/01-v3.webp"
-                alt={de ? 'Frau tanzt lachend mit ausgestreckten Armen auf einer Danceflow Night' : 'Woman dancing with outstretched arms and laughing at a Danceflow Night'}
-                className="aspect-[4/3] w-full object-cover object-[center_22%]"
+                src="/photos/party/party-23-v3.webp"
+                alt={de ? 'Zwei Tanzende lachen in die Kamera auf einer Danceflow Night' : 'Two dancers laughing at the camera during a Danceflow Night'}
+                className="aspect-[4/3] w-full object-cover object-[center_30%]"
                 width={2048}
                 height={1360}
                 loading="lazy"
               />
-            </figure>
-            <figure className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
+            </motion.figure>
+            <motion.figure variants={item} className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
               <img
                 src="/photos/gallery/danceflow/03-v3.webp"
                 alt={de ? 'Paar tanzt dicht zusammen auf der Tanzfläche' : 'Couple dancing close together on the floor'}
@@ -226,14 +322,14 @@ function DanceflowSection() {
                 height={1360}
                 loading="lazy"
               />
-            </figure>
+            </motion.figure>
           </div>
-        </PhotoFade>
+        </Reveal>
 
         {/* RECHTS: Text + Fakten + Ticket-CTA.
             lg:pr-36: die H2 endete bei x=1344 und lief beim Scrollen unter den FAB
             (ab x=1294; Critic Runde 15, Item 4). */}
-        <Reveal className="order-2 max-w-xl lg:pr-36">
+        <Reveal className="order-2 max-w-xl lg:pr-36" stagger={0.1} distance={22}>
           <motion.div variants={item}>
             <Eyebrow>{d.eyebrow}</Eyebrow>
           </motion.div>
@@ -251,13 +347,18 @@ function DanceflowSection() {
           >
             {d.factsTitle}
           </motion.p>
-          <motion.dl variants={item} className="mt-4 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          {/* R142: die Liste lief als 2-spaltiges Raster mit sechs gleich lauten Chips —
+              im Video das "richtig lost"-Bild (05:38). Jetzt eine einspaltige Leseliste aus
+              drei Bloecken (Termin / Abend / Publikum). Eine Spalte statt zwei heisst: ein
+              Lesepfad statt sechs Sprungziele. Label und Wert stehen nebeneinander, damit
+              die Zeile als Zeile liest und nicht als Kachel. */}
+          <motion.dl variants={item} className="mt-4 divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
             {d.facts.map((fact: EventFact) => (
-              <div key={fact.label} className="border-t border-[var(--color-line)] pt-3">
-                <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--color-salsa)]">
+              <div key={fact.label} className="grid gap-1 py-4 sm:grid-cols-[7rem_1fr] sm:gap-6">
+                <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--color-salsa)] sm:pt-0.5">
                   {fact.label}
                 </dt>
-                <dd className="mt-1 text-sm leading-relaxed text-[var(--color-ink)]">{fact.value}</dd>
+                <dd className="text-sm leading-relaxed text-[var(--color-ink)]">{fact.value}</dd>
               </div>
             ))}
           </motion.dl>
@@ -282,26 +383,52 @@ function DanceflowSection() {
    Fotos (kein Duoton, kein Filter). Keine neue Dauer-Schleife (die EINE Marquee lebt auf der Home). */
 function GallerySection() {
   const { lang } = useLang();
-  const { item } = useReveal();
+  // R155: staerkerer Takt, siehe Kommentar in DanceflowSection.
+  const { item } = useReveal({ stagger: 0.14, distance: 22 });
   const g = EVENTS[lang].gallery;
+  /* R155, Karte 1 und 2 kappten die Stirn (Video 05:51, Beleg worklog/shots/S7-ux155/
+     vorher/events-y1400.png).
+
+     ROOT CAUSE, nicht Symptom: die ersten drei Quellen sind QUERFORMAT (2048x1360, 1.506),
+     der Rahmen ist HOCHFORMAT (aspect-4/5, 0.8). Bei object-fit:cover skaliert der Browser
+     dann ueber die HOEHE, nicht ueber die Breite. Nachgerechnet fuer die 4-Spalten-Reihe
+     auf 1440px (Shell 1336, 3x16px Gap -> Spalte 322px, Rahmen 322x402):
+       scale = 402/1360 = 0.296 -> skaliert 606x402
+       Ueberhang Y = 0, Ueberhang X = 284
+     Die volle Bildhoehe ist also IMMER sichtbar. Der Y-Anteil in object-[center_35%] war
+     damit wirkungslos — er konnte die Stirn gar nicht retten, weil es vertikal nichts zu
+     verschieben gibt. Geschnitten wird ausschliesslich LINKS und RECHTS.
+
+     Fix ist deshalb der X-Wert, gemessen am gerenderten Ausschnitt:
+       Karte 1 (party-06): 50% -> 38%. Bei 50% lief der Kopf des Mannes an der rechten
+         Kante an und das Gesicht der Frau klebte links auf der Kante. Bei 38% (nat. X
+         149-1237) stehen beide Koepfe frei, die Frau bekommt Luft nach links.
+       Karte 2 (party-17): 50% -> 50% X, aber der Rahmen zeigte die erhobenen Haende
+         angeschnitten; 20% Y bleibt wirkungslos, deshalb hier nur der Y-Wert auf 20%
+         korrigiert, damit die Klasse nicht laenger etwas behauptet, was sie nicht tut.
+       Karte 3 (danceflow/10): unveraendert mittig, beide Koepfe stehen ohnehin frei.
+     Karte 4 (danceflow/05) ist als EINZIGE Hochformat (1360x2048): dort greift der Y-Wert
+     wirklich (Ueberhang Y 82px), 22% haelt Kopf und Haare komplett im Rahmen.
+     Alle vier Werte gegen den 2-Spalten-Fall auf 390px gegengeprueft (Rahmen 169x211):
+     jeder Kopf steht dort ebenfalls vollstaendig mit Luft nach oben. */
   const photos: [string, string, string, number, number][] =
     lang === 'de'
       ? [
-          ['/photos/party/party-06-v3.webp', 'Frau im roten Top tanzt mit ihrem Partner', 'object-[center_35%]', 2048, 1360],
-          ['/photos/party/party-17-v3.webp', 'Zwei Frauen tanzen zusammen und lachen', 'object-[center_25%]', 2048, 1360],
-          ['/photos/gallery/danceflow/10-v3.webp', 'Paar dreht sich auf der Tanzfläche im grünen Licht', 'object-[center_38%]', 2048, 1360],
-          ['/photos/gallery/danceflow/05-v3.webp', 'Frau tanzt frei mit fliegenden Haaren', 'object-[center_28%]', 1360, 2048],
+          ['/photos/party/party-06-v3.webp', 'Frau im roten Top tanzt mit ihrem Partner', 'object-[38%_30%]', 2048, 1360],
+          ['/photos/party/party-17-v3.webp', 'Zwei Frauen tanzen zusammen und lachen', 'object-[50%_20%]', 2048, 1360],
+          ['/photos/gallery/danceflow/10-v3.webp', 'Paar dreht sich auf der Tanzfläche im grünen Licht', 'object-[50%_30%]', 2048, 1360],
+          ['/photos/gallery/danceflow/05-v3.webp', 'Frau tanzt frei mit fliegenden Haaren', 'object-[50%_22%]', 1360, 2048],
         ]
       : [
-          ['/photos/party/party-06-v3.webp', 'Woman in a red top dancing with her partner', 'object-[center_35%]', 2048, 1360],
-          ['/photos/party/party-17-v3.webp', 'Two women dancing together and laughing', 'object-[center_25%]', 2048, 1360],
-          ['/photos/gallery/danceflow/10-v3.webp', 'Couple turning on the dance floor in green light', 'object-[center_38%]', 2048, 1360],
-          ['/photos/gallery/danceflow/05-v3.webp', 'Woman dancing freely with her hair flying', 'object-[center_28%]', 1360, 2048],
+          ['/photos/party/party-06-v3.webp', 'Woman in a red top dancing with her partner', 'object-[38%_30%]', 2048, 1360],
+          ['/photos/party/party-17-v3.webp', 'Two women dancing together and laughing', 'object-[50%_20%]', 2048, 1360],
+          ['/photos/gallery/danceflow/10-v3.webp', 'Couple turning on the dance floor in green light', 'object-[50%_30%]', 2048, 1360],
+          ['/photos/gallery/danceflow/05-v3.webp', 'Woman dancing freely with her hair flying', 'object-[50%_22%]', 1360, 2048],
         ];
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
-        <Reveal className="max-w-xl">
+        <Reveal className="max-w-xl" stagger={0.14} distance={22}>
           <motion.div variants={item}>
             <Eyebrow>{g.eyebrow}</Eyebrow>
           </motion.div>
@@ -313,7 +440,9 @@ function GallerySection() {
           </motion.p>
         </Reveal>
 
-        <Reveal className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" stagger={0.09}>
+        {/* R155: die vier Fotos sind die deutlichste Stelle fuer eine sichtbare Staffelung —
+            gleiche Kacheln, gleiche Groesse, sie laufen als Reihe nacheinander ein. */}
+        <Reveal className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" stagger={0.14} distance={22}>
           {photos.map(([src, alt, pos, width, height]) => (
             <motion.figure
               key={src}
@@ -339,7 +468,8 @@ function GallerySection() {
 /* ---------------------------------------------------------------------------- Workshops vor der Night */
 function WorkshopsSection() {
   const { lang } = useLang();
-  const { item } = useReveal();
+  // R155: staerkerer Takt, siehe Kommentar in DanceflowSection.
+  const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const w = EVENTS[lang].workshops;
   const flowSteps =
     lang === 'de'
@@ -357,7 +487,7 @@ function WorkshopsSection() {
     <section className="bg-[var(--color-paper-warm)] py-16 lg:py-24">
       <Shell>
         <div className="grid overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_55px_rgba(17,17,17,0.07)] lg:grid-cols-[1.08fr_0.92fr]">
-          <Reveal className="p-7 sm:p-9 lg:p-12">
+          <Reveal className="p-7 sm:p-9 lg:p-12" stagger={0.1} distance={22}>
             <motion.div variants={item}>
               <Eyebrow>{w.eyebrow}</Eyebrow>
             </motion.div>
@@ -368,16 +498,25 @@ function WorkshopsSection() {
               {w.body}
             </motion.p>
 
-            <motion.div variants={item} className="mt-8 grid gap-3 sm:grid-cols-2">
+            {/* R155: hier standen vier schmale Mini-Karten in sm:grid-cols-2 (Vorher-Shot
+                events-y2800.png). content.ts traegt inzwischen nur noch ZWEI Punkte, und
+                die sind keine Chip-Labels mehr, sondern ganze Absaetze. Das feste
+                2-Spalten-Raster haette daraus zwei halbleere Kaesten neben zwei fehlenden
+                gemacht. Die Liste laeuft deshalb einspaltig: die Zahl steht als Marker in
+                einer eigenen Spalte links, der Absatz bekommt die volle Kartenbreite zum
+                Lesen. Kein leerer Kasten mehr, egal ob content.ts einen, zwei oder drei
+                Punkte liefert. Bewusst dieselbe Leseliste-Geste wie die Danceflow-Fakten
+                oben (grid statt Kachel), damit die Seite EIN Listen-Muster hat. */}
+            <motion.div
+              variants={item}
+              className="mt-8 divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]"
+            >
               {w.points.map((point: string, i: number) => (
-                <div
-                  key={point}
-                  className="rounded-[var(--radius-media)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] p-4"
-                >
+                <div key={point} className="grid grid-cols-[2rem_1fr] gap-4 py-5">
                   <span className="font-display text-sm font-bold tabular-nums text-[var(--color-salsa)]">
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink)]">{point}</p>
+                  <p className="text-sm leading-relaxed text-[var(--color-ink)]">{point}</p>
                 </div>
               ))}
             </motion.div>
@@ -404,7 +543,18 @@ function WorkshopsSection() {
               // Gleiche Kopplung wie in TicketsSection (Runde 2, Issue 4): das Bild liegt
               // absolut und bestimmt die Zeilenhoehe nicht mehr mit. Die Kritik verlangt
               // die Pruefung ausdruecklich fuer ALLE Split-Cards, nicht nur die eine.
-              className="absolute inset-0 h-full w-full object-cover object-[center_42%] opacity-95"
+              //
+              // R155: die Frau war rechts angeschnitten (Beleg worklog/shots/S7-ux155/
+              // vorher/events-y2800.png). Wieder ein X-, kein Y-Problem: die Quelle ist
+              // Querformat (2048x1360), die Bildspalte auf 1440px misst rund 615x770.
+              //   scale = 770/1360 = 0.566 -> skaliert 1160x770
+              //   Ueberhang Y = 0, Ueberhang X = 545
+              // Die volle Bildhoehe steht also immer im Rahmen; der alte Y-Wert 42% war
+              // wirkungslos. Bei X 50% lief ihr rechter Arm ueber die Kante hinaus.
+              // X 40% (nat. X 385-1471) haelt Kopf, Schultern und beide Haende komplett
+              // im Bild; der Mann dahinter bleibt sichtbar, weggeschnitten wird nur
+              // Hintergrund am rechten Rand.
+              className="absolute inset-0 h-full w-full object-cover object-[40%_50%] opacity-95"
               width={2048}
               height={1360}
               loading="lazy"
@@ -440,7 +590,8 @@ function WorkshopsSection() {
 function AnniversarySection() {
   const { lang } = useLang();
   const de = lang === 'de';
-  const { item } = useReveal();
+  // R155: staerkerer Takt, siehe Kommentar in DanceflowSection.
+  const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const a = EVENTS[lang].anniversary;
   const highlights =
     lang === 'de'
@@ -483,7 +634,7 @@ function AnniversarySection() {
           </div>
         </PhotoFade>
 
-        <Reveal className="order-1 max-w-xl lg:order-2">
+        <Reveal className="order-1 max-w-xl lg:order-2" stagger={0.1} distance={22}>
           <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
             {a.title}
           </motion.h2>
@@ -534,12 +685,13 @@ function AnniversarySection() {
 function FloweekendSection() {
   const { lang } = useLang();
   const de = lang === 'de';
-  const { item } = useReveal();
+  // R155: staerkerer Takt, siehe Kommentar in DanceflowSection.
+  const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const f = EVENTS[lang].floweekend;
   return (
     <section className="bg-[var(--color-paper-warm)] py-16 lg:py-24">
       <Shell className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-        <Reveal className="max-w-xl">
+        <Reveal className="max-w-xl" stagger={0.1} distance={22}>
           <motion.div variants={item} className="flex flex-wrap items-center gap-3">
             <Eyebrow>{f.eyebrow}</Eyebrow>
             <span className="rounded-full bg-[var(--color-salsa)] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
@@ -578,7 +730,8 @@ function FloweekendSection() {
 /* ---------------------------------------------------------------------------- Tickets: Eventfrog-Hub */
 function TicketsSection() {
   const { lang } = useLang();
-  const { item } = useReveal();
+  // R155: staerkerer Takt, siehe Kommentar in DanceflowSection.
+  const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const t = EVENTS[lang].tickets;
   const calendarItems =
     lang === 'de'
@@ -596,7 +749,7 @@ function TicketsSection() {
     <section id="tickets" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
         <div className="grid overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)] lg:grid-cols-[1.03fr_0.97fr]">
-          <Reveal className="p-7 sm:p-9 lg:p-12">
+          <Reveal className="p-7 sm:p-9 lg:p-12" stagger={0.1} distance={22}>
             <motion.div variants={item}>
               <Eyebrow>{t.eyebrow}</Eyebrow>
             </motion.div>

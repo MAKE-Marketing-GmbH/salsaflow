@@ -21,7 +21,7 @@ import { CtaPill, CtaText } from '@/public/site/primitives';
 export function BookingReturn() {
   const { lang } = useLang();
   const de = lang === 'de';
-  const cancelled = typeof window !== 'undefined' && window.location.pathname.includes('abbruch');
+  const cancelled = globalThis.window?.location.pathname.includes('abbruch') ?? false;
 
   const title = cancelled
     ? de ? 'Kein Problem.' : 'No problem.'

@@ -28,7 +28,7 @@ import { HOME_V3 } from '@/public/home/content-v3';
 import { FounderCards } from '@/public/team/FounderRow';
 import { Eyebrow, Shell, BeatMark, CtaArrow } from '@/public/site/primitives';
 import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
-import { MEASURE_L } from '@/public/home/kit';
+import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
 /** Heller Fallback, falls ein Foto fehlt (onError): warme Flaeche statt Broken-Icon. */
@@ -78,9 +78,16 @@ export function TeamBlock() {
       // den Nachbarkanten. Die Sektion bleibt mit ihrem full-bleed Foto-Band und knapp 2000px
       // Hoehe weiterhin der EINE Hoehepunkt der Seite — die Betonung traegt das Bild, nicht
       // der leere Rand darunter.
+      // R183 Fix-Runde 3: Der Sektionskopf lief als einziger Wert der Seite von Hand
+      // (`pt-12 pb-16 lg:pt-16`) statt ueber den geteilten Token. Gemessen
+      // (worklog/.r183c-scan.mjs) kostete das mobil 16px: die Kante events -> team lag bei
+      // 112px (64 Fuss + 48 Kopf), waehrend JEDE andere Kante der Home 128px traegt.
+      // SECTION_Y_HOME ist py-16 lg:py-16 und der Wert, den Offer, EventsTeaser, Faq,
+      // LocationBand und WhyGrid schon benutzen. Damit steht der Kopf auf 64px an beiden
+      // Breakpoints und die Kante auf den 128px des Seitenrhythmus.
       className={cn(
         'relative isolate scroll-mt-24 overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]',
-        'pt-12 pb-16 lg:pt-16',
+        SECTION_Y_HOME,
       )}
     >
       {/* Der Gegenstueck-Gradient oben links ist mit demselben Befund geloescht wie der im
@@ -147,8 +154,19 @@ export function TeamBlock() {
         </Reveal>
       </Shell>
 
-      {/* 3) Das Teamfoto als full-bleed Band: randlos, ohne Radius, ohne Rahmen, ohne Chip —
-          nichts liegt mehr darauf (das war die Kritik). Dieselbe Geste wie die Foto-Baender
+      {/* 3) Das Teamfoto als breites Band: ohne Rahmen, ohne Chip — nichts liegt mehr
+          darauf (das war die Kritik).
+          R134/7: Das Band lief vorher hart bis x=0 durch, waehrend Preis-Karte, Offer-Karten
+          und Hero-Foto auf derselben Seite 24px Radius tragen. Raphael-Video 01:32: "ueberall
+          abgerundet, ein Vollbreiten-Bild ist eckig." Das Band traegt jetzt denselben
+          --radius-media-Token wie jede andere Medienflaeche.
+          Der Auftrag war GENAU der Radius. Ein zwischenzeitlicher `<Shell>`-Wrapper hat mehr
+          geaendert als das: Shell erzwingt max-w-[1400px] und px-5 sm:px-8, das Band verlor
+          also Viewport-Breite — und weil die Hoehe ab sm ueber `sm:aspect-[9/4]` aus der
+          Breite folgt, wurde es zugleich niedriger. Der Wrapper ist wieder weg. Das Band
+          bleibt full-bleed; nur die vier Ecken sind rund. Motiv, Hoehe, Seitenverhaeltnis und
+          object-position sind damit unveraendert.
+          Dieselbe Geste wie die Foto-Baender
           der Unterseiten-Heroes (subpage/kit.tsx), damit die Sprache sitewide dieselbe ist.
           Feste Bandhoehen statt `h-auto`: sonst waere das 1800x1200-Motiv auf 1440px ueber
           950px hoch und wuerde die Sektion allein tragen.
@@ -172,28 +190,70 @@ export function TeamBlock() {
           Gruppen-Unterkante (81.1%) liegen mit 1.5 bzw. 2.2 Prozentpunkten Luft darin.
           Unter sm bleibt die feste Hoehe (240px): dort rendert das Motiv nur 260px hoch, das
           Band zeigt ohnehin 92% — nichts ist angeschnitten. */}
-      <motion.figure
-        data-reveal
-        className="relative mt-12 w-full overflow-hidden bg-[var(--color-bg-soft)] lg:mt-16"
-        variants={imgReveal}
-        initial="hidden"
-        whileInView="show"
-        viewport={VIEWPORT}
-      >
-        <img
-          src="/photos/showcase/hp-29.webp"
-          onError={onImgError}
-          alt={de ? 'Das ganze Salsaflow-Team liegt lachend vor der Salsaflow-Wand im Studio.' : 'The whole Salsaflow team lying and laughing in front of the studio wall.'}
-          /* Unter sm: festes 240px-Band mit object-position 70%. Dort rendert das Motiv nur
-             260px hoch (390px Viewport), sichtbar sind 92% — der Versatz holt nur die letzte
-             Parkettzeile weg. Ab sm traegt das Seitenverhaeltnis (siehe Kommentar oben) und
-             object-center zentriert die 66.7%, in denen Logo UND Gruppe komplett liegen. */
-          className="h-[15rem] w-full object-cover object-[center_70%] sm:aspect-[9/4] sm:h-auto sm:object-center"
-          width={1800}
-          height={1200}
-          loading="lazy"
-        />
-      </motion.figure>
+      {/* R183 (Raphael 20.08.): "Das Teamfoto ist rund und klebt an der Kante."
+          Gemessen vorher (worklog/.r183-team-measure.mjs, 1440px): figure left=0, right=1440,
+          also Innenabstand 0 links UND rechts — bei gleichzeitig border-radius 24px. Genau das
+          ist der Fehler: ein Radius liest sich nur dann als Karte, wenn Rand um ihn herum
+          liegt. Bei Innenabstand 0 haben die runden Ecken keinen Platz, in dem sie sitzen
+          koennen; sie wirken wie ein Zufalls-Anschnitt an der Fensterkante (die vier
+          paper-warm-Kerben im Beleg-Shot home-desktop-09-y6000.png).
+          Entschieden ist die KARTE, nicht das ehrliche Full-bleed. Begruendung per Zaehlung:
+          jede andere runde Flaeche der Seite (Preis-Karte, Offer-Karten, Event-Kacheln) sitzt
+          eingerueckt in einer <Shell>; dieses Band war das EINZIGE full-bleed Element mit
+          Radius (grep "w-full overflow-hidden" ueber src/public/home/*.tsx: genau ein Treffer).
+          Full-bleed haette den Radius loeschen muessen — und damit die R134/7-Entscheidung
+          von oben (Video 01:32) wieder aufgerissen. Die Karte haelt beide Vorgaben.
+          Die Shell traegt dieselben Kanten wie Intro und Gruenderreihe darueber/darunter, das
+          Band steht damit auf der Textkante der Sektion statt daneben.
+          Das Seitenverhaeltnis bleibt unangetastet: `sm:aspect-[9/4]` zeigt bei JEDER Breite
+          66.7% der Bildhoehe (Rechnung oben), das Band wird durch die schmalere Shell nur
+          proportional niedriger — Logo-Oberkante und Gruppen-Unterkante bleiben im Fenster.
+
+          NICHT geaendert wird hier der Abstand ueber dem Band. Ein erster Versuch hatte ihn auf
+          mt-16/lg:mt-24 (96px) hochgezogen, um den Auftragssatz "unter dem Hero mehr Luft" zu
+          erfuellen. Dieser Abstand sitzt zwischen Zahlenzeile und Foto, also INNERHALB dieser
+          Sektion — er kann die Hero-Kante nicht bewegen. Er ist zurueckgebaut und bleibt auf
+          mt-12/lg:mt-16, dem Wert der Nachbarkanten.
+
+          Zur Hero-Unterkante gehoert ein Befund, der NICHT in diese Datei gehoert, aber
+          festgehalten sein muss, damit die naechste Runde ihn nicht erneut hier sucht:
+            - Die Kante ist echt zu eng. Gemessen (worklog/.r183c-scan.mjs, 1440px) traegt die
+              Hero-Sektion padding-bottom 0 und #angebot padding-top 64px. Die Kante
+              Hero -> #angebot liegt damit bei 64px, waehrend JEDE andere Sektionskante der
+              Home 128px traegt. Der Hero ist die einzige Kante auf halbem Seitenrhythmus.
+            - Sie ist aus TeamBlock.tsx mechanisch nicht erreichbar. Beleg
+              worklog/.r183c-lever.mjs: #team und ALLE seine Kinder auf 400px Margin gesetzt,
+              Hero-Unterkante davor y=847, danach y=847, Kante davor 0px, danach 0px.
+              Kein Wert dieser Datei bewegt die Hero-Kante um einen Pixel.
+            - Der Fix gehoert an Hero.tsx (padding-bottom) oder Offer.tsx (SECTION_Y_HOME auf
+              den Kopf). Beide sind in diesem Item tabu und deshalb unangetastet.
+          Der frueher hier notierte Wert "134px" war zu optimistisch gemessen: er lief bis zur
+          H2 INNERHALB von #angebot, also inklusive deren Sektionspolster, nicht bis zur
+          Sektionskante. Die Kante selbst ist 64px. */}
+      <Shell>
+        <motion.figure
+          data-reveal
+          className="relative mt-12 w-full overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] lg:mt-16"
+          variants={imgReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={VIEWPORT}
+        >
+          <img
+            src="/photos/showcase/hp-29.webp"
+            onError={onImgError}
+            alt={de ? 'Das ganze Salsaflow-Team liegt lachend vor der Salsaflow-Wand im Studio.' : 'The whole Salsaflow team lying and laughing in front of the studio wall.'}
+            /* Unter sm: festes 240px-Band mit object-position 70%. Dort rendert das Motiv nur
+               260px hoch (390px Viewport), sichtbar sind 92% — der Versatz holt nur die letzte
+               Parkettzeile weg. Ab sm traegt das Seitenverhaeltnis (siehe Kommentar oben) und
+               object-center zentriert die 66.7%, in denen Logo UND Gruppe komplett liegen. */
+            className="h-[15rem] w-full object-cover object-[center_70%] sm:aspect-[9/4] sm:h-auto sm:object-center"
+            width={1800}
+            height={1200}
+            loading="lazy"
+          />
+        </motion.figure>
+      </Shell>
 
       <Shell>
         {/* 4) Die vier Gruender als eigene klare Reihe unter dem Band (FounderCards,

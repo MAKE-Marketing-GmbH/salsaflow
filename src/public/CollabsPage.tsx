@@ -30,14 +30,14 @@ export function CollabsPage() {
   const c = COLLABS[lang];
   return (
     <SubPageShell seo="collabs">
+      <div data-collabs-page="">
       {/* Runde 2, Issue 1: Typo-Hero statt Foto-Split. Achse 'split' — Headline links,
           Angebot + CTA in der rechten Schiene (B2B-Anfrageseite).
           R69: Das Team-Motiv hp-27 sass ungenutzt in der Content-Datei (hero.image),
           der Fold war nur Text. Jetzt dense + media-Band wie R68 Tanzschuhe: das Foto
-          laeuft randlos unter Typo und Schiene. Achse bleibt 'split'. center 40% auf
-          dem 1800x1200-Motiv trifft Koepfe und Shirt-Logos; 15rem Band hoeher als
-          Tanzschuhe (13rem), weil das Split-Layout kuenzer stapelt und die Koepfe
-          mehr Hoehe brauchen. */}
+          laeuft randlos unter Typo und Schiene. Achse bleibt 'split'.
+          R149: Video 07:45 schnitt die Scheitel ab. Das 15rem-Band war zu flach.
+          center 24% legt die Scheitel in den 730-Fold; 28rem gibt den Koepfen Platz. */}
       <SubHero
         axis="split"
         dense
@@ -50,8 +50,8 @@ export function CollabsPage() {
         media={{
           src: c.hero.image.src,
           alt: c.hero.image.alt,
-          position: 'center 40%',
-          heightClass: 'h-[11rem] sm:h-[13rem] lg:h-[15rem]',
+          position: 'center 24%',
+          heightClass: 'h-[16rem] sm:h-[20rem] lg:h-[28rem]',
         }}
       />
       <HowSection c={c} />
@@ -60,6 +60,7 @@ export function CollabsPage() {
       <RequestSection c={c} />
       <FaqBlock title={c.faqTitle} items={c.faq} />
       <FinalCta c={c} />
+      </div>
     </SubPageShell>
   );
 }
@@ -138,13 +139,14 @@ function PartnerSection({ c }: { c: (typeof COLLABS)['de'] }) {
           </motion.div>
           <motion.div variants={item} className="relative">
             <div className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_30px_70px_-30px_rgba(17,17,17,0.42)]">
+              {/* R152: Partnerbild ohne lazy-Attribut. Default eager.
+                  object-[center_80%] holt die Schuhe ins 4/3-Fenster. */}
               <img
                 src={p.image.src}
                 alt={p.image.alt}
-                className="aspect-[4/3] w-full object-cover object-[center_45%]"
+                className="aspect-[4/3] w-full object-cover object-[center_80%]"
                 width={1200}
                 height={900}
-                loading="lazy"
               />
             </div>
             {/* Festes Papier statt Glas (Sweep 14.08.2026). */}
@@ -162,8 +164,9 @@ function PartnerSection({ c }: { c: (typeof COLLABS)['de'] }) {
 function TrustSection({ c }: { c: (typeof COLLABS)['de'] }) {
   const { item } = useReveal();
   const t = c.trust;
+  // R152: py-16 lg:py-24 riss bei y2400 ein Cream-Leerband zwischen Fakten und Anfrage.
   return (
-    <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
+    <section className="bg-[var(--color-bg-soft)] py-8 lg:py-12">
       <Shell>
         <Reveal className="max-w-2xl">
           <SectionHead eyebrow={t.eyebrow} title={t.title} titleAccent={t.titleAccent} lead={t.body} />
@@ -189,8 +192,9 @@ function TrustSection({ c }: { c: (typeof COLLABS)['de'] }) {
 function RequestSection({ c }: { c: (typeof COLLABS)['de'] }) {
   const { item } = useReveal();
   const r = c.request;
+  // R152: gleiches Leerband wie TrustSection, gleiche Kur.
   return (
-    <section className="bg-[var(--color-paper-warm)] py-16 lg:py-24">
+    <section className="bg-[var(--color-paper-warm)] py-8 lg:py-12">
       <Shell>
         <Reveal className="mx-auto max-w-3xl overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-7 shadow-[0_18px_60px_rgba(17,17,17,0.06)] sm:p-10">
           <motion.div variants={item}>

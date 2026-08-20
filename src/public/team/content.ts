@@ -93,9 +93,9 @@ export type Founder = {
 //   Claudia      6.51%      23.06%        33.1%
 //   Sebastian    4.67%      18.03%        26.7%   <- deutlich kleinerer Kopf in der Datei
 //   Vanessa      5.87%      22.28%        32.8%
-// Sebastians Kopf war in seiner Datei rund 25% kleiner als Fabios — deshalb brauchte er auch
-// den staerksten Zoom (152% statt 114%). Genau das kann object-position nicht: es verschiebt,
-// es skaliert nicht.
+// R159: 152.2% Zoom war zu eng (Schultern und Brust weg, Scheitel knapp). Zoom liegt
+// jetzt bei 122%, damit Kopf plus Brust im 4:5-Panel sitzen und der Scheitel frei bleibt.
+// object-position verschiebt nur, es skaliert nicht — darum bleibt `bust`.
 //
 // Zielwerte im 4:5-Panel: Kopfhoehe 46%, Augenlinie 38% der Panelhoehe.
 // `bust` ist das daraus ausgerechnete Bildfenster (Breite/links/oben in % der Panelmasse).
@@ -107,7 +107,17 @@ export type Founder = {
 export const FOUNDERS: Founder[] = [
   { key: 'fabio', name: 'Fabio', last: 'Branco', photo: '/photos/founders/fabio.webp', fem: false, optPos: 'object-[52%_6%]', bust: { w: '114.1%', l: '-7.3%', t: '7.9%' } },
   { key: 'claudia', name: 'Claudia', last: 'Branco', photo: '/photos/founders/claudia.webp', fem: true, optPos: 'object-[44%_6%]', bust: { w: '122.9%', l: '0%', t: '6.0%' } },
-  { key: 'sebastian', name: 'Sebastian', last: 'Carballo', photo: '/photos/founders/sebastian.webp', fem: false, optPos: 'object-[50%_4%]', bust: { w: '152.2%', l: '-23.6%', t: '7.0%' } },
+  // R156: `photo` zeigt hier auf `sebastian-ok.webp`, nicht auf `sebastian.webp`.
+  // Grund ist NICHT die Datei. `sebastian.webp` liegt im Ordner, ist ein gueltiges WebP
+  // (147228 Byte, 1414x2000, RGBA, dekodiert sauber) und byte-identisch mit dem Stand in
+  // HEAD (gleiche sha256). Ein statischer Server liefert sie korrekt als `image/webp` aus.
+  // Der laufende Vite-Dev-Server beantwortet aber GENAU diesen einen Pfad mit dem
+  // SPA-Index (`Content-Type: text/html`) — der Browser bekommt HTML statt Bild und zeigt
+  // das kaputte Bild-Icon (sichtbar im Avatar-Stapel der RolesSection, Vorher-Shot
+  // worklog/shots/S7-ux156/vorher/team-y2800.png). Alle anderen Fotos derselben Ordner
+  // (fabio/claudia/vanessa, alle teacher-*) kommen normal als `image/webp`.
+  // `sebastian-ok.webp` ist dieselbe Datei unter einem Pfad, den Vite ausliefert.
+  { key: 'sebastian', name: 'Sebastian', last: 'Carballo', photo: '/photos/founders/sebastian-ok.webp', fem: false, optPos: 'object-[50%_4%]', bust: { w: '122%', l: '-11%', t: '1%' } },
   { key: 'vanessa', name: 'Vanessa', last: 'Costante', photo: '/photos/founders/vanessa.webp', fem: true, optPos: 'object-[56%_7%]', bust: { w: '123.9%', l: '-13.7%', t: '6.8%' } },
 ];
 
@@ -160,7 +170,11 @@ export type TeamContent = {
   };
 };
 
-export const TEAM: Record<Lang, TeamContent> = {
+/* `satisfies` statt `: Record<Lang, TeamContent>`: die Annotation weitete jeden Wert auf
+ * `string` und warf damit die Typ-Evidenz weg, die im Objekt schon steht (anti-slop
+ * no-known-value-widening). Mit `satisfies` prueft der Compiler denselben Vertrag —
+ * beide Sprachen, alle Felder — und behaelt die genauen Literal-Typen. */
+export const TEAM = {
   de: {
     founders: {
       eyebrow: '',
@@ -322,4 +336,4 @@ export const TEAM: Record<Lang, TeamContent> = {
       secondary: 'Follow us on Instagram',
     },
   },
-};
+} satisfies Record<Lang, TeamContent>;

@@ -20,6 +20,12 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
   // Footer sichtbar -> Float weg (Doppel-WhatsApp + Overlap mit Footer-Button vermeiden).
   const [footerInView, setFooterInView] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  // R134/10, geschaerft R153: Raphael will keine 0815-Animation. Kein Puls, kein Ping-Ring,
+  // kein Scale, kein Wackeln. Der Knopf kommt EINMAL herein — nur opacity und translateY.
+  // Danach ist Ruhe; Bewegung gibt es nur noch auf Hover.
+  // Der Auftritt liegt in `.whatsapp-float` in index.css, innerhalb einer
+  // `prefers-reduced-motion: no-preference`-Media-Query. Kein React-State, kein
+  // `useReducedMotion` im Markup: Server und Client rendern damit dieselben Klassen.
 
   useEffect(() => {
     const footer = document.querySelector('footer');
@@ -61,7 +67,18 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
         // Raphael 17.08.: rechts unten, weiss auf gruen. Auch auf dem Handy sichtbar.
         'whatsapp-float fixed right-5 z-40 inline-flex h-14 items-center gap-2 rounded-full px-4 sm:right-6',
         'bg-[var(--color-whatsapp)] text-white shadow-lg shadow-black/15 ring-1 ring-black/10',
-        't-hover-move transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom] hover:-translate-y-0.5 hover:bg-[var(--color-whatsapp-hover)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-whatsapp)]',
+        // R153: `t-hover-move` ist hier raus. Die Klasse deckte dieselben Eigenschaften ab
+        // wie die Zeile darunter, setzte aber `transition-duration: var(--dur-base)` und
+        // gewann per Reihenfolge gegen die Utility — gemessen 0.24s statt der gewollten
+        // 0.42s. Die explizite `transition-[...]`-Zeile ist die Obermenge (plus `bottom`),
+        // also bleibt nur sie.
+        'hover:-translate-y-0.5 hover:bg-[var(--color-whatsapp-hover)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-whatsapp)]',
+        // `bottom` bleibt in der Transition, weil Cookie-Banner und Sticky-CTA den Knopf
+        // im Betrieb verschieben. Der Auftritt selbst laeuft als CSS-Animation
+        // (`.whatsapp-float` in index.css), nicht ueber diese Transition.
+        // Dauer und Kurve kommen aus den Motion-Token statt aus einer eigenen 520ms-Zahl —
+        // dieselbe Stufe wie der Auftritt in `.whatsapp-float`.
+        'transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom] duration-[var(--dur-slow)] ease-[var(--ease-sf)]',
         // R101: Seiten-Anker (z.B. /kursplan) setzt --whatsapp-lift per Media-Query auf :root.
         className,
       )}
@@ -71,9 +88,14 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
       // Klasse: /kursplan setzt sie mobil auf 5rem, damit der Float die Tages-Chips freigibt.
       // --sticky-cta-height: der mobile Home-CTA-Balken (StickyCta) meldet seine Hoehe,
       // solange er sichtbar ist — der Float sass sonst genau auf dem roten Knopf.
+      // R153: Der Cookie-Anteil laeuft ueber --cookie-float-lift, nicht mehr direkt ueber
+      // --cookie-banner-height. Unter sm ist die Variable 0px: dort haelt der rechte Gutter
+      // am Banner-Wrapper (CookieBanner.tsx) die Karte vom Knopf weg, und ein Vertikal-Lift
+      // haette den Kreis auf den Hero-CTA «Schnupperstunde buchen» gehoben. Ab sm traegt die
+      // Variable die gemessene Kartenhoehe und der Float steigt ueber die Karte.
       style={{
         bottom: raised
-          ? 'calc(1.25rem + var(--sticky-cta-height, 0px) + var(--cookie-banner-height, 0px) + var(--whatsapp-lift, 0px))'
+          ? 'calc(1.25rem + var(--sticky-cta-height, 0px) + var(--cookie-float-lift, 0px) + var(--whatsapp-lift, 0px))'
           : 'calc(1.25rem + var(--sticky-cta-height, 0px) + var(--whatsapp-lift, 0px))',
       }}
     >

@@ -104,7 +104,7 @@ const R = {
 };
 
 /* ============================================================= SALSA (Muster, 1:1 pages/03) */
-const salsa: Record<Lang, StyleContent> = {
+const salsa = {
   de: {
     seo: 'salsa',
     crumb: { label: 'Salsa', href: R.salsaPage },
@@ -112,13 +112,11 @@ const salsa: Record<Lang, StyleContent> = {
       eyebrow: 'Salsa Kurse in Basel',
       title: 'Lerne Salsa so, dass du dich auf der Tanzfläche sicher fühlst.',
       lead: 'Bei Salsaflow lernst du Rhythmus, Grundschritte, Führung, Folgen und erste Kombinationen in klar aufgebauten Kursen, auch wenn du ganz neu startest und ohne Tanzpartner kommst.',
-      bullets: [
-        'Salsa Beginner bis Advanced',
-        'Gratis Schnupperstunde möglich',
-        'Ohne Tanzpartner möglich',
-        'Direkt am Bahnhof Basel SBB',
-        'Danceflow Night zum Üben im echten Social',
-      ],
+      // R131 (Mobil-Fold, 18.08.): Die Pills brauchten mobil drei Zeilen und
+      // endeten bei y=707. Das Band startete dadurch erst bei y=739 und zeigte
+      // im 844er-Fold nur Stirn und Dutt. Brief erlaubt: Pills weichen, wenn
+      // sie das Band aus dem Fold druecken. EN-Bullets bleiben unveraendert.
+      bullets: [],
       primary: { label: 'Salsa Schnupperstunde buchen', href: R.schnupper },
       secondary: { label: 'Salsa Kursplan ansehen', href: R.salsaPlan },
       microcopy: 'Kostenlos · unverbindlich · wir helfen dir beim passenden Level.',
@@ -149,8 +147,11 @@ const salsa: Record<Lang, StyleContent> = {
         // Luft zum Fold. Crop bleibt center 14% (P85), Motiv bleibt, EN 55
         // bleibt, R87-22rem-Rueckdreh gilt nicht (damals wurde der Crop
         // mitbewegt, jetzt nur die Hoehe).
+        // R131: Mobil war das Fenster mit 10rem (160px, davon 104 im Fold) zu
+        // flach fuer beide Gesichter. Mobil/sm hoeher: 20rem / 22rem. lg bleibt
+        // 24rem wie in R109. Crop bleibt center 14% (P85-Lock, nicht gedreht).
         position: 'center 14%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[24rem]',
+        heightClass: 'h-[20rem] sm:h-[22rem] lg:h-[24rem]',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Rhythmus, Grundschritt, erste Drehung. In Ruhe.',
@@ -392,10 +393,10 @@ const salsa: Record<Lang, StyleContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, StyleContent>;
 
 /* ============================================================= BACHATA (1:1 pages/04) */
-const bachata: Record<Lang, StyleContent> = {
+const bachata = {
   de: {
     seo: 'bachata',
     crumb: { label: 'Bachata', href: R.bachataPage },
@@ -415,7 +416,7 @@ const bachata: Record<Lang, StyleContent> = {
       microcopy: 'Wir helfen dir, sicher und passend einzusteigen.',
       image: { src: '/photos/premium/offer-bachata-1200.webp', alt: 'Bachata-Paar mit ruhiger, warmer Verbindung im Salsaflow Studio' },
       band: {
-        src: '/photos/premium/offer-bachata-wide-v2.webp',
+        src: '/photos/premium/offer-bachata-1200.webp',
         alt: 'Bachata-Paar in ruhiger Haltung im Unterricht',
         // R71: 10% zeigte nur Boden, 25% nur Haar-Kuppen (63px Streifen zu flach).
         // R71-Nachzieh: zwei Hebel zusammen — Band-Top ~220px hoch (tight-Block in
@@ -444,7 +445,12 @@ const bachata: Record<Lang, StyleContent> = {
         { title: 'Was du lernst', text: 'Basics, Gewicht, Führung und Folgen, Körperkontrolle, sichere Bewegungsqualität.' },
         { title: 'Was sich ändert', text: 'Deine Bewegungen sehen weich aus, weil sie kontrolliert sind: Das Timing sitzt, Signale sind klar, Nähe bleibt respektvoll.' },
       ],
-      image: { src: '/photos/gallery/kurse/03.jpg', alt: 'Lachendes Bachata-Paar im Unterricht, Köpfe vollständig' },
+      // R138, Raphael-Video 09:08: «Genauso hier bei Bachata, das war auch falsch
+      // eingefaerbt.» gallery/kurse/03.jpg ist eine Club-Nacht-Aufnahme mit rotem
+      // Bodenlicht; jede Gradation zog sie entweder grau oder rot. Ersetzt durch
+      // gallery/kurse/01.jpg — per Read geprueft: Tageslicht, scharf, Paar in
+      // Fuehrungshaltung, passt zum Blocktext «Fuehrung und Folgen».
+      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Bachata-Paar übt eine geführte Drehung im hellen Unterrichtsraum' },
     },
     fit: {
       title: 'Bachata passt, wenn du Flow suchst, aber trotzdem Struktur brauchst',
@@ -554,7 +560,7 @@ const bachata: Record<Lang, StyleContent> = {
       microcopy: 'We help you get in safely and at the right level.',
       image: { src: '/photos/premium/offer-bachata-1200.webp', alt: 'Bachata couple with a calm, warm connection in the Salsaflow studio' },
       band: {
-        src: '/photos/premium/offer-bachata-wide-v2.webp',
+        src: '/photos/premium/offer-bachata-1200.webp',
         alt: 'Bachata couple in a calm posture during class',
         position: 'center 22%',
         heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
@@ -574,7 +580,8 @@ const bachata: Record<Lang, StyleContent> = {
         { title: 'What you learn', text: 'Basics, weight transfer, leading and following, body control and safe technique.' },
         { title: 'What changes', text: 'Your movement looks soft because it is controlled: the timing sits, signals are clear, closeness stays respectful.' },
       ],
-      image: { src: '/photos/gallery/kurse/03.jpg', alt: 'Smiling Bachata couple in class, heads fully visible' },
+      // R138: gleiches Motiv wie DE, siehe Begruendung dort.
+      image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Bachata couple practising a led turn in the bright studio' },
     },
     fit: {
       title: 'Bachata suits you if you want flow, but still need structure',
@@ -660,9 +667,9 @@ const bachata: Record<Lang, StyleContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, StyleContent>;
 
-export const STYLE_CONTENT: Record<StyleKey, Record<Lang, StyleContent>> = {
+export const STYLE_CONTENT = {
   salsa,
   bachata,
-};
+} satisfies Record<StyleKey, Record<Lang, StyleContent>>;

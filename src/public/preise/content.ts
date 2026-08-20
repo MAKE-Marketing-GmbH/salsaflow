@@ -38,7 +38,9 @@ export type PreiseContent = {
     lead: string;
     primary: Cta;
     secondary: Cta;
-    image: Img;
+    /** R154: `image` ist hier ersatzlos raus. SubHero (subpage/kit.tsx) hat keinen
+     *  `image`-Prop — der Hero rendert ausschliesslich `media`. Das Feld trug seit
+     *  dem Band-Umbau nur noch tote Copy (kurs-03.jpg in beiden Sprachen). */
     /** Full-bleed Band unter dem Hero (Kritiker final-1, Issue 1). */
     media: HeroMedia;
     cardLabel: string;
@@ -132,7 +134,10 @@ export type PreiseContent = {
   faq: { q: string; a: string }[];
 };
 
-export const PREISE: Record<Lang, PreiseContent> = {
+// `satisfies` statt Typ-Annotation (anti-slop no-known-value-widening): die Pruefung
+// gegen PreiseContent bleibt exakt gleich, die konkreten Literale gehen aber nicht
+// verloren. `Record<Lang, ...>` haette de/en zu austauschbaren Schluesseln verwaschen.
+export const PREISE = {
   de: {
     crumb: { label: 'Preise', href: '/preise' },
     onRequest: 'auf Anfrage',
@@ -143,10 +148,6 @@ export const PREISE: Record<Lang, PreiseContent> = {
       lead: 'Hier findest du die wichtigsten Preise übersichtlich zusammengefasst. Für Shows, Animationen und Spezialanfragen erhältst du ein individuelles Angebot.',
       primary: { label: 'Kursplan ansehen', href: '/kursplan' },
       secondary: { label: 'Frage stellen', href: '/kontakt' },
-      image: {
-        src: '/photos/kurse/kurs-03.jpg',
-        alt: 'Ruhiger Blick in eine Tanzklasse im Salsaflow Studio',
-      },
       media: {
         src: '/photos/kurse/kurs-05.jpg',
         alt: 'Volle Kursstaffel im hellen Salsaflow Studio, alle tanzen im Takt',
@@ -173,8 +174,25 @@ export const PREISE: Record<Lang, PreiseContent> = {
         // Bandkante kommt NICHT aus der Band-Hoehe — der Band-Top haengt am Hero-Ende,
         // nicht an der Hoehe. Die Luft liegt in kit.tsx: Shell pb-2 -> pb-6 bei dense
         // (R70-Kommentar dort). Live gemessen: Labels enden y572, Band-Top y590.
+        //
+        // R154: Band waechst nach unten auf 20rem (320px) Desktop, 16rem (256px) ab sm.
+        // Der Band-Top haengt am Hero-Ende (R70 oben), die Hoehe schiebt also nur die
+        // Unterkante — die Ankerzahlen im Fold bleiben, wo sie waren.
+        //
+        // position bleibt 38%. Der Auftrag nannte 30%, die Nachmessung widerspricht:
+        // dieselbe Methode wie oben (YuNet 0.6, /tmp/facecut.py) gegen den echten
+        // 1440x320-Kasten, 24 Gesichter in der Datei, Bild skaliert auf 1440x958:
+        //   pos 38% -> Fenster y243-563, 23 Gesichter ganz, 0 zerschnitten
+        //   pos 30% -> Fenster y192-512, 23 Gesichter ganz, 0 zerschnitten
+        // Beide sind schnittfrei — 38% schneidet also nichts, was 30% rettet. Der
+        // Unterschied liegt oben: 30% zieht 51px mehr Decke und Neonroehren ins Bild,
+        // also genau den leeren Decken-Crop, den Kritiker Runde 3 (Fix 6, Kommentar
+        // oben) schon einmal abgeraeumt hat. Bei 14rem war 38% ebenfalls schnittfrei
+        // (23 ganz, 0 zerschnitten) — die abgeschnittenen Koepfe im Ist-Befund kommen
+        // nicht aus der Position, sondern aus der zu kleinen Bandhoehe: bei 224px lag
+        // die Unterkante mitten in der vorderen Reihe. Genau das behebt die Hoehe.
         position: 'center 38%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[14rem]',
+        heightClass: 'h-[10rem] sm:h-[16rem] lg:h-[20rem]',
       },
       cardLabel: 'Klar und übersichtlich',
       cardText: 'Alle Preise auf einen Blick. Den Rest klärst du im Kursplan oder per Nachricht.',
@@ -255,9 +273,13 @@ export const PREISE: Record<Lang, PreiseContent> = {
         ],
         link: { label: 'Schnupperstunde abmachen', href: SCHNUPPER_HREF },
       },
+      // Nachtlicht raus, Kurs-Paar rein: unter einer Kurspreis-Tabelle gehoert
+      // Unterricht, kein Abendmotiv. gallery/kurse/01.jpg zeigt Partnerwork im
+      // Paar bei Tageslicht, kein Gruppen-Lineup — die Bildidee der Sektion.
       image: {
-        src: '/photos/party/party-36.webp',
-        alt: 'Kursgruppe übt gemeinsam den Grundschritt im Salsaflow Studio',
+        src: '/photos/gallery/kurse/01.jpg',
+        alt: 'Paar übt im Kurs eine Drehung, weitere Paare im Hintergrund',
+        position: 'center 28%',
       },
     },
     privat: {
@@ -359,20 +381,14 @@ export const PREISE: Record<Lang, PreiseContent> = {
         'Wir prüfen mit dir, ob sich der Pass lohnt',
       ],
       cta: { label: 'Pass anfragen', href: '/kontakt' },
-      // Erste Wahl war party-25.webp (hellster Wert im Bestand, 179/255). Im Screenshot
-      // (/tmp/rest-fix1-shots/preise-desktop-06-y4200.png) war das Motiv aber eine
-      // Langzeitbelichtung: alle vier Personen sind Bewegungsschlieren, im 16/9-Ausschnitt
-      // blieb sichtbar nur der Wand-Schriftzug. Ein unscharfes Bild loest den Befund
-      // "wirkt unfertig" nicht, es verschiebt ihn. Darum classfreude: 151/255, scharf,
-      // volle Klasse in Bewegung im hellen Studio — und inhaltlich genau die Aussage der
-      // Headline ("mehr als einen Kurs"). Die Datei war seit dem Hero-Wechsel
-      // (home/Hero.tsx:14) ohne Platzierung.
+      // Nachtlicht raus, Kurs-Paar rein: das Vorgaengermotiv war eine Abendaufnahme
+      // und wiederholte ein Klassen-Lineup der Seite. offer-salsa-wide-1400.webp
+      // zeigt einen hellen Kursmoment, nah und ohne Lineup — passt zur Pass-Aussage
+      // ("mehr als einen Kurs") und liegt im 16/9-Kasten der Sektion schnittfrei.
       image: {
-        src: '/photos/kurse/kurs-07.jpg',
-        alt: 'Volle Kursgruppe tanzt gemeinsam im hellen Salsaflow Studio',
-        // Hochformat (1067x1600), Koepfe bei 15-25% der Hoehe: ohne position war der
-        // Haupttaenzer im Querformat-Crop kopflos (Kopf-Schnitt-Sweep 13.08.2026).
-        position: 'center 15%',
+        src: '/photos/premium/offer-salsa-wide-1400.webp',
+        alt: 'Frau lacht im Kurs, Partner unscharf im Spiegel',
+        position: 'center 40%',
       },
     },
     fit: {
@@ -428,16 +444,13 @@ export const PREISE: Record<Lang, PreiseContent> = {
       lead: 'Here you find the most important prices at a glance. For shows, animations and special requests you get an individual quote.',
       primary: { label: 'See the schedule', href: '/kursplan' },
       secondary: { label: 'Ask a question', href: '/kontakt' },
-      image: {
-        src: '/photos/kurse/kurs-03.jpg',
-        alt: 'A calm look into a dance class at the Salsaflow studio',
-      },
       media: {
         src: '/photos/kurse/kurs-05.jpg',
         alt: 'A full course term in the bright Salsaflow studio, everyone dancing in time',
-        // Gleicher Ausschnitt wie de.
+        // Gleicher Ausschnitt und gleiche Hoehe wie de (R154). Vorher stand hier
+        // lg:h-[12rem] gegen 14rem in de — dieselbe Seite war je Sprache anders hoch.
         position: 'center 38%',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
+        heightClass: 'h-[10rem] sm:h-[16rem] lg:h-[20rem]',
       },
       cardLabel: 'Clear and simple',
       cardText: 'All prices at a glance. You sort out the rest in the schedule or by message.',
@@ -503,9 +516,11 @@ export const PREISE: Record<Lang, PreiseContent> = {
         ],
         link: { label: 'Arrange a trial class', href: SCHNUPPER_HREF },
       },
+      // Same motif as de (reasoning documented there).
       image: {
-        src: '/photos/party/party-36.webp',
-        alt: 'Course group practising the basic step together in the Salsaflow studio',
+        src: '/photos/gallery/kurse/01.jpg',
+        alt: 'Couple practising a turn in class, other couples in the background',
+        position: 'center 28%',
       },
     },
     privat: {
@@ -588,9 +603,11 @@ export const PREISE: Record<Lang, PreiseContent> = {
         'We check with you whether the pass is worth it',
       ],
       cta: { label: 'Ask about the pass', href: '/kontakt' },
+      // Same motif and same crop as de (reasoning documented there).
       image: {
-        src: '/photos/kurse/kurs-07.jpg',
-        alt: 'A full class dancing together in the bright Salsaflow studio',
+        src: '/photos/premium/offer-salsa-wide-1400.webp',
+        alt: 'Woman laughing in class, partner blurred in the mirror',
+        position: 'center 40%',
       },
     },
     fit: {
@@ -635,4 +652,4 @@ export const PREISE: Record<Lang, PreiseContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, PreiseContent>;

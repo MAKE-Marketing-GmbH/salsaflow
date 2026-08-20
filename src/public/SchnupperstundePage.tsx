@@ -56,10 +56,18 @@ export function SchnupperstundePage() {
               ? 'Kurs im Salsaflow Studio, Gruppe tanzt mit Freude'
               : 'Class at the Salsaflow studio, group dancing with joy',
           // R113 (17.08.): Fold hatte kein Kursfoto. Band unter dem Typo-Block,
-          // gleiches Muster wie Events/StylePages. Gesichter sitzen im oberen
-          // Bilddrittel (Quelle 1920x1280, Koepfe y~250-500), darum center 30%.
-          position: 'center 30%',
-          heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[16rem]',
+          // gleiches Muster wie Events/StylePages.
+          // R164 (19.08.): 16rem + 30% schnitt die Koepfe. Gemessen live: Band-Top
+          // 319, Fenster deckte Quell-y 282-623 — Scheitel der vorderen Reihe fiel
+          // raus. Koepfe liegen im Motiv (1920x1280) bei y 240-560.
+          // Neu lg: Hoehe 20rem (320px) und object-position 27%.
+          // Rechnung 1440: scale 0.75, Fenster 320/0.75 = 427 Quell-Pixel,
+          // Start (960-320)*0.27/0.75 = 230, Ende 657. Koepfe komplett drin.
+          // Band-Bottom 319+320 = 639 < 900, das Band bleibt im Fold.
+          // Schmal bleibt es bei 40%: dort zeigt das kurze Band fast das ganze
+          // Motiv, ein hoeherer Start wuerde nur Decke zeigen.
+          positionClass: 'object-[50%_40%] lg:object-[50%_27%]',
+          heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[20rem]',
         }}
         dense
         tightBottom
@@ -126,11 +134,36 @@ function FactsSection({ de }: { de: boolean }) {
   );
 }
 
+// R164 (19.08.): Mobil lag der Weiter-Knopf des Wizards auf Hoehe des fixen
+// WhatsApp-Kreises. Gemessen 390x844: Knopf x 165-289 y 784-832,
+// Kreis x 314-370 y 768-824.
+// Ursache: die Knopf-Leiste im Wizard ist mobil sticky am unteren Rand —
+// genau dort sitzt der Kreis. Abstand an der Sektion hilft darum nicht.
+// Fix auf unserem eigenen Wrapper: den Knopf selbst um 65px nach links
+// ruecken. Der Kreis braucht 76px (56 breit + right-5); der Wizard-eigene
+// pr-20 (80px) reicht nicht, weil sich die Leiste mit -mx-5 ueber den
+// Karton hinaus zieht — gemessen bleiben damit nur 25px Luft.
+//
+// Anker ist data-testid="inquiry-next", nicht ein Klassen-String: das
+// Attribut ist ein benutzter Vertrag (scripts/ui-smoke-contact.cjs:92,
+// scripts/r1-kursplan-capture.cjs:56). Wer es umbenennt, bricht sofort
+// diese Smoke-Skripte und den Assert im Beleg-Skript. Ein Griff nach
+// max-sm:sticky waere dagegen still zerbrochen: Tailwind-Utilities in
+// fremden Dateien sind kein Vertrag.
+// margin statt padding auf der Leiste: so haengt der Abstand nicht daran,
+// ob die Leiste sticky, flex oder sonst etwas ist.
+// pb-32 statt pb-12 haelt zusaetzlich Luft unter der Sektion.
+// Kein pr auf der Sektion selbst: das hat den Wizard-Karton auf 262px
+// gequetscht, waehrend die Fact-Karten 350px breit blieben.
+
 function FormSection({ de }: { de: boolean }) {
   return (
-    <section id="anfrage" className="scroll-mt-24 bg-[var(--color-paper-warm)] pt-2 pb-12 lg:pt-2 lg:pb-16">
+    <section
+      id="anfrage"
+      className="scroll-mt-24 bg-[var(--color-paper-warm)] pt-2 pb-32 lg:pt-2 lg:pb-16"
+    >
       <Shell>
-        <Reveal className="mx-auto w-full max-w-[640px] overflow-visible rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)]">
+        <Reveal className="mx-auto w-full max-w-[640px] overflow-visible rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)] max-sm:[&_[data-testid='inquiry-next']]:mr-[65px]">
           <InquiryWizard initialTopic="schnupperstunde" lockTopic />
         </Reveal>
         <p className="mx-auto mt-6 max-w-[640px] text-center text-sm text-[var(--color-ink-muted)]">

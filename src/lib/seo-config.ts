@@ -181,12 +181,12 @@ export const SEO_META = {
     de: {
       title: 'Fotos aus Kursen & Events | Salsaflow Basel',
       description:
-        'Momente von unserer Tanzfläche. Tanzabende und Kurse. So fühlt sich Salsaflow an, wenn die Musik läuft.',
+        'Fotos aus Kursen, Shows und Danceflow Nights bei Salsaflow in Basel. Filter nach Album.',
     },
     en: {
       title: 'Photos from Classes & Events | Salsaflow Basel',
       description:
-        'Moments from our dance floor. Dance nights and courses. This is what Salsaflow feels like when the music plays.',
+        'Photos from classes, shows and Danceflow Nights at Salsaflow in Basel. Filter by album.',
     },
   },
   contact: {
@@ -322,24 +322,24 @@ export const SEO_META = {
     de: {
       title: 'Anniversary Weekend | Salsaflow Dance Company Basel',
       description:
-        'Das Anniversary Weekend von Salsaflow: Workshops, Shows, Socials und Community-Momente in Basel.',
+        'Salsaflow Anniversary Weekend in Basel: Workshops mit klaren Themen und Levels, Shows und Socials. Du lernst und tanzst an einem Wochenende.',
     },
     en: {
       title: 'Anniversary Weekend | Salsaflow Dance Company Basel',
       description:
-        'The Anniversary Weekend by Salsaflow: workshops, shows, socials and community moments in Basel.',
+        'Salsaflow Anniversary Weekend in Basel: workshops with clear themes and levels, shows and socials. You learn and dance for one weekend.',
     },
   },
   floweekend: {
     de: {
       title: 'Floweekend Basel: Workshops & Socials | Salsaflow',
       description:
-        'Floweekend bei Salsaflow: intensiver lernen, tanzen und Community erleben mit Workshops und Social-Dance-Momenten in Basel.',
+        'Floweekend in Basel: Salsa- und Bachata-Workshops zu Technik, Musikalität und Partnerarbeit. Dazu Social Dancing am selben Wochenende.',
     },
     en: {
       title: 'Floweekend Basel: Workshops & Socials | Salsaflow',
       description:
-        'Floweekend at Salsaflow: learn, dance and experience community more intensely, with workshops and social-dance moments in Basel.',
+        'Floweekend in Basel: Salsa and Bachata workshops on technique, musicality and partner work. Social dancing on the same weekend.',
     },
   },
   eventkalender: {

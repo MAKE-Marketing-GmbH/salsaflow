@@ -40,9 +40,12 @@ export type KursaufbauContent = {
     title: string;
     titleAccent?: string;
     body: string;
-    forYouLabel: string;
+    // R141: forYouLabel ist raus. Die «Fuer dich, wenn»-Zeile ist jetzt die immer
+    // sichtbare Kernzeile jeder Stufe und steht als normaler Satz da, ohne Label.
     youLearnLabel: string;
     nextLabel: string;
+    /** R141: Label der Detail-Klappe je Stufe (Inhalte + Wechsel-Kriterium). */
+    detailsLabel: string;
     startTag: string;
     buildTag: string;
     rungs: { name: string; forYou: string; youLearn: string; next: string }[];
@@ -100,7 +103,7 @@ const R = {
   self: '/kursaufbau',
 };
 
-export const KURSAUFBAU: Record<Lang, KursaufbauContent> = {
+export const KURSAUFBAU = {
   de: {
     seo: 'kursaufbau',
     crumb: { label: 'Kursaufbau', href: R.self },
@@ -118,8 +121,16 @@ export const KURSAUFBAU: Record<Lang, KursaufbauContent> = {
       primary: { label: 'Level klären', href: R.schnupper },
       secondary: { label: 'Kursplan ansehen', href: R.kursplan },
       microcopy: 'Lieber kurz fragen als im falschen Level starten.',
+      // R141b: kurs-03.jpg war zugleich das Motiv im Salsa-SplitHero (StylePage.tsx:141).
+      // Dasselbe Foto auf /kursaufbau und auf der Salsa-Seite laesst die Routen gleich
+      // aussehen. kurs-02.jpg kommt nicht zurueck (31.7/255, unterbelichtet).
+      // kurse-classfreude-01.webp misst 126.6/255, ist scharf, zeigt eine ganze Klasse im
+      // hellen Studio mit ganzen Koepfen (per Read geprueft) und traegt genau den Alt-Text.
+      // Es ist ein neutrales Kurs-Motiv, kein Salsa-, Bachata-, Heels- oder Privat-Bild.
+      // Kein CSS-Filter, echtes Foto. R80-Lock unberuehrt: lg:aspect-[3/2] und der CTA im
+      // Fold haengen an KursaufbauPage.tsx, nicht am Motiv.
       image: {
-        src: '/photos/kurse/kurs-02.jpg',
+        src: '/photos/2026/kurse-classfreude-01.webp',
         alt: 'Tanzkurs im hellen Salsaflow Studio, die Gruppe übt gemeinsam',
       },
       cardLabel: 'Dein Einstieg',
@@ -129,42 +140,42 @@ export const KURSAUFBAU: Record<Lang, KursaufbauContent> = {
       eyebrow: 'Level-Übersicht',
       title: 'Salsa und Bachata bauen Stufe für Stufe',
       titleAccent: 'auf.',
-      body: 'Die Stufen bauen Technik und Sicherheit schrittweise auf. Flow-Kurse festigen das Gelernte, bevor es in den nächsten Bereich geht.',
-      forYouLabel: 'Für dich, wenn',
+      body: 'Fünf Stufen bauen Technik und Sicherheit Schritt für Schritt auf. Flow-Kurse festigen das Gelernte, bevor der nächste Bereich beginnt.',
       youLearnLabel: 'Du lernst',
       nextLabel: 'Weiter, wenn',
+      detailsLabel: 'Inhalte und Wechsel',
       startTag: 'Hier startest du',
       buildTag: 'Baut auf',
       rungs: [
         {
           name: 'Beginner Stufe 1 bis 6',
-          forYou: 'du neu startest oder deine Grundlagen systematisch aufbauen willst.',
+          forYou: 'Du startest neu oder willst deine Grundlagen systematisch aufbauen.',
           youLearn: 'Rhythmus, Grundschritte, Drehungen sowie Führung und Folge.',
-          next: 'du die Inhalte der Beginner-Stufen sicher anwenden kannst.',
+          next: 'Du kannst die Beginner-Inhalte sicher anwenden.',
         },
         {
           name: 'Beginner Flow',
-          forYou: 'du die Beginner-Stufen abgeschlossen hast und sie festigen willst.',
+          forYou: 'Du hast die Beginner-Stufen 1 bis 6 hinter dir und willst sie festigen.',
           youLearn: 'Bekannte Inhalte verbinden, Timing stabilisieren und freier tanzen.',
-          next: 'du Beginner-Kombinationen ruhig und musikalisch tanzen kannst.',
+          next: 'Beginner-Kombinationen gelingen dir ruhig und musikalisch.',
         },
         {
           name: 'Intermediate Stufe 7 bis 12',
-          forYou: 'deine Grundlagen sitzen und du Technik und Repertoire erweitern willst.',
-          youLearn: 'komplexere Figuren, Musikalität, Styling und präzisere Signale.',
-          next: 'du die Intermediate-Inhalte mit unterschiedlichen Partner:innen sicher tanzt.',
+          forYou: 'Deine Grundlagen sitzen und du willst Technik und Repertoire erweitern.',
+          youLearn: 'Komplexere Figuren, Musikalität, Styling und präzisere Signale.',
+          next: 'Du kannst Intermediate-Inhalte mit unterschiedlichen Partner:innen sicher tanzen.',
         },
         {
           name: 'Intermediate Flow',
-          forYou: 'du die Intermediate-Stufen abgeschlossen hast und mehr Flow suchst.',
+          forYou: 'Du hast die Stufen 7 bis 12 hinter dir und suchst mehr Flow.',
           youLearn: 'Kombinationen variieren, musikalischer reagieren und Details verfeinern.',
-          next: 'du Intermediate-Inhalte flexibel und kontrolliert einsetzen kannst.',
+          next: 'Du kannst Intermediate-Inhalte flexibel und kontrolliert einsetzen.',
         },
         {
           name: 'Advanced ab Stufe 13',
-          forYou: 'du anspruchsvolle Technik sicher beherrschst und weiter vertiefen willst.',
+          forYou: 'Du beherrschst anspruchsvolle Technik sicher und willst tiefer gehen.',
           youLearn: 'Feinheiten, Dynamik, Interpretation und komplexe Kombinationen.',
-          next: 'du Inhalte kontrolliert, musikalisch und mit eigenem Ausdruck tanzt.',
+          next: 'Du tanzt mit Kontrolle, Musikalität und eigenem Ausdruck.',
         },
       ],
       stylesIntro: 'Salsa tanzen wir On1 und On2. Heels hat einen eigenen Aufbau: Beginner, Intermediate und Advanced. Workshops laufen als Open Level.',
@@ -214,9 +225,15 @@ export const KURSAUFBAU: Record<Lang, KursaufbauContent> = {
       title: 'Regelmässiges Training bringt dich sicher',
       titleAccent: 'weiter.',
       body: 'Wenn du fehlst, melde dich frühzeitig. Ob und wie eine Lektion nachgeholt werden kann, hängt vom Kurs, Level und Platz ab.',
+      // R141: gallery/kurse/04.jpg war hier das Club-Foto und mass 29/255 Graustufen-
+      // Mittel (Raphael 04:58: «das Bild ist uebelst unterbelichtet»). kurs-05.jpg misst
+      // 106/255, ist scharf und warm (R minus B = +31, wie der Hero kurs-02), zeigt eine
+      // volle Kursstaffel im Tageslicht-Studio und traegt damit genau die Aussage der
+      // Headline. Kein CSS-Filter, echtes Foto. DESIGN.md:93 (sitewide max 2x) haelt:
+      // bisher EIN Design-Slot (/preise Fit-Band), der Galerie-Eintrag ist Archiv.
       image: {
-        src: '/photos/gallery/kurse/04.jpg',
-        alt: 'Tanzende im Salsaflow Kurs in entspannter Studio-Atmosphäre',
+        src: '/photos/kurse/kurs-05.jpg',
+        alt: 'Volle Kursstaffel tanzt im hellen Salsaflow Studio bei Tageslicht',
       },
       cardLabel: 'Dein Tempo',
       cardText: 'Melde dich früh, dann finden wir eine Lösung.',
@@ -268,8 +285,9 @@ export const KURSAUFBAU: Record<Lang, KursaufbauContent> = {
       primary: { label: 'Clarify your level', href: R.schnupper },
       secondary: { label: 'See the schedule', href: R.kursplan },
       microcopy: 'Better to ask briefly than to start at the wrong level.',
+      // Gleiches Motiv wie de (R141b).
       image: {
-        src: '/photos/kurse/kurs-02.jpg',
+        src: '/photos/2026/kurse-classfreude-01.webp',
         alt: 'Dance class in the bright Salsaflow studio, the group practising together',
       },
       cardLabel: 'Your start',
@@ -279,42 +297,42 @@ export const KURSAUFBAU: Record<Lang, KursaufbauContent> = {
       eyebrow: 'Level overview',
       title: 'Salsa and Bachata build from one stage to the',
       titleAccent: 'next.',
-      body: 'Each stage builds technique and confidence. Flow classes consolidate what you have learned before you move into the next group.',
-      forYouLabel: 'For you, if',
+      body: 'Five stages build technique and confidence step by step. Flow classes consolidate what you have learned before the next group begins.',
       youLearnLabel: 'You learn',
       nextLabel: 'Move on, when',
+      detailsLabel: 'Content and next step',
       startTag: 'You start here',
       buildTag: 'Builds on',
       rungs: [
         {
           name: 'Beginner stages 1 to 6',
-          forYou: 'you are new or want to rebuild your foundations systematically.',
-          youLearn: 'rhythm, basic steps, turns, leading and following.',
-          next: 'you can use the content from the beginner stages with confidence.',
+          forYou: 'You are new or want to build your foundations systematically.',
+          youLearn: 'Rhythm, basic steps, turns, leading and following.',
+          next: 'You can use the beginner material with confidence.',
         },
         {
           name: 'Beginner Flow',
-          forYou: 'you have completed the beginner stages and want to consolidate them.',
-          youLearn: 'connect familiar material, stabilise your timing and dance more freely.',
-          next: 'you can dance beginner combinations smoothly and in time with the music.',
+          forYou: 'You have finished beginner stages 1 to 6 and want to consolidate them.',
+          youLearn: 'Connect familiar material, stabilise your timing and dance more freely.',
+          next: 'You can dance beginner combinations smoothly and in time with the music.',
         },
         {
           name: 'Intermediate stages 7 to 12',
-          forYou: 'your foundations are solid and you want to expand your technique and repertoire.',
-          youLearn: 'more complex figures, musicality, styling and more precise signals.',
-          next: 'you can dance the intermediate material confidently with different partners.',
+          forYou: 'Your foundations are solid and you want more technique and repertoire.',
+          youLearn: 'More complex figures, musicality, styling and more precise signals.',
+          next: 'You can dance the intermediate material confidently with different partners.',
         },
         {
           name: 'Intermediate Flow',
-          forYou: 'you have completed the intermediate stages and want more flow.',
-          youLearn: 'vary combinations, respond more musically and refine the details.',
-          next: 'you can use intermediate material flexibly and with control.',
+          forYou: 'You have finished stages 7 to 12 and want more flow.',
+          youLearn: 'Vary combinations, respond more musically and refine the details.',
+          next: 'You can use intermediate material flexibly and with control.',
         },
         {
           name: 'Advanced from stage 13',
-          forYou: 'you are confident with demanding technique and want to develop it further.',
-          youLearn: 'fine detail, dynamics, interpretation and complex combinations.',
-          next: 'you dance the material with control, musicality and individual expression.',
+          forYou: 'You are confident with demanding technique and want to go deeper.',
+          youLearn: 'Fine detail, dynamics, interpretation and complex combinations.',
+          next: 'You dance with control, musicality and your own expression.',
         },
       ],
       stylesIntro: 'We dance Salsa On1 and On2. Heels has its own structure: beginner, intermediate and advanced. Workshops run as open level.',
@@ -364,9 +382,10 @@ export const KURSAUFBAU: Record<Lang, KursaufbauContent> = {
       title: 'Regular practice helps you progress with',
       titleAccent: 'confidence.',
       body: 'If you miss a class, let us know early. Whether and how a lesson can be caught up depends on the course, level and space.',
+      // Gleiches Motiv wie de (R141).
       image: {
-        src: '/photos/gallery/kurse/04.jpg',
-        alt: 'Dancers in the Salsaflow course in a relaxed studio atmosphere',
+        src: '/photos/kurse/kurs-05.jpg',
+        alt: 'A full course term dancing in the bright Salsaflow studio in daylight',
       },
       cardLabel: 'Your pace',
       cardText: 'Let us know early and we will find a solution.',
@@ -401,4 +420,4 @@ export const KURSAUFBAU: Record<Lang, KursaufbauContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, KursaufbauContent>;

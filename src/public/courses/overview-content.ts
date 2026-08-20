@@ -93,7 +93,15 @@ const photos = {
   heels: '/photos/2026/kurse-heels-energie-01.webp',
 };
 
-export const COURSES_OVERVIEW: Record<Lang, OverviewContent> = {
+type OverviewContentByLanguage = Record<Lang, OverviewContent>;
+
+function defineOverviewContent(
+  content: OverviewContentByLanguage,
+): OverviewContentByLanguage {
+  return content;
+}
+
+export const COURSES_OVERVIEW = defineOverviewContent({
   de: {
     hero: {
       eyebrow: 'Salsa · Bachata · Heels · Privatstunden',
@@ -370,4 +378,4 @@ export const COURSES_OVERVIEW: Record<Lang, OverviewContent> = {
       cta: 'Open the schedule',
     },
   },
-};
+});

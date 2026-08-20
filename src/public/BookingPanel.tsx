@@ -8,7 +8,7 @@
 // Motion: EINE Signatur — getakteter Fade-up (Feder-Kurve) auf Liste und Panel-Wechsel,
 // alles motion-safe, also respektiert prefers-reduced-motion automatisch.
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { EASE_OUT, useHydrated } from '@/public/home/motion';
@@ -67,6 +67,9 @@ const FUNNEL = {
     today: 'heute',
     // R64: toter ?kurs=-Link — klar sagen, dann die Termine unter dem Satz stehen lassen.
     kursGone: 'Dieser Kurs läuft gerade nicht mehr. Hier sind die aktuellen Termine:',
+    // R134/3: Multistep im Dialog. Zwei Schritte, wenige Felder je Schritt.
+    formNext: 'Weiter',
+    formBack: 'Zurück',
   },
   en: {
     pickDay: 'Pick your day',
@@ -89,6 +92,8 @@ const FUNNEL = {
     emptyWeek: 'Everything is booked this week. Try another day or drop us a line.',
     today: 'today',
     kursGone: 'This class is no longer running. Here are the current openings:',
+    formNext: 'Next',
+    formBack: 'Back',
   },
 } as const;
 
@@ -139,6 +144,17 @@ function Funnel() {
   // R54: fertiger Buchungs-Stand liegt in BookingForm (Dialog). Der Funnel braucht ihn fuer
   // Schritt 3 der Fortschritts-Leiste — BookingForm meldet ihn ueber onDone hoch.
   const [done, setDone] = useState(false);
+
+  // Der Dialog haengt seinen Scroll-Lock- und Erst-Fokus-Effekt an diese Funktion.
+  // Als Inline-Pfeilfunktion entstand sie bei JEDEM Render von Funnel neu, der Effekt
+  // lief erneut, der Body wurde ent- und neu gesperrt und der Fokus sprang zurueck auf
+  // den Schliessen-Knopf. `onDone()` loeste so einen Render garantiert aus und stahl
+  // dem Nutzer mitten im Formular den Fokus. Die beiden Setter sind von React stabil,
+  // die Funktion ist damit fuer die Lebensdauer des Dialogs dieselbe.
+  const closeReservation = useCallback(() => {
+    setReserveOpen(false);
+    setDone(false);
+  }, []);
 
   const loadPlan = () => {
     if (!embeddedSchedule()) setPlanLoading(true);
@@ -262,18 +278,67 @@ function Funnel() {
   const termOf = (c: ScheduleCourse): ScheduleTerm | undefined =>
     schedule?.terms.find((t) => t.id === c.termId);
 
+  const showDayList = !(course && !reserveOpen);
+
+  // Kritik-Fund (buchung-desktop-01-kursliste.png): Das Foto-Band ueber der Kursliste war zu
+  // knapp beschnitten — der Frau rechts fehlte der Oberkopf, der Frau links endete der Kopf
+  // am Haaransatz an der Bildkante.
+  // Ursache gemessen, nicht geschaetzt: Die Quelle war `kurse-heels-energie-01.webp`
+  // (1920x935). Bei 1440px Bandbreite und 12rem Bandhoehe rendert object-cover das Motiv
+  // 701px hoch — sichtbar sind 192px, also 27.4% der Bildhoehe. Die vorderen Koepfe brauchen
+  // in dieser Datei rund 40%. Der Ausschnitt KONNTE sie nicht fassen, egal wohin
+  // object-position ihn schob: `center 22%` legte das Fenster auf 16.0%..43.4%, und selbst
+  // `top` (0%..27.4%) schnitt die vordere Reihe am Kinn ab.
+  // Die band-fertige Fassung desselben Motivs bleibt. Der Desktop-Fold belegt,
+  // dass `center 30%` erst unterhalb der Stirn beginnt. `center 12%` legt das
+  // sichtbare Fenster auf den Kopfbereich und hält zugleich den Heels-Crop-Lock.
   return (
+    <>
+    {showDayList && (
+      <div data-buchung-photo className="relative mb-4 w-full overflow-hidden">
+        <img
+          src="/photos/2026/kurse-heels-energie-hero-2100.webp"
+          alt={lang === 'de'
+            ? 'Heels-Kurs bei Salsaflow, Energie auf der Fläche'
+            : 'Heels class at Salsaflow, energy on the floor'}
+          width={2100}
+          height={900}
+          loading="eager"
+          fetchPriority="high"
+          className="h-[7.5rem] w-full object-cover object-[center_12%] sm:h-[12rem]"
+        />
+      </div>
+    )}
     <div className="mx-auto max-w-[1080px] px-5 sm:px-8">
-      {/* Fortschritt: drei Worte, keine Deko. */}
-      <ol className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]" aria-hidden>
-        <li className={cn(!course && 'text-[var(--color-salsa)]')}>{ft.step1}</li>
-        <li className="text-[var(--color-line)]">→</li>
-        <li className={cn(course && !done && 'text-[var(--color-salsa)]')}>{ft.step2}</li>
-        <li className="text-[var(--color-line)]">→</li>
-        {/* R54: Copy kennt drei Schritte, die Leiste zeigte nur zwei. Schritt 3 wird aktiv,
-            sobald die Buchung fertig ist (done). */}
-        <li className={cn(done && 'text-[var(--color-salsa)]')}>{ft.step3}</li>
-      </ol>
+      {/* Fortschritt: drei Worte, keine Deko.
+          R134/4: Schritt 1 war eine tote Beschriftung. Wer im Funnel auf «Kurs» klickte,
+          blieb stehen (Raphael-Video 00:41). Schritt 1 ist jetzt ein echter Link auf
+          /tanzkurse — der Weg zurueck zur Kursuebersicht. Damit traegt die Leiste eine
+          Aktion und darf nicht mehr aria-hidden sein; sie steht als <nav> mit Label da,
+          die beiden restlichen Schritte bleiben reine Zustands-Anzeige. */}
+      <nav aria-label={lang === 'de' ? 'Fortschritt' : 'Progress'} className="mb-4">
+        <ol className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+          <li>
+            <a
+              href="/tanzkurse"
+              data-testid="step-back-to-courses"
+              aria-current={!course ? 'step' : undefined}
+              className={cn(
+                't-hover underline-offset-4 hover:text-[var(--color-salsa)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)]',
+                !course && 'text-[var(--color-salsa)]',
+              )}
+            >
+              {ft.step1}
+            </a>
+          </li>
+          <li aria-hidden className="text-[var(--color-line)]">→</li>
+          <li className={cn(course && !done && 'text-[var(--color-salsa)]')} aria-current={course && !done ? 'step' : undefined}>{ft.step2}</li>
+          <li aria-hidden className="text-[var(--color-line)]">→</li>
+          {/* R54: Copy kennt drei Schritte, die Leiste zeigte nur zwei. Schritt 3 wird aktiv,
+              sobald die Buchung fertig ist (done). */}
+          <li className={cn(done && 'text-[var(--color-salsa)]')} aria-current={done ? 'step' : undefined}>{ft.step3}</li>
+        </ol>
+      </nav>
 
       {planLoading ? (
         <p role="status" className="py-16 text-center text-sm text-[var(--color-ink-muted)]">{ft.loadPlan}</p>
@@ -303,7 +368,7 @@ function Funnel() {
             </p>
           )}
 
-          {!(course && !reserveOpen) && (
+          {showDayList && (
           <>
           <h1 className="type-h1 text-[var(--color-ink)]">
             {ft.pickDay}
@@ -582,16 +647,14 @@ full
             <BookingForm
               key={course.id}
               course={course}
-              onBack={() => {
-                setReserveOpen(false);
-                setDone(false);
-              }}
+              onBack={closeReservation}
               onDone={() => setDone(true)}
             />
           )}
         </>
       )}
     </div>
+    </>
   );
 }
 
@@ -704,11 +767,11 @@ function CourseDetail({
             </dd>
           </div>
         </dl>
-        <div className="relative h-52 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)]">
+        <div className="relative h-64 min-h-[16rem] overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)]">
           <iframe
             title={de ? 'Standort Salsaflow auf Google Maps' : 'Salsaflow location on Google Maps'}
-            src={CONTACT.mapsEmbed}
-            className="absolute inset-0 h-full w-full border-0"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8000!2d7.5866!3d47.548917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f14!3m3!1m2!1s0x4791b9bbe6210ca7%3A0xe24471415832cb62!2sSalsaflow%20Dance%20Company%20GmbH!5e0!3m2!1sde!2sch"
+            className="h-full w-full min-h-[16rem] border-0"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
           />
@@ -757,12 +820,21 @@ function BookingForm({
 }) {
   const { lang } = useLang();
   const bt = BOOKING_UI[lang];
+  const ft = FUNNEL[lang];
 
   const [avail, setAvail] = useState<CourseAvailability | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
+  // R134/3: Der Dialog war EIN langer Scroll (Rolle, Anmeldung, Deine Daten, Partnerdaten,
+  // Nachricht) — Raphael-Video 00:13. Jetzt zwei Schritte: 1 = Rolle + Allein/Paar,
+  // 2 = Daten. Offene Klassen (Heels) haben keine Rollenwahl, dort startet der Fluss
+  // direkt auf Schritt 2 und die Weiter-Taste entfaellt.
+  const [step, setStep] = useState<1 | 2>(1);
   const [role, setRole] = useState<'leader' | 'follower' | null>(null);
+  // Klick auf die Rolle und sofort Weiter las den State noch als null
+  // (React committet setRole erst nach dem Event). Der Ref steht im selben Tick.
+  const roleRef = useRef<'leader' | 'follower' | null>(null);
   const [mode, setMode] = useState<'solo' | 'couple'>('solo');
   const [needsAushilfe, setNeedsAushilfe] = useState(false);
   const [me, setMe] = useState<Person>(emptyPerson);
@@ -772,11 +844,26 @@ function BookingForm({
 
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<CreateBookingResult | null>(null);
   const [showErrors, setShowErrors] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Schritt-Anfang: nach jedem Schrittwechsel wandert der Fokus hierher.
+  // Ohne das bleibt der Fokus auf «Weiter» bzw. «Zurueck» — beide Knoepfe werden
+  // beim Wechsel ausgetauscht, der Fokus faellt danach auf <body> zurueck.
+  // Schritt 1: die Rollen-Ueberschrift «Ich tanze als». Offene Klassen haben keinen
+  // Schritt 1, dieser Ref bleibt dort leer.
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  // Schritt 2, erste Zeile: die Auswahl aus Schritt 1 — bei offenen Klassen der
+  // Hinweis, dass ohne Rollen getanzt wird. Immer vorhanden.
+  const stepSummaryRef = useRef<HTMLParagraphElement>(null);
+  const privacyRef = useRef<HTMLInputElement>(null);
+  // Erst ab dem ersten Wechsel fokussieren: beim Oeffnen gehoert der Fokus dem
+  // Schliessen-Knopf (Dialog-Konvention), nicht der Ueberschrift.
+  const stepChanged = useRef(false);
 
   const loadAvail = () => {
     setLoading(true);
@@ -853,10 +940,60 @@ function BookingForm({
   // Heels wird ohne Rollentrennung getanzt: dort gibt es kein Leader/Follower und kein Paar.
   const isOpen = course.styleKey === 'heels';
 
+  // Offene Klasse hat keinen Schritt 1 — sonst staende dort eine leere Seite mit
+  // einem Weiter-Knopf. Der sichtbare Schritt ist deshalb abgeleitet, nicht roh.
+  const visibleStep: 1 | 2 = isOpen ? 2 : step;
+
   function changeMode(next: 'solo' | 'couple') {
     setMode(next);
     if (next === 'couple') setNeedsAushilfe(false);
   }
+
+  function chooseRole(next: 'leader' | 'follower') {
+    roleRef.current = next;
+    setRole(next);
+  }
+
+  function goToStep2() {
+    const hasRole = isOpen || roleRef.current !== null;
+    if (!hasRole) {
+      // Ein Fehlertext an den Kacheln, nicht noch formError mit demselben Satz.
+      setShowErrors(true);
+      setFormError(null);
+      focusFirstInvalid();
+      return;
+    }
+    if (role === null && roleRef.current !== null) setRole(roleRef.current);
+    setFormError(null);
+    setShowErrors(false);
+    stepChanged.current = true;
+    setStep(2);
+  }
+
+  // Ein Schrittwechsel ist ein Seitenwechsel im Kleinen: die Flaeche startet oben und
+  // der Fokus steht auf der neuen Ueberschrift. Sonst liest ein Screenreader nach
+  // «Weiter» gar nichts vor und die Tastatur landet wieder ganz am Anfang des Dialogs.
+  useEffect(() => {
+    if (!stepChanged.current) return;
+    const frame = window.requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ top: 0 });
+      // R183: Beide Schritt-Ueberschriften sind weg. Das Fokus-Ziel ist jetzt der
+      // erste bedeutungstragende Knoten des Schritts: Schritt 1 die Rollen-Frage,
+      // Schritt 2 die Auswahl-Zeile aus Schritt 1.
+      // Dieser Effekt laeuft nur nach einem echten Schrittwechsel (`stepChanged`).
+      // Den setzen nur `goToStep2()` und der Zurueck-Knopf des Rollen-Falls — beide
+      // gibt es bei einer offenen Klasse nicht. Fuer `isOpen` feuert der Effekt also
+      // nie, und `stepSummaryRef` darf dort null sein.
+      // Das erste Eingabefeld bleibt die Absicherung, damit der Fokus nie auf
+      // <body> faellt, falls ein Anker doch einmal fehlt.
+      const target =
+        (visibleStep === 1 ? stepHeadingRef.current : stepSummaryRef.current) ??
+        formRef.current?.querySelector<HTMLElement>('input, textarea, button') ??
+        null;
+      target?.focus();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [visibleStep]);
 
   // Voll heisst: der Kursplan meldet den Kurs als ausgebucht. Dann geht die Anfrage auf die Warteliste.
   const laneFull = avail?.full ?? course.status === 'full';
@@ -865,7 +1002,8 @@ function BookingForm({
     lang === 'de' ? course.levelDe : course.levelEn,
     course.onVariant,
   )}`.trim();
-  const teachers = course.teachers.map((t) => t.displayName.split(' ')[0]).join(', ');
+  // R183: `teachers` ist weg — die Kopfzeile nennt die Lehrer nicht mehr (Kursseite
+  // traegt die Infos). `dayLabel` bleibt: die Bestaetigung zeigt «Wann» weiterhin.
   const dayLabel = WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday;
 
   const focusFirstInvalid = () =>
@@ -873,9 +1011,14 @@ function BookingForm({
 
   async function submit() {
     setFormError(null);
+    setSubmitError(null);
     setShowErrors(true);
-    if (!isOpen && mode === 'solo' && role === null) {
-      setFormError(bt.requiredHint);
+    // Rolle fehlt: das ist Schritt 1. Zurueckspringen statt einen Fehler zu zeigen,
+    // den man auf dem sichtbaren Schritt gar nicht beheben kann.
+    if (!isOpen && roleRef.current === null) {
+      setStep(1);
+      setShowErrors(true);
+      setFormError(null);
       focusFirstInvalid();
       return;
     }
@@ -890,7 +1033,10 @@ function BookingForm({
       return;
     }
     if (!privacy) {
-      setFormError(lang === 'de' ? 'Bitte setze das Häkchen beim Datenschutz.' : 'Please tick the privacy box.');
+      // Der Fehler steht direkt an der Checkbox (aria-describedby) UND der Fokus
+      // springt dorthin. Ein Alert allein liess die Box unmarkiert stehen.
+      setFormError(null);
+      window.requestAnimationFrame(() => privacyRef.current?.focus());
       return;
     }
 
@@ -898,7 +1044,7 @@ function BookingForm({
     try {
       const r = await createBooking({
         courseId: course.id,
-        role: isOpen ? null : mode === 'couple' ? role ?? 'leader' : role,
+        role: isOpen ? null : mode === 'couple' ? roleRef.current ?? 'leader' : roleRef.current,
         mode: isOpen ? 'solo' : mode,
         participant: { firstName: me.firstName, lastName: me.lastName, email: me.email, phone: me.phone || undefined },
         partner:
@@ -912,7 +1058,7 @@ function BookingForm({
       setResult(r);
       onDone?.();
     } catch (e) {
-      setFormError(e instanceof Error ? e.message : bt.errorGeneric);
+      setSubmitError(e instanceof Error ? e.message : bt.errorGeneric);
     } finally {
       setSubmitting(false);
     }
@@ -931,7 +1077,10 @@ function BookingForm({
         id={`booking-panel-${course.id}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={`booking-panel-title-${course.id}`}
+        // R183: Die sichtbare Ueberschrift traegt nur noch den Kursnamen. Der Dialog
+        // benennt darum die Handlung selbst — sonst ruft ein Screenreader beim Oeffnen
+        // «Bachata Beginner Stufe 5, Dialog» aus und sagt nicht, dass gebucht wird.
+        aria-label={`${bt.title}: ${courseLabel}`}
         data-testid="booking-dialog"
         /* Hoehe in `dvh`, nicht `vh`. Auf Mobil-Browsern meint `vh` den Viewport OHNE
            Adressleiste — der Dialog wurde damit hoeher als der sichtbare Bereich und die
@@ -943,18 +1092,37 @@ function BookingForm({
         className="my-auto flex max-h-[min(92vh,900px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-panel-in_180ms_ease-out]"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="relative shrink-0 overflow-hidden bg-[var(--color-ink)] px-4 py-3 text-white sm:px-5 sm:py-3.5">
-          <div aria-hidden className="absolute inset-x-0 top-0 h-1 bg-[var(--color-salsa)]" />
+        {/* R134/1: Der 4px-Salsa-Strich ueber der schwarzen Kopfzeile ist WEG (Raphael:
+            "KI-Scheisse"). Er war ein aufgesetzter Akzent ohne Funktion — der Kurstitel
+            traegt das Rot schon. Stattdessen traegt der Kopf jetzt einen ruhigen
+            Tiefenverlauf und eine Haarlinie nach unten, also eine Kante aus dem Aufbau
+            statt einer Deko-Kappe. */}
+        <div className="relative shrink-0 overflow-hidden border-b border-white/10 bg-[linear-gradient(180deg,#1a1a1a_0%,var(--color-ink)_100%)] px-4 py-3 text-white sm:px-5 sm:py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h3 id={`booking-panel-title-${course.id}`} className="font-display text-lg font-extrabold leading-tight tracking-tight sm:text-xl">
-                {bt.title}: <span className="text-[var(--color-salsa)]">{courseLabel}</span>
+              {/* Kritik-Fund KRITISCH: Der Kursname stand in Salsa-Rot auf der fast schwarzen
+                  Kopfzeile — im PNG gemessen rgb(173,24,39) auf rgb(19,19,19), Kontrast 2.6:1.
+                  WCAG AA verlangt 4.5:1 fuer Fliesstext und 3.0:1 selbst fuer grosse Schrift.
+                  Das ist die wichtigste Zeile des Dialogs: welchen Kurs buche ich gerade.
+                  Der Name steht jetzt weiss wie «Kurs buchen:» (18.6:1). Die Auszeichnung
+                  laeuft ueber Helligkeit und Schriftschnitt: das Label davor ist auf 70 %
+                  gedimmt, der Name traegt volles Weiss. Kein Rot auf Schwarz. */}
+              {/* R183: Das Label «Kurs buchen:» ist WEG. Der Dialog ist der Buchung —
+                  das sagt der Absende-Knopf «Platz reservieren». Uebrig bleibt die eine
+                  Zeile, die der Nutzer wirklich pruefen will: WELCHEN Kurs buche ich.
+                  Fuer Screenreader benennt aria-label des Dialogs die Handlung weiter. */}
+              {/* Kein `id` mehr: der Dialog benennt sich ueber `aria-label`, das
+                  fruehere `aria-labelledby` zeigte als einziges hierher. Eine id ohne
+                  Referenz ist toter Markup. */}
+              <h3 className="font-display text-lg font-extrabold leading-tight tracking-tight text-white sm:text-xl">
+                {courseLabel}
               </h3>
-              <p className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/55 sm:text-xs">
-                <span>{dayLabel}</span>
-                <span>{course.startTime}-{course.endTime}</span>
-                {teachers && <span>{teachers}</span>}
-              </p>
+              {/* R183: Wochentag, Uhrzeit und Lehrer sind WEG (Absprache 17.08.: die
+                  Kursseite traegt die Infos). Der Nutzer kommt aus der Kursliste oder von
+                  der Kursseite — dort stand genau diese Zeile schon, und er hat auf sie
+                  geklickt. Der Kursname allein beantwortet «bin ich richtig hier».
+                  Wann und Wo stehen nach dem Absenden wieder da, in der Bestaetigung
+                  (SuccessPanel, Fakten «Wann»/«Wo») — dort ist es neue Information. */}
             </div>
             {/* h-11/w-11 statt h-10: 44px-Tap-Ziel fuer den Dialog-Schliessen-Knopf
                 (Critic Runde 16, Item 3). */}
@@ -973,7 +1141,9 @@ function BookingForm({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        {/* ref: DIESER Kasten scrollt, nicht der Dialog selbst. Ohne die Bindung lief
+            der Scroll-Reset beim Schrittwechsel ins Leere. */}
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="px-4 py-4 sm:px-5 sm:py-4">
           {loading ? (
             <p role="status" className="py-6 text-center text-sm text-[var(--color-ink-muted)]">{bt.loading}</p>
@@ -1021,51 +1191,71 @@ function BookingForm({
                 submit();
               }}
             >
-                {/* Gruppe 1: Anmeldung (Rolle, Modus, Tarif) — flach, ohne Karten-Verschachtelung. */}
-                <h3 className="type-h3 text-[var(--color-ink)]">{bt.stepRegister}</h3>
+                {/* R183: Die Schritt-Zaehlung ist WEG. Die Seite zaehlt schon einmal, oben in
+                    der Fortschritts-Leiste (1 · Kurs → 2 · Anmeldung → 3 · Fertig). Zwei Zaehler
+                    fuer einen Fluss lassen den Nutzer die beiden Zahlen abgleichen, statt zu
+                    waehlen. Der sichtbare Schritt steht ohnehin in der Ueberschrift. */}
 
-                {/* Rolle (nur bei Leader/Follower-Kursen) */}
-                {isOpen ? (
-                  <p className="text-sm text-[var(--color-ink-muted)]">{bt.openClassNote}</p>
-                ) : (
-                  <section className="border-t border-[var(--color-line)] pt-2.5 first:border-t-0 first:pt-0" aria-labelledby="booking-role-title" aria-describedby={showErrors && role === null ? 'booking-role-error' : undefined}>
-                    <h3 id="booking-role-title" className="mb-1.5 text-sm font-bold text-[var(--color-ink)]">{bt.chooseRole}</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      <RoleTile
-                        testid="role-follower"
-                        active={role === 'follower'}
-                        label={bt.follower}
-                        onClick={() => setRole('follower')}
-                        invalid={showErrors && mode === 'solo' && role === null}
-                      />
-                      <RoleTile
-                        testid="role-leader"
-                        active={role === 'leader'}
-                        label={bt.leader}
-                        onClick={() => setRole('leader')}
-                        invalid={showErrors && mode === 'solo' && role === null}
-                      />
-                    </div>
-                    <p className="mt-1.5 text-xs leading-snug text-[var(--color-ink-muted)]">
-                      {lang === 'de' ? 'Für die Balance im Kurs.' : 'Helps us balance the class.'}
-                    </p>
-                    {showErrors && mode === 'solo' && role === null && (
-                      <p id="booking-role-error" className="mt-1.5 text-sm font-medium text-[var(--color-salsa)]">{bt.requiredHint}</p>
-                    )}
-                  </section>
-                )}
+                {/* Schritt 1: Rolle + Allein/Paar. Sonst nichts. */}
+                {visibleStep === 1 && (
+                <>
+                {/* R183: Die Ueberschrift «Anmeldung» ist WEG. Sie stand wortgleich 90px
+                    ueber der Gruppen-Ueberschrift `bt.registration` — dasselbe Wort zweimal,
+                    einmal als Schritt-Titel und einmal als Feldgruppe. Der Schritt-Titel war
+                    der schwaechere: er benannte den Dialog, den die Kopfzeile schon benennt.
+                    Die Rollen-Ueberschrift «Ich tanze als» ist jetzt das Fokus-Ziel nach dem
+                    Schrittwechsel und traegt tabIndex={-1}. */}
+
+                {/* Rolle. Dieser Block gehoert zu Schritt 1, und Schritt 1 gibt es nur bei
+                    Leader/Follower-Kursen: `visibleStep` ist bei offenen Klassen fest 2
+                    (siehe oben). Ein `isOpen`-Zweig waere hier toter Code. Offene Klassen
+                    springen direkt in die Daten — ohne erklaerenden Satz, denn der Kurstyp
+                    steht auf der Kursseite (Absprache 17.08.). */}
+                <section className="pt-0" aria-labelledby="booking-role-title" aria-describedby={showErrors && role === null ? 'booking-role-error' : undefined}>
+                  <h3 ref={stepHeadingRef} tabIndex={-1} id="booking-role-title" className="mb-1.5 text-sm font-bold text-[var(--color-ink)] focus:outline-none">{bt.chooseRole}</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <ChoiceTile
+                      testid="role-follower"
+                      active={role === 'follower'}
+                      label={bt.follower}
+                      onClick={() => chooseRole('follower')}
+                      invalid={showErrors && role === null}
+                    />
+                    <ChoiceTile
+                      testid="role-leader"
+                      active={role === 'leader'}
+                      label={bt.leader}
+                      onClick={() => chooseRole('leader')}
+                      invalid={showErrors && role === null}
+                    />
+                  </div>
+                  {/* R183: «Für die Balance im Kurs.» ist WEG. Der Satz rechtfertigte die
+                      Frage, statt bei der Wahl zu helfen — wer «Follower» oder «Leader»
+                      liest, waehlt danach nicht anders. Die Fehlermeldung bleibt. */}
+                  {showErrors && role === null && (
+                    <p id="booking-role-error" role="alert" data-testid="booking-required-error" className="mt-1.5 text-sm font-medium text-[var(--color-salsa)]">{bt.requiredHint}</p>
+                  )}
+                </section>
 
                 {/* Modus allein / Paar (nur Leader/Follower) */}
                 {!isOpen && (
                   <section className="border-t border-[var(--color-line)] pt-2.5" aria-labelledby="booking-mode-title">
                     <h3 id="booking-mode-title" className="mb-1.5 text-sm font-bold text-[var(--color-ink)]">{bt.registration}</h3>
-                    <div className="flex gap-2">
-                      <ModeButton testid="mode-solo" active={mode === 'solo'} onClick={() => changeMode('solo')}>
-                        {bt.solo}
-                      </ModeButton>
-                      <ModeButton testid="mode-couple" active={mode === 'couple'} onClick={() => changeMode('couple')}>
-                        {bt.couple}
-                      </ModeButton>
+                    {/* Gleiches Raster und gleiche Kachel wie die Rollenwahl darueber:
+                        eine Auswahl sieht im ganzen Schritt gleich aus. */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <ChoiceTile
+                        testid="mode-solo"
+                        active={mode === 'solo'}
+                        label={bt.solo}
+                        onClick={() => changeMode('solo')}
+                      />
+                      <ChoiceTile
+                        testid="mode-couple"
+                        active={mode === 'couple'}
+                        label={bt.couple}
+                        onClick={() => changeMode('couple')}
+                      />
                     </div>
                     {mode === 'solo' && (
                       <label className="mt-2.5 flex items-start gap-2.5 rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] px-3 py-2.5 text-sm leading-snug text-[var(--color-ink)]">
@@ -1095,9 +1285,58 @@ function BookingForm({
                     {bt.courseFull}
                   </p>
                 )}
+                </>
+                )}
 
-                {/* Gruppe 2: Personendaten */}
-                <h3 className="border-t border-[var(--color-line)] pt-4 type-h3 text-[var(--color-ink)]">{bt.stepData}</h3>
+                {/* Schritt 2: nur noch Daten. */}
+                {visibleStep === 2 && (
+                <>
+                {/* Gruppe 2: Personendaten.
+                    R183: Die Ueberschrift «Deine Daten» ist WEG. Jedes Feld darunter traegt
+                    sein eigenes Label (Vorname, Nachname, E-Mail, Telefon) — die Ueberschrift
+                    fasste nur zusammen, was direkt darunter schon steht. Fuer Screenreader
+                    bleibt die Gruppe benannt: PersonFields traegt die Legende weiter als
+                    sr-only (hideLegend), die Section behaelt ihr aria-labelledby.
+                    Das Fokus-Ziel nach dem Schrittwechsel ist jetzt die Auswahl-Zeile. */}
+
+                {/* Erste Zeile des Schritts, und zugleich das Fokus-Ziel nach dem Wechsel:
+                    die Auswahl aus Schritt 1 — sonst ist die Entscheidung nach dem Wechsel
+                    unsichtbar.
+
+                    R183 Runde 3: Der Zweig fuer die offene Klasse ist WEG. Er zeigte
+                    «Offene Klasse - keine Rollenwahl noetig.» als erste Zeile. Zwei Gruende:
+                    1. Das ist Kurstyp-Information. Absprache 17.08.: die Kursseite traegt
+                       die Infos, das Modal traegt Rolle plus Anmeldung. Der Nutzer hat den
+                       Kurs eben dort ausgewaehlt.
+                    2. Der Satz erklaerte eine Rollenwahl, die in diesem Zweig nie erscheint
+                       — er beantwortete eine Frage, die der Nutzer nie gestellt bekommt.
+                    Der frueher genannte Grund «Schritt 2 braucht ein Fokus-Ziel» traegt
+                    nicht: der Fokus-Effekt haengt an `stepChanged`, das nur `goToStep2()`
+                    und der Zurueck-Knopf des Rollen-Falls setzen. Beide gibt es hier nicht;
+                    bei `isOpen` schliesst «Zurueck» den Dialog (siehe unten). Gemessen in
+                    worklog/.r183-openclass-reach.mjs: booking-next fehlt, Zurueck schliesst,
+                    focusAnchorNeeded=false. Der Anker war unerreichbarer Code. */}
+                {!isOpen && (
+                  <p
+                    ref={stepSummaryRef}
+                    tabIndex={-1}
+                    data-testid="step1-summary"
+                    className="text-sm text-[var(--color-ink-muted)] focus:outline-none"
+                  >
+                    {role === 'leader' ? bt.leader : bt.follower}
+                    {' · '}
+                    {mode === 'couple' ? bt.couple : bt.solo}
+                  </p>
+                )}
+
+                {isOpen && laneFull && (
+                  <p
+                    data-testid="lane-full-note"
+                    className="rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] px-3 py-2 text-sm font-medium text-[var(--color-ink)]"
+                  >
+                    {bt.courseFull}
+                  </p>
+                )}
 
                 {/* Eigene Daten */}
                 <PersonFields legend={bt.yourData} prefix="bk" person={me} onChange={setMe} bt={bt} showErrors={showErrors} hideLegend />
@@ -1123,48 +1362,27 @@ function BookingForm({
                     className="w-full resize-y rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] px-3 py-2 text-sm text-[var(--color-ink)] focus:border-[var(--color-salsa)] focus:bg-white focus:outline-none"
                   />
                 </label>
+                </>
+                )}
 
-                {formError && <p role="alert" className="text-sm font-medium text-[var(--color-salsa)]">{formError}</p>}
+                {/* Schritt 1 hat kein optionales Feld — dort schliesst die Meldung den
+                    Block ab. Auf Schritt 2 steht sie oben an den Pflichtfeldern (siehe
+                    Kommentar dort) und darf hier kein zweites Mal erscheinen. */}
+                {visibleStep === 1 && formError && !(showErrors && role === null) && (
+                  <p role="alert" className="text-sm font-medium text-[var(--color-salsa)]">{formError}</p>
+                )}
               </form>
             )}
           </div>
         </div>
 
+        {/* R134/3: Die Fusszeile traegt genau die Aktion des sichtbaren Schritts.
+            Schritt 1 hat eine Weiter-Taste und keinen Datenschutz-Haken — der gehoert
+            zum Absenden, nicht zur Rollenwahl. */}
         {!loading && !loadError && avail?.bookable && !result && (
           <div className="sticky bottom-0 z-10 shrink-0 border-t border-[var(--color-line)] bg-white px-4 py-3 sm:px-5">
-            <label className="mb-2 flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-relaxed text-[var(--color-ink-muted)]">
-              <input
-                type="checkbox"
-                data-testid="booking-privacy"
-                checked={privacy}
-                onChange={(e) => setPrivacy(e.target.checked)}
-                className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-salsa)]"
-              />
-              <span className="min-w-0 text-pretty">
-                {lang === 'de' ? (
-                  <>
-                    Ich habe die{' '}
-                    <a href="/datenschutz" className="font-semibold text-[var(--color-salsa)] underline underline-offset-4">
-                      Datenschutzerklärung
-                    </a>{' '}
-                    gelesen und bin damit einverstanden.
-                  </>
-                ) : (
-                  <>
-                    I have read the{' '}
-                    <a href="/datenschutz" className="font-semibold text-[var(--color-salsa)] underline underline-offset-4">
-                      privacy policy
-                    </a>{' '}
-                    and agree to it.
-                  </>
-                )}
-              </span>
-            </label>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-center text-xs font-medium text-[var(--color-ink-muted)] sm:text-left">
-                {lang === 'de' ? 'Bezahlt wird vor Ort' : 'Pay on site'}
-              </p>
-              <div className="flex gap-2">
+            {visibleStep === 1 ? (
+              <div className="flex items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={onBack}
@@ -1173,16 +1391,102 @@ function BookingForm({
                   {bt.back}
                 </button>
                 <button
-                  type="submit"
-                  form={`booking-form-${course.id}`}
-                  data-testid="booking-submit"
-                  disabled={submitting}
-                  className="btn-base btn-primary flex-1 px-6 py-2.5 text-sm disabled:opacity-50 sm:flex-none"
+                  type="button"
+                  onClick={goToStep2}
+                  data-testid="booking-next"
+                  className="btn-base btn-primary flex-1 px-6 py-2.5 text-sm sm:flex-none"
                 >
-                  {submitting ? bt.submitting : bt.reserveCta}
+                  {ft.formNext}
                 </button>
               </div>
-            </div>
+            ) : (
+              <>
+                {submitError && (
+                  <p
+                    role="alert"
+                    data-testid="booking-submit-error"
+                    className="mb-2 text-sm font-medium text-[var(--color-salsa)]"
+                  >
+                    {submitError}
+                  </p>
+                )}
+                {/* Kein mb hier: Satz und Link darunter gehoeren zusammen und stehen
+                    darum enger beieinander als der Link am Absende-Knopf (Naehe = Gruppe).
+                    Der Abstand nach unten sitzt am Link. */}
+                <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                  <input
+                    ref={privacyRef}
+                    type="checkbox"
+                    data-testid="booking-privacy"
+                    checked={privacy}
+                    onChange={(e) => setPrivacy(e.target.checked)}
+                    // Fehlender Haken ist ein Feldfehler, kein allgemeiner Formularfehler:
+                    // die Box selbst wird markiert und traegt ihre Meldung.
+                    aria-invalid={showErrors && !privacy ? true : undefined}
+                    aria-describedby={showErrors && !privacy ? 'booking-privacy-error' : undefined}
+                    className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-salsa)]"
+                  />
+                  {/* R183 gemessen: Der Inline-Link war 19px hoch — unter den 40px, die ein
+                      Finger sicher trifft, und er liegt mitten im Text der Checkbox. Ein
+                      Fehlgriff setzte den Haken statt die Seite zu oeffnen (oder umgekehrt).
+                      Der Satz nennt den Datenschutz jetzt nur noch. Der Link steht als
+                      eigene Zeile NEBEN dem Label (nicht darin) mit min-h-11: ein Klick
+                      darauf kann den Haken gar nicht mehr mitschalten. */}
+                  <span className="min-w-0 text-pretty">
+                    {lang === 'de'
+                      ? 'Ich habe die Datenschutzerklärung gelesen und bin damit einverstanden.'
+                      : 'I have read the privacy policy and agree to it.'}
+                  </span>
+                </label>
+                <a
+                  href="/datenschutz"
+                  target="_blank"
+                  rel="noreferrer"
+                  data-testid="booking-privacy-link"
+                  className="mb-2 inline-flex min-h-11 items-center text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4"
+                >
+                  {lang === 'de' ? 'Datenschutzerklärung lesen' : 'Read the privacy policy'}
+                </a>
+                {showErrors && !privacy && (
+                  <p id="booking-privacy-error" className="mb-2 text-sm font-medium text-[var(--color-salsa)]">
+                    {lang === 'de' ? 'Bitte setze das Häkchen beim Datenschutz.' : 'Please tick the privacy box.'}
+                  </p>
+                )}
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="order-last text-center text-xs font-medium text-[var(--color-ink-muted)] sm:order-first sm:text-left">
+                    {lang === 'de' ? 'Bezahlt wird vor Ort' : 'Pay on site'}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      // Offene Klasse hat keinen Schritt 1: dort schliesst der Knopf den
+                      // Dialog wie bisher, sonst geht er einen Schritt zurueck.
+                      onClick={
+                        isOpen
+                          ? onBack
+                          : () => {
+                              stepChanged.current = true;
+                              setStep(1);
+                            }
+                      }
+                      data-testid="booking-step-back"
+                      className="t-hover shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]"
+                    >
+                      {isOpen ? bt.back : ft.formBack}
+                    </button>
+                    <button
+                      type="submit"
+                      form={`booking-form-${course.id}`}
+                      data-testid="booking-submit"
+                      disabled={submitting}
+                      className="btn-base btn-primary flex-1 px-6 py-2.5 text-sm disabled:opacity-50 sm:flex-none"
+                    >
+                      {submitting ? bt.submitting : bt.reserveCta}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -1365,7 +1669,23 @@ function Fact({ label, tone, children }: { label: string; tone: 'light' | 'dark'
   );
 }
 
-function RoleTile({
+/**
+ * EINE Auswahl-Kachel fuer JEDE Auswahl in Schritt 1 — Rolle und Anmeldeart.
+ *
+ * Kritik-Fund KRITISCH (buchung-desktop-04-modal-leader-selected.png): Schritt 1 hatte
+ * zwei Auswahl-Gruppen direkt untereinander und zwei verschiedene "gewaehlt"-Looks.
+ * Im PNG gemessen: "Leader" gewaehlt = rgb(173,24,39) auf einer eckig-gerundeten Kachel,
+ * "Allein" gewaehlt = rgb(10,10,10) auf einer Pille — zwei Farben fuer dieselbe Bedeutung,
+ * 90px voneinander entfernt. Getrennte Komponenten (RoleTile / ModeButton) konnten nur
+ * auseinanderlaufen; jetzt gibt es nur noch diese eine.
+ *
+ * Eine Linie: Rot ist der EINZIGE Gewaehlt-Zustand. Rot traegt sonst nur der CTA, damit
+ * bleibt "rot = das habe ich gewaehlt bzw. das loest aus" die ganze Seite ueber wahr.
+ *
+ * R134/2 bleibt darin erhalten: auf roter Flaeche steht das Label weiss (Kontrast 5.9:1
+ * auf #AD1827), das Haekchen liegt im weissen Kreis. Kein Zustand ohne lesbares Wort.
+ */
+function ChoiceTile({
   testid,
   active,
   label,
@@ -1386,9 +1706,9 @@ function RoleTile({
       aria-invalid={invalid || undefined}
       onClick={onClick}
       className={cn(
-        'relative flex flex-col items-start rounded-[var(--radius-card)] border px-3 py-2.5 text-left transition-colors sm:px-3.5 sm:py-3',
+        'relative flex flex-1 flex-col items-start rounded-[var(--radius-card)] border px-3 py-2.5 text-left transition-colors sm:px-3.5 sm:py-3',
         active
-          ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white shadow-[inset_0_0_0_1.5px_var(--color-salsa)] ring-1 ring-[var(--color-salsa)]/30'
+          ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)]'
           : 'border-[var(--color-line)] bg-[var(--color-bg-soft)] hover:border-[var(--color-salsa)]',
         invalid && !active && 'border-[var(--color-salsa)]/50',
       )}
@@ -1398,7 +1718,7 @@ function RoleTile({
         className={cn(
           'absolute right-2.5 top-2.5 flex h-4 w-4 items-center justify-center rounded-full border',
           active
-            ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white'
+            ? 'border-white bg-white text-[var(--color-salsa)]'
             : 'border-[var(--color-line)] bg-white',
         )}
       >
@@ -1408,38 +1728,9 @@ function RoleTile({
           </svg>
         )}
       </span>
-      <span className={cn('pr-7 font-display text-base font-bold leading-tight sm:text-lg', active ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)]')}>
+      <span className={cn('pr-7 font-display text-base font-bold leading-tight sm:text-lg', active ? 'text-white' : 'text-[var(--color-ink)]')}>
         {label}
       </span>
-    </button>
-  );
-}
-
-function ModeButton({
-  testid,
-  active,
-  onClick,
-  children,
-}: {
-  testid: string;
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      data-testid={testid}
-      aria-pressed={active}
-      onClick={onClick}
-      className={cn(
-        'flex-1 rounded-full border px-3 py-2 text-sm font-semibold transition-colors sm:px-4 sm:py-2.5',
-        active
-          ? 'border-[var(--color-ink)] bg-[var(--color-ink)] text-white shadow-sm'
-          : 'border-[var(--color-line)] bg-[var(--color-bg-soft)] text-[var(--color-ink)] hover:border-[var(--color-salsa)]',
-      )}
-    >
-      {children}
     </button>
   );
 }
@@ -1483,7 +1774,7 @@ function PersonFields({
             aria-describedby={showErrors && !person.firstName.trim() ? `${prefix}-firstName-error` : undefined}
             className={input}
           />
-          {showErrors && !person.firstName.trim() && <span id={`${prefix}-firstName-error`} className="mt-1 block text-xs font-medium text-[var(--color-salsa)]">{bt.requiredHint}</span>}
+          {showErrors && !person.firstName.trim() && <span id={`${prefix}-firstName-error`} className="mt-1 block text-xs font-medium text-[var(--color-salsa)]">{bt.fieldRequired}</span>}
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
@@ -1500,7 +1791,7 @@ function PersonFields({
             aria-describedby={showErrors && !person.lastName.trim() ? `${prefix}-lastName-error` : undefined}
             className={input}
           />
-          {showErrors && !person.lastName.trim() && <span id={`${prefix}-lastName-error`} className="mt-1 block text-xs font-medium text-[var(--color-salsa)]">{bt.requiredHint}</span>}
+          {showErrors && !person.lastName.trim() && <span id={`${prefix}-lastName-error`} className="mt-1 block text-xs font-medium text-[var(--color-salsa)]">{bt.fieldRequired}</span>}
         </label>
       </div>
       <label className="block">
@@ -1519,7 +1810,8 @@ function PersonFields({
           aria-describedby={showErrors && !emailOk(person.email) ? `${prefix}-email-error` : undefined}
           className={input}
         />
-        {showErrors && !emailOk(person.email) && <span id={`${prefix}-email-error`} className="mt-1 block text-xs font-medium text-[var(--color-salsa)]">{bt.requiredHint}</span>}
+        {showErrors && !person.email.trim() && <span id={`${prefix}-email-error`} className="mt-1 block text-xs font-medium text-[var(--color-salsa)]">{bt.fieldRequired}</span>}
+        {showErrors && person.email.trim() && !emailOk(person.email) && <span id={`${prefix}-email-error`} className="mt-1 block text-xs font-medium text-[var(--color-salsa)]">{bt.emailInvalid}</span>}
       </label>
       <label className="block">
         <span className="mb-1 block text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">

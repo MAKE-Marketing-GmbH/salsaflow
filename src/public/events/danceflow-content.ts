@@ -96,7 +96,7 @@ const CRUMBS: Crumb[] = [
   { label: 'Danceflow Night', href: R.self },
 ];
 
-export const DANCEFLOW: Record<Lang, DanceflowContent> = {
+export const DANCEFLOW = {
   de: {
     seo: 'danceflow',
     crumbs: CRUMBS,
@@ -115,7 +115,7 @@ export const DANCEFLOW: Record<Lang, DanceflowContent> = {
       secondary: { label: 'Eintrittspreise ansehen', href: R.preise },
       microcopy: 'Komm zum Tanzen, nicht zum Beweisen.',
       image: {
-        src: '/photos/party/party-50-v3.webp',
+        src: '/photos/party/party-50-v4.webp',
         alt: 'Tanzpaar inmitten einer hellen Danceflow Night im Salsaflow-Studio',
         width: 2048,
         height: 1360,
@@ -249,7 +249,7 @@ export const DANCEFLOW: Record<Lang, DanceflowContent> = {
       secondary: { label: 'See entry prices', href: R.preise },
       microcopy: 'Come to dance, not to prove yourself.',
       image: {
-        src: '/photos/party/party-50-v3.webp',
+        src: '/photos/party/party-50-v4.webp',
         alt: 'Dance couple in the middle of a bright Danceflow Night at the Salsaflow studio',
         width: 2048,
         height: 1360,
@@ -361,4 +361,4 @@ export const DANCEFLOW: Record<Lang, DanceflowContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, DanceflowContent>;

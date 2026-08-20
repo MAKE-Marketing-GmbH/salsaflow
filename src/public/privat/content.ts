@@ -37,7 +37,12 @@ export type PrivatContent = {
     title: string;
     titleAccent?: string;
     intro: string;
+    /** R140: Die drei haeufigsten Anlaesse. Sie bleiben Karten und tragen den Block. */
     cards: { title: string; text: string }[];
+    /** R140: Die restlichen Anlaesse als leise Zeile darunter, nicht als vierte bis
+     *  sechste gleich laute Karte (Video 04:21 «viel zu viel», Frame p-08). */
+    moreLabel: string;
+    more: string[];
     cta: Cta;
   };
   flow: {
@@ -99,70 +104,107 @@ const de: PrivatContent = {
   crumb: { label: 'Privatstunden', href: R.privat },
   hero: {
     eyebrow: 'Privatstunden in Basel',
-    title: 'Persönlicher Unterricht für genau das, was du verbessern willst.',
-    titleAccent: 'verbessern',
-    lead: 'In einer Privatstunde arbeitest du direkt an deinem Ziel: Technik, Rhythmus, Führung, Folgen, Styling, Hochzeitstanz oder ein sicherer Einstieg in dein nächstes Level.',
+    // R140 (Video 04:21 «viel zu viel Text»): Headline von 8 auf 5 Wörter, Lead von
+    // 30 auf 14 Wörter, vier Chips auf drei. Aussage und Ziel-Liste bleiben.
+    title: 'Unterricht für genau dein Ziel.',
+    titleAccent: 'dein Ziel',
+    lead: 'Technik, Hochzeitstanz oder der Sprung ins nächste Level. Du sagst, woran du arbeiten willst.',
     bullets: [
-      'persönliche Korrektur statt allgemeiner Kurslogik',
-      'Salsa, Bachata, Hochzeitstanz und Technik-Fokus möglich',
-      'für Einzelpersonen, Paare oder kleine Ziele',
-      'direkt im Salsaflow-Studio am Bahnhof SBB',
+      'persönliche Korrektur statt Kurslogik',
+      'Salsa, Bachata, Hochzeitstanz, Technik',
+      'im Studio am Bahnhof SBB',
     ],
     primary: { label: 'Privatstunde anfragen', href: R.privatAnfrage },
     secondary: { label: 'Preise ansehen', href: R.preise },
-    microcopy: 'Beschreib kurz dein Ziel. Wir empfehlen dir den sinnvollen nächsten Schritt.',
+    microcopy: 'Beschreib kurz dein Ziel. Wir empfehlen dir den nächsten Schritt.',
+    // R177b: party-04 war warm/orange (Opus FAIL). party-31-v3: weisse Wand,
+    // blaues Licht, Frau frontal, Mann Gesicht sichtbar. Mittel 91.3.
+    // Nicht studiowand, nicht party-33, nicht KI. Crop in PrivatstundenPage.
     image: {
-      src: '/photos/premium/offer-privat-square-1200.webp',
-      alt: 'Persönlicher Tanzunterricht im hellen Salsaflow Studio',
+      src: '/photos/party/party-31-v3.webp',
+      alt: 'Paar tanzt, die Frau lächelt in die Kamera, der Mann hinter ihr',
     },
     cardLabel: 'Dein Ziel',
     cardText: 'Technik, Hochzeitstanz oder ein sicherer Einstieg. Persönlich begleitet.',
   },
   when: {
-    title: 'Privatstunden sind sinnvoll, wenn du nicht allgemein üben willst, sondern gezielt weiterkommen möchtest.',
-    titleAccent: 'gezielt',
-    intro: 'Reguläre Kurse bauen dich Schritt für Schritt auf. Privatstunden setzen dort an, wo du persönliche Aufmerksamkeit brauchst.',
+    // R140: Titel von 16 auf 5 Wörter. Der alte Satz lief über drei Zeilen und sagte
+    // dasselbe wie der Intro-Satz darunter.
+    title: 'Wann sich das lohnt.',
+    titleAccent: 'lohnt',
+    intro: 'Kurse bauen dich Schritt für Schritt auf. Privatstunden setzen dort an, wo du Aufmerksamkeit brauchst.',
+    // R140: Drei statt sechs Karten. Drei Anlässe tragen den Block, drei stehen
+    // als leise Zeile darunter. Die Reihenfolge ist eine Layout-Entscheidung,
+    // keine Häufigkeits-Aussage: dazu gibt es keine Zahlen vom Studio.
     cards: [
-      { title: 'Hochzeitstanz', text: 'Wenn ein bestimmter Anlass näherkommt und ihr euch sicherer fühlen wollt.' },
-      { title: 'Technik', text: 'Wenn du immer wieder an der gleichen Bewegung hängen bleibst.' },
-      { title: 'Levelwechsel', text: 'Wenn du wissen willst, ob du bereit für das nächste Level bist.' },
-      { title: 'Wiedereinstieg', text: 'Wenn du früher getanzt hast und nicht weisst, wo du wieder einsteigen sollst.' },
-      { title: 'Paartanz als Paar', text: 'Wenn ihr gemeinsam lernen und in eurem Tempo arbeiten wollt.' },
-      { title: 'Styling & Musikalität', text: 'Wenn du Bewegungen schöner, freier und musikalischer tanzen möchtest.' },
+      { title: 'Hochzeitstanz', text: 'Ein Anlass steht an und ihr wollt euch sicher fühlen.' },
+      { title: 'Technik', text: 'Du bleibst immer wieder an derselben Bewegung hängen.' },
+      { title: 'Levelwechsel', text: 'Du willst wissen, ob du bereit für das nächste Level bist.' },
     ],
+    // R140: Die restlichen Anlässe bleiben lesbar, aber leise. Label neutral:
+    // «Ebenfalls häufig» behauptete eine Häufigkeit ohne Beleg.
+    moreLabel: 'Weitere Anlässe',
+    more: ['Wiedereinstieg nach einer Pause', 'Zusammen als Paar üben', 'Styling und Musikalität'],
     cta: { label: 'Ziel beschreiben', href: R.privatAnfrage },
   },
   flow: {
     eyebrow: 'So funktioniert es',
-    title: 'Eine gute Privatstunde beginnt nicht mit Figuren. Sie beginnt mit deinem Ziel.',
-    titleAccent: 'Ziel',
+    // R140: Der alte Titel war eine Antithese-Figur («beginnt nicht mit Figuren.
+    // Sie beginnt mit …», forbidden.md A2) und lief über drei Zeilen.
+    title: 'So läuft eine Stunde ab.',
+    titleAccent: 'Stunde',
     body: 'Je klarer dein Ziel, desto besser wird die Stunde.',
     steps: [
-      { tag: 'Schritt 1', title: 'Ziel klären', text: 'Du sagst uns, was du verbessern willst oder welcher Anlass ansteht.' },
-      { tag: 'Schritt 2', title: 'Fokus setzen', text: 'Wir wählen Technik, Bewegungen oder Übungen, die zu deinem Level passen.' },
-      { tag: 'Schritt 3', title: 'Direkt korrigieren', text: 'Du bekommst Feedback im Moment, statt erst Wochen später zu merken, was nicht sitzt.' },
+      { tag: 'Schritt 1', title: 'Ziel klären', text: 'Du sagst uns, woran du arbeiten willst.' },
+      { tag: 'Schritt 2', title: 'Fokus setzen', text: 'Wir wählen Übungen, die zu deinem Level passen.' },
+      { tag: 'Schritt 3', title: 'Direkt korrigieren', text: 'Du bekommst dein Feedback sofort, nicht Wochen später.' },
     ],
     cta: { label: 'Privatstunde buchen', href: R.privatAnfrage },
     // Runde 3, Issue 3: war /photos/gallery/kurse/03.jpg — ein Party-Schnappschuss unter
     // der Ueberschrift "Persoenliche Korrektur im Unterricht". Der wide-Crop der
     // Privatstunden-Strecke zeigt genau das: eine Lehrerin fuehrt Hand in Hand.
+    //
+    // R140 (Video 09:02 «viel zu dunkel und das ist auch falsch eingefaerbt»): erst weg
+    // von offer-privat-wide-original-v2.webp (mean 124.5, R 130.1 / G 118.6 / B 124.7 —
+    // Gruen unter Rot UND Blau, also Magenta-Stich).
+    //
+    // R140-Fix: offer-privat-1200.webp war der falsche Ersatz. Es ist derselbe Schnitt
+    // wie der damalige quadratische Hero-Crop — gleiches Paar, gleiche Wand,
+    // gleiches warmes Licht, nur naeher. Der Crop schnitt der Frau links das Gesicht an.
+    // Jetzt gallery/kurse/06.jpg, per Read einzeln angesehen und gemessen:
+    //   offer-privat-1200: mean 133.7, R 157.1 / G 129.7 / B 114.4  (warmes Kunstlicht)
+    //   kurse/06.jpg:      mean 125.3, R 165.9 / G 116.4 /  B 93.4  (Tageslicht, die
+    //     Rot-Spitze ist die rote Studiowand im Motiv, kein Weissabgleich-Fehler)
+    // Scharf, Tageslicht, helles Parkett, alle Koepfe ganz im Bild, anderes Motiv als
+    // der Hero. Es zeigt genau die Aussage der Sektion: jemand korrigiert vorne, die
+    // Uebenden machen mit. Kein KI-Bild, kein Salsa-/Bachata-/Heels-Motiv.
+    // Kein CSS-Filter als Ersatz: photo-grade-private ist raus, das Foto traegt sich selbst.
+    //
+    // Quadratisch statt 3:2: die Quelle ist hochkant (1066x1600). Bei 1:1 bleibt der
+    // Lehrer ganz im Ausschnitt.
     image: {
-      src: '/photos/premium/offer-privat-wide-original-v2.webp',
-      alt: 'Persönliche Korrektur im Salsaflow Unterricht',
+      src: '/photos/gallery/kurse/06.jpg',
+      alt: 'Tanzlehrer zeigt einen Schritt, die Übenden folgen im hellen Studio',
     },
   },
   formats: {
-    title: 'Das Format richtet sich nach deinem Ziel.',
+    // R140-Fix: «zu dritt» engte die Kleingruppe auf genau drei Personen ein und
+    // widersprach der Zeile «Kleingruppe» darunter. Der Titel nennt jetzt dieselben
+    // drei Formate wie die Liste.
+    title: 'Allein, als Paar oder in kleiner Gruppe.',
+    titleAccent: 'kleiner Gruppe',
     items: [
-      { name: 'Einzelperson', text: 'Ideal für Technik, Styling, Musikalität oder Level-Fragen.' },
-      { name: 'Paar', text: 'Ideal für Hochzeitstanz, Paartanz-Sicherheit oder gemeinsames Lernen.' },
-      { name: 'Kleingruppe', text: 'Sinnvoll, wenn mehrere Personen ein bestimmtes Thema oder einen Anlass vorbereiten.' },
+      { name: 'Einzelperson', text: 'Für Technik, Styling oder Level-Fragen.' },
+      { name: 'Paar', text: 'Für Hochzeitstanz und Sicherheit als Paar.' },
+      // R140-Fix: Thema war beim Kürzen weggefallen und stand nur noch als Anlass.
+      { name: 'Kleingruppe', text: 'Wenn mehrere ein Thema oder einen Anlass vorbereiten.' },
     ],
   },
   prices: {
     title: 'Einzelstunde oder Paket?',
     titleAccent: 'Paket',
-    body: 'Eine Einzelstunde passt, wenn du ein konkretes Thema testen oder eine Frage klären willst. Ein Paket lohnt sich, wenn du an einem Ziel über mehrere Wochen arbeiten möchtest, etwa Hochzeitstanz, Technik oder Levelaufbau.',
+    // R140: von 38 auf 21 Wörter. Beide Fälle stehen weiter drin.
+    body: 'Eine Einzelstunde passt für eine konkrete Frage. Ein Paket lohnt sich, wenn du über Wochen an einem Ziel arbeitest.',
     rows: [
       { label: 'Privatstunde 1 Person', price: 'CHF 100.-' },
       { label: '5 Privatstunden 1 Person', price: 'CHF 450.-' },
@@ -175,13 +217,17 @@ const de: PrivatContent = {
   notFor: {
     title: 'Nicht jede Frage braucht eine Privatstunde.',
     titleAccent: 'Privatstunde',
-    body: 'Wenn du einfach herausfinden willst, ob Salsa oder Bachata zu dir passt, reicht oft eine Gratis Schnupperstunde. Wenn du aber ein klares Ziel, einen Anlass oder eine wiederkehrende Unsicherheit hast, ist Privatunterricht der schnellere Weg.',
+    // R140: gekürzt. R140-Fix: «reicht» war eine absolute Zusage, im Plan stand
+    // «oft». Anlass und wiederkehrendes Problem sind wieder drin: sie waren zwei
+    // von drei Gründen für eine Privatstunde und fielen beim Kürzen weg.
+    body: 'Für die erste Orientierung reicht oft die Gratis Schnupperstunde. Bei einem klaren Ziel, einem Anlass oder einem wiederkehrenden Problem kommst du mit Privatunterricht schneller weiter.',
     cta: { label: 'Schnupperstunde buchen', href: R.schnupper },
   },
   closing: {
-    title: 'Beschreib uns dein Ziel. Wir sagen dir, was sinnvoll ist.',
+    title: 'Beschreib uns dein Ziel.',
     titleAccent: 'dein Ziel',
-    body: 'Schreib kurz, ob es um Salsa, Bachata, Hochzeitstanz, Technik oder Level geht. So können wir dir schneller eine passende Empfehlung geben.',
+    // R140: von 23 auf 15 Wörter.
+    body: 'Schreib kurz, worum es geht: Salsa, Bachata, Hochzeitstanz, Technik oder Level. Wir empfehlen dir das passende Format.',
     primary: { label: 'Privatstunde anfragen', href: R.privatAnfrage },
     secondary: { label: 'Kontakt aufnehmen', href: R.kontakt },
     microcopy: 'Persönlich · flexibel · direkt am Bahnhof SBB.',
@@ -213,67 +259,67 @@ const en: PrivatContent = {
   crumb: { label: 'Private lessons', href: R.privat },
   hero: {
     eyebrow: 'Private lessons in Basel',
-    title: 'Personal coaching for exactly what you want to improve.',
-    titleAccent: 'improve',
-    lead: 'In a private lesson you work directly on your goal: technique, rhythm, leading, following, styling, wedding dance or a safe entry into your next level.',
+    title: 'Coaching for exactly your goal.',
+    titleAccent: 'your goal',
+    lead: 'Technique, a wedding dance or the step up to the next level. You tell us what to work on.',
     bullets: [
-      'personal correction instead of general course logic',
-      'Salsa, Bachata, wedding dance and a technique focus possible',
-      'for individuals, couples or small goals',
-      'right in the Salsaflow studio at Basel SBB station',
+      'personal correction instead of course logic',
+      'Salsa, Bachata, wedding dance, technique',
+      'in the studio at Basel SBB station',
     ],
     primary: { label: 'Request a private lesson', href: R.privatAnfrage },
     secondary: { label: 'See the prices', href: R.preise },
-    microcopy: 'Describe your goal in a few words. We recommend the sensible next step.',
+    microcopy: 'Describe your goal in a few words. We recommend the next step.',
+    // R177: same photo as DE. Not studiowand-01.
     image: {
-      src: '/photos/premium/offer-privat-square-1200.webp',
-      alt: 'Personal dance coaching in the bright Salsaflow studio',
+      src: '/photos/party/party-31-v3.webp',
+      alt: 'Couple dancing, the woman smiling at the camera, the man behind her',
     },
     cardLabel: 'Your goal',
     cardText: 'Technique, wedding dance or a safe start. Personally guided.',
   },
   when: {
-    title: 'Private lessons make sense when you do not want to practise in general but want to make targeted progress.',
-    titleAccent: 'targeted',
-    intro: 'Regular courses build you up step by step. Private lessons start exactly where you need personal attention.',
+    title: 'When it pays off.',
+    titleAccent: 'pays off',
+    intro: 'Courses build you up step by step. Private lessons start where you need attention.',
     cards: [
-      { title: 'Wedding dance', text: 'When a certain occasion is coming up and you want to feel more confident together.' },
-      { title: 'Technique', text: 'When you keep getting stuck on the same movement.' },
-      { title: 'Level change', text: 'When you want to know if you are ready for the next level.' },
-      { title: 'Coming back', text: 'When you danced before and do not know where to start again.' },
-      { title: 'Dancing as a couple', text: 'When you want to learn together and work at your own pace.' },
-      { title: 'Styling & musicality', text: 'When you want to dance movements more beautifully, freely and musically.' },
+      { title: 'Wedding dance', text: 'An occasion is coming up and you want to feel confident.' },
+      { title: 'Technique', text: 'You keep getting stuck on the same movement.' },
+      { title: 'Level change', text: 'You want to know if you are ready for the next level.' },
     ],
+    moreLabel: 'Other reasons',
+    more: ['Coming back after a break', 'Practising together as a couple', 'Styling and musicality'],
     cta: { label: 'Describe your goal', href: R.privatAnfrage },
   },
   flow: {
     eyebrow: 'How it works',
-    title: 'A good private lesson does not start with figures. It starts with your goal.',
-    titleAccent: 'goal',
+    title: 'How a lesson runs.',
+    titleAccent: 'lesson',
     body: 'The clearer your goal, the better the lesson.',
     steps: [
-      { tag: 'Step 1', title: 'Clarify the goal', text: 'You tell us what you want to improve or which occasion is coming up.' },
-      { tag: 'Step 2', title: 'Set the focus', text: 'We pick technique, movements or exercises that fit your level.' },
-      { tag: 'Step 3', title: 'Correct on the spot', text: 'You get feedback in the moment, instead of noticing weeks later what is not working.' },
+      { tag: 'Step 1', title: 'Clarify the goal', text: 'You tell us what you want to work on.' },
+      { tag: 'Step 2', title: 'Set the focus', text: 'We pick exercises that fit your level.' },
+      { tag: 'Step 3', title: 'Correct on the spot', text: 'You get your feedback right away, not weeks later.' },
     ],
     cta: { label: 'Book a private lesson', href: R.privatAnfrage },
     image: {
-      src: '/photos/premium/offer-privat-wide-original-v2.webp',
-      alt: 'Personal correction in a Salsaflow class',
+      src: '/photos/gallery/kurse/06.jpg',
+      alt: 'Dance teacher showing a step while the students follow in the bright studio',
     },
   },
   formats: {
-    title: 'The format follows your goal.',
+    title: 'Alone, as a couple or in a small group.',
+    titleAccent: 'small group',
     items: [
-      { name: 'Individual', text: 'Ideal for technique, styling, musicality or level questions.' },
-      { name: 'Couple', text: 'Ideal for a wedding dance, partner-dance confidence or learning together.' },
-      { name: 'Small group', text: 'Useful when several people prepare a certain topic or occasion.' },
+      { name: 'Individual', text: 'For technique, styling or level questions.' },
+      { name: 'Couple', text: 'For a wedding dance and confidence as a pair.' },
+      { name: 'Small group', text: 'When several people prepare a topic or an occasion.' },
     ],
   },
   prices: {
     title: 'Single lesson or package?',
     titleAccent: 'package',
-    body: 'A single lesson fits when you want to test a specific topic or clear up a question. A package is worth it when you want to work on a goal over several weeks, for example wedding dance, technique or level building.',
+    body: 'A single lesson fits a specific question. A package is worth it when you work on a goal over several weeks.',
     rows: [
       { label: 'Private lesson, 1 person', price: 'CHF 100.-' },
       { label: '5 private lessons, 1 person', price: 'CHF 450.-' },
@@ -286,13 +332,13 @@ const en: PrivatContent = {
   notFor: {
     title: 'Not every question needs a private lesson.',
     titleAccent: 'private lesson',
-    body: 'If you simply want to find out whether Salsa or Bachata suits you, a free trial class is often enough. But if you have a clear goal, an occasion or a recurring uncertainty, private coaching is the faster way.',
+    body: 'For a first orientation, the free trial class is often enough. With a clear goal, an occasion or a recurring problem, private coaching gets you there faster.',
     cta: { label: 'Book a trial class', href: R.schnupper },
   },
   closing: {
-    title: 'Describe your goal. We will recommend the right format.',
+    title: 'Describe your goal.',
     titleAccent: 'your goal',
-    body: 'Tell us briefly whether your goal is Salsa, Bachata, a wedding dance, technique or level placement. We can then recommend the right format.',
+    body: 'Tell us briefly what it is about: Salsa, Bachata, a wedding dance, technique or level. We will recommend the right format.',
     primary: { label: 'Request a private lesson', href: R.privatAnfrage },
     secondary: { label: 'Get in touch', href: R.kontakt },
     microcopy: 'Personal · flexible · right by Basel SBB station.',
@@ -319,4 +365,4 @@ const en: PrivatContent = {
   ],
 };
 
-export const PRIVAT: Record<Lang, PrivatContent> = { de, en };
+export const PRIVAT = { de, en } satisfies Record<Lang, PrivatContent>;

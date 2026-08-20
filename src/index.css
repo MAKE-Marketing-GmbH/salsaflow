@@ -51,9 +51,8 @@
   --color-salsa-700: #8e1320;
   --color-salsa-600: #8e1320; /* Back-Compat: Hover/Active auf rotem Button (dunkler) */
   --color-salsa-500: #c61f30;
-  --color-salsa-300: #e07b86; /* Back-Compat */
-  --color-salsa-100: #f7dcdf;
-  --color-salsa-50: #fceeef;
+  /* Die hellen Stufen sind geloescht (Raphael-Lock 17.08.: kein Pastellrot, nirgends).
+     Wer eine hellere Stufe braucht, nimmt Weiss mit Deckkraft auf dunkler Flaeche. */
 
   /* Typografie (Stage 7: Display Familjen Grotesk -> Cabinet Grotesk, self-hosted) */
   --font-display: "Cal Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -87,6 +86,20 @@
   --dur-base: 240ms;
   --dur-slow: 420ms;
   --ease-sf: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* R153: Wie stark der Cookie-Hinweis den WhatsApp-Float anhebt.
+   * Unter sm ist der Wert 0px — dort loest der rechte Gutter am Banner-Wrapper den
+   * Konflikt bereits waagerecht, und ein Vertikal-Lift wuerde den Kreis genau auf den
+   * Hero-CTA «Schnupperstunde buchen» heben. Ab sm hebt der Float ueber die Karte.
+   * Der Float rechnet die Variable in seinen Inline-`bottom` mit (WhatsAppFloat.tsx);
+   * `--cookie-banner-height` selbst bleibt unberuehrt, weil das body-Polster daran haengt. */
+  --cookie-float-lift: 0px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --cookie-float-lift: var(--cookie-banner-height, 0px);
+  }
 }
 
 @media (max-width: 639px) {
@@ -278,6 +291,37 @@ form h3.type-h3,
        zurueckgedreht — Raphael R120: 12rem war falsche Flaeche.) */
     --whatsapp-lift: 5rem;
   }
+
+  /* R138, /tanzkurse/bachata Mobil: derselbe Fall wie /kursplan, nur kleiner. Der Float
+     stand bei y690-746 und x314-370; der erste Bullet-Chip laeuft von x20 bis x315 und
+     beginnt bei y739 — die rechte Chip-Rundung lag unter dem Knopf (Kritik R138,
+     Mobil-Shot y766-821). Die Chip-Copy ist gesperrt, der Chip darf also nicht kuerzer
+     werden. 1.5rem heben den Float auf y666-722, also 17px ueber die Chip-Oberkante,
+     ohne ihn auf das Hero-Foto zu schieben (Foto-Unterkante y718 liegt rechts daneben
+     bei x369, der Knopf beginnt erst bei x314 und bleibt unter der Bildkante).
+     Gilt nur unter sm und nur auf dieser Route: der Marker ist bewusst
+     [data-bachata-style-page], NICHT [data-split-hero-page] — Salsa teilt sich den
+     Split-Hero, hat im Fold aber keine Chips neben dem Knopf und muss pixelgleich zu
+     S7-ux137 bleiben. Desktop unveraendert 0px. */
+  :root:has([data-bachata-style-page]) {
+    --whatsapp-lift: 1.5rem;
+  }
+
+  /* R139, /tanzkurse/heels Mobil: hier steht bewusst KEIN Lift.
+     Ein erster Versuch setzte 3.5rem und schob den Knopf damit von der Chip-Zeile
+     mitten auf das Hero-Foto (y712-768 im Bild y541-773, x314-370 im Bild x21-369) —
+     er verdeckte die zweite Taenzerin (Sol-Fund R139, live gemessen).
+     Ein Lift kann den Fall nicht loesen: zwischen Bildunterkante und Chip-Oberkante
+     liegen strukturell nur 21px (grid gap-5), der Knopf ist 56px hoch. Jeder Wert
+     trifft entweder Foto oder Chip.
+     Geloest wurde es an der Bild-Ratio in HeelsView.tsx: mobil 21/9 statt 3/2 zieht
+     die Bildkante auf y690, Chip-Zeile 1 laeuft y711-755 und endet bei x172. Die
+     Knopf-Spalte ab x314 ist damit frei, und der Float bleibt bei Default 0
+     auf y768-824 — ohne Kontakt zu Foto oder Chip. Bei 360x800 ebenso
+     (Bild bis y700, Float y724-780).
+     Gemessen im Zustand OHNE Cookie-Banner: der Banner (78px) hebt den Float
+     voruebergehend mit, faellt nach dem Akzeptieren weg und laesst ihn 78px tiefer
+     zurueck. Wer nur den Erstbesuch shootet, sieht die echte Lage nie. */
 }
 
 /* Kontrast-Schutz (Regel 005): Ein Link ohne eigene text-Klasse erbt die
@@ -367,7 +411,7 @@ form h3.type-h3,
    *   .btn-outline  Kontur, transparenter Grund, hover fuellt mit ink
    *   Text-Link mit Pfeil = CtaText/GhostCta in site/primitives.tsx (keine Klasse noetig)
    *
-   * Hover geht NIE nach Rosa. salsa-50/100 als Hover-Flaeche hellt den Knopf auf,
+   * Hover geht NIE nach Rosa. Eine helle Hover-Flaeche hellt den Knopf auf,
    * statt ihn zu vertiefen — der Zustandswechsel las sich als "deaktiviert".
    * Groesse, Padding und Icon bleiben an der Stelle; hier steht nur die Bauform. */
   .btn-base {
@@ -441,6 +485,17 @@ main img.photo-grade-private {
   filter: saturate(0.9) contrast(1.14) brightness(1.08) !important;
 }
 
+/* R138, Raphael-Video 09:08 zur Bachata-Route: «das war auch falsch eingefaerbt.»
+ * photo-grade-bachata (saturate 0.82, contrast 1.14) zieht die warmen Hauttoene
+ * dieser Aufnahmen ins Graue und haertet die Kanten. Die Klasse haengt aber auch an
+ * Offer.tsx:67 und bleibt darum unveraendert. Diese zwei Klassen gelten nur fuer
+ * /tanzkurse/bachata: heller, ohne den Saettigungs-Entzug.
+ * -hero: das grosse Hero-Foto rechts. -why: das Foto im Warum-Block. */
+main img.photo-grade-bachata-hero,
+main img.photo-grade-bachata-why {
+  filter: saturate(0.98) contrast(1.04) brightness(1.06) !important;
+}
+
 /* Buchungs-Dialog: sanfte Ein-Animation (Backdrop + Panel, 150-200ms).
  * motion-safe ist im Tailwind-Arbitrary-Value gesetzt, reduced-motion bleibt ruhig. */
 @keyframes booking-backdrop-in {
@@ -460,6 +515,318 @@ main img.photo-grade-private {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+/* WhatsApp-Float: EIN Auftritt, danach Ruhe (R134/10).
+ * Kein Puls, kein Ping-Ring, kein Wackeln — der Knopf steigt einmal aus der unteren
+ * Kante auf und richtet sich dabei auf.
+ *
+ * Warum CSS statt React-State: Der Startzustand lag vorher in `useState(false)` und
+ * haengte an `useReducedMotion()`. Auf dem Server ist dieser Wert null, beim Hydrieren
+ * kann er true werden — Server und Client rendern dann verschiedene Klassen und der
+ * Knopf blieb im schlimmsten Fall unsichtbar. Die Animation laeuft jetzt in einer
+ * stabilen Klasse: dasselbe HTML auf Server und Client, und `prefers-reduced-motion`
+ * entscheidet allein die Media-Query. Wer keine Bewegung will, sieht den Knopf sofort
+ * an seinem Platz. */
+@media (prefers-reduced-motion: no-preference) {
+  /* R153: Nur zwei Eigenschaften bewegen sich — opacity und translateY. Das `scale(0.9)`
+   * ist raus: es liess den Knopf beim Auftritt aufpoppen, und genau dieses Aufpoppen liest
+   * sich wie der Puls, den Raphael nicht will. Kein Puls, kein Ping, kein Scale, kein
+   * Wackeln, keine Wiederholung: `animation-iteration-count` bleibt der Default 1. */
+  @keyframes whatsapp-float-in {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Dauer und Kurve aus den Motion-Token (--dur-slow / --ease-sf) statt eigener 520ms-Zahl:
+   * eine Stufe fuer grosse Flaechen, eine Kurve fuer alles. `both` haelt den Startzustand
+   * waehrend der Verzoegerung, sonst blitzt der Knopf vor dem Auftritt kurz auf. */
+  .whatsapp-float {
+    animation: whatsapp-float-in var(--dur-slow) var(--ease-sf) 90ms both;
+  }
+}
+
+/* R140, /privatstunden Desktop: Der Float ist sitewide eine Pille mit dem Label
+ * «WhatsApp» (im Vorher-Shot 1440x730 gemessen, worklog/shots/S7-ux140/vorher/
+ * privat-desktop-1440-fold.png). Auf dieser Route soll er ein Kreis sein.
+ * Route-lokal ueber den eigenen Marker [data-privat-page] aus PrivatstundenPage.tsx,
+ * damit WhatsAppFloat.tsx (sitewide) und die Marker anderer Routen unberuehrt bleiben.
+ * Nur ab sm: mobil ist der Knopf ohnehin schon ein Kreis. */
+@media (min-width: 640px) {
+  body:has([data-privat-page]) a.whatsapp-float {
+    width: 3.5rem;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  body:has([data-privat-page]) a.whatsapp-float span {
+    display: none;
+  }
+}
+
+/* R141, /kursaufbau Desktop: gleicher Fall wie R140 auf /privatstunden. Der Float ist
+ * sitewide eine Pille mit dem Label «WhatsApp» (im Vorher-Shot 1440x730 gemessen,
+ * worklog/shots/S7-ux141/vorher/kursaufbau-desktop-1440-vorher.png). Auf dieser Route
+ * soll er ein Kreis sein. Route-lokal ueber den eigenen Marker [data-kursaufbau-page]
+ * aus KursaufbauPage.tsx, damit WhatsAppFloat.tsx (sitewide) und die Marker anderer
+ * Routen unberuehrt bleiben. Nur ab sm: mobil ist der Knopf ohnehin schon ein Kreis. */
+@media (min-width: 640px) {
+  body:has([data-kursaufbau-page]) a.whatsapp-float {
+    width: 3.5rem;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  body:has([data-kursaufbau-page]) a.whatsapp-float span {
+    display: none;
+  }
+}
+
+/* R142, /events Desktop: gleicher Fall wie R140 (/privatstunden) und R141 (/kursaufbau).
+ * Der Float ist sitewide eine Pille mit dem Label «WhatsApp» (im Vorher-Shot 1440x730
+ * gemessen, worklog/shots/S7-ux142/vorher/events-desktop-00-fold.png). Auf dieser Route
+ * soll er ein Kreis sein. Route-lokal ueber den eigenen Marker [data-events-page] aus
+ * EventsPage.tsx, damit WhatsAppFloat.tsx (sitewide) und die Marker anderer Routen
+ * unberuehrt bleiben. Nur ab sm: mobil ist der Knopf ohnehin schon ein Kreis. */
+@media (min-width: 640px) {
+  body:has([data-events-page]) a.whatsapp-float {
+    width: 3.5rem;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  body:has([data-events-page]) a.whatsapp-float span {
+    display: none;
+  }
+}
+
+/* R144, /team Desktop: gleicher Fall wie R142 (/events). Der Float ist sitewide eine
+ * Pille mit dem Label «WhatsApp» (im Vorher-Shot 1440x730 als 121x56 gemessen,
+ * worklog/shots/S7-ux144/vorher/team-desktop-1440.png). Auf dieser Route soll er ein
+ * Kreis sein. Route-lokal ueber den eigenen Marker [data-team-page] aus TeamPage.tsx,
+ * damit WhatsAppFloat.tsx (sitewide) und die Marker anderer Routen unberuehrt bleiben.
+ * Regelkoerper ist die unveraenderte Kopie der R142-Regel darueber, nur der Selektor
+ * wechselt. Nur ab sm: mobil ist der Knopf ohnehin schon ein Kreis. */
+@media (min-width: 640px) {
+  body:has([data-team-page]) a.whatsapp-float {
+    width: 3.5rem;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  body:has([data-team-page]) a.whatsapp-float span {
+    display: none;
+  }
+}
+
+/* R147, /faq Desktop: gleicher Fall wie R144 (/team). Der Float ist sitewide eine
+ * Pille mit Label (Vorher-Shot worklog/shots/S7-ux147/vorher/faq-desktop-1440.png,
+ * 121x56 bei x1295). Auf dieser Route soll er ab sm ein Kreis ohne Text sein. */
+@media (min-width: 640px) {
+  body:has([data-faq-page]) a.whatsapp-float {
+    width: 3.5rem;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  body:has([data-faq-page]) a.whatsapp-float span {
+    display: none;
+  }
+}
+
+/* R149, /mehr/collabs Desktop: gleicher Fall wie R147 (/faq). Der Float ist sitewide
+ * eine Pille mit Label (Vorher-Shot worklog/shots/S7-ux149/vorher/collabs-desktop-1440.png).
+ * Auf dieser Route soll er ab sm ein Kreis ohne Text sein. */
+@media (min-width: 640px) {
+  body:has([data-collabs-page]) a.whatsapp-float {
+    width: 3.5rem;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  body:has([data-collabs-page]) a.whatsapp-float span {
+    display: none;
+  }
+}
+
+/* R152 collabs-header, /mehr/collabs: SiteHeader.tsx faehrt beim Runterscrollen per
+ * Inline-Style aus dem Bild (translateY(-100%), SiteHeader.tsx:158). Auf dieser Route
+ * bleibt die Leiste stehen — die Seite ist eine B2B-Anfrageseite, der Weg zum Kontakt
+ * muss in jedem Scroll-Stand sichtbar bleiben. Der Inline-Style gewinnt sonst gegen die
+ * Klasse, darum !important. Marker ist [data-collabs-page] aus CollabsPage.tsx: alle
+ * anderen Routen behalten ihr Hide-on-Scroll. */
+body:has([data-collabs-page]) header.fixed {
+  transform: none !important;
+}
+
+/* R150, /mehr/tanzschuhe und /mehr/partys Desktop: gleicher Kreis wie Collabs.
+ * Sitewide ist der Float eine Pille (121x56). Auf diesen zwei Routen Kreis ohne Text. */
+@media (min-width: 640px) {
+  body:has([data-tanzschuhe-page]) a.whatsapp-float,
+  body:has([data-partys-page]) a.whatsapp-float {
+    width: 3.5rem;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  body:has([data-tanzschuhe-page]) a.whatsapp-float span,
+  body:has([data-partys-page]) a.whatsapp-float span {
+    display: none;
+  }
+}
+
+/* R151 partys-blob, /mehr/partys: Der Hero-Blob aus kit.tsx ist h-[36rem] w-[36rem] bei
+ * -right-40 -top-40. Die Sektion ist overflow-hidden, also war nur ein Viertel Kreis zu
+ * sehen — eine Ecke, kein Kreis. Der Hebel liegt hier in der CSS, weil kit.tsx sitewide
+ * gilt und alle anderen Routen ihre Ecke behalten. Marker ist [data-partys-page] aus
+ * PartysPage.tsx. 12rem statt 36rem und positive Offsets legen den ganzen Kreis frei
+ * ins Hero-Papier. Getroffen wird nur das aria-hidden-Div direkt in der Hero-Sektion:
+ * nicht die Danceflow-Kachel, nicht der WhatsApp-Float. */
+body:has([data-partys-page]) section.relative.isolate.overflow-hidden > div.pointer-events-none[aria-hidden] {
+  right: 2.5rem !important;
+  top: 5rem !important;
+  left: auto !important;
+  bottom: auto !important;
+  width: 12rem !important;
+  height: 12rem !important;
+}
+
+/* R151: microcopy-pb-8 schob das 19rem-Band unter den 730-Fold. Padding weg, Band bleibt. */
+body:has([data-partys-page]) section.relative.isolate.overflow-hidden > div:not([aria-hidden]) {
+  padding-bottom: 0 !important;
+}
+
+/* R150b /mehr/partys Desktop 1440×730: 22rem bei Band-Top y484 ragt unter den Fold
+ * und schneidet das Kinn; 15rem/18% schnitt den hinteren Scheitel. party-31-v3
+ * (2048×1360) braucht Quell-Y 90–544 fuer beide Koepfe. Microcopy aus dem Fold,
+ * Shell-pb weg, Band 20rem bei object-position 10% — Fenster endet vor y730. */
+@media (min-width: 1024px) {
+  body:has([data-partys-page]) section.relative.isolate.overflow-hidden > div.mx-auto {
+    padding-bottom: 0;
+  }
+
+  body:has([data-partys-page]) section.relative.isolate.overflow-hidden p.text-sm {
+    display: none;
+  }
+
+  body:has([data-partys-page]) section.relative.isolate.overflow-hidden img[fetchpriority='high'] {
+    height: 20rem !important;
+    object-position: 50% 10% !important;
+  }
+}
+
+/* R150, /mehr/tanzschuhe Mobil: FAB lag auf der H2 «Der richtige Schuh»
+ * (Beleg worklog/shots/S7-ux150/vorher/tanzschuhe-mobil-390.png). Hebel am Text. */
+@media (max-width: 639px) {
+  body:has([data-tanzschuhe-page]) :is(h2, h3) {
+    padding-right: 5.5rem;
+  }
+}
+
+/* R147, /faq Mobil: FAB lag auf Accordion-Zeilen (Chevron x350-370, FAB x314-370,
+ * Beleg worklog/shots/S7-ux147/vorher/faq-accordion-scroll-390.png). Hebel am Text. */
+@media (max-width: 639px) {
+  body:has([data-faq-page]) #faq :is(h2, h3, p, summary, a) {
+    padding-right: 6.5rem;
+  }
+}
+
+/* R146, /team Mobil: FAB lag auf der Gruender-H2 «geprägt habe»
+ * (Beleg worklog/shots/S7-ux144/team-mobil-390.png). Hebel am Text, analog R140b. */
+@media (max-width: 639px) {
+  [data-team-page] ~ main :is(h2, p, li, dd) {
+    padding-right: 4rem;
+  }
+}
+
+/* R142-Fix, /events Mobil (Brief Punkt 6: FAB ueberdeckt kein Wort).
+ * Live gemessen bei 390x844 im gescrollten Danceflow-Block: der Float steht fix bei
+ * x314-370, y766-822. Der Fakten-Wert «Social Dancing mit eigenen DJs. Schueler CHF 5.-,
+ * Gaeste CHF 10.-» lief bis x369 und damit unter den Knopf — «CHF 10.-» war verdeckt
+ * (Beleg worklog/shots/S7-ux142/events-danceflow-scroll-390.png, erster Lauf).
+ *
+ * Wie bei R140 sitzt der Hebel am Text, nicht am Knopf: ein --whatsapp-lift verschiebt das
+ * Problem nur auf den naechsten Absatz. Unter sm endet der Fliesstext dieser Route 4rem
+ * frueher (Knopfbreite 3.5rem plus right-5 = 1.25rem, macht 4.75rem; 4rem reichen, weil
+ * der Text ohnehin am Container-Padding von 1.25rem endet). Nur dd/p/li: Ueberschriften
+ * und Knoepfe bleiben unberuehrt (R138 Fund 7/8: kein pr-* auf Flex-Zeilen). Ab sm faellt
+ * die Regel weg, dort liegt der Kreis rechts neben dem breiteren Satzspiegel. */
+@media (max-width: 639px) {
+  [data-events-page] ~ main :is(p, li, dd) {
+    padding-right: 4rem;
+  }
+}
+
+/* R140-Fix, /privatstunden Mobil (Brief Punkt 4: kein Text vom FAB ueberdeckt).
+ * Live gemessen bei 390x844: der Float steht fix bei x314-370, y768-824. Der
+ * Fliesstext laeuft bis x369 und lief damit an fuenf Stellen unter den Knopf —
+ * Hero-Microcopy, When-Karte «Levelwechsel», Flow-Schritt 2, Closing-Body und
+ * eine FAQ-Antwort (Messung mit getClientRects, Toleranz 0).
+ *
+ * Ein --whatsapp-lift loest den Fall NICHT: der Knopf schwebt ueber der ganzen
+ * Seite, jede Hoehe trifft irgendeinen Absatz. Der Hebel sitzt am Text: unter sm
+ * endet der Fliesstext dieser Route 4rem frueher, also links neben der
+ * Knopf-Spalte (Knopfbreite 3.5rem plus right-5 = 1.25rem, macht 4.75rem;
+ * 4rem reichen, weil der Text ohnehin am Container-Padding von 1.25rem endet).
+ * Ueberschriften, Preiszeilen, Chips und Knoepfe bleiben unberuehrt: sie sind
+ * entweder kurz genug oder duerfen nicht umbrechen (R138 Fund 7/8: kein pr-* auf
+ * Flex-Zeilen). Ab sm faellt die Regel weg, dort ist der Float ein Kreis rechts
+ * unten neben dem breiteren Satzspiegel. */
+@media (max-width: 639px) {
+  [data-privat-page] :is(p, li) {
+    padding-right: 4rem;
+  }
+
+  /* Ausnahme 1: Zeilen mit Link (Breadcrumb, CTA-Zeilen). Ein padding-right
+   * wuerde die Klickflaeche stauchen statt Text zu schuetzen. */
+  [data-privat-page] :is(p, li):has(> a) {
+    padding-right: 0;
+  }
+
+  /* Ausnahme 2: die Preiszeile. Sie ist eine Flex-Reihe mit rechtsbuendigem
+   * Betrag (tabular-nums). Ein padding-right am li schoebe den Betrag nach
+   * innen und riss ihn aus der Flucht der Zeilen darueber (R138 Fund 7/8:
+   * kein pr-* auf Flex-Zeilen). Ein Rand an der Karte war ebenfalls falsch:
+   * er stauchte die Spalte so weit, dass «Privatstunde 1 Person» auf zwei
+   * Zeilen brach und der Betrag aus der Karte lief (im Shot geprueft). Die
+   * Preis-Copy ist gesperrt (Lock 13.08.), also bleibt die Zeile unberuehrt.
+   *
+   * Der Rest ist bewusst OFFEN und wird hier festgehalten, statt schlecht
+   * geloest zu werden: die Betraege enden bei x357, der Knopf steht ab x314,
+   * die Preiskarte ist mobil also 43px zu breit fuer eine freie Knopf-Spalte.
+   * Drei Wege wurden gemessen und alle drei sind schlechter als das Problem:
+   *   - margin-right an der Karte: «Privatstunde 1 Person» bricht auf zwei
+   *     Zeilen, der Betrag laeuft aus der Karte (Shot privat-mobil-prices).
+   *   - margin-right am Betrag: rechts klafft eine leere Spalte, die
+   *     Trennlinien enden vor dem Kartenrand (Shot privatstunden-mobile-11).
+   *   - --whatsapp-lift 4-8rem: jede Hoehe trifft eine andere Zeile
+   *     (4/5/6rem «CHF 130.-», 7/8rem «CHF 450.-» plus zwei Ueberschriften).
+   * Der saubere Weg waere eine kuerzere Zeilen-Copy («1 Person» statt
+   * «Privatstunde 1 Person»), und die ist gesperrt. Bleibt als einziger
+   * Beruehrungspunkt und gehoert Raphael vorgelegt, nicht heimlich gebogen. */
+  [data-privat-page] li:has(.tabular-nums) {
+    padding-right: 0;
   }
 }
 
@@ -486,8 +853,10 @@ html:has(.faq-page) {
   /* /kursplan: die Wochen-Pfeile sitzen im ersten Fold, nicht am Dokumentende.
      Body-Polster schiebt sie nicht hoch. Bei sichtbarer Leiste das Foto-Band und
      den Kalender-Kopf so weit stauchen, dass die Pfeile über der Leiste bleiben. */
+  /* R179: 8.25rem schnitt die Köpfe (Sol). 11rem bleibt unter dem 14rem-Band
+     nach Accept, Gesichter bleiben. CookieBanner unangetastet. */
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
-    height: 8.25rem;
+    height: 11rem;
   }
 
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero] > .mx-auto {
@@ -497,11 +866,24 @@ html:has(.faq-page) {
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) #kursplan-list {
     padding-top: 1.25rem;
   }
+
+  /* /buchung: Cookie schnitt die letzte Fold-Kurszeile. Foto stauchen.
+     Leiste selbst nicht mehr fixed — sie sitzt im Footer-Fluss (Akzeptieren bleibt). */
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-buchung-photo] img {
+    height: 5.25rem;
+  }
+
+  body:has([data-buchung]) [data-cookie-banner] {
+    position: static;
+    inset: auto;
+  }
 }
 
 /* Desktop-Fold: Cookie schnitt die Tageskarten, Foto-Band war 19rem.
    Stauchen hebt die Leiste über die Cookie-Zeile. */
 @media (width >= 40rem) {
+  /* R179: 10rem = 160px schnitt Köpfe auf 1440 mit sichtbarer Leiste.
+     14rem bleibt unter 18rem nach Accept. CookieBanner unangetastet. */
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
     height: 14rem;
   }

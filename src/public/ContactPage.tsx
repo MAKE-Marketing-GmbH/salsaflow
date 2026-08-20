@@ -25,20 +25,40 @@ import { Music, MapPin, CalendarClock, ArrowRight, type LucideIcon } from 'lucid
 // (helle Raeume mit Anlage -> Lage am SBB -> flexible Nutzung).
 const ROOM_ICONS: LucideIcon[] = [Music, MapPin, CalendarClock];
 
-const TOPIC_HASHES: Record<string, TopicKey> = {
+type TopicHashLookup = Record<string, TopicKey>;
+type ContactCookieStyle = CSSProperties & {
+  '--contact-cookie-safe': string;
+};
+
+declare global {
+  interface WindowEventMap {
+    'salsaflow-cookie-visibility': CustomEvent<boolean>;
+  }
+}
+
+function defineTopicHashes(hashes: TopicHashLookup): TopicHashLookup {
+  return hashes;
+}
+
+function defineContactCookieStyle(style: ContactCookieStyle): ContactCookieStyle {
+  return style;
+}
+
+const TOPIC_HASHES = defineTopicHashes({
   '#schnupperstunde': 'schnupperstunde',
   '#privatstunden': 'privatstunden',
   '#raumvermietung': 'raumvermietung',
   '#geschenkgutschein': 'geschenkgutschein',
   '#events': 'events',
   '#animationen': 'animationen',
-};
+});
 
 function topicFromLocation(): TopicKey {
-  if (typeof window === 'undefined') return 'schnupperstunde';
-  const fromHash = TOPIC_HASHES[window.location.hash];
+  const browserWindow = globalThis.window;
+  if (!browserWindow) return 'schnupperstunde';
+  const fromHash = TOPIC_HASHES[browserWindow.location.hash];
   if (fromHash) return fromHash;
-  if (new URLSearchParams(window.location.search).has('kurs')) return 'kurs';
+  if (new URLSearchParams(browserWindow.location.search).has('kurs')) return 'kurs';
   return 'schnupperstunde';
 }
 
@@ -52,23 +72,24 @@ export function ContactPage() {
   // Hash setzt das Anliegen und scrollt zum Wizard. #raumvermietung darf nicht an der
   // Infosektion landen — die Traegt bewusst keine gleichnamige id mehr.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    const browserWindow = globalThis.window;
+    if (!browserWindow) return;
     const next = topicFromLocation();
     setTopic(next);
-    if (!TOPIC_HASHES[window.location.hash]) return;
+    if (!TOPIC_HASHES[browserWindow.location.hash]) return;
     const target = document.getElementById('kontaktformular');
     if (!target) return;
-    const frame = window.requestAnimationFrame(() => {
+    const frame = browserWindow.requestAnimationFrame(() => {
       target.scrollIntoView({ block: 'start' });
     });
-    return () => window.cancelAnimationFrame(frame);
+    return () => browserWindow.cancelAnimationFrame(frame);
   }, []);
 
   // Die fixe Cookie-Leiste darf den letzten Kontaktinhalt nicht verdecken. Das bestehende
   // Sichtbarkeits-Event hält den Abstand exakt so lange aktiv, wie die Leiste sichtbar ist.
   useEffect(() => {
-    const onCookieVisibility = (event: Event) => {
-      setCookieVisible(Boolean((event as CustomEvent<boolean>).detail));
+    const onCookieVisibility = (event: WindowEventMap['salsaflow-cookie-visibility']) => {
+      setCookieVisible(Boolean(event.detail));
     };
     window.addEventListener('salsaflow-cookie-visibility', onCookieVisibility);
     const frame = window.requestAnimationFrame(() => {
@@ -84,8 +105,9 @@ export function ContactPage() {
   // räumt er die Arbeitsfläche dauerhaft frei; auf anderen Routen erscheint er weiter normal.
   useEffect(() => {
     const formSection = document.querySelector('#schnupperstunde');
-    if (!formSection || typeof IntersectionObserver === 'undefined') return;
-    const observer = new IntersectionObserver((entries) => {
+    const Observer = globalThis.IntersectionObserver;
+    if (!formSection || !Observer) return;
+    const observer = new Observer((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) setCookieClear(true);
     });
     observer.observe(formSection);
@@ -93,6 +115,9 @@ export function ContactPage() {
   }, []);
 
   const cookieSafe = cookieVisible && !cookieClear;
+  const contactCookieStyle = defineContactCookieStyle({
+    '--contact-cookie-safe': cookieSafe ? 'calc(3.625rem + env(safe-area-inset-bottom))' : '0px',
+  });
 
   return (
     <>
@@ -103,9 +128,7 @@ export function ContactPage() {
         tabIndex={-1}
         className="contact-page"
         data-cookie-clear={cookieClear ? 'true' : 'false'}
-        style={{
-          '--contact-cookie-safe': cookieSafe ? 'calc(3.625rem + env(safe-area-inset-bottom))' : '0px',
-        } as CSSProperties}
+        style={contactCookieStyle}
       >
         <ContactHero />
         <FormSection topic={topic} setTopic={setTopic} />
@@ -126,15 +149,19 @@ export function ContactPage() {
 // Google-Zeile, rechts eine kompakte Foto-Komposition aus hellen Studio-Bildern. Dieselbe
 // Bauform, dieselbe Bild-Sprache, damit die Seite nicht ihr eigenes Muster erfindet.
 //
-// Bild-Wahl nach DESIGN.md:92/93 (ein Bild-Stil ueber die Seite, kein Bild sitewide mehr als
-// zweimal). Alle drei Kacheln sind bisher ungenutzt und WARM gemessen (Mittelwert R minus B):
-//   kurse/kurs-07.jpg                       +58.9   Kurs im Studio, Tageslicht
-//   2026/kurse-heels-energie-card-960.webp  +26.8   Heels-Gruppe vor der Studiowand
-//   2026/hero-paar-dreh-card-960.webp       +93.6   Paar im Drehmoment
-// Das Team-Gruppenfoto (gallery/kurse/09.jpg) stand hier zuerst und ist wieder raus: es ist
-// vor grauem Studio-Hintergrund fotografiert und misst -22.5, also KUEHL. Neben +26.8 und
-// +93.6 war das ein Sprung von rund 50 Punkten in einer Dreier-Komposition — genau der
-// Bild-Stil-Bruch, den DESIGN.md:92 ausschliesst.
+// Bild-Wahl nach DESIGN.md:92 (ein Bild-Stil ueber die Seite). Drei Studio-Kacheln,
+// Tageslicht, Helligkeits-Abstand max 38 (Kachel 2 vs 3):
+//   kurse/kurs-07.jpg                   1067x1600  lum 128  R-B +59.0  Kurs vor roter Wand
+//   premium/community-story-1600.webp   1600x1067  lum 151  R-B +22.2  Team auf der Couch
+//   premium/offer-salsa-wide-1400.webp  1400x1000  lum 113  R-B +50    Paar in der Salsa-Haltung
+// R178: 2026/kurse-classfreude-01.webp raus (Home-Duplikat WhyGrid.tsx:91, 10 Fundstellen).
+// Dritte Kachel nicht auf der Startseite. 4/3-Crop: object-center haelt beide Koepfe frei.
+// Raus: gallery/kurse/01 (lum 96, 55 Punkte unter Kachel 2, 10 Fundstellen gegen DESIGN.md:93),
+// gallery/kurse/08 (gleicher Taenzer/Shooting wie Kachel 1, sichtbares Duplikat),
+// kurs-03 (Logo-Wand, im Spiegel doppelt), kurs-05 (Logo-Wand), heels-energie (Logo-Wand),
+// hero-paar-dreh (Tungsten-Orange), gallery/kurse/06 (LocationSection),
+// hp-03/21/29 (Logo-Wand), party-03, party-07-v3, event-06-v3 (Schriftzug/Wasserzeichen),
+// party-25, party-50-v3, hp-13 (Salsaflow-Wand-Logo bzw. Plakat).
 function ContactHero() {
   const { lang } = useLang();
   const h = CONTACT_PAGE[lang].hero;
@@ -227,8 +254,8 @@ function ContactHero() {
             <img
               src="/photos/kurse/kurs-07.jpg"
               alt={lang === 'de'
-                ? 'Eine Kursgruppe von Salsaflow übt gemeinsam den Grundschritt im Studio'
-                : 'A Salsaflow class practising the basic step together in the studio'}
+                ? 'Trainer in grauem Tanktop führt den Schritt, die Kursgruppe tanzt vor der roten Studiowand'
+                : 'Instructor in a grey tank top leading the step, the class dancing in front of the red studio wall'}
               // object-top: Hochformat (1067x1600) im 4/5-Ausschnitt, mittig lagen die Koepfe
               // der hinteren Reihe ausserhalb.
               className="h-full w-full object-cover object-top"
@@ -244,15 +271,15 @@ function ContactHero() {
               className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_20px_48px_-26px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
             >
               <img
-                src="/photos/2026/kurse-heels-energie-card-960.webp"
+                src="/photos/premium/community-story-1600.webp"
                 alt={lang === 'de'
-                  ? 'Eine Heels-Gruppe tanzt im hellen Studio von Salsaflow'
-                  : 'A heels group dancing in the bright Salsaflow studio'}
-                // 8%: Hochformat (960x1200) in der 4/3-Kachel. Bei 22% lag der Scheitel der
-                // vorderen Taenzerin ausserhalb (Crop-Vergleich /tmp/heels-{0,8,15,22}.png).
-                className="h-full w-full object-cover object-[center_8%]"
-                width={960}
-                height={1200}
+                  ? 'Vier Team-Mitglieder sitzen lachend auf einer Ledercouch im hellen Studio'
+                  : 'Four team members sitting and smiling on a leather couch in the bright studio'}
+                // 3:2 (1600x1067) in 4/3: Crop nur links/rechts, volle Hoehe. object-center
+                // haelt alle vier Koepfe frei. Kein Wand-Logo.
+                className="h-full w-full object-cover object-center"
+                width={1600}
+                height={1067}
                 loading="eager"
               />
             </motion.div>
@@ -261,13 +288,14 @@ function ContactHero() {
               className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_20px_48px_-26px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
             >
               <img
-                src="/photos/2026/hero-paar-dreh-card-960.webp"
+                src="/photos/premium/offer-salsa-wide-1400.webp"
                 alt={lang === 'de'
-                  ? 'Ein Paar dreht sich beim Tanzen im Salsaflow Studio'
-                  : 'A couple turning while dancing in the Salsaflow studio'}
-                className="h-full w-full object-cover object-[center_28%]"
-                width={960}
-                height={1200}
+                  ? 'Tanzpaar in der Salsa-Haltung, Frau mit blonden Locken im Vordergrund, heller Übungsraum'
+                  : 'Dancing couple in salsa hold, woman with blonde curls in the foreground, bright practice room'}
+                // 1400x1000 (7:5) in 4/3: Crop nur minimal links/rechts. object-center haelt beide Koepfe frei.
+                className="h-full w-full object-cover object-center"
+                width={1400}
+                height={1000}
                 loading="eager"
               />
             </motion.div>

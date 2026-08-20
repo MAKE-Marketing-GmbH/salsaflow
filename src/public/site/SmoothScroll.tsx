@@ -10,7 +10,8 @@ export function SmoothScroll() {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const onAnchorClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const anchor = (e.target as HTMLElement | null)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
+      if (!(e.target instanceof Element)) return;
+      const anchor = e.target.closest<HTMLAnchorElement>('a[href^="#"]');
       const href = anchor?.getAttribute('href');
       if (!href || href === '#') return;
       const target = document.getElementById(decodeURIComponent(href.slice(1)));

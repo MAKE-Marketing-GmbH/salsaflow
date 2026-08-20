@@ -32,16 +32,22 @@ export function TanzschuhePage() {
   const c = TANZSCHUHE[lang];
   return (
     <SubPageShell seo="tanzschuhe">
+      <div data-tanzschuhe-page="">
       {/* Runde 2, Issue 1: Typo-Hero statt Foto-Split. Achse 'left' — die Seite ist eine
           ruhige Beratungsseite, sie beginnt linksbuendig gestapelt.
           R68: Das Schuh-Motiv sass ungenutzt in der Content-Datei (hero.image), der Fold
           war nur Text. Jetzt axis="left" + dense + media-Band nach dem Eventkalender-Muster
           (R58): das Foto laeuft randlos unter der Headline, Schuhe im 1440-Fold sichtbar.
           13rem statt Eventkalender-18rem: die H1 ist hier dreizeilig, dadurch bleibt das
-          Band trotz laengerem Kopf im Fold. */}
+          Band trotz laengerem Kopf im Fold.
+          R150: Desktop-WhatsApp als Kreis ueber [data-tanzschuhe-page].
+          Video 07:57/08:09: das flache 16rem-Band schnitt beide Paare. 24rem bei
+          center 84% zeigt Absatz bis Spitze und endet im 900-Fold (Band-Top ~504).
+          Motiv bleibt heels-shoes-stilllife.webp (einziges echtes Schuh-Still). */}
       <SubHero
         axis="left"
         dense
+        tightBottom
         seoCrumbs={c.crumbs}
         title={c.hero.title}
         titleAccent={c.hero.titleAccent}
@@ -52,11 +58,8 @@ export function TanzschuhePage() {
         media={{
           src: c.hero.image.src,
           alt: c.hero.image.alt,
-          // Motiv ist quadratisch (1600x1600), die Schuhe sitzen im unteren Drittel
-          // (~72-80% Hoehe). center 30% zeigte nur den leeren Spiegel oben — 72% holt
-          // die beiden Schuh-Paare in den sichtbaren Fold-Streifen.
-          position: 'center 72%',
-          heightClass: 'h-[11rem] sm:h-[13rem] lg:h-[16rem]',
+          position: 'center 84%',
+          heightClass: 'h-[18rem] sm:h-[22rem] lg:h-[24rem]',
         }}
       />
       <ByStyleSection c={c} />
@@ -65,6 +68,7 @@ export function TanzschuhePage() {
       <PartnerSection c={c} />
       <FaqBlock title={c.faqTitle} items={c.faq} />
       <FinalCta c={c} />
+      </div>
     </SubPageShell>
   );
 }

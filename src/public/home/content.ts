@@ -103,7 +103,16 @@ const offerPhotos = {
   privat: '/photos/premium/offer-privat-wide-original-v2.webp',
 };
 
-export const HOME: { de: HomeStrings; en: HomeStrings } = {
+type HomeContentByLanguage = {
+  de: HomeStrings;
+  en: HomeStrings;
+};
+
+function defineHomeContent(content: HomeContentByLanguage): HomeContentByLanguage {
+  return content;
+}
+
+export const HOME = defineHomeContent({
   de: {
     nav: {
       tanzkurse: 'Tanzkurse',
@@ -137,14 +146,19 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
       link: 'Lern uns kennen',
     },
     offer: {
-      eyebrow: 'Unser Angebot',
-      title: 'Welcher Tanz passt zu dir?',
-      lead: 'Salsa, Bachata und Heels fühlen sich unterschiedlich an. Entdecke die Stile oder wähle Privatstunden, Workshops und Shows passend zu deinem Ziel.',
+      // R186 (Dom, 20.08.): Der Kunde will nach dem Hero in einem Blick sehen, was es gibt.
+      // Titel darum exakt «Salsa, Bachata, Heels.» — die Aufzaehlung IST die Antwort, eine
+      // Frage davor kostet nur eine Zeile. Eyebrow und Lead sind weg: der Lead erklaerte
+      // Kurs, Ziel, Workshop und Show, also vier Dinge, die die vier Karten selbst zeigen.
+      // Kartentitel auf die Tanzart gekuerzt, das Detail steht im Text darunter.
+      eyebrow: '',
+      title: 'Salsa, Bachata, Heels.',
+      lead: '',
       cards: [
-        { key: 'salsa', title: 'Salsa tanzen in Basel', hint: 'Beginner bis Advanced', text: 'Für alle, die Rhythmus, Technik und Social Dancing verbinden wollen. Von den ersten Basics bis zu fliessenden Kombinationen.', photo: offerPhotos.salsa, alt: 'Tanzpaar dreht sich beim Salsa im Salsaflow Studio', href: '/tanzkurse/salsa' },
-        { key: 'bachata', title: 'Bachata mit Verbindung und Flow', hint: 'Bachata Sensual', text: 'Für weiche Bewegungen und Paartanz mit Gefühl. Ideal, wenn du an Technik und Connection arbeiten willst. Also daran, wie gut ihr euch beim Führen und Folgen spürt.', photo: offerPhotos.bachata, alt: 'Bachata-Paar beim Üben', href: '/tanzkurse/bachata' },
-        { key: 'heels', title: 'Heels für Ausdruck und Präsenz', hint: 'Haltung und Choreografie', text: 'Für alle, die sicherer, stärker und freier tanzen wollen. Technik, Haltung und Choreografie in einer unterstützenden Atmosphäre.', photo: offerPhotos.heels, alt: 'Heels-Class im Studio', href: '/tanzkurse/heels' },
-        { key: 'privat', title: 'Privatstunden: gezielt besser werden', hint: '1:1 Coaching', text: 'Privatstunden passen, wenn du an Technik, Stil, Hochzeitstanz oder einem konkreten Ziel arbeiten möchtest.', photo: offerPhotos.privat, alt: 'Lehrerin begleitet einen Schüler in einer Privatstunde', href: '/privatstunden' },
+        { key: 'salsa', title: 'Salsa', hint: 'Beginner bis Advanced', text: 'Für alle, die Rhythmus, Technik und Social Dancing verbinden wollen. Von den ersten Basics bis zu fliessenden Kombinationen.', photo: offerPhotos.salsa, alt: 'Tanzpaar dreht sich beim Salsa im Salsaflow Studio', href: '/tanzkurse/salsa' },
+        { key: 'bachata', title: 'Bachata', hint: 'Bachata Sensual', text: 'Für weiche Bewegungen und Paartanz mit Gefühl. Ideal, wenn du an Technik und Connection arbeiten willst.', photo: offerPhotos.bachata, alt: 'Bachata-Paar beim Üben', href: '/tanzkurse/bachata' },
+        { key: 'heels', title: 'Heels', hint: 'Haltung und Choreografie', text: 'Für alle, die sicherer, stärker und freier tanzen wollen. Technik, Haltung und Choreografie in einer unterstützenden Atmosphäre.', photo: offerPhotos.heels, alt: 'Heels-Class im Studio', href: '/tanzkurse/heels' },
+        { key: 'privat', title: 'Privatstunden', hint: '1:1 Coaching', text: 'Privatstunden passen, wenn du an Technik, Stil, Hochzeitstanz oder einem konkreten Ziel arbeiten möchtest.', photo: offerPhotos.privat, alt: 'Lehrerin begleitet einen Schüler in einer Privatstunde', href: '/privatstunden' },
       ],
       extras: [
         { key: 'gutschein', title: 'Geschenkgutschein', text: 'Verschenk Tanzen. Ein Gutschein für die Schnupperstunde, einen Kurs oder Privatstunden.', cta: 'Gutschein anfragen', href: '/kontakt#geschenkgutschein', icon: 'gift' },
@@ -162,7 +176,15 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
     },
     events: {
       eyebrow: 'Events & Workshops',
-      title: 'Lernen ist der Anfang. Tanzen passiert in der Community.',
+      // Kritik-Fund (home-desktop-08-y5250.png, R134/8): «Lernen ist der Anfang. Tanzen
+      // passiert in der Community.» waren zwei Slogan-Zeilen statt Information.
+      // forbidden-check.py meldete dazu [A1] Staccato-Verdacht (4+5 Woerter).
+      // Die Zeile sagt jetzt, was nach dem Kurs konkret passiert. Der Satz darunter nennt
+      // die Danceflow Night ohnehin schon — die H2 fuehrt jetzt darauf hin, statt eine
+      // Stimmung zu behaupten. Check auf der neuen Zeile: 0 harte Verstoesse.
+      // Die /events-Seite traegt ihre eigene Zeile (events/content.ts) und ist nicht Teil
+      // von Welle 1 (Route / + Buchungs-Flow).
+      title: 'Nach dem Kurs geht es auf der Danceflow Night weiter.',
       body: 'Bei der Danceflow Night triffst du Freunde, übst das Gelernte und tanzt in entspannter Atmosphäre. Vor ausgewählten Abenden finden Workshops statt.',
       cta: 'Alle Events ansehen',
     },
@@ -248,14 +270,15 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
       link: 'Get to know us',
     },
     offer: {
-      eyebrow: 'What we offer',
-      title: 'Which dance style suits you?',
-      lead: 'Salsa, Bachata and Heels each feel different. Explore the styles or choose private lessons, workshops and shows based on your goal.',
+      // R186: sinngleich kurz zur deutschen Fassung. Kein Eyebrow, kein Lead.
+      eyebrow: '',
+      title: 'Salsa, Bachata, Heels.',
+      lead: '',
       cards: [
-        { key: 'salsa', title: 'Dance Salsa in Basel', hint: 'Beginner to advanced', text: 'For everyone who wants to connect rhythm, technique and social dancing. From the first basics to flowing combinations.', photo: offerPhotos.salsa, alt: 'Dance couple turning while dancing salsa at the Salsaflow studio', href: '/tanzkurse/salsa' },
-        { key: 'bachata', title: 'Bachata with connection and flow', hint: 'Bachata Sensual', text: 'For soft movement and partner dancing with feeling. Ideal if you want to work on technique and connection. How well you sense each other while leading and following.', photo: offerPhotos.bachata, alt: 'Bachata couple practising', href: '/tanzkurse/bachata' },
-        { key: 'heels', title: 'Heels for expression and presence', hint: 'Posture and choreography', text: 'For everyone who wants to dance with more confidence, strength and freedom. Technique, posture and choreography in a supportive atmosphere.', photo: offerPhotos.heels, alt: 'Heels class in the studio', href: '/tanzkurse/heels' },
-        { key: 'privat', title: 'Private lessons for a specific goal', hint: '1:1 coaching', text: 'Private lessons are useful when you want to work on technique, style, a wedding dance or another specific goal.', photo: offerPhotos.privat, alt: 'Teacher giving a private lesson', href: '/privatstunden' },
+        { key: 'salsa', title: 'Salsa', hint: 'Beginner to advanced', text: 'For everyone who wants to connect rhythm, technique and social dancing. From the first basics to flowing combinations.', photo: offerPhotos.salsa, alt: 'Dance couple turning while dancing salsa at the Salsaflow studio', href: '/tanzkurse/salsa' },
+        { key: 'bachata', title: 'Bachata', hint: 'Bachata Sensual', text: 'For soft movement and partner dancing with feeling. Ideal if you want to work on technique and connection.', photo: offerPhotos.bachata, alt: 'Bachata couple practising', href: '/tanzkurse/bachata' },
+        { key: 'heels', title: 'Heels', hint: 'Posture and choreography', text: 'For everyone who wants to dance with more confidence, strength and freedom. Technique, posture and choreography in a supportive atmosphere.', photo: offerPhotos.heels, alt: 'Heels class in the studio', href: '/tanzkurse/heels' },
+        { key: 'privat', title: 'Private lessons', hint: '1:1 coaching', text: 'Private lessons are useful when you want to work on technique, style, a wedding dance or another specific goal.', photo: offerPhotos.privat, alt: 'Teacher giving a private lesson', href: '/privatstunden' },
       ],
       extras: [
         { key: 'gutschein', title: 'Gift voucher', text: 'Give the gift of dance. A voucher for a trial class, a course or private lessons.', cta: 'Request a voucher', href: '/kontakt#geschenkgutschein', icon: 'gift' },
@@ -273,7 +296,7 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
     },
     events: {
       eyebrow: 'Events & workshops',
-      title: 'Learning is the beginning. Dancing happens in the community.',
+      title: 'After class the Danceflow Night keeps going.',
       body: 'At the Danceflow Night you meet friends, practise what you learned and dance in a relaxed atmosphere. Workshops take place before selected evenings.',
       cta: 'See all events',
     },
@@ -326,4 +349,4 @@ export const HOME: { de: HomeStrings; en: HomeStrings } = {
       datenschutz: 'Privacy',
     },
   },
-};
+});

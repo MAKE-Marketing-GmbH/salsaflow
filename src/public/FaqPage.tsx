@@ -39,7 +39,7 @@ export function FaqPage() {
 
   return (
     <SubPageShell seo={c.seo}>
-      <div className="faq-page" data-cookie-clear={cookieClear ? 'true' : undefined}>
+      <div className="faq-page" data-faq-page="" data-cookie-clear={cookieClear ? 'true' : undefined}>
         <FaqHero c={c} />
         <FaqSection c={c} />
         <FinalCta c={c} />
@@ -75,6 +75,8 @@ function FaqHero({ c }: { c: FaqPageContent }) {
       primary={{ label: c.hero.primary.label, href: c.hero.primary.href }}
       secondary={{ label: c.hero.secondary.label, href: '#faq' }}
       microcopy={c.hero.microcopy}
+      dense
+      tightBottom
     />
   );
 }
@@ -97,7 +99,7 @@ function FaqSection({ c }: { c: FaqPageContent }) {
   return (
     <section
       id="faq"
-      className="scroll-mt-[calc(var(--nav-h)+1.5rem)] bg-[var(--color-bg-soft)] pb-16 pt-12 lg:pb-20 lg:pt-14"
+      className="scroll-mt-[calc(var(--nav-h)+1.5rem)] bg-[var(--color-bg-soft)] pb-16 pt-8 lg:pb-20 lg:pt-14"
     >
       <script
         id="ld-faq"
@@ -107,7 +109,18 @@ function FaqSection({ c }: { c: FaqPageContent }) {
       <Shell>
         <Reveal className="max-w-3xl">
           <SectionHead eyebrow={f.eyebrow} title={f.title} titleAccent={f.titleAccent} />
-          <div className="mt-6 border-t border-[var(--color-line)] pt-5">
+          <div className="mt-6 flex flex-wrap gap-2">
+            {c.themes.items.map((theme) => (
+              <a
+                key={theme.href}
+                href={theme.href}
+                className="inline-flex min-h-11 items-center rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-paper)] px-3.5 py-2 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
+              >
+                {theme.label}
+              </a>
+            ))}
+          </div>
+          <div className="mt-8 border-t border-[var(--color-line)] pt-6">
             <p className="text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">
               {lang === 'de'
                 ? 'Deine Frage ist nicht dabei? Schreib uns kurz, wir antworten persönlich.'
@@ -123,13 +136,19 @@ function FaqSection({ c }: { c: FaqPageContent }) {
           </div>
         </Reveal>
 
-        <Reveal className="mt-10 grid gap-10 lg:mt-12 lg:grid-cols-2 lg:gap-14" stagger={0.06}>
-          {f.columns.map((column, columnIndex) => (
+        <Reveal className="mt-12 flex max-w-3xl flex-col gap-16 lg:mt-16" stagger={0.06}>
+          {f.columns.map((column) => (
             <motion.div key={column.title} variants={item}>
               <h3 className="type-h3 text-[var(--color-ink)]">{column.title}</h3>
-              <div className="mt-4 divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
-                {column.items.map((faq, index) => (
-                  <FaqItem key={faq.q} q={faq.q} a={faq.a} defaultOpen={columnIndex === 0 && index === 0} />
+              <div className="mt-6 divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
+                {column.items.map((faq, i) => (
+                  <FaqItem
+                    key={faq.q}
+                    q={faq.q}
+                    a={faq.a}
+                    defaultOpen={column === f.columns[0] && i === 0}
+                    link={faq.link}
+                  />
                 ))}
               </div>
             </motion.div>

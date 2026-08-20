@@ -134,7 +134,15 @@ export const WALL_REVIEWS: Review[] = [
 
 // Die Originalauszuege oben bleiben unveraendert als Quellenwahrheit. Fuer den sichtbaren
 // Sprachwechsel liegen hier sinngenaue, nicht werblich erweiterte Uebersetzungen.
-const REVIEW_TEXT: Record<string, Record<Lang, string>> = {
+type LocalizedReviewLookup = Record<string, Record<Lang, string>>;
+
+function defineLocalizedReviewLookup(
+  lookup: LocalizedReviewLookup,
+): LocalizedReviewLookup {
+  return lookup;
+}
+
+const REVIEW_TEXT = defineLocalizedReviewLookup({
   Deliu: {
     de: 'Die Lehrpersonen sind fantastisch und die Atmosphäre ist immer herzlich und voller Freude. Ich merke deutlich, wie sehr sich mein Tanzen verbessert hat, und freue mich schon auf den nächsten Kurs.',
     en: 'The teachers are absolutely fantastic, and the atmosphere is always welcoming and fun. I truly feel that my dancing has improved significantly, and I am already looking forward to the next course!',
@@ -183,9 +191,9 @@ const REVIEW_TEXT: Record<string, Record<Lang, string>> = {
     de: 'Beste Tanzschule in Basel! Nicht zu gross, super persönliche Betreuung und die nettesten, witzigsten Lehrer!',
     en: 'Best dance school in Basel! Not too big, very personal support and the nicest, funniest teachers!',
   },
-};
+});
 
-const REVIEW_ASPECT: Record<string, Record<Lang, string>> = {
+const REVIEW_ASPECT = defineLocalizedReviewLookup({
   Anfänger: { de: 'Anfänger', en: 'Beginner' },
   Community: { de: 'Community', en: 'Community' },
   Bachata: { de: 'Bachata', en: 'Bachata' },
@@ -198,15 +206,15 @@ const REVIEW_ASPECT: Record<string, Record<Lang, string>> = {
   'Neu in Basel': { de: 'Neu in Basel', en: 'New in Basel' },
   'Wie eine Familie': { de: 'Wie eine Familie', en: 'Like a family' },
   Persönlich: { de: 'Persönlich', en: 'Personal' },
-};
+});
 
-const REVIEW_WHEN: Record<string, Record<Lang, string>> = {
+const REVIEW_WHEN = defineLocalizedReviewLookup({
   'vor 2 Monaten': { de: 'vor 2 Monaten', en: '2 months ago' },
   'vor 6 Monaten': { de: 'vor 6 Monaten', en: '6 months ago' },
   'vor 1 Jahr': { de: 'vor 1 Jahr', en: '1 year ago' },
   'vor 2 Jahren': { de: 'vor 2 Jahren', en: '2 years ago' },
   'vor 3 Jahren': { de: 'vor 3 Jahren', en: '3 years ago' },
-};
+});
 
 export function localizeReview(review: Review, lang: Lang) {
   return {

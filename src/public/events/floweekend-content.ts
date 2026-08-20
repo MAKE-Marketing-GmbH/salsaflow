@@ -80,7 +80,15 @@ const R = {
   tanzschuhe: '/mehr/tanzschuhe',
 };
 
-export const FLOWEEKEND: Record<Lang, FloweekendContent> = {
+type FloweekendContentByLanguage = Record<Lang, FloweekendContent>;
+
+function defineFloweekendContent(
+  content: FloweekendContentByLanguage,
+): FloweekendContentByLanguage {
+  return content;
+}
+
+export const FLOWEEKEND = defineFloweekendContent({
   de: {
     seo: 'floweekend',
     crumbs: [
@@ -294,4 +302,4 @@ export const FLOWEEKEND: Record<Lang, FloweekendContent> = {
       },
     ],
   },
-};
+});

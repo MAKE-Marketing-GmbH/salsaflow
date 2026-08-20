@@ -7,6 +7,10 @@
 // Die Bilder kommen aus der kuratierten, in sich geschlossenen Liste (gallery/content.ts) - kein
 // Laufzeit-Manifest mehr, damit die Galerie immer voll und vorhersehbar ist. Motion: der ruhige
 // Fade-up-Takt aus @/public/home/motion (Reveal/useReveal), reduced-motion ist eingebaut.
+//
+// Das Raster zeigt reine Bilder: kein sichtbarer Bildtext unter der Kachel (Raphael 20.08.2026)
+// und seit Runde 3 auch kein Album-Badge mehr auf der Kachel (kimi-critic: lag auf Koerpern,
+// doppelte die Filter-Chips). Das Album steht im Filter und in der Album-Zeile darueber.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -24,6 +28,11 @@ import { InstagramShowcase } from '@/public/social/InstagramShowcase';
 type Photo = { albumId: AlbumId; src: string; alt: string; width?: number; height?: number };
 type Filter = AlbumId | 'all';
 type Packed = { photo: Photo; index: number };
+
+// Raphael 20.08.2026: die Kacheln tragen keinen sichtbaren Bildtext mehr. Der frühere
+// captionFor() (Serie + Ort unter jeder Kachel) ist damit ersatzlos raus. Die Beschreibung
+// lebt weiter im alt-Attribut und im aria-label des Foto-Buttons — Screenreader verlieren
+// nichts, das Auge bekommt ein ruhiges Raster.
 
 function packColumns(items: Packed[], n: number): Packed[][] {
   const cols: Packed[][] = Array.from({ length: n }, () => []);
@@ -63,29 +72,20 @@ export function PhotosPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
 
-  // Sichtbare Fotos aus der kuratierten Liste, gefiltert. "Alle" behaelt die gemischte
-  // Reihenfolge (Abende, Kurse, Team, Shows im Wechsel); ein Filter zeigt nur sein Album.
+  // Sichtbare Fotos aus der kuratierten Liste, gefiltert. Team-Album bleibt draussen.
+  // "Alle" mischt Abende, Kurse und Shows; ein Filter zeigt nur sein Album.
   // Jedes Foto bringt seine eigene, echte Alt-Zeile mit (aus gallery/content.ts).
   const colCount = useGalleryCols();
   const photos = useMemo<Photo[]>(() => {
-    const base = filter === 'all' ? GALLERY_PHOTOS : GALLERY_PHOTOS.filter((p) => p.albumId === filter);
+    const visible = GALLERY_PHOTOS.filter((p) => p.albumId !== 'team');
+    const base = filter === 'all' ? visible : visible.filter((p) => p.albumId === filter);
     return base.map((p) => ({ albumId: p.albumId, src: p.src, alt: lang === 'en' ? (p.altEn ?? p.alt) : p.alt, width: p.width, height: p.height }));
   }, [filter, lang]);
   const packed = useMemo(
     () => packColumns(photos.map((photo, index) => ({ photo, index })), colCount),
     [photos, colCount],
   );
-  const firstOfAlbum = useMemo(() => {
-    const seen = new Set<AlbumId>();
-    const first = new Set<string>();
-    for (const p of photos) {
-      if (!seen.has(p.albumId)) {
-        seen.add(p.albumId);
-        first.add(p.src);
-      }
-    }
-    return first;
-  }, [photos]);
+  // Runde 3: firstOfAlbum ist mit dem Album-Badge weggefallen (kimi-critic).
 
   // Filterwechsel schliesst eine offene Lightbox (sonst zeigt der Index auf ein falsches Foto).
   function changeFilter(next: Filter) {
@@ -117,7 +117,7 @@ export function PhotosPage() {
                   <FilterChip active={filter === 'all'} onClick={() => changeFilter('all')} testId="gallery-filter-all">
                     {g.filterAll}
                   </FilterChip>
-                  {ALBUM_ORDER.map((id) => (
+                  {ALBUM_ORDER.filter((id) => id !== 'team').map((id) => (
                     <FilterChip
                       key={id}
                       active={filter === id}
@@ -149,7 +149,7 @@ export function PhotosPage() {
                   variants={item}
                   className="rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-3 shadow-[0_18px_55px_rgba(17,17,17,0.06)] sm:p-4"
                 >
-                  <div className="grid grid-cols-2 items-end gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                  <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
                     {packed.map((col, ci) => (
                       <ul key={ci} className="flex flex-col gap-3 sm:gap-4">
                         {col.map(({ photo: p, index: i }) => (
@@ -161,6 +161,13 @@ export function PhotosPage() {
                               data-testid="gallery-photo"
                               className="group relative block w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] shadow-sm transition-shadow duration-[var(--dur-base)] hover:shadow-[0_16px_40px_-16px_rgba(17,17,17,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
                             >
+                              {/* Kein object-cover und kein festes Kachel-Verhaeltnis: h-auto laesst
+                                  jedes Foto in seinem eigenen Seitenverhaeltnis stehen, packColumns
+                                  rechnet mit genau diesem Verhaeltnis. Die Kachel schneidet also
+                                  nichts ab. Angeschnittene Koepfe am Rand stecken schon im Original
+                                  (geprueft an gallery/danceflow/01-v3.webp, 2048x1360: der Partner
+                                  ist in der Quelle angeschnitten). object-position waere hier ohne
+                                  Wirkung — der Fix muesste das Foto selbst ersetzen. */}
                               <img
                                 src={p.src}
                                 alt={p.alt}
@@ -179,11 +186,10 @@ export function PhotosPage() {
                               >
                                 <Maximize2 size={15} strokeWidth={2} />
                               </span>
-                              {firstOfAlbum.has(p.src) && (
-                                <span className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-[var(--color-ink)] shadow-sm backdrop-blur">
-                                  {g.albums[p.albumId].title}
-                                </span>
-                              )}
+                              {/* Runde 3 (kimi-critic): das Album-Badge auf der ersten Kachel
+                                  ist raus. Es lag unsystematisch auf Koerpern und Gesichtern und
+                                  wiederholte nur die Filter-Chips, die direkt darueber stehen.
+                                  Das Album steht weiter im Filter und in der Album-Zeile. */}
                             </button>
                           </li>
                         ))}
@@ -263,12 +269,17 @@ function GalleryHero() {
         <Reveal className="relative">
           <motion.div variants={item} className="mx-auto grid w-full max-w-md grid-cols-2 gap-3 sm:gap-4 lg:max-w-none">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
+              {/* Kontext statt Portrait (Auftrag 19.08.2026): anniversary-recap-v2 zeigte ein
+                  einzelnes, eng geschnittenes Gesicht und las sich wie ein Portraet. Ersatz ist
+                  die volle Community-Menge an einem Abend. object-right, weil der mittige 4/5-Crop
+                  das Salsaflow-Wasserzeichen unten links anschneidet (Crop-Vergleich
+                  /tmp/fotocrop/crowd-right.png gegen crowd-45.png). */}
               <img
-                src="/photos/instagram/anniversary-recap-v2.webp"
-                alt={lang === 'de' ? 'Tänzerinnen und Tänzer am Salsaflow Anniversary Weekend' : 'Dancers at the Salsaflow Anniversary Weekend'}
-                className="h-full w-full object-cover object-center"
-                width={1080}
-                height={1916}
+                src="/photos/2026/community-crowd-01.webp"
+                alt={lang === 'de' ? 'Volle Salsaflow-Community feiert gemeinsam an einem Tanzabend' : 'The full Salsaflow community celebrating together at a dance night'}
+                className="h-full w-full object-cover object-right"
+                width={1920}
+                height={1281}
                 loading="eager"
                 fetchPriority="high"
               />
@@ -311,10 +322,13 @@ function FilterHeader() {
   return (
     <motion.div variants={item}>
       <Eyebrow>{lang === 'de' ? 'Galerie' : 'Gallery'}</Eyebrow>
+      {/* Runde 3 (kimi-critic): "Such nicht ewig. Spring direkt in den Moment..."
+          war ein Werbe-Imperativ ohne Information. Die Zeile sagt jetzt, was die
+          Chips darunter tun. */}
       <p className="mt-3 max-w-2xl text-xl font-semibold leading-snug text-[var(--color-ink)] sm:text-2xl">
         {lang === 'de'
-          ? 'Such nicht ewig. Spring direkt in den Moment, der dich interessiert.'
-          : "Don't search forever. Jump straight to the moment that interests you."}
+          ? 'Die Filter zeigen dir nur ein Album: Danceflow Nights, Kurse oder Shows.'
+          : 'The filters show one album at a time: Danceflow Nights, courses or shows.'}
       </p>
     </motion.div>
   );
@@ -412,6 +426,10 @@ function Lightbox({
 
   useEffect(() => {
     // Fokus beim Oeffnen merken und am Ende zuruecksetzen (Fokus-Falle leicht gehalten).
+    // SAFETY: document.activeElement ist typisiert als Element | null. Die Lightbox oeffnet
+    // ausschliesslich per Klick auf den Foto-Button, das aktive Element ist also ein
+    // HTMLElement. Die Assertion behaelt | null und der einzige Zugriff unten ist der
+    // optionale Aufruf previouslyFocused?.focus?.() — beide Faelle sind abgesichert.
     const previouslyFocused = document.activeElement as HTMLElement | null;
     const frame = window.requestAnimationFrame(() => closeRef.current?.focus());
 
