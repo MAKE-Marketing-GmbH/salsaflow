@@ -853,8 +853,10 @@ html:has(.faq-page) {
   /* /kursplan: die Wochen-Pfeile sitzen im ersten Fold, nicht am Dokumentende.
      Body-Polster schiebt sie nicht hoch. Bei sichtbarer Leiste das Foto-Band und
      den Kalender-Kopf so weit stauchen, dass die Pfeile über der Leiste bleiben. */
+  /* R179: 8.25rem schnitt die Köpfe (Sol). 11rem bleibt unter dem 14rem-Band
+     nach Accept, Gesichter bleiben. CookieBanner unangetastet. */
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
-    height: 8.25rem;
+    height: 11rem;
   }
 
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero] > .mx-auto {
@@ -880,8 +882,10 @@ html:has(.faq-page) {
 /* Desktop-Fold: Cookie schnitt die Tageskarten, Foto-Band war 19rem.
    Stauchen hebt die Leiste über die Cookie-Zeile. */
 @media (width >= 40rem) {
+  /* R179: 10rem = 160px schnitt Köpfe auf 1440 mit sichtbarer Leiste.
+     14rem bleibt unter 18rem nach Accept. CookieBanner unangetastet. */
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
-    height: 10rem;
+    height: 14rem;
   }
 
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero] > .mx-auto {

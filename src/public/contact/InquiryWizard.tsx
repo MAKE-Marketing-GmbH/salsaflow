@@ -248,6 +248,7 @@ export function InquiryWizard({
   const [error, setError] = useState('');
   const headingRef = useRef<HTMLHeadingElement>(null);
   const lastTopic = useRef(initialTopic);
+  const prevStep = useRef(step);
   const reduced = useReducedMotion();
   const hydrated = useHydrated();
 
@@ -265,7 +266,13 @@ export function InquiryWizard({
     setStep(lockTopic ? 1 : 0);
   }, [initialTopic, lockTopic]);
 
+  // R164: Fokus nur nach echtem Schrittwechsel. lockTopic startet bei step=1.
+  // StrictMode feuert den Effect zweimal auf demselben step — ohne Riegel
+  // scrollt headingRef.focus() den Hero weg (H1 y −306, scrollY 528).
   useEffect(() => {
+    const was = prevStep.current;
+    prevStep.current = step;
+    if (was === step) return;
     if (step > 0) headingRef.current?.focus();
   }, [step]);
 
@@ -438,7 +445,11 @@ export function InquiryWizard({
         };
 
   return (
-    <form onSubmit={submit} onKeyDown={blockEnterSubmit} noValidate className="flex flex-col p-5 sm:p-6 lg:p-7">
+    /* R178: mobil pt-1 statt pt-4. Der Kopf des Formulars ist die knappste Stelle der
+       Seite: vom Formular-Rand (y 762) bis zum 390-Fold (844) sind es 82px, und
+       davon muessen Fortschritt, Titel UND die erste Kartenreihe leben. Seiten und
+       Boden bleiben bei 4, ab sm gilt wieder p-6. */
+    <form onSubmit={submit} onKeyDown={blockEnterSubmit} noValidate className="flex flex-col px-4 pb-4 pt-0.5 sm:p-6 lg:p-7">
       <WizardProgress
         step={lockTopic ? step - 1 : step}
         labels={lockTopic ? copy.progress.slice(1) : copy.progress}
@@ -451,7 +462,12 @@ export function InquiryWizard({
           zweiten Wahl-Gruppe (Beleg /tmp/s3-mob-step2-fold.png).
           min-h nur bis sm: darueber haelt es die Karte bei kurzen Schritten stabil, mobil
           erzeugte es zusammen mit der Reserve rund 290px Leerraue ueber der Leiste. */}
-      <div className="mt-5 pb-20 sm:min-h-[14rem] sm:pb-0">
+      {/* R178: pb-20 auf pb-4 gekuerzt. Die Reserve stammt aus der Zeit, als die
+          klebende Leiste ueber dem letzten Feld lag. Mit der kompakten Schritt-1-Hoehe
+          stand darunter rund 190px Leerflaeche zwischen letzter Karte und Weiter-Knopf
+          (Beleg kontakt-390-form-r178.png vor dieser Aenderung). pb-4 haelt weiter
+          Abstand zur Leiste, ohne ein Loch zu reissen. */}
+      <div className="mt-1 pb-4 sm:mt-5 sm:min-h-[14rem] sm:pb-0">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={step}
@@ -460,10 +476,22 @@ export function InquiryWizard({
             exit={stepMotion.exit}
             transition={{ duration: reduced ? 0 : 0.22, ease: EASE_OUT }}
           >
+            {/* R178: Schritt 1 traegt nur noch Titel plus Raster. Die Lead-Zeile
+                ("Waehle dein Anliegen") sagte dasselbe wie der Titel und dasselbe wie
+                das Fortschritts-Label ANLIEGEN darueber — drei Saetze fuer eine
+                Anweisung. Gestrichen sind damit 23px Zeile plus 8px Abstand, und die
+                ersten beiden Karten stehen mobil ueber dem Fold. Die Zeile bleibt in
+                der Kurzform auf der Startseite: dort fehlt die Fortschrittsleiste. */}
             {step === 0 && (
               <fieldset>
-                <legend className="type-h3 text-[var(--color-ink)]">{copy.topicTitle}</legend>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.topicLead}</p>
+                {/* type-h3 BLEIBT stehen: die Klasse traegt in index.css eine eigene
+                    Wortabstand-Regel fuer `form legend.type-h3` (dort word-spacing
+                    0.1em, sonst kleben die Woerter). Darum wird die Klasse nicht
+                    ersetzt, sondern nur ihre Groesse mobil ueberschrieben:
+                    max-sm:text-[17px] statt der clamp-Groesse 20px. Das spart die
+                    letzten Pixel, die der ersten Kartenreihe ueber dem Fold fehlten.
+                    Ab sm greift wieder die clamp-Groesse aus type-h3. */}
+                <legend className="type-h3 text-[var(--color-ink)] max-sm:text-[17px] max-sm:leading-tight">{copy.topicTitle}</legend>
                 <TopicGrid topics={orderedTopics} topic={topic} onSelect={selectTopic} />
               </fieldset>
             )}
@@ -566,9 +594,21 @@ export function InquiryWizard({
         </p>
       )}
 
-      {/* Mobil klebt die Zeile am unteren Rand, damit der Knopf nicht unter dem Fold
-          verschwindet. Die Reserve dafuer steht oben am Scroll-Container (pb-24). */}
-      <div className="mt-7 flex flex-row items-center justify-between gap-3 max-sm:sticky max-sm:bottom-0 max-sm:-mx-5 max-sm:border-t max-sm:border-[var(--color-line)] max-sm:bg-white max-sm:px-5 max-sm:py-3 max-sm:pr-20">
+      {/* -mx/px folgen dem Formular-Padding: mobil p-4, darum -mx-4/px-4. Stuenden hier
+          weiter 5er-Werte, ragte die Leiste 4px ueber die Kartenkante hinaus. */}
+      {/* R178 Runde 2: KEIN sticky mehr. Vorher klebte die Zeile mobil per
+          `max-sm:sticky max-sm:bottom-0` am Fussrand. Weil das Formular hoch ist
+          (8er-Raster), heftete sie sich schon bei scrollY=0 an den Viewport-Boden und
+          stand damit BEI y=796 — quer ueber dem Schritt-1-Titel (804) und der ersten
+          Kartenreihe (835). Gemessen mit elementFromPoint: titleSeen=false,
+          card0Seen=false, also war der Kopf des Formulars nicht lesbar. Ihr
+          natuerlicher Platz ist y=1183, gut unter dem Fold (Beleg /tmp/r178b-probe.cjs:
+          stickyTop 796 vs naturalTop 1183). Ohne sticky verdeckt sie nichts mehr; der
+          Weiter-Knopf steht dort, wo die letzte Karte endet, und wird beim Scrollen
+          erreicht. Die alte Begruendung ("Knopf nicht unter dem Fold") galt fuer ein
+          kurzes Formular; mit acht Karten kauft sie Sichtbarkeit des Knopfes mit
+          Unsichtbarkeit des ganzen Formularkopfes. */}
+      <div className="mt-6 flex flex-row items-center justify-between gap-3 max-sm:-mx-4 max-sm:border-t max-sm:border-[var(--color-line)] max-sm:px-4 max-sm:pt-3 sm:mt-7">
         {step > (lockTopic ? 1 : 0) ? (
           <button type="button" onClick={() => { setError(''); setStep((current) => current - 1); }} className="t-hover inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]">
             <ArrowLeft aria-hidden className="h-4 w-4 shrink-0" />{copy.back}
@@ -604,7 +644,9 @@ function TopicGrid({
 }) {
   const { lang } = useLang();
   return (
-    <div className="mt-6 grid grid-cols-2 gap-3">
+    // R178: mobil mt-1 statt mt-6. Die gesparten Reihen Abstand entscheiden, ob
+    // die erste Kartenreihe noch ueber dem 390-Fold steht. Ab sm bleibt es bei mt-6.
+    <div className="mt-1 grid grid-cols-2 gap-2 sm:mt-6 sm:gap-3">
       {topics.map((entry) => (
         <ChoiceCard
           key={entry.key}
@@ -664,7 +706,15 @@ function ChoiceCard({
         // Label + Hint rechts gestapelt, sonst braeche der Hint in die Icon-Spalte.
         tall
           ? hint
-            ? 'min-h-16 flex-row items-center gap-3 px-3 py-2.5 text-[13px] sm:px-4 sm:py-3 sm:text-sm'
+            // R178 Runde 3: mobil min-h-11 und py-1.5. Gemessen war die Karte
+            // trotz min-h-14 real 68px hoch, zwei sogar 86px — nicht wegen der
+            // Luft, sondern wegen der Erklaerzeile: neben dem Icon bleiben bei
+            // 390px genau 89px Textbreite, und sechs von acht Hints sind dort
+            // 91-107px breit, brechen also auf zwei Zeilen (Beleg
+            // /tmp/r178c-fit.cjs). Mobil traegt die Karte darum nur Icon plus
+            // Label in EINER Zeile; der Hint kommt ab sm zurueck, wo die Spalte
+            // breit genug ist. Ab sm bleibt das alte, luftigere Mass.
+            ? 'min-h-11 flex-row items-center gap-2.5 px-3 py-1.5 text-[13px] sm:min-h-16 sm:gap-3 sm:px-4 sm:py-3 sm:text-sm'
             : 'min-h-16 flex-col items-start gap-1.5 px-3 py-2.5 text-[13px] sm:flex-row sm:items-center sm:gap-3 sm:px-4 sm:py-3 sm:text-sm'
           : nowrap
             ? 'min-h-14 flex-col items-center justify-center gap-1 px-1.5 py-2 text-center text-[12px] sm:min-h-11 sm:flex-row sm:gap-2 sm:px-3 sm:text-sm'
@@ -690,9 +740,13 @@ function ChoiceCard({
       >
         {label}
         {hint ? (
+          // `hidden sm:block`: mobil kostet die Zeile zwei Zeilen statt einer und
+          // damit die halbe Kartenhoehe (68-86px statt 44px). Sie erklaert eine
+          // Wahl, die das Label schon nennt — unter dem Fold zu stehen ist der
+          // hoehere Preis. Ab sm ist die Spalte breit genug, dort bleibt sie.
           <span
             className={cn(
-              'mt-0.5 block text-[11px] font-medium leading-snug sm:text-xs',
+              'mt-0.5 hidden text-[11px] font-medium leading-snug sm:block sm:text-xs',
               active ? 'text-white/80' : 'text-[var(--color-ink-muted)]',
             )}
           >
@@ -716,8 +770,13 @@ function WizardProgress({ step, labels }: { step: number; labels: readonly strin
     >
       {labels.map((label, index) => (
         <li key={label} aria-current={index === step ? 'step' : undefined} className="min-w-0">
-          <span className={cn('block h-1.5 rounded-full transition-colors duration-[var(--dur-base)]', index <= step ? 'bg-[var(--color-salsa)]' : 'bg-[var(--color-line)]')} />
-          <span className={cn('mt-2 block truncate text-[12px] font-semibold uppercase tracking-[0.16em] sm:tracking-[0.1em]', index === step ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-muted)]')}>{label}</span>
+          {/* R178 Runde 3: mobil h-1 statt h-1.5 und eine feste, enge Zeilenhoehe
+              (leading-[1.05]) auf dem Schritt-Wort. `leading-tight` liess bei 11px
+              noch 14px Zeilenkasten stehen. Jeder dieser Pixel entscheidet, ob die
+              erste Anliegen-Karte lesbar ueber dem Fold steht. Ab sm bleibt alles
+              beim alten, luftigeren Mass. */}
+          <span className={cn('block h-1 rounded-full transition-colors duration-[var(--dur-base)] sm:h-1.5', index <= step ? 'bg-[var(--color-salsa)]' : 'bg-[var(--color-line)]')} />
+          <span className={cn('mt-0.5 block truncate text-[11px] font-semibold uppercase leading-[1.05] tracking-[0.12em] sm:mt-2 sm:text-[12px] sm:leading-normal sm:tracking-[0.1em]', index === step ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-muted)]')}>{label}</span>
         </li>
       ))}
     </ol>
@@ -870,7 +929,12 @@ function topicCardLabel(topic: TopicKey, fallback: string, de: boolean) {
   if (topic === 'raumvermietung') return de ? 'Raum mieten' : 'Room rental';
   if (topic === 'geschenkgutschein') return de ? 'Gutschein' : 'Gift voucher';
   if (topic === 'events') return de ? 'Events & Workshops' : 'Events & workshops';
-  if (topic === 'animationen') return de ? 'Shows & Animationen' : 'Shows & animations';
+  // R178 Runde 3: "Shows & Animationen" (111px) passte als einzige Karte nicht in
+  // die 89px Textbreite bei 390px und brach auf zwei Zeilen — die vierte Reihe war
+  // dadurch 50 statt 44px hoch. "Shows" (32px) ist das Kopfwort desselben Namens,
+  // steht so auch im Menue und in der Fusszeile, und die Erklaerzeile daneben sagt
+  // ab sm weiter "Auftritt fuer deinen Anlass". Kein neues Wort fuer dieselbe Sache.
+  if (topic === 'animationen') return de ? 'Shows' : 'Shows';
   if (topic === 'kontakt') return de ? 'Allgemeine Frage' : 'General question';
   return fallback;
 }

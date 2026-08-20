@@ -1,8 +1,16 @@
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
-import { useLang } from '@/lib/i18n';
+import { useLang, levelLabelI18n, WEEKDAY_LABEL } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import {
+  buildScheduleSlots,
+  embeddedSchedule,
+  fetchSchedule,
+  type ScheduleResponse,
+  type ScheduleSlot,
+} from '@/lib/schedule';
 import type { StyleContent } from '@/public/courses/styles/content';
 import {
   MEASURE_L,
@@ -81,6 +89,7 @@ export function StylePage({ data }: { data: Record<'de' | 'en', StyleContent> })
         <FitSection c={c} />
         <BeginnerSection c={c} />
         <LevelsSection c={c} />
+        <StyleSlotsSection styleKey={c.seo} />
         <SocialSection c={c} />
         <div className={isSalsa ? 'lg:[&>section]:!py-16' : undefined}>
           <ClosingInvite
@@ -158,7 +167,7 @@ const SALSA_HERO_PHOTO: SplitHeroPhoto = {
    Der Split-Hero ist parametrisiert statt kopiert; SALSA_HERO_PHOTO traegt die
    R137-Werte unveraendert weiter, der Salsa-Zweig rendert Byte fuer Byte gleich.
 
-   Motiv: /photos/premium/offer-bachata-1200.webp (1200x1600).
+   Motiv: /photos/2026/hero-paar-studiowand-01.webp (1920x1280). Siehe R172 unten.
 
    KORREKTUR R138 (Kritik nach dem ersten Bau): Der Hero lief zwischenzeitlich auf
    offer-bachata-wide-v2.webp. Das ist ein KI-Auszug desselben Motivs, kein Foto —
@@ -166,23 +175,33 @@ const SALSA_HERO_PHOTO: SplitHeroPhoto = {
    Linie exakt entlang Haaransatz, Ohr und Wange (Matte-Kante, kein Rim-Light), dazu
    hinter der Schulter einen kopflosen Koerper-Rest. Als 10rem-Streifen fiel das nicht
    auf, als grosses Hero war es der Blickfang. Brief Punkt 2 verbietet KI-Bilder.
-   offer-bachata-1200.webp ist die unretuschierte Quelle desselben Paares: derselbe
-   Crop-Bereich per Read geprueft, natuerliche Hautkante, keine Umriss-Linie, kein
-   Geister-Koerper. Warmes Studiolicht, scharf, beide Gesichter inkl. Kinn ganz im
+   Danach lief der Hero auf offer-bachata-1200.webp, der unretuschierten Foto-Quelle
+   desselben Paares. Die KI-Kante war damit weg, das Bild blieb aber das dunkelste
+   Paar-Motiv im Bestand — R172 tauscht es (Kommentar am `src` unten).
+   Jedes Ersatz-Motiv muss weiter ein echtes Foto sein: natuerliche Hautkante, keine
+   Umriss-Linie, kein Geister-Koerper, scharf, beide Gesichter inkl. Kinn ganz im
    Bild, Bachata-Naehe statt Heels/Fitness.
    kurs-03.jpg (Salsa) und gallery/kurse/03.jpg (Bachata-Why) sind hier verboten. */
 const BACHATA_HERO_PHOTO: SplitHeroPhoto = {
-  src: '/photos/premium/offer-bachata-1200.webp',
-  de: 'Bachata-Paar im warmen Salsaflow Studio, Fuehrung aus der Nahdistanz',
-  en: 'Bachata couple in the warm Salsaflow studio, leading from close connection',
+  /* R176, Look-FAIL R172: studiowand war hell (110.9), aber Logo fuellt die Wand
+     und der Mann steht mit dem Ruecken. Crop kann das Logo nicht wegschneiden.
+     party-33.webp: Mittel 97.1, R-B niedrig (kein Tungsten-Orange), beide Gesichter,
+     Fuehrungshaltung, Logo nur im Spiegel. Nur gallery/content.ts sonst.
+     Verboten bleiben: offer-bachata-1200, wide-v2, dreh-01, studiowand-Hero.
+     Crop bleibt usesBandPosition (center 20% in content.ts). */
+  src: '/photos/party/party-33.webp',
+  de: 'Paar tanzt in geschlossener Haltung im Salsaflow-Studio',
+  en: 'Couple dancing in closed hold at the Salsaflow studio',
   /* Klassenstring vollstaendig, in derselben Reihenfolge wie die Salsa-Variante.
      Mobil 4/3 statt 16/10: das Quellbild ist Hochformat, und der flachere Rahmen
      zog den Hero-Block soweit nach unten, dass der zweite Chip im 844er-Fold
      mittendurch geschnitten wurde. lg 4/3 fuellt die rechte Spalte bis knapp unter
-     den 730er-Fold. photo-grade-bachata-hero: Video 09:08 «das war auch falsch
-     eingefaerbt» — photo-grade-bachata haengt auch an Offer.tsx:67 und bleibt darum
-     unangetastet, diese Route bekommt ihre eigene, ruhigere Klasse (index.css). */
-  imgClass: 'aspect-[16/9] w-full object-cover lg:aspect-[4/3] photo-grade-bachata-hero',
+     den 730er-Fold. R161, Video 09:08 «das war auch falsch eingefaerbt»: der Hero
+     traegt jetzt GAR keine Grade-Klasse mehr. Die Gegen-Klasse aus R138 war nur ein
+     zweiter Filter ueber einem Filter. Das Foto steht auf dem Bild-Stil-Lock der
+     Route und traegt sich selbst. photo-grade-bachata bleibt in index.css, weil
+     Offer.tsx:67 daran haengt — hier wird sie einfach nicht gesetzt. */
+  imgClass: 'aspect-[16/9] w-full object-cover lg:aspect-[4/3]',
   /* Crop kommt aus content.ts `hero.band.position` ('center 20%', Brief Punkt 3).
      Das Quellbild ist Hochformat mit beiden Koepfen im oberen Drittel; 20% legt das
      4/3-Fenster auf den Gesichtsblock statt auf Boden. Der Lock wirkt jetzt wirklich. */
@@ -261,10 +280,10 @@ function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
               ) : null}
             </div>
 
-            <motion.div
-              variants={item}
-              className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]"
-            >
+            {/* R165: Foto ohne Stagger. Video 03:17 Beweis durch Bilder.
+                Gemessen: bei 700ms war die Spalte leer (item 7 im Stagger),
+                bei 2000ms sichtbar. Der Nutzer sieht sonst eine leere Rechte. */}
+            <div className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]">
               {/* Fold-kalibriert pro Route. Der Klassenstring kommt VOLLSTAENDIG aus
                   photo.imgClass — kein cn()-Zusammenbau mehr, damit Salsa exakt den
                   R137-String rendert (GATES.md G1). */}
@@ -278,7 +297,7 @@ function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
                 loading="eager"
                 fetchPriority="high"
               />
-            </motion.div>
+            </div>
             {h.bullets.length ? (
               /* gap-2.5 statt gap-1.5 unter sm ist der Fold-Hebel: mit 6px Abstand begann
                  der dritte Chip bei y839 und stand als 5px-Sliver mit halber Rundung auf
@@ -396,10 +415,10 @@ function WhySection({ c }: { c: StyleContent }) {
                   // darunter. Heels behaelt 4/3 in der schmalen Spalte.
                   wideWhy ? 'aspect-[4/3] lg:aspect-[3/2]' : 'aspect-[4/3]',
                   isSalsa && w.image.position ? undefined : 'object-[center_42%]',
-                  // R138 Video 09:08: photo-grade-bachata (sat 0.82) entfaerbte dieses
-                  // Foto. Route-lokale Klasse statt die geteilte umzubiegen — sie haengt
-                  // auch an Offer.tsx:67.
-                  c.seo === 'bachata' ? 'photo-grade-bachata-why' : undefined,
+                  // R161, Video 09:08: hier stand eine Bachata-Gegen-Klasse gegen
+                  // photo-grade-bachata. Beide sind weg — dieses Foto lief nie unter
+                  // der geteilten Klasse, die Korrektur korrigierte also nichts und
+                  // faerbte nur ein zweites Mal. Bild-Stil-Lock der Route reicht.
                 )}
                 width={1200}
                 height={900}
@@ -604,6 +623,232 @@ function LevelsSection({ c }: { c: StyleContent }) {
         </Reveal>
       </Shell>
     </section>
+  );
+}
+
+/* -------------------------------------------------------------------- Termine */
+
+/* R162: Die Stilseite erklaerte den Stil, nannte aber keinen einzigen Termin — wer
+   einsteigen wollte, musste erst auf den Kursplan wechseln. Diese Sektion zeigt die
+   Termine GENAU DIESES Stils direkt hier, mit sichtbarem «frei» oder «Ausgebucht».
+
+   Bewusst KEIN CourseEngine-Import: die Engine ist der volle Kursplan mit Staffel-
+   Wechsler, Wochen-Navigation, Filtern und Tages-Tabs. Hier braucht es eine Liste.
+   Beide lesen dieselben Daten aus @/lib/schedule, darum bleibt kein zweiter
+   Datenstand entstehen. Keine neue API. */
+
+const SLOTS_UI = {
+  de: {
+    eyebrow: 'Termine',
+    title: 'Wann du',
+    titleAccent: 'tanzen kannst',
+    lead: 'Alle laufenden Termine in diesem Stil. Ein Klick auf die Zeile bringt dich zur Anmeldung.',
+    free: 'frei',
+    full: 'Ausgebucht',
+    teacherTba: 'Team',
+    empty: 'Gerade laeuft in diesem Stil kein Kurs. Schreib uns — wir sagen dir, wann der naechste startet.',
+    more: 'Alle Kurse im Kursplan',
+    clock: 'Uhr',
+  },
+  en: {
+    eyebrow: 'Dates',
+    title: 'When you',
+    titleAccent: 'can dance',
+    lead: 'Every running course in this style. Click a row to go to the sign-up.',
+    free: 'open',
+    full: 'Fully booked',
+    teacherTba: 'Team',
+    empty: 'No course is running in this style right now. Write to us and we will tell you when the next one starts.',
+    more: 'See the full schedule',
+    clock: '',
+  },
+} as const;
+
+/** Laedt den Kursplan: erst der eingebettete Stand (steht schon im HTML, darum kein
+ *  «wird geladen»), danach aktualisiert der Netz-Aufruf auf den Live-Stand. Genau der
+ *  Vertrag aus schedule.ts. */
+function useSchedule(): ScheduleResponse | null {
+  const [data, setData] = useState<ScheduleResponse | null>(() => embeddedSchedule());
+
+  useEffect(() => {
+    let alive = true;
+    fetchSchedule()
+      .then((res) => {
+        if (alive) setData(res);
+      })
+      .catch(() => {
+        /* Der eingebettete Stand bleibt stehen. Eine leere Liste waere schlechter
+           als ein Plan, der ein paar Minuten alt ist. */
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return data;
+}
+
+/** Faltet die bereits sortierten Slots zu Wochentag-Bloecken. `buildScheduleSlots`
+ *  liefert sie nach Wochentag und Startzeit sortiert (schedule.ts), darum reicht ein
+ *  Durchlauf: ein neuer Tag beginnt genau dort, wo sich `weekday` aendert. */
+function groupSlotsByWeekday(slots: ScheduleSlot[]): { weekday: string; slots: ScheduleSlot[] }[] {
+  const groups: { weekday: string; slots: ScheduleSlot[] }[] = [];
+  for (const slot of slots) {
+    const last = groups[groups.length - 1];
+    if (last && last.weekday === slot.weekday) last.slots.push(slot);
+    else groups.push({ weekday: slot.weekday, slots: [slot] });
+  }
+  return groups;
+}
+
+/** Die Termin-Sektion eines Stils. `styleKey` ist der Routen-Schluessel
+ *  (salsa|bachata|heels) und trifft styleKey in der API 1:1 — gemessen gegen
+ *  /api/public/schedule: salsa 50, bachata 8, heels 4 Kurse.
+ *
+ *  Exportiert, weil nicht jeder Stil ueber StylePage laeuft: /tanzkurse/heels
+ *  rendert HeelsView.tsx (eigener Plan-Rhythmus, siehe pages.tsx). Ohne Export
+ *  muesste die Sektion dort ein zweites Mal existieren — zwei Kopien derselben
+ *  Liste, die ab dem ersten Fix auseinanderlaufen. Ein Import, eine Wahrheit.
+ *  Mountpunkt in HeelsView: <StyleSlotsSection styleKey={c.seo} />. */
+export function StyleSlotsSection({ styleKey }: { styleKey: string }) {
+  const { lang } = useLang();
+  const { item } = useReveal();
+  const t = SLOTS_UI[lang];
+  const data = useSchedule();
+
+  const slots = data ? buildScheduleSlots(data.courses.filter((course) => course.styleKey === styleKey), data.terms) : [];
+
+  /* Nichts zu zeigen heisst: nichts zeigen. Eine Sektion mit Ueberschrift ueber einer
+     leeren Liste sieht kaputt aus, und ein Skelett waere hier eine Behauptung ueber
+     Daten, die es vielleicht nicht gibt. */
+  if (!slots.length) return null;
+
+  return (
+    <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
+      <Shell>
+        <Reveal className="max-w-2xl">
+          <motion.div variants={item}>
+            <Eyebrow>{t.eyebrow}</Eyebrow>
+          </motion.div>
+          <motion.h2 variants={item} className={cn('mt-5', sectionTitle, MEASURE_L)}>
+            {t.title} <TitleAccent>{t.titleAccent}</TitleAccent>
+          </motion.h2>
+          <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
+            {t.lead}
+          </motion.p>
+        </Reveal>
+
+        {/* Nach Wochentag gruppiert statt als eine lange Liste. Ungruppiert stand
+            «Montag» neunmal untereinander und der Tag war die lauteste Information
+            auf dem Schirm, obwohl er sich neunmal nicht aendert (am Live-Render mit
+            25 Zeilen gemessen). Als Zwischen-Ueberschrift sagt der Tag einmal, was
+            er sagen muss, und die Zeile traegt nur noch, was sie unterscheidet. */}
+        <div className="mt-10 flex flex-col gap-8">
+          {groupSlotsByWeekday(slots).map((group) => (
+            <Reveal key={group.weekday} stagger={0.04}>
+              <motion.h3
+                variants={item}
+                className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]"
+              >
+                {WEEKDAY_LABEL[lang][group.weekday]?.long ?? group.weekday}
+              </motion.h3>
+              <div className="mt-3 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white">
+                {group.slots.map((slot) => (
+                  <SlotLine key={slot.key} slot={slot} />
+                ))}
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal className="mt-6">
+          <motion.div variants={item}>
+            <a
+              href="/kursplan"
+              className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+            >
+              {t.more}
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+            </a>
+          </motion.div>
+        </Reveal>
+      </Shell>
+    </section>
+  );
+}
+
+function SlotLine({ slot }: { slot: ScheduleSlot }) {
+  const { lang } = useLang();
+  const { item } = useReveal();
+  const t = SLOTS_UI[lang];
+  const course = slot.primary;
+
+  /* Der Badge beschreibt den Kurs, auf den die Zeile ZEIGT — nicht irgendeinen aus
+     der Gruppe. `slot.bookable` ist genau dieses Ziel (schedule.ts: erster offener
+     Kurs, sonst der laufende). `slot.full` waere hier falsch: es steht nur auf true,
+     wenn laufende UND kommende Staffel voll sind. Am Live-Stand ist Montag 18:30
+     «Intermediate Stufe 11» laufend ausgebucht, die Oktober-Staffel offen — die Zeile
+     verlinkt Oktober, also ist «frei» die richtige und ehrliche Auskunft. Haengt das
+     Ziel dagegen an einem vollen Kurs, steht «Ausgebucht» statt eines Versprechens,
+     das die Anmeldung nicht halten kann. */
+  const isFull = slot.bookable.status === 'full';
+
+  const weekday = WEEKDAY_LABEL[lang][slot.weekday]?.long ?? slot.weekday;
+  const level = levelLabelI18n(lang === 'de' ? course.levelDe : course.levelEn, course.onVariant);
+  /* Nur der Vorname: die Zeile ist eng, und im Studio ruft ohnehin niemand den
+     Nachnamen. Mehrere Lehrer werden mit & verbunden wie im Kursplan. */
+  const teachers = course.teachers.map((teacher) => teacher.displayName.split(' ')[0]).join(' & ');
+
+  return (
+    <motion.a
+      variants={item}
+      href={`/buchung?kurs=${encodeURIComponent(slot.bookable.id)}`}
+      data-testid="style-slot"
+      data-course-id={slot.bookable.id}
+      data-full={isFull ? '' : undefined}
+      className="group flex flex-col gap-2 border-b border-[var(--color-line)] px-4 py-4 transition-colors last:border-b-0 hover:bg-[var(--color-bg-soft)] sm:flex-row sm:items-center sm:gap-5 sm:px-6"
+    >
+      {/* Die Uhrzeit ist der Anker der Zeile: danach sucht man, wenn man wissen will,
+          ob es in den eigenen Feierabend passt. Feste Breite ab sm, damit die Zeiten
+          untereinander eine Spalte bilden statt zu flattern. Der Wochentag steht als
+          Ueberschrift ueber der Gruppe und wird hier nicht wiederholt — nur der
+          Screenreader bekommt ihn pro Zeile, weil der Link auch einzeln vorgelesen
+          wird und «18:30–19:30» ohne Tag keine buchbare Auskunft ist. */}
+      <span className="flex shrink-0 flex-col sm:w-40">
+        {/* whitespace-nowrap: ohne die Klasse brach «19:30–20:30 Uhr» nach der Zeit um
+            und setzte «Uhr» auf eine zweite Zeile, waehrend «18:30–19:30 Uhr» einzeilig
+            blieb — die Zeitspalte lief zweizeilig gegen einzeilig (im Desktop-Render
+            gemessen). Die Zeit ist eine Einheit und darf nicht brechen. */}
+        <span className="whitespace-nowrap font-display text-base font-bold tabular-nums leading-tight text-[var(--color-ink)]">
+          <span className="sr-only">{weekday} </span>
+          {slot.startTime}–{slot.endTime}
+          {t.clock ? ` ${t.clock}` : ''}
+        </span>
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="block text-[0.98rem] font-semibold leading-snug text-[var(--color-ink)]">{level}</span>
+        <span className="mt-0.5 block break-words text-sm leading-snug text-[var(--color-ink-muted)]">
+          {teachers || t.teacherTba}
+        </span>
+      </span>
+
+      {/* Ausgebucht ist eine ruhige Auskunft, kein Alarm: graue Pille. «frei» traegt
+          Rot, weil Rot auf dieser Seite die Aktionsfarbe ist. */}
+      <span className="flex shrink-0 items-center gap-3 self-start sm:self-center">
+        <span
+          className={cn(
+            'inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold',
+            isFull
+              ? 'border-[var(--color-line)] bg-[var(--color-bg-soft)] text-[var(--color-ink-muted)]'
+              : 'border-[var(--color-salsa)]/30 bg-[var(--color-salsa)]/8 text-[var(--color-salsa)]',
+          )}
+        >
+          {isFull ? t.full : t.free}
+        </span>
+        <CtaArrow className="text-[var(--color-ink-muted)] transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5 group-hover:text-[var(--color-salsa)]" />
+      </span>
+    </motion.a>
   );
 }
 

@@ -834,6 +834,9 @@ function BookingForm({
   // direkt auf Schritt 2 und die Weiter-Taste entfaellt.
   const [step, setStep] = useState<1 | 2>(1);
   const [role, setRole] = useState<'leader' | 'follower' | null>(null);
+  // Klick auf die Rolle und sofort Weiter las den State noch als null
+  // (React committet setRole erst nach dem Event). Der Ref steht im selben Tick.
+  const roleRef = useRef<'leader' | 'follower' | null>(null);
   const [mode, setMode] = useState<'solo' | 'couple'>('solo');
   const [needsAushilfe, setNeedsAushilfe] = useState(false);
   const [me, setMe] = useState<Person>(emptyPerson);
@@ -943,16 +946,21 @@ function BookingForm({
     if (next === 'couple') setNeedsAushilfe(false);
   }
 
-  // Schritt 1 ist erfuellt, sobald die Rolle steht. Der Modus hat immer einen Wert (solo).
-  const step1Ok = isOpen || role !== null;
+  function chooseRole(next: 'leader' | 'follower') {
+    roleRef.current = next;
+    setRole(next);
+  }
 
   function goToStep2() {
-    setShowErrors(true);
-    if (!step1Ok) {
-      setFormError(bt.requiredHint);
+    const hasRole = isOpen || roleRef.current !== null;
+    if (!hasRole) {
+      // Ein Fehlertext an den Kacheln, nicht noch formError mit demselben Satz.
+      setShowErrors(true);
+      setFormError(null);
       focusFirstInvalid();
       return;
     }
+    if (role === null && roleRef.current !== null) setRole(roleRef.current);
     setFormError(null);
     setShowErrors(false);
     stepChanged.current = true;
@@ -990,9 +998,10 @@ function BookingForm({
     setShowErrors(true);
     // Rolle fehlt: das ist Schritt 1. Zurueckspringen statt einen Fehler zu zeigen,
     // den man auf dem sichtbaren Schritt gar nicht beheben kann.
-    if (!isOpen && role === null) {
+    if (!isOpen && roleRef.current === null) {
       setStep(1);
-      setFormError(bt.requiredHint);
+      setShowErrors(true);
+      setFormError(null);
       focusFirstInvalid();
       return;
     }
@@ -1018,7 +1027,7 @@ function BookingForm({
     try {
       const r = await createBooking({
         courseId: course.id,
-        role: isOpen ? null : mode === 'couple' ? role ?? 'leader' : role,
+        role: isOpen ? null : mode === 'couple' ? roleRef.current ?? 'leader' : roleRef.current,
         mode: isOpen ? 'solo' : mode,
         participant: { firstName: me.firstName, lastName: me.lastName, email: me.email, phone: me.phone || undefined },
         partner:
@@ -1184,14 +1193,14 @@ function BookingForm({
                         testid="role-follower"
                         active={role === 'follower'}
                         label={bt.follower}
-                        onClick={() => setRole('follower')}
+                        onClick={() => chooseRole('follower')}
                         invalid={showErrors && role === null}
                       />
                       <ChoiceTile
                         testid="role-leader"
                         active={role === 'leader'}
                         label={bt.leader}
-                        onClick={() => setRole('leader')}
+                        onClick={() => chooseRole('leader')}
                         invalid={showErrors && role === null}
                       />
                     </div>
@@ -1199,7 +1208,7 @@ function BookingForm({
                       {lang === 'de' ? 'Für die Balance im Kurs.' : 'Helps us balance the class.'}
                     </p>
                     {showErrors && role === null && (
-                      <p id="booking-role-error" className="mt-1.5 text-sm font-medium text-[var(--color-salsa)]">{bt.requiredHint}</p>
+                      <p id="booking-role-error" role="alert" data-testid="booking-required-error" className="mt-1.5 text-sm font-medium text-[var(--color-salsa)]">{bt.requiredHint}</p>
                     )}
                   </section>
                 )}
@@ -1310,7 +1319,7 @@ function BookingForm({
                 {/* Schritt 1 hat kein optionales Feld — dort schliesst die Meldung den
                     Block ab. Auf Schritt 2 steht sie oben an den Pflichtfeldern (siehe
                     Kommentar dort) und darf hier kein zweites Mal erscheinen. */}
-                {visibleStep === 1 && formError && (
+                {visibleStep === 1 && formError && !(showErrors && role === null) && (
                   <p role="alert" className="text-sm font-medium text-[var(--color-salsa)]">{formError}</p>
                 )}
               </form>

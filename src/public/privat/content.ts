@@ -117,9 +117,12 @@ const de: PrivatContent = {
     primary: { label: 'Privatstunde anfragen', href: R.privatAnfrage },
     secondary: { label: 'Preise ansehen', href: R.preise },
     microcopy: 'Beschreib kurz dein Ziel. Wir empfehlen dir den nächsten Schritt.',
+    // R177b: party-04 war warm/orange (Opus FAIL). party-31-v3: weisse Wand,
+    // blaues Licht, Frau frontal, Mann Gesicht sichtbar. Mittel 91.3.
+    // Nicht studiowand, nicht party-33, nicht KI. Crop in PrivatstundenPage.
     image: {
-      src: '/photos/premium/offer-privat-square-1200.webp',
-      alt: 'Persönlicher Tanzunterricht im hellen Salsaflow Studio',
+      src: '/photos/party/party-31-v3.webp',
+      alt: 'Paar tanzt, die Frau lächelt in die Kamera, der Mann hinter ihr',
     },
     cardLabel: 'Dein Ziel',
     cardText: 'Technik, Hochzeitstanz oder ein sicherer Einstieg. Persönlich begleitet.',
@@ -166,7 +169,7 @@ const de: PrivatContent = {
     // Gruen unter Rot UND Blau, also Magenta-Stich).
     //
     // R140-Fix: offer-privat-1200.webp war der falsche Ersatz. Es ist derselbe Schnitt
-    // wie das Hero-Foto offer-privat-square-1200.webp — gleiches Paar, gleiche Wand,
+    // wie der damalige quadratische Hero-Crop — gleiches Paar, gleiche Wand,
     // gleiches warmes Licht, nur naeher. Der Crop schnitt der Frau links das Gesicht an.
     // Jetzt gallery/kurse/06.jpg, per Read einzeln angesehen und gemessen:
     //   offer-privat-1200: mean 133.7, R 157.1 / G 129.7 / B 114.4  (warmes Kunstlicht)
@@ -267,9 +270,10 @@ const en: PrivatContent = {
     primary: { label: 'Request a private lesson', href: R.privatAnfrage },
     secondary: { label: 'See the prices', href: R.preise },
     microcopy: 'Describe your goal in a few words. We recommend the next step.',
+    // R177: same photo as DE. Not studiowand-01.
     image: {
-      src: '/photos/premium/offer-privat-square-1200.webp',
-      alt: 'Personal dance coaching in the bright Salsaflow studio',
+      src: '/photos/party/party-31-v3.webp',
+      alt: 'Couple dancing, the woman smiling at the camera, the man behind her',
     },
     cardLabel: 'Your goal',
     cardText: 'Technique, wedding dance or a safe start. Personally guided.',

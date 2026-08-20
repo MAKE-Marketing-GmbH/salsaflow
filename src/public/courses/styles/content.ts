@@ -104,7 +104,7 @@ const R = {
 };
 
 /* ============================================================= SALSA (Muster, 1:1 pages/03) */
-const salsa: Record<Lang, StyleContent> = {
+const salsa = {
   de: {
     seo: 'salsa',
     crumb: { label: 'Salsa', href: R.salsaPage },
@@ -393,10 +393,10 @@ const salsa: Record<Lang, StyleContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, StyleContent>;
 
 /* ============================================================= BACHATA (1:1 pages/04) */
-const bachata: Record<Lang, StyleContent> = {
+const bachata = {
   de: {
     seo: 'bachata',
     crumb: { label: 'Bachata', href: R.bachataPage },
@@ -416,7 +416,7 @@ const bachata: Record<Lang, StyleContent> = {
       microcopy: 'Wir helfen dir, sicher und passend einzusteigen.',
       image: { src: '/photos/premium/offer-bachata-1200.webp', alt: 'Bachata-Paar mit ruhiger, warmer Verbindung im Salsaflow Studio' },
       band: {
-        src: '/photos/premium/offer-bachata-wide-v2.webp',
+        src: '/photos/premium/offer-bachata-1200.webp',
         alt: 'Bachata-Paar in ruhiger Haltung im Unterricht',
         // R71: 10% zeigte nur Boden, 25% nur Haar-Kuppen (63px Streifen zu flach).
         // R71-Nachzieh: zwei Hebel zusammen — Band-Top ~220px hoch (tight-Block in
@@ -560,7 +560,7 @@ const bachata: Record<Lang, StyleContent> = {
       microcopy: 'We help you get in safely and at the right level.',
       image: { src: '/photos/premium/offer-bachata-1200.webp', alt: 'Bachata couple with a calm, warm connection in the Salsaflow studio' },
       band: {
-        src: '/photos/premium/offer-bachata-wide-v2.webp',
+        src: '/photos/premium/offer-bachata-1200.webp',
         alt: 'Bachata couple in a calm posture during class',
         position: 'center 22%',
         heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[12rem]',
@@ -667,9 +667,9 @@ const bachata: Record<Lang, StyleContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, StyleContent>;
 
-export const STYLE_CONTENT: Record<StyleKey, Record<Lang, StyleContent>> = {
+export const STYLE_CONTENT = {
   salsa,
   bachata,
-};
+} satisfies Record<StyleKey, Record<Lang, StyleContent>>;

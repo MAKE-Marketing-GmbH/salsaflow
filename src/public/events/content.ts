@@ -74,13 +74,12 @@ export const EVENTS: Record<Lang, EventsContent> = {
       eyebrow: 'Workshops',
       title: 'Ein Workshop gibt einem Thema einen ganzen Abend.',
       body: 'Du konzentrierst dich auf Technik, Figuren, Musikalität oder Styling und kannst das Gelernte danach direkt auf Events anwenden.',
+      // R155: vorher vier kleine Punkte (Video 05:40, "Mini-Sachen lost"). Jetzt zwei
+      // Bloecke, je ein Gedanke pro Satz: Punkt 1 traegt Technik, Styling und
+      // Musikalitaet, Punkt 2 die Gastlehrer:innen. Keine neue Aussage.
       points: [
-        'Technik: saubere Bewegung statt nur mehr Figuren',
-        'Styling: bewusster Ausdruck in Salsa, Bachata oder Heels',
-        'Musikalität: besser hören, besser reagieren',
-        // Konkretisiert aus dem Onboarding: "Artisten aus ganz Europa kommen monatlich zu
-        // Salsaflow" (leistungen[2].besonders). Vorher stand hier nur "je nach Gastlehrer:innen".
-        'Special Topics: mit Gastlehrer:innen, die monatlich aus ganz Europa anreisen',
+        'Dein Handwerk. Du lernst saubere Bewegung statt nur mehr Figuren. Du findest bewussten Ausdruck in Salsa, Bachata oder Heels. Du hörst die Musik besser und reagierst besser auf sie.',
+        'Deine Special Topics. Dafür reisen Gastlehrer:innen monatlich aus ganz Europa an.',
       ],
     },
     anniversary: {
@@ -141,11 +140,10 @@ export const EVENTS: Record<Lang, EventsContent> = {
       eyebrow: 'Workshops',
       title: 'A workshop gives one topic a full evening.',
       body: 'You focus on technique, figures, musicality or styling and can apply what you learned directly at the next event.',
+      // R155: same two-block grouping as DE, one thought per sentence.
       points: [
-        'Technique: clean movement instead of just more figures',
-        'Styling: conscious expression in Salsa, Bachata or Heels',
-        'Musicality: hear better, react better',
-        'Special topics: with guest teachers who travel in from across Europe every month',
+        'Your craft. You learn clean movement instead of just more figures. You find conscious expression in Salsa, Bachata or Heels. You hear the music better and react to it better.',
+        'Your special topics. For these, guest teachers travel in from across Europe every month.',
       ],
     },
     anniversary: {

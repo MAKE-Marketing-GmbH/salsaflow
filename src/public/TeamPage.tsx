@@ -211,17 +211,88 @@ function TeachingLine({ teaching, lang }: { teaching: Teaching | undefined; lang
  *    und Salsaflow-Wand — es traegt kein Gesicht. Der alte Kommentar rechnete mit
  *    "Gruppe 30..80%", also inklusive Schuhe; darum war das Fenster zu tief gesetzt.
  *
- * b) DIE BANDKANTE. Mit `dense` sitzt der Band-Top live bei y=385. Bis zur Falz bleiben
- *    345px. Ein 22rem-Band (352px) endet folglich bei y=737 und laeuft 7px UEBER die
- *    Falz — genau der Anschnitt, der weg soll. 21rem (336px) endet bei y=721 und liegt
- *    mit 9px Luft komplett im Fold.
+ * b) DIE BANDKANTE. Mit `dense` sitzt der Band-Top live bei y=385.
  *
- * Aus (a) und (b) folgt das Fenster: 336px von 892px, es werden 556px weggeschnitten.
- * Damit Scheitel (268px) UND Kinn (500px) drin liegen, muss die Y-Position zwischen
- * 29.4% und 48.1% liegen. `center 39%` ist die Mitte dieses Bandes und legt das Fenster
- * auf 216..552px: 52px Luft ueber dem Scheitel, 52px unter dem tiefsten Kinn.
- * `center 58%` lag AUSSERHALB dieses Bandes (Fenster 313..649px) und kappte die hintere
- * Reihe an der Stirn — belegt im Fold-Shot des ersten Durchgangs.
+ * R156 (Video 06:57/07:03, "nicht abschneiden"): die Rechnung oben war an EINER Stelle
+ * falsch, und daran hing der ganze Anschnitt. Sie setzte das tiefste Kinn der KNIENDEN
+ * Reihe auf 56% und erklaerte alles darunter zu "Hose, Boden und Wand". Nachgemessen an
+ * der Quelldatei stimmt das nicht: die kniende Reihe reicht mit Knien, Schienbeinen und
+ * Schuhen bis 78..80% der Bildhoehe (Farbscan auf Holzboden-Pixel, ab 81% ist die Flaeche
+ * durchgehend Parkett). Oben faengt das Haar der hinteren Reihe bei 25% an. Die Gruppe
+ * belegt also 25..80%, nicht 30..56%.
+ *
+ * Ein 21rem-Band (336px) zeigte davon live nur 24.3%..62.0% — die Koepfe waren ganz, die
+ * kniende Reihe endete auf halbem Oberschenkel. Genau der Befund aus dem Video. Das Band
+ * war zu FLACH; die Position war es nie.
+ *
+ * Die Position bleibt darum unveraendert bei `center 39%` (LOCK, nicht zurueck auf 58%),
+ * das Band waechst nach unten. Gemessen am laufenden Stand (1440px, Band-Top y=385):
+ *    21rem/336px -> src 24.3%..62.0%   Fuesse ab (Ist-Zustand)
+ *    28rem/448px -> src 19.4%..69.6%   Fuesse immer noch ab
+ *    36rem/576px -> src 13.8%..78.4%   Schuhspitzen noch knapp an
+ *    38rem/608px -> src 12.4%..80.6%   ganze Gruppe inkl. Schuhe und Boden
+ *
+ * Ab lg steht aber eine FESTE Hoehe (rem) und keine feste Hoehe kann das halten. Bei
+ * object-cover haengt der Ausschnitt am Verhaeltnis Breite/Hoehe: dieselben 608px zeigen
+ * auf 1440px Breite src 12.4%..80.6% (Fuesse drin), auf 1920px aber nur 19.1%..70.2% —
+ * die Fuesse waren auf breiten Schirmen wieder ab (gemessen ueber 390..1920px). Ein
+ * fester rem-Wert muesste pro Breite mitwachsen (1600px braucht 42rem, 1728px 46rem,
+ * 1920px 50rem); das ist keine Kette, die man pflegen kann.
+ *
+ * Ab lg traegt darum ein SEITENVERHAELTNIS statt einer festen Hoehe. Es haelt den
+ * Ausschnitt auf jeder Breite konstant: `aspect-[21/9]` zeigt bei 1280, 1440, 1920 und
+ * 2560px identisch src 12.0%..81.2% — Scheitel (25%) und Schuhe (80%) liegen auf jeder
+ * Breite im Fenster. Auf 1440px ist das Band damit 617px hoch, also praktisch die 38rem
+ * aus der Messreihe oben, nur eben breitenstabil.
+ *
+ * R159 (Video 06:57, "nicht abschneiden") — die Werte oben nachgeprueft, nicht neu gesetzt.
+ * Die 25% Scheitel und 80% Schuhe standen bisher als Behauptung im Kommentar. Jetzt sind
+ * sie gegen die Quelldatei gemessen (Zeilen-Scan auf hp-03.webp, 1800x1115, Luminanz < 110):
+ *   erste Zeile mit Haar  y=280  = 25.1% ; darueber ist jede Zeile reine helle Wand (0 Treffer)
+ *   letzte Zeile Gruppe   y~892  = 80.0% ; ab 82% ist die Flaeche durchgehend Parkett
+ * Beides deckt sich mit der Rechnung. `center 39%` ist damit belegt, nicht geraten.
+ *
+ * Der FOLD ist der eigentliche Punkt aus dem Video, und er haengt nicht am Band allein,
+ * sondern an der Bandkante (y=385). Live gemessen, Fenster bis zur Fold-Kante:
+ *   1366x768   src 12.0%..57.2%      1280x800   src 12.0%..64.3%
+ *   1440x900   src 12.0%..69.7%      1920x1080  src 12.0%..70.4%
+ * Die Koepfe liegen bei 25..45%, also auf JEDER dieser Hoehen komplett ueber der Kante.
+ * Ueberm Scheitel bleiben konstant 13.1pp = 117px Luft (Fenster startet 12.0%, Haar 25.1%).
+ * Angeschnitten wird nur die kniende Reihe unterhalb der Brust — kein Kopf, kein Gesicht.
+ *
+ * Mobil 390px zeigt src 0.0%..100.0% vertikal und 2.8%..97.2% horizontal: das ganze
+ * Gruppenbild mit Raum und Boden. Das ist Kontext, kein Portraet-Crop — genau die
+ * Forderung aus dem Video. Ein engeres Fenster waere hier ein Rueckschritt.
+ *
+ * Fazit R159: die Geometrie erfuellt "nicht abschneiden" bereits. Sie wird darum NICHT
+ * angefasst. Wer sie spaeter dreht, muss diese Messreihe neu fahren und schlagen.
+ *
+ * R180b (Video 06:59, Fold-Schnitt + Aufloesung) —
+ * Playwright gegen http://127.0.0.1:5175/team, Gate /tmp/shoot-team-v2.mjs.
+ * Das alte Gate mass nur das object-fit-Fenster der GANZEN Datei, nie den
+ * Teil oberhalb der Fold-Kante. Darum PASS bei Schnitt auf halbem Oberschenkel.
+ *
+ * IST 1440x900, dpr=2, vor dem Fix (hp-03.webp 1800x1115, aspect 21/9, pos 39%):
+ *   CSS 1440x617, Band-Top y=385.3, Band-Bot y=1002.4, vh=900
+ *   BAND src 12.0%..81.2%   (Schuhe liegen im Band)
+ *   FOLD src 12.0%..69.7%   (Fold-Kante schneidet bei 69.7% — Schuhe 80% draussen)
+ *   Device-Pixel 2880 noetig, Quelle 1800, Ratio 0.63x
+ *
+ * heightClass allein reicht nicht: bei pos 39% und Band-Top 385 liegt die
+ * Fold-Decke bei src 74.2%, auch wenn das Band genau bis vh=900 reicht.
+ * Darum beides, mit Messung:
+ *   lg-Aspect 21/9 (617px, laeuft 102px unter die Fold-Kante)
+ *     -> 14/5 (514px, Band-Bot y=899.6, sitzt im Fold)
+ *   position 39% -> 54% (Fenster rutscht nach unten, Luft ueber den Koepfen bleibt)
+ *
+ * SOLL 1440x900 gerechnet (14/5, pos 54%, gleiche Motiv-Prozente nach Upscale):
+ *   FOLD src 22.87%..80.52%
+ *   headsWhole: 22.87 <= 25.1, Luft 2.23pp (~20 CSS-px) ueber dem Scheitel
+ *   shoesInFold: 80.52 >= 80.0
+ *
+ * Aufloesung: `src` ist in TeamPage.tsx frei. Neues File
+ * /photos/showcase/hp-03-2880.webp, Lanczos aus hp-03 (1800 -> 2880).
+ * Keine neuen Details, aber Browser-Bilinear-Matsch weg. Deckung 2880/2880 = 1.0x.
  */
 function TeamHero() {
   const { lang } = useLang();
@@ -241,11 +312,13 @@ function TeamHero() {
       lead={h.lead}
       primary={{ href: SCHNUPPER_HREF, label: lang === 'de' ? 'Schnupperstunde buchen' : 'Book a trial class' }}
       media={{
-        src: '/photos/showcase/hp-03.webp',
+        src: '/photos/showcase/hp-03-2880.webp',
         alt: 'Das Salsaflow-Team gemeinsam im hellen Studio',
-        // Beide Werte gemessen, siehe Kopfkommentar (a) Motiv und (b) Bandkante.
-        position: 'center 39%',
-        heightClass: 'h-[16rem] sm:h-[18rem] lg:h-[21rem]',
+        // R180b: Fold-Gate clippt an vh. 21/9 + 39% zeigte FOLD 12.0%..69.7% (Schuhe ab).
+        // Aspect 14/5 setzt das Band in den Fold; 54% schiebt das Fenster auf die Schuhe.
+        // Alte Zahlen und Rechnung: Block R180b im Kopfkommentar.
+        position: 'center 54%',
+        heightClass: 'h-[16rem] sm:h-[24rem] lg:h-auto lg:aspect-[14/5]',
       }}
     />
   );
@@ -625,17 +698,29 @@ function RolesSection() {
               der Galerie. Jetzt ein echter Kursmoment vor der Salsaflow-Wand
               (Luminanz 159/255 statt 53/255) — er zeigt, was die Sektion behauptet:
               viele Menschen, ein gemeinsamer Kursabend. */}
-          {/* 22% statt 40%: das 21:9-Fenster nimmt ~12% der Bildhoehe weg, bei 40% fehlte
-              der Frau rechts (weisse Bluse) die Schaedeldecke (Critic Runde 11, Item 2). */}
+          {/* R156 (Video 07:03, "niemand am Rand halb"): hier stand
+              kurse-heels-energie-01.webp in einem 21:9-Fenster. Die blonde Frau links war
+              angeschnitten — und zwar nicht durch das Fenster, sondern durch die DATEI: sie
+              steht im Quellbild selbst am linken Rand und ist dort bereits halbiert
+              (1920x935, Raster-Check auf der Quelldatei). Ein anderer Crop kann das nicht
+              heilen, weil die fehlende Bildhaelfte gar nicht existiert. Bei 2.05:1 Quelle in
+              einem 2.33:1 Fenster schneidet object-cover ausserdem nur HOEHE weg, nie Breite.
+              Darum der Tausch auf ein vorhandenes Kursfoto, kein neues Motiv:
+              kurse-classfreude-01.webp (1920x1280, 3:2). Es zeigt dieselbe Aussage — viele
+              Menschen, ein gemeinsamer Kursabend — hat aber an beiden Raendern ganze Figuren
+              und dank 3:2 genug Hoehe fuer einen Crop.
+              Fenster 16/9 statt 21/9 und `center 30%`: gemessen zeigt das src 4.7%..89.1%,
+              also erhobene Haende oben komplett und Fuesse plus Boden unten. Das flachere
+              21:9 haette bei jeder Position entweder die Haende oder die Fuesse gekappt
+              (bei 30%: nur 10.7%..75.0%). */}
           <img
-            src="/photos/2026/kurse-heels-energie-01.webp"
+            src="/photos/2026/kurse-classfreude-01.webp"
             alt={supportVisual.alt}
-            className="aspect-[21/9] w-full rounded-[var(--radius-media)] object-cover object-[center_22%]"
-            /* Runde 3, Issue 8: die Datei ist jetzt 1920x935 (Wasserzeichen-Streifen unten
-               abgeschnitten). width/height muessen das echte Seitenverhaeltnis melden,
-               sonst reserviert der Browser die falsche Hoehe (CLS). */
+            className="aspect-[16/9] w-full rounded-[var(--radius-media)] object-cover object-[center_30%]"
+            /* Echtes Seitenverhaeltnis der Datei melden, sonst reserviert der Browser die
+               falsche Hoehe (CLS) — gleicher Grund wie zuvor, neue Masse. */
             width={1920}
-            height={935}
+            height={1280}
             loading="lazy"
           />
           {/* Runde 1 (2026-08-07), Eyebrow-Drosselung: hier stand zusaetzlich das Label
@@ -733,6 +818,15 @@ function RolesSection() {
  *  DESKTOP-Problem (das gleichfoermige Fuenfer-Band), auf Mobil erzeugt er nur eine
  *  ausgerissene Reihe. Die Formatvariation gilt darum ab `lg`, unterhalb tragen alle
  *  Kacheln dasselbe 4/5-Fenster. `pos`/`zoom` bleiben je Person unveraendert gueltig. */
+/* R159 (Video 06:57, "Koepfe nicht abschneiden") — auch die Lehrer-Kacheln nachgemessen,
+ * nicht neu gesetzt. Scalp je Quelldatei (1414x2000, erste Zeile mit deckendem Pixel):
+ *   aleksandra 6.0%   anina 6.5%   jelena 6.8%   maarten 7.3%   tobias 5.0%
+ * Fenster je Kachel bei lg (Spalte 224px, aspect-[4/5]) gegen die `pos`-Werte unten:
+ *   aleksandra 0.2%..88.6%   anina 0.9%..89.3%   jelena 0.1%..88.5%
+ *   maarten    0.9%..89.3%   tobias 0.3%..88.7%
+ * Damit bleibt ueber jedem Scheitel Luft (4.7..6.7pp) und das Fenster reicht bis 88%,
+ * zeigt also Kopf UND Oberkoerper. Kein enger Gesichtscrop, kein angeschnittener Kopf.
+ * Die Werte bleiben darum unveraendert. */
 const FACE_TILE: { pos: string; ratio: string }[] = [
   { ratio: 'aspect-[4/5]', pos: 'object-[48%_2%]' },
   { ratio: 'aspect-[4/5]', pos: 'object-[52%_8%]' },

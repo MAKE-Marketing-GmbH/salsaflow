@@ -124,14 +124,21 @@ export type GalleryPhoto = { albumId: AlbumId; src: string; alt: string; altEn?:
 // Nur echte Fotos aus public/photos/ (jeder Pfad gegen den echten Foto-Export geprueft),
 // kein Duoton, keine KI-Personen, keine Logo- oder Promo-Kacheln, keine leeren Dateien.
 // Vier Alben: Danceflow Nights (Party-Fotos), Kurse und Unterricht, Team als Gruppe
-// (keine Einzelportraets) und Shows (Buehnenauftritte). Reihenfolge ist bewusst gemischt: die Ansicht
-// "Alle" zeigt sofort Abende, Kurse, Team und Shows im Wechsel; ein Filter zeigt nur sein Album.
+// (keine Einzelportraets) und Shows (Buehnenauftritte).
+//
+// Team-Regel (Auftrag 19.08.2026): /fotos zeigt Kontext, keine Portraets. Deshalb keine
+// Freisteller aus founders/ oder team/teacher-*.webp und keine posierten Studio-Kleinposen vor
+// grauem Hintergrund. Raus sind hp-06, hp-17, hp-22 und hp-27 (alle grauer Studiohintergrund,
+// zwei bis vier Personen in gestellter Pose). Drin bleiben Gruppen am echten Ort: hp-03
+// Posierte Wand-Gruppen (hp-03, hp-08, community-comeback-v2) sind raus. Neu dazu
+// kommen Bewegungs- und Gruppenbilder aus Kurs, Buehne und Community.
+// Reihenfolge ist bewusst gemischt: die Ansicht
+// "Alle" zeigt Abende, Kurse und Shows im Wechsel; ein Filter zeigt nur sein Album.
 // Jedes Foto hat eine echte, beschreibende Alt-Zeile (Deutsch, echte Umlaute, CH-ss).
 export const GALLERY_PHOTOS: GalleryPhoto[] = [
-  { albumId: 'danceflow', src: '/photos/instagram/anniversary-recap-v2.webp', alt: 'Tänzerinnen und Tänzer feiern das Salsaflow Anniversary Weekend', altEn: 'Dancers celebrating the Salsaflow Anniversary Weekend', width: 1080, height: 1916 },
-  { albumId: 'kurse', src: '/photos/instagram/studio-flow-v2.webp', alt: 'Gruppe tanzt gemeinsam im hellen Salsaflow-Studio', altEn: 'Group dancing together in the bright Salsaflow studio', width: 1080, height: 1916 },
-  { albumId: 'team', src: '/photos/instagram/community-comeback-v2.webp', alt: 'Die Salsaflow-Community gemeinsam vor der Studiowand', altEn: 'The Salsaflow community together in front of the studio wall', width: 1080, height: 725 },
-  { albumId: 'kurse', src: '/photos/instagram/lady-style-v2.webp', alt: 'Lady-Style-Gruppe bei einer Choreografie im Studio', altEn: 'Lady Style group performing choreography in the studio', width: 640, height: 1136 },
+  { albumId: 'danceflow', src: '/photos/gallery/danceflow/11-v3.webp', alt: 'Paar tanzt mitten in der Menge bei einer Danceflow Night', altEn: 'Couple dancing in the middle of the crowd at a Danceflow Night', width: 1360, height: 2048 },
+  // studio-flow-v2 und lady-style-v2 bleiben nur im Galerie-Hero, nicht nochmal im Raster
+  // (Video 18.08 Punkt 3: nicht dasselbe Foto überall).
   { albumId: 'danceflow', src: '/photos/gallery/danceflow/01-v3.webp', alt: 'Tanzpaar dreht sich eng bei einer Danceflow Night', width: 2048, height: 1360 },
   { albumId: 'kurse', src: '/photos/gallery/kurse/01.jpg', alt: 'Tanzpaar übt einen neuen Schritt im Kurs', width: 1600, height: 1066 },
   { albumId: 'danceflow', src: '/photos/party/party-03.webp', alt: 'Tänzerin in Blau zeigt vor klatschendem Publikum', altEn: 'Dancer in blue performing for a clapping audience', width: 1500, height: 1000 },
@@ -199,36 +206,34 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
 
   { albumId: 'danceflow', src: '/photos/party/party-13.webp', alt: 'Frau im weissen Top tanzt mit ihrem Partner', width: 1500, height: 1000 },
   { albumId: 'kurse', src: '/photos/premium/offer-bachata-1200.webp', alt: 'Paar tanzt Bachata eng zusammen im Kurs', width: 1200, height: 1600 },
-  { albumId: 'team', src: '/photos/showcase/hp-03.webp', alt: 'Das ganze Team vor der Salsaflow-Wand im Studio', width: 1800, height: 1115 },
   { albumId: 'shows', src: '/photos/shows/show-17.webp', alt: 'Bühne und Saal beim grossen Abendprogramm', width: 1600, height: 1600 },
   { albumId: 'danceflow', src: '/photos/party/party-15.webp', alt: 'Paar dreht sich vor der beleuchteten Studiowand', width: 1500, height: 1000 },
 
   { albumId: 'danceflow', src: '/photos/party/party-17-v3.webp', alt: 'Zwei Frauen tanzen zusammen und haben Spass', width: 2048, height: 1360 },
   { albumId: 'kurse', src: '/photos/premium/offer-heels-1200.webp', alt: 'Heels-Kurs mit ausdrucksstarker Pose', width: 1200, height: 1600 },
-  { albumId: 'team', src: '/photos/showcase/hp-06.webp', alt: 'Vier aus dem Team posieren im hellen Studio', width: 1200, height: 1800 },
+  { albumId: 'kurse', src: '/photos/2026/kurse-classfreude-01.webp', alt: 'Das Team führt eine volle Klasse durch die Schrittfolge', altEn: 'The team leading a full class through the step sequence', width: 1920, height: 1280 },
   { albumId: 'shows', src: '/photos/shows/show-19.webp', alt: 'Ensemble tanzt eine Nummer im grünen Bühnenlicht', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/party/party-21.webp', alt: 'Paar posiert eng vor rotem Hintergrund', width: 1500, height: 1000 },
 
   { albumId: 'danceflow', src: '/photos/party/party-27.webp', alt: 'Frau im roten Oberteil tanzt mit ihrem Partner', width: 1500, height: 1000 },
   { albumId: 'kurse', src: '/photos/kurse/kurs-02.jpg', alt: 'Paar tanzt im Kurs, weitere Lernende im Hintergrund', width: 1600, height: 1067 },
-  { albumId: 'team', src: '/photos/showcase/hp-08.webp', alt: 'Die Crew posiert gemeinsam für ein Gruppenbild', width: 1200, height: 1800 },
   { albumId: 'shows', src: '/photos/shows/show-20.webp', alt: 'Formation in lila und grün auf der dunklen Bühne', width: 1800, height: 1200 },
   { albumId: 'danceflow', src: '/photos/party/party-28.webp', alt: 'Dichte Menge feiert gemeinsam auf der Tanzfläche', width: 1500, height: 1000 },
 
   { albumId: 'danceflow', src: '/photos/party/party-33.webp', alt: 'Mehrere Paare tanzen im blauen Partylicht', width: 1500, height: 1000 },
   { albumId: 'kurse', src: '/photos/kurse/kurs-04.jpg', alt: 'Paar übt eine enge Bachata-Figur im Studio', width: 1600, height: 1067 },
-  { albumId: 'team', src: '/photos/showcase/hp-17.webp', alt: 'Zwei Tanzpaare des Teams posieren gut gelaunt', width: 1314, height: 1800 },
+  { albumId: 'shows', src: '/photos/showcase/hp-11.webp', alt: 'Die ganze Crew nach der Show zusammen auf der Bühne', altEn: 'The whole crew together on stage after the show', width: 1800, height: 1200 },
   { albumId: 'shows', src: '/photos/shows/show-21.webp', alt: 'Tänzerinnen in lila Kleidern posieren für die Show', width: 1350, height: 1800 },
   { albumId: 'danceflow', src: '/photos/party/party-34.webp', alt: 'Paar tanzt eng umschlungen im Halbdunkel', width: 1500, height: 1000 },
 
   { albumId: 'danceflow', src: '/photos/party/party-35-v3.webp', alt: 'Frau im geblümten Top tanzt mit ihrem Partner', width: 2048, height: 1360 },
   { albumId: 'kurse', src: '/photos/kurse/kurs-06.jpg', alt: 'Gruppe von Tänzerinnen im Ladies-Styling-Kurs', width: 1067, height: 1600 },
-  { albumId: 'team', src: '/photos/showcase/hp-22.webp', alt: 'Zwei Tänzerinnen des Teams posieren im Studio', width: 1200, height: 1800 },
+  { albumId: 'kurse', src: '/photos/2026/kurse-heels-energie-01.webp', alt: 'Trainerin tanzt der Heels-Gruppe die Figur vor', altEn: 'Instructor dancing the figure for the heels group', width: 1920, height: 935 },
   { albumId: 'danceflow', src: '/photos/party/party-44.webp', alt: 'Frau streckt den Arm hoch mitten in der Drehung', width: 1500, height: 1000 },
 
   { albumId: 'danceflow', src: '/photos/party/party-52.webp', alt: 'Gruppe springt jubelnd mit erhobenen Armen', width: 1500, height: 1000 },
   { albumId: 'kurse', src: '/photos/kurse/kurs-07.jpg', alt: 'Kursleiter tanzt vorne, die Gruppe macht den Schritt mit', width: 1067, height: 1600 },
-  { albumId: 'team', src: '/photos/showcase/hp-27.webp', alt: 'Vier aus dem Team sitzen entspannt zusammen', width: 1800, height: 1200 },
+  { albumId: 'danceflow', src: '/photos/2026/community-diversitaet-01.webp', alt: 'Tanzende aus dem Team und der Community mischen sich auf der Fläche', altEn: 'Dancers from the team and the community mixing on the floor', width: 1920, height: 1280 },
   { albumId: 'danceflow', src: '/photos/party/party-54.webp', alt: 'Zwei Musiker spielen Congas zur Live-Musik', width: 1500, height: 1000 },
 
   { albumId: 'kurse', src: '/photos/premium/offer-privat-1200.webp', alt: 'Privatstunde: Lehrerin führt einen Schüler Schritt für Schritt', width: 1200, height: 1600 },

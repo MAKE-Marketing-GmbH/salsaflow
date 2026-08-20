@@ -72,8 +72,8 @@ export function SchedulePage() {
           {/* Achse 'split' wie /tanzkurse: H1 links, Erklaerung + CTA in der rechten Schiene.
               `items-end` setzt beide Bloecke auf dieselbe Grundlinie, statt die Schiene
               mittig neben der Headline schweben zu lassen. */}
-          <Shell className="pb-9 pt-4 sm:pb-11 lg:pb-6 lg:pt-4">
-            <div className="grid gap-7 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16">
+          <Shell className="pb-2 pt-2 sm:pb-11 lg:pb-4 lg:pt-3">
+            <div className="grid gap-2 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16">
               <h1 className={`type-h1 text-[var(--color-ink)] ${MEASURE_XL}`}>
                 {de ? (
                   <>Finde deinen <TitleAccent>Kurs.</TitleAccent></>
@@ -81,7 +81,7 @@ export function SchedulePage() {
                   <>Find your <TitleAccent>class.</TitleAccent></>
                 )}
               </h1>
-              <div className="flex flex-col gap-5 border-t border-[var(--color-line)] pt-5 lg:border-t-0 lg:pt-0">
+              <div className="flex flex-col gap-3 border-t border-[var(--color-line)] pt-3 lg:gap-5 lg:border-t-0 lg:pt-0">
                 <p className="max-w-xl text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
                   {de
                     ? 'Wähle Staffel, Woche und Wochentag. Du siehst sofort, wann welcher Kurs läuft und wo noch Plätze frei sind.'
@@ -119,10 +119,14 @@ export function SchedulePage() {
               height={900}
               loading="eager"
               fetchPriority="high"
-              // center 28%: beide Gesichter liegen im oberen Drittel des Motivs. Bei 38%
-              // schnitt das flache Band das Kinn der Taenzerin an (gemessen 1440x900,
-              // /tmp/s2/v1-desktop-fold.png).
-              className="h-[12rem] w-full object-cover object-[center_28%] sm:h-[15rem] lg:h-[11rem]"
+              // lg 18rem (288px) bleibt. Mobil 14rem (224px): 11rem war der
+              // Cinema-Streifen, den der Auftrag als Defekt nennt. Platz fuer
+              // die +48px kommt aus Shell pt/pb, Grid-Gap, Schienen-pt und
+              // Listen-pt — nicht aus dem Band. object 16%: 26%/28% setzten
+              // den 26%-Punkt auf 26% der Box — Schaedel am oberen Rand.
+              // Filter inline, sonst gewinnt `main img` (saturate 0.96).
+              className="h-[14rem] w-full object-cover object-[center_16%] sm:h-[15rem] lg:h-[18rem]"
+              style={{ filter: 'saturate(1) contrast(1.04) brightness(1.08)' }}
             />
           </div>
         </section>
@@ -133,7 +137,7 @@ export function SchedulePage() {
             /tmp/kursplan-cal-shots3/kursplan-desktop-01-y700.png). */}
         {/* pb: der dunkle ScheduleBottomCta stand vorher direkt auf dem schwarzen Footer —
             zwei grosse Dunkelflaechen ohne Fuge (Kritik-Runde 10.08.2026). Papier-Luft dazwischen. */}
-        <section id="kursplan-list" className="scroll-mt-24 bg-[var(--color-bg-soft)] pb-14 pt-8 sm:pb-16 sm:pt-10 lg:pt-5">
+        <section id="kursplan-list" className="scroll-mt-24 bg-[var(--color-bg-soft)] pb-14 pt-2 sm:pb-16 sm:pt-10 lg:pt-5">
           <div className="mx-auto max-w-[1080px] px-5 sm:px-8">
             <CourseEngine onTotal={setTotal} />
           </div>

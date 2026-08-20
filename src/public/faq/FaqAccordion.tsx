@@ -11,32 +11,37 @@
 // Accordion-Motion hier lokal — gleiche Optik, gleiche Daten (Faq-Typ aus kit), plus
 // sanfte Hoehen-Feder. FAQPage-JSON-LD setzt weiterhin FaqPage.tsx selbst (ld-faq).
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useState, type MouseEvent, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { EASE_OUT } from '@/public/home/motion';
 import type { Faq } from '@/public/subpage/kit';
+import type { FaqLink } from '@/public/faq/content';
 
 /** Ein FAQ-Eintrag: Frage (summary) + Antwort (motion-Panel). */
-export function FaqItem({ q, a, defaultOpen = false }: Faq & { defaultOpen?: boolean }) {
+export function FaqItem({
+  q,
+  a,
+  defaultOpen = false,
+  link,
+}: Faq & { defaultOpen?: boolean; link?: FaqLink }) {
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(defaultOpen);
-  const detailsRef = useRef<HTMLDetailsElement>(null);
 
-  // Native Toggle-Events synchronisieren den State (Tastatur, Screenreader, Suchmaschinen-
-  // Vorab-Text). Das Panel steuert sich selbst ueber AnimatePresence; das details-Attribut
-  // `open` bleibt die einzige Wahrheit fuer CSS (group-open:rotate-180) und a11y.
-  useEffect(() => {
-    const el = detailsRef.current;
-    if (!el) return;
-    const onToggle = () => setOpen(el.open);
-    el.addEventListener('toggle', onToggle);
-    return () => el.removeEventListener('toggle', onToggle);
-  }, []);
+  // R163/R166: React darf details nicht unkontrolliert zuruecksetzen.
+  // Native summary toggled und React rendert ohne open — die Antwort klappt zu.
+  // Darum: open={open} und preventDefault auf dem Summary-Klick.
+  function onSummaryClick(event: MouseEvent<HTMLElement>) {
+    event.preventDefault();
+    setOpen((was) => !was);
+  }
 
   return (
-    <details ref={detailsRef} open={defaultOpen || undefined} className="group py-3">
-      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-6 rounded-[var(--radius-chip)] py-6 text-left font-display text-lg font-bold leading-snug text-[var(--color-ink)] marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-4 sm:text-xl [&::-webkit-details-marker]:hidden">
+    <details open={open} className="group py-3">
+      <summary
+        onClick={onSummaryClick}
+        className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-6 rounded-[var(--radius-chip)] py-6 text-left font-display text-lg font-bold leading-snug text-[var(--color-ink)] marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-4 sm:text-xl [&::-webkit-details-marker]:hidden"
+      >
         {q}
         <ChevronDown
           size={22}
@@ -65,7 +70,17 @@ export function FaqItem({ q, a, defaultOpen = false }: Faq & { defaultOpen?: boo
             transition={reduced ? { duration: 0 } : { duration: 0.32, ease: EASE_OUT }}
             className="overflow-hidden"
           >
-            <FaqAnswer>{a}</FaqAnswer>
+            <FaqAnswer>
+              {a}
+              {link ? (
+                <>
+                  {' '}
+                  <a href={link.href} className="whitespace-nowrap">
+                    {link.label}
+                  </a>
+                </>
+              ) : null}
+            </FaqAnswer>
           </motion.div>
         ) : null}
       </AnimatePresence>

@@ -18,7 +18,9 @@ import type { Faq, Crumb, HeroCta } from '@/public/subpage/kit';
 
 type Img = { src: string; alt: string };
 type Theme = { label: string; hint: string; href: string };
-export type FaqColumn = { title: string; items: Faq[] };
+export type FaqLink = { label: string; href: string };
+export type FaqItemData = Faq & { link?: FaqLink };
+export type FaqColumn = { title: string; items: FaqItemData[] };
 
 export type FaqPageContent = {
   seo: SeoKey;
@@ -188,6 +190,7 @@ export const FAQ_CONTENT = {
             {
               q: 'Brauche ich Tanzschuhe für den Start?',
               a: 'Nicht zwingend. Für die erste Stunde reichen oft saubere, bequeme Schuhe. Später können Tanzschuhe helfen, besonders bei Drehungen und Heels.',
+              link: { label: 'Zur Seite Tanzschuhe', href: R.tanzschuhe },
             },
             {
               q: 'Was ziehe ich zum Kurs an?',
@@ -352,6 +355,7 @@ export const FAQ_CONTENT = {
             {
               q: 'Do I need dance shoes to start?',
               a: 'Not necessarily. For the first class, clean, comfortable shoes are often enough. Later, dance shoes can help, especially with turns and heels.',
+              link: { label: 'To the dance shoes page', href: R.tanzschuhe },
             },
             {
               q: 'What do I wear to class?',

@@ -8,6 +8,12 @@ import { Check } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { HEELS, type HeelsContent } from '@/public/courses/styles/heels-content';
+/* R162: Termine dieses Stils. Dieselbe Sektion wie auf Salsa/Bachata, importiert statt
+   kopiert — zwei Listen liefen ab dem ersten Fix auseinander. Sie muss ein echtes Kind
+   im JSX-Baum sein: scripts/prerender.mjs legt den Plan als globalThis.__SCHEDULE__ ab,
+   damit renderToString schon echte Zeiten schreibt (DESIGN.md: «Voller Text im HTML fuer
+   oeffentliche Routen»). Ein Portal auf den Marker haette hier leeres HTML ausgeliefert. */
+import { StyleSlotsSection } from '@/public/courses/styles/StylePage';
 import {
   MEASURE_L,
   MEASURE_XL,
@@ -63,6 +69,9 @@ export function HeelsPage() {
         <TrainingSection c={c} />
         <ShoesSection c={c} />
         <AtmosphereSection c={c} />
+        {/* Gleiche Position wie auf Salsa/Bachata: die Termine stehen vor dem
+            Schluss-CTA, damit der Leser den Tag kennt, bevor er gefragt wird. */}
+        <StyleSlotsSection styleKey={c.seo} />
         <ClosingSection c={c} />
         <FaqBlock title={c.faqTitle} items={c.faq} />
       </div>

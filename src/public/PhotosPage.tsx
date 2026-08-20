@@ -25,6 +25,30 @@ type Photo = { albumId: AlbumId; src: string; alt: string; width?: number; heigh
 type Filter = AlbumId | 'all';
 type Packed = { photo: Photo; index: number };
 
+/** Video 18.08 Punkt 16: kurzer Kontext = Serie + Ort, keine erfundenen Daten. */
+function captionFor(photo: Photo, lang: 'de' | 'en'): string {
+  const scene = photo.alt
+    .replace(/ bei einer Danceflow Night/gi, '')
+    .replace(/ at a Danceflow Night/gi, '')
+    .replace(/ im Kurs/gi, '')
+    .replace(/ in the studio/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (photo.albumId === 'danceflow') {
+    const where = lang === 'de' ? 'Danceflow Night, Basel, 1./3./5. Freitag' : 'Danceflow Night, Basel, 1st/3rd/5th Friday';
+    return `${where}. ${scene}`;
+  }
+  if (photo.albumId === 'kurse') {
+    const where = lang === 'de' ? 'Kurs im Studio am Bahnhof SBB, Basel' : 'Class at the studio by Basel SBB';
+    return `${where}. ${scene}`;
+  }
+  if (photo.albumId === 'shows') {
+    const where = lang === 'de' ? 'Show-Auftritt, Salsaflow' : 'Salsaflow stage show';
+    return `${where}. ${scene}`;
+  }
+  return scene;
+}
+
 function packColumns(items: Packed[], n: number): Packed[][] {
   const cols: Packed[][] = Array.from({ length: n }, () => []);
   const heights = Array.from({ length: n }, () => 0);
@@ -63,12 +87,13 @@ export function PhotosPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
 
-  // Sichtbare Fotos aus der kuratierten Liste, gefiltert. "Alle" behaelt die gemischte
-  // Reihenfolge (Abende, Kurse, Team, Shows im Wechsel); ein Filter zeigt nur sein Album.
+  // Sichtbare Fotos aus der kuratierten Liste, gefiltert. Team-Album bleibt draussen.
+  // "Alle" mischt Abende, Kurse und Shows; ein Filter zeigt nur sein Album.
   // Jedes Foto bringt seine eigene, echte Alt-Zeile mit (aus gallery/content.ts).
   const colCount = useGalleryCols();
   const photos = useMemo<Photo[]>(() => {
-    const base = filter === 'all' ? GALLERY_PHOTOS : GALLERY_PHOTOS.filter((p) => p.albumId === filter);
+    const visible = GALLERY_PHOTOS.filter((p) => p.albumId !== 'team');
+    const base = filter === 'all' ? visible : visible.filter((p) => p.albumId === filter);
     return base.map((p) => ({ albumId: p.albumId, src: p.src, alt: lang === 'en' ? (p.altEn ?? p.alt) : p.alt, width: p.width, height: p.height }));
   }, [filter, lang]);
   const packed = useMemo(
@@ -117,7 +142,7 @@ export function PhotosPage() {
                   <FilterChip active={filter === 'all'} onClick={() => changeFilter('all')} testId="gallery-filter-all">
                     {g.filterAll}
                   </FilterChip>
-                  {ALBUM_ORDER.map((id) => (
+                  {ALBUM_ORDER.filter((id) => id !== 'team').map((id) => (
                     <FilterChip
                       key={id}
                       active={filter === id}
@@ -149,11 +174,12 @@ export function PhotosPage() {
                   variants={item}
                   className="rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-3 shadow-[0_18px_55px_rgba(17,17,17,0.06)] sm:p-4"
                 >
-                  <div className="grid grid-cols-2 items-end gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                  <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
                     {packed.map((col, ci) => (
                       <ul key={ci} className="flex flex-col gap-3 sm:gap-4">
                         {col.map(({ photo: p, index: i }) => (
                           <li key={`${filter}-${p.src}`}>
+                            <figure>
                             <button
                               type="button"
                               onClick={() => setLightboxIndex(i)}
@@ -161,6 +187,13 @@ export function PhotosPage() {
                               data-testid="gallery-photo"
                               className="group relative block w-full overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] shadow-sm transition-shadow duration-[var(--dur-base)] hover:shadow-[0_16px_40px_-16px_rgba(17,17,17,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
                             >
+                              {/* Kein object-cover und kein festes Kachel-Verhaeltnis: h-auto laesst
+                                  jedes Foto in seinem eigenen Seitenverhaeltnis stehen, packColumns
+                                  rechnet mit genau diesem Verhaeltnis. Die Kachel schneidet also
+                                  nichts ab. Angeschnittene Koepfe am Rand stecken schon im Original
+                                  (geprueft an gallery/danceflow/01-v3.webp, 2048x1360: der Partner
+                                  ist in der Quelle angeschnitten). object-position waere hier ohne
+                                  Wirkung — der Fix muesste das Foto selbst ersetzen. */}
                               <img
                                 src={p.src}
                                 alt={p.alt}
@@ -185,6 +218,13 @@ export function PhotosPage() {
                                 </span>
                               )}
                             </button>
+                            <figcaption
+                              data-testid="gallery-caption"
+                              className="mt-2 px-0.5 text-sm leading-snug text-[var(--color-ink-muted)]"
+                            >
+                              {captionFor(p, lang)}
+                            </figcaption>
+                            </figure>
                           </li>
                         ))}
                       </ul>
@@ -263,12 +303,17 @@ function GalleryHero() {
         <Reveal className="relative">
           <motion.div variants={item} className="mx-auto grid w-full max-w-md grid-cols-2 gap-3 sm:gap-4 lg:max-w-none">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
+              {/* Kontext statt Portrait (Auftrag 19.08.2026): anniversary-recap-v2 zeigte ein
+                  einzelnes, eng geschnittenes Gesicht und las sich wie ein Portraet. Ersatz ist
+                  die volle Community-Menge an einem Abend. object-right, weil der mittige 4/5-Crop
+                  das Salsaflow-Wasserzeichen unten links anschneidet (Crop-Vergleich
+                  /tmp/fotocrop/crowd-right.png gegen crowd-45.png). */}
               <img
-                src="/photos/instagram/anniversary-recap-v2.webp"
-                alt={lang === 'de' ? 'Tänzerinnen und Tänzer am Salsaflow Anniversary Weekend' : 'Dancers at the Salsaflow Anniversary Weekend'}
-                className="h-full w-full object-cover object-center"
-                width={1080}
-                height={1916}
+                src="/photos/2026/community-crowd-01.webp"
+                alt={lang === 'de' ? 'Volle Salsaflow-Community feiert gemeinsam an einem Tanzabend' : 'The full Salsaflow community celebrating together at a dance night'}
+                className="h-full w-full object-cover object-right"
+                width={1920}
+                height={1281}
                 loading="eager"
                 fetchPriority="high"
               />
@@ -412,6 +457,10 @@ function Lightbox({
 
   useEffect(() => {
     // Fokus beim Oeffnen merken und am Ende zuruecksetzen (Fokus-Falle leicht gehalten).
+    // SAFETY: document.activeElement ist typisiert als Element | null. Die Lightbox oeffnet
+    // ausschliesslich per Klick auf den Foto-Button, das aktive Element ist also ein
+    // HTMLElement. Die Assertion behaelt | null und der einzige Zugriff unten ist der
+    // optionale Aufruf previouslyFocused?.focus?.() — beide Faelle sind abgesichert.
     const previouslyFocused = document.activeElement as HTMLElement | null;
     const frame = window.requestAnimationFrame(() => closeRef.current?.focus());
 

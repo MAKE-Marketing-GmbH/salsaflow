@@ -141,8 +141,14 @@ function FaqSection({ c }: { c: FaqPageContent }) {
             <motion.div key={column.title} variants={item}>
               <h3 className="type-h3 text-[var(--color-ink)]">{column.title}</h3>
               <div className="mt-6 divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
-                {column.items.map((faq) => (
-                  <FaqItem key={faq.q} q={faq.q} a={faq.a} />
+                {column.items.map((faq, i) => (
+                  <FaqItem
+                    key={faq.q}
+                    q={faq.q}
+                    a={faq.a}
+                    defaultOpen={column === f.columns[0] && i === 0}
+                    link={faq.link}
+                  />
                 ))}
               </div>
             </motion.div>
