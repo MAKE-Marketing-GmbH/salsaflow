@@ -159,10 +159,10 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
       // Kreis (3.5rem) bei right-5 (1.25rem) plus 0.75rem Luft = 5.5rem. Ab sm ist er eine
       // Pille mit Label «WhatsApp» bei right-6 und braucht mehr: 10.5rem.
       // Kein `left` am Float — der Knopf bleibt sitewide rechts unten im Gutter.
-      className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pr-[5.5rem] sm:px-5 sm:pb-5"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pr-[5.5rem] sm:px-5 sm:pb-5"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
     >
-      <div className="mx-auto flex w-full max-w-[640px] items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)]/95 px-4 py-2.5 shadow-[0_10px_30px_rgba(17,17,17,0.14)] backdrop-blur-sm sm:px-5">
+      <div className="pointer-events-auto mx-auto flex w-full max-w-[640px] items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)]/95 px-4 py-2.5 shadow-[0_10px_30px_rgba(17,17,17,0.14)] backdrop-blur-sm sm:px-5">
         <div className="min-w-0 flex-1 text-xs font-medium leading-snug text-[var(--color-ink)] sm:text-sm">
           <span>{c.text}</span>
           <a
