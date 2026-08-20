@@ -14,9 +14,17 @@ function read(file) {
   return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
 }
 
+// Die Sollzahl stand hier fest auf 27, waehrend `routes.tsx` seit mehreren Commits
+// 26 Routen mit `prerender: true` fuehrt. Der Pruefer meldete darum FAIL, obwohl
+// keine Seite fehlte. Eine feste Zahl bricht bei jeder Routenaenderung erneut.
+// Jetzt zaehlt die Quelle selbst: `prerender: true` in `src/routes.tsx`.
+const routesQuelle = read(path.resolve('src/routes.tsx'));
+const soll = (routesQuelle.match(/prerender: true/g) ?? []).length;
+check(soll > 0, 'Keine Route mit `prerender: true` in src/routes.tsx gefunden.');
+
 const sitemap = read(path.join(dist, 'sitemap.xml'));
 const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
-check(urls.length === 27, `Sitemap hat ${urls.length} statt 27 kanonischen Routen.`);
+check(urls.length === soll, `Sitemap hat ${urls.length} statt ${soll} kanonischen Routen.`);
 check(new Set(urls).size === urls.length, 'Sitemap enthält doppelte URLs.');
 
 for (const rawUrl of urls) {
