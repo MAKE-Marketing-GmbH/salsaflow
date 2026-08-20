@@ -96,7 +96,7 @@ const CRUMBS: Crumb[] = [
   { label: 'Danceflow Night', href: R.self },
 ];
 
-export const DANCEFLOW: Record<Lang, DanceflowContent> = {
+export const DANCEFLOW = {
   de: {
     seo: 'danceflow',
     crumbs: CRUMBS,
@@ -361,4 +361,4 @@ export const DANCEFLOW: Record<Lang, DanceflowContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, DanceflowContent>;

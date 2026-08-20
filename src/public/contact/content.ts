@@ -88,7 +88,7 @@ export type ContactContent = {
   };
 };
 
-export const CONTACT_PAGE: Record<Lang, ContactContent> = {
+export const CONTACT_PAGE = {
   de: {
     hero: {
       eyebrow: 'Kontakt & Anfahrt',
@@ -316,7 +316,7 @@ export const CONTACT_PAGE: Record<Lang, ContactContent> = {
       google: 'Google review',
     },
   },
-};
+} satisfies Record<Lang, ContactContent>;
 
 // Externer Collab-Link (wiki.md 11). Eine Swap-Stelle.
 export const COLLAB_URL = 'https://www.2332dancewear.com/collections/salsaflow';

@@ -7,6 +7,10 @@
 // Die Bilder kommen aus der kuratierten, in sich geschlossenen Liste (gallery/content.ts) - kein
 // Laufzeit-Manifest mehr, damit die Galerie immer voll und vorhersehbar ist. Motion: der ruhige
 // Fade-up-Takt aus @/public/home/motion (Reveal/useReveal), reduced-motion ist eingebaut.
+//
+// Das Raster zeigt reine Bilder: kein sichtbarer Bildtext unter der Kachel (Raphael 20.08.2026)
+// und seit Runde 3 auch kein Album-Badge mehr auf der Kachel (kimi-critic: lag auf Koerpern,
+// doppelte die Filter-Chips). Das Album steht im Filter und in der Album-Zeile darueber.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -25,29 +29,10 @@ type Photo = { albumId: AlbumId; src: string; alt: string; width?: number; heigh
 type Filter = AlbumId | 'all';
 type Packed = { photo: Photo; index: number };
 
-/** Video 18.08 Punkt 16: kurzer Kontext = Serie + Ort, keine erfundenen Daten. */
-function captionFor(photo: Photo, lang: 'de' | 'en'): string {
-  const scene = photo.alt
-    .replace(/ bei einer Danceflow Night/gi, '')
-    .replace(/ at a Danceflow Night/gi, '')
-    .replace(/ im Kurs/gi, '')
-    .replace(/ in the studio/gi, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (photo.albumId === 'danceflow') {
-    const where = lang === 'de' ? 'Danceflow Night, Basel, 1./3./5. Freitag' : 'Danceflow Night, Basel, 1st/3rd/5th Friday';
-    return `${where}. ${scene}`;
-  }
-  if (photo.albumId === 'kurse') {
-    const where = lang === 'de' ? 'Kurs im Studio am Bahnhof SBB, Basel' : 'Class at the studio by Basel SBB';
-    return `${where}. ${scene}`;
-  }
-  if (photo.albumId === 'shows') {
-    const where = lang === 'de' ? 'Show-Auftritt, Salsaflow' : 'Salsaflow stage show';
-    return `${where}. ${scene}`;
-  }
-  return scene;
-}
+// Raphael 20.08.2026: die Kacheln tragen keinen sichtbaren Bildtext mehr. Der frühere
+// captionFor() (Serie + Ort unter jeder Kachel) ist damit ersatzlos raus. Die Beschreibung
+// lebt weiter im alt-Attribut und im aria-label des Foto-Buttons — Screenreader verlieren
+// nichts, das Auge bekommt ein ruhiges Raster.
 
 function packColumns(items: Packed[], n: number): Packed[][] {
   const cols: Packed[][] = Array.from({ length: n }, () => []);
@@ -100,17 +85,7 @@ export function PhotosPage() {
     () => packColumns(photos.map((photo, index) => ({ photo, index })), colCount),
     [photos, colCount],
   );
-  const firstOfAlbum = useMemo(() => {
-    const seen = new Set<AlbumId>();
-    const first = new Set<string>();
-    for (const p of photos) {
-      if (!seen.has(p.albumId)) {
-        seen.add(p.albumId);
-        first.add(p.src);
-      }
-    }
-    return first;
-  }, [photos]);
+  // Runde 3: firstOfAlbum ist mit dem Album-Badge weggefallen (kimi-critic).
 
   // Filterwechsel schliesst eine offene Lightbox (sonst zeigt der Index auf ein falsches Foto).
   function changeFilter(next: Filter) {
@@ -179,7 +154,6 @@ export function PhotosPage() {
                       <ul key={ci} className="flex flex-col gap-3 sm:gap-4">
                         {col.map(({ photo: p, index: i }) => (
                           <li key={`${filter}-${p.src}`}>
-                            <figure>
                             <button
                               type="button"
                               onClick={() => setLightboxIndex(i)}
@@ -212,19 +186,11 @@ export function PhotosPage() {
                               >
                                 <Maximize2 size={15} strokeWidth={2} />
                               </span>
-                              {firstOfAlbum.has(p.src) && (
-                                <span className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-[var(--color-ink)] shadow-sm backdrop-blur">
-                                  {g.albums[p.albumId].title}
-                                </span>
-                              )}
+                              {/* Runde 3 (kimi-critic): das Album-Badge auf der ersten Kachel
+                                  ist raus. Es lag unsystematisch auf Koerpern und Gesichtern und
+                                  wiederholte nur die Filter-Chips, die direkt darueber stehen.
+                                  Das Album steht weiter im Filter und in der Album-Zeile. */}
                             </button>
-                            <figcaption
-                              data-testid="gallery-caption"
-                              className="mt-2 px-0.5 text-sm leading-snug text-[var(--color-ink-muted)]"
-                            >
-                              {captionFor(p, lang)}
-                            </figcaption>
-                            </figure>
                           </li>
                         ))}
                       </ul>
@@ -356,10 +322,13 @@ function FilterHeader() {
   return (
     <motion.div variants={item}>
       <Eyebrow>{lang === 'de' ? 'Galerie' : 'Gallery'}</Eyebrow>
+      {/* Runde 3 (kimi-critic): "Such nicht ewig. Spring direkt in den Moment..."
+          war ein Werbe-Imperativ ohne Information. Die Zeile sagt jetzt, was die
+          Chips darunter tun. */}
       <p className="mt-3 max-w-2xl text-xl font-semibold leading-snug text-[var(--color-ink)] sm:text-2xl">
         {lang === 'de'
-          ? 'Such nicht ewig. Spring direkt in den Moment, der dich interessiert.'
-          : "Don't search forever. Jump straight to the moment that interests you."}
+          ? 'Die Filter zeigen dir nur ein Album: Danceflow Nights, Kurse oder Shows.'
+          : 'The filters show one album at a time: Danceflow Nights, courses or shows.'}
       </p>
     </motion.div>
   );

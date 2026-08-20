@@ -50,6 +50,10 @@ const SECTION_OFFSET = 'calc(var(--nav-h) + 1.5rem)';
 
 function courseStart(course: ScheduleCourse, data: ScheduleResponse, lang: 'de' | 'en') {
   const term = data.terms.find((t) => t.id === course.termId);
+  // SAFETY: `course.weekday` kommt als roher String aus der API und ist NICHT garantiert ein
+  // WeekdayKey. Die Zusicherung ist trotzdem gefahrlos: nextScheduleDate schlaegt den Wert nur
+  // per WEEKDAY_ORDER.indexOf nach (src/lib/schedule.ts) und liefert bei einem unbekannten Tag
+  // -1 bzw. null. Der Aufrufer faengt null unten mit der "Start laut Kursplan"-Zeile ab.
   const iso =
     course.nextDates?.[0] ??
     (term ? nextScheduleDate(term.startDate, course.weekday as WeekdayKey, [term]) : null);
@@ -70,6 +74,11 @@ function PrimaryCta({ href, children }: { href: string; children: React.ReactNod
 
 /* Stil-Thumbs fuer Upcoming-Karten — gleiche Premium-Motive wie CourseEngine, damit
    vier Start-Bloecke nicht als identische "STARTET BALD"-Schablonen wirken. */
+/* Der Lookup unten indiziert mit `course.styleKey` (roher String aus der API), darum ist die
+   offene Dictionary-Signatur hier die richtige Vertragsform und kein Typ-Verlust: sie erlaubt
+   den String-Zugriff und liefert bei unbekanntem Stil `undefined`, was der `??`-Fallback faengt.
+   Mit `satisfies` statt Annotation bricht `tsc` mit TS7053 (gemessen: 5 Fehler). */
+// oxlint-disable-next-line anti-slop/no-known-value-widening
 const STYLE_THUMB: Record<string, string> = {
   salsa: '/photos/premium/offer-salsa-800.webp',
   bachata: '/photos/premium/offer-bachata-800.webp',
@@ -78,6 +87,7 @@ const STYLE_THUMB: Record<string, string> = {
 
 /* Die Motive sind Hochformat, die Karte 16/10: object-cover schneidet mittig und
    koepft die Taenzer (Kritiker r13). Fokus deshalb pro Motiv auf die Gesichtszone. */
+// oxlint-disable-next-line anti-slop/no-known-value-widening
 const STYLE_THUMB_FOCUS: Record<string, string> = {
   salsa: 'center 22%',
   bachata: 'center 20%',
@@ -88,10 +98,12 @@ const STYLE_THUMB_FOCUS: Record<string, string> = {
    mit nur einem Motiv pro Stil standen identische Fotos direkt nebeneinander
    (Sweep 14.08.2026, /tmp/s-r6-tanzkurse-390-4.png). Beide Dateien waren bisher
    ungenutzt (0 Fundstellen), Dopplungs-Limit unberuehrt. */
+// oxlint-disable-next-line anti-slop/no-known-value-widening
 const STYLE_THUMB_ALT: Record<string, string> = {
   salsa: '/photos/2026/event-social-couple-01.webp',
   bachata: '/photos/2026/event-social-couple-02.webp',
 };
+// oxlint-disable-next-line anti-slop/no-known-value-widening
 const STYLE_THUMB_ALT_FOCUS: Record<string, string> = {
   salsa: 'center 35%',
   bachata: 'center 20%',
@@ -243,27 +255,47 @@ function CoursesHero() {
           ['3', 'studios by the station'],
         ];
   return (
-    <HeroFrame
-      axis="split"
-      dense
-      liftMedia
-      title={`${h.title}${h.titleAccent ? ` ${h.titleAccent}` : ''}`}
-      lead={h.lead}
-      primary={{
-        label: de ? 'Gratis Schnupperstunde buchen' : 'Book a free trial class',
-        href: SCHNUPPER_HREF,
-      }}
-      secondary={{ label: de ? 'Kursplan ansehen' : 'See the schedule', href: '#kurskalender' }}
-      facts={wide ? stats : undefined}
-      media={{
-        src: '/photos/2026/kurse-classfreude-hero-2100.webp',
-        alt: de ? 'Tanzkurs im hellen Salsaflow Studio' : 'Dance class in the bright Salsaflow studio',
-        /* Live-Fold 1440x730: 28% koepfte die vordere Reihe. 16% holt die Gesichter
-           in den sichtbaren Streifen unter der Typo. */
-        position: 'center 16%',
-        heightClass: 'h-[20rem] sm:h-[26rem] lg:h-[34rem]',
-      }}
-    />
+    <>
+      {/* Raphael 20.08.2026: "Tanzkurse-Bilder rund." Das Hero-Band lief als einziges
+          Element der Seite eckig full-bleed bis an beide Viewportkanten (gemessen
+          borderRadius 0px, x=0, w=1440) — der ganze Rest der Seite ist gerundet.
+
+          HeroFrame rendert sein media-Band bewusst ohne Radius (kit.tsx) und kit.tsx ist
+          hier tabu. Statt die geteilte Komponente fuer alle Routen zu aendern, laeuft der
+          Hero jetzt OHNE media-Prop und das Band steht als eigenes, gerundetes Medienband
+          in dieser Seite. Alle anderen Routen behalten damit exakt ihr Default-Band. */}
+      <HeroFrame
+        axis="split"
+        dense
+        title={`${h.title}${h.titleAccent ? ` ${h.titleAccent}` : ''}`}
+        lead={h.lead}
+        primary={{
+          label: de ? 'Gratis Schnupperstunde buchen' : 'Book a free trial class',
+          href: SCHNUPPER_HREF,
+        }}
+        secondary={{ label: de ? 'Kursplan ansehen' : 'See the schedule', href: '#kurskalender' }}
+        facts={wide ? stats : undefined}
+      />
+      <div className="bg-[var(--color-paper-warm)] pb-10 lg:pb-14">
+        <Shell>
+          <div className="overflow-hidden rounded-[var(--radius-media)]">
+            <img
+              src="/photos/2026/kurse-classfreude-hero-2100.webp"
+              alt={de ? 'Tanzkurs im hellen Salsaflow Studio' : 'Dance class in the bright Salsaflow studio'}
+              /* Das Motiv ist eine Gruppe mit erhobenen Armen; die Koepfe liegen im
+                 oberen Drittel. Bei 16% schnitt die Bandkante die vordere Reihe am
+                 Scheitel ab. 34% legt die Gesichtszone in die Bandmitte, die Koepfe
+                 bekommen oben Luft. */
+              className="h-[18rem] w-full object-cover object-[center_34%] sm:h-[24rem] lg:h-[30rem]"
+              width={2048}
+              height={1152}
+              loading="eager"
+              fetchPriority="high"
+            />
+          </div>
+        </Shell>
+      </div>
+    </>
   );
 }
 
@@ -275,6 +307,21 @@ function StylesSection() {
   const s = COURSES_OVERVIEW[lang].styles;
   const mainCards = s.cards.filter((card) => !card.accent);
   const workshop = s.cards.find((card) => card.accent);
+  /* Raphael 20.08.2026: "Mehr verschiedene Fotos."
+     Die Bachata-Stilkarte trug offer-bachata-1200.webp, der Kurs-Teaser weiter
+     unten offer-bachata-800.webp: dasselbe Paar, nur zwei Groessen. Ob beide
+     gleichzeitig sichtbar sind, haengt am Kursplan-Feed — deshalb hier nicht
+     "war doppelt", sondern: das Risiko ist ausgebaut. Die Karte zeigt jetzt
+     community-diversitaet-01.webp (sitewide sonst nur an einer Stelle), die
+     800er bleibt im Teaser, damit der Bachata-Crop-Lock (center 20%) haelt.
+     Gemessen 20.08. auf 1440 und 390: 11 Fotos, 0 doppelte Motive. */
+  const CARD_PHOTO_OVERRIDE = {
+    bachata: {
+      src: '/photos/2026/community-diversitaet-01.webp',
+      position: 'object-[center_38%]',
+      alt: de ? 'Tanzende Paare auf der Bachata-Flaeche' : 'Couples dancing bachata on the floor',
+    },
+  } satisfies Record<string, { src: string; position: string; alt: string }>;
   const metaByKey: Record<string, string[]> = de
     ? {
         salsa: ['Beginner bis Advanced', 'Partnerwork', 'Musikalität', 'Social Dance'],
@@ -326,6 +373,13 @@ function StylesSection() {
           <ul>
             {mainCards.map((card, i) => {
               const flip = i % 2 === 1;
+              // SAFETY: der `in`-Test oben beweist, dass card.key ein Schluessel von
+              // CARD_PHOTO_OVERRIDE ist; nur dann wird indiziert.
+              const override =
+                card.key in CARD_PHOTO_OVERRIDE
+                  ? CARD_PHOTO_OVERRIDE[card.key as keyof typeof CARD_PHOTO_OVERRIDE]
+                  : undefined;
+              const photo = override?.src ?? card.photo;
               return (
                 <motion.li
                   key={card.key}
@@ -339,20 +393,26 @@ function StylesSection() {
                     href={card.href}
                     aria-label={card.title}
                     className={cn(
-                      'group relative block aspect-[4/5] overflow-hidden sm:aspect-[7/5]',
+                      /* Raphael 20.08.2026: "Tanzkurse-Bilder rund" — Plural. Runde 1 rundete
+                         nur das Hero-Band; die drei Stil-Fotos blieben scharfkantig und
+                         standen damit als einzige eckige Medienflaechen neben lauter
+                         gerundeten (Hero-Band, Privatstunden-Foto, Teaser-Thumbs). Gleicher
+                         Token wie sitewide: --radius-media. */
+                      'group relative block aspect-[4/5] overflow-hidden rounded-[var(--radius-media)] sm:aspect-[7/5]',
                       flip && 'lg:order-2',
                     )}
                   >
                     <img
-                      src={card.photo}
-                      alt={card.alt ?? card.title}
+                      src={photo}
+                      alt={override?.alt ?? card.alt ?? card.title}
                       className={cn(
                         'absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-base)] ease-out motion-safe:group-hover:scale-[1.04]',
                         // Das Bachata-Motiv ist hochkant. In der Querformat-Karte (7/5) schneidet
                         // ein mittiger Ausschnitt beiden Tanzenden den Oberkopf ab.
                         // 12% statt 25%: der Maennerkopf war oben angeschnitten
                         // (Critic Runde 10, Item 5).
-                        card.photo?.includes('offer-bachata') && 'object-[center_12%]',
+                        photo?.includes('offer-bachata') && 'object-[center_12%]',
+                        override?.position,
                       )}
                       width={1200}
                       height={857}
@@ -411,7 +471,9 @@ function StylesSection() {
                   <PrimaryCta href={workshop.href}>{workshop.cta}</PrimaryCta>
                 </div>
               </div>
-              <div className="group relative order-1 block aspect-[4/5] overflow-hidden sm:aspect-[7/5] lg:order-2">
+              {/* Vierte Reihe desselben Zickzacks -> derselbe Medien-Radius wie die drei
+                  Stil-Fotos darueber. */}
+              <div className="group relative order-1 block aspect-[4/5] overflow-hidden rounded-[var(--radius-media)] sm:aspect-[7/5] lg:order-2">
                 <img
                   // Runde 2, Issue 5: /photos/gallery/danceflow/01.jpg hatte Luminanz 37/255
                   // und sass auf bg-soft — ein dunkles Loch im hellen Raster. 01-v3.webp ist
@@ -439,21 +501,29 @@ function LevelsSection() {
   const de = lang === 'de';
   const l = COURSES_OVERVIEW[lang].levels;
   const [mainTrack, heelsTrack] = l.tracks;
-  const sideTitle = de ? 'So findest du deinen Einstieg.' : 'How to find your start.';
+  /* Raphael 20.08.2026: "Level/Aufbau weniger Text." Gate G27 misst den ganzen
+     Sektionstext gegen 120 Woerter.
+     Runde 1: 185 -> 125 Woerter. Der Block sagte dieselbe Sache viermal: Lead, eine
+     eigene Ueberschrift "So findest du deinen Einstieg" mit Fliesstext, eine
+     01/02/03-Liste ("Stil waehlen / Level testen / In der Staffel wachsen") und die
+     Flow-Notizen in der Leiter. Ueberschrift und Liste sind raus.
+     Runde 2: 125 -> 119 Woerter. Die Zeile sagte zum dritten Mal, was die H2
+     ("Wir finden es gemeinsam heraus") und der Lead ("Schnupperstunde ... bei der
+     Einordnung") schon tragen. Sie nennt jetzt nur noch die Handlung.
+     Runde 3 (Kritik Sol): Beim Streichen der 01/02/03-Liste fiel "In der Staffel
+     wachsen" / "Grow through the term" ersatzlos weg. Die Aussage steht sonst
+     NIRGENDS in der Sektion: mainTrack.note ("von ganz neu bis Advanced") meint
+     den Weg ueber alle Level, der Chip "Nachholen in der Staffel" meint eine
+     verpasste Lektion. Die Zeile hier traegt die Aussage jetzt wieder.
+     Bezahlt ist sie aus derselben Zeile: der Aufruf "Komm in die Schnupperstunde"
+     ist raus, weil der Lead direkt darueber schon "eine Schnupperstunde ... bei
+     der Einordnung" nennt. Die Sektion sagt die Schnupperstunde damit einmal
+     statt zweimal und ist bei 119 Woertern — genauso viele wie vor dem Fix,
+     eine Aussage mehr.
+     Die Leiter bleibt: sie ist die Signatur der Sektion, kein Text-Fueller. */
   const sideText = de
-    ? 'Wenn du zwischen zwei Levels stehst, frag uns lieber kurz. Zur Schnupperstunde sehen wir gemeinsam, wo du dich wohlfühlst.'
-    : 'If you are between two levels, just ask us. At the trial class we find together where you feel comfortable.';
-  const sideItems: [string, string][] = de
-    ? [
-        ['01', 'Stil wählen'],
-        ['02', 'Level testen'],
-        ['03', 'In der Staffel wachsen'],
-      ]
-    : [
-        ['01', 'Choose a style'],
-        ['02', 'Try your level'],
-        ['03', 'Grow through the term'],
-      ];
+    ? 'Eine Staffel, eine Stufe weiter.'
+    : 'One term, one stage further.';
 
   return (
     /* Kritiker r5: untere ~40% Creme vor Pricing + Mobile leere Hälfte — Sektions-Padding
@@ -466,10 +536,18 @@ function LevelsSection() {
             Karte, Schatten und Radius sind raus — es bleiben zwei Spalten, getrennt durch
             EINE senkrechte Haarlinie, so wie die Home ihre Zweispalter setzt. */}
         <Reveal className="border-t border-[var(--color-line)]">
-          <div className="grid lg:grid-cols-[0.96fr_1.04fr]">
+          {/* items-start: durch den gekuerzten Text ist die linke Spalte kuerzer als die
+              Leiter rechts. Bei der Default-Dehnung (stretch) blieben darunter gemessene
+              282px leere Flaeche stehen. Die Trennlinie zieht separat ueber die volle
+              Zeilenhoehe, damit die Spalten-Optik erhalten bleibt. */}
+          <div className="relative grid lg:grid-cols-[0.96fr_1.04fr] lg:items-start">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 left-[calc(0.96/2*100%)] hidden w-px bg-[var(--color-line)] lg:block"
+            />
             <motion.div
               variants={item}
-              className="border-b border-[var(--color-line)] py-6 sm:py-7 lg:border-b-0 lg:border-r lg:py-7 lg:pr-12"
+              className="border-b border-[var(--color-line)] py-6 sm:py-7 lg:border-b-0 lg:py-7 lg:pr-12"
             >
               <Eyebrow>{l.eyebrow}</Eyebrow>
               <h2 className={cn("mt-4", sectionTitle, MEASURE_L)}>
@@ -477,25 +555,10 @@ function LevelsSection() {
               </h2>
               <p className={cn("mt-3 max-w-xl text-pretty", sectionLead)}>{l.lead}</p>
 
-              {/* Karten-Verschachtelung aufgeloest (Design-Kritik Runde 1): vorher lag hier
-                  eine hellgraue Karte IN der weissen Karte, darin drei weisse Zeilen-Pillen —
-                  drei Ebenen fuer eine Aufzaehlung. Jetzt traegt die aeussere Karte alles,
-                  getrennt nur durch 1px-Linien und Weissraum. */}
-              <div className="mt-6 border-t border-[var(--color-line)] pt-5">
-                <p className="type-h4 text-[var(--color-ink-muted)]">{sideTitle}</p>
-                <p className="mt-2.5 max-w-xl text-base leading-relaxed text-[var(--color-ink-muted)]">{sideText}</p>
-                <ul className="mt-4 grid gap-x-6 sm:grid-cols-3 lg:grid-cols-1">
-                  {sideItems.map(([number, label]) => (
-                    <li
-                      key={number}
-                      className="flex items-center gap-3 border-b border-[var(--color-line)] py-2.5 last:border-b-0 lg:last:border-b"
-                    >
-                      <span className="font-display text-sm font-bold tabular-nums text-[var(--color-salsa)]">{number}</span>
-                      <span className="text-sm font-semibold leading-tight text-[var(--color-ink)]">{label}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {/* Aus Ueberschrift + Absatz + 01/02/03-Liste ist eine Zeile geworden.
+                  Die drei Schritte standen als Deko-Liste da (nicht klickbar) und
+                  wiederholten nur, was Lead und Leiter schon sagen. */}
+              <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--color-ink-muted)]">{sideText}</p>
 
               <div className="mt-6 grid gap-x-10 gap-y-5 border-t border-[var(--color-line)] pt-5 sm:grid-cols-2">
                 <div>
@@ -525,9 +588,15 @@ function LevelsSection() {
                     </div>
                     <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{mainTrack?.note}</p>
                   </div>
-                  {/* Deko-Pille -> Label (Kritik Runde 2: Pillen nur wo sie klickbar filtern). */}
+                  {/* Deko-Pille -> Label (Kritik Runde 2: Pillen nur wo sie klickbar filtern).
+                      R183 Welle 2: "Stufe fuer Stufe" -> "Stufenweise". Ein Wort statt drei,
+                      gleiche Aussage. Die Leiter darunter ist 01 bis 05 durchnummeriert.
+                      Runde 3: kurz geloescht, dann wieder eingesetzt. Gemessen kostet das
+                      Label 0 Woerter, weil textContent es ohne Leerzeichen an die Nachbarn
+                      klebt ("Advanced.Stufenweise01Beginner"). Es zu entfernen haette also
+                      sichtbare Gestaltung gekostet und am Gate nichts gebracht. */}
                   <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
-                    {de ? 'Stufe für Stufe' : 'Level by level'}
+                    {de ? 'Stufenweise' : 'Step by step'}
                   </span>
                 </div>
 
@@ -775,7 +844,10 @@ function SummerSection() {
             <img
               src="/photos/party/party-46-v3.webp"
               alt={de ? 'Lachendes Tanzpaar im hellen Salsaflow Studio' : 'Smiling dance couple in the bright Salsaflow studio'}
-              className="aspect-[4/3] w-full object-cover object-[center_38%]"
+              /* Letzte eckige Medienflaeche der Seite (Sommerkurse). Gleicher Token wie
+                 Hero-Band, Stil-Fotos und Privatstunden-Foto. Kein overflow-Wrapper noetig:
+                 der Radius sitzt direkt auf dem Bild. */
+              className="aspect-[4/3] w-full rounded-[var(--radius-media)] object-cover object-[center_38%]"
               width={2048}
               height={1360}
               loading="lazy"

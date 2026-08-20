@@ -763,8 +763,12 @@ export function StyleSlotsSection({ styleKey }: { styleKey: string }) {
 
         <Reveal className="mt-6">
           <motion.div variants={item}>
+            {/* Der Link traegt den Stil mit (Dom-Feedback 20.08.): Wer auf der Stilseite
+                steht, will den Plan DIESES Stils, nicht den Gesamtplan. Ungefiltert
+                landete er in allen ~62 Kursen und musste den Filter von Hand setzen.
+                CourseEngine.tsx liest den Parameter bereits (readArrayParam('stil')). */}
             <a
-              href="/kursplan"
+              href={`/kursplan?stil=${styleKey}`}
               className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {t.more}

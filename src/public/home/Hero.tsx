@@ -74,7 +74,6 @@
 // wandern ins Overlay: Sterne + 4,9 + Anzahl als eine Zeile, "Kursplan ansehen" als sichtbarer
 // heller Link neben dem roten Pill statt als grauer Text-Link unter dem Banner-Rand.
 
-import { ArrowUpRight } from 'lucide-react';
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
@@ -168,13 +167,25 @@ export function Hero() {
               Dokument-Polster greift hier also nicht. */}
           {/* Der Textblock startet so weit vor der Foto-Unterkante, dass die KOMPLETTE H1
               darueber Platz hat. Gemessen auf 390/360/430: vom Blockanfang bis zum H1-Beginn
-              liegen 110px (Script-Zeile + Stil-Pills), die H1 selbst misst 124px. 110+124 =
+              lagen 110px (Script-Zeile + Stil-Pills), die H1 selbst misst 124px. 110+124 =
               234px, plus 16px Luft = 250px = 15.625rem. Der Wert ist der einzige Grund, warum
               die Naht unter dem Satz liegt und nicht in ihm — er darf nicht kleiner werden,
-              ohne die H1 neu zu messen. sm+ unveraendert (pt-0). */}
+              ohne die H1 neu zu messen. sm+ unveraendert (pt-0).
+
+              R185 (20.08.): Die Stil-Pills sind raus (Begruendung am entfernten Block), damit
+              faellt ihr Anteil aus dem Vorlauf. Folge im Screenshot: die ersten zwei
+              Lead-Zeilen standen dunkelgrau auf dem dunklen Foto und waren nicht lesbar.
+              Gemessen auf 360/390/430 identisch: Lead ragte 48px ins Foto, waehrend die H1
+              76px Luft zur Kante hatte.
+
+              Achtung auf das Vorzeichen: der Wert wird von --hero-photo-h ABGEZOGEN. Ein
+              groesserer pt schiebt den Block also nach OBEN, nicht nach unten. Erster Versuch
+              mit 18.625rem machte es darum schlimmer (96px statt 48px im Foto). Richtig ist
+              250px - 48px = 202px = 12.625rem. Die Naht liegt damit wieder zwischen H1 und
+              Lead. Wer die Pills je zurueckholt, rechnet zurueck auf 15.625rem. */}
           <div
             data-hero-fold
-            className="relative z-10 self-center px-5 pt-[calc(var(--hero-photo-h)-15.625rem)] sm:px-8 sm:pt-0 lg:py-10 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-0"
+            className="relative z-10 self-center px-5 pt-[calc(var(--hero-photo-h)-12.625rem)] sm:px-8 sm:pt-0 lg:py-10 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-0"
           >
             {/* leading-[1.3] statt leading-none: Alex Brush setzt Ober- und Unterlaengen
                 ausserhalb einer 1.0-Zeilenbox, dadurch stimmten die Abstaende nicht. */}
@@ -189,27 +200,20 @@ export function Hero() {
               {h.claim}
             </motion.p>
 
-            <motion.nav
-              variants={item}
-              aria-label={de ? 'Tanzstil wählen' : 'Choose a dance style'}
-              className="mt-4 flex flex-wrap gap-2"
-            >
-              {[
-                { label: 'Salsa', href: '/tanzkurse/salsa' },
-                { label: 'Bachata', href: '/tanzkurse/bachata' },
-                { label: 'Heels', href: '/tanzkurse/heels' },
-              ].map((style) => (
-                <a
-                  key={style.label}
-                  href={style.href}
-                  className="t-hover-move group inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-paper-warm)]/90 px-4 py-2 text-sm font-semibold text-[var(--color-ink-muted)] shadow-sm backdrop-blur-sm hover:-translate-y-0.5 hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)] max-sm:border-white/30 max-sm:bg-black/20 max-sm:text-white max-sm:hover:border-[var(--color-script-cream)] max-sm:hover:text-[var(--color-script-cream)]"
-                >
-                  <span>{style.label}</span>
-                  <ArrowUpRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-[var(--ease-sf)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.25} />
-                </a>
-              ))}
-            </motion.nav>
+            {/* R185 (20.08.): Hier standen drei Stil-Pillen Salsa/Bachata/Heels auf
+                /tanzkurse/salsa|bachata|heels. Sie sind raus, weil die naechste Sektion
+                dieselbe Frage stellt: "Welcher Tanz passt zu dir?" fuehrt auf exakt
+                dieselben drei Ziele — dort aber mit Foto, Erklaertext und Niveau, also
+                mit echter Entscheidungshilfe.
 
+                Gemessen vorher (live, 5175): Pillen bei y=230, H1 erst y=282, der
+                Kursplan-CTA bei y=613. Mobil y=382 gegen y=698. Die erste Aktion im
+                Fold war damit eine Stilwahl ohne Hilfe statt des Kursplans. Genau das
+                schliesst das Fold-Gate aus: im Fold fuehrt der Kursplan, die Stilwahl
+                gehoert in den naechsten Abschnitt.
+
+                Kein Weg geht verloren. Die drei Ziele stehen in der Offer-Sektion und
+                zusaetzlich im Header-Dropdown "Tanzkurse". */}
             {/* Zeilenmass am Heading selbst (kit.tsx MEASURE_XL), nicht am Wrapper: ein
                 em-Mass auf einem 16px-Wrapper wuerde die grosse H1 zersaegen.
 
@@ -268,23 +272,28 @@ export function Hero() {
                 : 'Three studios right by Basel SBB. Come alone or as a pair, your first class is free.'}
             </motion.p>
 
-            {/* Kritikpunkt 5: der Secondary "Kursplan ansehen" stand mobil als nackter roter
-                Textlink unter dem Pill und war dort der schwaechste Reiz im Fold — obwohl der
-                Kursplan der zweitwichtigste Weg der Seite ist (er traegt den Terminbeweis).
-                Neu unter sm: eigene Zeile ueber die volle Breite als Umriss-Pill, damit er
-                dieselbe Trefferflaeche wie der Primary hat. Rot auf Papier bleibt (Kontrast
-                7.4:1); nur der Rahmen kommt dazu. Kein zweiter GEFUELLTER Button — DESIGN.md
-                erlaubt genau einen Primary pro Sektion. Ab sm unveraendert der Textlink.
-                Beide liegen laut Sonde auf Papier, nicht auf dem Foto (Messung unten). */}
+            {/* Raphael 20.08.: "Kursplan isch s wichtigschte, Gratis Schnupperstund söll
+                absolut im Hintergrund si, schliesslich zahle d lüdd wenn sie wittermache."
+                Darum traegt jetzt der KURSPLAN die gefuellte Pille, nicht mehr die
+                Schnupperstunde. Das dreht die frueher hier begruendete Reihenfolge um.
+
+                Die Schnupperstunde verschwindet nicht, sie wird leiser: reiner Textlink,
+                auch auf Mobil. Die frueher noetige Umriss-Pille unter sm faellt weg — sie
+                haette dem sekundaeren Weg dieselbe Flaeche gegeben wie dem primaeren und
+                genau die Hierarchie zerstoert, um die es hier geht.
+
+                Trefferflaeche bleibt: min-h-11 (44px) haelt das Tap-Ziel auf Mobil, ohne
+                dass der Link wie ein zweiter Button aussieht. DESIGN.md erlaubt genau
+                einen gefuellten Primary pro Sektion — der gehoert dem Kursplan. */}
             <motion.div variants={item} className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 max-sm:mt-6 max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2">
-              <CtaPill href="/schnupperstunde" className="max-sm:w-full">
-                {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
+              <CtaPill href="/kursplan" className="max-sm:w-full">
+                {cta.plan}
               </CtaPill>
               <CtaText
-                href="/kursplan"
-                className="max-sm:mr-16 max-sm:justify-center max-sm:rounded-full max-sm:border max-sm:border-[var(--color-line)] max-sm:px-6"
+                href="/schnupperstunde"
+                className="min-h-11 max-sm:justify-center"
               >
-                {cta.plan}
+                {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
               </CtaText>
             </motion.div>
 

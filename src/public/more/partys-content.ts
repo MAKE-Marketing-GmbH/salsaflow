@@ -67,7 +67,7 @@ export type PartysContent = {
   };
 };
 
-export const PARTYS: Record<Lang, PartysContent> = {
+export const PARTYS = {
   de: {
     crumbs: [
       { label: 'Partys', href: '/mehr/partys' },
@@ -242,4 +242,4 @@ export const PARTYS: Record<Lang, PartysContent> = {
       secondary: { label: 'Open the event overview', href: '/events-workshops/eventkalender' },
     },
   },
-};
+} satisfies Record<Lang, PartysContent>;

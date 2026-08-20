@@ -199,19 +199,23 @@ function EventsHero() {
         // 28rem bleibt, weil Facts unter dem Band den Fold tragen. Crop 20 % holt
         // die Haende; Haar-Landmarke nat. Y 225 bleibt im Fenster.
         //
-        // Sichtbares Fenster bei 25rem und unveraendertem 30%:
-        //   1280px: scale 0.853, Ueberhang 453 -> nat. Y 159-628
-        //   1440px: scale 0.960, Ueberhang 560 -> nat. Y 175-592
-        //   1920px: scale 1.280, Ueberhang 880 -> nat. Y 206-519
-        // Landmarken an der Datei nachgemessen (nicht geschaetzt): die hoechste Frisur
-        // (Taenzerin vorn links) beginnt bei nat. Y 225, die dritte Taenzerin bei 230,
-        // die hinteren beiden bei 293/295. Selbst im engsten Fall (1920px, Oberkante 206)
-        // bleiben 19px Luft ueber dem hoechsten Haar — kein Scheitel wird gekappt.
-        // Nach unten reicht das Fenster bis Y 519-628, also bis Oberschenkel/Rocksaum
-        // statt bis zur Huefte. Ab 35% kappt die Oberkante bei 1920 die Scheitel.
-        // Mobil/sm bleiben unveraendert (Fenster deckt dort ohnehin die ganze Figur ab).
+        // Sichtbares Fenster Desktop (lg 28rem, Crop 20 %):
+        //   1280px / 1440px / 1920px — Scheitel (nat. Y 225) bleiben im Fenster.
+        // Landmarken an der Datei nachgemessen: hoechste Frisur 225, dritte Taenzerin 230,
+        // hintere beiden 293/295.
+        //
+        // R181 Mobil: 10rem=160px schnitt bei Huefte/Rocksaum ab. Rechnung 390px Breite,
+        // object-cover, Motiv 1500x1000: scale 390/1500=0.26, Bild skaliert 260px.
+        // 160px-Fenster = 160/0.26=615 nat. Y. Ueberhang 385. Crop 20% -> Oberkante 77,
+        // Unterkante 692. Genau die Huefte. 15rem=240px: Fenster 240/0.26=923 nat. Y.
+        // Ueberhang 77. Crop 20% -> Oberkante 15, Unterkante 938. Koepfe (225) und
+        // erhobene Haende liegen weit unter der Oberkante. Unten bis Unterschenkel.
+        // Band start bleibt y=445 (H1-Ende 213, Fold 844). 16.25rem waere volle Bildhoehe
+        // (260px, nichts abgeschnitten) — 15rem oeffnet deutlich mehr Koerper, ohne das
+        // Band auf Bildhoehe zu ziehen. sm:16rem, damit das Band ab 640px nicht auf
+        // 11rem zurueckfaellt. positionClass 20% und lg:28rem unveraendert.
         positionClass: 'object-[center_20%]',
-        heightClass: 'h-[10rem] sm:h-[11rem] lg:h-[28rem]',
+        heightClass: 'h-[15rem] sm:h-[16rem] lg:h-[28rem]',
       }}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

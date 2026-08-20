@@ -267,32 +267,10 @@ function TeachingLine({ teaching, lang }: { teaching: Teaching | undefined; lang
  * Fazit R159: die Geometrie erfuellt "nicht abschneiden" bereits. Sie wird darum NICHT
  * angefasst. Wer sie spaeter dreht, muss diese Messreihe neu fahren und schlagen.
  *
- * R180b (Video 06:59, Fold-Schnitt + Aufloesung) —
- * Playwright gegen http://127.0.0.1:5175/team, Gate /tmp/shoot-team-v2.mjs.
- * Das alte Gate mass nur das object-fit-Fenster der GANZEN Datei, nie den
- * Teil oberhalb der Fold-Kante. Darum PASS bei Schnitt auf halbem Oberschenkel.
- *
- * IST 1440x900, dpr=2, vor dem Fix (hp-03.webp 1800x1115, aspect 21/9, pos 39%):
- *   CSS 1440x617, Band-Top y=385.3, Band-Bot y=1002.4, vh=900
- *   BAND src 12.0%..81.2%   (Schuhe liegen im Band)
- *   FOLD src 12.0%..69.7%   (Fold-Kante schneidet bei 69.7% — Schuhe 80% draussen)
- *   Device-Pixel 2880 noetig, Quelle 1800, Ratio 0.63x
- *
- * heightClass allein reicht nicht: bei pos 39% und Band-Top 385 liegt die
- * Fold-Decke bei src 74.2%, auch wenn das Band genau bis vh=900 reicht.
- * Darum beides, mit Messung:
- *   lg-Aspect 21/9 (617px, laeuft 102px unter die Fold-Kante)
- *     -> 14/5 (514px, Band-Bot y=899.6, sitzt im Fold)
- *   position 39% -> 54% (Fenster rutscht nach unten, Luft ueber den Koepfen bleibt)
- *
- * SOLL 1440x900 gerechnet (14/5, pos 54%, gleiche Motiv-Prozente nach Upscale):
- *   FOLD src 22.87%..80.52%
- *   headsWhole: 22.87 <= 25.1, Luft 2.23pp (~20 CSS-px) ueber dem Scheitel
- *   shoesInFold: 80.52 >= 80.0
- *
- * Aufloesung: `src` ist in TeamPage.tsx frei. Neues File
- * /photos/showcase/hp-03-2880.webp, Lanczos aus hp-03 (1800 -> 2880).
- * Keine neuen Details, aber Browser-Bilinear-Matsch weg. Deckung 2880/2880 = 1.0x.
+ * R187 korrigiert den freigegebenen Zuschnitt auf `center 38%`.
+ * Der finale Browserbeleg bei 1440x730 zeigt 32px Luft über dem höchsten Scheitel.
+ * Alle Köpfe und der Wandschriftzug bleiben vollständig sichtbar.
+ * Mobil zeigt das Band das ganze Gruppenbild.
  */
 function TeamHero() {
   const { lang } = useLang();
@@ -314,11 +292,10 @@ function TeamHero() {
       media={{
         src: '/photos/showcase/hp-03-2880.webp',
         alt: 'Das Salsaflow-Team gemeinsam im hellen Studio',
-        // R180b: Fold-Gate clippt an vh. 21/9 + 39% zeigte FOLD 12.0%..69.7% (Schuhe ab).
-        // Aspect 14/5 setzt das Band in den Fold; 54% schiebt das Fenster auf die Schuhe.
-        // Alte Zahlen und Rechnung: Block R180b im Kopfkommentar.
-        position: 'center 54%',
-        heightClass: 'h-[16rem] sm:h-[24rem] lg:h-auto lg:aspect-[14/5]',
+        // Parent nach R180c: vh-Höhe bleibt als Fold-Rest. Der freigegebene
+        // Zuschnitt 38 % zeigt bei 1440x730 alle Köpfe und hält das Logo lesbar.
+        position: 'center 38%',
+        heightClass: 'h-[16rem] sm:h-[24rem] lg:h-[calc(100vh-24.08rem)]',
       }}
     />
   );

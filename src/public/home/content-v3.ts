@@ -92,7 +92,7 @@ export type HomeV3Strings = {
   links: { eyebrow: string; title: string; cards: LinkCard[] };
 };
 
-export const HOME_V3: Record<Lang, HomeV3Strings> = {
+export const HOME_V3 = {
   de: {
     contact: { gift: 'Gratis Schnupperstunde', whatsapp: 'Schreib uns auf WhatsApp' },
     why: {
@@ -384,7 +384,7 @@ export const HOME_V3: Record<Lang, HomeV3Strings> = {
       ],
     },
   },
-};
+} satisfies Record<Lang, HomeV3Strings>;
 
 // Ein Ziel sitewide: die Gratis-Schnupperstunde. Anker wie im Rest der App (Hero, Footer).
 export const TRIAL_HREF = '/schnupperstunde';

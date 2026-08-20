@@ -14,7 +14,6 @@ import { SiteFooter } from '@/public/site/SiteFooter';
 import { Hero } from '@/public/home/Hero';
 import { Offer } from '@/public/home/Offer';
 import { ScheduleTeaser } from '@/public/home/ScheduleTeaser';
-import { WhyGrid } from '@/public/home/WhyGrid';
 import { WallOfLove } from '@/public/home/WallOfLove';
 import { TeamBlock } from '@/public/home/TeamBlock';
 import { PriceSignal } from '@/public/home/PriceSignal';
@@ -94,10 +93,16 @@ export function HomePage() {
           (77px, mobil ab 480px Scroll) deckte sonst am Seitenende den letzten Inhalt
           (Critic Runde 15, Item 2). Die Variable ist 0px, sobald der Balken weg ist. */}
       <main id="main" tabIndex={-1} style={{ paddingBottom: 'var(--sticky-cta-height, 0px)' }}>
+        {/* R186 (Dom, 20.08.): WhyGrid ist raus aus der sichtbaren Reihenfolge. Der Kunde
+            hat die Sektion "Du brauchst keinen perfekten Moment. Nur den ersten Schritt."
+            im Screenshot abgelehnt. Sie beantwortete vier Einsteiger-Einwaende, die die
+            FAQ am Seitenende ohnehin traegt ("Fragen vor deiner ersten Stunde").
+            Die Datei home/WhyGrid.tsx bleibt unangetastet liegen. Der Import ist raus,
+            sonst meldet oxlint eine ungenutzte Einfuhr. Zurueckholen kostet also zwei
+            Zeilen: die Einfuhr oben und <WhyGrid /> hier. */}
         <Hero />
         <Offer />
         <ScheduleTeaser withCoursePath />
-        <WhyGrid />
         <WallOfLove />
         <EventsTeaser />
         <TeamBlock />

@@ -25,20 +25,40 @@ import { Music, MapPin, CalendarClock, ArrowRight, type LucideIcon } from 'lucid
 // (helle Raeume mit Anlage -> Lage am SBB -> flexible Nutzung).
 const ROOM_ICONS: LucideIcon[] = [Music, MapPin, CalendarClock];
 
-const TOPIC_HASHES: Record<string, TopicKey> = {
+type TopicHashLookup = Record<string, TopicKey>;
+type ContactCookieStyle = CSSProperties & {
+  '--contact-cookie-safe': string;
+};
+
+declare global {
+  interface WindowEventMap {
+    'salsaflow-cookie-visibility': CustomEvent<boolean>;
+  }
+}
+
+function defineTopicHashes(hashes: TopicHashLookup): TopicHashLookup {
+  return hashes;
+}
+
+function defineContactCookieStyle(style: ContactCookieStyle): ContactCookieStyle {
+  return style;
+}
+
+const TOPIC_HASHES = defineTopicHashes({
   '#schnupperstunde': 'schnupperstunde',
   '#privatstunden': 'privatstunden',
   '#raumvermietung': 'raumvermietung',
   '#geschenkgutschein': 'geschenkgutschein',
   '#events': 'events',
   '#animationen': 'animationen',
-};
+});
 
 function topicFromLocation(): TopicKey {
-  if (typeof window === 'undefined') return 'schnupperstunde';
-  const fromHash = TOPIC_HASHES[window.location.hash];
+  const browserWindow = globalThis.window;
+  if (!browserWindow) return 'schnupperstunde';
+  const fromHash = TOPIC_HASHES[browserWindow.location.hash];
   if (fromHash) return fromHash;
-  if (new URLSearchParams(window.location.search).has('kurs')) return 'kurs';
+  if (new URLSearchParams(browserWindow.location.search).has('kurs')) return 'kurs';
   return 'schnupperstunde';
 }
 
@@ -52,23 +72,24 @@ export function ContactPage() {
   // Hash setzt das Anliegen und scrollt zum Wizard. #raumvermietung darf nicht an der
   // Infosektion landen — die Traegt bewusst keine gleichnamige id mehr.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    const browserWindow = globalThis.window;
+    if (!browserWindow) return;
     const next = topicFromLocation();
     setTopic(next);
-    if (!TOPIC_HASHES[window.location.hash]) return;
+    if (!TOPIC_HASHES[browserWindow.location.hash]) return;
     const target = document.getElementById('kontaktformular');
     if (!target) return;
-    const frame = window.requestAnimationFrame(() => {
+    const frame = browserWindow.requestAnimationFrame(() => {
       target.scrollIntoView({ block: 'start' });
     });
-    return () => window.cancelAnimationFrame(frame);
+    return () => browserWindow.cancelAnimationFrame(frame);
   }, []);
 
   // Die fixe Cookie-Leiste darf den letzten Kontaktinhalt nicht verdecken. Das bestehende
   // Sichtbarkeits-Event hält den Abstand exakt so lange aktiv, wie die Leiste sichtbar ist.
   useEffect(() => {
-    const onCookieVisibility = (event: Event) => {
-      setCookieVisible(Boolean((event as CustomEvent<boolean>).detail));
+    const onCookieVisibility = (event: WindowEventMap['salsaflow-cookie-visibility']) => {
+      setCookieVisible(Boolean(event.detail));
     };
     window.addEventListener('salsaflow-cookie-visibility', onCookieVisibility);
     const frame = window.requestAnimationFrame(() => {
@@ -84,8 +105,9 @@ export function ContactPage() {
   // räumt er die Arbeitsfläche dauerhaft frei; auf anderen Routen erscheint er weiter normal.
   useEffect(() => {
     const formSection = document.querySelector('#schnupperstunde');
-    if (!formSection || typeof IntersectionObserver === 'undefined') return;
-    const observer = new IntersectionObserver((entries) => {
+    const Observer = globalThis.IntersectionObserver;
+    if (!formSection || !Observer) return;
+    const observer = new Observer((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) setCookieClear(true);
     });
     observer.observe(formSection);
@@ -93,6 +115,9 @@ export function ContactPage() {
   }, []);
 
   const cookieSafe = cookieVisible && !cookieClear;
+  const contactCookieStyle = defineContactCookieStyle({
+    '--contact-cookie-safe': cookieSafe ? 'calc(3.625rem + env(safe-area-inset-bottom))' : '0px',
+  });
 
   return (
     <>
@@ -103,9 +128,7 @@ export function ContactPage() {
         tabIndex={-1}
         className="contact-page"
         data-cookie-clear={cookieClear ? 'true' : 'false'}
-        style={{
-          '--contact-cookie-safe': cookieSafe ? 'calc(3.625rem + env(safe-area-inset-bottom))' : '0px',
-        } as CSSProperties}
+        style={contactCookieStyle}
       >
         <ContactHero />
         <FormSection topic={topic} setTopic={setTopic} />

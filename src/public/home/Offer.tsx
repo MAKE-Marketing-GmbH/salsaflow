@@ -7,83 +7,71 @@ import { Reveal, useReveal } from '@/public/home/motion';
 import { MEASURE_L, MEASURE_M, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
-function FeaturedStyle({ card }: { card: OfferCard }) {
+/* R186 (Dom, 20.08.): Vorher trug diese Sektion EINE grosse Featured-Karte links und
+   zwei duenne Zeilen rechts, Privatstunden war ganz herausgefiltert. Dom will vier
+   gleichwertige, bildstarke Angebote nebeneinander sehen. Darum jetzt eine Karte fuer
+   alle vier — dieselbe Form, dieselbe Hoehe, nur das Motiv unterscheidet sie.
+
+   Der Bildzuschnitt bleibt pro Motiv erhalten: die Werte stammen aus der frueheren
+   StyleRow und sind an das jeweilige Foto gemessen, nicht geraten. Bachata liegt bei
+   36 % und Heels bei 20 %, damit die Koepfe im Bild bleiben (Crop-Lock R138/R139). */
+function cardCrop(key: string) {
+  if (key === 'salsa') return 'object-[center_46%]';
+  if (key === 'bachata') return 'object-[center_36%]';
+  if (key === 'heels') return 'object-[center_20%]';
+  return 'object-[center_42%]';
+}
+
+/* Die intrinsischen Masse verhindern einen Layout-Shift beim Laden. Sie stehen pro
+   Motiv, weil die vier Dateien unterschiedliche Formate haben (Salsa quer, Heels hoch). */
+function cardSize(key: string) {
+  if (key === 'salsa') return { w: 1600, h: 1067 };
+  if (key === 'bachata') return { w: 2752, h: 1536 };
+  if (key === 'privat') return { w: 1800, h: 1200 };
+  return { w: 1200, h: 1600 };
+}
+
+function StyleCard({ card }: { card: OfferCard }) {
   const { lang } = useLang();
+  const size = cardSize(card.key);
 
   return (
     <a
       href={card.href}
       aria-label={`${card.title}: ${card.hint}`}
-      className="group relative isolate flex min-h-[31rem] overflow-hidden rounded-[1.5rem] bg-[var(--color-ink)] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:rounded-[2.5rem] lg:min-h-[42rem]"
+      className="group relative isolate flex min-h-[22rem] overflow-hidden rounded-[1.5rem] bg-[var(--color-ink)] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:rounded-[2rem] lg:min-h-[26rem]"
     >
-      {/* width/height sind die INTRINSISCHEN Masse der Datei (Seitenverhaeltnis-Hinweis fuers
-          Layout). Sie standen fest auf 1200x1600 (Hochformat) — mit dem neuen Salsa-Motiv
-          kurs-01.jpg (1600x1067, Querformat, siehe content.ts) waere daraus ein falsches
-          Verhaeltnis und damit ein Layout-Shift geworden. Das Bild liegt absolut im Rahmen,
-          die sichtbare Form bestimmt der Container, nicht diese Zahlen. */}
       <img
         src={card.photo}
         alt={card.alt}
-        className="absolute inset-0 h-full w-full object-cover object-[center_42%] transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.025]"
-        width={1600}
-        height={1067}
+        className={cn(
+          'absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.025]',
+          card.key === 'bachata' ? 'photo-grade-bachata' : card.key === 'privat' ? 'photo-grade-private' : undefined,
+          cardCrop(card.key),
+        )}
+        width={size.w}
+        height={size.h}
         loading="lazy"
       />
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[var(--color-ink)]/85 via-transparent to-transparent" />
-      <div className="relative z-10 mt-auto max-w-xl p-6 sm:p-8 lg:p-10">
-        <span className="text-sm font-semibold text-white/80">{card.hint}</span>
-        <h3
-          className={cn(
-            'type-h3 mt-3',
-            MEASURE_L,
-          )}
-        >
-          {card.title}
-        </h3>
-        <p className="mt-4 max-w-md text-pretty text-base leading-relaxed text-white/80">{card.text}</p>
-        <span className="mt-6 inline-flex min-h-11 items-center gap-2 font-semibold">
-          {lang === 'de' ? 'Salsa entdecken' : 'Explore salsa'}
+      {/* Der Verlauf traegt den Text. Erster Versuch endete bei 25 % Deckung auf halber
+          Hoehe — gemessen im Bild standen dann "HALTUNG UND CHOREOGRAFIE" (Heels) und
+          "1:1 COACHING" (Privatstunden) weiss auf hellem Studio und waren unlesbar.
+          Beide Motive sind oben hell. Der Verlauf deckt jetzt bis zwei Drittel Hoehe. */}
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[var(--color-ink)]/95 via-[var(--color-ink)]/70 via-45% to-transparent" />
+      <div className="relative z-10 mt-auto p-5 sm:p-6">
+        <span className="text-xs font-semibold uppercase tracking-wide text-white/85">{card.hint}</span>
+        <h3 className={cn('type-h3 mt-2', MEASURE_M)}>{card.title}</h3>
+        <p className="mt-3 text-pretty text-sm leading-relaxed text-white/85">{card.text}</p>
+        {/* Der Linktext wiederholte zuerst den Kartentitel ("Salsa" ueber "Salsa →").
+            Er sagt jetzt, wohin der Klick fuehrt. Privatstunden fuehren auf die
+            Anfrageseite, die drei Tanzarten auf ihre Stilseite mit Terminen. */}
+        <span className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold">
+          {card.key === 'privat'
+            ? (lang === 'de' ? 'Privatstunde anfragen' : 'Request a private lesson')
+            : (lang === 'de' ? 'Kurse und Termine' : 'Courses and dates')}
           <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
         </span>
       </div>
-    </a>
-  );
-}
-
-function StyleRow({ card, index }: { card: OfferCard; index: number }) {
-  return (
-    <a
-      href={card.href}
-      aria-label={`${card.title}: ${card.hint}`}
-      className="group grid min-h-[10rem] grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-4 border-b border-[var(--color-line)] py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:gap-6"
-    >
-
-      <div className="h-24 overflow-hidden rounded-[1.25rem] bg-[var(--color-bg-soft)] transition-transform duration-[var(--dur-base)] ease-out motion-safe:group-hover:-translate-y-0.5 sm:h-32 sm:rounded-[1.5rem]">
-        <img
-          src={card.photo}
-          alt={card.alt}
-          className={cn(
-            'h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.035]',
-            card.key === 'bachata' ? 'photo-grade-bachata' : card.key === 'privat' ? 'photo-grade-private' : undefined,
-            index === 1 ? 'object-[center_36%]' : index === 2 ? 'object-[center_20%]' : 'object-[center_46%]',
-          )}
-          width={card.key === 'privat' ? 1800 : card.key === 'bachata' ? 2752 : 1200}
-          height={card.key === 'privat' ? 1200 : card.key === 'bachata' ? 1536 : 1600}
-          loading="lazy"
-        />
-      </div>
-      <div className="min-w-0">
-        <span className="text-xs font-semibold text-[var(--color-salsa)]">{card.hint}</span>
-        <h3
-          className={cn(
-            'type-h3 mt-1 text-[var(--color-ink)]',
-            MEASURE_M,
-          )}
-        >
-          {card.title}
-        </h3>
-      </div>
-      <ArrowRight aria-hidden size={20} strokeWidth={2} className="text-[var(--color-ink)] transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-1 group-hover:text-[var(--color-salsa)]" />
     </a>
   );
 }
@@ -92,11 +80,9 @@ export function Offer() {
   const { lang } = useLang();
   const o = HOME[lang].offer;
   const { item } = useReveal({ stagger: 0.07 });
-  // R134/9: Die Privatstunden-Karte ("1:1 Coaching") faellt auf der Startseite weg
-  // (Raphael-Video 01:54). Sie bleibt in content.ts und auf /privatstunden erhalten —
-  // hier ist sie nur die vierte Karte in einer Stil-Reihe und lenkt vom Kursweg ab.
-  // Gefiltert statt geloescht, weil content.ts auch die englische Fassung traegt.
-  const cards = o.cards.filter((card) => card.key !== 'privat');
+  // R186 (Dom, 20.08.): Der Filter `card.key !== 'privat'` aus R134/9 ist raus. Dom will
+  // die Privatstunden auf der Startseite sehen, Desktop als vierte Karte ganz rechts.
+  // Die Reihenfolge steht in content.ts: Salsa, Bachata, Heels, Privatstunden.
 
   return (
     <section id="angebot" className={cn('relative scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}>
@@ -113,30 +99,29 @@ export function Offer() {
           >
             {o.title}
           </motion.h2>
-          <motion.p variants={item} className="mt-4 max-w-[65ch] text-pretty text-lg leading-relaxed text-[var(--color-ink-muted)]">
-            {o.lead}
-          </motion.p>
+          {/* R186: Der Lead ist in content.ts leer. Ein leeres <p> traegt trotzdem seinen
+              mt-4 und die Zeilenhoehe, also 4rem Loch zwischen H2 und Karten. Darum
+              gar nicht erst rendern. */}
+          {o.lead ? (
+            <motion.p variants={item} className="mt-4 max-w-[65ch] text-pretty text-lg leading-relaxed text-[var(--color-ink-muted)]">
+              {o.lead}
+            </motion.p>
+          ) : null}
         </Reveal>
 
-        <Reveal className="mt-10 grid gap-8 lg:mt-14 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12" stagger={0.07}>
-          <motion.div variants={item} className="min-w-0 lg:-mb-8">
-            <FeaturedStyle card={cards[0]} />
-          </motion.div>
-          {/* lg:pr-36: der fixe WhatsApp-FAB (x ab 1294) lag beim Scrollen auf dem rechten
-              Zeilenende (right=1388, Pfeil + Textende) — Muster ScheduleTeaser
-              (Critic Runde 12, Item 5).
-              R134/9: Mit der weggefallenen Privatstunden-Karte trugen hier nur noch zwei
-              Zeilen (zusammen 338px) neben einer 672px hohen Featured-Karte — gemessen
-              blieben 325px leere Flaeche unter der letzten Zeile. Die Spalte verteilt ihre
-              Hoehe jetzt auf die verbliebenen Zeilen (flex + flex-1), damit rechts und
-              links auf derselben Linie enden. Unter lg bleibt der normale Fluss. */}
-          <motion.div variants={item} className="border-t border-[var(--color-line)] lg:flex lg:flex-col lg:justify-center lg:pr-36 lg:pt-2">
-            {cards.slice(1).map((card, index) => (
-              <StyleRow key={card.key} card={card} index={index + 1} />
-            ))}
-          </motion.div>
+        {/* R186 (Dom, 20.08.): Vier gleich grosse Karten statt einer grossen und zwei
+            Zeilen. Desktop vier Spalten, damit Privatstunden ganz rechts steht. Mobil
+            eine Spalte in derselben Reihenfolge, Tablet zwei.
+            Kein lg:pr-36 mehr: das Polster hielt frueher den WhatsApp-FAB vom rechten
+            Zeilenende fern. Die Karten enden jetzt am Shell-Rand, der Text sitzt links
+            unten in der Karte — der FAB liegt ueber der Bildflaeche, nicht auf Schrift. */}
+        <Reveal className="mt-10 grid gap-5 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4 lg:gap-6" stagger={0.07}>
+          {o.cards.map((card) => (
+            <motion.div key={card.key} variants={item} className="min-w-0">
+              <StyleCard card={card} />
+            </motion.div>
+          ))}
         </Reveal>
-
 
         <Reveal className="mt-10 lg:mt-12">
           <motion.a

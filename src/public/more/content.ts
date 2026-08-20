@@ -34,7 +34,7 @@ export type MoreContent = {
   };
 };
 
-export const MORE_PAGE: Record<Lang, MoreContent> = {
+export const MORE_PAGE = {
   de: {
     hero: {
       eyebrow: 'MEHR VON SALSAFLOW',
@@ -131,4 +131,4 @@ export const MORE_PAGE: Record<Lang, MoreContent> = {
       secondaryHref: '/kursplan',
     },
   },
-};
+} satisfies Record<Lang, MoreContent>;

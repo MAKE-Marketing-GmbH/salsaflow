@@ -88,7 +88,7 @@ const R = {
   mieten: '#mieten',
 };
 
-export const STANDORT: Record<Lang, StandortContent> = {
+export const STANDORT = {
   de: {
     seo: 'standort',
     crumbs: [
@@ -304,4 +304,4 @@ export const STANDORT: Record<Lang, StandortContent> = {
       ],
     },
   },
-};
+} satisfies Record<Lang, StandortContent>;

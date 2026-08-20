@@ -56,7 +56,13 @@ export type FeedPost = {
  * Stand des Datenblocks. Setzt das Refresh-Skript mit.
  * Quelle "redaktion" = von Hand gepflegt, "profil-abruf" = vom Skript geholt.
  */
-export const FEED_STAND = { datum: '2026-08-14', quelle: 'redaktion' as 'redaktion' | 'profil-abruf' };
+export const FEED_STAND = {
+  datum: '2026-08-14',
+  quelle: 'redaktion',
+} satisfies {
+  datum: string;
+  quelle: 'redaktion' | 'profil-abruf';
+};
 
 // --- BEGIN INSTAGRAM-FEED-DATEN (refresh-instagram-feed.mjs schreibt ab hier) ---
 const FEED: FeedPost[] = [

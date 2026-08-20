@@ -30,10 +30,10 @@ const FALLBACK_STYLES = [
  *  (gemessen: eine Zeile rendert 76px, plus Kopf 250px = 554px bei 900px Viewport). */
 const ROWS_PER_DAY = 4;
 
-const MONTH_SHORT: Record<'de' | 'en', string[]> = {
+const MONTH_SHORT = {
   de: ['Jan.', 'Feb.', 'März', 'Apr.', 'Mai', 'Juni', 'Juli', 'Aug.', 'Sep.', 'Okt.', 'Nov.', 'Dez.'],
   en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-};
+} satisfies Record<'de' | 'en', string[]>;
 
 /** "2026-09-09" -> "9. Sep." bzw. "Sep 9". Bewusst eine lokale Kopie derselben Formel wie
  *  CourseEngine.shortDate (dort file-privat) statt eines Cross-Import in fremden Owner-Code. */

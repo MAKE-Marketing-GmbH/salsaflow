@@ -65,7 +65,7 @@ const WHATSAPP_HREF = 'https://wa.me/41764788411';
 
 /* Lokales Mikro-Lexikon fuer die Kalender-Ansicht. Steht bewusst hier und nicht in
  * src/lib/i18n.tsx: es sind Begriffe, die es nur in dieser Ansicht gibt. */
-const CAL: Record<Lang, {
+type CalendarCopy = {
   day: string;
   style: string;
   allStyles: string;
@@ -90,7 +90,9 @@ const CAL: Record<Lang, {
   thisWeek: string;
   termStartsOn: string;
   noCoursesTerm: string;
-}> = {
+};
+
+const CAL = {
   de: {
     day: 'Tag',
     style: 'Stil',
@@ -143,15 +145,15 @@ const CAL: Record<Lang, {
     termStartsOn: 'This term starts on',
     noCoursesTerm: 'No class is scheduled in this term yet.',
   },
-};
+} satisfies Record<Lang, CalendarCopy>;
 
 /** Kurzname der Staffel fuer den Umschalter. Die API liefert "Staffel August 2026"; im
  *  Schalter steht die Jahreszahl schon im Datum darunter, sie wuerde die Pille nur breiter
  *  machen. Englisch bekommt dieselbe Kuerzung ueber den Monatsnamen aus `startDate`. */
-const MONTH_LONG: Record<Lang, string[]> = {
+const MONTH_LONG = {
   de: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
   en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-};
+} satisfies Record<Lang, string[]>;
 
 function termLabel(term: ScheduleTerm, lang: Lang): string {
   const month = MONTH_LONG[lang][(Number(term.startDate.slice(5, 7)) - 1 + 12) % 12];
@@ -187,7 +189,13 @@ function termWeeks(term: ScheduleTerm, courses: ScheduleCourse[]): string[] {
   return [...mondays].sort();
 }
 
-const TEACHER_PHOTOS: Record<string, string> = {
+type PhotoLookup = Record<string, string>;
+
+function definePhotoLookup(photos: PhotoLookup): PhotoLookup {
+  return photos;
+}
+
+const TEACHER_PHOTOS = definePhotoLookup({
   aleks: '/photos/team/teacher-aleksandra.webp',
   aleksandra: '/photos/team/teacher-aleksandra.webp',
   claudia: '/photos/founders/claudia.webp',
@@ -199,33 +207,48 @@ const TEACHER_PHOTOS: Record<string, string> = {
   tobi: '/photos/team/teacher-tobias.webp',
   tobias: '/photos/team/teacher-tobias.webp',
   vanessa: '/photos/founders/vanessa.webp',
-};
+});
 
-const STYLE_PHOTOS: Record<string, string> = {
+const STYLE_PHOTOS = definePhotoLookup({
   bachata: '/photos/premium/offer-bachata-800.webp',
   heels: '/photos/premium/offer-heels-800.webp',
   salsa: '/photos/premium/offer-salsa-800.webp',
-};
+});
 
 function portraitFor(teacher: ScheduleCourse['teachers'][number] | undefined, styleKey: string) {
   if (teacher?.photoUrl) return { src: teacher.photoUrl, named: true };
   const name = teacher?.displayName.trim().toLowerCase();
-  if (name && TEACHER_PHOTOS[name]) return { src: TEACHER_PHOTOS[name], named: true };
+  const teacherPhoto = name ? TEACHER_PHOTOS[name] : undefined;
+  if (teacherPhoto) return { src: teacherPhoto, named: true };
   return { src: STYLE_PHOTOS[styleKey] ?? '/photos/premium/offer-salsa-800.webp', named: false };
 }
 
 /* Kurzes Start-Datum fuer die Badge ("9. Sep." / "Sep 9"). Das lange Format aus
  * formatDateI18n ("9. September 2026") sprengt die Badge-Zeile. */
-const MONTH_SHORT: Record<Lang, string[]> = {
+const MONTH_SHORT = {
   de: ['Jan.', 'Feb.', 'März', 'Apr.', 'Mai', 'Juni', 'Juli', 'Aug.', 'Sep.', 'Okt.', 'Nov.', 'Dez.'],
   en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-};
+} satisfies Record<Lang, string[]>;
 
 function shortDate(iso: string, lang: Lang): string {
   const [, m, d] = iso.split('-').map(Number);
   if (!m || !d) return iso;
   const month = MONTH_SHORT[lang][(m - 1) % 12];
   return lang === 'de' ? `${d}. ${month}` : `${month} ${d}`;
+}
+
+function weekdayIndex(value: string): number {
+  return WEEKDAY_ORDER.findIndex((weekday) => weekday === value);
+}
+
+function parseWeekday(value: string | undefined): WeekdayKey | null {
+  if (!value) return null;
+  return WEEKDAY_ORDER.find((weekday) => weekday === value) ?? null;
+}
+
+function currentSearchParams(): URLSearchParams | null {
+  const search = globalThis.window?.location.search;
+  return search === undefined ? null : new URLSearchParams(search);
 }
 
 /** Ein Wochen-Slot: EIN wiederkehrender Termin im Stundenplan INNERHALB einer Staffel.
@@ -282,7 +305,7 @@ function buildSlots(courses: ScheduleCourse[], term: ScheduleTerm | null, weekSt
 
   const dateInWeek = (course: ScheduleCourse): string | null => {
     if (!weekStart) return null;
-    const offset = WEEKDAY_ORDER.indexOf(course.weekday as WeekdayKey);
+    const offset = weekdayIndex(course.weekday);
     if (offset < 0) return null;
     const iso = addDaysISO(weekStart, offset);
     const dates = course.nextDates;
@@ -317,7 +340,7 @@ function buildSlots(courses: ScheduleCourse[], term: ScheduleTerm | null, weekSt
 
   return slots.sort(
     (a, b) =>
-      WEEKDAY_ORDER.indexOf(a.weekday as WeekdayKey) - WEEKDAY_ORDER.indexOf(b.weekday as WeekdayKey) ||
+      weekdayIndex(a.weekday) - weekdayIndex(b.weekday) ||
       a.startTime.localeCompare(b.startTime) ||
       a.endTime.localeCompare(b.endTime),
   );
@@ -326,22 +349,19 @@ function buildSlots(courses: ScheduleCourse[], term: ScheduleTerm | null, weekSt
 /* URL-Sync: ?stil= bleibt als Komma-Liste erhalten (mehrere Seiten verlinken /kursplan?stil=salsa),
  * ?tag= ist jetzt Einzelwert (der Kalender zeigt genau einen Tag). */
 function readArrayParam(name: string): string[] {
-  if (typeof window === 'undefined') return [];
-  const raw = new URLSearchParams(window.location.search).get(name);
+  const raw = currentSearchParams()?.get(name);
   return raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [];
 }
 
-function readDayParam(): string | null {
-  if (typeof window === 'undefined') return null;
-  const raw = new URLSearchParams(window.location.search).get('tag');
+function readDayParam(): WeekdayKey | null {
+  const raw = currentSearchParams()?.get('tag');
   const first = raw ? raw.split(',')[0]?.trim() : '';
-  return first && (WEEKDAY_ORDER as readonly string[]).includes(first) ? first : null;
+  return parseWeekday(first);
 }
 
 /** ?staffel=<termId> macht eine Staffel-Ansicht teilbar (gleiche Idee wie ?tag= und ?stil=). */
 function readTermParam(): string | null {
-  if (typeof window === 'undefined') return null;
-  return new URLSearchParams(window.location.search).get('staffel')?.trim() || null;
+  return currentSearchParams()?.get('staffel')?.trim() || null;
 }
 
 export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void }) {
@@ -447,7 +467,7 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     return WEEKDAY_ORDER
       .filter((key) => allSlots.some((s) => s.weekday === key))
       .map((key) => ({
-        key: key as string,
+        key,
         count: byStyle.filter((s) => s.weekday === key).length,
         date: addDaysISO(activeWeek, WEEKDAY_ORDER.indexOf(key)),
       }));
@@ -475,8 +495,9 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
 
   // Aktiven Tag + Stil + Staffel in die URL schreiben (teilbarer Plan), ohne History-Eintrag.
   useEffect(() => {
-    if (typeof window === 'undefined' || !activeDay) return;
-    const params = new URLSearchParams(window.location.search);
+    const browserWindow = globalThis.window;
+    if (!browserWindow || !activeDay) return;
+    const params = new URLSearchParams(browserWindow.location.search);
     params.set('tag', activeDay);
     if (activeTerm) params.set('staffel', activeTerm.id);
     if (styleKeys.length) params.set('stil', styleKeys.join(','));
@@ -485,7 +506,11 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     params.delete('phase');
     params.delete('level');
     const qs = params.toString();
-    window.history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash);
+    browserWindow.history.replaceState(
+      null,
+      '',
+      browserWindow.location.pathname + (qs ? `?${qs}` : '') + browserWindow.location.hash,
+    );
     // `activeTerm` gehoert in die Abhaengigkeiten, sonst schreibt der Effekt nach einem
     // Staffel-Wechsel die ALTE Staffel-ID zurueck in die URL (gemessen: Klick auf
     // "Staffel Oktober" liess ?staffel= auf der August-ID stehen, der geteilte Link

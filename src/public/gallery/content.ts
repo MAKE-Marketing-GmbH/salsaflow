@@ -32,9 +32,12 @@ export const GALLERY = {
   de: {
     hero: {
       eyebrow: 'Galerie',
-      titleA: 'Echte Momente',
-      titleAccent: 'schlagen',
-      titleB: 'perfekte Posen.',
+      // Runde 3 (kimi-critic): "Echte Momente schlagen perfekte Posen." war eine
+      // Antithese nach forbidden.md A2 (echt gegen perfekt). Ersetzt durch eine
+      // Aussage, die sagt, was auf den Fotos zu sehen ist.
+      titleA: 'Fotos aus unseren Kursen,',
+      titleAccent: 'Abenden',
+      titleB: 'und Shows.',
       lead: 'Ein Blick in unsere Kurse, Workshops, Danceflow Nights, Shows und die Salsaflow-Community in Basel.',
     },
     filterAll: 'Alle',
@@ -74,9 +77,9 @@ export const GALLERY = {
   en: {
     hero: {
       eyebrow: 'Gallery',
-      titleA: 'Real moments',
-      titleAccent: 'beat',
-      titleB: 'perfect poses.',
+      titleA: 'Photos from our classes,',
+      titleAccent: 'nights',
+      titleB: 'and shows.',
       lead: 'A look into our classes, workshops, Danceflow Nights, shows and the Salsaflow community in Basel.',
     },
     filterAll: 'All',
@@ -237,4 +240,59 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
   { albumId: 'danceflow', src: '/photos/party/party-54.webp', alt: 'Zwei Musiker spielen Congas zur Live-Musik', width: 1500, height: 1000 },
 
   { albumId: 'kurse', src: '/photos/premium/offer-privat-1200.webp', alt: 'Privatstunde: Lehrerin führt einen Schüler Schritt für Schritt', width: 1200, height: 1600 },
+
+  // Nachschub 20.08.2026 (Video-19-Soll "mehr Fotos"): weitere echte Motive aus dem
+  // Foto-Export, die vorher nicht im Raster lagen. Jedes Bild vor der Aufnahme angesehen
+  // (Kontaktbogen /tmp/fotocand/set1-4.png), Alt-Zeile beschreibt die echte Szene.
+  // Bewusst draussen: founders/*, team/teacher-*, gallery/kurse/09.jpg (gestellte
+  // Studio-Gruppe vor hellem Hintergrund = Portraet-Charakter), party-26 und party-53
+  // (einzelne Person im Mittelpunkt), shows/show-04 und show-10 (reine Logo-Kacheln),
+  // shows/show-05, show-06, show-18 (62x62-Platzhalter, kein echtes Foto).
+  { albumId: 'danceflow', src: '/photos/party/party-14.webp', alt: 'Paar tanzt eng in der Menge, weitere Gäste rundherum', altEn: 'Couple dancing close in the crowd, more guests all around', width: 1500, height: 1000 },
+  { albumId: 'kurse', src: '/photos/gallery/kurse/08.jpg', alt: 'Kursleiter zeigt lachend die Figur, die Gruppe schaut zu', altEn: 'Instructor demonstrating the figure with a smile while the group watches', width: 1067, height: 1600 },
+  { albumId: 'danceflow', src: '/photos/party/party-19.webp', alt: 'Paar tanzt eine tiefe Figur im warmen Licht des Saals', altEn: 'Couple dancing a deep figure in the warm light of the hall', width: 1500, height: 1000 },
+  { albumId: 'shows', src: '/photos/shows/show-01.webp', alt: 'Ensemble tanzt eine Reihe in grünen und lila Kostümen', altEn: 'Ensemble dancing in a line in green and purple costumes', width: 1800, height: 1139 },
+  { albumId: 'danceflow', src: '/photos/party/party-24.webp', alt: 'Tanzende bewegen sich schnell vor der Salsaflow-Wand', altEn: 'Dancers moving fast in front of the Salsaflow wall', width: 1500, height: 1000 },
+
+  { albumId: 'danceflow', src: '/photos/party/party-29.webp', alt: 'Paar tanzt nah beieinander im violetten Partylicht', altEn: 'Couple dancing close together in purple party light', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-25.webp', alt: 'Tanzende ziehen in Bewegung an der Salsaflow-Wand vorbei', altEn: 'Dancers moving past the Salsaflow wall', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-30.webp', alt: 'Paar tanzt im blauen Licht mitten unter anderen Gästen', altEn: 'Couple dancing in blue light among other guests', width: 1000, height: 1500 },
+  { albumId: 'shows', src: '/photos/shows/show-15.webp', alt: 'Grosse Formation tanzt auf der Convention-Bühne', altEn: 'Large formation dancing on the convention stage', width: 1600, height: 850 },
+  { albumId: 'danceflow', src: '/photos/party/party-32.webp', alt: 'Paar tanzt eng, hinter ihnen füllt sich der Saal', altEn: 'Couple dancing close while the hall fills up behind them', width: 1500, height: 1000 },
+
+  { albumId: 'danceflow', src: '/photos/party/party-36.webp', alt: 'Gruppe tanzt dicht gedrängt am Abend im Studio', altEn: 'Group dancing tightly packed in the studio in the evening', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-37.webp', alt: 'Paar lacht sich beim Tanzen an, Gäste im Hintergrund', altEn: 'Couple smiling at each other while dancing, guests in the background', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-38.webp', alt: 'Paar tanzt im blauen Licht vor der Studiowand', altEn: 'Couple dancing in blue light in front of the studio wall', width: 1500, height: 1000 },
+  { albumId: 'shows', src: '/photos/shows/show-22.webp', alt: 'Ensemble verbeugt sich mit erhobenen Armen nach der Show', altEn: 'Ensemble bowing with raised arms after the show', width: 1000, height: 667 },
+  { albumId: 'danceflow', src: '/photos/party/party-39.webp', alt: 'Zwei Paare tanzen nebeneinander im vollen Saal', altEn: 'Two couples dancing side by side in the full hall', width: 1500, height: 1000 },
+
+  { albumId: 'danceflow', src: '/photos/party/party-40.webp', alt: 'Paar tanzt am Abend im warmen Licht des Studios', altEn: 'Couple dancing in the warm studio light in the evening', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-41.webp', alt: 'Frau lacht beim Tanzen mit ihrem Partner im blauen Licht', altEn: 'Woman laughing while dancing with her partner in blue light', width: 1500, height: 1000 },
+  { albumId: 'shows', src: '/photos/party/party-42.webp', alt: 'Show-Gruppe tanzt eine Figur vor der Spiegelwand', altEn: 'Show group dancing a figure in front of the mirror wall', width: 1500, height: 1000 },
+  { albumId: 'shows', src: '/photos/shows/show-23.webp', alt: 'Formation tanzt in dunklen Kostümen auf der Bühne', altEn: 'Formation dancing in dark costumes on stage', width: 1800, height: 1200 },
+  { albumId: 'shows', src: '/photos/party/party-43.webp', alt: 'Zwei Tänzerinnen in lila Fransenkostümen bei der Show', altEn: 'Two dancers in purple fringe costumes during the show', width: 1500, height: 1000 },
+
+  { albumId: 'danceflow', src: '/photos/party/party-45.webp', alt: 'Paar tanzt lachend im blauen Licht, Fläche gut gefüllt', altEn: 'Couple laughing while dancing in blue light on a busy floor', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-48.webp', alt: 'Paar tanzt ruhig in geschlossener Haltung im Saal', altEn: 'Couple dancing calmly in closed hold in the hall', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-49.webp', alt: 'Paar tanzt vor roter Wand und hat sichtbar Spass', altEn: 'Couple dancing in front of a red wall and clearly having fun', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-55.webp', alt: 'Paar tanzt eng umschlungen im hellen Saal', altEn: 'Couple dancing closely embraced in the bright hall', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-56.webp', alt: 'Frau tanzt mit ihrem Partner mitten in der Nacht-Menge', altEn: 'Woman dancing with her partner in the middle of the night crowd', width: 1500, height: 1000 },
+
+  { albumId: 'danceflow', src: '/photos/party/party-57.webp', alt: 'Gruppe tanzt vor der Spiegelwand, alle in Bewegung', altEn: 'Group dancing in front of the mirror wall, everyone in motion', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-58.webp', alt: 'Paar dreht sich locker auf der Fläche im Grünlicht', altEn: 'Couple turning easily on the floor in green light', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-59.webp', alt: 'Paar tanzt im Spiegelsaal, weitere Paare dahinter', altEn: 'Couple dancing in the mirror hall with more couples behind', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-60.webp', alt: 'Tänzerin dreht sich mit fliegenden Haaren im Takt', altEn: 'Dancer turning with flying hair to the beat', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/party/party-61.webp', alt: 'Paar tanzt lachend Hand in Hand auf der vollen Fläche', altEn: 'Couple dancing hand in hand and laughing on the full floor', width: 1500, height: 1000 },
+
+  { albumId: 'danceflow', src: '/photos/party/party-62.webp', alt: 'Paar tanzt entspannt am Rand der Tanzfläche', altEn: 'Couple dancing relaxed at the edge of the dance floor', width: 1500, height: 1000 },
+  { albumId: 'danceflow', src: '/photos/gallery/danceflow/10-v3.webp', alt: 'Voller Saal tanzt gemeinsam bei einer Danceflow Night', altEn: 'A full hall dancing together at a Danceflow Night', width: 2048, height: 1360 },
+  { albumId: 'danceflow', src: '/photos/gallery/danceflow/12-v3.webp', alt: 'Paare tanzen im warmen Licht durch den ganzen Saal', altEn: 'Couples dancing through the whole hall in warm light', width: 2048, height: 1360 },
+  { albumId: 'danceflow', src: '/photos/gallery/danceflow/09-v2.jpg', alt: 'Tanzende füllen die Fläche bis in den hinteren Teil', altEn: 'Dancers filling the floor all the way to the back', width: 1066, height: 1600 },
+  { albumId: 'danceflow', src: '/photos/events/event-06.jpg', alt: 'Gäste tanzen ausgelassen bei einem Salsaflow-Event', altEn: 'Guests dancing exuberantly at a Salsaflow event', width: 1600, height: 1067 },
+
+  { albumId: 'danceflow', src: '/photos/events/event-09.jpg', alt: 'Hochformat vom Abend: viele Paare auf der Tanzfläche', altEn: 'Portrait shot of the evening: many couples on the dance floor', width: 1400, height: 2095 },
+  { albumId: 'danceflow', src: '/photos/2026/event-party-dreh-01.webp', alt: 'Paar dreht sich schwungvoll bei einer Party im Studio', altEn: 'Couple turning with momentum at a party in the studio', width: 1920, height: 1280 },
+  { albumId: 'danceflow', src: '/photos/2026/event-social-couple-01.webp', alt: 'Paar tanzt beim Social entspannt miteinander', altEn: 'Couple dancing relaxed together at the social', width: 1920, height: 1280 },
+  { albumId: 'danceflow', src: '/photos/2026/event-social-couple-02.webp', alt: 'Paar tanzt Bachata im blauen Licht des Abends', altEn: 'Couple dancing bachata in the blue light of the evening', width: 1366, height: 2048 },
+  { albumId: 'danceflow', src: '/photos/2026/event-venue-wide-01.webp', alt: 'Blick über den ganzen Saal mit tanzender Menge', altEn: 'View across the whole hall with a dancing crowd', width: 1920, height: 1253 },
 ];

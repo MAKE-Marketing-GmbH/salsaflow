@@ -82,7 +82,7 @@ export type ShowsAnimContent = {
 const ANFRAGE = '/kontakt#animationen';
 const KONTAKT = '/kontakt';
 
-export const SHOWS_ANIM: Record<Lang, ShowsAnimContent> = {
+export const SHOWS_ANIM = {
   de: {
     crumb: { label: 'Shows & Animationen', href: '/shows-animationen' },
     hero: {
@@ -402,4 +402,4 @@ export const SHOWS_ANIM: Record<Lang, ShowsAnimContent> = {
       ],
     },
   },
-};
+} satisfies Record<Lang, ShowsAnimContent>;

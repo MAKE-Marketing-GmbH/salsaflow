@@ -289,11 +289,9 @@ function Funnel() {
   // in dieser Datei rund 40%. Der Ausschnitt KONNTE sie nicht fassen, egal wohin
   // object-position ihn schob: `center 22%` legte das Fenster auf 16.0%..43.4%, und selbst
   // `top` (0%..27.4%) schnitt die vordere Reihe am Kinn ab.
-  // Ersatz ist die band-fertige Fassung desselben Motivs: `kurse-heels-energie-hero-2100`
-  // (2100x900). Dort zeigt dasselbe Band 31.1% der Bildhoehe, und bei `center 30%` liegt das
-  // Fenster so, dass JEDER Kopf vollstaendig im Bild steht (per Read am echten Ausschnitt
-  // geprueft). Die Datei steht sonst nur auf /tanzkurse/heels — mit dieser Stelle bleibt sie
-  // bei zwei Seiten und haelt die Regel «max 2x dasselbe Foto sitewide».
+  // Die band-fertige Fassung desselben Motivs bleibt. Der Desktop-Fold belegt,
+  // dass `center 30%` erst unterhalb der Stirn beginnt. `center 12%` legt das
+  // sichtbare Fenster auf den Kopfbereich und hält zugleich den Heels-Crop-Lock.
   return (
     <>
     {showDayList && (
@@ -307,7 +305,7 @@ function Funnel() {
           height={900}
           loading="eager"
           fetchPriority="high"
-          className="h-[7.5rem] w-full object-cover object-[center_30%] sm:h-[12rem]"
+          className="h-[7.5rem] w-full object-cover object-[center_12%] sm:h-[12rem]"
         />
       </div>
     )}
@@ -853,10 +851,15 @@ function BookingForm({
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  // Schritt-Ueberschrift: nach jedem Schrittwechsel wandert der Fokus hierher.
+  // Schritt-Anfang: nach jedem Schrittwechsel wandert der Fokus hierher.
   // Ohne das bleibt der Fokus auf «Weiter» bzw. «Zurueck» — beide Knoepfe werden
   // beim Wechsel ausgetauscht, der Fokus faellt danach auf <body> zurueck.
+  // Schritt 1: die Rollen-Ueberschrift «Ich tanze als». Offene Klassen haben keinen
+  // Schritt 1, dieser Ref bleibt dort leer.
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  // Schritt 2, erste Zeile: die Auswahl aus Schritt 1 — bei offenen Klassen der
+  // Hinweis, dass ohne Rollen getanzt wird. Immer vorhanden.
+  const stepSummaryRef = useRef<HTMLParagraphElement>(null);
   const privacyRef = useRef<HTMLInputElement>(null);
   // Erst ab dem ersten Wechsel fokussieren: beim Oeffnen gehoert der Fokus dem
   // Schliessen-Knopf (Dialog-Konvention), nicht der Ueberschrift.
@@ -974,7 +977,20 @@ function BookingForm({
     if (!stepChanged.current) return;
     const frame = window.requestAnimationFrame(() => {
       scrollRef.current?.scrollTo({ top: 0 });
-      stepHeadingRef.current?.focus();
+      // R183: Beide Schritt-Ueberschriften sind weg. Das Fokus-Ziel ist jetzt der
+      // erste bedeutungstragende Knoten des Schritts: Schritt 1 die Rollen-Frage,
+      // Schritt 2 die Auswahl-Zeile aus Schritt 1.
+      // Dieser Effekt laeuft nur nach einem echten Schrittwechsel (`stepChanged`).
+      // Den setzen nur `goToStep2()` und der Zurueck-Knopf des Rollen-Falls — beide
+      // gibt es bei einer offenen Klasse nicht. Fuer `isOpen` feuert der Effekt also
+      // nie, und `stepSummaryRef` darf dort null sein.
+      // Das erste Eingabefeld bleibt die Absicherung, damit der Fokus nie auf
+      // <body> faellt, falls ein Anker doch einmal fehlt.
+      const target =
+        (visibleStep === 1 ? stepHeadingRef.current : stepSummaryRef.current) ??
+        formRef.current?.querySelector<HTMLElement>('input, textarea, button') ??
+        null;
+      target?.focus();
     });
     return () => window.cancelAnimationFrame(frame);
   }, [visibleStep]);
@@ -986,7 +1002,8 @@ function BookingForm({
     lang === 'de' ? course.levelDe : course.levelEn,
     course.onVariant,
   )}`.trim();
-  const teachers = course.teachers.map((t) => t.displayName.split(' ')[0]).join(', ');
+  // R183: `teachers` ist weg — die Kopfzeile nennt die Lehrer nicht mehr (Kursseite
+  // traegt die Infos). `dayLabel` bleibt: die Bestaetigung zeigt «Wann» weiterhin.
   const dayLabel = WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday;
 
   const focusFirstInvalid = () =>
@@ -1060,7 +1077,10 @@ function BookingForm({
         id={`booking-panel-${course.id}`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={`booking-panel-title-${course.id}`}
+        // R183: Die sichtbare Ueberschrift traegt nur noch den Kursnamen. Der Dialog
+        // benennt darum die Handlung selbst — sonst ruft ein Screenreader beim Oeffnen
+        // «Bachata Beginner Stufe 5, Dialog» aus und sagt nicht, dass gebucht wird.
+        aria-label={`${bt.title}: ${courseLabel}`}
         data-testid="booking-dialog"
         /* Hoehe in `dvh`, nicht `vh`. Auf Mobil-Browsern meint `vh` den Viewport OHNE
            Adressleiste — der Dialog wurde damit hoeher als der sichtbare Bereich und die
@@ -1087,14 +1107,22 @@ function BookingForm({
                   Der Name steht jetzt weiss wie «Kurs buchen:» (18.6:1). Die Auszeichnung
                   laeuft ueber Helligkeit und Schriftschnitt: das Label davor ist auf 70 %
                   gedimmt, der Name traegt volles Weiss. Kein Rot auf Schwarz. */}
-              <h3 id={`booking-panel-title-${course.id}`} className="font-display text-lg font-extrabold leading-tight tracking-tight sm:text-xl">
-                <span className="font-semibold text-white/70">{bt.title}:</span> <span className="text-white">{courseLabel}</span>
+              {/* R183: Das Label «Kurs buchen:» ist WEG. Der Dialog ist der Buchung —
+                  das sagt der Absende-Knopf «Platz reservieren». Uebrig bleibt die eine
+                  Zeile, die der Nutzer wirklich pruefen will: WELCHEN Kurs buche ich.
+                  Fuer Screenreader benennt aria-label des Dialogs die Handlung weiter. */}
+              {/* Kein `id` mehr: der Dialog benennt sich ueber `aria-label`, das
+                  fruehere `aria-labelledby` zeigte als einziges hierher. Eine id ohne
+                  Referenz ist toter Markup. */}
+              <h3 className="font-display text-lg font-extrabold leading-tight tracking-tight text-white sm:text-xl">
+                {courseLabel}
               </h3>
-              <p className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/55 sm:text-xs">
-                <span>{dayLabel}</span>
-                <span>{course.startTime}-{course.endTime}</span>
-                {teachers && <span>{teachers}</span>}
-              </p>
+              {/* R183: Wochentag, Uhrzeit und Lehrer sind WEG (Absprache 17.08.: die
+                  Kursseite traegt die Infos). Der Nutzer kommt aus der Kursliste oder von
+                  der Kursseite — dort stand genau diese Zeile schon, und er hat auf sie
+                  geklickt. Der Kursname allein beantwortet «bin ich richtig hier».
+                  Wann und Wo stehen nach dem Absenden wieder da, in der Bestaetigung
+                  (SuccessPanel, Fakten «Wann»/«Wo») — dort ist es neue Information. */}
             </div>
             {/* h-11/w-11 statt h-10: 44px-Tap-Ziel fuer den Dialog-Schliessen-Knopf
                 (Critic Runde 16, Item 3). */}
@@ -1163,55 +1191,51 @@ function BookingForm({
                 submit();
               }}
             >
-                {/* R135: Zaehlung folgt visibleStep. Sichtbar 1 → 1 von 2, sichtbar 2 → 2 von 2. */}
-                {!isOpen && (
-                  <p
-                    data-testid="booking-step-indicator"
-                    className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]"
-                  >
-                    {lang === 'de'
-                      ? `Schritt ${visibleStep} von 2`
-                      : `Step ${visibleStep} of 2`}
-                  </p>
-                )}
+                {/* R183: Die Schritt-Zaehlung ist WEG. Die Seite zaehlt schon einmal, oben in
+                    der Fortschritts-Leiste (1 · Kurs → 2 · Anmeldung → 3 · Fertig). Zwei Zaehler
+                    fuer einen Fluss lassen den Nutzer die beiden Zahlen abgleichen, statt zu
+                    waehlen. Der sichtbare Schritt steht ohnehin in der Ueberschrift. */}
 
                 {/* Schritt 1: Rolle + Allein/Paar. Sonst nichts. */}
                 {visibleStep === 1 && (
                 <>
-                {/* Gruppe 1: Anmeldung (Rolle, Modus, Tarif) — flach, ohne Karten-Verschachtelung.
-                    tabIndex={-1}: Ziel fuer den Fokus nach dem Schrittwechsel. */}
-                <h3 ref={stepHeadingRef} tabIndex={-1} className="type-h3 text-[var(--color-ink)] focus:outline-none">{bt.stepRegister}</h3>
+                {/* R183: Die Ueberschrift «Anmeldung» ist WEG. Sie stand wortgleich 90px
+                    ueber der Gruppen-Ueberschrift `bt.registration` — dasselbe Wort zweimal,
+                    einmal als Schritt-Titel und einmal als Feldgruppe. Der Schritt-Titel war
+                    der schwaechere: er benannte den Dialog, den die Kopfzeile schon benennt.
+                    Die Rollen-Ueberschrift «Ich tanze als» ist jetzt das Fokus-Ziel nach dem
+                    Schrittwechsel und traegt tabIndex={-1}. */}
 
-                {/* Rolle (nur bei Leader/Follower-Kursen) */}
-                {isOpen ? (
-                  <p className="text-sm text-[var(--color-ink-muted)]">{bt.openClassNote}</p>
-                ) : (
-                  <section className="pt-0" aria-labelledby="booking-role-title" aria-describedby={showErrors && role === null ? 'booking-role-error' : undefined}>
-                    <h3 id="booking-role-title" className="mb-1.5 text-sm font-bold text-[var(--color-ink)]">{bt.chooseRole}</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      <ChoiceTile
-                        testid="role-follower"
-                        active={role === 'follower'}
-                        label={bt.follower}
-                        onClick={() => chooseRole('follower')}
-                        invalid={showErrors && role === null}
-                      />
-                      <ChoiceTile
-                        testid="role-leader"
-                        active={role === 'leader'}
-                        label={bt.leader}
-                        onClick={() => chooseRole('leader')}
-                        invalid={showErrors && role === null}
-                      />
-                    </div>
-                    <p className="mt-1.5 text-xs leading-snug text-[var(--color-ink-muted)]">
-                      {lang === 'de' ? 'Für die Balance im Kurs.' : 'Helps us balance the class.'}
-                    </p>
-                    {showErrors && role === null && (
-                      <p id="booking-role-error" role="alert" data-testid="booking-required-error" className="mt-1.5 text-sm font-medium text-[var(--color-salsa)]">{bt.requiredHint}</p>
-                    )}
-                  </section>
-                )}
+                {/* Rolle. Dieser Block gehoert zu Schritt 1, und Schritt 1 gibt es nur bei
+                    Leader/Follower-Kursen: `visibleStep` ist bei offenen Klassen fest 2
+                    (siehe oben). Ein `isOpen`-Zweig waere hier toter Code. Offene Klassen
+                    springen direkt in die Daten — ohne erklaerenden Satz, denn der Kurstyp
+                    steht auf der Kursseite (Absprache 17.08.). */}
+                <section className="pt-0" aria-labelledby="booking-role-title" aria-describedby={showErrors && role === null ? 'booking-role-error' : undefined}>
+                  <h3 ref={stepHeadingRef} tabIndex={-1} id="booking-role-title" className="mb-1.5 text-sm font-bold text-[var(--color-ink)] focus:outline-none">{bt.chooseRole}</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <ChoiceTile
+                      testid="role-follower"
+                      active={role === 'follower'}
+                      label={bt.follower}
+                      onClick={() => chooseRole('follower')}
+                      invalid={showErrors && role === null}
+                    />
+                    <ChoiceTile
+                      testid="role-leader"
+                      active={role === 'leader'}
+                      label={bt.leader}
+                      onClick={() => chooseRole('leader')}
+                      invalid={showErrors && role === null}
+                    />
+                  </div>
+                  {/* R183: «Für die Balance im Kurs.» ist WEG. Der Satz rechtfertigte die
+                      Frage, statt bei der Wahl zu helfen — wer «Follower» oder «Leader»
+                      liest, waehlt danach nicht anders. Die Fehlermeldung bleibt. */}
+                  {showErrors && role === null && (
+                    <p id="booking-role-error" role="alert" data-testid="booking-required-error" className="mt-1.5 text-sm font-medium text-[var(--color-salsa)]">{bt.requiredHint}</p>
+                  )}
+                </section>
 
                 {/* Modus allein / Paar (nur Leader/Follower) */}
                 {!isOpen && (
@@ -1267,13 +1291,38 @@ function BookingForm({
                 {/* Schritt 2: nur noch Daten. */}
                 {visibleStep === 2 && (
                 <>
-                {/* Gruppe 2: Personendaten. Fokus-Ziel nach dem Schrittwechsel (siehe oben). */}
-                <h3 ref={stepHeadingRef} tabIndex={-1} className="type-h3 text-[var(--color-ink)] focus:outline-none">{bt.stepData}</h3>
+                {/* Gruppe 2: Personendaten.
+                    R183: Die Ueberschrift «Deine Daten» ist WEG. Jedes Feld darunter traegt
+                    sein eigenes Label (Vorname, Nachname, E-Mail, Telefon) — die Ueberschrift
+                    fasste nur zusammen, was direkt darunter schon steht. Fuer Screenreader
+                    bleibt die Gruppe benannt: PersonFields traegt die Legende weiter als
+                    sr-only (hideLegend), die Section behaelt ihr aria-labelledby.
+                    Das Fokus-Ziel nach dem Schrittwechsel ist jetzt die Auswahl-Zeile. */}
 
-                {/* Was in Schritt 1 gewaehlt wurde, steht hier als eine Zeile — sonst ist
-                    die Entscheidung nach dem Wechsel unsichtbar. */}
+                {/* Erste Zeile des Schritts, und zugleich das Fokus-Ziel nach dem Wechsel:
+                    die Auswahl aus Schritt 1 — sonst ist die Entscheidung nach dem Wechsel
+                    unsichtbar.
+
+                    R183 Runde 3: Der Zweig fuer die offene Klasse ist WEG. Er zeigte
+                    «Offene Klasse - keine Rollenwahl noetig.» als erste Zeile. Zwei Gruende:
+                    1. Das ist Kurstyp-Information. Absprache 17.08.: die Kursseite traegt
+                       die Infos, das Modal traegt Rolle plus Anmeldung. Der Nutzer hat den
+                       Kurs eben dort ausgewaehlt.
+                    2. Der Satz erklaerte eine Rollenwahl, die in diesem Zweig nie erscheint
+                       — er beantwortete eine Frage, die der Nutzer nie gestellt bekommt.
+                    Der frueher genannte Grund «Schritt 2 braucht ein Fokus-Ziel» traegt
+                    nicht: der Fokus-Effekt haengt an `stepChanged`, das nur `goToStep2()`
+                    und der Zurueck-Knopf des Rollen-Falls setzen. Beide gibt es hier nicht;
+                    bei `isOpen` schliesst «Zurueck» den Dialog (siehe unten). Gemessen in
+                    worklog/.r183-openclass-reach.mjs: booking-next fehlt, Zurueck schliesst,
+                    focusAnchorNeeded=false. Der Anker war unerreichbarer Code. */}
                 {!isOpen && (
-                  <p data-testid="step1-summary" className="text-sm text-[var(--color-ink-muted)]">
+                  <p
+                    ref={stepSummaryRef}
+                    tabIndex={-1}
+                    data-testid="step1-summary"
+                    className="text-sm text-[var(--color-ink-muted)] focus:outline-none"
+                  >
                     {role === 'leader' ? bt.leader : bt.follower}
                     {' · '}
                     {mode === 'couple' ? bt.couple : bt.solo}
@@ -1361,7 +1410,10 @@ function BookingForm({
                     {submitError}
                   </p>
                 )}
-                <label className="mb-2 flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                {/* Kein mb hier: Satz und Link darunter gehoeren zusammen und stehen
+                    darum enger beieinander als der Link am Absende-Knopf (Naehe = Gruppe).
+                    Der Abstand nach unten sitzt am Link. */}
+                <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-relaxed text-[var(--color-ink-muted)]">
                   <input
                     ref={privacyRef}
                     type="checkbox"
@@ -1374,26 +1426,27 @@ function BookingForm({
                     aria-describedby={showErrors && !privacy ? 'booking-privacy-error' : undefined}
                     className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-salsa)]"
                   />
+                  {/* R183 gemessen: Der Inline-Link war 19px hoch — unter den 40px, die ein
+                      Finger sicher trifft, und er liegt mitten im Text der Checkbox. Ein
+                      Fehlgriff setzte den Haken statt die Seite zu oeffnen (oder umgekehrt).
+                      Der Satz nennt den Datenschutz jetzt nur noch. Der Link steht als
+                      eigene Zeile NEBEN dem Label (nicht darin) mit min-h-11: ein Klick
+                      darauf kann den Haken gar nicht mehr mitschalten. */}
                   <span className="min-w-0 text-pretty">
-                    {lang === 'de' ? (
-                      <>
-                        Ich habe die{' '}
-                        <a href="/datenschutz" className="font-semibold text-[var(--color-salsa)] underline underline-offset-4">
-                          Datenschutzerklärung
-                        </a>{' '}
-                        gelesen und bin damit einverstanden.
-                      </>
-                    ) : (
-                      <>
-                        I have read the{' '}
-                        <a href="/datenschutz" className="font-semibold text-[var(--color-salsa)] underline underline-offset-4">
-                          privacy policy
-                        </a>{' '}
-                        and agree to it.
-                      </>
-                    )}
+                    {lang === 'de'
+                      ? 'Ich habe die Datenschutzerklärung gelesen und bin damit einverstanden.'
+                      : 'I have read the privacy policy and agree to it.'}
                   </span>
                 </label>
+                <a
+                  href="/datenschutz"
+                  target="_blank"
+                  rel="noreferrer"
+                  data-testid="booking-privacy-link"
+                  className="mb-2 inline-flex min-h-11 items-center text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4"
+                >
+                  {lang === 'de' ? 'Datenschutzerklärung lesen' : 'Read the privacy policy'}
+                </a>
                 {showErrors && !privacy && (
                   <p id="booking-privacy-error" className="mb-2 text-sm font-medium text-[var(--color-salsa)]">
                     {lang === 'de' ? 'Bitte setze das Häkchen beim Datenschutz.' : 'Please tick the privacy box.'}

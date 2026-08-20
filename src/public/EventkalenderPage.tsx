@@ -55,7 +55,7 @@ export function EventkalenderPage() {
         media={{
           src: c.hero.image.src,
           alt: c.hero.image.alt,
-          position: 'center 30%',
+          position: c.hero.image.position,
           heightClass: 'h-[11rem] sm:h-[13rem] lg:h-[18rem]',
         }}
       />

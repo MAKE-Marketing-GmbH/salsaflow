@@ -103,7 +103,7 @@ const R = {
   self: '/kursaufbau',
 };
 
-export const KURSAUFBAU: Record<Lang, KursaufbauContent> = {
+export const KURSAUFBAU = {
   de: {
     seo: 'kursaufbau',
     crumb: { label: 'Kursaufbau', href: R.self },
@@ -420,4 +420,4 @@ export const KURSAUFBAU: Record<Lang, KursaufbauContent> = {
       },
     ],
   },
-};
+} satisfies Record<Lang, KursaufbauContent>;

@@ -90,7 +90,7 @@ export const COLLABS = {
       lead: 'Hier findest du Partner und Empfehlungen für Tanzschuhe, Kleidung und weitere Angebote rund ums Tanzen.',
       primary: { label: 'Partner ansehen', href: '#partner' },
       secondary: { label: 'Collab anfragen', href: '/kontakt' },
-      image: { src: '/photos/showcase/hp-27.webp', alt: 'Das Salsaflow-Team präsentiert Shirts der eigenen Kollektion' },
+      image: { src: '/photos/showcase/hp-27-3840.webp', alt: 'Das Salsaflow-Team präsentiert Shirts der eigenen Kollektion' },
       cardLabel: 'Empfehlungen',
       cardText: 'Nur was dir auf der Tanzfläche wirklich hilft.',
     },
@@ -123,7 +123,7 @@ export const COLLABS = {
       primary: { label: 'Tanzschuhe ansehen', href: '/mehr/tanzschuhe' },
       secondary: { label: 'Shop öffnen', href: COLLAB_URL },
       // R152: kurs-03 zeigte Schritte, keine Schuhe. Jetzt das echte Heels-Studiofoto.
-      image: { src: '/photos/premium/offer-heels-1200.webp', alt: 'Zwei Tänzerinnen in Salsaflow-Heels, Studioaufnahme' },
+      image: { src: '/photos/premium/offer-heels-1404.webp', alt: 'Zwei Tänzerinnen in Salsaflow-Heels, Studioaufnahme' },
     },
     trust: {
       eyebrow: 'Warum Salsaflow',
@@ -181,7 +181,7 @@ export const COLLABS = {
       lead: 'Here you find partners and recommendations for dance shoes, clothing and other offers around dancing.',
       primary: { label: 'See partners', href: '#partner' },
       secondary: { label: 'Suggest a collab', href: '/kontakt' },
-      image: { src: '/photos/showcase/hp-27.webp', alt: 'The Salsaflow team presenting shirts from its own collection' },
+      image: { src: '/photos/showcase/hp-27-3840.webp', alt: 'The Salsaflow team presenting shirts from its own collection' },
       cardLabel: 'Recommendations',
       cardText: 'Only what really helps you on the dance floor.',
     },
@@ -209,7 +209,7 @@ export const COLLABS = {
       bullets: ['A dedicated Salsaflow collection', 'Fits class and socials', 'Comfortable clothes are enough at the start'],
       primary: { label: 'See dance shoes', href: '/mehr/tanzschuhe' },
       secondary: { label: 'Open the shop', href: COLLAB_URL },
-      image: { src: '/photos/premium/offer-heels-1200.webp', alt: 'Two dancers in Salsaflow heels, studio shot' },
+      image: { src: '/photos/premium/offer-heels-1404.webp', alt: 'Two dancers in Salsaflow heels, studio shot' },
     },
     trust: {
       eyebrow: 'Why Salsaflow',
