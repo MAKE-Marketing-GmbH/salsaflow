@@ -6,6 +6,10 @@
 // 1400px-Shell, ein ruhiger Fade-up-Takt (Reveal / useReveal) und alle Pfeile als Lucide
 // (ArrowRight / ArrowDown, KEINE Unicode-Pfeile). Copy + Fakten + alle data-testid bleiben
 // unveraendert (Eventfrog-Anbindung, Danceflow-Fakten 1./3./5. Freitag, 5/10 CHF). DE/EN.
+//
+// R188 E3: die ausfuehrliche Danceflow-Sektion direkt unter dem Hero ist raus. An ihrer
+// Stelle steht die Preview aller vier Event-Wege (EventsPreviewSection). Die Danceflow-
+// Fakten leben unveraendert auf /events-workshops/danceflow-night.
 
 import { type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -18,7 +22,12 @@ import { cn } from '@/lib/utils';
 import { Eyebrow, Shell, CtaText, sectionTitle, sectionLead } from '@/public/site/primitives';
 import { ClosingInvite, MEASURE_L, HeroFrame } from '@/public/subpage/kit';
 import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
-import { EVENTS, EVENTFROG_URL, EVENTFROG_IS_EXTERNAL, type EventFact } from '@/public/events/content';
+import {
+  EVENTS,
+  EVENTFROG_URL,
+  EVENTFROG_IS_EXTERNAL,
+  type EventPreviewCard,
+} from '@/public/events/content';
 
 // Icon-System fuer die drei Anniversary-Highlights (einmal im Jahr -> Workshops & Partys -> Community).
 const HIGHLIGHT_ICONS: LucideIcon[] = [CalendarDays, PartyPopper, Users];
@@ -38,7 +47,7 @@ export function EventsPage() {
       <div data-events-page="" />
       <main id="main" tabIndex={-1}>
         <EventsHero />
-        <DanceflowSection />
+        <EventsPreviewSection />
         <GallerySection />
         <WorkshopsSection />
         <AnniversarySection />
@@ -129,18 +138,16 @@ function ScrollDownLink({ href, children }: { href: string; children: ReactNode 
 function EventsHero() {
   const { lang } = useLang();
   const h = EVENTS[lang].hero;
-  const facts: [string, string][] =
+  /* R188 E2 (Video 03:02 "diesen Text hier wegmachen, ein bisschen simpler"):
+     die Zeile trug je Wert eine zweite Zeile Begleittext ("Freitag im Monat",
+     "von Salsaflow", "direkt am Bahnhof"). Die drei Werte sagen es allein —
+     "1. 3. 5." neben "Basel SBB" liest sich als Termin und Ort ohne Erklaerung.
+     Der Begleittext ist deshalb raus, nicht nur kleiner gesetzt. Die Fakten
+     selbst bleiben wortgleich (Pflichtfakten laut content.ts). */
+  const facts: string[] =
     lang === 'de'
-      ? [
-          ['1. 3. 5.', 'Freitag im Monat'],
-          ['DJs', 'von Salsaflow'],
-          ['Basel SBB', 'direkt am Bahnhof'],
-        ]
-      : [
-          ['1st 3rd 5th', 'Friday each month'],
-          ['DJs', 'by Salsaflow'],
-          ['Basel SBB', 'right by the station'],
-        ];
+      ? ['1. 3. 5.', 'DJs', 'Basel SBB']
+      : ['1st 3rd 5th', 'DJs', 'Basel SBB'];
   /* Design-Kritik Runde 2, Issue 1: auch dieser Hero war eine eigene Kopie der Einheits-
      Bauform (Text links / gerahmtes Foto rechts / drei rote Zahlen). Er laeuft jetzt ueber
      HeroFrame mit Achse 'wide' — die H1 steht ueber die volle Shell, und das Eventfoto
@@ -182,14 +189,24 @@ function EventsHero() {
       }
       lead={h.lead}
       media={{
-        src: '/photos/party/party-47.webp',
+        src: '/photos/r188-events/events-hero-2048.webp',
         alt:
           lang === 'de'
             ? 'Vier Tänzerinnen in Lila zeigen eine Choreografie im Salsaflow-Saal'
             : 'Four dancers in purple performing a choreography in the Salsaflow studio',
-        // R143: das alte Gruppenfoto ist als Motiv raus. Ersatz ist party-47 (1500x1000, vor dem Einbau
-        // per Read geprueft): vier Taenzerinnen in Lila vor der hellen Salsaflow-Wand,
-        // echtes Foto, scharf, in src/ sonst unbenutzt.
+        // R188 E1 (Video 02:57 "die Aufloesung von dem Bild ist nicht gut"). Motiv bleibt,
+        // nur die Datei wird scharf. `party-47.webp` mass 1500x1000 und lief als full-bleed
+        // Band ueber die ganze Viewport-Breite — auf 1920px wurde jedes Quellpixel auf 1.28
+        // Bildpixel gestreckt, daher der Matsch.
+        //
+        // Dieselbe Aufnahme liegt im Repo groesser: docs/bilder/live-site-bilder/
+        // i2ee26fbf23308cbd.jpg mit 2048x1365. Gemessen statt geraten, Methode wie
+        // worklog/R187-originale.md (RMSE gegen die alte Datei, Schwelle 0.06):
+        //   RMSE 0.0022 -> identischer Ausschnitt, reiner Dateitausch, kein neues Motiv.
+        // Vor dem Einbau per Read angesehen: vier Taenzerinnen in Lila, scharf, alle vier
+        // Koepfe und die erhobenen Haende vollstaendig im Bild.
+        // Ableitung: cwebp -q 88 -m 6 -> public/photos/r188-events/events-hero-2048.webp (152 KB).
+        // 2048 deckt das Band bis 1920px Viewport ohne Hochskalieren ab.
         //
         // R155 hatte das Band von 21rem auf 28rem (448px) verlaengert, damit die Figuren
         // bis zum Rock laufen statt an der Huefte abzubrechen. Das war richtig fuer die
@@ -225,153 +242,102 @@ function EventsHero() {
     </HeroFrame>
     {/* R174: die drei Hero-Fakten standen vorher IM HeroFrame ueber dem Band. Hier
         unten tragen sie dieselbe Rolle (Hero-Meta, gleiche Reihenfolge, gleiche Typo),
-        kosten das Band aber keinen Platz mehr. py-4 statt py-6: gemessen 88px statt
-        104px Zeilenhoehe, damit die Zeile mit Wert UND Label komplett ueber der Falz
-        steht (Ende 893) statt bei 937 abzureissen. Bewusst KEINE Kacheln — dieselbe
-        offene dl-Leiste wie im HeroFrame, nur an anderer Stelle. */}
+        kosten das Band aber keinen Platz mehr. Bewusst KEINE Kacheln — dieselbe
+        offene Leiste wie im HeroFrame, nur an anderer Stelle.
+        R188 E2: ohne die zweite Zeile ist aus dem dl eine ul geworden. Ein Wert je
+        Spalte ist kein Begriff-Beschreibung-Paar mehr, also traegt ihn auch kein dl.
+        py-5 statt py-4: die Zeile ist um die Label-Zeile kuerzer, die Luft darum
+        bleibt damit gleich. */}
     <div className="bg-[var(--color-paper-warm)]">
       <Shell>
-        <dl className="grid grid-cols-1 gap-5 border-t border-[var(--color-line)] py-4 md:grid-cols-3 md:gap-4">
-          {facts.map(([value, label]) => (
-            <div key={label}>
-              <dt className="font-display text-2xl font-extrabold leading-none text-[var(--color-salsa)] sm:text-3xl">
-                {value}
-              </dt>
-              <dd className="mt-2 text-xs leading-snug text-balance text-[var(--color-ink-muted)] [overflow-wrap:normal] [word-break:keep-all]">
-                {label}
-              </dd>
-            </div>
+        <ul className="grid grid-cols-1 gap-3 border-t border-[var(--color-line)] py-5 md:grid-cols-3 md:gap-4">
+          {facts.map((value) => (
+            <li
+              key={value}
+              className="font-display text-2xl font-extrabold leading-none text-[var(--color-salsa)] sm:text-3xl"
+            >
+              {value}
+            </li>
           ))}
-        </dl>
+        </ul>
       </Shell>
     </div>
     </>
   );
 }
 
-/* ---------------------------------------------------------------------------- Danceflow Nights (jetzt HELL, echte Fotos)
-   Kein Duoton mehr, keine dunkle Flaeche: Sektion hell, links eine Komposition aus echten
-   Party-Fotos (im Bild dunkel erlaubt), rechts Eyebrow + Headline + Body + klare Info-Bloecke
-   (Wann / Was / Wo / Fuer wen / Eintritt) + Ticket-CTA. Bright-Editorial wie der EventsTeaser. */
-function DanceflowSection() {
+/* ---------------------------------------------------------------------------- Preview aller Events (R188 E3)
+   Video 03:09: "Diese Sektion sieht übelst lost aus. Da würde ich so einen Preview machen
+   von allen Events, die wir haben."
+
+   Hier stand die Danceflow-Sektion: links eine Foto-Komposition aus drei Bildern, rechts
+   Headline, Fliesstext und eine dreizeilige Fakten-Liste. Sie erklaerte EIN Event auf der
+   Uebersichtsseite ausfuehrlich und liess die drei anderen ungenannt — genau das wirkte
+   verloren. Die Danceflow Night hat ihre eigene Unterseite, auf der dieselben Fakten
+   vollstaendig stehen (danceflow-content.ts). Nichts geht also verloren, die Uebersicht
+   bekommt ihre Aufgabe zurueck: alle vier Wege zeigen und weiterleiten.
+
+   Gleiche Containerhoehen (SW2): das Grid setzt `items-stretch` (Default) und jede Karte
+   ist `flex h-full flex-col`. Meta/Titel/Text stehen oben, der Link haengt an `mt-auto`.
+   Damit sitzen die vier CTA-Zeilen auf einer Linie, auch wenn ein Text zweizeilig laeuft.
+   Das Bild hat feste `aspect-[4/3]`, also startet auch der Text ueberall auf gleicher Hoehe. */
+function EventsPreviewSection() {
   const { lang } = useLang();
-  const de = lang === 'de';
-  // R155: der Reveal war da, wirkte aber schwach (Video 05:32/05:37). Grund: alle Bloecke
-  // liefen auf dem Default-Takt (14px Versatz, 0.07s Stagger) — bei einer langen Textspalte
-  // ist das unter der Wahrnehmungsschwelle. Die Textseite bekommt hier den kraeftigeren
-  // Takt (22px, 0.10s): sichtbar gestaffelt, aber immer noch im Design-Vertrag
-  // (Distanz <= 24px, Dauer 0.4-0.7s). `useReveal` haengt beides an useReducedMotion —
-  // ohne Bewegung bleiben Stagger 0 und Versatz 0, es fadet nur.
   const { item } = useReveal({ stagger: 0.1, distance: 22 });
-  const d = EVENTS[lang].danceflow;
+  const p = EVENTS[lang].preview;
   return (
-    // Kritik Runde 2: pro Seite EIN Hoehepunkt mit der grossen Abstandsstufe — auf /events
-    // ist das laut Kritik die Danceflow Night. Alle anderen Sektionen laufen auf der Standardstufe.
     <section id="danceflow" className="scroll-mt-24 bg-white py-16 lg:py-[6.25rem]">
-      <Shell className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
-        {/* LINKS: Foto-Komposition aus echten Danceflow-Fotos. Ein grosses Gruppen-Foto oben,
-            darunter zwei echte Tanz-Momente. Ersetzt die drei entfernten Duotone-Kacheln. */}
-        {/* R142 Reveal (Video 05:32 "mach so Reveal Animations"): die drei Fotos stiegen
-            als EIN Block ein (PhotoFade). Jetzt staffelt der vorhandene Reveal aus
-            home/motion.tsx sie nacheinander — grosses Foto zuerst, dann die zwei kleinen.
-            Kein neues Motion-Primitiv, keine zweite Marquee. `item` haengt in useReveal an
-            useReducedMotion: ohne Bewegung bleibt nur der Fade, kein Versatz. */}
-        <Reveal className="order-1" stagger={0.16} distance={22}>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <motion.figure variants={item} className="col-span-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-black/5 shadow-[0_24px_60px_-28px_rgba(17,17,17,0.5)]">
-              {/* R143: hier lag `danceflow/02-v3` — dort schnitt der 16/10-Rahmen die
-                  hinteren Koepfe und den rechten Rand an. Ersatz ist `party/party-35-v3`
-                  (2048x1360, vor dem Einbau per Read geprueft): echtes Party-Foto, hell,
-                  scharf, Paar frontal. Nachgerechnet: 2048/1360 = 1.506 ist flacher als
-                  16/10 = 1.6, es fallen also nur 80px Hoehe weg (sichtbar 1280 von 1360).
-                  Bei object-[center_30%] liegen 24px davon oben — das Fenster deckt nat.
-                  Y 24-1304 ab. Die hoechste Frisur (Mann) beginnt bei nat. Y~95, beide
-                  Hauptkoepfe und die Gaeste im Hintergrund bleiben komplett, der rechte
-                  Rand laeuft ungeschnitten durch (Beleg /tmp/p35_df30.png). */}
-              <img
-                src="/photos/party/party-35-v3.webp"
-                alt={de ? 'Paar tanzt lachend auf einer Danceflow Night, weitere Gäste im Hintergrund' : 'Couple dancing and laughing at a Danceflow Night with more guests behind them'}
-                className="aspect-[16/10] w-full object-cover object-[center_30%]"
-                width={2048}
-                height={1360}
-                loading="lazy"
-              />
-            </motion.figure>
-            {/* R142: hier lag `danceflow/01-v3` — das ist der Hero von /tanzkurse und damit
-                laut Brief ein Fremd-Motiv auf dieser Route. Ersatz ist `party/party-23-v3`
-                (2048x1360): echtes Party-Foto, hell und
-                scharf, beide Koepfe komplett im Bild, nirgends sonst in src/ verwendet.
-                object-[center_30%] statt 22%: das Motiv traegt die Gesichter mittig, bei 22%
-                schnitte der 4/3-Rahmen die Stirn der Frau an. */}
-            <motion.figure variants={item} className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
-              <img
-                src="/photos/party/party-23-v3.webp"
-                alt={de ? 'Zwei Tanzende lachen in die Kamera auf einer Danceflow Night' : 'Two dancers laughing at the camera during a Danceflow Night'}
-                className="aspect-[4/3] w-full object-cover object-[center_30%]"
-                width={2048}
-                height={1360}
-                loading="lazy"
-              />
-            </motion.figure>
-            <motion.figure variants={item} className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]">
-              <img
-                src="/photos/gallery/danceflow/03-v3.webp"
-                alt={de ? 'Paar tanzt dicht zusammen auf der Tanzfläche' : 'Couple dancing close together on the floor'}
-                className="aspect-[4/3] w-full object-cover object-[center_30%]"
-                width={2048}
-                height={1360}
-                loading="lazy"
-              />
-            </motion.figure>
-          </div>
+      <Shell>
+        <Reveal className="max-w-xl" stagger={0.1} distance={22}>
+          <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
+            {p.title}
+          </motion.h2>
+          <motion.p variants={item} className={cn('mt-4 max-w-xl text-pretty', sectionLead)}>
+            {p.lead}
+          </motion.p>
         </Reveal>
 
-        {/* RECHTS: Text + Fakten + Ticket-CTA.
-            lg:pr-36: die H2 endete bei x=1344 und lief beim Scrollen unter den FAB
-            (ab x=1294; Critic Runde 15, Item 4). */}
-        <Reveal className="order-2 max-w-xl lg:pr-36" stagger={0.1} distance={22}>
-          <motion.div variants={item}>
-            <Eyebrow>{d.eyebrow}</Eyebrow>
-          </motion.div>
-          <motion.h2 variants={item} className={cn("mt-5", sectionTitle, MEASURE_L)}>
-            {d.title}
-          </motion.h2>
-          <motion.p variants={item} className={cn("mt-5 max-w-xl text-pretty", sectionLead)}>
-            {d.body}
-          </motion.p>
-
-          {/* Klare Info-Bloecke (Wann / Was / Wo / Fuer wen / Eintritt) aus content.ts. */}
-          <motion.p
-            variants={item}
-            className="mt-8 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]"
-          >
-            {d.factsTitle}
-          </motion.p>
-          {/* R142: die Liste lief als 2-spaltiges Raster mit sechs gleich lauten Chips —
-              im Video das "richtig lost"-Bild (05:38). Jetzt eine einspaltige Leseliste aus
-              drei Bloecken (Termin / Abend / Publikum). Eine Spalte statt zwei heisst: ein
-              Lesepfad statt sechs Sprungziele. Label und Wert stehen nebeneinander, damit
-              die Zeile als Zeile liest und nicht als Kachel. */}
-          <motion.dl variants={item} className="mt-4 divide-y divide-[var(--color-line)] border-t border-[var(--color-line)]">
-            {d.facts.map((fact: EventFact) => (
-              <div key={fact.label} className="grid gap-1 py-4 sm:grid-cols-[7rem_1fr] sm:gap-6">
-                <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--color-salsa)] sm:pt-0.5">
-                  {fact.label}
-                </dt>
-                <dd className="text-sm leading-relaxed text-[var(--color-ink)]">{fact.value}</dd>
+        <Reveal
+          className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"
+          stagger={0.1}
+          distance={22}
+        >
+          {p.cards.map((card: EventPreviewCard) => (
+            <motion.a
+              key={card.title}
+              variants={item}
+              href={card.href}
+              className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_14px_40px_rgba(17,17,17,0.04)] transition-colors duration-[var(--dur-fast)] hover:border-[var(--color-salsa)]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
+            >
+              <img
+                src={card.image.src}
+                alt={card.image.alt}
+                className={cn('aspect-[4/3] w-full object-cover', card.image.position)}
+                width={1600}
+                height={1200}
+                loading="lazy"
+              />
+              <div className="flex flex-1 flex-col p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
+                  {card.meta}
+                </p>
+                <h3 className="mt-3 type-h3 text-[var(--color-ink)]">{card.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                  {card.text}
+                </p>
+                {/* mt-auto zieht die Link-Zeile in allen vier Karten auf dieselbe Grundlinie. */}
+                <span className="mt-auto inline-flex items-center gap-1.5 pt-6 text-sm font-bold text-[var(--color-salsa)]">
+                  {card.ctaLabel}
+                  <ArrowRight
+                    size={16}
+                    strokeWidth={2.25}
+                    aria-hidden
+                    className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5"
+                  />
+                </span>
               </div>
-            ))}
-          </motion.dl>
-
-          <motion.div variants={item} className="mt-8">
-            <EventfrogCta label={d.ctaTickets} />
-          </motion.div>
-          <motion.p
-            variants={item}
-            className="mt-4 max-w-md text-sm leading-relaxed text-[var(--color-ink-muted)]"
-          >
-            {d.note}
-          </motion.p>
+            </motion.a>
+          ))}
         </Reveal>
       </Shell>
     </section>
@@ -383,7 +349,8 @@ function DanceflowSection() {
    Fotos (kein Duoton, kein Filter). Keine neue Dauer-Schleife (die EINE Marquee lebt auf der Home). */
 function GallerySection() {
   const { lang } = useLang();
-  // R155: staerkerer Takt, siehe Kommentar in DanceflowSection.
+  // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
+  // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
   const { item } = useReveal({ stagger: 0.14, distance: 22 });
   const g = EVENTS[lang].gallery;
   /* R155, Karte 1 und 2 kappten die Stirn (Video 05:51, Beleg worklog/shots/S7-ux155/
@@ -417,13 +384,13 @@ function GallerySection() {
           ['/photos/party/party-06-v3.webp', 'Frau im roten Top tanzt mit ihrem Partner', 'object-[38%_30%]', 2048, 1360],
           ['/photos/party/party-17-v3.webp', 'Zwei Frauen tanzen zusammen und lachen', 'object-[50%_20%]', 2048, 1360],
           ['/photos/gallery/danceflow/10-v3.webp', 'Paar dreht sich auf der Tanzfläche im grünen Licht', 'object-[50%_30%]', 2048, 1360],
-          ['/photos/gallery/danceflow/05-v3.webp', 'Frau tanzt frei mit fliegenden Haaren', 'object-[50%_22%]', 1360, 2048],
+          ['/photos/party/party-31-v3.webp', 'Frau tanzt mit offenen Armen auf einer Danceflow Night', 'object-center', 2048, 1360],
         ]
       : [
           ['/photos/party/party-06-v3.webp', 'Woman in a red top dancing with her partner', 'object-[38%_30%]', 2048, 1360],
           ['/photos/party/party-17-v3.webp', 'Two women dancing together and laughing', 'object-[50%_20%]', 2048, 1360],
           ['/photos/gallery/danceflow/10-v3.webp', 'Couple turning on the dance floor in green light', 'object-[50%_30%]', 2048, 1360],
-          ['/photos/gallery/danceflow/05-v3.webp', 'Woman dancing freely with her hair flying', 'object-[50%_22%]', 1360, 2048],
+          ['/photos/party/party-31-v3.webp', 'Woman dancing with open arms at a Danceflow Night', 'object-center', 2048, 1360],
         ];
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
@@ -468,7 +435,8 @@ function GallerySection() {
 /* ---------------------------------------------------------------------------- Workshops vor der Night */
 function WorkshopsSection() {
   const { lang } = useLang();
-  // R155: staerkerer Takt, siehe Kommentar in DanceflowSection.
+  // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
+  // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
   const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const w = EVENTS[lang].workshops;
   const flowSteps =
@@ -534,11 +502,11 @@ function WorkshopsSection() {
 
           <div className="relative min-h-[31rem] overflow-hidden bg-[var(--color-ink)] lg:min-h-0">
             <img
-              src="/photos/gallery/danceflow/12-v3.webp"
+              src="/photos/party/party-06-v3.webp"
               alt={
                 lang === 'de'
-                  ? 'Frau tanzt bei Partylicht auf einer Danceflow Night'
-                  : 'Woman dancing in party light at a Danceflow Night'
+                  ? 'Paar tanzt gemeinsam auf einer Danceflow Night'
+                  : 'Couple dancing together at a Danceflow Night'
               }
               // Gleiche Kopplung wie in TicketsSection (Runde 2, Issue 4): das Bild liegt
               // absolut und bestimmt die Zeilenhoehe nicht mehr mit. Die Kritik verlangt
@@ -554,7 +522,7 @@ function WorkshopsSection() {
               // X 40% (nat. X 385-1471) haelt Kopf, Schultern und beide Haende komplett
               // im Bild; der Mann dahinter bleibt sichtbar, weggeschnitten wird nur
               // Hintergrund am rechten Rand.
-              className="absolute inset-0 h-full w-full object-cover object-[40%_50%] opacity-95"
+              className="absolute inset-0 h-full w-full object-cover object-center opacity-95"
               width={2048}
               height={1360}
               loading="lazy"
@@ -590,7 +558,8 @@ function WorkshopsSection() {
 function AnniversarySection() {
   const { lang } = useLang();
   const de = lang === 'de';
-  // R155: staerkerer Takt, siehe Kommentar in DanceflowSection.
+  // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
+  // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
   const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const a = EVENTS[lang].anniversary;
   const highlights =
@@ -685,7 +654,8 @@ function AnniversarySection() {
 function FloweekendSection() {
   const { lang } = useLang();
   const de = lang === 'de';
-  // R155: staerkerer Takt, siehe Kommentar in DanceflowSection.
+  // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
+  // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
   const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const f = EVENTS[lang].floweekend;
   return (
@@ -730,7 +700,8 @@ function FloweekendSection() {
 /* ---------------------------------------------------------------------------- Tickets: Eventfrog-Hub */
 function TicketsSection() {
   const { lang } = useLang();
-  // R155: staerkerer Takt, siehe Kommentar in DanceflowSection.
+  // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
+  // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
   const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const t = EVENTS[lang].tickets;
   const calendarItems =

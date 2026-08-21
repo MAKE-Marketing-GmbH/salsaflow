@@ -104,12 +104,14 @@ export const EVENTKALENDER = {
       image: {
         src: '/photos/premium/danceflow-home-3840.webp',
         alt: 'Tanzende Menschen bei einer Salsaflow Danceflow Night in Basel',
-        // R187: ohne Angabe galt `center 50%`, das kappte die erhobenen Hände.
-        // Das Band zeigt bei 1440 nur 555 von 2560 Bildpixeln;
-        // bei 50 % fielen 1003 Pixel oben weg. 22 % laesst jede Hand ganz und
-        // haelt die Gesichter im Bild. Altfehler, nicht vom R187-Bildtausch:
-        // alt und neu haben dasselbe Seitenverhaeltnis (1,4989 zu 1,5000).
-        position: 'center 22%',
+        // R188 E7: 22% war zu hoch angesetzt und schnitt der vorderen Reihe die
+        // Kinne an der Bandunterkante ab. Nachgerechnet mit YuNet: die Koepfe der
+        // Gruppe liegen im auf 1440 skalierten Bild zwischen y=128 und y=593.
+        // 32% zentriert diese Spanne im Band — jedes Gesicht der Gruppe hat oben
+        // und unten Luft, die erhobenen Haende bleiben weiterhin ganz im Bild.
+        // Die verbleibenden Anschnitte betreffen nur unscharfe Personen weit im
+        // Hintergrund; die sind in einer echten Saalaufnahme nicht vermeidbar.
+        position: 'center 32%',
       },
       cardLabel: 'Aktueller Stand',
       cardText: 'Neue Einzeltermine folgen.',

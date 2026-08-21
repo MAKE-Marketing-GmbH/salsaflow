@@ -24,7 +24,8 @@ import {
   Eyebrow,
   TitleAccent,
   CtaArrow,
-  BeatMark,
+  // R188 KA1: `BeatMark` ist raus. Die einzige Fundstelle war die Legende
+  // «So liest du die Leiter», die mit den verschachtelten Karten weggefallen ist.
   sectionTitle,
   sectionLead,
   Reveal,
@@ -144,54 +145,33 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
   const l = c.levels;
   return (
     <section id="levels" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-20 lg:py-32">
+      {/* R188 KA1 (Video 11:19 «Einfach macht das ein bisschen simpler»): Die Sektion
+          steckte in drei Kartenebenen ineinander — eine 2rem-Karte um die ganze Sektion,
+          darin eine 1.75rem-Karte um die Leiter, darin je Stufe noch eine 2xl-Karte.
+          Drei Rahmen, drei Radien, drei Flaechen fuer eine Liste. Verschachtelte Karten
+          sind laut design-Doktrin immer falsch.
+          Jetzt: kein Sektions-Rahmen, kein Leiter-Rahmen. Es bleibt EINE Kartenebene,
+          naemlich die Stufe selbst. Die Legende «So liest du die Leiter» faellt weg: sie
+          erklaerte zwei Pillen, die neben jeder Stufe ohnehin im Klartext stehen. */}
       <Shell>
-        <Reveal className="overflow-hidden rounded-[2rem] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_rgba(17,17,17,0.07)]">
-          <div className="grid lg:grid-cols-[0.92fr_1.08fr]">
-            {/* Linke Spalte: Kopf + Legende + Stil-Verweise */}
-            {/* R141 Nachtrag: Unter der Schritt-Grafik standen rund 330 CSS-px leer
-                (gemessen in levels-desktop-1440-nachher.png), weil die Spalte sich auf
-                die volle Zeilenhoehe der Leiter streckte, ihr Inhalt aber oben klebte.
-                Die Spalte streckt sich weiter — nur so laeuft die Trennlinie (lg:border-r)
-                ueber die ganze Kartenhoehe. Stattdessen schiebt lg:mt-auto an der Grafik
-                allein sie an den unteren Rand: Kopf, Legende und Stil-Knoepfe behalten
-                oben ihren gewohnten Rhythmus, die Grafik schliesst die Spalte unten ab.
-                Kein lg:justify-between (das reisst zwischen JEDEN Block eine Luecke) und
-                kein lg:sticky (das versetzte die Spalte um den Nav-Offset und riss oben
-                100px, unten 241px neu auf — beides gemessen). */}
-            <motion.div
-              variants={item}
-              className="flex flex-col border-b border-[var(--color-line)] p-7 sm:p-10 lg:border-b-0 lg:border-r lg:p-12"
-            >
+        <Reveal>
+          <div className="grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-start lg:gap-20">
+            {/* Linke Spalte: Kopf + Stil-Verweise.
+                `lg:sticky` statt der frueheren gestreckten Spalte: die Leiter ist mit
+                fuenf Stufen rund 900px hoch, der Kopf nur rund 400px. Ohne sticky stuende
+                unter den Stil-Knoepfen eine halbe Bildschirmhoehe leer (genau die Luecke,
+                die R141 mit der Schritt-Grafik zugestellt hatte). Mitlaufend bleibt die
+                Frage sichtbar, waehrend man die Stufen liest. */}
+            <motion.div variants={item} className="flex flex-col lg:sticky lg:top-[calc(var(--nav-h)+2rem)]">
               <Eyebrow>{l.eyebrow}</Eyebrow>
               <h2 className={`mt-5 ${sectionTitle}`}>
                 {l.title} {l.titleAccent ? <TitleAccent>{l.titleAccent}</TitleAccent> : null}
               </h2>
               <p className={`mt-4 ${sectionLead}`}>{l.body}</p>
 
-              <div className="mt-8 rounded-[1.5rem] border border-[var(--color-line)] bg-[var(--color-paper-warm)] p-5">
-                <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
-                  <BeatMark />
-                  {de ? 'So liest du die Leiter' : 'How to read the ladder'}
-                </p>
-                <ul className="mt-4 grid gap-3">
-                  <li className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-salsa)] font-display text-xs font-bold tabular-nums text-white">
-                      01
-                    </span>
-                    <span className="text-sm font-semibold leading-tight text-[var(--color-ink)]">{l.startTag}</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-line)] bg-white font-display text-xs font-bold tabular-nums text-[var(--color-ink)]">
-                      02
-                    </span>
-                    <span className="text-sm font-semibold leading-tight text-[var(--color-ink-muted)]">{l.buildTag}</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="mt-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{l.stylesIntro}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-8">
+                <p className="max-w-md text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{l.stylesIntro}</p>
+                <div className="mt-5 flex flex-wrap gap-2">
                   {l.styles.map((s) => (
                     <a
                       key={s.href}
@@ -205,61 +185,38 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
                 </div>
               </div>
 
-              {/* R141: Die Leiter-Grafik stand unter der Leiter in der rechten Spalte. Weil
-                  die Stufen jetzt einklappen, wurde die rechte Spalte kuerzer und links
-                  blieben ab den Stil-Knoepfen rund 1000px leere Flaeche stehen (im Shot
-                  levels-desktop-1440-nachher.png gemessen). Die Grafik fuellt genau diese
-                  Luecke und steht inhaltlich richtig: sie zeigt dieselbe Stufenfolge wie
-                  die Legende darueber. Nur ab lg, mobil bleibt sie unter der Leiter. */}
-              <figure className="mt-10 hidden lg:mt-auto lg:block lg:pt-12">
-                <img
-                  src="/composites/graphic-world/step-salsa-line.webp"
-                  alt=""
-                  aria-hidden
-                  width={2048}
-                  height={760}
-                  loading="lazy"
-                  className="pointer-events-none w-full opacity-75"
-                />
-                <figcaption className="mt-3 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[var(--color-ink-muted)]">
-                  {l.graphicCaption}
-                </figcaption>
-              </figure>
+              {/* R188 KA1: Die Schritt-Grafik ist raus. Sie war `alt=""` und
+                  `aria-hidden`, trug also keine Information — sie fuellte nur Leerraum
+                  (so stand es im R141-Kommentar hier woertlich). Ihre Bildunterschrift
+                  wiederholte ausserdem die H2 daneben. */}
             </motion.div>
 
-            {/* Rechte Spalte: die Leiter */}
-            {/* lg:pr-36: die Leiter-Tags endeten bei x=1309-1330 und liefen beim Scrollen
-                unter den FAB (ab x=1294; Critic Runde 16, Item 4). */}
-            <motion.div variants={item} className="bg-[var(--color-bg-soft)] p-5 sm:p-7 lg:p-8 lg:pr-36">
-              <div className="rounded-[1.75rem] border border-[var(--color-line)] bg-[var(--color-paper-warm)] p-5 sm:p-6">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <BeatMark />
-                    <h3 className="type-h3 text-[var(--color-ink)]">
-                      {de ? 'Salsa & Bachata: Stufe für Stufe' : 'Salsa & Bachata: stage by stage'}
-                    </h3>
-                  </div>
-                  {/* R141 Nachtrag: Die Pille trug woertlich denselben Text wie die H3
-                      daneben («Stufe fuer Stufe»), also dieselben drei Woerter zweimal in
-                      EINER Zeile — genau die Redundanz, die Raphael bei 04:46 beklagt.
-                      Mobil brach die H3 dadurch dreizeilig gegen die Pille. Jetzt nennt
-                      sie die Anzahl der Stufen und orientiert damit wirklich. */}
-                  <span className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-semibold tabular-nums text-[var(--color-ink-muted)] shadow-sm">
-                    {l.rungs.length} {de ? 'Stufen' : 'stages'}
-                  </span>
-                </div>
+            {/* Rechte Spalte: die Leiter, jetzt ohne eigenen Rahmen */}
+            <motion.div variants={item}>
+              <div className="flex items-baseline justify-between gap-3 border-b border-[var(--color-line)] pb-4">
+                <h3 className="type-h3 text-[var(--color-ink)]">
+                  {de ? 'Salsa & Bachata: Stufe für Stufe' : 'Salsa & Bachata: stage by stage'}
+                </h3>
+                <span className="shrink-0 text-xs font-semibold tabular-nums text-[var(--color-ink-muted)]">
+                  {l.rungs.length} {de ? 'Stufen' : 'stages'}
+                </span>
+              </div>
 
-                <ol className="mt-6 grid gap-3">
+              <ol className="mt-5 grid gap-3">
                   {l.rungs.map((rung, ri) => {
                     const active = ri === 0;
                     return (
                       <li
                         key={rung.name}
+                        // R188 KA1: `bg-white/70` war halbtransparent gegen die
+                        // Papier-Flaeche der entfernten Leiter-Karte. Ohne diese
+                        // Flaeche stuende die Stufe jetzt auf bg-soft und waere
+                        // milchig. Volles Weiss, wie die aktive Stufe.
                         className={cn(
                           'rounded-2xl border p-4 sm:p-5',
                           active
                             ? 'border-[var(--color-salsa)]/35 bg-white shadow-sm'
-                            : 'border-[var(--color-line)] bg-white/70',
+                            : 'border-[var(--color-line)] bg-white',
                         )}
                       >
                         <div className="flex items-center gap-4">
@@ -336,27 +293,10 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
                       </li>
                     );
                   })}
-                </ol>
+              </ol>
 
-                {/* Simple Level-Grafik (bestehendes Asset, dekorativ).
-                    R141: ab lg steht sie in der linken Spalte und fuellt dort den
-                    Leerraum. Hier bleibt sie nur unter lg, damit sie nicht doppelt
-                    erscheint. */}
-                <figure className="mt-7 lg:hidden">
-                  <img
-                    src="/composites/graphic-world/step-salsa-line.webp"
-                    alt=""
-                    aria-hidden
-                    width={2048}
-                    height={760}
-                    loading="lazy"
-                    className="pointer-events-none w-full opacity-75"
-                  />
-                  <figcaption className="mt-3 text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[var(--color-ink-muted)]">
-                    {l.graphicCaption}
-                  </figcaption>
-                </figure>
-              </div>
+              {/* R188 KA1: die mobile Zweitfassung der Schritt-Grafik ist mit der
+                  Desktop-Fassung zusammen raus (Begruendung oben in der linken Spalte). */}
             </motion.div>
           </div>
         </Reveal>
@@ -501,13 +441,18 @@ function MissSection({ c }: { c: KursaufbauContent }) {
             <img
               src={m.image.src}
               alt={m.image.alt}
-              // kurs-05.jpg ist Querformat (1600x1065). object-[center_38%] wie im
-              // /preise-Band: die Koepfe der Klasse liegen im oberen Drittel und bleiben
-              // im hohen Ausschnitt ganz im Bild (Kopf-Schnitt-Pruefung R141).
+              // R188 SW4: Die Datei ist jetzt der rechts beschnittene Auszug
+              // (1410x1065, content.ts miss.image). width/height melden die ECHTEN
+              // Masse — mit den alten 1600x1065 haette der Browser die falsche
+              // Hoehe reserviert und die Seite waere beim Laden gesprungen (CLS).
+              // object-[center_38%] bleibt: der Ausschnitt fuellt die Breite voll
+              // (extra_x = 0 im gemessenen 767x403-Kasten), die Position verschiebt
+              // also nur senkrecht. Bei 38% liegen alle Koepfe der Klasse ganz im
+              // Bild (Quell-y 125..861 von 1065, am echten Ausschnitt nachgesehen).
               // Ab lg absolut positioniert: das Bild fuellt die Spur, die der Text
               // aufspannt, und traegt selbst keine Hoehe in das Grid hinein.
               className="h-72 w-full object-cover object-[center_38%] sm:h-80 lg:absolute lg:inset-0 lg:h-full"
-              width={1600}
+              width={1410}
               height={1065}
               loading="lazy"
             />

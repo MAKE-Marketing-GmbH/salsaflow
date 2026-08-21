@@ -75,7 +75,13 @@ export function Faq() {
               const isOpen = open === i;
               return (
                 <motion.div key={it.q} variants={item}>
-                  <h3>
+                  {/* R188 / SW3: die Stufe gehoert auf das <h3> selbst, nicht nur auf ein
+                      <span> darin. Vorher war dieses Element eine leere Huelle ohne jede
+                      Groessenangabe (gemessen 16px = Browser-Vorgabe), waehrend das Kind
+                      seine eigene Kette trug — die Ebene H3 stand damit nirgends im Code,
+                      nur zufaellig im Ergebnis. Jetzt traegt das Heading die Stufe und das
+                      Kind erbt sie. */}
+                  <h3 className="type-h3-sub">
                     <button
                       id={`faq-q-${i}`}
                       type="button"
@@ -104,7 +110,15 @@ export function Faq() {
                          der untersten in DESIGN.md erlaubten Stufe. */
                       className="group/btn flex w-full items-center justify-between gap-5 py-4 text-left"
                     >
-                      <span className="hyphens-none !tracking-normal font-display text-lg font-bold leading-snug text-[var(--color-ink)] transition-colors [word-spacing:0.12em] group-hover/btn:text-[var(--color-salsa)] sm:text-xl">
+                      {/* R188 / H4 + SW3: die Frage lief auf einer eigenen Groessenkette
+                          (text-lg/sm:text-xl) statt auf der Stufen-Klasse. Gemessen war das
+                          zwar zufaellig nah an H3, aber das <h3> darum trug GAR keine Stufe
+                          und fiel auf die Browser-Vorgabe zurueck (16px/400) — die Ebene H3
+                          rendete auf dieser Seite dadurch in zwei Groessen. Jetzt traegt die
+                          Zeile `type-h3-sub`, also die definierte Zeilen-Form der Ebene 3.
+                          !tracking-normal + word-spacing bleiben: Cal Sans klebt sonst in
+                          kurzen Fragen die Woerter zusammen (R27/R28). */}
+                      <span className="hyphens-none !tracking-normal text-[var(--color-ink)] transition-colors [word-spacing:0.12em] group-hover/btn:text-[var(--color-salsa)]">
                         {it.q}
                       </span>
                       {/* Chevron im Kreis. Aktiver Zustand = einziger roter Vollton (kein Pastell). */}

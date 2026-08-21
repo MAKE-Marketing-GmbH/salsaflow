@@ -54,6 +54,11 @@ export type PreiseContent = {
     fixed: string;
     cardTitle: string;
     cardNote: string;
+    /** R188 P3: Die Pille am Ankerpreis. Der Auftrag verlangt ausdruecklich
+     *  «Empfehlung hervorheben». Sie darf nur sagen, was die Seite ohnehin belegt —
+     *  hier: dass dieser Preis der normale Einstieg ist. Keine neue Zusage, keine
+     *  erfundene Beliebtheits-Aussage («meistgebucht»), dazu gibt es keine Zahlen. */
+    anchorNote: string;
     groups: PriceGroup[];
     included: string[];
     cta: Cta;
@@ -86,9 +91,9 @@ export type PreiseContent = {
     /** Der 5er-Block ist ein Rabatt, den die Tabelle zwar enthaelt, aber nicht ausspricht. */
     note: string;
     cta: Cta;
+    /** R188 P7: `cardLabel`/`cardText` sind hier raus. Der Kasten unter dem Foto trug
+     *  «1:1 Fokus / Dein Tempo. Dein Ziel.» und wiederholte damit die H2 daneben. */
     image: Img;
-    cardLabel: string;
-    cardText: string;
   };
   workshops: {
     title: string;
@@ -215,11 +220,20 @@ export const PREISE = {
       ],
     },
     regular: {
-      title: 'Reguläre Kursstaffel',
-      body: 'Eine Kursstaffel ist der normale Einstieg, wenn du Salsa, Bachata oder Heels strukturiert lernen möchtest.',
+      // R188 P1/KA2: Ueberschrift als Frage, die Besucher wirklich stellen.
+      // «Regulaere Kursstaffel» war ein Produktname, keine Frage.
+      title: 'Was kostet ein regulärer',
+      titleAccent: 'Kurs?',
+      // R188 P4 (Video 06:53 «Macht das hier weg, den Text»): der Begleitsatz unter
+      // dem Intro ist raus. Die Preistabelle daneben sagt dasselbe kuerzer.
+      body: '',
       fixed: '8 Wochen, eine Lektion à 60 Minuten pro Woche.',
       cardTitle: 'Kursstaffel',
       cardNote: 'Festpreis pro Staffel.',
+      // Belegt durch `entry.items[0]` («Die Schnupperstunde ist gratis … entscheidest
+      // danach») und `fixed` (8 Wochen, eine Lektion pro Woche): die Staffel ist der
+      // normale Weg in einen Kurs. Keine Beliebtheits-Behauptung.
+      anchorNote: 'Der übliche Einstieg',
       groups: [
         {
           label: 'Einzeln',
@@ -243,8 +257,11 @@ export const PREISE = {
           ],
         },
       ],
+      // R188 P2 (Video 06:42 «Das hier doppelt sich zum Beispiel hier links»):
+      // «8 Lektionen à 60 Minuten» stand hier UND als `fixed`-Zeile darueber
+      // («8 Wochen, eine Lektion à 60 Minuten pro Woche»). Dieselbe Zahl zweimal in
+      // 200px Hoehe. Die Dauer steht jetzt nur noch einmal, in `fixed`.
       included: [
-        '8 Lektionen à 60 Minuten',
         'Nachholen in der Staffel möglich',
         'Aushilfe wird organisiert',
         'Keine versteckten Kosten',
@@ -273,18 +290,26 @@ export const PREISE = {
         ],
         link: { label: 'Schnupperstunde abmachen', href: SCHNUPPER_HREF },
       },
-      // Nachtlicht raus, Kurs-Paar rein: unter einer Kurspreis-Tabelle gehoert
-      // Unterricht, kein Abendmotiv. gallery/kurse/01.jpg zeigt Partnerwork im
-      // Paar bei Tageslicht, kein Gruppen-Lineup — die Bildidee der Sektion.
+      // R188 P6 (Video 07:05 «Das Bild hier sieht aus»): gallery/kurse/01.jpg war
+      // 1600x1066, Graustufen-Mittel 96.9/255, und zeigte im 21/9-Band vor allem den
+      // Ruecken der Frau — kein Gesicht, kein Studio, kein Anlass.
+      // Ersatz aus dem Original-Katalog (worklog/R187-originale.md, Ableitung nach
+      // public/photos/r188-preise/): 2026/hero-paar-studiowand-01.webp, 1920x1280,
+      // Mittel 107.5/255, beide Gesichter offen, Salsaflow-Wand im Hintergrund.
+      // position 30% am echten 21/9-Ausschnitt geprueft (1920x822): beide Koepfe
+      // vollstaendig im Fenster, bei 50% schneidet die Oberkante den Mann an.
       image: {
-        src: '/photos/gallery/kurse/01.jpg',
-        alt: 'Paar übt im Kurs eine Drehung, weitere Paare im Hintergrund',
-        position: 'center 28%',
+        src: '/photos/r188-preise/kurs-paar-studiowand-1920.webp',
+        alt: 'Paar tanzt vor der Salsaflow Studiowand, beide lachen',
+        position: 'center 30%',
       },
     },
     privat: {
       eyebrow: 'Privatstunden',
-      title: 'Privatstunden für persönlichen Fokus',
+      // R188 KA2: Ueberschrift als Frage. «Privatstunden für persönlichen Fokus»
+      // war eine Produktbeschreibung. Die Frage darunter beantwortet die Tabelle.
+      title: 'Was kostet eine',
+      titleAccent: 'Privatstunde?',
       body: 'Privatstunden lohnen sich, wenn du an einem konkreten Ziel arbeitest: Hochzeitstanz, Technik, Styling, Levelwechsel oder Wiedereinstieg.',
       rows: [
         { label: 'Privatstunde, 1 Person', value: 'CHF 100.-' },
@@ -311,11 +336,11 @@ export const PREISE = {
         src: '/photos/premium/offer-privat-square-1200.webp',
         alt: 'Paar bei einer Privatstunde im Studio',
       },
-      cardLabel: '1:1 Fokus',
-      cardText: 'Dein Tempo. Dein Ziel.',
     },
     workshops: {
-      title: 'Workshops und Events',
+      // R188 KA2 (Fix-Runde 2, kimi-critic): «Workshops und Events» war ein Etikett,
+      // keine Frage. Die Sektion beantwortet, was Workshop und Danceflow Night kosten.
+      title: 'Was kosten Workshops und Danceflow Nights?',
       lead: 'Zwei Wege, mehr auf die Tanzfläche zu kommen: ein Thema vertiefen oder einfach mittanzen.',
       workshop: {
         title: 'Workshop',
@@ -363,8 +388,9 @@ export const PREISE = {
     },
     pass: {
       badge: 'Mehr tanzen, ein Preis',
-      title: 'Für alle, die mehr als einen Kurs tanzen',
-      titleAccent: 'wollen.',
+      // R188 KA2: Frage statt Zielgruppen-Ansprache.
+      title: 'Lohnt sich der Salsaflow',
+      titleAccent: 'Pass?',
       body: 'Der Salsaflow Pass kann sinnvoll sein, wenn du regelmässig mehrere Kurse besuchen möchtest.',
       rows: [
         { label: 'Salsaflow Pass', value: 'CHF 410.-' },
@@ -405,8 +431,10 @@ export const PREISE = {
       cta: { label: 'Passenden Einstieg finden', href: '/kontakt' },
     },
     closing: {
-      title: 'Finde den nächsten Termin im',
-      titleAccent: 'Kursplan.',
+      // R188 KA2 (Fix-Runde 2, kimi-critic): Aufforderung wird Frage plus Antwort,
+      // gleiche Bauform wie der Abschluss auf /kursaufbau (content.ts:251).
+      title: 'Wann startet der nächste',
+      titleAccent: 'Kurs?',
       body: 'Öffne den Kursplan, wähle Tanzstil und Level oder schreib uns, wenn du unsicher bist.',
       primary: { label: 'Kursplan ansehen', href: '/kursplan' },
       secondary: { label: 'Frage stellen', href: '/kontakt' },
@@ -462,11 +490,15 @@ export const PREISE = {
       ],
     },
     regular: {
-      title: 'Regular course term',
-      body: 'A course term is the normal way in when you want to learn Salsa, Bachata or Heels in a structured way.',
+      // R188 P1/P4: same change as de — question headline, accompanying text removed.
+      title: 'What does a regular course',
+      titleAccent: 'cost?',
+      body: '',
       fixed: '8 weeks, one 60-minute lesson per week.',
       cardTitle: 'Course term',
       cardNote: 'Fixed price per term.',
+      // Same reasoning as de: states the normal route into a course, nothing new.
+      anchorNote: 'The usual start',
       groups: [
         {
           label: 'Solo',
@@ -490,8 +522,8 @@ export const PREISE = {
           ],
         },
       ],
+      // R188 P2: «8 lessons of 60 minutes» duplicated the `fixed` line above.
       included: [
-        '8 lessons of 60 minutes',
         'Catch up within the term',
         'We arrange a partner',
         'No hidden costs',
@@ -516,16 +548,18 @@ export const PREISE = {
         ],
         link: { label: 'Arrange a trial class', href: SCHNUPPER_HREF },
       },
-      // Same motif as de (reasoning documented there).
+      // R188 P6: same motif and crop as de (reasoning documented there).
       image: {
-        src: '/photos/gallery/kurse/01.jpg',
-        alt: 'Couple practising a turn in class, other couples in the background',
-        position: 'center 28%',
+        src: '/photos/r188-preise/kurs-paar-studiowand-1920.webp',
+        alt: 'Couple dancing in front of the Salsaflow studio wall, both laughing',
+        position: 'center 30%',
       },
     },
     privat: {
       eyebrow: 'Private lessons',
-      title: 'Private lessons for personal focus',
+      // R188 KA2: question headline, same as de.
+      title: 'What does a private lesson',
+      titleAccent: 'cost?',
       body: 'Private lessons pay off when you work on a specific goal: wedding dance, technique, styling, a level change or a comeback.',
       rows: [
         { label: 'Private lesson, 1 person', value: 'CHF 100.-' },
@@ -547,11 +581,10 @@ export const PREISE = {
         src: '/photos/premium/offer-privat-square-1200.webp',
         alt: 'Couple in a private lesson at the studio',
       },
-      cardLabel: '1:1 focus',
-      cardText: 'Your pace. Your goal.',
     },
     workshops: {
-      title: 'Workshops and events',
+      // R188 KA2 (Fix-Runde 2): question headline, same as de.
+      title: 'What do workshops and Danceflow Nights cost?',
       lead: 'Two ways to get more time on the floor: go deeper on a topic or simply dance along.',
       workshop: {
         title: 'Workshop',
@@ -590,8 +623,9 @@ export const PREISE = {
     },
     pass: {
       badge: 'More dancing, one price',
-      title: 'For everyone who wants to dance more than one',
-      titleAccent: 'course.',
+      // R188 KA2: question headline, same as de.
+      title: 'Is the Salsaflow Pass worth',
+      titleAccent: 'it?',
       body: 'The Salsaflow Pass can make sense if you want to take several courses regularly.',
       rows: [
         { label: 'Salsaflow Pass', value: 'CHF 410.-' },
@@ -624,8 +658,9 @@ export const PREISE = {
       cta: { label: 'Find your right start', href: '/kontakt' },
     },
     closing: {
-      title: 'Find the next date in the',
-      titleAccent: 'schedule.',
+      // R188 KA2 (Fix-Runde 2): question headline, same as de.
+      title: 'When does the next course',
+      titleAccent: 'start?',
       body: 'Open the schedule, pick a dance style and level, or write to us if you are unsure.',
       primary: { label: 'See the schedule', href: '/kursplan' },
       secondary: { label: 'Ask a question', href: '/kontakt' },

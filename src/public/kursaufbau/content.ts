@@ -51,7 +51,9 @@ export type KursaufbauContent = {
     rungs: { name: string; forYou: string; youLearn: string; next: string }[];
     stylesIntro: string;
     styles: Cta[];
-    graphicCaption: string;
+    /** R188 KA1: `graphicCaption` ist raus. Die Bildunterschrift gehoerte zur
+     *  Schritt-Grafik, die mit dem Feedback «das Bild macht gar keinen Sinn»
+     *  entfernt wurde. */
   };
   doubt: {
     eyebrow: string;
@@ -138,8 +140,9 @@ export const KURSAUFBAU = {
     },
     levels: {
       eyebrow: 'Level-Übersicht',
-      title: 'Salsa und Bachata bauen Stufe für Stufe',
-      titleAccent: 'auf.',
+      // R188 KA2: Frage statt Aussage. Wer hier landet, sucht seine Stufe.
+      title: 'Welche Stufen gibt es bei Salsa und',
+      titleAccent: 'Bachata?',
       body: 'Fünf Stufen bauen Technik und Sicherheit Schritt für Schritt auf. Flow-Kurse festigen das Gelernte, bevor der nächste Bereich beginnt.',
       youLearnLabel: 'Du lernst',
       nextLabel: 'Weiter, wenn',
@@ -184,12 +187,12 @@ export const KURSAUFBAU = {
         { label: 'Bachata', href: R.bachata },
         { label: 'Heels', href: R.heels },
       ],
-      graphicCaption: 'Salsa und Bachata mit Flow-Stufen',
     },
     doubt: {
       eyebrow: 'Wenn du unsicher bist',
-      title: 'Unsicherheit beim Level ist normal. Falsch starten muss nicht',
-      titleAccent: 'sein.',
+      // R188 KA2: Frage statt zweiteiliger Aussage ueber drei Zeilen.
+      title: 'Was, wenn du dein Level nicht',
+      titleAccent: 'kennst?',
       blocks: [
         {
           quote: 'Ich will nicht zu tief starten.',
@@ -208,8 +211,9 @@ export const KURSAUFBAU = {
     },
     term: {
       eyebrow: 'Kursstaffeln & Dauer',
-      title: 'Acht Wochen für einen klaren',
-      titleAccent: 'Lernabschnitt.',
+      // R188 KA2: Frage statt Slogan. Die Antwort (8 Wochen) steht in der ersten Karte.
+      title: 'Wie lange dauert eine',
+      titleAccent: 'Kursstaffel?',
       body: 'Unsere Kurse laufen als Staffeln. Jede Staffel zeigt dir klar Startdatum, Dauer, Wochentag, Studio und Level. So weisst du vorher genau, worauf du dich einlässt.',
       cards: [
         { label: 'Dauer', value: 'In der Regel 8 Wochen pro Staffel.' },
@@ -222,8 +226,12 @@ export const KURSAUFBAU = {
     },
     miss: {
       eyebrow: 'Nachholen & Fehlen',
-      title: 'Regelmässiges Training bringt dich sicher',
-      titleAccent: 'weiter.',
+      // R188 KA2 (Video 11:38-11:46, woertlich): «regelmässiges Training bringt dich
+      // sicher weiter. Ja klar, aber niemand checkt, dass es hier darum geht, was ist,
+      // wenn du einen Kurs verpasst? Das muss mal richtig dastehen.»
+      // Genau dieser Satz steht jetzt als Ueberschrift.
+      title: 'Was ist, wenn du einen Kurs',
+      titleAccent: 'verpasst?',
       body: 'Wenn du fehlst, melde dich frühzeitig. Ob und wie eine Lektion nachgeholt werden kann, hängt vom Kurs, Level und Platz ab.',
       // R141: gallery/kurse/04.jpg war hier das Club-Foto und mass 29/255 Graustufen-
       // Mittel (Raphael 04:58: «das Bild ist uebelst unterbelichtet»). kurs-05.jpg misst
@@ -231,8 +239,26 @@ export const KURSAUFBAU = {
       // volle Kursstaffel im Tageslicht-Studio und traegt damit genau die Aussage der
       // Headline. Kein CSS-Filter, echtes Foto. DESIGN.md:93 (sitewide max 2x) haelt:
       // bisher EIN Design-Slot (/preise Fit-Band), der Galerie-Eintrag ist Archiv.
+      //
+      // R188 SW4 (Kritiker: «rechter unterer Bildrand, halber Kopf abgeschnitten»):
+      // Der Schnitt lag NICHT am object-position, sondern in der Quelldatei selbst.
+      // Gemessen im echten Renderkasten (Browser, 1440er Desktop): das Bild rendert
+      // 767x403, die Quelle 1600x1065 skaliert auf 767x511 — extra_x = 0, das Bild
+      // fuellt die Breite also voll aus. Jede object-position-Aenderung verschiebt nur
+      // senkrecht und kann einen SEITLICH angeschnittenen Kopf nie retten.
+      // Der Kopf gehoert dem baertigen Mann im schwarzen Tanktop bei Quell-x 1420-1600,
+      // y 540-820: die rechte Dateikante halbiert sein Gesicht (per Crop einzeln
+      // angesehen). Im Original-Katalog (worklog/R187-originale.md Zeile 132) hat
+      // kurs-05.jpg KEIN groesseres Original — Upscaling ist verboten, ein Bildtausch
+      // haette das geprueft passende Motiv der Sektion zerstoert.
+      // Deshalb: rechte Kante bei x=1410 abgeschnitten, sonst nichts. Die halbe Figur
+      // ist damit ganz raus statt halb drin. Der Mann im weissen Shirt daneben behaelt
+      // seinen Kopf vollstaendig (Quell-x 1330-1400, per Crop geprueft), nur seine
+      // Schulter laeuft aus dem Bild — das ist kein Kopfschnitt.
+      // Neue Datei 1410x1065, Graustufen-Mittel 108.6 (vorher 106), kein Upscaling:
+      // die Quelle ist mit 1410px immer noch fast doppelt so breit wie der 767px-Kasten.
       image: {
-        src: '/photos/kurse/kurs-05.jpg',
+        src: '/photos/r188-kursaufbau/kursstaffel-studio-1410.jpg',
         alt: 'Volle Kursstaffel tanzt im hellen Salsaflow Studio bei Tageslicht',
       },
       cardLabel: 'Dein Tempo',
@@ -295,8 +321,9 @@ export const KURSAUFBAU = {
     },
     levels: {
       eyebrow: 'Level overview',
-      title: 'Salsa and Bachata build from one stage to the',
-      titleAccent: 'next.',
+      // R188 KA2: question headline, same as de.
+      title: 'Which stages do Salsa and Bachata',
+      titleAccent: 'have?',
       body: 'Five stages build technique and confidence step by step. Flow classes consolidate what you have learned before the next group begins.',
       youLearnLabel: 'You learn',
       nextLabel: 'Move on, when',
@@ -341,12 +368,12 @@ export const KURSAUFBAU = {
         { label: 'Bachata', href: R.bachata },
         { label: 'Heels', href: R.heels },
       ],
-      graphicCaption: 'Salsa and Bachata with Flow stages',
     },
     doubt: {
       eyebrow: 'If you are unsure',
-      title: 'Not sure about your level? We can help you choose the right',
-      titleAccent: 'stage.',
+      // R188 KA2: question headline, same as de.
+      title: 'What if you do not know your',
+      titleAccent: 'level?',
       blocks: [
         {
           quote: 'I do not want to start too low.',
@@ -365,8 +392,9 @@ export const KURSAUFBAU = {
     },
     term: {
       eyebrow: 'Course terms & duration',
-      title: 'Eight weeks for one clear learning',
-      titleAccent: 'block.',
+      // R188 KA2: question headline, same as de.
+      title: 'How long does a course term',
+      titleAccent: 'last?',
       body: 'Our classes run in course blocks. Each listing shows the start date, duration, weekday, studio and level, so you know the format before you book.',
       cards: [
         { label: 'Duration', value: 'Usually 8 weeks per term.' },
@@ -379,12 +407,15 @@ export const KURSAUFBAU = {
     },
     miss: {
       eyebrow: 'Catching up & missing a class',
-      title: 'Regular practice helps you progress with',
-      titleAccent: 'confidence.',
+      // R188 KA2: question headline, same as de (Video 11:38-11:46).
+      title: 'What if you miss a',
+      titleAccent: 'class?',
       body: 'If you miss a class, let us know early. Whether and how a lesson can be caught up depends on the course, level and space.',
-      // Gleiches Motiv wie de (R141).
+      // Gleiches Motiv und derselbe Beschnitt wie de (R141, R188 SW4 — Begruendung
+      // und Messwerte stehen dort). Beide Sprachen muessen dieselbe Datei zeigen,
+      // sonst traegt /kursaufbau je Sprache einen anderen Kopfschnitt.
       image: {
-        src: '/photos/kurse/kurs-05.jpg',
+        src: '/photos/r188-kursaufbau/kursstaffel-studio-1410.jpg',
         alt: 'A full course term dancing in the bright Salsaflow studio in daylight',
       },
       cardLabel: 'Your pace',

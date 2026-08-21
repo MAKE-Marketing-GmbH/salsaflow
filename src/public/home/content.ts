@@ -96,9 +96,35 @@ export type HomeStrings = {
   };
 };
 
+/* R188 / H2 (Video 21.08., 12:01 + 12:12): "Bachata-Bild uebelst komisch eingetoent."
+   Der Befund stand nach der letzten Runde WEITER offen. Der Kritiker mass auf der Karte
+   Rot-minus-Blau 70.5, waehrend die drei Nachbarkarten zwischen 2 und 30 lagen.
+
+   Warum der letzte Versuch nicht half: er tauschte `offer-bachata-wide-v2.webp` gegen eine
+   Groessenableitung aus `docs/bilder/assets/premium-2026-07-03/offer-bachata.jpg` und hielt
+   diese Quelle fuer "neutral". Nachgemessen ist sie das nicht — die Aufnahme selbst ist im
+   warmen Kunstlicht entstanden:
+     docs/.../offer-bachata.jpg          R=127.2 G=71.7 B=40.9  ->  R-B = 86.3
+     public/.../offer-bachata-neutral-1400.webp (die Ableitung) ->  R-B = 85.4
+   Ein Zuschnitt kann einen Farbstich nicht entfernen; der Name der Datei war die einzige
+   "Neutralitaet". Jede Ableitung dieses Motivs traegt den Stich weiter.
+
+   Deshalb jetzt ein ANDERES echtes Original statt derselben Aufnahme:
+   `/photos/showcase/hp-26.webp` (1200x1800), gemessen R=166.6 G=166.9 B=167.4, also
+   R-B = -0.8 — neutral im Sinne der Kritik und in derselben Studio-Serie fotografiert wie
+   die vier Gruender-Portraets darunter. Kein Filter, keine Farbkorrektur, kein Upscaling:
+   die Datei wird unveraendert ausgeliefert.
+
+   Motiv-Pruefung (die Karte heisst "Bachata — Fuer weiche Bewegungen und Paartanz mit
+   Gefuehl"): das Foto zeigt genau das, ein Paar in einer weichen Ausdrehung. Es ist
+   natives Hochformat und passt damit auf die Kartenflaeche (gemessen 316x416, ~3:4) ohne
+   Verschiebung; beide Koepfe liegen mit Luft im Bild (SW4: "Koepfe nie abschneiden").
+   Dichte 1200/316 = 3.8, klar ueber der 2.0-Linie. Auf der Startseite war das Motiv
+   vorher ungenutzt (grep "hp-26" ueber src/: kein Treffer), es entsteht also keine
+   Dublette. Die alten Dateien bleiben liegen — sie haengen noch an anderen Routen. */
 const offerPhotos = {
   salsa: '/photos/kurse/kurs-01.jpg',
-  bachata: '/photos/premium/offer-bachata-wide-v2.webp',
+  bachata: '/photos/showcase/hp-26.webp',
   heels: '/photos/2026/kurse-heels-energie-card-960.webp',
   privat: '/photos/premium/offer-privat-wide-original-v2.webp',
 };

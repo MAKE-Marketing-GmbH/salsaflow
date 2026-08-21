@@ -346,28 +346,52 @@ export function TeaserCard({
     // Kalender-Spalte, Stil · Level in EINER Zeile mit rotem Level-Akzent, Status als Badge,
     // rechts der rote Pill-CTA. Vorher war es ein anderes Zeilen-Muster (Wochentag doppelt,
     // nackter Pfeil statt CTA) — zwei Optiken fuer dieselbe Sache.
+    //
+    // R188 / H3 (Video 21.08., 12:20): "Kursplan-Preview auf der Startseite = gleicher Look
+    // wie /kursplan (nach dessen Redesign)." Der Kursplan bekommt in derselben Welle KP3:
+    // die GANZE Zeile faerbt beim Hover auf --color-salsa, jede Textebene invertiert auf
+    // Weiss, und der rote Pill-CTA am Zeilenende faellt weg (die rote Hauptaktion gehoert
+    // dem Sektions-CTA, nicht jeder Zeile). Diese Zeile hier fuehrt jetzt genau dieselbe
+    // Geste — sonst haetten Startseite und Kursplan wieder zwei Optiken fuer dieselbe Sache,
+    // also exakt den Zustand, den der Angleich von 2026-08-07 schon einmal beseitigt hat.
+    //
+    // Bewusst gespiegelt statt importiert: `courses/CourseEngine.tsx` exportiert nur die
+    // ganze Engine (Filter, Wochenwahl, Modal, Buchungs-Flow), keine einzelne Zeile —
+    // gepruefte grep-Lage: genau ein `export function` in der Datei. Ein Import haette den
+    // vollen Kursplan in die Startseite gezogen; die Datei zu zerlegen waere ein Eingriff in
+    // fremden Owner-Code (parallel in Arbeit). Gespiegelt sind deshalb die WERTE, nicht der
+    // Code: dieselbe Fuellfarbe, dieselbe `focus-within`-Kopplung, dieselben Weiss-Stufen
+    // (Titel 100%, Sekundaertext 85%).
+    //
+    // KEIN Bild in der Zeile: der Kursplan verliert seine Lehrpersonen-Portraits in derselben
+    // Welle (KP1 "simpel, ohne Bild"). Die Startseite hatte hier ohnehin nie eines.
     return (
       <a
         href={href}
-        className="group flex flex-col gap-3 border-b border-[var(--color-line)] px-1 py-5 transition-colors last:border-b-0 hover:bg-[var(--color-bg-soft)] sm:flex-row sm:items-center sm:gap-6 sm:px-4 lg:pr-36"
+        className="group flex flex-col gap-3 border-b border-[var(--color-line)] px-3 py-5 transition-colors duration-[var(--dur-fast)] last:border-b-0 hover:border-[var(--color-salsa)] hover:bg-[var(--color-salsa)] focus-within:border-[var(--color-salsa)] focus-within:bg-[var(--color-salsa)] sm:flex-row sm:items-center sm:gap-6 sm:px-4 lg:pr-36"
       >
         <span className="flex shrink-0 items-baseline gap-2 sm:w-32 sm:flex-col sm:items-start sm:gap-1">
           {/* Ohne tabular-nums: Cal Sans machte aus der Uhr "18 : 30" mit Loechern um den
               Doppelpunkt (Critic Runde 14, Item 2 — wie CourseEngine). Die Tages-KACHELN
               oben behalten tabular-nums: dort steht eine reine Zahl, gleiche Breite gewollt. */}
-          <span className="font-display text-2xl font-extrabold leading-none text-[var(--color-ink)]">
+          <span className="font-display text-2xl font-extrabold leading-none text-[var(--color-ink)] transition-colors group-hover:text-white group-focus-within:text-white">
             {course.startTime}
           </span>
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)] transition-colors group-hover:text-white/85 group-focus-within:text-white/85">
             {WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday}
           </span>
         </span>
         <span className="min-w-0 flex-1">
           {/* Gleiche Gewichtung wie im Kalender (CourseEngine.SlotRow): Stil ruhig, Level fett.
               Rot bleibt dem CTA. */}
-          <span className="block font-display text-lg leading-tight text-[var(--color-ink-muted)] sm:text-xl">
+          <span className="block font-display text-lg leading-tight text-[var(--color-ink-muted)] transition-colors group-hover:text-white/85 group-focus-within:text-white/85 sm:text-xl">
             {style}
-            {level && <span className="font-bold text-[var(--color-ink)]"> · {level}</span>}
+            {level && (
+              <span className="font-bold text-[var(--color-ink)] transition-colors group-hover:text-white group-focus-within:text-white">
+                {' '}
+                · {level}
+              </span>
+            )}
           </span>
           {/* EIN Verfuegbarkeits-Badge, der die ganze Wahrheit traegt.
               Runde 1, Nachmessung: "Plätze frei" allein war mehrdeutig. `full` ist per
@@ -382,10 +406,15 @@ export function TeaserCard({
                   Text "Nächster Start 9. Sep." — 4 identische Pillen pro Tag, reines Rauschen.
               Darum sagt der Badge den Zustand jetzt selbst: ausgebucht / erst ab Datum frei /
               jetzt frei. Drei Zustaende, eine Pille, kein Widerspruch, keine Wiederholung. */}
+          {/* R188 / H3: auf der roten Flaeche traegt der Badge weder seinen hellgruenen
+              noch seinen grauen Grund — beide verschwinden bzw. flecken. Er wechselt auf
+              halbtransparentes Weiss mit weisser Schrift, dieselbe Loesung wie die Badges
+              im Kursplan (CourseEngine.Badge unter group-hover). */}
           <span className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
             <span
               className={cn(
-                'inline-flex items-center rounded-full px-2.5 py-0.5 font-medium',
+                'inline-flex items-center rounded-full px-2.5 py-0.5 font-medium transition-colors',
+                'group-hover:bg-white/20 group-hover:text-white group-focus-within:bg-white/20 group-focus-within:text-white',
                 full || runningFull
                   ? 'bg-[var(--color-bg-soft)] text-[var(--color-ink-muted)]'
                   : 'bg-[color-mix(in_srgb,var(--color-flow-green)_13%,white)] text-[var(--color-flow-green)]',
@@ -403,8 +432,17 @@ export function TeaserCard({
         </span>
         {/* lg:pr-36 an der Zeile: der fixe WhatsApp-Float (right-5/6, h-14) lag auf
             «Termine ansehen» (S7-Shot home-desktop-03-y1500). Kopf und Tages-Tabs
-            nutzen dieselbe Naht. Float bleibt. */}
-        <span className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start rounded-full bg-[var(--color-salsa)] px-5 py-2.5 text-sm font-semibold text-white transition-colors group-hover:bg-[var(--color-salsa-700)] sm:self-center">
+            nutzen dieselbe Naht. Float bleibt.
+
+            R188 / H3: hier stand ein GEFUELLTER roter Pill je Zeile. Auf der roten
+            Hover-Flaeche waere er unsichtbar (Rot auf Rot), und schon im Ruhezustand
+            waren es vier gefuellte Primaerknoepfe untereinander — DESIGN.md erlaubt
+            genau einen pro Sektion, und der gehoert dem «Zum ganzen Kursplan» im Kopf.
+            Der Kursplan hat dieselbe Entscheidung schon getroffen (CourseEngine:
+            "EIN ruhiger Zeilen-CTA fuer alle; die rote Hauptaktion gehoert dem
+            ScheduleBottomCta"). Jetzt derselbe ruhige Zeilen-CTA, der beim Hover mit
+            der Flaeche auf Weiss wechselt. */}
+        <span className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start px-1 text-sm font-semibold text-[var(--color-ink)] transition-colors group-hover:text-white group-focus-within:text-white sm:self-center">
           {lang === 'de' ? 'Termine ansehen' : 'View dates'}
           <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2} />
         </span>

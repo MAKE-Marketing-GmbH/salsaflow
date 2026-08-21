@@ -111,27 +111,31 @@ export const HEELS = {
       microcopy: 'Level, Schuhe und Vorbereitung klären wir vor dem Start.',
       image: { src: '/photos/premium/offer-heels-1200.webp', alt: 'Heels-Tänzerin mit klarer Linie und Präsenz im Salsaflow Studio' },
       band: {
-        // Hochformat-Zuschnitt (960x1200) desselben Shots wie das fruehere
-        // 21:9-Band. object-cover braucht vertikalen Ueberhang, sonst waere
-        // `position` unten ein totes Feld (R138 Fund 2).
-        src: '/photos/2026/kurse-heels-energie-card-960.webp',
+        // R188 Final-Crop: Die 960x1200-Kartenfassung ist bereits in der Datei eng
+        // beschnitten. Darum fehlten im Desktop- und Mobil-Hero zwei Scheitel.
+        // Diese 1470x630-Ableitung stammt ohne Skalierung aus dem echten 2100x900-Foto.
+        // Sie entfernt nur die zwei Quellränder. Keine Farbänderung, kein Upscaling.
+        src: '/photos/r188-tanzkurse/heels-hero-heads-1470.webp',
         alt: 'Heels-Kurs im hellen Studio, energiegeladene Gruppe vor der Salsaflow-Wand',
-        // R74 (Fold 1440x730): 0% zeigte im 217px-Streifen nur Haar und Stirn, die
-        // Gesichter lagen UNTER dem Fold. Live-Reihe 0/8/12/14/20: erst ab ~12% tragen
-        // die Koepfe Kinn mit Luft — bei 12% zeigen Frontfrau (orange), Frau schwarz und
-        // Frau weiss alle Auge/Nase/Mund/Kinn mit Hals. 14% rutscht die weisse Bluse
-        // oben schon wieder ran, 20% kappt sie.
-        //
-        // R139: Alle drei Felder sind live. HeelsView setzt src, alt und
-        // objectPosition direkt aus diesem Objekt.
-        position: 'center 12%',
+        position: '30% center',
       },
       cardLabel: 'Dein Einstieg',
       cardText: 'Sicher stehen, Haltung finden, freier bewegen.',
     },
     myth: {
-      eyebrow: 'Kein Druck',
-      title: 'Du musst nicht perfekt laufen können. Du lernst, dich sicher zu bewegen',
+      /* R188 ST4, Raphael-Video 10:xx: «Ueberschriften nicht poetisch, konkret.»
+         Hier stand der Kicker «KEIN DRUCK» ueber «Du musst nicht perfekt laufen
+         koennen» (Beleg worklog/shots/R188/after-final2-tanzkurse/tanzkurse_heels/
+         d-01.png). Zwei Probleme in einer Zeile: der Kicker war ein Stimmungswort ohne
+         Information, und er brachte den Deko-Strich mit, den TZ2 sitewide verbietet.
+         Leerer String heisst: SectionHead rendert den Eyebrow-Block gar nicht.
+
+         Die Ueberschrift beantwortet jetzt eine Frage statt eine Sorge zu verneinen.
+         «Du musst nicht perfekt laufen koennen» sagt, was NICHT noetig ist; die Karten
+         darunter raeumen ohnehin schon drei Sorgen ab. Die H2 sagt jetzt, was man im
+         Kurs lernt — dasselbe Muster wie «Was lernst du…?» auf Salsa. */
+      eyebrow: '',
+      title: 'Was du im Heels-Kurs ohne Vorkenntnisse lernst',
       body: 'Viele denken bei Heels sofort an perfekte Linien, Bühne und Selbstbewusstsein. Im Kurs beginnt es viel einfacher: sicher stehen, Gewicht kontrollieren, Haltung finden und sich Schritt für Schritt freier bewegen.',
       cards: [
         { myth: '„Ich bin nicht selbstbewusst genug.“', reality: 'Genau daran arbeitest du im Kurs. Selbstbewusstsein ist nicht Voraussetzung, sondern Ergebnis.' },
@@ -228,21 +232,18 @@ export const HEELS = {
       microcopy: 'We sort out level, shoes and preparation before you start.',
       image: { src: '/photos/premium/offer-heels-1200.webp', alt: 'Heels dancer with a clear line and presence in the Salsaflow studio' },
       band: {
-        src: '/photos/2026/kurse-heels-energie-card-960.webp',
+        src: '/photos/r188-tanzkurse/heels-hero-heads-1470.webp',
         alt: 'Heels class in the bright studio, energetic group in front of the Salsaflow wall',
-        // R74 (Fold 1440x730): 0% zeigte nur Haar und Stirn. Live-Reihe: erst ab ~12%
-        // tragen die Koepfe Kinn mit Luft (Frontfrau, Frau schwarz, Frau weiss alle mit
-        // Hals, kein Kinn auf der Kante). DE/EN identisch gesetzt (gleiche Geometrie).
-        //
-        // R139: src, alt und position sind alle drei live. Details beim DE-Pendant oben.
-        position: 'center 12%',
+        // Gleiche echte 1470x630-Ableitung und Geometrie wie in der deutschen Fassung.
+        position: '30% center',
       },
       cardLabel: 'Your start',
       cardText: 'Stand safely, find posture, move more freely.',
     },
     myth: {
-      eyebrow: 'No pressure',
-      title: 'You do not need to walk perfectly. You learn to move safely',
+      /* R188 ST4 — englische Fassung, siehe Begruendung am deutschen Block. */
+      eyebrow: '',
+      title: 'What you learn in a Heels class without any experience',
       body: 'Many people think of perfect lines, the stage and confidence when they hear heels. In class it starts much simpler: stand safely, control your weight, find posture and move more freely step by step.',
       cards: [
         { myth: '"I am not confident enough."', reality: 'That is exactly what you work on in class. Confidence is not a requirement, it is a result.' },

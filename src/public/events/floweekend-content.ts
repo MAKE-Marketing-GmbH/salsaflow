@@ -105,9 +105,17 @@ export const FLOWEEKEND = defineFloweekendContent({
       // Runde 3, Issue 3: events-hero-1400 lag gleichzeitig auf /events/anniversary,
       // /events/eventkalender und hier — drei Event-Unterseiten mit demselben Aufmacher.
       // Floweekend bekommt einen eigenen Social-Moment aus der Party-Strecke.
+      // R188 E7: party-29 musste hier weg. Das Hero-Band ist ein schmaler Streifen
+      // (h-[10rem] bis h-[16rem]). In party-29 verteilen sich die Koepfe ueber 757px
+      // der auf 1440 skalierten Hoehe — gemessen mit YuNet. Ein 256px-Fenster kann
+      // diese Spanne nicht fassen, egal welchen Y-Wert object-position bekommt. Das
+      // Band schnitt die Gesichter deshalb waagerecht durch (Stirn oben, Kinn unten).
+      // party-52 haelt alle 16 Koepfe in einer Spanne von 140px und passt damit in
+      // den Streifen. Motiv ist eine volle Workshop-Klasse, thematisch naeher am
+      // Floweekend als die Party-Aufnahme.
       image: {
-        src: '/photos/party/party-29.webp',
-        alt: 'Gruppe tanzt gemeinsam im hellen Salsaflow Studio',
+        src: '/photos/party/party-52.webp',
+        alt: 'Grosse Tanzgruppe posiert gemeinsam im Salsaflow Studio',
       },
       cardLabel: 'Floweekend',
       cardText: 'Mehr Zeit, mehr Themen, mehr Menschen.',
@@ -210,9 +218,11 @@ export const FLOWEEKEND = defineFloweekendContent({
       primary: { label: 'Ask about Floweekend', href: R.kontakt },
       secondary: { label: 'Ask about your level', href: R.kontakt },
       microcopy: 'The programme, levels and prices will be published with the next confirmed date.',
+      // R188 E7: siehe Kommentar in der deutschen Fassung — party-52 statt party-29,
+      // weil nur dort alle Koepfe in den schmalen Band-Ausschnitt passen.
       image: {
-        src: '/photos/party/party-29.webp',
-        alt: 'Group dancing together in the bright Salsaflow studio',
+        src: '/photos/party/party-52.webp',
+        alt: 'Large dance group posing together in the Salsaflow studio',
       },
       cardLabel: 'Floweekend',
       cardText: 'More time, more topics, more people.',

@@ -132,9 +132,9 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
             <img
               src={h.image.src}
               alt={h.image.alt}
-              className="aspect-[4/5] w-full object-cover object-[32%_35%] sm:aspect-[5/4] lg:aspect-[5/4]"
-              width={1600}
-              height={1067}
+              className="aspect-[4/3] w-full object-cover object-center sm:aspect-[5/4] lg:aspect-[5/4]"
+              width={1800}
+              height={1200}
               loading="eager"
               fetchPriority="high"
             />
@@ -246,7 +246,7 @@ function FormatsSection({ c }: { c: ShowsAnimContent }) {
                 <motion.div
                   key={fmt.name}
                   variants={item}
-                  className="rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] p-6 shadow-[0_14px_40px_rgba(17,17,17,0.04)] sm:p-7"
+                  className="flex min-h-[19rem] flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] p-6 shadow-[0_14px_40px_rgba(17,17,17,0.04)] sm:p-7"
                 >
                   <div className="flex items-center gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[var(--color-salsa)] shadow-sm">
@@ -268,7 +268,7 @@ function FormatsSection({ c }: { c: ShowsAnimContent }) {
                       Runde 7, Item 2). */}
                   <a
                     href={fmt.cta.href}
-                    className="group mt-3 inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+                    className="group mt-auto inline-flex min-h-12 items-center gap-1.5 self-start pt-5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
                   >
                     {fmt.cta.label}
                     <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
@@ -280,7 +280,7 @@ function FormatsSection({ c }: { c: ShowsAnimContent }) {
             {/* Kombi-Karte: hebt sich als roter Akzent-Rahmen ab (Hoehepunkt + Beteiligung). */}
             <motion.div
               variants={item}
-              className="rounded-[var(--radius-card)] border border-[var(--color-salsa)]/30 bg-[var(--color-paper-warm)] p-6 shadow-[0_14px_40px_rgba(17,17,17,0.04)] sm:p-7"
+              className="flex min-h-[19rem] flex-col rounded-[var(--radius-card)] border border-[var(--color-salsa)]/30 bg-[var(--color-paper-warm)] p-6 shadow-[0_14px_40px_rgba(17,17,17,0.04)] sm:p-7"
             >
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-salsa)] text-white shadow-sm">
@@ -315,11 +315,13 @@ function FormatsSection({ c }: { c: ShowsAnimContent }) {
               variants={item}
               className="overflow-hidden rounded-[var(--radius-media)] ring-1 ring-black/5 shadow-[0_24px_60px_-28px_rgba(17,17,17,0.5)]"
             >
+              {/* R188 S1: show-09 ersetzt das schwache Motiv. Das echte Bühnenfoto hat
+                  1800x1200 Pixel. Der mittige Ausschnitt hält die fünf Tänzerinnen im Bild. */}
               <img
                 src={f.image.src}
                 alt={f.image.alt}
-                className="aspect-[4/5] w-full object-cover object-[center_40%] lg:aspect-[4/6]"
-                width={1600}
+                className="aspect-[4/5] w-full object-cover object-center lg:aspect-[4/6]"
+                width={1800}
                 height={1200}
                 loading="lazy"
               />

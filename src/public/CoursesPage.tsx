@@ -21,22 +21,24 @@ import { levelLabelI18n, useLang, WEEKDAY_LABEL } from '@/lib/i18n';
 import { Seo } from '@/lib/seo';
 import { SiteHeader } from '@/public/site/SiteHeader';
 import { SiteFooter, CONTACT } from '@/public/site/SiteFooter';
-import { Shell, Eyebrow, CtaArrow, CtaPill, CtaText, BeatMark, sectionTitle, sectionLead } from '@/public/site/primitives';
+import { Shell, CtaArrow, CtaPill, CtaText, sectionTitle, sectionLead } from '@/public/site/primitives';
 import { WhatsAppIcon } from '@/public/site/BrandIcons';
-import { MEASURE_L, HeroFrame, ClosingInvite } from '@/public/subpage/kit';
+/* R188 TZ1: HeroFrame ist raus. Die Kopfsektion baut jetzt lokal, damit
+   `lg:items-start` gilt, ohne die Achse 'split' sitewide zu aendern (kit.tsx tabu). */
+import { MEASURE_L, MEASURE_XL, ClosingInvite } from '@/public/subpage/kit';
 import { Reveal, useReveal } from '@/public/home/motion';
 import { cn } from '@/lib/utils';
 import { COURSES_OVERVIEW } from '@/public/courses/overview-content';
 import { fetchSchedule, nextScheduleDate, pickVariedCourses, type ScheduleCourse, type ScheduleResponse, type WeekdayKey } from '@/lib/schedule';
+/* Check und ShieldCheck sind mit der Preise-Sektion (R188 TZ5) weggefallen:
+   sie standen nur in deren Leistungsliste und Garantie-Zeile. */
 import {
   ArrowRight,
-  Check,
   Users,
   Music,
   CalendarClock,
   HeartHandshake,
   GraduationCap,
-  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -201,8 +203,14 @@ export function CoursesPage() {
         <CoursesHero />
         <StylesSection />
         <LevelsSection />
-        <PricesSection />
-        <SummerSection />
+        {/* R188 TZ5, Raphael-Video 09:12: «Was ein regulaerer Kurs kostet — komplett weg.»
+            Die Sektion stand hier als dritte Preis-Stelle der Seite: die Privatstunden-
+            Preise laufen weiter unten in PrivatSection, der volle Tarif steht auf /preise.
+            PricesSection ist damit ersatzlos raus. Die Preis-Daten in overview-content.ts
+            bleiben stehen, weil PrivatSection sie liest (prices.groups[key='privat']). */}
+        {/* R188 TZ6: Der komplette Sommer-/Spezialpreis-Promo-Block ist entfernt.
+            Raphael beanstandete nicht nur Badge und Linie, sondern den verbleibenden
+            Block mit «Drei Wochen Sommerkurs» und «Spezialpreis». Kein Ersatz. */}
         <PrivatSection />
         <CalendarSection />
         {/* Design-Kritik Runde 3, Issue 7: der Abbinder stand vorher MITTEN auf der Seite
@@ -221,13 +229,24 @@ export function CoursesPage() {
 }
 
 /* ---------------------------------------------------------------------------- Intro */
-/* Design-Kritik Runde 2, Issue 1: dieser Hero war eine EIGENE Kopie derselben Bauform wie
-   SubHero (Text links / Foto rechts / drei rote Stat-Zahlen). Genau diese Kopien haben die
-   Sechsfach-Dopplung erzeugt (Beleg /tmp/slices/z_hero_grid.jpg). Jetzt laeuft er ueber
-   HeroFrame — dieselbe EINE Definition wie alle Unterseiten, Achse 'split':
-   Headline links, Erklaerung + CTA in der rechten Schiene, kein Hero-Foto. */
+/* R188 TZ1, Raphael-Video 08:45: «Links die Ueberschrift, rechts der frei schwebende
+   Text — die sind nicht auf einer ordentlichen Hoehe.»
+
+   Gemessen am Vorher-Shot (worklog/shots/R188/before/tanzkurse/d-01.png): die H1 beginnt
+   bei y=130, der Lead rechts bei y=103 und der CTA-Block haengt darunter frei in der
+   Luft. Ursache ist die Achse 'split' in HeroFrame (kit.tsx): sie stellt beide Spalten
+   auf `lg:items-end`, also auf eine gemeinsame UNTERkante. Weil die rechte Schiene
+   (Lead + zwei CTAs + drei Zahlen) hoeher baut als die zweizeilige H1, rutscht die
+   Headline nach unten und keine der beiden Spalten hat oben eine gemeinsame Linie.
+
+   kit.tsx ist hier tabu (parallele Items, sitewide Wirkung). Der Kopf laeuft darum
+   nicht mehr ueber HeroFrame, sondern als eigene Sektion in dieser Datei: dasselbe
+   Zweispalter-Bild, aber `lg:items-start` plus eine gemeinsame Haarlinie ueber beiden
+   Spalten. H1 und Lead starten damit auf derselben Oberkante. Alle anderen Routen
+   behalten HeroFrame und ihre Achse unveraendert. */
 function CoursesHero() {
   const { lang } = useLang();
+  const { container, item } = useReveal();
   const h = COURSES_OVERVIEW[lang].hero;
   const de = lang === 'de';
   /* Facts (~290px unter den CTAs) schieben das Foto auf 390 aus dem Fold.
@@ -241,7 +260,7 @@ function CoursesHero() {
     return () => mq.removeEventListener('change', apply);
   }, []);
   /* Mobile: "Studios am Bahnhof SBB" brach als alleinstehendes "SBB" unter "Bahnhof".
-     Kurzeres Label + keep-all im HeroFrame-Fact-Label. Desktop bleibt lesbar. */
+     Kurzeres Label + keep-all im Fact-Label. Desktop bleibt lesbar. */
   const stats: [string, string][] =
     de
       ? [
@@ -259,39 +278,96 @@ function CoursesHero() {
       {/* Raphael 20.08.2026: "Tanzkurse-Bilder rund." Das Hero-Band lief als einziges
           Element der Seite eckig full-bleed bis an beide Viewportkanten (gemessen
           borderRadius 0px, x=0, w=1440) — der ganze Rest der Seite ist gerundet.
+          Das Band steht darum als eigenes, gerundetes Medienband in dieser Seite. */}
+      <section
+        className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
+        style={{ paddingTop: 'calc(var(--nav-h) + 0.5rem)' }}
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
+        />
+        <Shell className="pt-2 pb-10 lg:pt-3 lg:pb-14">
+          <motion.div data-reveal variants={container} initial="hidden" animate="show">
+            {/* Die gemeinsame Oberkante ist sichtbar, nicht nur gerechnet: EINE Haarlinie
+                laeuft ueber beide Spalten, beide Inhalte starten mit demselben pt-8.
 
-          HeroFrame rendert sein media-Band bewusst ohne Radius (kit.tsx) und kit.tsx ist
-          hier tabu. Statt die geteilte Komponente fuer alle Routen zu aendern, laeuft der
-          Hero jetzt OHNE media-Prop und das Band steht als eigenes, gerundetes Medienband
-          in dieser Seite. Alle anderen Routen behalten damit exakt ihr Default-Band. */}
-      <HeroFrame
-        axis="split"
-        dense
-        title={`${h.title}${h.titleAccent ? ` ${h.titleAccent}` : ''}`}
-        lead={h.lead}
-        primary={{
-          label: de ? 'Gratis Schnupperstunde buchen' : 'Book a free trial class',
-          href: SCHNUPPER_HREF,
-        }}
-        secondary={{ label: de ? 'Kursplan ansehen' : 'See the schedule', href: '#kurskalender' }}
-        facts={wide ? stats : undefined}
-      />
+                `mt-0` auf der H1: type-h1 bringt einen eigenen Aussenabstand mit. Der
+                addierte sich auf das pt-8 und schob die Ueberschrift 14px unter die
+                rechte Spalte (am Live-Render gemessen: H1-Box bei y=111, rechte Spalte
+                bei y=97). Genau der Versatz, den Raphael sieht. Mit mt-0 tragen beide
+                Spalten denselben Abstand zur Linie.
+
+                Gleiche BOX-Kante reicht optisch nicht: type-h1 laeuft auf
+                line-height 1, der Lead auf 1.625. Die H1-Versalien starten also direkt
+                am Padding (32px + 0 Leerraum), die erste Lead-Zeile erst 5.6px darunter
+                (32px + (29.25-18)/2). Ohne Korrektur haengt der Text rechts sichtbar
+                tiefer als die Ueberschrift — genau der Versatz aus dem Video.
+                Rechts steht darum `lg:pt-[1.625rem]` = 26px: 26 + 5.6 = 31.6, also die
+                Oberkante der H1-Versalien bei 32. Am Live-Render nachgemessen. */}
+            <div className="grid gap-8 border-t border-[var(--color-line)] lg:grid-cols-[1.15fr_0.85fr] lg:items-start lg:gap-16">
+              <motion.h1
+                variants={item}
+                className={cn('type-h1 mt-0 pt-8 text-[var(--color-ink)]', MEASURE_XL)}
+              >
+                {h.title}{h.titleAccent ? ` ${h.titleAccent}` : ''}
+              </motion.h1>
+              <div className="flex flex-col gap-6 lg:pt-[1.625rem]">
+                <motion.p variants={item} className={cn('max-w-xl text-pretty', sectionLead)}>
+                  {h.lead}
+                </motion.p>
+                <motion.div variants={item} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <PrimaryCta href={SCHNUPPER_HREF}>
+                    {de ? 'Gratis Schnupperstunde buchen' : 'Book a free trial class'}
+                  </PrimaryCta>
+                  <CtaText href="#kurskalender">{de ? 'Kursplan ansehen' : 'See the schedule'}</CtaText>
+                </motion.div>
+                {wide ? (
+                  <motion.dl
+                    variants={item}
+                    className="grid max-w-xl grid-cols-1 gap-5 border-t border-[var(--color-line)] pt-6 md:grid-cols-3 md:gap-4"
+                  >
+                    {stats.map(([value, label]) => (
+                      <div key={label}>
+                        <dt className="font-display text-2xl font-extrabold leading-none text-[var(--color-salsa)] sm:text-3xl">
+                          {value}
+                        </dt>
+                        {/* text-balance + keep-all: "Studios am Bahnhof" soll nicht als
+                            alleinstehendes Wort unter die Zeile rutschen. */}
+                        <dd className="mt-2 text-balance text-xs leading-snug text-[var(--color-ink-muted)] [overflow-wrap:normal] [word-break:keep-all]">
+                          {label}
+                        </dd>
+                      </div>
+                    ))}
+                  </motion.dl>
+                ) : null}
+              </div>
+            </div>
+          </motion.div>
+        </Shell>
+      </section>
       <div className="bg-[var(--color-paper-warm)] pb-10 lg:pb-14">
         <Shell>
           <div className="overflow-hidden rounded-[var(--radius-media)]">
-            <img
-              src="/photos/2026/kurse-classfreude-hero-2100.webp"
-              alt={de ? 'Tanzkurs im hellen Salsaflow Studio' : 'Dance class in the bright Salsaflow studio'}
-              /* Das Motiv ist eine Gruppe mit erhobenen Armen; die Koepfe liegen im
-                 oberen Drittel. Bei 16% schnitt die Bandkante die vordere Reihe am
-                 Scheitel ab. 34% legt die Gesichtszone in die Bandmitte, die Koepfe
-                 bekommen oben Luft. */
-              className="h-[18rem] w-full object-cover object-[center_34%] sm:h-[24rem] lg:h-[30rem]"
-              width={2048}
-              height={1152}
-              loading="eager"
-              fetchPriority="high"
-            />
+            <picture>
+              {/* R188 letzter Mobil-Fix: Das 2100x900-Band braucht auf 390px einen
+                  horizontalen Crop. Jeder getestete Crop endete rechts in einer Person.
+                  Das echte 1920x1280-Original zeigt dieselbe Aufnahme in 3:2 vollständig.
+                  Mobil passt es ohne Crop in den 3:2-Rahmen. Kein Kopf und kein Körper
+                  wird durch die Rahmenkante getrennt. Ab sm bleibt das bisherige Band. */}
+              <source media="(max-width: 639px)" srcSet="/photos/2026/kurse-classfreude-01.webp" />
+              <img
+                src="/photos/2026/kurse-classfreude-hero-2100.webp"
+                alt={de ? 'Tanzkurs im hellen Salsaflow Studio' : 'Dance class in the bright Salsaflow studio'}
+                /* Das Desktop-Motiv ist eine Gruppe mit erhobenen Armen; die Koepfe
+                   liegen im oberen Drittel. 34% legt die Gesichtszone in die Bandmitte. */
+                className="aspect-[3/2] h-auto w-full object-contain sm:aspect-auto sm:h-[24rem] sm:object-cover sm:object-[center_34%] lg:h-[30rem]"
+                width={2048}
+                height={1152}
+                loading="eager"
+                fetchPriority="high"
+              />
+            </picture>
           </div>
         </Shell>
       </div>
@@ -322,43 +398,49 @@ function StylesSection() {
       alt: de ? 'Tanzende Paare auf der Bachata-Flaeche' : 'Couples dancing bachata on the floor',
     },
   } satisfies Record<string, { src: string; position: string; alt: string }>;
-  const metaByKey: Record<string, string[]> = de
-    ? {
-        salsa: ['Beginner bis Advanced', 'Partnerwork', 'Musikalität', 'Social Dance'],
-        bachata: ['Basics', 'Sensual-Elemente', 'Connection', 'Körperkontrolle'],
-        heels: ['Haltung', 'Walks', 'Choreo', 'Ausdruck'],
-      }
-    : {
-        salsa: ['Beginner to advanced', 'Partner work', 'Musicality', 'Social dance'],
-        bachata: ['Basics', 'Sensual elements', 'Connection', 'Body control'],
-        heels: ['Posture', 'Walks', 'Choreo', 'Expression'],
-      };
+  /* R188 TZ2: Die Schlagwort-Listen fuellten die geloeschte Overline-Zeile
+     («Beginner bis Advanced · Partnerwork · …»). Sie hatten sonst keinen Leser. */
 
   return (
     <section style={{ scrollMarginTop: SECTION_OFFSET }} className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
-        <Reveal className="grid gap-6 lg:grid-cols-[0.9fr_0.46fr] lg:items-end">
-          <motion.div variants={item} className="max-w-2xl">
-            <Eyebrow>{s.eyebrow}</Eyebrow>
-            <h2 className={cn('mt-5', sectionTitle, MEASURE_L)}>
+        {/* R188 TZ6: Rechts stand eine zweite Spalte mit Trennlinie, Takt-Marker und dem
+            Satz «Stil waehlen, Schnupperstunde buchen und im passenden Level starten.»
+            Der Satz sagte dasselbe wie der Lead links daneben, und Linie plus Marker
+            waren die Deko-Elemente, die Raphael auf dieser Seite beanstandet
+            («Linie dort scheisse, weg»). Der Kopf ist jetzt eine Spalte. */}
+        {/* R188 TZ2 Runde 2, Raphael-Video 08:52: «Diese Striche ueberall weglassen,
+            mehr Platz lassen.» Runde 1 hatte nur die Deko-Overlines INNERHALB der
+            Stil-Reihen entfernt; der Sektionskopf trug den Kicker weiter. Beleg:
+            worklog/shots/R188/after-final/tanzkurse/d-02.png zeigt ueber der H2 den
+            roten Dreistrich-Marker und «KURSRICHTUNGEN».
+            Der Kicker ist raus. Er benannte in Versalien, was die H2 darunter im Satz
+            sagt («Salsa, Bachata, Heels oder ein gezielter Workshop»), und der Marker
+            war der Strich selbst. Das freigewordene Mass geht als Luft in den Kopf:
+            die Ueberschrift startet ohne mt-5 direkt oben, der Lead bekommt mt-5. */}
+        {/* AAA Runde 2 (Opus), Beleg worklog/shots/R188/after-final2-tanzkurse/
+            tanzkurse/d-02.png: Der Sektionskopf stand in EINER max-w-2xl-Spalte ganz
+            links. Rechts daneben blieben auf 1440 rund 700px voellig leer — bei einer
+            Ueberschrift, die auf zwei Zeilen laeuft, und einem Lead auf zwei Zeilen.
+            Die Sektion begann damit als halb leere Flaeche.
+
+            Kopf und Lead stehen jetzt nebeneinander: die H2 links, der Lead rechts.
+            Beide starten auf derselben Oberkante, dieselbe Zweispalter-Logik wie der
+            Seitenkopf weiter oben (CoursesHero, TZ1) — die Seite bekommt damit EIN
+            Kopfmuster statt zweier. Der Lead traegt `lg:pt-[0.5rem]`, weil type-h2 und
+            sectionLead verschiedene Zeilenhoehen haben und die erste Lead-Zeile sonst
+            ueber der H2-Oberkante der Versalien saesse. Kein neuer Kicker, kein Strich:
+            es verschiebt sich nur, was vorher schon da war. Unter lg stapelt es wie
+            bisher. */}
+        <Reveal>
+          <motion.div
+            variants={item}
+            className="grid gap-x-16 gap-y-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-start"
+          >
+            <h2 className={cn(sectionTitle, MEASURE_L)}>
               {s.title}{s.titleAccent ? ` ${s.titleAccent}` : ''}
             </h2>
-            <p className={`mt-4 text-pretty ${sectionLead}`}>{s.lead}</p>
-          </motion.div>
-          {/* Zwei Eyebrows nebeneinander ("KURSRICHTUNGEN" links, "DEIN WEG" rechts) lasen sich
-              als zwei konkurrierende Sektions-Koepfe. Der rechte Block ist kein Kopf, sondern
-              ein Hinweis — er bekommt jetzt keinen Eyebrow mehr, nur den Takt-Marker als Anker.
-              Runde 2: die weisse Schatten-Box um den Hinweis ist raus, es bleibt eine Oberkante. */}
-          {/* hidden lg:block: unter lg stapelte der Hinweis als toter BeatMark-Block
-              zwischen H2 und erstem Foto (Critic Runde 14, Item 5) — er ist eine
-              Rand-Notiz fuer die breite Zweispalter-Zeile, kein Mobilinhalt. */}
-          <motion.div variants={item} className="hidden border-t border-[var(--color-line)] pt-5 lg:block">
-            <BeatMark />
-            <p className="mt-3 text-pretty text-sm leading-relaxed text-[var(--color-ink-muted)]">
-              {de
-                ? 'Stil wählen, Schnupperstunde buchen und im passenden Level starten.'
-                : 'Choose a style, book a trial class and start at the right level.'}
-            </p>
+            <p className={cn('max-w-xl text-pretty lg:pt-[0.5rem]', sectionLead)}>{s.lead}</p>
           </motion.div>
         </Reveal>
 
@@ -381,11 +463,29 @@ function StylesSection() {
                   : undefined;
               const photo = override?.src ?? card.photo;
               return (
+                /* AAA Runde 2 (Opus), SW2 — Beleg d-02.png/d-03.png:
+                   Die drei Stil-Teaser standen vertikal uneinheitlich. Gemessen an den
+                   Screenshots: Der Salsa-Text beginnt bei y=577 neben einem Bild, das
+                   von y=400 bis y=899 laeuft (also mittig), der Bachata-Text bei y=224
+                   neben einem Bild von y=44 bis y=572 (also ebenfalls mittig) — aber
+                   weil die drei Texte VERSCHIEDEN lang sind (Salsa 3 Zeilen, Bachata 3,
+                   Heels 3, plus unterschiedlich hohe Ueberschriften), landet jeder Block
+                   auf einer anderen relativen Hoehe seiner Reihe. Im Scroll liest sich
+                   das als «Bachata klebt oben am Bild, Heels haengt mittig».
+
+                   Fix ohne neue Elemente: `items-center` faellt weg, die Textspalte
+                   richtet sich mit `items-stretch` (Grid-Default) an der Reihe aus und
+                   setzt ihren Inhalt selbst auf `justify-center`. Damit steht jeder
+                   Text auf DERSELBEN relativen Achse seiner Reihe — der optischen Mitte
+                   des Bildes daneben — unabhaengig davon, wie lang er ist.
+                   Zusaetzlich bekommt die Textspalte `lg:py-0`: das feste py-14/py-20
+                   addierte sich auf die Bildhoehe und war der zweite Grund fuer die
+                   ungleichen Abstaende. Unter lg (gestapelt) bleibt das Polster. */
                 <motion.li
                   key={card.key}
                   variants={item}
                   className={cn(
-                    'grid grid-cols-1 items-center gap-x-12 border-t border-[var(--color-line)]',
+                    'grid grid-cols-1 gap-x-12 border-t border-[var(--color-line)]',
                     flip ? 'lg:grid-cols-[5fr_7fr]' : 'lg:grid-cols-[7fr_5fr]',
                   )}
                 >
@@ -424,11 +524,16 @@ function StylesSection() {
                       className="t-underline absolute inset-x-0 bottom-0 h-[3px] bg-[var(--color-salsa)]"
                     />
                   </a>
-                  <div className={cn('flex flex-col justify-center py-12', flip && 'lg:order-1')}>
-                    <span className="text-[12px] font-semibold uppercase leading-[1.4] tracking-[0.16em] text-[var(--color-ink-muted)]">
-                      {String(i + 1).padStart(2, '0')} · {(metaByKey[card.key] ?? []).join(' · ')}
-                    </span>
-                    <h3 className="mt-4 type-h3 text-[var(--color-ink)]">
+                  {/* R188 TZ2, Raphael-Video 08:52: «Diese Striche ueberall weglassen,
+                      mehr Platz lassen.» Hier stand ueber jeder Ueberschrift eine
+                      Deko-Overline aus Nummer und vier Schlagworten
+                      («01 · BEGINNER BIS ADVANCED · PARTNERWORK · …»), getrennt durch
+                      Mittelpunkte. Sie war reine Dekoration: nicht klickbar, kein Filter,
+                      und sie wiederholte in Stichworten, was der Absatz darunter als Satz
+                      sagt. Raus, und das gewonnene Vertikalmass geht als Luft in die
+                      Reihe (py-12 -> py-14/lg:py-20). */}
+                  <div className={cn('flex flex-col justify-center py-14 lg:py-0', flip && 'lg:order-1')}>
+                    <h3 className="type-h3 text-[var(--color-ink)]">
                       {card.title}
                     </h3>
                     <p className="mt-4 max-w-[42ch] text-pretty text-[1.0625rem] leading-[1.588] text-[var(--color-ink-muted)]">
@@ -457,9 +562,11 @@ function StylesSection() {
           <Reveal className="mt-0">
             <motion.article
               variants={item}
-              className="grid grid-cols-1 items-center gap-x-12 border-y border-[var(--color-line)] lg:grid-cols-[5fr_7fr]"
+              /* AAA SW2: vierte Reihe desselben Zickzacks -> dieselbe Ausrichtung wie die
+                 drei Stil-Reihen darueber (items-stretch + justify-center im Text). */
+              className="grid grid-cols-1 gap-x-12 border-y border-[var(--color-line)] lg:grid-cols-[5fr_7fr]"
             >
-              <div className="order-2 flex flex-col justify-center py-8 lg:order-1 lg:py-14">
+              <div className="order-2 flex flex-col justify-center py-8 lg:order-1 lg:py-0">
                 <GraduationCap aria-hidden className="h-8 w-8 text-[var(--color-salsa)]" strokeWidth={1.75} />
                 <h3 className="mt-4 type-h3 text-[var(--color-ink)]">
                   {workshop.title}
@@ -498,7 +605,10 @@ function StylesSection() {
 function LevelsSection() {
   const { lang } = useLang();
   const { item } = useReveal();
-  const de = lang === 'de';
+  /* `de` ist mit R188 TZ2 weggefallen: die Sektion hatte genau einen im Code
+     geschriebenen Text, das Deko-Label «Stufenweise / Step by step». Alles andere
+     liest sie aus COURSES_OVERVIEW[lang]. Mit dem Label ist auch die Sprachweiche hier
+     ueberfluessig. */
   const l = COURSES_OVERVIEW[lang].levels;
   const [mainTrack, heelsTrack] = l.tracks;
   /* Raphael 20.08.2026: "Level/Aufbau weniger Text." Gate G27 misst den ganzen
@@ -520,10 +630,22 @@ function LevelsSection() {
      der Einordnung" nennt. Die Sektion sagt die Schnupperstunde damit einmal
      statt zweimal und ist bei 119 Woertern — genauso viele wie vor dem Fix,
      eine Aussage mehr.
-     Die Leiter bleibt: sie ist die Signatur der Sektion, kein Text-Fueller. */
-  const sideText = de
-    ? 'Eine Staffel, eine Stufe weiter.'
-    : 'One term, one stage further.';
+     Die Leiter bleibt: sie ist die Signatur der Sektion, kein Text-Fueller.
+
+     R188 TZ3, Raphael-Video 09:00: «Viel zu viel Text, kuerzen, Abstand zwischen
+     den Sachen.» Runde 4 zieht weiter zusammen — gestrichen sind:
+     - die Zeile `sideText` ("Eine Staffel, eine Stufe weiter."): sie sagt in anderen
+       Worten dasselbe wie mainTrack.note ("Ein klarer Weg von ganz neu bis Advanced")
+       direkt daneben.
+     - die beiden Flow-Erklaersaetze in der Leiter (flowNoteBeginner /
+       flowNoteIntermediate): sie hingen als zweite Textebene an zwei der fuenf Stufen
+       und erklaerten das Wort «Flow», das die Stufe selbst schon traegt. Die Leiter
+       liest sich damit als fuenf gleich gebaute Zeilen statt als drei Zeilen und zwei
+       Absaetze.
+     - die Zustands-Spalte rechts ("AUFBAUEN"/"VERBINDEN"): eine dritte Spalte
+       Versalien pro Zeile, die keine Information trug, die die Stufe nicht schon hat.
+     Das gewonnene Mass geht als Abstand zurueck in die Liste (py-3 -> py-4).
+     Die Flow-Texte bleiben in overview-content.ts stehen: /kursaufbau liest sie. */
 
   return (
     /* Kritiker r5: untere ~40% Creme vor Pricing + Mobile leere Hälfte — Sektions-Padding
@@ -540,27 +662,29 @@ function LevelsSection() {
               Leiter rechts. Bei der Default-Dehnung (stretch) blieben darunter gemessene
               282px leere Flaeche stehen. Die Trennlinie zieht separat ueber die volle
               Zeilenhoehe, damit die Spalten-Optik erhalten bleibt. */}
-          <div className="relative grid lg:grid-cols-[0.96fr_1.04fr] lg:items-start">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-y-0 left-[calc(0.96/2*100%)] hidden w-px bg-[var(--color-line)] lg:block"
-            />
+          {/* R188 TZ6a Runde 2, Raphael-Video 09:20: «Die Linie dort ist scheisse, weg.»
+              Hier lief die letzte senkrechte Trennlinie der Seite: ein 1px-Streifen ueber
+              die volle Zeilenhoehe zwischen linker Spalte und Leiter (Beleg
+              worklog/shots/R188/after-final2-tanzkurse/tanzkurse/d-05.png, die Linie
+              laeuft dort von y=0 bis y=595 zwischen «Salsa On1 und On2» und «Salsa &
+              Bachata»). Sie trennte zwei Spalten, die der Weissraum schon trennt.
+              Raus, ohne Ersatz. Der Spaltenabstand steigt von 12 auf 16
+              (lg:pr-12 -> lg:pr-16, lg:pl-12 -> lg:pl-16): das Mass, das die Linie
+              vorher besetzt hat, geht als Luft in die Luecke, damit die Spalten ohne
+              Strich klar auseinander liegen. */}
+          <div className="grid lg:grid-cols-[0.96fr_1.04fr] lg:items-start">
             <motion.div
               variants={item}
-              className="border-b border-[var(--color-line)] py-6 sm:py-7 lg:border-b-0 lg:py-7 lg:pr-12"
+              className="border-b border-[var(--color-line)] py-6 sm:py-7 lg:border-b-0 lg:py-7 lg:pr-16"
             >
-              <Eyebrow>{l.eyebrow}</Eyebrow>
-              <h2 className={cn("mt-4", sectionTitle, MEASURE_L)}>
+              {/* R188 TZ2: Kicker «LEVEL & AUFBAU» plus Takt-Marker raus (Begruendung
+                  am Kopf der Stil-Sektion). Der Lead rueckt von mt-3 auf mt-5 ab. */}
+              <h2 className={cn(sectionTitle, MEASURE_L)}>
                 {l.title}{l.titleAccent ? ` ${l.titleAccent}` : ''}
               </h2>
-              <p className={cn("mt-3 max-w-xl text-pretty", sectionLead)}>{l.lead}</p>
+              <p className={cn("mt-5 max-w-xl text-pretty", sectionLead)}>{l.lead}</p>
 
-              {/* Aus Ueberschrift + Absatz + 01/02/03-Liste ist eine Zeile geworden.
-                  Die drei Schritte standen als Deko-Liste da (nicht klickbar) und
-                  wiederholten nur, was Lead und Leiter schon sagen. */}
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--color-ink-muted)]">{sideText}</p>
-
-              <div className="mt-6 grid gap-x-10 gap-y-5 border-t border-[var(--color-line)] pt-5 sm:grid-cols-2">
+              <div className="mt-7 grid gap-x-10 gap-y-6 border-t border-[var(--color-line)] pt-6 sm:grid-cols-2">
                 <div>
                   <h3 className="type-h3 text-[var(--color-ink)]">{l.onTitle}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{l.onText}</p>
@@ -577,30 +701,27 @@ function LevelsSection() {
             </motion.div>
 
             {/* Rechte Spalte: keine Karte, keine eigene Fuellfarbe mehr — sie stand als
-                graue Flaeche in einer weissen Box auf Papier (drei Toene fuer eine Liste). */}
-            <motion.div variants={item} className="py-6 lg:py-7 lg:pl-12">
+                graue Flaeche in einer weissen Box auf Papier (drei Toene fuer eine Liste).
+                R188 TZ6a: pl-12 -> pl-16, siehe Begruendung an der linken Spalte. */}
+            <motion.div variants={item} className="py-6 lg:py-7 lg:pl-16">
               <div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <BeatMark />
-                      <h3 className="type-h3 text-[var(--color-ink)]">{mainTrack?.title}</h3>
-                    </div>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{mainTrack?.note}</p>
-                  </div>
-                  {/* Deko-Pille -> Label (Kritik Runde 2: Pillen nur wo sie klickbar filtern).
-                      R183 Welle 2: "Stufe fuer Stufe" -> "Stufenweise". Ein Wort statt drei,
-                      gleiche Aussage. Die Leiter darunter ist 01 bis 05 durchnummeriert.
-                      Runde 3: kurz geloescht, dann wieder eingesetzt. Gemessen kostet das
-                      Label 0 Woerter, weil textContent es ohne Leerzeichen an die Nachbarn
-                      klebt ("Advanced.Stufenweise01Beginner"). Es zu entfernen haette also
-                      sichtbare Gestaltung gekostet und am Gate nichts gebracht. */}
-                  <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
-                    {de ? 'Stufenweise' : 'Step by step'}
-                  </span>
+                {/* R188 TZ2: Rechts stand hier das gesperrte Label «STUFENWEISE». Das ist
+                    dieselbe Bauform wie die geloeschten Overline-Striche: gesperrte
+                    Versalien als Deko neben einer Ueberschrift. Es sagte ausserdem
+                    nichts Neues — die Leiter direkt darunter ist 01 bis 05 nummeriert. */}
+                {/* R188 TZ2 Runde 2: Auch dieser rote Dreistrich ist weg. Er stand als
+                    einziger Marker der Seite noch neben einer Ueberschrift und war damit
+                    genau der «Strich», den Raphael meint — nur an einer H3 statt an einem
+                    Kicker. */}
+                <div>
+                  <h3 className="type-h3 text-[var(--color-ink)]">{mainTrack?.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{mainTrack?.note}</p>
                 </div>
 
-                <ol className="mt-5 grid gap-2">
+                {/* R188 TZ3: eine Zeile pro Stufe, alle gleich gebaut. Die Flow-Saetze
+                    und die Zustands-Spalte rechts sind raus (Begruendung oben), der
+                    Zeilenabstand waechst von py-3 auf py-4. */}
+                <ol className="mt-6 grid">
                   {mainTrack?.rungs.map((rung, ri) => {
                     const isFlow = /flow/i.test(rung);
                     return (
@@ -609,7 +730,7 @@ function LevelsSection() {
                         className={cn(
                           // Zeilen statt Kaesten: Trennlinie + Weissraum. Die aktive Stufe
                           // ist an einer roten Kante links erkennbar, nicht an einer Karte.
-                          'grid grid-cols-[3.25rem_1fr] gap-4 border-b border-[var(--color-line)] py-3 last:border-b-0 sm:grid-cols-[4.25rem_1fr_auto] sm:items-center',
+                          'grid grid-cols-[3.25rem_1fr] items-center gap-4 border-b border-[var(--color-line)] py-4 last:border-b-0 sm:grid-cols-[4.25rem_1fr]',
                           isFlow && 'border-l-2 border-l-[var(--color-salsa)] pl-4',
                         )}
                       >
@@ -623,66 +744,29 @@ function LevelsSection() {
                         >
                           {String(ri + 1).padStart(2, '0')}
                         </span>
-                        <span className="min-w-0">
-                          <span
-                            className={cn(
-                              'block font-display text-lg font-bold leading-tight sm:text-xl',
-                              isFlow ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
-                            )}
-                          >
-                            {rung}
-                          </span>
-                          {isFlow ? (
-                            <span className="mt-1 block text-sm leading-relaxed text-[var(--color-ink-muted)]">
-                              {/* R59: ein Satz pro Stufe. Vorher trugen Beginner Flow und
-                                  Intermediate Flow denselben flowNote-Text. Jetzt Beginner =
-                                  Grundschritte festigen, Intermediate = Figuren variieren. */}
-                              {/beginner/i.test(rung) ? l.flowNoteBeginner : l.flowNoteIntermediate}
-                            </span>
-                          ) : null}
-                        </span>
-                        <span className="col-span-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)] sm:col-span-1 sm:text-right">
-                          {isFlow ? (de ? 'Verbinden' : 'Connect') : de ? 'Aufbauen' : 'Build'}
+                        <span
+                          className={cn(
+                            'min-w-0 font-display text-lg font-bold leading-tight sm:text-xl',
+                            isFlow ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
+                          )}
+                        >
+                          {rung}
                         </span>
                       </li>
                     );
                   })}
                 </ol>
 
-                <div className="mt-5 grid items-end gap-x-6 gap-y-3 lg:grid-cols-[1.55fr_1fr]">
-                  <figure className="min-w-0">
-                    <img
-                      src="/composites/graphic-world/step-salsa-line.webp"
-                      alt=""
-                      aria-hidden
-                      width={2048}
-                      height={760}
-                      loading="lazy"
-                      className="pointer-events-none w-full opacity-75"
-                    />
-                    <figcaption className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
-                      Salsa On1 &middot; 1-2-3 &middot; 5-6-7
-                    </figcaption>
-                  </figure>
-                  <figure className="min-w-0">
-                    <img
-                      src="/composites/graphic-world/step-bachata-line.webp"
-                      alt=""
-                      aria-hidden
-                      width={577}
-                      height={316}
-                      loading="lazy"
-                      className="pointer-events-none w-full opacity-75"
-                    />
-                    <figcaption className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
-                      Bachata &middot; 1-2-3-4
-                    </figcaption>
-                  </figure>
-                </div>
+                {/* R188 TZ4, Raphael-Video 09:05: «Die Bilder in der Levelsektion
+                    weglassen.» Hier standen zwei Fussschritt-Diagramme
+                    (step-salsa-line.webp / step-bachata-line.webp) mit Versal-Captions
+                    unter der Leiter. Sie waren aria-hidden, also fuer Screenreader
+                    ohnehin nicht vorhanden, und erklaerten eine Taktzaehlung, die auf
+                    dieser Uebersichtsseite nirgends gebraucht wird. Beide raus. */}
 
                 {/* Vier weisse Schatten-Pillen -> eine Fakten-Zeile unter einer Haarlinie.
                     Sie waren nicht klickbar und damit Deko (Kritik Runde 2). */}
-                <ul className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t border-[var(--color-line)] pt-4">
+                <ul className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t border-[var(--color-line)] pt-5">
                   {l.chips.map((chip) => (
                     <li key={chip.label} className="text-sm font-semibold text-[var(--color-ink)]">
                       {chip.label}
@@ -692,180 +776,6 @@ function LevelsSection() {
               </div>
             </motion.div>
           </div>
-        </Reveal>
-      </Shell>
-    </section>
-  );
-}
-
-/* ---------------------------------------------------------------------------- Preise */
-function PricesSection() {
-  const { lang } = useLang();
-  const { item } = useReveal();
-  const de = lang === 'de';
-  const p = COURSES_OVERVIEW[lang].prices;
-  const courseGroup = p.groups.find((group) => group.key === 'kurs') ?? p.groups[0];
-  const privatGroup = p.groups.find((group) => group.key === 'privat');
-  const coursePrice = courseGroup?.rows[0];
-  const included = de
-    ? ['8 Lektionen', 'Nachholen in der Staffel', 'Aushilfe wird organisiert', 'Keine versteckten Kosten']
-    : ['8 lessons', 'Make-up class in the term', 'Dance partner help is organised', 'No hidden costs'];
-  return (
-    /* Kritiker r5: Pricing enger an Level-Pfad — Top-Padding gekürzt, Bottom bleibt ruhig. */
-    <section style={{ scrollMarginTop: SECTION_OFFSET }} className="bg-[var(--color-bg-soft)] py-12 pt-10 lg:py-20 lg:pt-12">
-      <Shell>
-        <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-12">
-          <Reveal className="max-w-xl">
-            <motion.div variants={item}>
-              <Eyebrow>{p.eyebrow}</Eyebrow>
-            </motion.div>
-            <motion.h2 variants={item} className={cn("mt-4", sectionTitle, MEASURE_L)}>
-              {p.title}{p.titleAccent ? ` ${p.titleAccent}` : ''}
-            </motion.h2>
-            <motion.p variants={item} className={cn("mt-3 max-w-xl text-pretty", sectionLead)}>
-              {p.lead}
-            </motion.p>
-            <motion.p variants={item} className="mt-6 flex items-center gap-3 text-sm font-semibold text-[var(--color-ink)]">
-              <ShieldCheck aria-hidden className="h-5 w-5 shrink-0 text-[var(--color-salsa)]" strokeWidth={1.75} />
-              {p.guarantee}
-            </motion.p>
-          </Reveal>
-
-          {/* Design-Kritik Runde 2 (critical, y=3050-3900): drei Radius-Ebenen ineinander —
-              weisse Aussenbox mit Schatten, darin zwei Karten mit Radius und Schatten, darin
-              die Check-Zeilen NOCHMAL als eigene Kaesten. Alle drei Ebenen sind raus. Es
-              bleiben zwei Spalten, gefasst von einer Ober- und einer Trennlinie; die
-              Check-Zeilen sind wieder eine Liste. */}
-          <Reveal className="grid border-t border-[var(--color-line)] sm:grid-cols-2" stagger={0.08}>
-            {courseGroup && coursePrice ? (
-              <motion.article
-                variants={item}
-                className="relative flex h-full flex-col border-b border-[var(--color-line)] py-6 sm:border-b-0 sm:border-r sm:pb-7 sm:pr-8"
-              >
-                {/* Warmer Rot-Schein statt Pastell-Blob (gleiche Technik wie der Hero-Lichtschein).
-                    Runde 3: -right-16 schob den Kreis 64px ueber die rechte Shell-Kante — auf 390px
-                    (Shell-Padding 20px) waren das gemessene 14px Seitenbreite zu viel. Auf Mobil
-                    sitzt der Schein jetzt buendig an der Kante, ab sm bleibt der Ueberhang
-                    (dort hat die Shell genug Luft, die Seite bleibt exakt 390/1440 breit). */}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -top-16 right-0 -z-10 h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.08)_0%,transparent_70%)] sm:-right-16"
-                />
-                <div className="relative">
-                  <p className="type-h4 text-[var(--color-ink-muted)]">
-                    {courseGroup.title}
-                  </p>
-                  <p className="mt-6 font-display text-[4rem] font-extrabold leading-none tracking-[-0.022em] text-[var(--color-salsa)] sm:text-[4.65rem]">
-                    {coursePrice.value}
-                  </p>
-                  <p className="mt-3 max-w-xs text-base leading-relaxed text-[var(--color-ink-muted)]">{coursePrice.label}</p>
-                </div>
-                <ul className="relative mt-8 grid gap-2.5">
-                  {included.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-start gap-3 text-sm font-semibold text-[var(--color-ink)]"
-                    >
-                      <Check size={15} strokeWidth={3} aria-hidden className="mt-0.5 shrink-0 text-[var(--color-salsa)]" />
-                      <span className="leading-snug">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                {courseGroup.cta ? (
-                  <a
-                    href={courseGroup.cta.href}
-                    className="group relative mt-auto inline-flex items-center gap-1.5 pt-8 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
-                  >
-                    {courseGroup.cta.label}
-                    <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
-                  </a>
-                ) : null}
-              </motion.article>
-            ) : null}
-
-            {privatGroup ? (
-              <motion.article
-                variants={item}
-                className="flex h-full flex-col py-6 sm:pb-7 sm:pl-8"
-              >
-                <p className="type-h4 text-[var(--color-ink-muted)]">{privatGroup.title}</p>
-                <dl className="mt-5 border-t border-[var(--color-line)]">
-                  {privatGroup.rows.map((row, i) => (
-                    <div
-                      key={row.label}
-                      className="grid grid-cols-[1fr_auto] items-baseline gap-4 border-b border-[var(--color-line)] py-4 last:border-b-0"
-                    >
-                      <dt className="text-[0.95rem] leading-snug text-[var(--color-ink-muted)]">{row.label}</dt>
-                      {/* Rot-Dosierung: nur der Anker-Preis (erste Zeile) rot, die weiteren in Ink. */}
-                      <dd
-                        className={cn(
-                          'shrink-0 font-display text-base font-extrabold',
-                          i === 0 ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
-                        )}
-                      >
-                        {row.value}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-                {privatGroup.cta ? (
-                  <a
-                    href={privatGroup.cta.href}
-                    className="group mt-auto inline-flex items-center gap-1.5 pt-6 text-sm font-semibold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
-                  >
-                    {privatGroup.cta.label}
-                    <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
-                  </a>
-                ) : null}
-              </motion.article>
-            ) : null}
-          </Reveal>
-        </div>
-      </Shell>
-    </section>
-  );
-}
-
-/* ---------------------------------------------------------------------------- Sommerkurse */
-function SummerSection() {
-  const { lang } = useLang();
-  const { item } = useReveal();
-  const de = lang === 'de';
-  const su = COURSES_OVERVIEW[lang].summer;
-  return (
-    <section style={{ scrollMarginTop: SECTION_OFFSET }} className="bg-[var(--color-paper-warm)] py-16 lg:py-24">
-      <Shell>
-        {/* Bild links, Inhalt rechts. Bricht das Hero-Echo (Text links / Bild rechts).
-            Runde 2: das Panel war eine weisse Schatten-Karte, in der das Bild NOCHMAL in
-            einem eigenen Radius-Rahmen mit 1rem Abstand sass. Beide Ebenen sind weg —
-            das Foto laeuft bis an die Spaltenkante wie im Home-Zickzack. */}
-        <Reveal className="border-y border-[var(--color-line)] lg:grid lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
-          <motion.div variants={item} className="relative">
-            <img
-              src="/photos/party/party-46-v3.webp"
-              alt={de ? 'Lachendes Tanzpaar im hellen Salsaflow Studio' : 'Smiling dance couple in the bright Salsaflow studio'}
-              /* Letzte eckige Medienflaeche der Seite (Sommerkurse). Gleicher Token wie
-                 Hero-Band, Stil-Fotos und Privatstunden-Foto. Kein overflow-Wrapper noetig:
-                 der Radius sitzt direkt auf dem Bild. */
-              className="aspect-[4/3] w-full rounded-[var(--radius-media)] object-cover object-[center_38%]"
-              width={2048}
-              height={1360}
-              loading="lazy"
-            />
-          </motion.div>
-          <motion.div variants={item} className="py-12 lg:pl-12">
-            {/* Die Glas-Pill lag als eigene Schwebe-Ebene auf dem Foto. Sie ist jetzt die
-                Meta-Zeile ueber dem Eyebrow — gleiche Information, eine Ebene weniger. */}
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-salsa)]">{su.badge}</p>
-            <Eyebrow>{su.eyebrow}</Eyebrow>
-            <h2 className={cn("mt-5", sectionTitle, MEASURE_L)}>
-              {su.title}{su.titleAccent ? ` ${su.titleAccent}` : ''}
-            </h2>
-            <p className={cn("mt-4 max-w-xl text-pretty", sectionLead)}>{su.body}</p>
-            <div className="mt-8">
-              <PrimaryCta href={SCHNUPPER_HREF}>{de ? 'Gratis Schnupperstunde buchen' : 'Book a free trial class'}</PrimaryCta>
-            </div>
-          </motion.div>
         </Reveal>
       </Shell>
     </section>
@@ -916,8 +826,11 @@ function PrivatSection() {
   const { item } = useReveal();
   const de = lang === 'de';
   const pr = COURSES_OVERVIEW[lang].privat;
-  // Eine Quelle fuer die Privat-Preise: dieselben Zeilen wie in der Preise-Sektion.
-  const privatPrices = COURSES_OVERVIEW[lang].prices.groups.find((g) => g.key === 'privat')?.rows ?? [];
+  /* R188 TZ5 Runde 2: `privatPrices` ist mit der Preistabelle weggefallen. Damit liest
+     /tanzkurse die Preis-Daten aus overview-content.ts an KEINER Stelle mehr — die Seite
+     nennt keinen Franken-Betrag und verweist stattdessen auf /preise. Die Daten selbst
+     bleiben in overview-content.ts stehen: sie sind dort der gemeinsame Bestand, und
+     /preise ist die Seite, die sie zeigt. */
   return (
     <section id="privatstunden" className="scroll-mt-24 bg-[var(--color-paper-warm)] py-16 lg:py-24">
       <Shell>
@@ -926,13 +839,57 @@ function PrivatSection() {
             {/* Bild-Chrome und schwebende Glas-Karte raus (Kritik Runde 2). Die Caption
                 sitzt jetzt unter dem Foto an einer Haarlinie. */}
             <motion.div variants={item} className="flex h-full flex-col">
+              {/* R188 TZ7, Raphael-Video 09:28: «Das Privatstunden-Foto ist
+                  unterbelichtet, tauschen.»
+
+                  Runde 3. Die zwei Vorgaenger sind beide am Screenshot gescheitert:
+                  /photos/gallery/kurse/05.jpg (Luminanz 50/255, Nachtaufnahme mit
+                  Blitz) und danach ein weissabgeglichenes Derivat von
+                  /photos/2026/hero-paar-studiowand-01.webp (Luminanz 111.6). Auf der
+                  hellen Papierflaeche (#FBFAF8) stand auch das zweite noch als dunkles
+                  Feld. Ein Weissabgleich macht ein Bild neutral, nicht hell.
+
+                  Jetzt: /photos/premium/offer-privat-wide-original-v2.webp, gemessen
+                  Luminanz 121.5 im Original, R minus B = +5.4, Laplace-Schaerfe 3.27.
+                  Das Motiv zeigt genau ZWEI Menschen in einer Eins-zu-eins-Fuehrung vor
+                  der Salsaflow-Wand — die Aussage der Sektion.
+
+                  Ableitung ist ein reiner Downscale 1800x1200 auf 1500x1000, Qualitaet
+                  88. Kein Aufhellen, kein Upscaling, kein Crop — beide Koepfe bleiben
+                  vollstaendig (TZ8). Gemessen danach: Luminanz 124.4, R 130.0 / G 118.8
+                  / B 124.5. Vor dem Einbau per Read angesehen.
+
+                  Das Quellmotiv laeuft sitewide sonst nur auf der Startseite
+                  (src/public/home/content.ts:115).
+
+                  R188 TZ8 (mobiler Crop): Die Datei war vollstaendig, der RAHMEN nicht.
+                  Mobil lief hier aspect-[4/5] mit object-center. Nachgerechnet am Bild
+                  (Quelle 1500x1000): die beiden Koepfe belegen zusammen x 205..1055,
+                  also 850px. Ein 4/5-Fenster ist bei 1000px Hoehe nur 800px breit — 50px
+                  zu schmal. Der Kopf der Frau lief darum links aus dem Bild, ihr Zopf war
+                  weg und das Gesicht klebte auf der Kante. Wichtig: das war KEIN
+                  Positions-Fehler. Bei 800px Fensterbreite rettet KEIN object-position-Wert
+                  beide Koepfe, weil das Motiv breiter ist als der Rahmen. Ein X-Wert haette
+                  nur ausgesucht, welcher Kopf faellt.
+
+                  Fix ist deshalb das Seitenverhaeltnis, nicht die Position: mobil
+                  aspect-square (1000x1000 Fenster). Damit passt die 850px-Spanne mit
+                  75px Luft je Seite. object-[26%_center] legt das Fenster auf x=130 —
+                  mittig ueber die Koepfe statt mittig ueber die Datei, weil das Paar
+                  links der Bildmitte steht. Auf 390px Viewport (Rahmen 358x358) am
+                  gerenderten Ausschnitt geprueft: beide Koepfe vollstaendig mit Luft.
+
+                  Ab sm bleibt alles wie gehabt: 4/3 ist 1333px breit, dort liegen beide
+                  Koepfe schon bei object-center frei (Luft links 122px, rechts 361px),
+                  und ab lg traegt object-cover ohnehin die volle Spaltenhoehe. Der
+                  Desktop-Zustand aendert sich durch diesen Fix nicht. */}
               <div className="relative min-h-0 flex-1 overflow-hidden rounded-[var(--radius-media)]">
                 <img
-                  src="/photos/gallery/kurse/05.jpg"
-                  alt={de ? 'Tanzpaar bei einer Privatstunde' : 'Couple in a private lesson'}
-                  className="aspect-[4/5] w-full object-cover object-[center_42%] sm:aspect-[4/3] lg:aspect-auto lg:h-full"
-                  width={1600}
-                  height={1066}
+                  src="/photos/r188-tanzkurse/privatstunden-hell-1500.webp"
+                  alt={de ? 'Tanzlehrer fuehrt eine Schuelerin in einer Privatstunde vor der Salsaflow-Wand' : 'Dance teacher leading a student in a private lesson in front of the Salsaflow wall'}
+                  className="aspect-square w-full object-cover object-[26%_center] sm:aspect-[4/3] sm:object-center lg:aspect-auto lg:h-full"
+                  width={1500}
+                  height={1000}
                   loading="lazy"
                 />
               </div>
@@ -948,13 +905,13 @@ function PrivatSection() {
           </Reveal>
 
           <Reveal className="order-1 max-w-xl lg:order-2">
-            <motion.div variants={item}>
-              <Eyebrow>{pr.eyebrow}</Eyebrow>
-            </motion.div>
-            <motion.h2 variants={item} className={cn("mt-5", sectionTitle, MEASURE_L)}>
+            {/* R188 TZ2: Kicker «PRIVATSTUNDEN» plus Strich raus. Die H2 sagt
+                «Persoenlich schneller weiterkommen», der Absatz nennt die Privatstunde
+                beim Namen; das Versal-Label war die dritte Nennung und der Strich Deko. */}
+            <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
               {pr.title}{pr.titleAccent ? ` ${pr.titleAccent}` : ''}
             </motion.h2>
-            <motion.p variants={item} className={cn("mt-4 max-w-xl text-pretty", sectionLead)}>
+            <motion.p variants={item} className={cn("mt-5 max-w-xl text-pretty", sectionLead)}>
               {pr.body}
             </motion.p>
             <motion.ul variants={item} className="mt-7 space-y-px">
@@ -971,29 +928,28 @@ function PrivatSection() {
               })}
             </motion.ul>
 
-            {/* Kompakte Preis-Tabelle (gleiche Zahlen wie in der Preise-Sektion). */}
+            {/* R188 TZ5 Runde 2, Raphael-Video 09:12: «Die Sektion komplett weg.»
+                Runde 1 hatte die eigene Sektion «Was ein regulaerer Kurs kostet»
+                geloescht — hier stand aber weiter eine zweite, vollstaendige
+                Preistabelle: vier Zeilen CHF 100 / 450 / 130 / 600 mit Tarif-Labels.
+                Am Screenshot nachgewiesen (worklog/shots/R188/after-final2-tanzkurse/
+                tanzkurse/d-07.png, Aufnahme 11:46 also NACH Runde 1): der Preisblock
+                stand unveraendert auf der Seite. Kundenwort war «komplett weg», nicht
+                «eine von zwei Stellen weg».
+
+                Ersatz ist der schlanke Verweis, den der Auftrag nennt: eine Zeile plus
+                Textlink auf /preise. Die Zahlen leben dort an EINER Stelle weiter.
+                Bewusst KEIN neuer Kicker und kein Deko-Strich (TZ2) — die Zeile haengt
+                an derselben Haarlinie, die die Tabelle vorher trug. */}
             <motion.div variants={item} className="mt-8 border-t border-[var(--color-line)] pt-6">
-              <h3 className="type-h4 text-[var(--color-ink-muted)]">
-                {de ? 'Preise' : 'Prices'}
-              </h3>
-              <dl className="mt-3 space-y-px">
-                {privatPrices.map((row, i) => (
-                  <div
-                    key={row.label}
-                    className="flex items-baseline justify-between gap-4 border-t border-[var(--color-line)] py-3 first:border-t-0"
-                  >
-                    <dt className="text-[0.95rem] leading-snug text-[var(--color-ink-muted)]">{row.label}</dt>
-                    <dd
-                      className={cn(
-                        'shrink-0 font-display text-base font-extrabold',
-                        i === 0 ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
-                      )}
-                    >
-                      {row.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+              <p className="text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">
+                {de
+                  ? 'Alle Tarife für Privatstunden und Kurse stehen auf der Preisseite.'
+                  : 'All rates for private lessons and courses are on the prices page.'}
+              </p>
+              <div className="mt-3">
+                <CtaText href="/preise">{de ? 'Preise ansehen' : 'See the prices'}</CtaText>
+              </div>
             </motion.div>
 
             <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -1051,12 +1007,14 @@ function CalendarSection() {
     <section id="kurskalender" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-10 pb-6 lg:py-12 lg:pb-6">
       <Shell>
         <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          {/* R188 TZ2: letzter Kicker der Seite («KURSKALENDER») raus — gleiche
+              Begruendung wie oben. Damit traegt /tanzkurse keinen einzigen
+              Versal-Kicker und keinen roten Strich mehr. */}
           <motion.div variants={item} className="max-w-xl">
-            <Eyebrow>{cal.eyebrow}</Eyebrow>
-            <h2 className={cn("mt-4", sectionTitle, MEASURE_L)}>
+            <h2 className={cn(sectionTitle, MEASURE_L)}>
               {cal.title}{cal.titleAccent ? ` ${cal.titleAccent}` : ''}
             </h2>
-            <p className={cn("mt-3 max-w-xl text-pretty", sectionLead)}>{cal.lead}</p>
+            <p className={cn("mt-5 max-w-xl text-pretty", sectionLead)}>{cal.lead}</p>
           </motion.div>
           <motion.div variants={item}>
             <PrimaryCta href="/kursplan">{cal.cta}</PrimaryCta>

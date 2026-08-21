@@ -8,7 +8,8 @@
 // anniversary-content.ts.
 
 import { motion } from 'framer-motion';
-import { Check, GraduationCap, Sparkles, Users, type LucideIcon } from 'lucide-react';
+// R188 E5: `Check` lief nur in der entfernten AudienceSection.
+import { GraduationCap, Sparkles, Users, type LucideIcon } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { ANNIVERSARY, type AnniversaryContent } from '@/public/events/anniversary-content';
@@ -42,7 +43,12 @@ export function AnniversaryPage() {
       <AnniversaryHero c={c} />
       <AboutSection c={c} />
       <ProgrammSection c={c} />
-      <AudienceSection c={c} />
+      {/* R188 E5 (Video 04:35 "Das hier würde ich weglassen"): die Sektion "Für wen /
+          Für alle, die mehr wollen als eine normale Kurswoche" ist raus. Sie wiederholte
+          mit ihrer Vier-Punkte-Liste, was die drei Saeulen in AboutSection schon sagen.
+          Die Funktion AudienceSection ist mitentfernt, damit kein toter Code liegen
+          bleibt; die Copy steht weiter in anniversary-content.ts und ist damit ohne
+          Textverlust zurueckholbar. */}
       <ProofSection c={c} />
       <ClosingSection c={c} />
       <FaqBlock title={c.faqTitle} items={c.faq} />
@@ -66,7 +72,25 @@ function AnniversaryHero({ c }: { c: AnniversaryContent }) {
       {/* R82 (Fold 1440x730): lg:pt-8 -> lg:pt-0 hebt den Hero-Inhalt um 32px. Zusammen
           mit H1-Kappung, Foto lg:aspect-[3/2] und CTA lg:mt-4 sitzt der rote Knopf
           "Programm ansehen" ganz im Fenster. NUR Abstand + H1-Schriftgroesse. */}
-      <Shell className="grid items-center gap-10 pb-14 pt-6 sm:pb-16 lg:grid-cols-[0.98fr_1.02fr] lg:gap-14 lg:pb-20 lg:pt-0">
+      {/* R188 E6, Teil 1 (Video 05:10 "Hier, das ist viel zu fest. Also viel zu nah
+          beieinander"). Gemessen bei 1440x900: die H1 endete bei x=679, das Foto begann
+          bei x=736 — 57px Luft zwischen Textspalte und Bildkante. Der Spaltenabstand
+          selbst war lg:gap-14 (56px); die H1 lief bis an ihre Spaltenkante und stiess
+          damit fast an den Bildrahmen.
+
+          lg:gap-20 (80px) gibt beiden Spalten die fehlende Luft. Weil `items-center`
+          bleibt, verschiebt das keine vertikale Ausrichtung.
+
+          R188 E6, Teil 4 — Nachtrag Runde 2. gap-20 allein war zu wenig: mehr
+          Spaltenabstand schiebt die BILDspalte nach rechts, die linke Textkante bleibt
+          liegen. Fuer den Knopf aendert sich dadurch nichts. Der Grund, warum die
+          CTA-Reihe verloren aussah, ist die Spaltenteilung: bei 0.98fr war die
+          Textspalte 615px breit, die H1 nutzte davon 615px, die CTA-Reihe nur 365px.
+          0.86fr/1.14fr nimmt der Textspalte die ungenutzte Breite (615 -> 540) und gibt
+          sie dem Foto. Die H1 bricht dadurch weiter oben um, Lead und CTA-Reihe ruecken
+          naeher an die Spaltenkante, und der Knopf steht nicht mehr in einem Loch.
+          Gegengeprueft im Screenshot, nicht nur in der Zahl. */}
+      <Shell className="grid items-center gap-10 pb-14 pt-6 sm:pb-16 lg:grid-cols-[0.86fr_1.14fr] lg:gap-20 lg:pb-20 lg:pt-0">
         <motion.div data-reveal variants={container} initial="hidden" animate="show" className="max-w-2xl">
           <motion.div variants={item} className="mb-6">
             <Breadcrumb trail={c.crumbs} />
@@ -85,11 +109,23 @@ function AnniversaryHero({ c }: { c: AnniversaryContent }) {
           <motion.p variants={item} className={`mt-6 max-w-xl ${sectionLead}`}>
             {h.lead}
           </motion.p>
-          <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center lg:mt-4">
+          {/* R188 E6, Fix-Runde 3. Die Runde-2-Aenderung hat den Knopf nicht bewegt:
+              Messung vorher bei 1440px: CTA-Wrapper x=52..592, Pill x=52..257,
+              Ghost x=273..421. Rechts vom CTA-Paar blieben 171px leer; links 0px.
+              Der Kritiker hatte deshalb recht: die schmalere Textspalte rahmte den
+              Knopf nur neu, liess seine Position aber exakt bei x=52.
+
+              `lg:justify-center` verteilt den freien Raum der 540px-Zeile gleich:
+              Das 369px breite Paar rueckt um 85px nach rechts. H1 und Lead bleiben
+              linksbuendig, mobil bleibt die gestapelte CTA-Reihe unveraendert. */}
+          <motion.div
+            variants={item}
+            className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 lg:mt-6 lg:justify-center"
+          >
             <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
             <GhostCta href={h.secondary.href}>{h.secondary.label}</GhostCta>
           </motion.div>
-          <motion.p variants={item} className="mt-4 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+          <motion.p variants={item} className="mt-4 max-w-xl text-sm leading-relaxed text-[var(--color-ink-muted)]">
             {h.microcopy}
           </motion.p>
         </motion.div>
@@ -100,10 +136,42 @@ function AnniversaryHero({ c }: { c: AnniversaryContent }) {
               src={h.image.src}
               alt={h.image.alt}
               // R82: lg:aspect-[4/5] (Foto 814px) -> lg:aspect-[3/2] (~434px) schrumpft
-              // die rechte Spalte; items-center zentriert hoeher. Motiv/Crop bleiben.
-              className="aspect-[4/5] w-full object-cover object-[center_38%] sm:aspect-[5/4] lg:aspect-[3/2]"
-              width={1400}
-              height={933}
+              // die rechte Spalte; items-center zentriert hoeher.
+              //
+              // R188 E6, Teil 2 (Video 05:16 "Das Bild ist unnötig abgeschnitten, ein
+              // bisschen höher") + E7 (05:24 "die Köpfe nicht abgeschnitten").
+              // ROOT CAUSE, nicht Symptom: die Quelle events-hero-1998.webp ist
+              // 1998x1124, also 16:9 (1.778). Der Rahmen erzwang 3/2 (1.5).
+              // Nachgerechnet am gerenderten Rahmen 651x434:
+              //   scale = max(651/1998, 434/1124) = 0.386 -> skaliert 771x434
+              //   Ueberhang X = 120px, Ueberhang Y = 0
+              // Geschnitten wurde also LINKS und RECHTS, nie oben. Der Y-Wert 38% in
+              // object-[center_38%] konnte gar nichts heben — er hatte keinen Weg.
+              // Weggefallen sind 120px Bildbreite, und darin standen die aeusseren
+              // Taenzer:innen der Gruppe.
+              //
+              // Fix ist das Seitenverhaeltnis, nicht die Position: lg:aspect-[16/9]
+              // ist exakt das Verhaeltnis der Datei. Ueberhang X und Y sind damit beide
+              // 0 — das Foto steht vollstaendig im Rahmen, keine Person wird
+              // angeschnitten, kein Kopf gekappt. Die Rahmenhoehe sinkt von 434px auf
+              // 366px, der Hero wird also zugleich ruhiger.
+              // object-center statt object-[center_38%]: bei Ueberhang 0 ist jede
+              // Position gleichwertig, und der ehrliche Wert ist die Mitte.
+              //
+              // R188 Fix-Runde 3, E7 mobil. Der Satz "mobil schneidet der Rahmen
+              // bewusst" stand hier zwei Runden lang und war falsch. Nachgemessen
+              // mit Gesichtserkennung im 390er-Rendering: aspect-[4/5] presste die
+              // 16:9-Datei in ein Hochformat, schnitt links und rechts je ~230px weg
+              // und zerteilte dabei die aeussere Taenzerin senkrecht — genau der
+              // Anschnitt, den E7 verbietet. Die Zahlen bei 348px Spaltenbreite:
+              //   4/5 (348x435) -> 2 angeschnittene Koepfe
+              //   5/4 (348x278) -> 1 angeschnittener Kopf
+              //   4/3 (348x261) -> 0
+              // Darum ueberall 4/3 oder flacher. Ein Gruppenfoto im Querformat
+              // vertraegt kein Hochformat-Fenster.
+              className="aspect-[4/3] w-full object-cover object-center lg:aspect-[16/9]"
+              width={1998}
+              height={1124}
               loading="eager"
               fetchPriority="high"
             />
@@ -168,7 +236,7 @@ function AboutSection({ c }: { c: AnniversaryContent }) {
               <img
                 src={a.image.src}
                 alt={a.image.alt}
-                className="aspect-[4/5] w-full object-cover object-[center_42%]"
+                className="aspect-[4/5] w-full object-cover object-[center_42%] lg:aspect-[4/3] lg:object-top"
                 width={1400}
                 height={1750}
                 loading="lazy"
@@ -236,70 +304,6 @@ function ProgrammSection({ c }: { c: AnniversaryContent }) {
             </a>
           </motion.div>
         </Reveal>
-      </Shell>
-    </section>
-  );
-}
-
-/* -------------------------------------------------------------------- Fuer wen */
-function AudienceSection({ c }: { c: AnniversaryContent }) {
-  const { item } = useReveal();
-  const a = c.audience;
-  return (
-    <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
-      <Shell>
-        <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-          <Reveal className="order-2 lg:order-1">
-            <motion.div
-              variants={item}
-              className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]"
-            >
-              <img
-                src={a.image.src}
-                alt={a.image.alt}
-                className="aspect-[4/5] w-full object-cover object-[center_40%]"
-                width={1200}
-                height={1500}
-                loading="lazy"
-              />
-            </motion.div>
-          </Reveal>
-          <Reveal className="order-1 max-w-xl lg:order-2">
-            <motion.div variants={item}>
-              <Eyebrow>{a.eyebrow}</Eyebrow>
-            </motion.div>
-            <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
-              {a.title} {a.titleAccent ? <TitleAccent>{a.titleAccent}</TitleAccent> : null}
-            </motion.h2>
-            <motion.div variants={item} className="mt-7 rounded-[var(--radius-media)] border border-[var(--color-salsa)]/25 bg-white p-7 shadow-[0_18px_50px_rgba(17,17,17,0.05)] sm:p-8">
-              <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
-                <BeatMark />
-                {a.fitTitle}
-              </p>
-              <ul className="mt-5 space-y-px">
-                {a.fit.map((y) => (
-                  <li key={y} className="flex items-start gap-3 border-t border-[var(--color-line)] py-3.5 first:border-t-0">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
-                      <Check size={13} strokeWidth={3} aria-hidden />
-                    </span>
-                    <span className="text-[0.98rem] leading-relaxed text-[var(--color-ink)]">{y}</span>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-            <motion.div variants={item} className="mt-5 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] p-6">
-              <h3 className="type-h3 text-[var(--color-ink)]">{a.newTitle}</h3>
-              <p className="mt-2 text-[0.96rem] leading-relaxed text-[var(--color-ink-muted)]">{a.newBody}</p>
-              <a
-                href={a.cta.href}
-                className="group mt-4 inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
-              >
-                {a.cta.label}
-                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
-              </a>
-            </motion.div>
-          </Reveal>
-        </div>
       </Shell>
     </section>
   );

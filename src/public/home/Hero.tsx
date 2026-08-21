@@ -121,8 +121,26 @@ export function Hero() {
   // (Rechenweg im Kommentar am Grid). Steht als Arbitrary Property auf der Section, weil
   // Foto und Textblock sie beide als calc()-Basis lesen — laufen die zwei Werte
   // auseinander, zerschneidet die Fotokante die H1.
+  /* R188 / SW5 + Absprache 18.08. ("Luft unter dem Hero", im Video als F2 fuer /faq und
+     als allgemeiner Wunsch "mehr Platz, weniger gedraengt" wiederholt).
+     Gemessen VOR dem Fix (node /tmp/r188-gaps.cjs, Kante = padding-bottom der Sektion
+     plus padding-top der naechsten):
+       Hero -> #angebot        64px      <- die einzige halbe Kante der Seite
+       #angebot -> #kurse     128px
+       #kurse -> #community   128px
+       ... alle weiteren      128px
+     Auf 1440px UND auf 390px derselbe Befund. Der Hero traegt padding-bottom 0, die Luft
+     unter ihm kam allein aus dem Kopfpolster der Folgesektion. Der Uebergang von der
+     wichtigsten Flaeche der Seite in die naechste war damit der engste der ganzen Seite.
+     Der Vorbefund steht ausformuliert in home/TeamBlock.tsx (Kommentar R183, Zeilen 218-232):
+     dort wurde nachgewiesen, dass kein Wert aus TeamBlock diese Kante bewegt und der Hebel
+     hier liegt. Genau hier sitzt er jetzt.
+     pb-16 (64px) bringt die Kante auf 128px und damit auf denselben Wert wie jede andere —
+     der Hero bekommt Luft, ohne dass die Seite einen neuen Sonderabstand lernt. lg:pb-14 am
+     Grid darunter bleibt unangetastet: das ist der Innenabstand der Textspalte zum
+     Sektionsfuss, nicht die Kante. */
   return (
-    <section className="relative w-full bg-[var(--color-paper-warm)] text-[var(--color-ink)] [--hero-photo-h:68svh]">
+    <section className="relative w-full bg-[var(--color-paper-warm)] pb-16 text-[var(--color-ink)] [--hero-photo-h:68svh]">
       <motion.div data-reveal variants={container} initial="hidden" animate="show">
         {/* Zwei Spalten erst ab lg. Die Section-Mindesthoehe bindet den Fold an den Viewport,
             damit das Foto oben mitspielt statt darunter zu rutschen (Kopfkommentar Ursache A).

@@ -100,8 +100,8 @@ export const SHOWS_ANIM = {
       secondary: { label: 'Beispiele ansehen', href: '#beispiele' },
       microcopy: 'Sag uns Anlass, Datum, Ort und gewünschte Stimmung.',
       image: {
-        src: '/photos/shows/show-12.webp',
-        alt: 'Salsaflow-Tanzcrew in dynamischer Bewegung auf dunkler Bühne, Tänzerinnen in violetten Fransenkleidern und Tänzer in Grün',
+        src: '/photos/shows/show-23.webp',
+        alt: 'Salsaflow-Tanzcrew tanzt gemeinsam auf einer hellen Eventbühne',
       },
       cardLabel: 'Für dein Event',
       cardText: 'Show, Animation und Workshop aus einer Hand.',
@@ -132,8 +132,8 @@ export const SHOWS_ANIM = {
       ],
       cta: { label: 'Anlass beschreiben', href: ANFRAGE },
       image: {
-        src: '/photos/shows/show-13.webp',
-        alt: 'Salsaflow-Tänzer bringen die Gäste einer Firmen-Weihnachtsfeier vor dem Christbaum in Bewegung',
+        src: '/photos/shows/show-19.webp',
+        alt: 'Salsaflow-Tanzcrew zeigt eine Choreografie auf der Bühne',
       },
     },
     formats: {
@@ -168,9 +168,16 @@ export const SHOWS_ANIM = {
         fit: 'der Abend einen klaren Höhepunkt und danach Beteiligung bekommen soll.',
         cta: { label: 'Kombination anfragen', href: ANFRAGE },
       },
+      // R188 S1: vorher show-16.webp. Das Bild war mit Graustufen-Mittel 15.7 das
+      // dunkelste im ganzen Bestand — Koerper vor schwarzem Grund, Gesichter kaum
+      // lesbar. Genau das las der Kunde im Video als "wirkt KI-generiert" (Feedback
+      // S1). Der R187-Katalog fuehrt show-16 zusaetzlich unter "NUR-AEHNLICH" mit
+      // einem graphic-world-Kandidaten, also ohne belegtes Foto-Original.
+      // Ersatz ist show-09.webp: echtes Bühnenfoto derselben Crew in 1800x1200.
+      // Alle fünf Tänzerinnen stehen mit Kopf und Körper innerhalb des Bildrandes.
       image: {
-        src: '/photos/shows/show-16.webp',
-        alt: 'Salsaflow-Company beim Finale einer Show, alle mit weit ausgestreckten Armen auf der Bühne',
+        src: '/photos/shows/show-09.webp',
+        alt: 'Fünf Tänzerinnen der Salsaflow-Company in lila Kostümen auf der Bühne',
       },
     },
     process: {
@@ -193,12 +200,12 @@ export const SHOWS_ANIM = {
           alt: 'Grosse Salsaflow-Tanzcompany posiert nach der Show gemeinsam auf der Bühne',
         },
         {
-          src: '/photos/shows/show-08.webp',
-          alt: 'Weihnachts-Show mit Samichlaus und einer Tänzerin in Rot auf der Bühne',
+          src: '/photos/shows/show-02.webp',
+          alt: 'Salsaflow-Tanzcrew zeigt eine Gruppenpose auf dunkler Bühne',
         },
         {
-          src: '/photos/shows/show-17.webp',
-          alt: 'Tänzer mit Mikrofon animiert die Gäste eines Firmenanlasses zum Mitmachen',
+          src: '/photos/shows/show-20.webp',
+          alt: 'Tänzerinnen der Salsaflow-Company in lila Kostümen auf der Bühne',
         },
         {
           src: '/photos/shows/show-03.webp',
@@ -260,8 +267,8 @@ export const SHOWS_ANIM = {
       secondary: { label: 'See examples', href: '#beispiele' },
       microcopy: 'Tell us the occasion, date, place and the mood you want.',
       image: {
-        src: '/photos/shows/show-12.webp',
-        alt: 'Salsaflow dance crew in dynamic motion on a dark stage, dancers in purple fringe dresses and men in green',
+        src: '/photos/shows/show-23.webp',
+        alt: 'Salsaflow dance crew performing together on a bright event stage',
       },
       cardLabel: 'For your event',
       cardText: 'Show, animation and workshop from one team.',
@@ -292,8 +299,8 @@ export const SHOWS_ANIM = {
       ],
       cta: { label: 'Describe your occasion', href: ANFRAGE },
       image: {
-        src: '/photos/shows/show-13.webp',
-        alt: 'Salsaflow dancers get the guests of a company Christmas party moving in front of the Christmas tree',
+        src: '/photos/shows/show-19.webp',
+        alt: 'Salsaflow dance crew performing a choreography on stage',
       },
     },
     formats: {
@@ -328,9 +335,10 @@ export const SHOWS_ANIM = {
         fit: 'the evening needs a clear highlight and some participation afterwards.',
         cta: { label: 'Ask about a combination', href: ANFRAGE },
       },
+      // R188 S1: siehe Begruendung im deutschen Zweig.
       image: {
-        src: '/photos/shows/show-16.webp',
-        alt: 'Salsaflow company at the finale of a show, everyone with arms wide open on stage',
+        src: '/photos/shows/show-09.webp',
+        alt: 'Five dancers of the Salsaflow company in purple costumes on stage',
       },
     },
     process: {
@@ -353,12 +361,12 @@ export const SHOWS_ANIM = {
           alt: 'Large Salsaflow dance company posing together on stage after the show',
         },
         {
-          src: '/photos/shows/show-08.webp',
-          alt: 'Christmas show with Santa and a dancer in red on stage',
+          src: '/photos/shows/show-02.webp',
+          alt: 'Salsaflow dance crew holding a group pose on a dark stage',
         },
         {
-          src: '/photos/shows/show-17.webp',
-          alt: 'A dancer with a microphone gets the guests of a company event to join in',
+          src: '/photos/shows/show-20.webp',
+          alt: 'Dancers of the Salsaflow company in purple costumes on stage',
         },
         {
           src: '/photos/shows/show-03.webp',

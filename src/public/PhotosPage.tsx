@@ -21,7 +21,8 @@ import { Seo } from '@/lib/seo';
 import { SiteHeader } from '@/public/site/SiteHeader';
 import { SiteFooter } from '@/public/site/SiteFooter';
 import { Shell, Eyebrow, TitleAccent, CtaPill, GoogleRating } from '@/public/site/primitives';
-import { Reveal, useReveal } from '@/public/home/motion';
+import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
+import { useReducedMotion, type Variants } from 'framer-motion';
 import { GALLERY, ALBUM_ORDER, GALLERY_PHOTOS, type AlbumId } from '@/public/gallery/content';
 import { InstagramShowcase } from '@/public/social/InstagramShowcase';
 
@@ -47,6 +48,43 @@ function packColumns(items: Packed[], n: number): Packed[][] {
   return cols;
 }
 
+/* R188 G1 (Video 01:20-01:29): "Schoene Reinflieg-Animationen ergaenzen (Bilder fliegen
+ * beim Scrollen rein)."
+ *
+ * Vorher lag das ganze Raster in EINEM `Reveal`. Das ist ein einziger Container, der
+ * einmal zuendet, wenn seine Oberkante in den Viewport kommt — bei einem Raster, das
+ * mehrere Bildschirmhoehen hoch ist, heisst das: die obersten Kacheln blenden auf, alle
+ * anderen stehen schon fertig da, bevor man sie sieht. Beim Scrollen fliegt nichts rein.
+ *
+ * Jetzt traegt JEDE Kachel ihren eigenen `whileInView`. Sie zuendet, wenn sie selbst
+ * sichtbar wird, also genau beim Scrollen und ueber die ganze Seitenlaenge.
+ *
+ * Die Werte kommen aus dem bestehenden Motion-Vertrag des Repos (home/motion.tsx):
+ * nur transform + opacity, EASE_OUT [0.22,1,0.36,1], `once: true`, Distanz <= 24px.
+ * Der Versatz ist 18px plus ein leichtes scale 0.985 — dieselbe Sprache wie die
+ * Bild-Reveals auf /team, kein neuer Effekt.
+ *
+ * reducedMotion: `useReducedMotion` nimmt Versatz UND Skalierung heraus, es bleibt ein
+ * kurzer Fade. Vor der Hydration ist der Endzustand der Startzustand (useHydrated),
+ * sonst schriebe der Prerender `opacity: 0` in jede Kachel und die Galerie waere ohne
+ * JavaScript leer — derselbe Grund, aus dem `useReveal` den Haken schon traegt.
+ */
+function useTileReveal(): Variants {
+  const reduced = useReducedMotion();
+  const hydrated = useHydrated();
+  return {
+    hidden: hydrated
+      ? { opacity: 0, y: reduced ? 0 : 18, scale: reduced ? 1 : 0.985 }
+      : { opacity: 1, y: 0, scale: 1 },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { duration: reduced ? 0.3 : 0.55, ease: EASE_OUT },
+    },
+  };
+}
+
 function useGalleryCols() {
   const [n, setN] = useState(2);
   useEffect(() => {
@@ -68,6 +106,7 @@ export function PhotosPage() {
   const { lang } = useLang();
   const g = GALLERY[lang];
   const { item } = useReveal();
+  const tileReveal = useTileReveal();
   const [filter, setFilter] = useState<Filter>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
@@ -152,8 +191,19 @@ export function PhotosPage() {
                   <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
                     {packed.map((col, ci) => (
                       <ul key={ci} className="flex flex-col gap-3 sm:gap-4">
-                        {col.map(({ photo: p, index: i }) => (
-                          <li key={`${filter}-${p.src}`}>
+                        {col.map(({ photo: p, index: i }, rowIndex) => (
+                          <motion.li
+                            key={`${filter}-${p.src}`}
+                            data-reveal
+                            variants={tileReveal}
+                            initial="hidden"
+                            whileInView="show"
+                            viewport={VIEWPORT}
+                            /* Kleiner Versatz je Reihe, damit die vier Spalten nicht
+                               im Gleichschritt kippen. Bei 0.05s und maximal drei
+                               Stufen bleibt es ein Takt, keine Warteschlange. */
+                            transition={{ delay: (rowIndex % 3) * 0.05 }}
+                          >
                             <button
                               type="button"
                               onClick={() => setLightboxIndex(i)}
@@ -191,7 +241,7 @@ export function PhotosPage() {
                                   wiederholte nur die Filter-Chips, die direkt darueber stehen.
                                   Das Album steht weiter im Filter und in der Album-Zeile. */}
                             </button>
-                          </li>
+                          </motion.li>
                         ))}
                       </ul>
                     ))}

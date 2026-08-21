@@ -7,11 +7,16 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
+import { sectionLead } from '@/public/site/primitives';
 import {
+  Breadcrumb,
   ClosingInvite,
+  GhostCta,
+  MEASURE_XL,
+  PrimaryCta,
   SubPageShell,
-  SubHero,
   SectionHead,
   Shell,
   Reveal,
@@ -64,20 +69,80 @@ function allFaqItems(c: FaqPageContent) {
   return c.faqSection.columns.flatMap((column) => column.items);
 }
 
+/* R188 F2 + F6 (Video 00:27-00:45): "Hero: mehr Platz/Luft generell" und "ganzer Text
+ * inkl. Buttons links zusammen, dazu ein Bild. Simpel."
+ *
+ * Der alte Hero lief ueber `SubHero axis="split"`. Diese Achse setzt die H1 links und
+ * schiebt Lead, Knoepfe und Microcopy in eine rechte SCHIENE — Text und Knoepfe standen
+ * also auf zwei Spalten verteilt, nicht zusammen. Dazu trug er `dense` und `tightBottom`,
+ * zwei Schalter, die den Hero absichtlich flach machen (Padding oben/unten gekuerzt,
+ * damit ein Bildband in den 730er-Fold rutscht). Beide Befunde aus dem Video haengen
+ * genau daran: eng, und der Text auseinandergezogen.
+ *
+ * Hier steht darum ein eigener, einfacher Hero statt einer weiteren Achse in kit.tsx:
+ * links Breadcrumb, H1, Lead, beide Knoepfe und die Microcopy als EIN Block; rechts
+ * das Bild. `dense`/`tightBottom` sind weg, das Padding ist grosszuegig
+ * (pt nav-h + 3rem, pb-16/lg:pb-24) — das ist die Luft aus F2.
+ *
+ * Die H1 ist wieder eine echte Ueberschrift statt der ersten FAQ-Frage. Die Frage steht
+ * unveraendert unten in der Liste; sie zweimal zu zeigen war der Grund, warum der Hero
+ * fruehe eine Riesenfrage ohne Seitentitel trug.
+ */
 function FaqHero({ c }: { c: FaqPageContent }) {
-  const first = allFaqItems(c)[0];
+  const { lang } = useLang();
+  const { container, item } = useReveal();
+  const h = c.hero;
   return (
-    <SubHero
-      axis="split"
-      seoCrumbs={[c.crumb]}
-      title={first.q}
-      lead={first.a}
-      primary={{ label: c.hero.primary.label, href: c.hero.primary.href }}
-      secondary={{ label: c.hero.secondary.label, href: '#faq' }}
-      microcopy={c.hero.microcopy}
-      dense
-      tightBottom
-    />
+    <section
+      className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
+      style={{ paddingTop: 'calc(var(--nav-h) + 3rem)' }}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
+      />
+      <Shell className="grid items-center gap-10 pb-16 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16 lg:pb-24">
+        <motion.div data-reveal variants={container} initial="hidden" animate="show">
+          <motion.div variants={item} className="mb-6">
+            <Breadcrumb trail={[c.crumb]} />
+          </motion.div>
+          <motion.h1 variants={item} className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
+            {lang === 'de' ? 'Fragen und Antworten' : 'Questions and answers'}
+          </motion.h1>
+          <motion.p variants={item} className={cn('mt-6 max-w-xl text-pretty', sectionLead)}>
+            {h.lead}
+          </motion.p>
+          {/* Text UND Knoepfe im selben Block (F6). */}
+          <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
+            <GhostCta href="#faq" down>
+              {h.secondary.label}
+            </GhostCta>
+          </motion.div>
+          <motion.p variants={item} className="mt-5 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+            {h.microcopy}
+          </motion.p>
+        </motion.div>
+
+        {/* Rechts EIN Bild, simpel: ein Rahmen, ein Radius, kein Chip, keine Collage. */}
+        <Reveal>
+          <motion.div
+            variants={item}
+            className="relative overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_30px_70px_-32px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
+          >
+            <img
+              src={h.image.src}
+              alt={h.image.alt}
+              className="aspect-[4/3] w-full object-cover object-[center_35%]"
+              width={1920}
+              height={1280}
+              loading="eager"
+              fetchPriority="high"
+            />
+          </motion.div>
+        </Reveal>
+      </Shell>
+    </section>
   );
 }
 
@@ -107,20 +172,16 @@ function FaqSection({ c }: { c: FaqPageContent }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replaceAll('<', '\\u003c') }}
       />
       <Shell>
-        <Reveal className="max-w-3xl">
-          <SectionHead eyebrow={f.eyebrow} title={f.title} titleAccent={f.titleAccent} />
-          <div className="mt-6 flex flex-wrap gap-2">
-            {c.themes.items.map((theme) => (
-              <a
-                key={theme.href}
-                href={theme.href}
-                className="inline-flex min-h-11 items-center rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-paper)] px-3.5 py-2 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
-              >
-                {theme.label}
-              </a>
-            ))}
-          </div>
-          <div className="mt-8 border-t border-[var(--color-line)] pt-6">
+        {/* R188 F3 (Video 00:45, "Haeufige Fragen sieht lost aus, Ueberschriften anders").
+            Der Kopf stand vorher in einer max-w-3xl-Spalte ganz links, die rechten zwei
+            Fuenftel der Seite blieben leer — das ist das "lost". Jetzt traegt der Kopf
+            die volle Shell: links Titel und Themen-Chips, rechts der Weg zur direkten
+            Frage. Die Chips sitzen auf einer eigenen Linie statt frei zu schweben. */}
+        <Reveal className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:gap-16">
+          <motion.div variants={item}>
+            <SectionHead eyebrow={f.eyebrow} title={f.title} titleAccent={f.titleAccent} />
+          </motion.div>
+          <motion.div variants={item} className="border-t border-[var(--color-line)] pt-6 lg:border-t-0 lg:pt-0">
             <p className="text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">
               {lang === 'de'
                 ? 'Deine Frage ist nicht dabei? Schreib uns kurz, wir antworten persönlich.'
@@ -133,27 +194,128 @@ function FaqSection({ c }: { c: FaqPageContent }) {
               {lang === 'de' ? 'Frag uns direkt' : 'Ask us directly'}
               <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
             </a>
-          </div>
+          </motion.div>
         </Reveal>
 
-        <Reveal className="mt-12 flex max-w-3xl flex-col gap-16 lg:mt-16" stagger={0.06}>
-          {f.columns.map((column) => (
-            <motion.div key={column.title} variants={item}>
-              <h3 className="type-h3 text-[var(--color-ink)]">{column.title}</h3>
-              <div className="mt-6 divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
-                {column.items.map((faq, i) => (
-                  <FaqItem
-                    key={faq.q}
-                    q={faq.q}
-                    a={faq.a}
-                    defaultOpen={column === f.columns[0] && i === 0}
-                    link={faq.link}
-                  />
-                ))}
-              </div>
-            </motion.div>
+        {/* R188 Runde 3, Sol-Befund m-02 ("fahrige Treppe mit viel verschenkter Hoehe").
+            Gemessen auf 390px: die sieben Pillen sind zwischen 82px und 269px breit, weil
+            jedes Label anders lang ist. In einem `flex-wrap` passte darum nie eine zweite
+            Pille neben die erste — sieben Pillen ergaben sieben Zeilen, jede mit einem
+            unterschiedlich langen Rest an leerem Platz rechts. Das ist die Treppe: nicht
+            zu wenig Platz, sondern eine Umbruchregel, die bei sehr unterschiedlichen
+            Breiten kein ruhiges Bild ergeben kann.
+            Mobil laufen die Pillen darum in EINER Reihe waagerecht, mit Wischen statt
+            Umbruch. Sieben Zeilen werden zu einer; die Pillen behalten ihre Hoehe (min-h-11
+            = 44px Touch-Ziel) und stehen alle auf derselben Grundlinie. `snap` laesst die
+            Reihe sauber einrasten, die negativen Raender fuehren die Reihe bis an den
+            Bildschirmrand, damit sichtbar ist, dass es rechts weitergeht.
+            Ab `sm` ist wieder Umbruch aktiv: dort ist die Zeile breit genug fuer mehrere
+            Pillen nebeneinander, und Desktop bleibt exakt wie freigegeben. */}
+        {/* `-mx-5 px-5` spiegelt exakt das mobile Shell-Padding (`px-5` in
+            site/primitives.tsx:24). Es gibt dafuer kein Token — die 1.25rem stehen dort
+            als Utility. Aendert sich das Shell-Padding, muss dieser Wert mitziehen. */}
+        <Reveal className="-mx-5 mt-8 flex snap-x snap-mandatory gap-2 overflow-x-auto px-5 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:snap-none sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+          {c.themes.items.map((theme) => (
+            <motion.a
+              key={theme.href}
+              variants={item}
+              href={theme.href}
+              className="inline-flex min-h-11 shrink-0 snap-start items-center whitespace-nowrap rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-paper)] px-3.5 py-2 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:shrink"
+            >
+              {theme.label}
+            </motion.a>
           ))}
         </Reveal>
+
+        {/* R188 F5 (Video 01:05): "Abwechselnd layouten: links FAQ / rechts Bild, dann
+            rechts FAQ / links Bild usw." Der Wechsel haengt am Index: bei geradem Index
+            steht die Frageliste links, bei ungeradem rechts. Umgesetzt ueber
+            `lg:order-*` statt ueber zwei getrennte Bloecke — so gibt es genau EINE
+            Bauform, und mobil stapelt alles in der Lesereihenfolge (Bild, dann Fragen).
+            `items-start` plus `lg:sticky` laesst das Bild neben langen Listen mitlaufen,
+            statt oben allein stehen zu bleiben. */}
+        <div className="mt-16 flex flex-col gap-20 lg:mt-20 lg:gap-28">
+          {f.columns.map((column, ci) => {
+            const imageRight = ci % 2 === 0;
+            return (
+              <Reveal
+                key={column.title}
+                className="grid items-start gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16"
+                stagger={0.06}
+              >
+                <motion.div
+                  variants={item}
+                  className={cn('min-w-0', imageRight ? 'lg:order-1' : 'lg:order-2')}
+                >
+                  <h3 className="type-h3 text-[var(--color-ink)]">{column.title}</h3>
+                  {/* F3: eine Zeile Erklaerung unter jeder Ueberschrift. Sie sagt, was
+                      dieser Block beantwortet — vorher stand dort nur ein Wort. */}
+                  <p className="mt-3 max-w-xl text-pretty text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">
+                    {column.blurb}
+                  </p>
+                  <div className="mt-7 divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
+                    {column.items.map((faq, i) => (
+                      <FaqItem
+                        key={faq.q}
+                        q={faq.q}
+                        a={faq.a}
+                        defaultOpen={ci === 0 && i === 0}
+                        link={faq.link}
+                        link2={faq.link2}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Zwei Motive bei langen Spalten (Befund d-04 + d-05, Ursache in
+                    faq/content.ts bei `image2`).
+
+                    Warum NICHT zwei sticky Bilder untereinander: gemessen pinnen zwei
+                    `sticky`-Geschwister mit demselben `top` auf genau derselben Hoehe und
+                    liegen dann uebereinander, statt sich abzuloesen (bei scrollY 3600
+                    standen beide auf top=20). Zwei Sticky-Elemente koennen sich nicht
+                    gegenseitig abloesen.
+
+                    Darum traegt nur das ZWEITE Bild `sticky`. Das erste scrollt normal mit
+                    der oberen Haelfte der Liste weg; sobald es oben raus ist, ist das
+                    zweite an seiner Stelle und bleibt fuer die untere Haelfte stehen.
+                    Ohne `image2` bleibt die Spalte exakt wie vorher: EIN Bild, sticky
+                    ueber die ganze Liste. */}
+                <motion.div
+                  variants={item}
+                  className={cn(imageRight ? 'lg:order-2' : 'lg:order-1', 'flex flex-col gap-8')}
+                >
+                  <figure className={cn(!column.image2 && 'lg:sticky lg:top-[calc(var(--nav-h)+2rem)]')}>
+                    <div className="overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
+                      <img
+                        src={column.image.src}
+                        alt={column.image.alt}
+                        className="aspect-[4/3] w-full object-cover object-[center_35%]"
+                        width={1920}
+                        height={1280}
+                        loading="lazy"
+                      />
+                    </div>
+                  </figure>
+                  {column.image2 ? (
+                    <figure className="lg:sticky lg:top-[calc(var(--nav-h)+2rem)]">
+                      <div className="overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
+                        <img
+                          src={column.image2.src}
+                          alt={column.image2.alt}
+                          className="aspect-[4/3] w-full object-cover object-[center_35%]"
+                          width={1800}
+                          height={1200}
+                          loading="lazy"
+                        />
+                      </div>
+                    </figure>
+                  ) : null}
+                </motion.div>
+              </Reveal>
+            );
+          })}
+        </div>
       </Shell>
     </section>
   );

@@ -11,6 +11,18 @@ import type { Lang } from '@/lib/i18n';
 /** Ein Eckdaten-Paar in der Danceflow-Sektion (Label + Wert). */
 export type EventFact = { label: string; value: string };
 
+/** Eine Karte der Event-Preview (R188 E3). Ein Event, ein Bild, ein Weg. */
+export type EventPreviewCard = {
+  title: string;
+  /** Ein Satz, was der Abend ist. Bewusst kurz — die Karte ist ein Wegweiser, kein Text. */
+  text: string;
+  /** Rhythmus oder Format in wenigen Woertern (steht als Meta-Zeile ueber dem Titel). */
+  meta: string;
+  image: { src: string; alt: string; position: string };
+  href: string;
+  ctaLabel: string;
+};
+
 export type EventsContent = {
   hero: {
     eyebrow: string;
@@ -30,6 +42,8 @@ export type EventsContent = {
     ctaTickets: string;
     note: string;
   };
+  /** R188 E3: Preview aller Event-Typen. Genau vier Karten, je ein Weg. */
+  preview: { title: string; lead: string; cards: EventPreviewCard[] };
   gallery: { eyebrow: string; title: string; lead: string };
   workshops: { eyebrow: string; title: string; body: string; points: string[] };
   anniversary: { eyebrow: string; title: string; body: string };
@@ -64,6 +78,66 @@ export const EVENTS = {
       ],
       ctaTickets: 'Nächste Danceflow Night ansehen',
       note: 'Oft gibt es vor der Night einen kurzen Workshop. Den genauen Plan findest du auf Eventfrog.',
+    },
+    /* R188 E3 (Video 03:09 "Diese Sektion sieht übelst lost aus. Da würde ich so einen
+       Preview machen von allen Events, die wir haben"). Alle vier Wege stehen als eine
+       Reihe nebeneinander: Danceflow Night, Anniversary Weekend, Floweekend, Eventkalender.
+       Jede Zeile ist ein Fakt aus der jeweiligen Unterseite, nichts ist erfunden:
+       Rhythmus 1./3./5. Freitag aus danceflow-content.ts, Wochenend-Formate aus
+       anniversary-/floweekend-content.ts, der Kalender aus eventkalender-content.ts. */
+    preview: {
+      title: 'Alle Events auf einen Blick.',
+      lead: 'Vier Wege, mehr zu tanzen als nur im Kurs.',
+      cards: [
+        {
+          title: 'Danceflow Night',
+          meta: 'Jeden 1., 3. und 5. Freitag',
+          text: 'Der Social-Dance-Abend am Bahnhof Basel SBB, mit eigenen DJs.',
+          image: {
+            src: '/photos/party/party-50-v4.webp',
+            alt: 'Paar tanzt auf einer Danceflow Night, weitere Gäste im Hintergrund',
+            position: 'object-[center_28%]',
+          },
+          href: '/events-workshops/danceflow-night',
+          ctaLabel: 'Danceflow Night ansehen',
+        },
+        {
+          title: 'Anniversary Weekend',
+          meta: 'Einmal im Jahr',
+          text: 'Das Community-Wochenende mit Workshops, Shows und Socials.',
+          image: {
+            src: '/photos/premium/events-hero-1998.webp',
+            alt: 'Salsaflow-Community posiert nach einer Show auf der Bühne',
+            position: 'object-[center_35%]',
+          },
+          href: '/events-workshops/anniversary-weekend',
+          ctaLabel: 'Anniversary ansehen',
+        },
+        {
+          title: 'Floweekend',
+          meta: 'Wochenendformat',
+          text: 'Workshops, Socials und Community in kompakter Form.',
+          image: {
+            src: '/photos/r188-events/floweekend-preview-2400.webp',
+            alt: 'Paar tanzt gemeinsam bei einem Salsaflow-Event',
+            position: 'object-center',
+          },
+          href: '/events-workshops/floweekend',
+          ctaLabel: 'Floweekend ansehen',
+        },
+        {
+          title: 'Eventkalender',
+          meta: 'Termine und Workshops',
+          text: 'Alle bestätigten Termine, Workshops und Tickets an einem Ort.',
+          image: {
+            src: '/photos/party/party-20-v3.webp',
+            alt: 'Tanzende begrüssen sich lachend auf der Tanzfläche',
+            position: 'object-[center_25%]',
+          },
+          href: '/events-workshops/eventkalender',
+          ctaLabel: 'Zum Eventkalender',
+        },
+      ],
     },
     gallery: {
       eyebrow: '',
@@ -130,6 +204,61 @@ export const EVENTS = {
       ],
       ctaTickets: 'See the next Danceflow Night',
       note: 'There is often a short workshop before the night. You find the exact plan on Eventfrog.',
+    },
+    /* R188 E3: same four cards as DE, same facts, same order. */
+    preview: {
+      title: 'All events at a glance.',
+      lead: 'Four ways to dance beyond your course.',
+      cards: [
+        {
+          title: 'Danceflow Night',
+          meta: 'Every 1st, 3rd and 5th Friday',
+          text: 'The social dance night at Basel SBB station, with our own DJs.',
+          image: {
+            src: '/photos/party/party-50-v4.webp',
+            alt: 'Couple dancing at a Danceflow Night with more guests behind them',
+            position: 'object-[center_28%]',
+          },
+          href: '/events-workshops/danceflow-night',
+          ctaLabel: 'See Danceflow Night',
+        },
+        {
+          title: 'Anniversary Weekend',
+          meta: 'Once a year',
+          text: 'The community weekend with workshops, shows and socials.',
+          image: {
+            src: '/photos/premium/events-hero-1998.webp',
+            alt: 'Salsaflow community posing on stage after a show',
+            position: 'object-[center_35%]',
+          },
+          href: '/events-workshops/anniversary-weekend',
+          ctaLabel: 'See the anniversary',
+        },
+        {
+          title: 'Floweekend',
+          meta: 'Weekend format',
+          text: 'Workshops, socials and community in a compact format.',
+          image: {
+            src: '/photos/r188-events/floweekend-preview-2400.webp',
+            alt: 'Couple dancing together at a Salsaflow event',
+            position: 'object-center',
+          },
+          href: '/events-workshops/floweekend',
+          ctaLabel: 'See Floweekend',
+        },
+        {
+          title: 'Event calendar',
+          meta: 'Dates and workshops',
+          text: 'All confirmed dates, workshops and tickets in one place.',
+          image: {
+            src: '/photos/party/party-20-v3.webp',
+            alt: 'Dancers greeting each other on the dance floor',
+            position: 'object-[center_25%]',
+          },
+          href: '/events-workshops/eventkalender',
+          ctaLabel: 'To the event calendar',
+        },
+      ],
     },
     gallery: {
       eyebrow: '',

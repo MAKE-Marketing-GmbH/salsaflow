@@ -397,6 +397,49 @@ form h3.type-h3,
     text-wrap: balance;
   }
 
+  /* R188 / H4 + SW3 (Video 21.08.): "Ueberschriften ueberall gleiche Groesse, konsistente
+     Hierarchie. 'Vom ersten Grundschritt zur sicheren Tanzflaeche' faellt raus."
+     Gemessen auf der Startseite VOR dem Fix (node /tmp/r188-heads.cjs, 1440px):
+       H1 68.8px · H2 44px · H3 23px UND 16px · H4 23px
+     Zwei belegte Bruchstellen, beide sind genau der Befund aus dem Video:
+       1. H3 lief in ZWEI Groessen. Die acht FAQ-Fragen und die drei Instagram-Titel sind
+          <h3>-Tags, tragen aber keine Stufen-Klasse — sie fielen auf die Browser-Vorgabe
+          (16px, Gewicht 400) zurueck, waehrend die Karten-H3 daneben auf 23px lief.
+       2. H4 rendert mit 23px EXAKT so gross wie H3. Die Level-Liste ("01 Beginner Stufe 1
+          bis 6") war damit von ihrer eigenen Ueberschrift ("Vom ersten Grundschritt ...")
+          nicht zu unterscheiden — die Ebene darunter sah aus wie dieselbe Ebene. Genau
+          deshalb "faellt die Zeile raus": nicht weil sie zu gross ist, sondern weil unter
+          ihr nichts kleiner wird.
+     Was hier BEWUSST nicht passiert: `.type-h4` wird nicht umdefiniert. Der Name klingt nach
+     "Ebene 4", die Klasse ist aber eine LABEL-Rolle (12px versal gesperrt) und haengt an
+     sechs Stellen ausserhalb der Startseite (SiteFooter, KursaufbauPage, BookingPanel,
+     CoursesPage 2x, InquiryWizard) — dort steht sie ueber Meta-Zeilen, nicht ueber
+     Ueberschriften. Sie zu aendern haette sechs ungepruefte Stellen mitverschoben.
+     Stattdessen zwei neue, eindeutig benannte Stufen. Beide sind additiv: keine bestehende
+     Klasse aendert ihren Wert, also kann keine fremde Seite kippen.
+
+     `.type-h3-sub` — Ueberschrift Ebene 3 in ZEILEN-Form (FAQ-Frage, Listentitel). Gleiche
+     Ebene wie `.type-h3`, ruhigere Groesse, weil sie in einer dichten Liste steht statt
+     ueber einem Block. Sie ersetzt die Browser-Vorgabe 16px/400, gegen die diese Tags
+     bisher gelaufen sind.
+     `.type-h5` — die echte Stufe UNTER H3, fuer Listen innerhalb eines H3-Blocks. */
+  .type-h3-sub {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.0625rem, 1.2vw, 1.1875rem);
+    line-height: 1.3;
+    letter-spacing: -0.014em;
+  }
+
+  .type-h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.0625rem, 1.15vw, 1.125rem);
+    line-height: 1.25;
+    letter-spacing: -0.014em;
+    text-wrap: balance;
+  }
+
   .type-h4 {
     font-family: var(--font-sans);
     font-weight: 600;

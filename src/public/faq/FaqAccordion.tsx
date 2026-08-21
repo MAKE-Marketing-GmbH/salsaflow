@@ -13,7 +13,7 @@
 
 import { useState, type MouseEvent, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import { EASE_OUT } from '@/public/home/motion';
 import type { Faq } from '@/public/subpage/kit';
 import type { FaqLink } from '@/public/faq/content';
@@ -24,7 +24,8 @@ export function FaqItem({
   a,
   defaultOpen = false,
   link,
-}: Faq & { defaultOpen?: boolean; link?: FaqLink }) {
+  link2,
+}: Faq & { defaultOpen?: boolean; link?: FaqLink; link2?: FaqLink }) {
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(defaultOpen);
 
@@ -70,17 +71,27 @@ export function FaqItem({
             transition={reduced ? { duration: 0 } : { duration: 0.32, ease: EASE_OUT }}
             className="overflow-hidden"
           >
-            <FaqAnswer>
-              {a}
-              {link ? (
-                <>
-                  {' '}
-                  <a href={link.href} className="whitespace-nowrap">
-                    {link.label}
+            <FaqAnswer>{a}</FaqAnswer>
+            {/* R188 F4: die Wege stehen als eigene Zeile UNTER der Antwort, nicht als
+                angehaengtes Wort im Fliesstext. Grund: die Antworten sind mit dieser
+                Runde laenger geworden, und ein Link am Satzende verschwindet dort. Als
+                eigene Zeile ist er das, was er sein soll — der naechste Schritt. Pfeil
+                und Unterstreichung folgen der bestehenden Link-Sprache der Seite
+                (vgl. "Frag uns direkt" in FaqPage.tsx). */}
+            {link || link2 ? (
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pb-6">
+                {[link, link2].filter((entry): entry is FaqLink => Boolean(entry)).map((entry) => (
+                  <a
+                    key={entry.href}
+                    href={entry.href}
+                    className="group inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--color-salsa)] underline decoration-1 underline-offset-4 transition-colors hover:text-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
+                  >
+                    {entry.label}
+                    <ArrowRight size={15} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
                   </a>
-                </>
-              ) : null}
-            </FaqAnswer>
+                ))}
+              </div>
+            ) : null}
           </motion.div>
         ) : null}
       </AnimatePresence>

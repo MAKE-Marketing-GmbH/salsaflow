@@ -185,46 +185,80 @@ function WhenSection({ c }: { c: PrivatContent }) {
             {w.intro}
           </motion.p>
         </Reveal>
-        {/* R140 (Video 04:21, Frame p-08): Vorher standen hier sechs gleich laute Karten
-            in zwei Reihen. Jetzt tragen die drei haeufigsten Anlaesse den Block, die
-            drei selteneren stehen als leise Zeile darunter. Eine Reihe statt zwei,
-            und der Blick hat eine Rangfolge. mt-14 statt mt-12: mehr Luft zum Lead. */}
-        <Reveal className="mt-14 grid gap-4 sm:grid-cols-3" stagger={0.07}>
+        {/* R188 PR1 (Video 10:51 «Macht das, das hier sieht alles ein bisschen lost aus»):
+            Zwei Runden davor sind an derselben Stelle gescheitert, beide aus demselben
+            Grund — sie haben die drei NEBENanlaesse wie Hauptanlaesse behandelt.
+
+            Runde 1: Karte mit Rahmen (123px) ueber randloser Zeile (69px), gemessen
+            [123,123,123,69,69,69]. Die untere Reihe wirkte abgehaengt.
+            Runde 2 (der Ist-Stand): alle sechs Zellen bekamen dieselbe Bauform, damit
+            waren sie zwar gleich hoch — aber die drei unteren tragen nur EINE Zeile
+            Text. Aus drei zu kleinen Zellen wurden drei fast leere grosse Karten
+            (Kritiker R188: «schlimmer als vorher», Belege d-02.png, m-02/m-03.png).
+            Gleiche Hoehe erzwingen heisst hier: Leere erzwingen.
+
+            Der Denkfehler in beiden Runden war die Annahme, die sechs Anlaesse
+            gehoerten in EIN Raster. Sie sind aber zwei verschiedene Dinge: drei
+            Anlaesse mit einer Erklaerung, und drei Stichworte ohne. Ein Stichwort
+            braucht keine Karte, es braucht eine Zeile.
+
+            Jetzt: die drei Hauptanlaesse bleiben Karten (untereinander gleich hoch,
+            gleiche Bauform, gleicher Inhalt — SW2 gilt innerhalb dieser Reihe). Die
+            drei Nebenanlaesse stehen als kompakte Chips in EINER Zeile darunter,
+            eingeleitet durch das Label aus dem Content. Damit gibt es keine zweite
+            Kartenreihe mehr, die halb so hoch waere wie die erste — SW2 ist erfuellt,
+            weil die Reihe verschwindet, nicht weil sie kuenstlich gestreckt wird. */}
+        <Reveal
+          className="mt-10 grid items-stretch gap-3 sm:auto-rows-fr sm:grid-cols-2 lg:grid-cols-3"
+          stagger={0.06}
+        >
           {w.cards.map((card, i) => {
             const Icon = WHEN_ICONS[i % WHEN_ICONS.length];
             return (
               <motion.div
                 key={card.title}
                 variants={item}
-                className="flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[0_14px_40px_rgba(17,17,17,0.04)] sm:p-7"
+                className="flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-5 sm:p-6"
               >
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
-                  <Icon size={20} strokeWidth={2} aria-hidden />
-                </span>
-                <h3 className="mt-5 type-h3 text-[var(--color-ink)]">{card.title}</h3>
-                <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{card.text}</p>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-bg-soft)] text-[var(--color-salsa)]">
+                    <Icon size={17} strokeWidth={2} aria-hidden />
+                  </span>
+                  <h3 className="type-h3 text-[var(--color-ink)]">{card.title}</h3>
+                </div>
+                <p className="mt-3 text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{card.text}</p>
               </motion.div>
             );
           })}
         </Reveal>
-        {/* Kein Kasten, kein Icon, kein Schatten: diese drei Anlaesse sollen lesbar sein,
-            aber nicht mit den Karten darueber um Aufmerksamkeit kaempfen. */}
-        <Reveal className="mt-8">
-          <motion.div variants={item} className="flex flex-col gap-x-8 gap-y-2 sm:flex-row sm:flex-wrap sm:items-baseline">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+
+        {/* Die Chip-Zeile. `moreLabel` wird wieder gerendert: ohne Einleitung stuenden
+            drei Stichworte ohne Zusammenhang unter drei erklaerten Karten. Das Label
+            liegt auf einer Zeile mit den Chips (ab sm), damit die Gruppe EIN Block
+            bleibt und nicht wieder in zwei Stapel zerfaellt — genau der Fehler, den
+            R188 Runde 1 hier schon einmal gemacht hat.
+            Chips statt Karten: gleiche Bauform wie die Hero-Chips dieser Seite
+            (PrivatstundenPage.tsx:127), also nichts neu erfunden. */}
+        <Reveal className="mt-4" stagger={0.05}>
+          <motion.div variants={item} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
               {w.moreLabel}
-            </p>
-            <ul className="flex flex-col gap-x-7 gap-y-2 text-[0.98rem] text-[var(--color-ink-muted)] sm:flex-row sm:flex-wrap">
+            </span>
+            <ul className="flex flex-wrap gap-2">
               {w.more.map((entry) => (
-                <li key={entry} className="flex items-start gap-2">
-                  <Check size={13} strokeWidth={3} aria-hidden className="mt-1.5 shrink-0 text-[var(--color-salsa)]" />
+                <li
+                  key={entry}
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-3.5 py-1.5 text-sm font-semibold text-[var(--color-ink)]"
+                >
+                  <Check size={13} strokeWidth={3} aria-hidden className="shrink-0 text-[var(--color-salsa)]" />
                   {entry}
                 </li>
               ))}
             </ul>
           </motion.div>
         </Reveal>
-        <Reveal className="mt-12">
+
+        <Reveal className="mt-8">
           <motion.div variants={item}>
             <PrimaryCta href={w.cta.href}>{w.cta.label}</PrimaryCta>
           </motion.div>

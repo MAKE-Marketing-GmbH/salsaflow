@@ -53,19 +53,28 @@ const TOPIC_HASHES = defineTopicHashes({
   '#animationen': 'animationen',
 });
 
-function topicFromLocation(): TopicKey {
+/* R188 K1 (Video 00:00-00:27, "keine Vorauswahl beim Laden"): der Rueckgabetyp ist jetzt
+   `TopicKey | null`. Vorher fiel jeder Aufruf ohne Hash auf 'schnupperstunde' zurueck — die
+   erste Karte stand damit beim Laden gefuellt in Salsa-Rot da, obwohl niemand sie gewaehlt
+   hatte. Eine vorgeklickte Antwort ist eine Antwort, die niemand gegeben hat; genau das
+   stand als Regel schon im Kopfkommentar des Wizards fuer Schritt 2 und gilt ab jetzt auch
+   fuer Schritt 1.
+   Die Hash-Wege (#raumvermietung aus der RentalSection, ?kurs= aus dem Kursplan) belegen
+   weiter vor: dort hat die Person die Wahl mit dem Klick auf den Link getroffen. */
+function topicFromLocation(): TopicKey | null {
   const browserWindow = globalThis.window;
-  if (!browserWindow) return 'schnupperstunde';
+  if (!browserWindow) return null;
   const fromHash = TOPIC_HASHES[browserWindow.location.hash];
   if (fromHash) return fromHash;
   if (new URLSearchParams(browserWindow.location.search).has('kurs')) return 'kurs';
-  return 'schnupperstunde';
+  return null;
 }
 
 export function ContactPage() {
   // Anliegen-State liegt hier in der Parent-Komponente (state lifting), damit "Raum anfragen"
   // in der RentalSection das Dropdown im Formular vorbelegen kann. FormSection ist controlled.
-  const [topic, setTopic] = useState<TopicKey>(topicFromLocation);
+  // null = beim Laden ist nichts gewaehlt (R188 K1).
+  const [topic, setTopic] = useState<TopicKey | null>(topicFromLocation);
   const [cookieVisible, setCookieVisible] = useState(false);
   const [cookieClear, setCookieClear] = useState(false);
 
@@ -311,7 +320,8 @@ function FormSection({
   topic,
   setTopic,
 }: {
-  topic: TopicKey;
+  /** null = keine Vorauswahl (R188 K1). */
+  topic: TopicKey | null;
   setTopic: (topic: TopicKey) => void;
 }) {
   const { item } = useReveal();

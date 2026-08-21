@@ -151,7 +151,7 @@ export const DANCEFLOW = {
       ],
       cta: { label: 'Weitere Eventformate ansehen', href: R.eventkalender },
       image: {
-        src: '/photos/party/party-07-v3.webp',
+        src: '/photos/party/party-17-v3.webp',
         alt: 'DJ und Stimmung im Studio während der Danceflow Night',
         width: 2048,
         height: 1360,
@@ -285,7 +285,7 @@ export const DANCEFLOW = {
       ],
       cta: { label: 'Explore other event formats', href: R.eventkalender },
       image: {
-        src: '/photos/party/party-07-v3.webp',
+        src: '/photos/party/party-17-v3.webp',
         alt: 'DJ and atmosphere in the studio during the Danceflow Night',
         width: 2048,
         height: 1360,

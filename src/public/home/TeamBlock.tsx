@@ -240,16 +240,35 @@ export function TeamBlock() {
           viewport={VIEWPORT}
         >
           <img
-            src="/photos/showcase/hp-29.webp"
+            src="/photos/r188-home/team-band-original-2800.webp"
             onError={onImgError}
-            alt={de ? 'Das ganze Salsaflow-Team liegt lachend vor der Salsaflow-Wand im Studio.' : 'The whole Salsaflow team lying and laughing in front of the studio wall.'}
-            /* Unter sm: festes 240px-Band mit object-position 70%. Dort rendert das Motiv nur
-               260px hoch (390px Viewport), sichtbar sind 92% — der Versatz holt nur die letzte
-               Parkettzeile weg. Ab sm traegt das Seitenverhaeltnis (siehe Kommentar oben) und
-               object-center zentriert die 66.7%, in denen Logo UND Gruppe komplett liegen. */
-            className="h-[15rem] w-full object-cover object-[center_70%] sm:aspect-[9/4] sm:h-auto sm:object-center"
-            width={1800}
-            height={1200}
+            alt={de ? 'Vier Menschen aus dem Salsaflow-Team sitzen zusammen im Studio.' : 'Four members of the Salsaflow team sitting together in the studio.'}
+            /* R188 / H5: hp-29.webp hatte auf Desktop nur 1800px fuer 1323px CSS-Breite
+               (Dichte 1,36 statt 2,0) und wirkte dadurch weich. Dieses echte Salsaflow-Foto
+               stammt aus hp-27-3840.webp und liegt als reine 2800px-Groessenableitung im
+               r188-home-Ordner. Bei 1323px CSS-Breite liefert es Dichte 2,12. */
+            /* R188 / SW4b (Video 21.08.: "Koepfe nie abschneiden", Kritiker zu d-07:
+               "das Sofa-Bild zeigt nur Beine").
+               Gemessen am Motiv statt geschaetzt (Schwellwertmaske ueber Saettigung und
+               Helligkeit, 2800x1867): die Gruppe belegt 12.9% bis 86.0% der Bildhoehe, die
+               Kopf-Oberkante liegt also bei 12.9%.
+               `sm:aspect-[9/4]` (=2.25) ist ein Band, das ueber die Breite skaliert und nur
+               66.7% der Bildhoehe zeigt — Fenster 16.6%..83.4%. Die Oberkante des Fensters
+               liegt damit 3.8 Prozentpunkte UNTER der Kopf-Oberkante: die Schaedeldecken der
+               vier waren abgeschnitten, unten fehlten die Fuesse. Ein object-position-Wert
+               kann das nicht loesen, weil Kopf UND Fuss zusammen 73.1% brauchen, das Fenster
+               aber nur 66.7% hoch ist.
+               `sm:aspect-[16/9]` (=1.78) zeigt 84.4% der Bildhoehe, Fenster 7.8%..92.2%:
+               ueber den Koepfen bleiben 5.1 Prozentpunkte Luft, unter den Fuessen 6.2. Die
+               ganze Gruppe steht im Bild. 3/2 waere das volle Motiv, macht das Band auf
+               1336px Breite aber 891px hoch und damit zur hoechsten Flaeche der Seite —
+               16/9 ist die Stufe, die das Motiv vollstaendig zeigt und ein Band bleibt.
+               Unter sm bleibt die feste Hoehe (240px) unveraendert: dort ist das Feld
+               350x240 und zeigt bereits 97.2% der Breite bei voller Hoehe (gemessen
+               worklog/.r188f6-crop.mjs), es war nie der Befund. */
+            className="h-[15rem] w-full object-cover object-center sm:aspect-[16/9] sm:h-auto"
+            width={2800}
+            height={1867}
             loading="lazy"
           />
         </motion.figure>

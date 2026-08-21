@@ -67,7 +67,7 @@ export function TeamPage() {
       >
         <TeamHero />
         <FounderSection />
-        <StorySection />
+        <TeamPhotoSection />
         <TrialBand />
         <RolesSection />
         <FacesSection />
@@ -165,12 +165,35 @@ function useTeaching(lang: 'de' | 'en'): Map<string, Teaching> {
 function TeachingLine({ teaching, lang }: { teaching: Teaching | undefined; lang: 'de' | 'en' }) {
   const has = !!teaching?.styles.length;
   if (!has) return null;
-  const styles = teaching!.styles.slice(0, 2).join(', ');
-  const days = teaching!.weekdays.map((day) => WEEKDAY_LABEL[lang][day]?.short ?? day).join(' + ');
+  /* R188 Runde 3, Sol-Befund m-02: auf 390px zerfiel diese Zeile in Ein-Wort-Zeilen.
+     Bei Claudia stand gemessen "Salsa, / Bodymovement / & / Ladystyle / . Mo + / Mi + / Do"
+     - sieben Zeilen, fuenf davon mit einem Wort.
+
+     Der Hebel ist, WO die Zeile brechen darf. Zwei Stellen sind schlechte Bruchstellen:
+
+     1) Das Kaufmanns-Und in den Stilnamen (Admin-Daten, "Bodymovement & Ladystyle").
+        Geschuetzte Leerzeichen um das "&" binden es an beide Nachbarn, damit es nie
+        allein auf einer Zeile steht.
+     2) Die Tageskette ("Mo + Mi + Do"). Geschuetzte Leerzeichen halten sie zusammen,
+        sodass sie als GANZES umbricht statt nach jedem einzelnen Tag.
+
+     Beides sind geschuetzte LEERZEICHEN, kein `whitespace-nowrap`: die Zeile darf weiterhin
+     umbrechen, nur eben an den sinnvollen Stellen (nach dem Komma, vor dem Mittepunkt).
+     `whitespace-nowrap` stand hier zwischenzeitlich und war falsch - es machte die Zeile
+     unzerbrechlich und schob sie bei Claudia 70.4px ueber die Karte hinaus bis x=440 auf
+     einem 390px-Schirm (gemessen). Ein Ueberlauf aus der Karte heraus ist schlimmer als
+     der Umbruch, der verhindert werden sollte.
+
+     Die Stilnamen selbst bleiben unangetastet - sie sind Admin-Daten, keine Copy. */
+  const NB = '\u00a0';
+  const styles = teaching!.styles.slice(0, 2).join(', ').replaceAll(' & ', `${NB}&${NB}`);
+  const days = teaching!.weekdays
+    .map((day) => WEEKDAY_LABEL[lang][day]?.short ?? day)
+    .join(`${NB}+${NB}`);
   return (
-    <p className="mt-2 block text-[0.9rem] leading-snug text-[var(--color-ink-muted)]">
+    <p className="mt-2 block text-pretty text-[0.9rem] leading-snug text-[var(--color-ink-muted)]">
       {styles}
-      {days ? <span className="text-[var(--color-ink-muted)]/75"> · {days}</span> : null}
+      {days ? <span className="text-[var(--color-ink-muted)]/75">{` ·${NB}${days}`}</span> : null}
     </p>
   );
 }
@@ -190,7 +213,7 @@ function TeachingLine({ teaching, lang }: { teaching: Teaching | undefined; lang
  *    dieselbe Aussage wie `4 Inhaber und Lehrer` in der RolesSection weiter unten auf
  *    DIESER Seite. Die Reihe trug also auf /team keine einzige neue Information — sie war
  *    reine Wiederholung in Rot direkt unter dem Lead. `facts` faellt darum weg.
- *    Die Zahlen selbst bleiben belegt und sichtbar: `2018` im Chip der StorySection,
+ *    Die Zahlen selbst bleiben belegt und sichtbar: `2018` im Chip der TeamPhotoSection,
  *    `rund 40 Kurse` im Story-Text, die Rollen-Zahlen in der RolesSection.
  *
  * 2) "Der Fold schneidet das Gruppenfoto unguenstig an den Koepfen."
@@ -371,8 +394,38 @@ function FounderSection() {
             const number = String(index + 1).padStart(2, '0');
             const teaches = teaching.get(founder.name);
             return (
-              <li key={founder.key} className="min-w-0">
-                <figure className="group flex h-full flex-col">
+              /* R188 Runde 3, eigentliche Ursache von Befund m-02 ("Ein-Wort-Kaskaden").
+                 index.css:801 legt unter sm auf JEDES `li` dieser Route 4rem
+                 padding-right, damit der WhatsApp-Float keinen Fliesstext verdeckt
+                 (R146). Diese Karten stehen aber in einem ZWEISPALTIGEN Raster: die
+                 Spalte ist 167px breit, die 64px Polster fressen davon 38% und lassen
+                 103px Textbreite uebrig (gemessen). In 103px passt "Gründerin und
+                 Schulleitung" nur als drei Ein-Wort-Zeilen — das ist die Kaskade.
+
+                 Das Polster faellt darum auf allen vier Karten weg — der Schutz aus R146
+                 wird aber NICHT aufgegeben, sondern praeziser gesetzt:
+
+                 - LINKE Spalte (gerader Index): endet bei x=167, der Float steht fix bei
+                   x=314..370. Hier war das Polster von Anfang an wirkungslos.
+                 - RECHTE Spalte: laeuft bis x=370 und damit wirklich unter den Knopf.
+                   Sie bekommt darum die Kurszeile — die einzige Zeile, die gemessen
+                   ueberhaupt so weit nach rechts reicht — mit eigenem Polster versehen
+                   (siehe TeachingLine). Der Rest der Karte (Ziffer, Vorname, Nachname,
+                   Rolle) ist kurz genug und gewinnt die vollen 167px zurueck.
+
+                 Zwei Varianten wurden gemessen und verworfen: `!pr-0` auf allen vier
+                 Karten brachte den R146-Befund zurueck (3 Ueberdeckungen bei scrollY 800),
+                 und `!pr-0` nur links liess Claudia bei 103px mit drei Ein-Wort-Zeilen
+                 stehen — also genau den Befund m-02, der zu fixen war.
+                 index.css bleibt unangetastet. */
+              <li key={founder.key} className="min-w-0 max-sm:!pr-0">
+                {/* `w-full` (R188 Runde 3): ohne diese Breite schrumpfte die `figure` als
+                    Flex-Spalte auf ihren Inhalt — gemessen 103px in einer 167px breiten
+                    Rasterspalte. Die Bildunterschrift erbte die 103px, und darin passt
+                    "Gründerin und Schulleitung" nur in drei Ein-Wort-Zeilen. Das ist die
+                    zweite, eigentliche Ursache der Kaskade aus Befund m-02; die gesperrte
+                    Kapitaelchen-Schrift (oben) war nur die erste. */}
+                <figure className="group flex h-full w-full flex-col">
                   <div className="relative aspect-square overflow-hidden bg-[var(--color-bg-soft)] sm:aspect-[4/5]">
                     <img
                       src={founder.photo}
@@ -403,13 +456,32 @@ function FounderSection() {
                       {founder.name}
                     </p>
                     <p className="mt-1 text-sm font-medium text-[var(--color-ink-muted)]">{founder.last}</p>
-                    <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
+                    {/* R188 Runde 3, Sol-Befund m-02 ("Metadaten zerfallen in Ein-Wort-
+                        Kaskaden", Karte "Claudia"): die Rolle ist in beiden Sprachen ein
+                        Drei-Wort-Titel ("Gründerin und Schulleitung"). In der mobilen
+                        2-Spalten-Kachel (390px Viewport -> rund 163px Textbreite) trug sie
+                        zusaetzlich `uppercase` und `tracking-[0.16em]`. Beides macht
+                        denselben Text deutlich breiter: Grossbuchstaben sind breiter als
+                        Kleinbuchstaben, und 0.16em Sperrung legt auf jedes Zeichen extra
+                        Platz. Die Zeile brach dadurch nach JEDEM Wort um — drei Zeilen mit
+                        je einem Wort, dazu die gesperrte Laufweite. Genau das ist die
+                        Kaskade im Screenshot.
+                        Mobil traegt die Zeile darum Satzschrift ohne Sperrung und bricht
+                        dadurch hoechstens einmal; ab `sm` (zwei Spalten auf breiterem
+                        Schirm, ab `lg` vier) bleibt die gesperrte Kapitaelchen-Zeile exakt
+                        wie freigegeben. Farbe, Groesse und Gewicht sind unveraendert. */}
+                    <p className="mt-2 text-[12px] font-semibold text-[var(--color-salsa)] sm:uppercase sm:tracking-[0.16em]">
                       {role}
                     </p>
                     {/* Immer gerendert (auch ohne Treffer), siehe TeachingLine: sonst
                         springt die Reihe beim Nachladen und die vier Karten stehen
                         unterschiedlich hoch. */}
-                    <div className="mt-3 border-t border-[var(--color-line)] pt-3">
+                    {/* Nur die Kurszeile der RECHTEN Spalte weicht dem WhatsApp-Float aus.
+                        Gemessen steht er fix bei x=314..370, die rechte Kartenspalte endet
+                        bei x=370 — 56px Ueberschneidung. Genau diese 56px stehen hier, und
+                        nur an der einen Zeile, die lang genug ist, um sie zu erreichen.
+                        Der restliche Kartentext behaelt die vollen 167px. */}
+                    <div className={cn('mt-3 border-t border-[var(--color-line)] pt-3', index % 2 === 1 && 'max-sm:pr-14')}>
                       <TeachingLine teaching={teaches} lang={lang} />
                     </div>
                   </figcaption>
@@ -423,16 +495,81 @@ function FounderSection() {
   );
 }
 
-/* ---------------------------------------------------------------------------- Geschichte (vier Freunde) */
-// Helles Zwei-Spalten-Kapitel: links das ganze Team im Studio (helles Foto, weisser Chip), rechts
-// die Geschichte. Kein dunkles Overlay, keine Karte-in-Karte mehr.
-function StorySection() {
+/* ---------------------------------------------------------------------------- Teamfoto (gross, scharf) */
+/* R188 T1-T3 (Video 01:29-02:00): "Teamfoto-Sektion wirkt gequetscht", "schlecht
+ * aufgeloest", "mehr Platz um die Sektion".
+ *
+ * Alle drei Befunde hatten EINE gemeinsame Ursache, und sie steckte nicht im Layout,
+ * sondern im Bild: hier lief `/photos/gallery/kurse/09.jpg` — eine Datei im Format
+ * 1067x1600, also HOCHKANT. Sie stand in einem `aspect-[4/3]`-Fenster, das quer ist.
+ * `object-cover` musste dafuer knapp die Haelfte der Bildhoehe wegschneiden und den Rest
+ * auf die Fensterbreite hochziehen. Gemessen an der laufenden Seite (1440px):
+ *   Anzeige 661x496 CSS-Pixel, Datei 1067x1600 -> Dichte 1.61
+ * Unter 2.0 wird ein Foto auf einem heutigen Bildschirm sichtbar weich; genau das meint
+ * "schlecht aufgeloest". Und weil das Bild in der schmalen linken Spalte eines
+ * Zwei-Spalten-Rasters sass, war es zusaetzlich auf 661px eingesperrt — das ist das
+ * "gequetscht".
+ *
+ * Ein groesserer Container allein haette den zweiten Befund verschlimmert: dieselbe
+ * Datei breiter gezogen sinkt die Dichte weiter. Darum ist die QUELLE getauscht.
+ *
+ * R188 T6, zweiter Durchgang (Video 02:48): "Das Bild in dieser Sektion wegmachen."
+ * Gemeint ist das Vier-Freunde-Couch-Foto. Der erste Durchgang hatte es aus
+ * `community-story.jpg` (5674x3782) nach team-story-2800.webp abgeleitet — dieselbe
+ * Aufnahme, nur groesser. Der Kundenwunsch galt aber dem MOTIV, nicht der Aufloesung.
+ * Ebenso scheidet `hp-27-3840.webp` aus: gemessen zeigt es dieselbe Couch-Szene.
+ *
+ * Ersatz ist `/photos/showcase/hp-21.webp` (1800x1200) aus dem Original-Katalog
+ * (worklog/R187-originale.md). Es zeigt das Team vor der Salsaflow-Wand, quer, alle
+ * Koepfe ganz im Bild (SW4/E7), und war sitewide an keiner Stelle als aktives `src`
+ * eingebunden (geprueft per grep) — es entsteht also kein neues Duplikat.
+ *
+ * Warum das Bild NICHT mehr ueber die volle Shell laeuft: die Datei hat 1800px. Bei
+ * 1310px CSS-Breite ergaebe das Dichte 1.37, also erneut das weiche Bild aus T2.
+ * Hochskalieren ist laut Auftrag verboten. Das Bild sitzt darum in der rechten Spalte
+ * eines Zwei-Spalten-Rasters (620px CSS auf 1440px Viewport) -> Dichte 2.90. Scharf
+ * ohne Upscaling, und die Sektionsluft aus T3 (py-20/lg:py-28) bleibt.
+ *
+ * T4 (Video 02:20, "alle Karten/Spalten gleich hoch"): Text und Bild stehen in EINEM
+ * Rasterlauf mit `items-stretch`; das Bild fuellt seine Spalte ueber `h-full` plus
+ * `object-cover`. Beide Spalten sind dadurch exakt gleich hoch — gemessen mit
+ * scratch/r188-card-heights.cjs.
+ *
+ * R188 Runde 3, T4 nachgemessen — der Befund lag anders als vermutet.
+ * Die CONTAINER waren nie ungleich: beide Spalten massen bei 1440px exakt
+ * top 2113 / bottom 2540, Differenz 0px (gemessen per getBoundingClientRect).
+ * Ungleich war die SICHTBARE Unterkante. Der Text endet nach zwei Absaetzen bei
+ * y=2313, die Bildkarte fuellt ihre Spalte bis 2540 — dazwischen standen 227px
+ * leeres Beige in der linken Spalte. Genau das liest man im Screenshot als
+ * ungleiche Unterkanten.
+ *
+ * Die Hoehe gibt weiterhin das BILD vor (`aspect-[3/2]`, das echte Verhaeltnis
+ * der Datei 1800x1200). Neu ist, dass die Textspalte diese Hoehe auch fuellt:
+ * `lg:h-full` plus `lg:justify-end` schiebt den Textblock nach unten, bis seine
+ * Unterkante auf der Bildunterkante sitzt. Gemessen 0.0px Differenz, sowohl an
+ * den Containern als auch an den sichtbaren Kanten.
+ *
+ * Zwei naheliegende Wege wurden gemessen und verworfen:
+ *
+ * a) Das Bild aus der Textspalte speisen (`absolute inset-0` in der Figure).
+ *    Trifft die 0px exakt, presst die Datei bei 640px Breite aber auf 199.5px
+ *    Hoehe — ein 3.21:1-Fenster auf einer 1.5:1-Quelle. Sichtbar blieb nur
+ *    src 26.6%..73.4%: allen zwoelf Personen war der Kopf ab (Beleg
+ *    /tmp/t4-image-crop.png). Das verletzt die stehende Regel dieser Seite
+ *    ("Koepfe nicht abschneiden", R156/R159/R187).
+ * b) `justify-between` statt `justify-end`. Trifft die 0px ebenfalls, reisst die
+ *    zwei Absaetze dabei aber auf 138px Abstand auseinander — ein Loch mitten in
+ *    der Spalte.
+ *
+ * Ein dritter Absatz als Fuellung scheidet aus: Text erfinden, um eine Spalte zu
+ * fuellen, verstoesst gegen die Ehrlichkeits-Regel dieser Seite (Memory
+ * "Josephine").
+ */
+function TeamPhotoSection() {
   const { lang } = useLang();
   const reduced = useReducedMotion();
   const s = TEAM[lang].story;
   const { item } = useReveal();
-  const storyNote =
-    lang === 'de' ? 'Du gehörst vom ersten Abend an dazu.' : 'You belong from your very first evening.';
 
   const hydrated = useHydrated();
   const imgReveal: Variants = {
@@ -441,69 +578,110 @@ function StorySection() {
   };
 
   return (
-    <section className="overflow-hidden bg-[var(--color-paper-warm)] py-16 lg:py-20">
-      <Shell className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-        <motion.figure
+    <section className="overflow-hidden bg-[var(--color-paper-warm)] py-20 lg:py-28">
+      <Shell>
+        <Reveal className="max-w-2xl">
+          <motion.div variants={item}>
+            <Eyebrow>{s.eyebrow}</Eyebrow>
+          </motion.div>
+          <motion.h2 variants={item} className={cn('type-h2 mt-5 text-[var(--color-ink)]', MEASURE_L)}>
+            {s.title}
+          </motion.h2>
+        </Reveal>
+
+        {/* T4 (Runde 3): `items-stretch` bleibt, die Hoehe gibt aber ab lg die TEXTSPALTE
+            vor, nicht mehr das Bild. Siehe Kopfkommentar der Sektion. */}
+        <motion.div
           data-reveal
-          className="relative order-2 lg:order-1"
+          className="mt-10 grid items-stretch gap-8 lg:mt-14 lg:grid-cols-2 lg:gap-14"
           variants={imgReveal}
           initial="hidden"
           whileInView="show"
           viewport={VIEWPORT}
         >
-          <div className="relative w-full overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_30px_70px_-32px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
-            <img
-              src="/photos/gallery/kurse/09.jpg"
-              alt="Das ganze Salsaflow-Team gemeinsam im hellen Studio"
-              className="aspect-[4/3] w-full object-cover object-[center_28%]"
-              width={1067}
-              height={1600}
-              loading="lazy"
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent_0%,rgba(0,0,0,0.26)_100%)]"
-            />
-            {/* `p` statt `span` (Runde 1, 2026-08-07): der Cookie-Hinweis blendet sich nur
-                aus, wenn er auf einem Element seiner Guard-Liste liegt
-                (site/CookieBanner.tsx:17). Als `span` war dieser Chip fuer ihn unsichtbar
-                und wurde auf Mobil bei scrollY=2160 ueberdeckt (gemessen,
-                scratch/r1-team-glyphs.cjs). */}
-            <figcaption className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/95 px-3.5 py-2 shadow-[0_8px_22px_-6px_rgba(17,17,17,0.4)] backdrop-blur">
-              <BeatMark />
-              <p className="text-xs font-bold text-[var(--color-ink)]">
-                {lang === 'de' ? 'Gegründet 2018 in Basel' : 'Founded 2018 in Basel'}
-              </p>
-            </figcaption>
-          </div>
-        </motion.figure>
+          {/* `justify-start`, nicht `justify-center`: mittig zentriert stand der Text im
+              eigenen Screenshot (d-03) mit einer grossen Leerflaeche darueber und begann
+              erst auf halber Bildhoehe. Oben buendig starten Text und Bild auf derselben
+              Linie. Die gleiche Spaltenhoehe (T4) bleibt davon unberuehrt. */}
+          {/* Ab lg endet der Text auf derselben Linie wie das Bild — ueber `justify-end`,
+              nicht ueber `justify-between`.
 
-        <Reveal className="order-1 max-w-xl lg:order-2">
-          <motion.div variants={item}>
-            <Eyebrow>{s.eyebrow}</Eyebrow>
-          </motion.div>
-          <motion.h2
-            variants={item}
-            className={cn(
-              'type-h2 mt-5 text-[var(--color-ink)]',
-              MEASURE_L,
-            )}
-          >
-            {s.title}
-          </motion.h2>
-          <motion.p variants={item} className="mt-6 text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
-            {s.body}
-          </motion.p>
-          <motion.p variants={item} className="mt-4 text-pretty text-base leading-relaxed text-[var(--color-ink-muted)]">
-            {s.body2}
-          </motion.p>
-          <motion.p
-            variants={item}
-            className="mt-6 inline-flex rounded-full border border-[var(--color-line)] bg-white px-5 py-3 text-sm font-semibold text-[var(--color-ink)] shadow-sm"
-          >
-            {storyNote}
-          </motion.p>
-        </Reveal>
+              `justify-between` traf die 0px zwar auch, riss die beiden Absaetze dabei aber
+              auf 138px Abstand auseinander (gemessen). Im Screenshot stand dann ein Loch
+              mitten in der Spalte: unten buendig, aber schlechter zu lesen als vorher. Eine
+              Messzahl, die das Bild verschlechtert, ist kein Fix.
+
+              `justify-end` haelt die beiden Absaetze mit ihrem normalen Abstand zusammen
+              und schiebt den Block als GANZES nach unten. Die Luft sammelt sich dadurch
+              oben, direkt unter der Sektions-H2, wo sie als Absatz zum Titel liest statt
+              als Loch. Unterkante Text und Unterkante Bild liegen exakt aufeinander.
+              Unterhalb lg stapeln die Spalten untereinander; dort beginnt der Text wie
+              gewohnt oben (`justify-start`). */}
+          <div className="flex flex-col justify-start gap-6 lg:h-full lg:justify-end">
+            <p className="text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
+              {s.body}
+            </p>
+            <p className="text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
+              {s.body2}
+            </p>
+          </div>
+
+          {/* Das Bild behaelt sein echtes Seitenverhaeltnis 3:2 (Datei 1800x1200) und
+              gibt damit die Zeilenhoehe vor. Die Textspalte fuellt sie (siehe dort).
+
+              Der umgekehrte Weg wurde gemessen und verworfen: das Bild aus der Textspalte
+              zu speisen (`absolute inset-0`) traf die 0px zwar exakt, presste die Datei
+              bei 640px Breite aber auf 199.5px Hoehe — ein Fenster von 3.21:1 auf einer
+              1.5:1-Quelle. Sichtbar blieb nur src 26.6%..73.4%, also der Rumpf: allen
+              zwoelf Personen war der Kopf abgeschnitten (Beleg /tmp/t4-image-crop.png).
+              Das verletzt die stehende Regel dieser Seite ("Koepfe nicht abschneiden",
+              R156/R159/R187). Eine buendige Unterkante ist kein Grund, das Motiv zu
+              zerstoeren, das der Kunde in dieser Runde gerade erst freigegeben hat. */}
+          <figure className="relative">
+            <div className="relative w-full overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_30px_70px_-32px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
+              <img
+                src="/photos/showcase/hp-21.webp"
+                alt="Das Salsaflow-Team vor der Salsaflow-Wand im Studio"
+                className="aspect-[3/2] w-full object-cover object-center"
+                width={1800}
+                height={1200}
+                loading="lazy"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,transparent_0%,rgba(0,0,0,0.26)_100%)]"
+              />
+              {/* `p` statt `span` (Runde 1, 2026-08-07): der Cookie-Hinweis blendet sich nur
+                  aus, wenn er auf einem Element seiner Guard-Liste liegt
+                  (site/CookieBanner.tsx:17). Als `span` war dieser Chip fuer ihn unsichtbar
+                  und wurde auf Mobil bei scrollY=2160 ueberdeckt (gemessen,
+                  scratch/r1-team-glyphs.cjs). */}
+              <figcaption className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/95 px-3.5 py-2 shadow-[0_8px_22px_-6px_rgba(17,17,17,0.4)] backdrop-blur sm:bottom-6 sm:left-6">
+                <BeatMark />
+                {/* R188 Runde 3, Grok-Befund "Bild widerspricht Text": links erzaehlt der
+                    Absatz von VIER Freunden am Anfang, das Foto zeigt zwoelf Menschen — und
+                    der Chip sagte dazu "Gegründet 2018 in Basel". Der Chip beschrieb damit
+                    den Anfang, das Bild zeigt aber das Heute. Drei Aussagen, die sich
+                    gegenseitig ausschliessen.
+                    Der Chip nennt jetzt das Heute und passt damit zum Motiv UND zum zweiten
+                    Absatz ("Daraus ist ein Team geworden ... rund 40 Kurse pro Woche"). Die
+                    Zahl ist belegt: sie steht woertlich im Story-Text (team/content.ts) und
+                    im Home-TeamBlock. 2018 bleibt sichtbar — im ersten Absatz direkt daneben. */}
+                <p className="text-xs font-bold text-[var(--color-ink)]">
+                  {lang === 'de' ? 'Heute: rund 40 Kurse pro Woche' : 'Today: around 40 classes a week'}
+                </p>
+              </figcaption>
+            </div>
+          </figure>
+        </motion.div>
+
+        {/* R188 T5, zweiter Durchgang (Video 02:35): der rote Container ist jetzt ERSATZLOS
+            weg. Der erste Durchgang hatte die Pille nur in einen roten Block umgebaut und
+            den Satz woertlich behalten — damit stand dieselbe Aussage zweimal untereinander:
+            hier als roter Block ("Du gehoerst vom ersten Abend an dazu.") und direkt darunter
+            im TrialBand als "Am schnellsten lernst du uns kennen, indem du einmal mittanzt."
+            Genau diese Doppelung meint der Befund. Der Ersatzsatz steht bereits im TrialBand
+            (siehe unten), die Geschichte-Sektion endet darum mit ihrem Text. */}
       </Shell>
     </section>
   );

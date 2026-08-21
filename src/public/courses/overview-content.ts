@@ -136,7 +136,10 @@ export const COURSES_OVERVIEW = defineOverviewContent({
         {
           key: 'heels',
           title: 'Heels für Haltung und Ausdruck',
-          text: 'Für Linien, Präsenz, Selbstbewusstsein und Choreografie. Unterstützend aufgebaut, nicht einschüchternd.',
+          // R188: «Unterstuetzend aufgebaut, nicht einschuechternd» war ein harter
+          // Treffer in forbidden.md (A2, Bauform «X, nicht Y»). Der Satz sagte ueber
+          // eine Verneinung, was er positiv sagen kann. Jetzt steht die Zusage direkt.
+          text: 'Für Linien, Präsenz, Selbstbewusstsein und Choreografie. Wir bauen die Technik Schritt für Schritt auf, ab Level Beginner.',
           photo: photos.heels,
           alt: 'Heels-Gruppe im hellen Salsaflow Studio bei Tageslicht',
           href: '/tanzkurse/heels',
@@ -274,7 +277,8 @@ export const COURSES_OVERVIEW = defineOverviewContent({
         {
           key: 'heels',
           title: 'Heels for posture and expression',
-          text: 'For lines, presence, confidence and choreography, taught step by step in a supportive atmosphere.',
+          // R188: gleiche Korrektur wie DE, siehe Begruendung dort.
+          text: 'For lines, presence, confidence and choreography. We build the technique step by step, from beginner level up.',
           photo: photos.heels,
           alt: 'Heels group in the bright Salsaflow studio in daylight',
           href: '/tanzkurse/heels',

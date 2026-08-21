@@ -214,12 +214,14 @@ const DETAIL_FIELDS = {
 } satisfies Record<TopicKey, DetailField[]>;
 
 export function InquiryWizard({
-  initialTopic = 'schnupperstunde',
+  initialTopic = null,
   onTopicChange,
   compact = false,
   lockTopic = false,
 }: {
-  initialTopic?: TopicKey;
+  /** null = keine Vorauswahl beim Laden (R188 K1). Die Schnupper-Seite und die
+   *  Hash-Links auf /kontakt setzen weiter einen echten Wert. */
+  initialTopic?: TopicKey | null;
   onTopicChange?: (topic: TopicKey) => void;
   compact?: boolean;
   /** true: Anliegen steht fest (eigene Schnupper-Seite). Kein 8er-Raster. */
@@ -234,7 +236,9 @@ export function InquiryWizard({
   }));
 
   const [step, setStep] = useState(lockTopic ? 1 : 0);
-  const [topic, setTopic] = useState<TopicKey>(initialTopic);
+  // null = noch nichts gewaehlt. Schritt 2 und 3 sehen nie null: der Weiter-Knopf in
+  // Schritt 1 ist ohne Wahl gesperrt (siehe canAdvance unten).
+  const [topic, setTopic] = useState<TopicKey | null>(initialTopic);
   // Antworten auf die Detail-Felder, nach Feld-id. Leer heisst: nicht beantwortet.
   const [details, setDetails] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState('');
@@ -247,7 +251,7 @@ export function InquiryWizard({
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState('');
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const lastTopic = useRef(initialTopic);
+  const lastTopic = useRef<TopicKey | null>(initialTopic);
   const prevStep = useRef(step);
   const reduced = useReducedMotion();
   const hydrated = useHydrated();
@@ -258,7 +262,9 @@ export function InquiryWizard({
   useEffect(() => {
     if (lastTopic.current === initialTopic) return;
     lastTopic.current = initialTopic;
-    setTopic(initialTopic);
+    // Ein Hash-Link setzt ein Anliegen; kommt null zurueck, bleibt die bereits
+    // getroffene Wahl stehen statt sie zu loeschen.
+    if (initialTopic) setTopic(initialTopic);
     setDetails({});
     setNotes('');
     setError('');
@@ -276,11 +282,18 @@ export function InquiryWizard({
     if (step > 0) headingRef.current?.focus();
   }, [step]);
 
-  const copy = useMemo(() => wizardCopy(de, topic), [de, topic]);
-  const topicLabel = topicCardLabel(topic, topics.find((entry) => entry.key === topic)?.label ?? topic, de);
-  const fields = DETAIL_FIELDS[topic];
+  /* Ohne Wahl traegt der Wizard die Texte des haeufigsten Anliegens als Geruest. Sichtbar
+     wird davon nichts: Schritt 2 und 3 sind erst nach einer Wahl erreichbar (canAdvance),
+     und die abgeschickte Nachricht liest `topic` selbst, nicht dieses Geruest. */
+  const activeTopic: TopicKey = topic ?? 'schnupperstunde';
+  const copy = useMemo(() => wizardCopy(de, activeTopic), [de, activeTopic]);
+  const topicLabel = topicCardLabel(activeTopic, topics.find((entry) => entry.key === activeTopic)?.label ?? activeTopic, de);
+  const fields = DETAIL_FIELDS[activeTopic];
   const emailValid = !email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const contactValid = Boolean(name.trim() && (email.trim() || phone.trim()) && emailValid);
+  /* R188 K1: ohne Anliegen geht es nicht weiter. Die Wahl ist damit eine echte Frage,
+     kein stillschweigend gesetzter Default. */
+  const canAdvance = step > 0 || Boolean(topic);
 
   function selectTopic(next: TopicKey) {
     setTopic(next);
@@ -323,7 +336,17 @@ export function InquiryWizard({
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!compact && step < LAST_STEP) {
+      // Schritt 1 ohne Anliegen: nicht weiter, sondern nachfragen.
+      if (!canAdvance) {
+        setError(copy.topicError);
+        return;
+      }
       goNext();
+      return;
+    }
+    // Kurzform auf der Startseite: dort gibt es nur diesen einen Schritt.
+    if (compact && !topic) {
+      setError(copy.topicError);
       return;
     }
     if (!contactValid) {
@@ -350,7 +373,8 @@ export function InquiryWizard({
           name: name.trim(),
           email: email.trim() || null,
           phone: phone.trim() || null,
-          topic,
+          // Ab hier ist `topic` gesetzt: ohne Wahl kommt der Code nicht bis zum Absenden.
+          topic: activeTopic,
           message,
           language: lang,
           website,
@@ -615,7 +639,20 @@ export function InquiryWizard({
           </button>
         ) : <span />}
         {step < LAST_STEP ? (
-          <button key="wizard-next" type="submit" data-testid="inquiry-next" className="btn-base btn-primary min-h-12 gap-2 px-7 text-base">
+          /* R188 K1: ohne Anliegen ist der Knopf sichtbar gedaempft. Er bleibt anklickbar
+             (kein `disabled`), damit ein Klick die Meldung ausloest statt ins Leere zu
+             gehen — ein toter Knopf sagt nicht, was fehlt. aria-disabled meldet den
+             Zustand an Screenreader. */
+          <button
+            key="wizard-next"
+            type="submit"
+            data-testid="inquiry-next"
+            aria-disabled={!canAdvance || undefined}
+            className={cn(
+              'btn-base btn-primary min-h-12 gap-2 px-7 text-base',
+              !canAdvance && 'opacity-55',
+            )}
+          >
             {copy.next}<ArrowRight aria-hidden className="h-4 w-4" />
           </button>
         ) : (
@@ -639,7 +676,8 @@ function TopicGrid({
   onSelect,
 }: {
   topics: { key: TopicKey; label: string }[];
-  topic: TopicKey;
+  /** null = keine Karte ist gewaehlt (R188 K1). */
+  topic: TopicKey | null;
   onSelect: (key: TopicKey) => void;
 }) {
   const { lang } = useLang();
@@ -696,11 +734,16 @@ function ChoiceCard({
   return (
     <label
       className={cn(
-        // focus-within macht die Tastatur-Auswahl sichtbar: das echte Radio ist sr-only, ohne
-        // diesen Ring sieht man beim Durchtabben und bei Pfeiltasten gar nichts.
         'flex h-full cursor-pointer items-center rounded-[var(--radius-card)] border text-left font-semibold',
         'transition-[background-color,border-color,color] duration-[var(--dur-fast)] ease-out',
-        'focus-within:outline-none focus-within:ring-2 focus-within:ring-[var(--color-salsa)] focus-within:ring-offset-2',
+        // R188 K2: `has-[:focus-visible]` statt `focus-within`. Der Unterschied entscheidet
+        // ueber genau den Ring, den das Video ruegt: ein MAUSKLICK auf das Label fokussiert
+        // das sr-only-Radio, `focus-within` haette danach dauerhaft einen roten Ring um die
+        // gewaehlte Karte gezogen — also wieder die Umrandung, die weg soll. `:focus-visible`
+        // setzt der Browser nur bei Tastatur-Fokus. Tab und Pfeiltasten bleiben damit
+        // sichtbar (sonst waere die sr-only-Wahl blind bedienbar), die Maus-Auswahl zeigt
+        // nur die Fuellung.
+        'has-[:focus-visible]:outline-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--color-salsa)] has-[:focus-visible]:ring-offset-2',
         // 390px: Icon über dem Wort, sonst schneidet "Schnupperstunde" ab (S7).
         // R62: mit Erklaerzeile bleibt die Karte ueberall eine Spalte — Icon links,
         // Label + Hint rechts gestapelt, sonst braeche der Hint in die Icon-Spalte.
@@ -719,8 +762,14 @@ function ChoiceCard({
           : nowrap
             ? 'min-h-14 flex-col items-center justify-center gap-1 px-1.5 py-2 text-center text-[12px] sm:min-h-11 sm:flex-row sm:gap-2 sm:px-3 sm:text-sm'
             : 'min-h-11 gap-3 px-4 py-3 text-sm',
+        // R188 K2 (Video 00:16, "ausgewaehlte Karte ohne Umrandung"): die aktive Karte
+        // trug bisher zusaetzlich zur roten Fuellung eine rote Kante. Auf der gefuellten
+        // Flaeche las sich das als zweiter Rahmen um denselben Zustand. Jetzt ist die
+        // Kante auf der aktiven Karte transparent — die Zelle behaelt ihre exakte
+        // Groesse (die 1px Kante bleibt im Kasten, nichts springt beim Klick), sichtbar
+        // ist nur noch die Fuellung. Genau EIN Signal fuer "gewaehlt".
         active
-          ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white'
+          ? 'border-transparent bg-[var(--color-salsa)] text-white'
           : 'border-[var(--color-line)] bg-[var(--color-paper)] text-[var(--color-ink)] hover:border-[var(--color-salsa)]',
       )}
     >
@@ -908,6 +957,7 @@ function wizardCopy(de: boolean, topic: TopicKey) {
     ),
     // requestLabel steht in der Mail an das Studio, nicht auf der Seite.
     requestLabel: de ? 'Anliegen' : 'Request',
+    topicError: de ? 'Bitte wähle zuerst dein Anliegen.' : 'Please choose your request first.',
     contactError: de ? 'Bitte gib deinen Vornamen und eine E-Mail oder Handynummer an.' : 'Please add your first name and either an email or mobile number.',
     privacyError: de ? 'Bitte setze das Häkchen beim Datenschutz.' : 'Please tick the privacy box.',
     back: de ? 'Zurück' : 'Back',

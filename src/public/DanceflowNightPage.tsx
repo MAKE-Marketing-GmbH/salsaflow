@@ -134,63 +134,58 @@ function WhySection({ c }: { c: DanceflowContent }) {
   const w = c.why;
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
+      {/* R188 E4 (Video 03:43 "Das hier sieht übelst lost aus, dass diese Container so gross
+          sind. Das ist übelst komisch." / 03:53 "Da kannst du vielleicht einfach das Bild
+          wegmachen und einfach nur die Container").
+
+          Vorher: links Text plus ein Hochformat-Foto, rechts drei Karten untereinander in
+          einer 1.15fr-Spalte. Die Karten mussten die Hoehe der Bildspalte mit ausfuellen und
+          liefen deshalb auf ueber 190px Hoehe fuer je zwei Zeilen Text — daher die riesigen,
+          halbleeren Kaesten im Video.
+
+          Jetzt: Bild raus (Raphaels Wortlaut), Kopf oben ueber die Shell, die drei Karten
+          nebeneinander in einer Reihe. Ihre Hoehe kommt jetzt vom Inhalt, nicht mehr von
+          einem Foto daneben. `items-stretch` (Grid-Default) plus `h-full` je Karte haelt die
+          drei trotzdem exakt gleich hoch (SW2), auch wenn ein Text eine Zeile laenger ist.
+          p-6 statt p-7 und kein sm:p-7 mehr: kompakter, wie gefordert. */}
       <Shell>
-        <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
-          <Reveal className="max-w-md">
-            <motion.div variants={item}>
-              <Eyebrow>{w.eyebrow}</Eyebrow>
-            </motion.div>
-            <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
-              {w.title} {w.titleAccent ? <TitleAccent>{w.titleAccent}</TitleAccent> : null}
-            </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
-              {w.body}
-            </motion.p>
+        <Reveal className="max-w-2xl">
+          <motion.div variants={item}>
+            <Eyebrow>{w.eyebrow}</Eyebrow>
+          </motion.div>
+          <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
+            {w.title} {w.titleAccent ? <TitleAccent>{w.titleAccent}</TitleAccent> : null}
+          </motion.h2>
+          <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            {w.body}
+          </motion.p>
+        </Reveal>
+        <Reveal className="mt-10 grid gap-4 sm:grid-cols-3" stagger={0.08}>
+          {w.cards.map((b, i) => (
             <motion.div
+              key={b.title}
               variants={item}
-              className="mt-8 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]"
+              className="flex h-full flex-col rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[0_14px_40px_rgba(17,17,17,0.04)]"
             >
-              {/* 05-v3.webp ist 1360x2048 (Hochformat). Ein erzwungenes 4/3 zeigte nur
-                  y 21%..71% der Quelle und schnitt den Scheitel der Taenzerin ab
-                  (Raphael 20.08.). 4/5 folgt dem Hochformat und zeigt y 3.4%..86.4%:
-                  Scheitel (9.5%) und Kinn (30%) liegen beide im Bild. */}
-              <img
-                src={w.image.src}
-                alt={w.image.alt}
-                className="aspect-[4/5] w-full object-cover object-[center_20%]"
-                width={w.image.width}
-                height={w.image.height}
-                loading="lazy"
-              />
+              <span className="font-display text-xl font-extrabold tabular-nums text-[var(--color-salsa)]">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <h3 className="mt-3 type-h3 text-[var(--color-ink)]">{b.title}</h3>
+              <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{b.text}</p>
             </motion.div>
-          </Reveal>
-          <Reveal className="grid gap-4" stagger={0.08}>
-            {w.cards.map((b, i) => (
-              <motion.div
-                key={b.title}
-                variants={item}
-                className="flex gap-5 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[0_14px_40px_rgba(17,17,17,0.04)] sm:p-7"
-              >
-                <span className="font-display text-xl font-extrabold tabular-nums text-[var(--color-salsa)]">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <div>
-                  <h3 className="type-h3 text-[var(--color-ink)]">{b.title}</h3>
-                  <p className="mt-2 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{b.text}</p>
-                </div>
-              </motion.div>
-            ))}
-            <motion.div variants={item} className="pt-1">
-              <a
-                href={w.cta.href}
-                className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
-              >
-                {w.cta.label}
-                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
-              </a>
-            </motion.div>
-          </Reveal>
-        </div>
+          ))}
+        </Reveal>
+        <Reveal className="mt-8">
+          <motion.div variants={item}>
+            <a
+              href={w.cta.href}
+              className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
+            >
+              {w.cta.label}
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+            </a>
+          </motion.div>
+        </Reveal>
       </Shell>
     </section>
   );
@@ -240,7 +235,7 @@ function FlowSection({ c }: { c: DanceflowContent }) {
             <img
               src={f.image.src}
               alt={f.image.alt}
-              className="aspect-[4/5] w-full object-cover"
+              className="aspect-[4/3] w-full object-cover object-center"
               width={f.image.width}
               height={f.image.height}
               loading="lazy"

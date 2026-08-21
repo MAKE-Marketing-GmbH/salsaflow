@@ -1,16 +1,10 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
-import { useLang, levelLabelI18n, WEEKDAY_LABEL } from '@/lib/i18n';
+import { useLang } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
-import {
-  buildScheduleSlots,
-  embeddedSchedule,
-  fetchSchedule,
-  type ScheduleResponse,
-  type ScheduleSlot,
-} from '@/lib/schedule';
+import { CourseEngine } from '@/public/courses/CourseEngine';
 import type { StyleContent } from '@/public/courses/styles/content';
 import {
   MEASURE_L,
@@ -141,9 +135,10 @@ type SplitHeroPhoto = {
   en: string;
   imgClass: string;
   columns: string;
-  /** Setzt objectPosition aus `hero.band.position` (content.ts) statt aus einem
-      zweiten, hier eingefrorenen Wert. Ohne Flag bleibt der Crop in `imgClass`. */
-  usesBandPosition?: boolean;
+  /** Echte Pixelmasse der Datei. Sie reservieren den Platz vor dem Laden; ein falscher
+      Wert verschiebt den Fold, an dem beide Routen kalibriert sind. */
+  width: number;
+  height: number;
 };
 
 const SALSA_HERO_PHOTO: SplitHeroPhoto = {
@@ -155,6 +150,8 @@ const SALSA_HERO_PHOTO: SplitHeroPhoto = {
   imgClass: 'aspect-[3/2] w-full object-cover object-center lg:aspect-[5/4]',
   /* R137-Werte: Spalten mittig zueinander, Textspalte 1.05fr. */
   columns: 'lg:grid-cols-[1.05fr_0.95fr] lg:items-center',
+  width: 1600,
+  height: 1064,
 };
 
 /* R138 (Raphael-Video 02:56 + 03:05, 18.08.): «Warum ist das so zu dunkel?» und
@@ -183,48 +180,91 @@ const SALSA_HERO_PHOTO: SplitHeroPhoto = {
    Bild, Bachata-Naehe statt Heels/Fitness.
    kurs-03.jpg (Salsa) und gallery/kurse/03.jpg (Bachata-Why) sind hier verboten. */
 const BACHATA_HERO_PHOTO: SplitHeroPhoto = {
-  /* R176, Look-FAIL R172: studiowand war hell (110.9), aber Logo fuellt die Wand
-     und der Mann steht mit dem Ruecken. Crop kann das Logo nicht wegschneiden.
-     party-33.webp: Mittel 97.1, R-B niedrig (kein Tungsten-Orange), beide Gesichter,
-     Fuehrungshaltung, Logo nur im Spiegel. Nur gallery/content.ts sonst.
-     Verboten bleiben: offer-bachata-1200, wide-v2, dreh-01, studiowand-Hero.
-     Crop bleibt usesBandPosition (center 20% in content.ts). */
-  src: '/photos/party/party-33.webp',
-  de: 'Paar tanzt in geschlossener Haltung im Salsaflow-Studio',
-  en: 'Couple dancing in closed hold at the Salsaflow studio',
-  /* Klassenstring vollstaendig, in derselben Reihenfolge wie die Salsa-Variante.
-     Mobil 4/3 statt 16/10: das Quellbild ist Hochformat, und der flachere Rahmen
-     zog den Hero-Block soweit nach unten, dass der zweite Chip im 844er-Fold
-     mittendurch geschnitten wurde. lg 4/3 fuellt die rechte Spalte bis knapp unter
-     den 730er-Fold. R161, Video 09:08 «das war auch falsch eingefaerbt»: der Hero
-     traegt jetzt GAR keine Grade-Klasse mehr. Die Gegen-Klasse aus R138 war nur ein
-     zweiter Filter ueber einem Filter. Das Foto steht auf dem Bild-Stil-Lock der
-     Route und traegt sich selbst. photo-grade-bachata bleibt in index.css, weil
-     Offer.tsx:67 daran haengt — hier wird sie einfach nicht gesetzt. */
-  imgClass: 'aspect-[16/9] w-full object-cover lg:aspect-[4/3]',
-  /* Crop kommt aus content.ts `hero.band.position` ('center 20%', Brief Punkt 3).
-     Das Quellbild ist Hochformat mit beiden Koepfen im oberen Drittel; 20% legt das
-     4/3-Fenster auf den Gesichtsblock statt auf Boden. Der Lock wirkt jetzt wirklich. */
-  usesBandPosition: true,
+  /* Verboten bleiben als Hero-Motiv (alle in frueheren Runden am Bild widerlegt):
+     offer-bachata-1200 und -wide-v2 (KI-Kante bzw. dunkelstes Paar im Bestand),
+     hero-paar-dreh-01, hero-paar-studiowand (Logo fuellt die Wand, Mann von hinten),
+     party-33 (gruene Buehnenlampe im Motiv, siehe unten),
+     showcase/hp-05 (entfaerbt: Sattigung 6.7, Kontrast 31.7 — wirkt dunstig, siehe unten),
+     showcase/hp-21 (Gruppenfoto, kein Paar), party-53 (Solo-Auftritt, kein Paar).
+
+     R188 ST7, Raphael-Video 12:01 («uebelst komisch eingetoent»), Runde 3.
+
+     Runde 1 hatte party-33.webp behalten und per Weissabgleich neutral gerechnet. Am
+     Screenshot gepruegt hat das nicht gehalten: worklog/shots/R188/after-final/
+     tanzkurse_bachata/d-01.png zeigt das Bild weiter gruen-blau. Der Grund steht schon
+     in der alten Notiz und war das Gegenargument gegen die eigene Loesung — «der gruene
+     Lichtfleck rechts bleibt: das ist eine echte Lampe». Genau die faerbt die halbe
+     rechte Bildhaelfte. Ein Weissabgleich zieht Kanal-Mittelwerte; er kann eine farbige
+     Lampe im Motiv nicht entfernen. Die Rechnung war richtig, die Diagnose falsch: der
+     Stich sass nicht nur im Weissabgleich, er sass im Licht der Szene.
+
+     Runde 2 tauschte auf showcase/hp-05.webp, weil das Bild ueber den Kanalmittelwert
+     neutral misst (R minus B = -5.0). Genau daran ist es gescheitert: «neutral» war als
+     Zielwert falsch gewaehlt. Am Render wirkte das Bild dunstig — die Messung erklaert
+     das eindeutig: Sattigung 6.7 von 100 und Luminanz-Kontrast 31.7. Das ist ein
+     flaues, fast graues Bild. Ein warmer Bachata-Hero braucht Farbe und Tiefe, nicht
+     Kanal-Gleichstand. R minus B nahe null heisst hier nicht «sauber», es heisst
+     «entfaerbt». Zusaetzlich zeigte hp-05 zwei Paare als Kleingruppe, nicht das eine
+     nahe Paar, das die Seite verkauft.
+
+     Runde 3 nimmt darum ein echtes warmes Original: party/party-06-v3.webp
+     (2048x1360). Gemessen ueber das Gesamtbild R 124.5 / G 65.8 / B 44.5, also
+     R minus B = +80.0 und R minus G = +58.7 bei Kontrast 51.2 — warmes Abendlicht im
+     Studio, kein Buehnen-Bunt und kein Gruenstich (G minus B = +21.3 liegt zwischen
+     Rot und Blau, also auf der Warm-Achse, nicht daneben).
+
+     Motiv: EIN Paar in offener Bachata-Drehung, beide Gesichter vollstaendig und frei
+     im Bild, Salsaflow-Wandlogo im Hintergrund. Echtes Foto: natuerliche Hautkante,
+     keine Umriss-Linie, kein Geister-Koerper. Beide Rahmen wurden vor dem Einbau am
+     Bild geprueft, nicht geschaetzt — 4/3 (Desktop) schneidet 117px links und rechts,
+     16/9 (mobil) 104px oben und unten; in beiden Faellen steht jeder Kopf frei.
+     Die Ableitung skaliert nur 2048x1360 auf 1500x996 und schneidet nichts — kein
+     Upscaling, keine Aufhellung, keine Farbkorrektur.
+
+     Doppelnutzung geprueft: party-06-v3 laeuft auf /events als kleine 322px-Karte in
+     einer Vierer-Reihe (EventsPage.tsx:384) und in der Galerie. Auf /tanzkurse/bachata
+     steht es als Hero. Verschiedene Seiten, verschiedene Rollen — kein Doppel-Motiv
+     auf einer Seite. Der freie Bestand wurde vorher durchgemessen: von 189 ausreichend
+     grossen Querformat-Dateien blieben nach warm+hell+scharf+unbenutzt genau drei, und
+     alle drei fielen am Bild durch (Gruppenfoto, Solo-Auftritt, gruene Buehnenlampe).
+     Ableitung liegt unter public/photos/r188-tanzkurse/. */
+  src: '/photos/r188-tanzkurse/bachata-hero-paarwarm-1500.webp',
+  de: 'Tanzpaar in offener Bachata-Drehung im warm beleuchteten Salsaflow-Studio',
+  en: 'Dance couple in an open bachata turn in the warmly lit Salsaflow studio',
+  /* Klassenstring vollstaendig, in derselben Reihenfolge wie die Salsa-Variante — das
+     ist die «gleiche Radius-Behandlung» aus dem Auftrag: derselbe Wrapper mit
+     rounded-[var(--radius-media)] plus 1px Linie wie Salsa und Heels, nur das
+     Seitenverhaeltnis ist pro Route auf den Fold kalibriert.
+     R161, Video 09:08 «das war auch falsch eingefaerbt»: der Hero traegt GAR keine
+     Grade-Klasse. Das Foto traegt sich selbst; photo-grade-bachata bleibt in index.css,
+     weil Offer.tsx:67 daran haengt — hier wird sie einfach nicht gesetzt. */
+  imgClass: 'aspect-[16/9] w-full object-cover object-center lg:aspect-[4/3]',
+  /* R188 ST7 Runde 3: KEIN Sonder-Crop. Der Wert 'center 20%' gehoerte zum alten
+     Hochformat-Motiv, dessen Koepfe im oberen Drittel lagen. Die Quelle ist bereits
+     Querformat (1500x996, Verhaeltnis 1.506) und damit flacher als der 4/3-Rahmen: dort
+     fuellt sie die Hoehe voll aus und wird nur seitlich beschnitten, eine vertikale
+     Verschiebung waere wirkungslos — genau der Fehler, den die R138-Kritik an dieser
+     Stelle schon einmal gefunden hat. Im 16/9-Rahmen (mobil) schneidet cover 104px oben
+     und unten; beide Koepfe wurden dort am Bild geprueft und stehen frei. Bachata steht
+     damit wie Salsa auf object-center. */
   /* Bachata hat fuenf Bullets (Salsa vier) und laengere Labels. Mit Salsas 1.05fr
      blieben der Textspalte 672px, die Chips brachen auf drei Zeilen und der Block
      endete bei y=707, das Foto schon bei 649 — genau das «gequetscht» aus 03:05.
      1.12fr gibt der Spalte Luft, items-start setzt beide Spalten auf dieselbe
      Oberkante statt das Foto in die Mitte zu haengen. */
   columns: 'lg:grid-cols-[1.12fr_0.88fr] lg:items-start',
+  width: 1500,
+  height: 996,
 };
 
 function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
   const { lang } = useLang();
   const { container, item } = useReveal();
   const h = c.hero;
-  /* Crop-Lock aus dem LIVE-Content, nicht aus einer toten Konfiguration.
-     Kritik R138: `position` lag nur noch im `hero.band`-Objekt, das dieser Hero gar
-     nicht mehr rendert — der Gate-Treffer auf 'center 20%' war damit Buchstabe ohne
-     Wirkung, waehrend der Hero hart 'center 30%' setzte. `usesBandPosition` schaltet
-     den Wert aus content.ts scharf: aendert ihn dort jemand, aendert sich das Bild.
-     Salsa laesst das Flag weg und bleibt bei object-center aus dem R137-String. */
-  const objectPosition = photo.usesBandPosition ? h.band.position : undefined;
+  /* R188 ST7: Beide Split-Hero-Routen tragen ihren Crop jetzt im Klassenstring
+     (object-center). Der frueher hier verdrahtete Umweg ueber `hero.band.position`
+     ist weg — er galt nur noch fuer das alte Bachata-Hochformat und waere mit der
+     neuen Querformat-Quelle wirkungslos gewesen. */
   return (
     <section
       className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
@@ -290,10 +330,9 @@ function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
               <img
                 src={photo.src}
                 alt={lang === 'de' ? photo.de : photo.en}
-                style={objectPosition ? { objectPosition } : undefined}
                 className={photo.imgClass}
-                width={1600}
-                height={1066}
+                width={photo.width}
+                height={photo.height}
                 loading="eager"
                 fetchPriority="high"
               />
@@ -387,6 +426,13 @@ function WhySection({ c }: { c: StyleContent }) {
      Leerfeld unter Block 03) — Raphael 03:05 «uebelst lost». Bachata bekommt
      dieselbe Aufteilung. Heels behaelt seine. */
   const wideWhy = isSalsa || c.seo === 'bachata';
+  /* R188 ST3, Raphael-Video 10:21: «Bild rechts, Inhalte links.» Auf Bachata lag das
+     Foto in der LINKEN Spalte unter Titel und Fliesstext, die Blockliste rechts — also
+     Bild links, Inhalte rechts, genau andersherum. Fuer Bachata wandert das Foto in
+     eine eigene rechte Spalte, Titel, Text und Blocks stehen zusammen links. Salsa und
+     Heels behalten ihre Aufteilung: Raphael hat nur Bachata beanstandet. */
+  const imageRight = c.seo === 'bachata';
+  if (imageRight) return <WhySectionImageRight c={c} />;
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
@@ -443,6 +489,60 @@ function WhySection({ c }: { c: StyleContent }) {
                 </div>
               </motion.div>
             ))}
+          </Reveal>
+        </div>
+      </Shell>
+    </section>
+  );
+}
+
+/** R188 ST3: Bachata-Variante der Warum-Sektion. Inhalte links, Bild rechts.
+ *
+ *  Die Blocks stehen jetzt unter dem Fliesstext in derselben linken Spalte, weil sie
+ *  denselben Gedanken zu Ende fuehren. Sie sind auf zwei gekuerzt (content.ts) und
+ *  tragen keine 01/02/03-Nummern mehr: Bei zwei Zeilen zaehlt niemand mit, die Nummer
+ *  war nur Deko. Das Foto bekommt die rechte Spalte allein und laeuft ab lg ueber die
+ *  volle Hoehe der Sektion, damit rechts keine Restflaeche bleibt. */
+function WhySectionImageRight({ c }: { c: StyleContent }) {
+  const { item } = useReveal();
+  const w = c.why;
+  return (
+    <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
+      <Shell>
+        <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16">
+          <Reveal>
+            <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
+              {w.title} {w.titleAccent ? <TitleAccent>{w.titleAccent}</TitleAccent> : null}
+            </motion.h2>
+            <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
+              {w.body}
+            </motion.p>
+            <motion.dl variants={item} className="mt-8 grid gap-5 border-t border-[var(--color-line)] pt-6 sm:grid-cols-2">
+              {w.blocks.map((b) => (
+                <div key={b.title}>
+                  <dt className="font-display text-base font-bold text-[var(--color-ink)]">{b.title}</dt>
+                  <dd className="mt-1.5 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{b.text}</dd>
+                </div>
+              ))}
+            </motion.dl>
+          </Reveal>
+
+          {/* Gleicher Rahmen wie jedes andere Bild der Stilseiten (ST5):
+              rounded-[var(--radius-media)] plus duenne Linie. */}
+          <Reveal>
+            <motion.div
+              variants={item}
+              className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]"
+            >
+              <img
+                src={w.image.src}
+                alt={w.image.alt}
+                className="aspect-[4/5] w-full object-cover object-[center_35%] sm:aspect-[4/3] lg:aspect-[5/6]"
+                width={1200}
+                height={1440}
+                loading="lazy"
+              />
+            </motion.div>
           </Reveal>
         </div>
       </Shell>
@@ -628,231 +728,48 @@ function LevelsSection({ c }: { c: StyleContent }) {
 
 /* -------------------------------------------------------------------- Termine */
 
-/* R162: Die Stilseite erklaerte den Stil, nannte aber keinen einzigen Termin — wer
-   einsteigen wollte, musste erst auf den Kursplan wechseln. Diese Sektion zeigt die
-   Termine GENAU DIESES Stils direkt hier, mit sichtbarem «frei» oder «Ausgebucht».
-
-   Bewusst KEIN CourseEngine-Import: die Engine ist der volle Kursplan mit Staffel-
-   Wechsler, Wochen-Navigation, Filtern und Tages-Tabs. Hier braucht es eine Liste.
-   Beide lesen dieselben Daten aus @/lib/schedule, darum bleibt kein zweiter
-   Datenstand entstehen. Keine neue API. */
-
-const SLOTS_UI = {
-  de: {
-    eyebrow: 'Termine',
-    title: 'Wann du',
-    titleAccent: 'tanzen kannst',
-    lead: 'Alle laufenden Termine in diesem Stil. Ein Klick auf die Zeile bringt dich zur Anmeldung.',
-    free: 'frei',
-    full: 'Ausgebucht',
-    teacherTba: 'Team',
-    empty: 'Gerade laeuft in diesem Stil kein Kurs. Schreib uns — wir sagen dir, wann der naechste startet.',
-    more: 'Alle Kurse im Kursplan',
-    clock: 'Uhr',
-  },
-  en: {
-    eyebrow: 'Dates',
-    title: 'When you',
-    titleAccent: 'can dance',
-    lead: 'Every running course in this style. Click a row to go to the sign-up.',
-    free: 'open',
-    full: 'Fully booked',
-    teacherTba: 'Team',
-    empty: 'No course is running in this style right now. Write to us and we will tell you when the next one starts.',
-    more: 'See the full schedule',
-    clock: '',
-  },
-} as const;
-
-/** Laedt den Kursplan: erst der eingebettete Stand (steht schon im HTML, darum kein
- *  «wird geladen»), danach aktualisiert der Netz-Aufruf auf den Live-Stand. Genau der
- *  Vertrag aus schedule.ts. */
-function useSchedule(): ScheduleResponse | null {
-  const [data, setData] = useState<ScheduleResponse | null>(() => embeddedSchedule());
-
-  useEffect(() => {
-    let alive = true;
-    fetchSchedule()
-      .then((res) => {
-        if (alive) setData(res);
-      })
-      .catch(() => {
-        /* Der eingebettete Stand bleibt stehen. Eine leere Liste waere schlechter
-           als ein Plan, der ein paar Minuten alt ist. */
-      });
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  return data;
-}
-
-/** Faltet die bereits sortierten Slots zu Wochentag-Bloecken. `buildScheduleSlots`
- *  liefert sie nach Wochentag und Startzeit sortiert (schedule.ts), darum reicht ein
- *  Durchlauf: ein neuer Tag beginnt genau dort, wo sich `weekday` aendert. */
-function groupSlotsByWeekday(slots: ScheduleSlot[]): { weekday: string; slots: ScheduleSlot[] }[] {
-  const groups: { weekday: string; slots: ScheduleSlot[] }[] = [];
-  for (const slot of slots) {
-    const last = groups[groups.length - 1];
-    if (last && last.weekday === slot.weekday) last.slots.push(slot);
-    else groups.push({ weekday: slot.weekday, slots: [slot] });
-  }
-  return groups;
-}
-
-/** Die Termin-Sektion eines Stils. `styleKey` ist der Routen-Schluessel
- *  (salsa|bachata|heels) und trifft styleKey in der API 1:1 — gemessen gegen
- *  /api/public/schedule: salsa 50, bachata 8, heels 4 Kurse.
+/**
+ * Die Stilseiten nutzen bewusst dieselbe Engine wie der Kursplan.
+ * Datum, Auswahlzustand und Buchungslink bleiben damit an einer Stelle gepflegt.
  *
- *  Exportiert, weil nicht jeder Stil ueber StylePage laeuft: /tanzkurse/heels
- *  rendert HeelsView.tsx (eigener Plan-Rhythmus, siehe pages.tsx). Ohne Export
- *  muesste die Sektion dort ein zweites Mal existieren — zwei Kopien derselben
- *  Liste, die ab dem ersten Fix auseinanderlaufen. Ein Import, eine Wahrheit.
- *  Mountpunkt in HeelsView: <StyleSlotsSection styleKey={c.seo} />. */
+ * R188 ST1 (Raphael-Video 09:37, Beleg
+ * worklog/shots/R188/after-final/tanzkurse_bachata/d-06.png): Der Stil kam bis hierher
+ * ueber den `?stil=`-Parameter, den der `useEffect` unten schreibt. Effekte laufen aber
+ * NACH dem ersten Render, und die Engine liest ihren Startfilter genau in diesem ersten
+ * Render aus der URL. Sie fand dort nichts, startete auf «Alle Stile» und zeigte auf der
+ * Bachata-Seite drei Salsa-Kurse.
+ *
+ * Der Stil geht jetzt als Prop direkt in die Engine (`fixedStyle`). Damit steht er vor
+ * dem ersten Render fest und ist nicht abwaehlbar. Der Effekt bleibt und macht nur noch
+ * das, wofuer er gedacht war: die URL teilbar halten.
+ */
 export function StyleSlotsSection({ styleKey }: { styleKey: string }) {
   const { lang } = useLang();
-  const { item } = useReveal();
-  const t = SLOTS_UI[lang];
-  const data = useSchedule();
-
-  const slots = data ? buildScheduleSlots(data.courses.filter((course) => course.styleKey === styleKey), data.terms) : [];
-
-  /* Nichts zu zeigen heisst: nichts zeigen. Eine Sektion mit Ueberschrift ueber einer
-     leeren Liste sieht kaputt aus, und ein Skelett waere hier eine Behauptung ueber
-     Daten, die es vielleicht nicht gibt. */
-  if (!slots.length) return null;
-
+  useEffect(() => {
+    const browserWindow = globalThis.window;
+    if (!browserWindow) return;
+    const params = new URLSearchParams(browserWindow.location.search);
+    params.set('stil', styleKey);
+    browserWindow.history.replaceState(null, '', `${browserWindow.location.pathname}?${params.toString()}${browserWindow.location.hash}`);
+  }, [styleKey]);
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
         <Reveal className="max-w-2xl">
-          <motion.div variants={item}>
-            <Eyebrow>{t.eyebrow}</Eyebrow>
-          </motion.div>
-          <motion.h2 variants={item} className={cn('mt-5', sectionTitle, MEASURE_L)}>
-            {t.title} <TitleAccent>{t.titleAccent}</TitleAccent>
-          </motion.h2>
-          <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
-            {t.lead}
-          </motion.p>
+          <h2 className={cn(sectionTitle, MEASURE_L)}>
+            {lang === 'de' ? 'Kurse und Termine' : 'Classes and dates'}
+          </h2>
+          <p className={`mt-4 text-pretty ${sectionLead}`}>
+            {lang === 'de'
+              ? 'Wähle einen Termin und buche deinen Platz direkt.'
+              : 'Choose a date and book your spot directly.'}
+          </p>
         </Reveal>
-
-        {/* Nach Wochentag gruppiert statt als eine lange Liste. Ungruppiert stand
-            «Montag» neunmal untereinander und der Tag war die lauteste Information
-            auf dem Schirm, obwohl er sich neunmal nicht aendert (am Live-Render mit
-            25 Zeilen gemessen). Als Zwischen-Ueberschrift sagt der Tag einmal, was
-            er sagen muss, und die Zeile traegt nur noch, was sie unterscheidet. */}
-        <div className="mt-10 flex flex-col gap-8">
-          {groupSlotsByWeekday(slots).map((group) => (
-            <Reveal key={group.weekday} stagger={0.04}>
-              <motion.h3
-                variants={item}
-                className="font-display text-sm font-extrabold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]"
-              >
-                {WEEKDAY_LABEL[lang][group.weekday]?.long ?? group.weekday}
-              </motion.h3>
-              <div className="mt-3 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white">
-                {group.slots.map((slot) => (
-                  <SlotLine key={slot.key} slot={slot} />
-                ))}
-              </div>
-            </Reveal>
-          ))}
+        <div className="mt-10" data-style-course-engine={styleKey}>
+          <CourseEngine fixedStyle={styleKey} />
         </div>
-
-        <Reveal className="mt-6">
-          <motion.div variants={item}>
-            {/* Der Link traegt den Stil mit (Dom-Feedback 20.08.): Wer auf der Stilseite
-                steht, will den Plan DIESES Stils, nicht den Gesamtplan. Ungefiltert
-                landete er in allen ~62 Kursen und musste den Filter von Hand setzen.
-                CourseEngine.tsx liest den Parameter bereits (readArrayParam('stil')). */}
-            <a
-              href={`/kursplan?stil=${styleKey}`}
-              className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
-            >
-              {t.more}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
-            </a>
-          </motion.div>
-        </Reveal>
       </Shell>
     </section>
-  );
-}
-
-function SlotLine({ slot }: { slot: ScheduleSlot }) {
-  const { lang } = useLang();
-  const { item } = useReveal();
-  const t = SLOTS_UI[lang];
-  const course = slot.primary;
-
-  /* Der Badge beschreibt den Kurs, auf den die Zeile ZEIGT — nicht irgendeinen aus
-     der Gruppe. `slot.bookable` ist genau dieses Ziel (schedule.ts: erster offener
-     Kurs, sonst der laufende). `slot.full` waere hier falsch: es steht nur auf true,
-     wenn laufende UND kommende Staffel voll sind. Am Live-Stand ist Montag 18:30
-     «Intermediate Stufe 11» laufend ausgebucht, die Oktober-Staffel offen — die Zeile
-     verlinkt Oktober, also ist «frei» die richtige und ehrliche Auskunft. Haengt das
-     Ziel dagegen an einem vollen Kurs, steht «Ausgebucht» statt eines Versprechens,
-     das die Anmeldung nicht halten kann. */
-  const isFull = slot.bookable.status === 'full';
-
-  const weekday = WEEKDAY_LABEL[lang][slot.weekday]?.long ?? slot.weekday;
-  const level = levelLabelI18n(lang === 'de' ? course.levelDe : course.levelEn, course.onVariant);
-  /* Nur der Vorname: die Zeile ist eng, und im Studio ruft ohnehin niemand den
-     Nachnamen. Mehrere Lehrer werden mit & verbunden wie im Kursplan. */
-  const teachers = course.teachers.map((teacher) => teacher.displayName.split(' ')[0]).join(' & ');
-
-  return (
-    <motion.a
-      variants={item}
-      href={`/buchung?kurs=${encodeURIComponent(slot.bookable.id)}`}
-      data-testid="style-slot"
-      data-course-id={slot.bookable.id}
-      data-full={isFull ? '' : undefined}
-      className="group flex flex-col gap-2 border-b border-[var(--color-line)] px-4 py-4 transition-colors last:border-b-0 hover:bg-[var(--color-bg-soft)] sm:flex-row sm:items-center sm:gap-5 sm:px-6"
-    >
-      {/* Die Uhrzeit ist der Anker der Zeile: danach sucht man, wenn man wissen will,
-          ob es in den eigenen Feierabend passt. Feste Breite ab sm, damit die Zeiten
-          untereinander eine Spalte bilden statt zu flattern. Der Wochentag steht als
-          Ueberschrift ueber der Gruppe und wird hier nicht wiederholt — nur der
-          Screenreader bekommt ihn pro Zeile, weil der Link auch einzeln vorgelesen
-          wird und «18:30–19:30» ohne Tag keine buchbare Auskunft ist. */}
-      <span className="flex shrink-0 flex-col sm:w-40">
-        {/* whitespace-nowrap: ohne die Klasse brach «19:30–20:30 Uhr» nach der Zeit um
-            und setzte «Uhr» auf eine zweite Zeile, waehrend «18:30–19:30 Uhr» einzeilig
-            blieb — die Zeitspalte lief zweizeilig gegen einzeilig (im Desktop-Render
-            gemessen). Die Zeit ist eine Einheit und darf nicht brechen. */}
-        <span className="whitespace-nowrap font-display text-base font-bold tabular-nums leading-tight text-[var(--color-ink)]">
-          <span className="sr-only">{weekday} </span>
-          {slot.startTime}–{slot.endTime}
-          {t.clock ? ` ${t.clock}` : ''}
-        </span>
-      </span>
-
-      <span className="min-w-0 flex-1">
-        <span className="block text-[0.98rem] font-semibold leading-snug text-[var(--color-ink)]">{level}</span>
-        <span className="mt-0.5 block break-words text-sm leading-snug text-[var(--color-ink-muted)]">
-          {teachers || t.teacherTba}
-        </span>
-      </span>
-
-      {/* Ausgebucht ist eine ruhige Auskunft, kein Alarm: graue Pille. «frei» traegt
-          Rot, weil Rot auf dieser Seite die Aktionsfarbe ist. */}
-      <span className="flex shrink-0 items-center gap-3 self-start sm:self-center">
-        <span
-          className={cn(
-            'inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold',
-            isFull
-              ? 'border-[var(--color-line)] bg-[var(--color-bg-soft)] text-[var(--color-ink-muted)]'
-              : 'border-[var(--color-salsa)]/30 bg-[var(--color-salsa)]/8 text-[var(--color-salsa)]',
-          )}
-        >
-          {isFull ? t.full : t.free}
-        </span>
-        <CtaArrow className="text-[var(--color-ink-muted)] transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5 group-hover:text-[var(--color-salsa)]" />
-      </span>
-    </motion.a>
   );
 }
 
@@ -865,7 +782,7 @@ function SocialSection({ c }: { c: StyleContent }) {
       <Shell>
         <Reveal className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <motion.div variants={item} className="order-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-white/10 lg:order-1">
-            <img src={s.image.src} alt={s.image.alt} style={s.image.position ? { objectPosition: s.image.position } : undefined} className="aspect-[16/11] w-full object-cover" width={1400} height={960} loading="lazy" />
+            <img src={s.image.src} alt={s.image.alt} style={s.image.position ? { objectPosition: s.image.position } : undefined} className="aspect-[16/11] w-full object-cover" width={1400} height={960} loading="eager" />
           </motion.div>
           <motion.div variants={item} className="order-1 max-w-xl lg:order-2">
             <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white/70">

@@ -17,7 +17,14 @@ import { cn } from '@/lib/utils';
    36 % und Heels bei 20 %, damit die Koepfe im Bild bleiben (Crop-Lock R138/R139). */
 function cardCrop(key: string) {
   if (key === 'salsa') return 'object-[center_46%]';
-  if (key === 'bachata') return 'object-[center_36%]';
+  /* R188 / H2: das Bachata-Motiv ist natives Hochformat (hp-26.webp, 1200x1800, siehe
+     content.ts). Der frueher noetige 36%-Versatz gehoerte zum alten Querformat und wuerde
+     hier den Kopf des Tanzenden aus dem Bild schieben. Gemessen an der Kartenflaeche
+     316x416 (Verhaeltnis 0.76 gegen 0.67 des Bildes): object-cover skaliert ueber die
+     Breite, sichtbar sind 87.9% der Bildhoehe um die Mitte, also 6.1% Beschnitt oben und
+     unten. Die Koepfe des Paares liegen bei 28-45% der Bildhoehe und damit mit Abstand
+     innerhalb des Fensters (SW4: "Koepfe nie abschneiden"). */
+  if (key === 'bachata') return 'object-center';
   if (key === 'heels') return 'object-[center_20%]';
   return 'object-[center_42%]';
 }
@@ -26,7 +33,7 @@ function cardCrop(key: string) {
    Motiv, weil die vier Dateien unterschiedliche Formate haben (Salsa quer, Heels hoch). */
 function cardSize(key: string) {
   if (key === 'salsa') return { w: 1600, h: 1067 };
-  if (key === 'bachata') return { w: 2752, h: 1536 };
+  if (key === 'bachata') return { w: 1200, h: 1800 };
   if (key === 'privat') return { w: 1800, h: 1200 };
   return { w: 1200, h: 1600 };
 }
@@ -44,9 +51,15 @@ function StyleCard({ card }: { card: OfferCard }) {
       <img
         src={card.photo}
         alt={card.alt}
+        /* R188 / H2: `photo-grade-bachata` ist hier raus. Die Klasse (index.css:480,
+           saturate .82 / contrast 1.14) war genau die "komische Toenung" aus dem Video —
+           sie lag ZUSAETZLICH auf einer schon nachbearbeiteten Datei. Das neue Bild ist eine
+           Groessenableitung des Originals und traegt sich ohne CSS-Filter. Kein Filter als
+           Bildersatz, dieselbe Entscheidung wie bei photo-grade-private auf /privatstunden
+           (privat/content.ts:181). */
         className={cn(
           'absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.025]',
-          card.key === 'bachata' ? 'photo-grade-bachata' : card.key === 'privat' ? 'photo-grade-private' : undefined,
+          card.key === 'privat' ? 'photo-grade-private' : undefined,
           cardCrop(card.key),
         )}
         width={size.w}

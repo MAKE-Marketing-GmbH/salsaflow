@@ -41,6 +41,12 @@ export type PrivatContent = {
     cards: { title: string; text: string }[];
     /** R140: Die restlichen Anlaesse als leise Zeile darunter, nicht als vierte bis
      *  sechste gleich laute Karte (Video 04:21 «viel zu viel», Frame p-08). */
+    /** R188 PR1, Fix-Runde 3: `moreLabel` wird wieder gerendert — als leise
+     *  Einleitung VOR den Chips, nicht als eigene Ueberschrift ueber einem eigenen
+     *  Block. Runde 2 hatte das Feld stillgelegt und die drei Anlaesse als eigene
+     *  Karten ins Kartenraster gehoben; daraus wurden drei fast leere Karten
+     *  (Kritiker R188). Als Chips brauchen sie wieder eine Einleitung, sonst
+     *  stehen drei Stichworte zusammenhanglos unter drei erklaerten Karten. */
     moreLabel: string;
     more: string[];
     cta: Cta;
@@ -130,8 +136,12 @@ const de: PrivatContent = {
   when: {
     // R140: Titel von 16 auf 5 Wörter. Der alte Satz lief über drei Zeilen und sagte
     // dasselbe wie der Intro-Satz darunter.
-    title: 'Wann sich das lohnt.',
-    titleAccent: 'lohnt',
+    // R188 KA2: Frage statt Aussage. «Wann sich das lohnt.» war ein halber Satz,
+    // die Frage dahinter ist «Wann lohnt sich eine Privatstunde?».
+    // `titleAccent` ist hier ein Teilstring von `title` (Accented in
+    // PrivatstundenPage.tsx:61 sucht ihn per indexOf), nicht ein Anhang.
+    title: 'Wann lohnt sich eine Privatstunde?',
+    titleAccent: 'Privatstunde?',
     intro: 'Kurse bauen dich Schritt für Schritt auf. Privatstunden setzen dort an, wo du Aufmerksamkeit brauchst.',
     // R140: Drei statt sechs Karten. Drei Anlässe tragen den Block, drei stehen
     // als leise Zeile darunter. Die Reihenfolge ist eine Layout-Entscheidung,
@@ -151,8 +161,10 @@ const de: PrivatContent = {
     eyebrow: 'So funktioniert es',
     // R140: Der alte Titel war eine Antithese-Figur («beginnt nicht mit Figuren.
     // Sie beginnt mit …», forbidden.md A2) und lief über drei Zeilen.
-    title: 'So läuft eine Stunde ab.',
-    titleAccent: 'Stunde',
+    // R188 KA2 (Fix-Runde 2, kimi-critic): «So läuft eine Stunde ab.» war eine
+    // Aussage. Die Frage dahinter ist die, die Besucher wirklich stellen.
+    title: 'Wie läuft eine Privatstunde ab?',
+    titleAccent: 'Privatstunde ab?',
     body: 'Je klarer dein Ziel, desto besser wird die Stunde.',
     steps: [
       { tag: 'Schritt 1', title: 'Ziel klären', text: 'Du sagst uns, woran du arbeiten willst.' },
@@ -191,8 +203,10 @@ const de: PrivatContent = {
     // R140-Fix: «zu dritt» engte die Kleingruppe auf genau drei Personen ein und
     // widersprach der Zeile «Kleingruppe» darunter. Der Titel nennt jetzt dieselben
     // drei Formate wie die Liste.
-    title: 'Allein, als Paar oder in kleiner Gruppe.',
-    titleAccent: 'kleiner Gruppe',
+    // R188 KA2 (Fix-Runde 2): Frage statt Aufzählung. Die drei Formate stehen
+    // ohnehin als Liste darunter, die Überschrift muss sie nicht vorwegnehmen.
+    title: 'Allein, zu zweit oder als Gruppe?',
+    titleAccent: 'als Gruppe?',
     items: [
       { name: 'Einzelperson', text: 'Für Technik, Styling oder Level-Fragen.' },
       { name: 'Paar', text: 'Für Hochzeitstanz und Sicherheit als Paar.' },
@@ -215,8 +229,9 @@ const de: PrivatContent = {
     altCta: { label: 'Kursaufbau ansehen', href: R.kursaufbau },
   },
   notFor: {
-    title: 'Nicht jede Frage braucht eine Privatstunde.',
-    titleAccent: 'Privatstunde',
+    // R188 KA2 (Fix-Runde 2): Frage statt Aussage, gleiche Aussage.
+    title: 'Brauchst du überhaupt eine Privatstunde?',
+    titleAccent: 'Privatstunde?',
     // R140: gekürzt. R140-Fix: «reicht» war eine absolute Zusage, im Plan stand
     // «oft». Anlass und wiederkehrendes Problem sind wieder drin: sie waren zwei
     // von drei Gründen für eine Privatstunde und fielen beim Kürzen weg.
@@ -224,8 +239,11 @@ const de: PrivatContent = {
     cta: { label: 'Schnupperstunde buchen', href: R.schnupper },
   },
   closing: {
-    title: 'Beschreib uns dein Ziel.',
-    titleAccent: 'dein Ziel',
+    // R188 KA2 (Fix-Runde 2): Aufforderung wird Frage, gleiche Bauform wie der
+    // Abschluss auf /kursaufbau (kursaufbau/content.ts:251). Die Aufforderung
+    // «Beschreib uns dein Ziel» steht weiter im Knopf darunter.
+    title: 'Woran willst du arbeiten?',
+    titleAccent: 'arbeiten?',
     // R140: von 23 auf 15 Wörter.
     body: 'Schreib kurz, worum es geht: Salsa, Bachata, Hochzeitstanz, Technik oder Level. Wir empfehlen dir das passende Format.',
     primary: { label: 'Privatstunde anfragen', href: R.privatAnfrage },
@@ -279,8 +297,9 @@ const en: PrivatContent = {
     cardText: 'Technique, wedding dance or a safe start. Personally guided.',
   },
   when: {
-    title: 'When it pays off.',
-    titleAccent: 'pays off',
+    // R188 KA2: question headline, same as de.
+    title: 'When is a private lesson worth it?',
+    titleAccent: 'worth it?',
     intro: 'Courses build you up step by step. Private lessons start where you need attention.',
     cards: [
       { title: 'Wedding dance', text: 'An occasion is coming up and you want to feel confident.' },
@@ -293,8 +312,9 @@ const en: PrivatContent = {
   },
   flow: {
     eyebrow: 'How it works',
-    title: 'How a lesson runs.',
-    titleAccent: 'lesson',
+    // R188 KA2 (Fix-Runde 2): question headline, same as de.
+    title: 'How does a private lesson run?',
+    titleAccent: 'private lesson run?',
     body: 'The clearer your goal, the better the lesson.',
     steps: [
       { tag: 'Step 1', title: 'Clarify the goal', text: 'You tell us what you want to work on.' },
@@ -308,8 +328,9 @@ const en: PrivatContent = {
     },
   },
   formats: {
-    title: 'Alone, as a couple or in a small group.',
-    titleAccent: 'small group',
+    // R188 KA2 (Fix-Runde 2): question headline, same as de.
+    title: 'Alone, as a couple or as a group?',
+    titleAccent: 'as a group?',
     items: [
       { name: 'Individual', text: 'For technique, styling or level questions.' },
       { name: 'Couple', text: 'For a wedding dance and confidence as a pair.' },
@@ -330,14 +351,16 @@ const en: PrivatContent = {
     altCta: { label: 'See the course structure', href: R.kursaufbau },
   },
   notFor: {
-    title: 'Not every question needs a private lesson.',
-    titleAccent: 'private lesson',
+    // R188 KA2 (Fix-Runde 2): question headline, same as de.
+    title: 'Do you even need a private lesson?',
+    titleAccent: 'private lesson?',
     body: 'For a first orientation, the free trial class is often enough. With a clear goal, an occasion or a recurring problem, private coaching gets you there faster.',
     cta: { label: 'Book a trial class', href: R.schnupper },
   },
   closing: {
-    title: 'Describe your goal.',
-    titleAccent: 'your goal',
+    // R188 KA2 (Fix-Runde 2): question headline, same as de.
+    title: 'What do you want to work on?',
+    titleAccent: 'work on?',
     body: 'Tell us briefly what it is about: Salsa, Bachata, a wedding dance, technique or level. We will recommend the right format.',
     primary: { label: 'Request a private lesson', href: R.privatAnfrage },
     secondary: { label: 'Get in touch', href: R.kontakt },

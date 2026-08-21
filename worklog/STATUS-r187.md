@@ -1,7 +1,12 @@
 # STATUS R187: Bildauflösung siteweit
 
 R187 prüft 27 öffentliche Haupt-Routen an fünf Viewports.
-Der fertige Stand ist für den Release geprüft.
+
+Stand 21.08.2026: R187 liegt auf `origin/main` und ist deployt. Der Auftrag
+verbot Push und Deploy zunächst. Raphael hat das am 20.08. aufgehoben: erst
+fertig bauen, dann pushen und deployen. Die Vorschau läuft unter
+`https://salsaflow-dc.vercel.app`. Die Kundendomain `www.salsaflow-dc.com`
+zeigt weiterhin auf die alte Seite und braucht Raphaels Freigabe.
 
 ## Ergebnis
 
@@ -141,34 +146,168 @@ gleicher Pixelzahl. Ein Tausch scheitert auch hier: `hero-paar-studiowand-01.web
 (1920x1280) zeigt dieselbe Aufnahme, aber ein Bandschnitt aus 1920 Breite gibt
 höchstens 1920 Pixel. Das Ziel sind 2672. Das wäre Hochskalierung.
 
-## Finale Crop-Korrekturen
+## Angeschnittene Köpfe auf `/team` (behoben)
 
-Die zwei belegten Zuschnittfehler sind behoben.
+Ein Kritiker hat das gefunden. Ich habe es am Browserbild und am Quellfoto
+nachgeprüft. Es stimmt. Auf `/team` kappte die Oberkante des Bandes die hintere
+Reihe. Die Gesichter blieben ganz, angeschnitten war bei drei Personen der
+obere Haaransatz. Raphael hat die Korrektur freigegeben. Sie ist eingebaut.
 
-- `/team` nutzt `center 38%`.
-- `/events-workshops/eventkalender` nutzt `center 22%`.
-- Desktop und Mobil zeigen alle Köpfe, Hände und Arme vollständig.
-- Das Team-Logo bleibt lesbar.
+Das ist kein Auflösungsproblem. Die Dichte-Messung konnte es nie finden, weil
+sie Pixel zählt und nicht, was im Rahmen steht.
 
-Finale Browserbilder:
+Das Quellfoto ist in Ordnung: `hp-03-2880.webp` (2880x1784) zeigt alle Köpfe
+vollständig, mit Luft darüber. Verloren gehen sie erst im Zuschnitt.
+`TeamPage.tsx:318` setzte `position: center 56%`. Die Box ist bei Viewport 1440
+nur 1440x345 groß. Sichtbar bleiben 690 Pixel Bildhöhe, 1094 fallen weg, davon
+bei 56 Prozent **613 Pixel oben**. Genau dort sind die Köpfe.
 
-- `worklog/shots/R187-final-crops-desktop-v2`
-- `worklog/shots/R187-final-crops-mobile-v2`
+Ich habe vier Zuschnitte gerendert und verglichen:
 
-Drei unabhängige Kritiker lasen die echten PNGs und gaben PASS.
+| Position | Oben abgeschnitten | Ergebnis |
+|---|---|---|
+| `center 56%` (vorher) | 613 px | hintere Reihe angeschnitten |
+| `center 44%` | 481 px | Köpfe knapp angeschnitten |
+| **`center 38%`** (jetzt) | **426 px** | **alle Köpfe ganz, Logo lesbar** |
+| `center 32%` | 328 px | alle Köpfe ganz, dafür leere Wand |
 
-## Ein Fall bleibt unverändert: `hp-22.webp`
+**Eingebaut:** `TeamPage.tsx:318` steht auf `center 38%`. Eine Zeile, kein neues
+Material, keine Ladekosten. Die 56 Prozent waren eine Entscheidung aus R180c;
+Raphael hat das Überschreiben freigegeben.
 
-`hp-22.webp` auf `/tanzkurse/heels` liegt bei Dichte 1,71.
-Der verfügbare Master ist wärmer und anders beschnitten.
-Der Tausch wäre ein nicht freigegebener Motivwechsel.
-Darum bleibt die Datei als MATERIALBEDARF dokumentiert.
+**Beleg:** `worklog/shots/R187-crop-fix/team-1440.png`. Ich habe das Bild selbst
+gelesen. Alle Köpfe der hinteren Reihe stehen ganz im Band, mit Luft darüber.
+Das Mobilbild (`team-390.png`) zeigt das Motiv unverändert vollständig.
+
+## Gekappte Hände auf `/events-workshops/eventkalender` (behoben)
+
+Derselbe Fehlertyp, andere Route. Ein dritter Kritiker hat ihn gefunden, ich
+habe das PNG selbst gelesen. Die Oberkante des Bandes schnitt die erhobenen
+Hände ab: links fehlten Fingerspitzen, rechts war ein Arm mitten im Unterarm
+durchtrennt. Das Motiv lebt vom Jubel nach oben. Genau der war weg.
+Raphael hat die Korrektur freigegeben. Sie ist eingebaut.
+
+Das Quellfoto ist in Ordnung. `danceflow-home-3840.webp` (3840x2560) zeigt
+jede Hand vollständig, darüber ist noch die Decke mit den Lampen zu sehen.
+
+WICHTIG, damit die Zuordnung stimmt: Dieses Bild ist einer meiner sechs
+Tausche. Der Zuschnitt kommt aber **nicht** daher. Alt und neu haben dasselbe
+Seitenverhältnis (1,4989 gegen 1,5000, das sind 0,07 Prozent Abweichung),
+also schneidet die Box exakt gleich. Der Fehler war vorher da. Das schärfere
+Bild macht ihn nur besser sichtbar.
+
+Ursache war die fehlende `position`-Angabe. Ohne Wert gilt `center 50%`. Das
+Band zeigt bei Viewport 1440 nur 555 von 2560 Pixeln Bildhöhe; bei 50 Prozent
+fallen **1003 Pixel oben** weg.
+
+| Position | Oben abgeschnitten | Ergebnis |
+|---|---|---|
+| `center 50%` (vorher) | 1003 px | Hände und Fingerspitzen gekappt |
+| `center 30%` | 602 px | Hände fast ganz |
+| **`center 22%`** (jetzt) | **441 px** | **alle Hände ganz, Gesichter im Bild** |
+| `center 15%` | 301 px | viel Decke, Gesichter rutschen nach unten |
+
+**Eingebaut:** `eventkalender-content.ts` trägt `position: 'center 22%'` an
+beiden Fundstellen, deutsch und englisch. `EventkalenderPage.tsx:58` reicht den
+Wert an `HeroFrame` durch. Der Wert stand dort vorher fest im Bauteil; jetzt
+kommt er aus dem Content, damit er nur an einer Stelle steht.
+
+**Beleg:** `worklog/shots/R187-crop-fix/eventkalender-1440.png`. Ich habe das
+Bild selbst gelesen. Jede erhobene Hand steht ganz im Band, darüber sind Decke
+und Lampen zu sehen. Das Mobilbild (`eventkalender-390.png`) bleibt vollständig.
+
+## Ein Fall braucht deine Entscheidung: `hp-22.webp`
+
+`hp-22.webp` auf `/tanzkurse/heels` liegt bei Dichte 1,71 und bräuchte
+1404x1755 Pixel. Es hat 1200x1800.
+
+Der Suchlauf sortierte es als „anderes Motiv" aus (RMSE 0,1193 gegen
+`offer-heels.jpg`). Die Sichtprobe zeigt aber dieselbe Aufnahme: zwei
+Tänzerinnen, gleiche Pose, gleiches Studio. Der Farbvergleich hat den
+Unterschied überzeichnet. `hp-22` ist kühl abgestimmt, das Master warm.
+In Graustufen mit ausgeglichenem Kontrast liegt der Wert bei **0,0040**.
+
+Ausgetauscht habe ich es trotzdem nicht. Die Ausschnitte sind verschieden:
+`hp-22` ist 2:3, das Master 3:4 (2400x3200). Eine Suche über Zoom und Position
+findet als besten Neuschnitt `2133x3200+133+0` mit RMSE 0,159. Das liegt weit
+über der Schwelle 0,06. `hp-22` ist zusätzlich nachbearbeitet.
+
+Wie der Tausch aussähe, kannst du direkt sehen. Aus demselben Master ist auf
+`/mehr/collabs` bereits `offer-heels-1404.webp` (1404x1872) entstanden, einer
+der sechs eingebauten Tausche. Beide Dateien nebeneinander zeigen dieselbe
+Aufnahme: zwei Tänzerinnen, gleiche Pose, gleiche Kleidung, gleiche Schuhe.
+Der füllend-zentrierte Graustufenvergleich liegt bei RMSE 0,0286 und damit
+unter der Schwelle 0,06. Sichtbar unterscheidet sich allein die Farbstimmung:
+`hp-22` ist kühl und grau, die Master-Fassung warm und beige.
+
+**Deine Entscheidung:** Aus dem Master wären 1404x1755 erreichbar. Das Bild sähe
+wärmer und anders beschnitten aus. Das ist ein Motivwechsel, und der braucht
+laut Auftrag deine Freigabe. Freigeben oder so lassen?
 
 ## Browserbelege
 
 Das Manifest enthält 27 Haupt-Routen und 54 Fold-Bilder.
 Die Pflichtgrößen sind 1440x730 und 390x844.
 Pfad: `worklog/shots/R187-resolution/manifest.json`.
+
+Nach den zwei Zuschnitt-Korrekturen kamen vier neue Fold-Bilder dazu:
+`worklog/shots/R187-crop-fix/`. Ich habe alle vier selbst gelesen.
+
+| Bild | Befund |
+|---|---|
+| `team-1440.png` | alle Köpfe der hinteren Reihe ganz, Logo lesbar |
+| `team-390.png` | Motiv vollständig, unverändert |
+| `eventkalender-1440.png` | jede erhobene Hand ganz, darüber Decke und Lampen |
+| `eventkalender-390.png` | Motiv vollständig, unverändert |
+
+## Die drei Kritikerstimmen
+
+Kein Bericht geht raus, den der Ersteller selbst freigegeben hat. Drei
+familienfremde Stimmen lasen echte PNGs:
+
+| Stimme | Gelesen | Urteil |
+|---|---|---|
+| Kimi | 16 PNG plus 6 eigene 1:1-Ausschnitte | FAIL, Befunde behoben |
+| Sol | 10 PNG, dazu `identify`- und `git`-Gegenrechnung | FAIL, Befunde behoben |
+| Luna | 11 PNG plus eigene Nachrechnung aller Zahlen | 5 von 6 PASS |
+
+Grok fiel mit HTTP 402 aus, das Guthaben war leer. Opus blieb außen vor: das
+ist die Builderfamilie und darf die eigene Arbeit nicht abnehmen.
+
+Lunas Zahlen decken sich mit meinen: 1655 Vorkommen, 27 Routen mit je fünf
+Viewports, 314 Paare, 49 schwach aus 42 Dateien, 0 Lauf-Fehler. Die
+Materialbedarf-Tabelle hat 49 Zeilen aus 42 Dateien, jede mit Zielpixelmaß.
+
+**Lunas einziger FAIL**, nachgeprüft und bestätigt: Ein Kursplan-Bild wirkt
+sichtbar weich. Luna nannte keinen Pfad, darum habe ich ihn selbst bestimmt.
+Betroffen ist `/photos/2026/hero-paar-studiowand-hero-2100.webp`, sichtbar in
+`worklog/shots/R187-resolution/kursplan-1440.png`. Am Bild geprüft: Haare und
+Hemdmuster verlieren Zeichnung, die Wandfläche wirkt flau. Kein Gesicht ist
+angeschnitten.
+
+Beide Ursachen stehen bereits in diesem Bericht: die Dichte 1,57 in der
+Materialbedarf-Tabelle, der Kompressionswert 0,0410 in der Tabelle darunter.
+Ein Tausch scheitert an der Breite: die größere Fassung
+`hero-paar-studiowand-01.webp` misst 1920x1280 und bleibt 752 Pixel unter der
+gebrauchten Breite von 2672. Das wäre Hochskalierung, die der Auftrag verbietet.
+Der FAIL ist ein belegter Materialmangel, kein Baufehler.
+
+## Regression R183 bis R186
+
+Alle vier Suiten liefen nach den Korrekturen. Kein Fehler hängt an R187:
+die drei Auffälligkeiten liegen in den Testskripten, nicht in der Seite.
+
+| Suite | Ergebnis | Bewertung |
+|---|---|---|
+| R183 | 3/4, `kontakt-tippen` rot | Testfehler. Die Schleife bricht eine Stufe zu früh ab. Nachgemessen: nach drei Stufen stehen drei Textfelder bereit. |
+| R184 | Abbruch | Skript stirbt an „waiting for element to be stable". Kein Urteil möglich. |
+| R185 | 4/4 PASS | grün |
+| R186 | 19/20, wechselnder Fehler | Timing. Wartet die Probe auf die API-Antwort statt auf eine feste Zeit, laden alle drei Buchungslinks. |
+
+Der R186-Fall ist nachgemessen: `/buchung?kurs=` lädt Salsa, Bachata und Heels
+alle korrekt, sobald `/api/public/schedule` beantwortet ist. Beleg:
+`worklog/.r187-buchung-probe2.mjs`. Ich habe kein Testskript geändert; das
+gehört nicht zu R187.
 
 ## Locks
 
@@ -181,7 +320,34 @@ Pfad: `worklog/shots/R187-resolution/manifest.json`.
 | Mobil-Vorlauf `12.625rem` | erhalten |
 | Kursplan als gefüllte rote Hauptaktion | erhalten |
 | Galerie ohne sichtbare Beschriftungen | erhalten |
-| Production-Release | nach finaler Prüfung freigegeben |
+| Production | gepusht und deployt nach Raphaels Freigabe vom 20.08. |
+| Kundendomain `www.salsaflow-dc.com` | unberührt, zeigt auf die alte Seite |
+
+### Was im Arbeitsbaum wirklich offen ist
+
+Eine frühere Fassung schrieb „0 geänderte verfolgte Dateien". Das war
+irreführend. Die Zahl galt dem Hauptcheckout. Für den Arbeitsbaum gilt sie
+nicht. Ein Kritiker hat es gemeldet, der Einwand stimmt. Sauber getrennt:
+
+| Ort | Stand |
+|---|---|
+| Hauptcheckout `/root/clients/salsaflow` (`main`) | 0 verfolgte Änderungen, 0 unpushed Commits |
+| Arbeitsbaum `/root/clients/salsaflow-w1` (`geil-welle`) | **40 verfolgte Änderungen**, 268 unverfolgte |
+
+Von diesen 40 stammen **5 Dateien** aus R187:
+`events/anniversary-content.ts`, `events/eventkalender-content.ts` und
+`more/collabs-content.ts` mit zusammen 14 geänderten `src:`-Zeilen, dazu
+`TeamPage.tsx` und `EventkalenderPage.tsx` für die zwei freigegebenen
+Zuschnitte. Dazu kommen 6 neue Bilddateien.
+Die übrigen **35 Dateien** sind Altbestand aus R183 bis R186 und aus der
+Anti-Slop-Runde (die `satisfies`-Umtypung, 20 Vorkommen über den Branch).
+Sie lagen vor R187 im Arbeitsbaum und gehören nicht zu dieser Aufgabe.
+Die 268 unverfolgten Dateien sind Worklog, Gates, Messskripte und Screenshots
+aus allen Runden; nur die 6 Bilder davon gehören zu R187.
+
+R187 wird als eigener Commit abgelegt: die 5 Quelldateien, die 6 Bilder und
+die R187-Belege. Der Altbestand bleibt unangetastet im Arbeitsbaum liegen.
+`git add -A` ist ausgeschlossen, jede Datei wird einzeln benannt.
 
 ## Belege
 

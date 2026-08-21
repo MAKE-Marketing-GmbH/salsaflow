@@ -364,7 +364,25 @@ function readTermParam(): string | null {
   return currentSearchParams()?.get('staffel')?.trim() || null;
 }
 
-export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void }) {
+/* R188 ST1, Raphael-Video 09:37: Die Kursliste auf /tanzkurse/bachata zeigte Salsa-Kurse.
+ *
+ * Ursache, am Code nachgelesen: `styleKeys` liest seinen Startwert EINMAL beim ersten
+ * Render aus `?stil=` (useState-Initialisierer, Zeile unten). Die Stilseite schreibt
+ * diesen Parameter aber erst in einem `useEffect` (StylePage.tsx, StyleSlotsSection) —
+ * also NACH dem ersten Render der Engine. Beim Lesen war die URL noch leer, der Filter
+ * startete auf [] und das heisst «Alle Stile». Der Screenshot zeigt genau das: Chip
+ * «Alle Stile» aktiv, darunter drei Salsa-Kurse auf der Bachata-Seite
+ * (worklog/shots/R188/after-final/tanzkurse_bachata/d-06.png).
+ *
+ * `fixedStyle` loest das an der Wurzel statt ueber die URL: die Seite sagt der Engine
+ * ihren Stil direkt als Prop. Der Filter ist damit schon im ersten Render gesetzt, kein
+ * Timing mehr im Spiel, und er ist nicht abwaehlbar — auf einer Bachata-Seite gibt es
+ * keinen Zustand «alle Stile». Die Chip-Zeile entfaellt dort deshalb ganz: ein Filter,
+ * der nur einen Wert kennt, ist keine Auswahl.
+ *
+ * Ohne die Prop (also auf /kursplan) bleibt alles wie vorher — Startwert aus `?stil=`,
+ * volle Chip-Zeile, «Alle Stile» waehlbar. */
+export function CourseEngine({ onTotal, fixedStyle }: { onTotal?: (total: number) => void; fixedStyle?: string }) {
   const { lang } = useLang();
   const c = CAL[lang];
   // Startwert aus dem eingebetteten Plan: sonst rendert der Prerender "wird geladen"
@@ -372,7 +390,9 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
   const [data, setData] = useState<ScheduleResponse | null>(embeddedSchedule);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(() => !embeddedSchedule());
-  const [styleKeys, setStyleKeys] = useState<string[]>(() => readArrayParam('stil'));
+  // Mit `fixedStyle` ist der Stil gesetzt, bevor irgendetwas rendert. Ohne die Prop
+  // bleibt der bisherige Startwert aus `?stil=` (Kursplan).
+  const [styleKeys, setStyleKeys] = useState<string[]>(() => (fixedStyle ? [fixedStyle] : readArrayParam('stil')));
   // null = noch nicht gewaehlt; dann bestimmt der Kalender den sinnvollen Starttag selbst.
   const [day, setDay] = useState<string | null>(() => readDayParam());
   // Hat der Besucher den Tag SELBST angeklickt? Nur dann gilt er absolut. Ohne diese
@@ -419,9 +439,22 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     [terms, termId],
   );
 
+  /* Auf einer Stilseite zaehlt nur der eigene Stil — schon HIER, nicht erst beim Filtern
+     der Slots. Die Wochenliste und die Standard-Woche leiten sich aus `termCourses` ab.
+     Blieben hier alle Stile drin, oeffnete /tanzkurse/bachata in der Woche von HEUTE:
+     Salsa laeuft ab 17.08., Bachata erst ab 26.08. Die Bachata-Zeilen stuenden dann in
+     einer Woche ohne eigenen Termin, und `dateInWeek` liefert korrekt `null` — die Zeile
+     traegt kein Datum. Mit dem Stil-Schnitt an dieser Stelle waehlt `activeWeek` die
+     erste Woche, in der es diesen Stil wirklich gibt. Ohne fixedStyle ist der Ausdruck
+     unveraendert, /kursplan bleibt damit identisch. */
   const termCourses = useMemo(
-    () => (data && activeTerm ? data.courses.filter((co) => co.termId === activeTerm.id) : []),
-    [data, activeTerm],
+    () =>
+      data && activeTerm
+        ? data.courses.filter(
+            (co) => co.termId === activeTerm.id && (!fixedStyle || co.styleKey === fixedStyle),
+          )
+        : [],
+    [data, activeTerm, fixedStyle],
   );
 
   /* ---------------------------------------------------------------- Woche (Achse 2) */
@@ -454,9 +487,18 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     if (data && onTotal) onTotal(allSlots.length);
   }, [data, allSlots.length, onTotal]);
 
+  /* Auf einer Stilseite gewinnt die Prop, nicht der State. Das ist der Unterschied
+     zwischen «Startwert» und «Lock»: ein blosser Startwert liesse sich ueber die
+     Chip-Zeile, den Zuruecksetzen-Knopf der Leer-Zustaende oder einen `?stil=`-Link
+     wieder auf «alle» stellen — auf /tanzkurse/bachata darf das nicht passieren. */
+  const effectiveStyleKeys = fixedStyle ? [fixedStyle] : styleKeys;
+
   const byStyle = useMemo(
-    () => (styleKeys.length ? allSlots.filter((s) => styleKeys.includes(s.styleKey)) : allSlots),
-    [allSlots, styleKeys],
+    () => (effectiveStyleKeys.length ? allSlots.filter((s) => effectiveStyleKeys.includes(s.styleKey)) : allSlots),
+    // effectiveStyleKeys ist bei gesetztem fixedStyle in jedem Render ein neues Array;
+    // die beiden Quellwerte sind stabil und darum die richtige Abhaengigkeit.
+    // oxlint-disable-next-line exhaustive-deps
+    [allSlots, fixedStyle, styleKeys],
   );
 
   // Tages-Leiste: die sieben Kalendertage der GEWAEHLTEN Woche. Damit tragen die Tabs echte
@@ -500,7 +542,10 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
     const params = new URLSearchParams(browserWindow.location.search);
     params.set('tag', activeDay);
     if (activeTerm) params.set('staffel', activeTerm.id);
-    if (styleKeys.length) params.set('stil', styleKeys.join(','));
+    // Auf Stilseiten schreibt die Engine denselben Stil, den die Seite ohnehin fuehrt.
+    // Der Parameter bleibt damit teilbar, ohne dass er den Filter noch steuern muesste.
+    const urlStyles = fixedStyle ? [fixedStyle] : styleKeys;
+    if (urlStyles.length) params.set('stil', urlStyles.join(','));
     else params.delete('stil');
     // Alt-Parameter aus der Filter-Sidebar-Zeit entfernen, damit keine toten Links entstehen.
     params.delete('phase');
@@ -573,13 +618,14 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
           setDayPicked(true);
         }}
         styles={data!.filters.styles}
-        styleKeys={styleKeys}
+        styleKeys={effectiveStyleKeys}
         onStyle={(keys) => {
           setStyleKeys(keys);
           // Neuer Stil = neue Frage. Der Tag wird wieder zum Vorschlag, damit ein Wechsel auf
           // "Heels" nicht auf dem dann leeren Montag stehen bleibt.
           setDayPicked(false);
         }}
+        fixedStyle={fixedStyle}
       />
 
       <section className="mt-6 sm:mt-8" aria-labelledby="kursplan-day-title">
@@ -594,7 +640,10 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
         ) : byStyle.length === 0 ? (
           <EmptyState onReset={() => setStyleKeys([])} />
         ) : blocks.length === 0 ? (
-          <DayEmpty showReset={styleKeys.length > 0} onReset={() => setStyleKeys([])} />
+          /* Ohne fixedStyle wie bisher: «Filter zuruecksetzen». MIT fixedStyle gibt es
+             nichts zurueckzusetzen — der Stil ist die Seite. Der Knopf entfaellt, sonst
+             stuende dort ein Schalter, der den Zustand nicht aendern kann. */
+          <DayEmpty showReset={!fixedStyle && styleKeys.length > 0} onReset={() => setStyleKeys([])} />
         ) : (
           <>
             {/* EINE Zeile ueber dem Plan statt derselben Badge in jeder Kurszeile: welcher
@@ -613,7 +662,11 @@ export function CourseEngine({ onTotal }: { onTotal?: (total: number) => void })
             </p>
             <div className="border-t border-[var(--color-line)]">
               {blocks.map((b) => (
-                <TimeBlock key={b.key} start={b.start} end={b.end}>
+                /* R188 ST2: activeDate ist das Datum des gewaehlten Tages in der
+                   gewaehlten Woche — genau der Termin, den die Zeilen dieses Blocks
+                   tragen (siehe `activeDate`-Memo oben). activeDay ist der Wochentag
+                   derselben Auswahl. */
+                <TimeBlock key={b.key} start={b.start} end={b.end} date={activeDate} weekday={activeDay}>
                   {b.slots.map((s) => (
                     <SlotRow key={s.key} slot={s} />
                   ))}
@@ -677,15 +730,21 @@ function TermBar({
                 aria-pressed={on}
                 data-testid={`term-${term.id}`}
                 className={cn(
-                  // min-h-11: gleiches Tap-Ziel wie die Stil-Chips darunter.
-                  'inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-4 py-1.5 text-[0.8rem] font-semibold transition-colors',
+                  // R188 KP2 (Raphael 21.08.: "diese ganzen Balken weg"). Der Staffel-
+                  // Schalter war eine rot ausgefuellte Pille mit Rand — zusammen mit den
+                  // Stil-Chips und den sechs Tages-Karten lagen drei schwere Balkenreihen
+                  // uebereinander, bevor der erste Kurs kam. Jetzt traegt die Auswahl nur
+                  // noch Schriftfarbe plus eine 2px-Unterstreichung: dieselbe Information,
+                  // keine Flaeche. Rot bleibt der Buchungsaktion vorbehalten.
+                  // min-h-11 bleibt: Tap-Ziel unveraendert.
+                  'inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-1 pb-1 text-[0.85rem] font-semibold transition-colors',
                   on
-                    ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white'
-                    : 'border-[var(--color-line)] bg-white text-[var(--color-ink-muted)] hover:border-[var(--color-salsa)] hover:text-[var(--color-ink)]',
+                    ? 'border-[var(--color-ink)] text-[var(--color-ink)]'
+                    : 'border-transparent text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]',
                 )}
               >
                 {termLabel(term, lang)}
-                <span className={cn('text-[0.7rem] font-medium', on ? 'text-white/75' : 'text-[var(--color-ink-muted)]')}>
+                <span className="text-[0.7rem] font-medium text-[var(--color-ink-muted)]">
                   {term.phase === 'running' ? c.termRunning : c.termUpcoming}
                 </span>
               </button>
@@ -697,7 +756,11 @@ function TermBar({
       {/* Wochen-Navigation. Mobil: Pfeile unter «Woche ab», links — sonst liegen sie
           unter dem WhatsApp-Kreis. Ab sm: Text links, Pfeile rechts wie zuvor. */}
       {weeks.length > 1 && activeWeek ? (
-        <div className="flex flex-col items-start gap-2 border-y border-[var(--color-line)] py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+        /* R188 KP2: `border-y` ist weg. Die Wochenzeile lag als eigener Kasten zwischen
+           Staffel-Reihe und Tages-Reihe und machte aus drei Bedienzeilen optisch fuenf
+           Balken. Die Zeile steht jetzt frei; die Pfeile rechts markieren sie deutlich
+           genug. Die Pfeil-Knoepfe selbst bleiben unveraendert (Tap-Ziel 44px). */
+        <div className="flex flex-col items-start gap-2 py-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <p className="min-w-0">
             <span className="block truncate text-sm font-semibold text-[var(--color-ink)]">
               {c.weekOf} {formatDateI18n(activeWeek, lang)}
@@ -762,6 +825,7 @@ function DayBar({
   styles,
   styleKeys,
   onStyle,
+  fixedStyle,
 }: {
   days: { key: string; count: number; date: string }[];
   active: string | null;
@@ -769,6 +833,8 @@ function DayBar({
   styles: { key: string; de: string; en: string }[];
   styleKeys: string[];
   onStyle: (keys: string[]) => void;
+  /** Gesetzt auf den Stilseiten. Dann steht der Stil fest und die Chip-Zeile entfaellt. */
+  fixedStyle?: string;
 }) {
   const { lang } = useLang();
   const c = CAL[lang];
@@ -788,7 +854,15 @@ function DayBar({
         // Es sind Filter-Schalter.
         role="group"
         aria-label={c.day}
-        className="grid grid-cols-3 gap-1.5 lg:flex lg:gap-2"
+        // R188 KP2: Als Reiterreihe braucht es keine Kartenluecken mehr. Bis Tablet bleibt
+        // das 3x2-Raster (sechs ausgeschriebene Daten passen auf 390 nicht in eine Zeile),
+        // ab lg stehen die Tage in EINER Reihe auf einer gemeinsamen Grundlinie.
+        // Fix-Runde 2 (eigener Screenshot-Befund m-01.png): Die Reiter-Unterstreichung
+        // stiess ohne Luft an die Stil-Chips darunter — auf 390 lag die Linie von "Fr"
+        // direkt auf der Chip-Reihe. Die gemeinsame Grundlinie sitzt jetzt am Container
+        // (border-b), und darunter liegen 1.25rem Luft (siehe mt-5 an der Chip-Zeile).
+        // gap-y-3 trennt zusaetzlich die beiden Raster-Reihen auf Mobil.
+        className="grid grid-cols-3 gap-x-2 gap-y-3 border-b border-[var(--color-line)] pb-1 lg:flex lg:gap-6 lg:pb-0"
       >
         {days.map((d) => {
           const on = d.key === active;
@@ -800,25 +874,37 @@ function DayBar({
               data-testid={`day-${d.key}`}
               onClick={() => onSelect(d.key)}
               className={cn(
-                'group flex flex-col items-center justify-center rounded-[var(--radius-card)] border px-2 py-2.5 transition-colors sm:min-w-0 sm:flex-1 sm:px-3 sm:py-4 lg:py-2.5',
+                // R188 KP2 (Raphael 21.08.: "diese ganzen Balken weg"). VORHER trug jeder
+                // der sechs Tage eine eigene Karte: Rand, weisse Flaeche, Radius, und der
+                // aktive Tag zusaetzlich einen schwarz ausgefuellten Block mit 24px-Schrift.
+                // Auf 1440 war das eine 96px hohe Balkenreihe quer ueber die Seite (Beleg:
+                // worklog/shots/R188/before/kursplan/d-01.png, unterer Rand).
+                //
+                // JETZT: keine Karten, keine Flaechen. Die Tage stehen als Reiter
+                // nebeneinander, der aktive traegt eine 2px-Linie darunter und volle
+                // Tintenfarbe. Das ist dieselbe ruhige Steuerung wie die Staffel-Zeile
+                // darueber — EINE Formsprache fuer beide Achsen statt zweier.
+                // Die Schrift faellt von text-2xl auf text-base: der Tagesname ist ein
+                // Filter, keine Ueberschrift. Die Ueberschrift der Seite ist die H1.
+                'group flex flex-col items-center justify-center border-b-2 px-1 py-2 transition-colors sm:min-w-0 sm:flex-1 sm:px-2',
                 on
-                  ? 'border-[var(--color-ink)] bg-[var(--color-ink)] text-white'
+                  ? 'border-[var(--color-ink)] text-[var(--color-ink)]'
                   : empty
-                    ? 'border-[var(--color-line)] bg-transparent text-[var(--color-ink-muted)] opacity-55'
-                    : 'border-[var(--color-line)] bg-white text-[var(--color-ink)] hover:border-[var(--color-ink)]',
+                    ? 'border-transparent text-[var(--color-ink-muted)] opacity-50'
+                    : 'border-transparent text-[var(--color-ink-muted)] hover:border-[var(--color-line)] hover:text-[var(--color-ink)]',
               )}
             >
               {/* Mobil bleibt die Abkuerzung kompakt, aber das konkrete Datum steht trotzdem im
                   HTML. Desktop zeigt direkt das verlangte Format "Samstag, 9. August". */}
-              <span className="font-display text-lg font-extrabold leading-none tracking-tight sm:text-2xl">
+              <span className={cn('font-display text-base leading-none tracking-tight sm:text-lg', on ? 'font-extrabold' : 'font-bold')}>
                 <span className="lg:hidden">{WEEKDAY_LABEL[lang][d.key]?.short ?? d.key}</span>
                 <span className="hidden lg:inline">{formatScheduleDay(d.date, lang)}</span>
               </span>{' '}
               <span
-                className={cn(
-                  'mt-1.5 text-[11px] font-semibold tabular-nums',
-                  on ? 'text-white/70' : 'text-[var(--color-ink-muted)]',
-                )}
+                // R188 KP2: Der aktive Tag ist keine schwarze Flaeche mehr, also darf die
+                // Kurszahl darunter nicht mehr weiss sein — sie stuende sonst weiss auf
+                // hellem Papier und waere unlesbar. Eine Farbe fuer beide Zustaende.
+                className="mt-1.5 text-[11px] font-semibold tabular-nums text-[var(--color-ink-muted)]"
               >
                 {/* Mobil "10.08. · 9": das lange "Montag, 10. August · 9 Kurse" brach in der
                     3er-Spalte um (Critic 13.08.2026). R55: die Kurszahl fehlte auf 390 ganz —
@@ -837,24 +923,29 @@ function DayBar({
           /tmp/salsaflow-r2-mobil/kursplan-mobile-00-fold.png). Die Chips umbrechen, und es
           sind ALLE sichtbar: der fruehere "+ n weitere"-Schalter versteckte fuenf Stile
           hinter einem Extra-Tap (Critic 13.08.2026). */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-        <span className="mr-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
-          {c.style}
-        </span>
-        <StyleChip active={styleKeys.length === 0} onClick={() => onStyle([])} testid="style-all">
-          {c.allStyles}
-        </StyleChip>
-        {styles.map((s) => (
-          <StyleChip
-            key={s.key}
-            active={styleKeys.includes(s.key)}
-            onClick={() => onStyle(styleKeys.includes(s.key) ? styleKeys.filter((k) => k !== s.key) : [...styleKeys, s.key])}
-            testid={`style-${s.key}`}
-          >
-            {lang === 'de' ? s.de : s.en}
+      {/* R188 ST1: Auf einer Stilseite entfaellt die ganze Zeile. Sie haette dort genau
+          einen waehlbaren Wert und daneben ein «Alle Stile», das den Besucher aus der
+          Seite herausfiltert — der Kopf sagt «Bachata», die Liste zeigte danach Salsa. */}
+      {fixedStyle ? null : (
+        <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+          <span className="mr-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
+            {c.style}
+          </span>
+          <StyleChip active={styleKeys.length === 0} onClick={() => onStyle([])} testid="style-all">
+            {c.allStyles}
           </StyleChip>
-        ))}
-      </div>
+          {styles.map((s) => (
+            <StyleChip
+              key={s.key}
+              active={styleKeys.includes(s.key)}
+              onClick={() => onStyle(styleKeys.includes(s.key) ? styleKeys.filter((k) => k !== s.key) : [...styleKeys, s.key])}
+              testid={`style-${s.key}`}
+            >
+              {lang === 'de' ? s.de : s.en}
+            </StyleChip>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -878,11 +969,16 @@ function StyleChip({
       data-testid={testid}
       aria-pressed={active}
       className={cn(
+        // R188 KP2: Die Chips bleiben Pillen — sie sind eine echte Mehrfachauswahl und
+        // brauchen eine sichtbare Umrisslinie, damit man sieht, wie viele man an hat.
+        // Weggenommen ist nur das GEWICHT: der aktive Chip war eine schwarz ausgefuellte
+        // Flaeche, elf davon nebeneinander lasen sich als vierter Balken. Aktiv heisst
+        // jetzt: dunkler Rand, dunkle Schrift, Papier darunter.
         // min-h-11 (44px): Tap-Ziel-Richtwert; die Chips lagen bei 33px (Raphael 13.08.2026).
         'min-h-11 shrink-0 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-[0.8rem] font-semibold transition-colors',
         active
-          ? 'border-[var(--color-ink)] bg-[var(--color-ink)] text-white'
-          : 'border-[var(--color-line)] bg-white text-[var(--color-ink-muted)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]',
+          ? 'border-[var(--color-ink)] bg-transparent text-[var(--color-ink)]'
+          : 'border-[var(--color-line)] bg-transparent text-[var(--color-ink-muted)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]',
         className,
       )}
     >
@@ -895,12 +991,56 @@ function StyleChip({
  * Zeit-Block: Uhrzeit gross links (Kalender-Spalte), Kurse rechts. Mobil rutscht
  * die Uhrzeit als Zeile ueber die Kurse.
  * -------------------------------------------------------------------------- */
-function TimeBlock({ start, end, children }: { start: string; end: string; children: React.ReactNode }) {
+/* R188 ST2, Raphael-Video 10:45: «Datum dazumachen, nicht nur Uhrzeit.»
+ *
+ * Das Datum war da, aber an der falschen Stelle und im falschen Gewicht: als kleiner
+ * Outline-Chip («26. Aug.») im Tag-Rudel rechts, zwischen «Quereinstieg moeglich» und
+ * «Plaetze frei» (Beleg worklog/shots/R188/after-final2-tanzkurse/tanzkurse_bachata/
+ * d-06.png). Dort liest es sich als Eigenschaft des Kurses, nicht als Termin — und es
+ * steht optisch unter der Uhrzeit, die links in 2rem Displayschrift sitzt.
+ *
+ * Das Datum steht jetzt gleichwertig zur Uhrzeit in der linken Zeitspalte: Wochentag und
+ * kurzes Datum («Mi 26. Aug.») ueber der Uhr, in derselben Spalte, in fetter Ink-Schrift.
+ * Der Chip im Tag-Rudel faellt dafuer weg — sonst stuende derselbe Termin zweimal in
+ * derselben Zeile.
+ *
+ * Alle Kurse eines Zeitblocks teilen sich Wochentag und Datum: der Block gruppiert nach
+ * `${startTime}-${endTime}` INNERHALB von `daySlots`, und daySlots ist bereits auf einen
+ * Wochentag gefiltert (CourseEngine oben). Ein Block kann also gar keine zwei Daten
+ * enthalten — darum haengt das Datum am Block und nicht an der Zeile.
+ *
+ * NICHT angefasst: `data-testid="course-card"`, `data-date` und `href="/buchung?kurs=…"`
+ * an der Kurszeile. Der Klicktest prueft sie, und `data-date` bleibt die maschinenlesbare
+ * Fassung desselben Termins. */
+function TimeBlock({
+  start,
+  end,
+  date,
+  weekday,
+  children,
+}: {
+  start: string;
+  end: string;
+  date: string | null;
+  weekday: string;
+  children: React.ReactNode;
+}) {
   const { lang } = useLang();
   const until = CAL[lang].until;
+  const weekdayShort = WEEKDAY_LABEL[lang][weekday]?.short;
+  const dateLabel = date ? [weekdayShort, shortDate(date, lang)].filter(Boolean).join(' ') : null;
   return (
     <div className="grid gap-1.5 border-b border-[var(--color-line)] py-3 sm:grid-cols-[8.5rem_minmax(0,1fr)] sm:gap-5 sm:py-5 lg:grid-cols-[10rem_minmax(0,1fr)]">
-      <p className="flex items-baseline gap-2 sm:block sm:self-stretch sm:border-r sm:border-[var(--color-line)] sm:pr-5">
+      <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 sm:block sm:self-stretch sm:border-r sm:border-[var(--color-line)] sm:pr-5">
+        {/* Das Datum steht ueber der Uhr — erst WANN, dann um wie viel Uhr. Fett und in
+            Ink, damit es dieselbe Ebene traegt wie die Uhrzeit und nicht als Beschriftung
+            gelesen wird. Mobil laeuft es in derselben Zeile mit, damit die Kopfzeile des
+            Blocks nicht auf drei Zeilen waechst. */}
+        {dateLabel ? (
+          <span className="order-first w-full text-sm font-bold text-[var(--color-ink)] sm:mb-1.5 sm:block">
+            {dateLabel}
+          </span>
+        ) : null}
         {/* Ohne tabular-nums: Cal Sans reserviert sonst Ziffernbreite fuer den Doppelpunkt
             — die Uhr las sich als "18 : 30" (Critic Runde 14, Item 2). */}
         <span className="inline-flex items-center gap-2 font-display text-[2rem] font-extrabold leading-none text-[var(--color-ink)]">
@@ -950,30 +1090,48 @@ function SlotRow({ slot }: { slot: WeekSlot }) {
       data-date={slot.date ?? undefined}
       data-style={slot.styleKey}
       className={cn(
-        'group flex flex-col gap-2 border-b border-[var(--color-line)] px-4 py-3 transition-colors last:border-b-0 sm:flex-row sm:items-center sm:gap-5 sm:px-5 sm:py-3.5',
-        beginner
-          ? 'bg-[var(--color-paper-warm)] hover:border-[var(--color-salsa)]'
-          : 'bg-white hover:bg-[var(--color-bg-soft)]',
+        // R188 KP3 (Raphael 21.08., Video 07:52): "Wenn ich mit der Maus drueber gehe,
+        // soll die GANZE Karte rot werden — passend zum Platz-reservieren-Look."
+        //
+        // VORHER wechselte nur die Textfarbe des CTA rechts; die Zeile selbst ging auf
+        // ein helles Grau. Man sah nicht, dass die ganze Zeile das Klickziel ist.
+        //
+        // JETZT faerbt `group-hover` die komplette Flaeche auf --color-salsa (#AD1827,
+        // das Marken-Rot aus index.css — KEIN Pastellrot, Raphael-Lock 17.08.). Jede
+        // Textebene darin invertiert mit: Titel, Lehrer-Zeile, CTA auf Weiss, die
+        // Badges auf halbtransparentes Weiss. Der gemessene Kontrast Weiss auf #AD1827
+        // ist 7.4:1 und damit ueber WCAG AA fuer Fliesstext (4.5:1).
+        //
+        // `focus-within` haengt am selben Zustand: wer mit der Tastatur durch die Liste
+        // geht, sieht dieselbe Fuellung wie mit der Maus. Ohne das waere die Rueckmeldung
+        // eine reine Maus-Funktion.
+        //
+        // duration/reducedMotion: die Faerbung laeuft ueber `transition-colors` mit
+        // --dur-fast. Bei `prefers-reduced-motion: reduce` schaltet index.css die Dauer
+        // global auf 0.01ms — die Farbe springt dann, sie verschwindet nicht.
+        'group flex flex-col gap-2 border-b border-[var(--color-line)] px-4 py-3 transition-colors duration-[var(--dur-fast)] last:border-b-0 hover:border-[var(--color-salsa)] hover:bg-[var(--color-salsa)] focus-within:border-[var(--color-salsa)] focus-within:bg-[var(--color-salsa)] sm:flex-row sm:items-center sm:gap-5 sm:px-5 sm:py-3.5',
+        beginner ? 'bg-[var(--color-paper-warm)]' : 'bg-white',
       )}
     >
       <span className="flex min-w-0 flex-1 items-start gap-3">
         <TeacherPortrait styleKey={slot.styleKey} style={style} teachers={course.teachers} />
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">
-            <span className="font-display text-lg leading-tight text-[var(--color-ink)] sm:text-xl">{style}</span>
+            <span className="font-display text-lg leading-tight text-[var(--color-ink)] transition-colors group-hover:text-white group-focus-within:text-white sm:text-xl">{style}</span>
             {level && <Badge tone="level">{level}</Badge>}
           </span>
-          <span className="mt-1 block break-words text-sm leading-snug text-[var(--color-ink-muted)]">
+          <span className="mt-1 block break-words text-sm leading-snug text-[var(--color-ink-muted)] transition-colors group-hover:text-white/85 group-focus-within:text-white/85">
             {teachers || c.teacherTba} · {course.locationName}
           </span>
           <span className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
             <Badge tone={slot.full ? 'muted' : 'strong'}>{slot.full ? c.full : c.free}</Badge>
             {beginner && <Badge tone="outline">{c.beginner}</Badge>}
             {slot.lateEntry && <Badge tone="outline">{c.lateEntry}</Badge>}
-            {/* Termin dieser Zeile in der gewaehlten Woche. Er ersetzt die alte
-                "Nächster Start"-Badge: die stand neunmal identisch untereinander und
-                beschrieb eine ANDERE Staffel als die Zeile, an der sie hing. */}
-            {slot.date && <Badge tone="outline">{shortDate(slot.date, lang)}</Badge>}
+            {/* R188 ST2: Hier stand der Datums-Chip ({shortDate(slot.date)}). Er ist in
+                die linke Zeitspalte gewandert (TimeBlock oben) und steht dort gleichwertig
+                zur Uhrzeit, wie Raphael es verlangt. Ein zweites Mal im Tag-Rudel waere
+                derselbe Termin doppelt in derselben Zeile. `data-date` am <a> bleibt
+                unveraendert — der Klicktest liest es dort. */}
           </span>
         </span>
       </span>
@@ -981,7 +1139,9 @@ function SlotRow({ slot }: { slot: WeekSlot }) {
           Pill-CTA, alle weiteren einen Textlink — sah aus wie zwei Buchungs-Systeme.
           Jetzt EIN ruhiger Zeilen-CTA fuer alle; die rote Hauptaktion gehoert dem
           ScheduleBottomCta. */}
-      <span className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start px-1 text-sm font-semibold text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-salsa)] sm:self-center">
+      {/* R188 KP3: Auf der roten Flaeche kann der CTA nicht mehr rot werden — er wuerde
+          verschwinden. Er wird weiss, wie der Rest der Zeile. */}
+      <span className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start px-1 text-sm font-semibold text-[var(--color-ink)] transition-colors group-hover:text-white group-focus-within:text-white sm:self-center">
         {label}
         <ArrowRight size={16} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
       </span>
@@ -1009,7 +1169,10 @@ function TeacherPortrait({
             key={teacher?.id ?? `${styleKey}-studio`}
             title={portrait.named ? teacher?.displayName : style}
             className={cn(
-              'relative h-14 w-12 overflow-hidden rounded-[1rem] border-2 border-white bg-[var(--color-bg-soft)]',
+              // R188 KP3: Der 2px-Trennring bleibt weiss — auf der roten Hover-Flaeche
+              // liest er sich als saubere Kontur um das Portrait statt als heller Fleck,
+              // und er trennt die beiden gestapelten Koepfe weiterhin voneinander.
+              'relative h-14 w-12 overflow-hidden rounded-[1rem] border-2 border-white bg-[var(--color-bg-soft)] transition-colors',
               index > 0 && '-ml-5 h-12',
             )}
           >
@@ -1111,11 +1274,22 @@ function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 font-medium',
-        tone === 'strong' && 'bg-[var(--color-ink)] text-white',
-        tone === 'level' && 'bg-[var(--color-bg-soft)] font-semibold text-[var(--color-ink)]',
-        tone === 'muted' && 'bg-[var(--color-bg-soft)] text-[var(--color-ink-muted)]',
-        tone === 'outline' && 'border border-[var(--color-line)] bg-white text-[var(--color-ink-muted)]',
+        // R188 KP3: Jeder Ton bekommt eine Rot-Fassung. Ohne die blieben auf der roten
+        // Zeile weisse und graue Kaestchen stehen und die Karte waere nur halb gefaerbt —
+        // genau das Fleckige, das Raphael im Video "nicht ganz rot" nennen wuerde.
+        // Auf Rot traegt jede Badge dieselbe Sprache: 1px weisser Rand bei 45 %,
+        // Schrift Weiss, keine eigene Fuellung. Die "Plaetze frei"-Badge (tone strong)
+        // dreht sich um: sie ist auf Papier die dunkle und auf Rot die weisse Flaeche,
+        // damit sie in beiden Zustaenden die auffaelligste bleibt.
+        'inline-flex items-center rounded-full px-2.5 py-0.5 font-medium transition-colors',
+        tone === 'strong'
+          && 'bg-[var(--color-ink)] text-white group-hover:bg-white group-hover:text-[var(--color-salsa)] group-focus-within:bg-white group-focus-within:text-[var(--color-salsa)]',
+        tone === 'level'
+          && 'bg-[var(--color-bg-soft)] font-semibold text-[var(--color-ink)] group-hover:bg-white/15 group-hover:text-white group-focus-within:bg-white/15 group-focus-within:text-white',
+        tone === 'muted'
+          && 'bg-[var(--color-bg-soft)] text-[var(--color-ink-muted)] group-hover:bg-white/15 group-hover:text-white group-focus-within:bg-white/15 group-focus-within:text-white',
+        tone === 'outline'
+          && 'border border-[var(--color-line)] bg-white text-[var(--color-ink-muted)] group-hover:border-white/45 group-hover:bg-transparent group-hover:text-white group-focus-within:border-white/45 group-focus-within:bg-transparent group-focus-within:text-white',
       )}
     >
       {children}

@@ -374,9 +374,25 @@ function Funnel() {
             {ft.pickDay}
           </h1>
 
-          {/* Tages-Leiste: dichte Chip-Reihe, Wrap glatt (Mobil 4+3 statt verwaiste So-Zeile). */}
+          {/* R188 KP2, Fix-Runde 2 (eigener Screenshot-Befund, buchung/d-01.png):
+              "Diese ganzen Balken weg" galt fuer die Tages-Steuerung — und die steht
+              ZWEIMAL auf der Site. Auf /kursplan wurde sie in Runde 1 auf ruhige Reiter
+              umgebaut, hier auf /buchung Schritt 1 blieb die alte Form stehen: jeder Tag
+              eine gefuellte Pille mit Rand, der aktive Tag ein voll rot ausgefuellter
+              Balken. Im aufgenommenen PNG ist das die auffaelligste Flaeche der Seite.
+              Zwei Formsprachen fuer dieselbe Handlung sind auch fuer sich genommen
+              falsch — der Nutzer waehlt an beiden Stellen denselben Wochentag.
+
+              JETZT dieselbe Reiterreihe wie in CourseEngine.tsx: keine Flaechen, kein
+              Radius, der aktive Tag traegt eine 2px-Linie darunter und volle Tintenfarbe.
+              Rot bleibt der Buchungs-Handlung vorbehalten ("Platz reservieren"), es ist
+              hier kein Filter-Zustand mehr.
+
+              ERHALTEN bleibt, was nicht Optik ist: min-h-11 (44px-Tap-Ziel, Critic
+              Runde 6/5), der ausgeschriebene Kurs-Zaehler (Critic Runde 10/1),
+              aria-pressed und role="group" statt eines falschen Tab-Musters. */}
           <div
-            className="mt-4 flex flex-wrap gap-1.5 sm:gap-2"
+            className="mt-4 flex flex-wrap gap-x-5 gap-y-1 border-b border-[var(--color-line)] sm:gap-x-6"
             // Kein role="tablist": Das ARIA-Tab-Muster verspricht Pfeiltasten-Navigation und
             // ein verknuepftes Panel. Beides gibt es hier nicht. Es sind Filter-Schalter,
             // und die beschreibt aria-pressed korrekt.
@@ -385,30 +401,31 @@ function Funnel() {
           >
             {days.map((d) => {
               const count = slots.filter((s) => s.weekday === d.key).length;
+              const on = activeDay === d.key;
               return (
                 <button
                   key={d.key}
                   type="button"
-                  aria-pressed={activeDay === d.key}
+                  aria-pressed={on}
                   data-testid={`day-${d.key}`}
                   onClick={() => setDay(d.key)}
                   className={cn(
                     // min-h-11: 44px-Tap-Ziel — mit py-1.5 allein massen die Chips 34px
                     // (Critic Runde 6, Item 5).
-                    'inline-flex min-h-11 items-center rounded-full border px-2.5 py-1.5 text-[0.8125rem] font-semibold transition-colors sm:px-3.5 sm:py-2.5 sm:text-sm',
-                    activeDay === d.key
-                      ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)] text-white'
-                      : 'border-[var(--color-line)] bg-white text-[var(--color-ink)] hover:border-[var(--color-salsa)]',
+                    'inline-flex min-h-11 items-center border-b-2 px-0.5 py-2 text-[0.8125rem] font-semibold transition-colors sm:text-sm',
+                    on
+                      ? 'border-[var(--color-ink)] text-[var(--color-ink)]'
+                      : 'border-transparent text-[var(--color-ink-muted)] hover:border-[var(--color-line)] hover:text-[var(--color-ink)]',
                   )}
                 >
                   {WEEKDAY_LABEL[lang][d.key]?.short ?? d.shortDe}
-                  <span className={cn('ml-1 text-[0.7rem] tabular-nums sm:ml-1.5 sm:text-xs', activeDay === d.key ? 'text-white/75' : 'text-[var(--color-ink-muted)]')}>
+                  <span className="ml-1 text-[0.7rem] tabular-nums text-[var(--color-ink-muted)] sm:ml-1.5 sm:text-xs">
                     {d.date.slice(8, 10)}.{d.date.slice(5, 7)}.
                   </span>
                   {count > 0 && (
                     // "9 Kurse" mit Abstand statt "·9": Datum und Zahl klebten zu einer
                     // Zahl zusammen ("10.08. ·9", Critic Runde 10, Item 1).
-                    <span className={cn('ml-1.5 text-[0.7rem] tabular-nums sm:text-xs', activeDay === d.key ? 'text-white/75' : 'text-[var(--color-ink-muted)]')}>
+                    <span className="ml-1.5 text-[0.7rem] tabular-nums text-[var(--color-ink-muted)] sm:text-xs">
                       {count} {count === 1 ? (lang === 'de' ? 'Kurs' : 'class') : (lang === 'de' ? 'Kurse' : 'classes')}
                     </span>
                   )}
@@ -658,6 +675,53 @@ full
   );
 }
 
+/** R188 KP5 (Raphael 21.08.: "eine kurze Beschreibung dazu").
+ *
+ *  KORREKTUR FIX-RUNDE 3 (sol-critic, berechtigt). Die vorherige Fassung stand
+ *  unter einem Kommentar, der Erfundenes ausdruecklich ausschloss — und behauptete
+ *  darunter genau zwei Dinge, die KEIN Feld belegt:
+ *    - "Du tanzt im Kurs mit wechselnden Partnerinnen und Partnern" (Partnerrotation).
+ *      Kein Feld in ScheduleCourse sagt etwas ueber die Unterrichtsmethode.
+ *    - "keine feste Tanzpartnerin oder festen Tanzpartner" (Partnerfreiheit).
+ *      `levelCategory === 'beginner'` sagt das Level, nicht die Anmeldebedingung.
+ *  Beides waere eine Zusage an den Kunden im Namen des Kunden gewesen. Raus.
+ *
+ *  REGEL AB JETZT: jede Teilaussage ist die Vorlesung EINES Feldes aus
+ *  ScheduleCourse (src/lib/schedule.ts:17-39), nichts darueber hinaus:
+ *    levelCategory 'beginner'    -> "Einstiegskurs." (Level, sonst nichts)
+ *    phase 'running'             -> "Die Staffel läuft bereits."
+ *      + allowsLateEntry true    -> "Quereinstieg ist möglich."
+ *      + allowsLateEntry false   -> kein Zusatz (wir wissen nur, dass sie laeuft)
+ *    phase 'upcoming'            -> "Die Staffel startet neu."
+ *    onVariant on1/on2           -> "Getanzt wird On1/On2." (Zaehlweise, ein Feld)
+ *
+ *  Kommt eine echte, vom Kunden freigegebene Kursbeschreibung ins CMS (R189),
+ *  ersetzt sie diese Funktion vollstaendig. */
+function courseBlurb(course: ScheduleCourse, lang: 'de' | 'en'): string {
+  const de = lang === 'de';
+  const parts: string[] = [];
+
+  if (course.levelCategory === 'beginner') {
+    parts.push(de ? 'Einstiegskurs.' : 'A starter class.');
+  }
+
+  if (course.phase === 'running') {
+    parts.push(de ? 'Die Staffel läuft bereits.' : 'This term is already running.');
+    if (course.allowsLateEntry) {
+      parts.push(de ? 'Quereinstieg ist möglich.' : 'Late entry is possible.');
+    }
+  } else {
+    parts.push(de ? 'Die Staffel startet neu.' : 'This term starts fresh.');
+  }
+
+  if (course.onVariant) {
+    const variant = course.onVariant === 'on1' ? 'On1' : 'On2';
+    parts.push(de ? `Getanzt wird ${variant}.` : `Danced ${variant}.`);
+  }
+
+  return parts.join(' ');
+}
+
 function CourseDetail({
   course,
   term,
@@ -693,6 +757,7 @@ function CourseDetail({
   )}`.trim();
   const teachers = course.teachers.map((t) => t.displayName.split(' ')[0]).join(', ');
   const dayLabel = WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday;
+  const blurb = courseBlurb(course, lang);
 
   return (
     <section
@@ -707,9 +772,17 @@ function CourseDetail({
           <h2 className="mt-1 font-display text-2xl font-extrabold leading-tight text-[var(--color-ink)]">
             {courseLabel}
           </h2>
+          {/* R188 KP5: "Datum dazu." Die Zeile trug bisher nur den Wochentag —
+              "Freitag 18:30-19:30" beantwortet nicht, WELCHER Freitag. Der naechste
+              konkrete Termin steht jetzt davor; fehlt er in den Daten, bleibt der
+              Wochentag als Rueckfall stehen. */}
           <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
-            {dayLabel} {course.startTime}-{course.endTime}
+            {course.nextDates?.[0] ? formatDateI18n(course.nextDates[0], lang) : dayLabel} · {course.startTime}-{course.endTime}
             {teachers ? ` · ${teachers}` : ''}
+          </p>
+          {/* R188 KP5: die kurze Beschreibung. Herkunft jedes Satzes: courseBlurb() oben. */}
+          <p data-testid="course-blurb" className="mt-2 max-w-prose text-sm leading-relaxed text-[var(--color-ink)]">
+            {blurb}
           </p>
         </div>
         <span
@@ -724,8 +797,42 @@ function CourseDetail({
         </span>
       </div>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] lg:items-start">
-        <dl className="grid gap-3 sm:grid-cols-2">
+      {/* R188 KP6 (Raphael 21.08., Video 08:30, Frame f167): "Die linken Infos und das
+          rechte Element sind nicht auf ordentlicher Hoehe, und das rechte graue leere
+          Bild sieht gar nicht gut aus."
+
+          ZWEI BEFUNDE, beide im Frame sichtbar:
+          (a) HOEHE. `lg:items-start` liess beide Spalten ihre Eigenhoehe behalten. Die
+              Infoliste war rund 120px hoch, der Kasten rechts fest 256px (h-64). Unten
+              klaffte eine sichtbare Stufe von ~136px. `lg:items-stretch` bindet jetzt
+              beide auf dieselbe Hoehe, und `self-stretch` am Bild sorgt dafuer, dass es
+              die Spalte wirklich fuellt statt oben zu haengen.
+          (b) DAS GRAUE FELD. Es war kein Platzhalter — es war ein Google-Maps-<iframe>.
+              Solange Maps nicht laedt (Cookie-Banner offen, Netz weg, Tracking-Blocker,
+              und exakt so im Video), bleibt ein leerer bg-soft-Kasten stehen. Genau das
+              zeigt Frame f167. Ein Element, das im Normalfall des Kunden grau ist, ist
+              an dieser Stelle falsch.
+
+          FIX: Die Karte ist raus, ein ECHTES Foto steht dort — kurse-classfreude-01
+          (Original 1920x1280 aus public/photos/2026, hier auf 1200x800 beschnitten nach
+          public/photos/r188-kursplan/). Es zeigt eine echte Klasse im echten Studio,
+          scharf, keine abgeschnittenen Koepfe (SW4), und es war vor dieser Aenderung
+          nirgends im Code platziert.
+
+          DIE KARTEN-FUNKTION GEHT NICHT VERLOREN: der Link "Route in Google Maps
+          oeffnen" steht unveraendert direkt darunter und fuehrt an dasselbe Ziel. Der
+          Weg kostet jetzt einen Klick und liefert dafuer immer ein Bild statt manchmal
+          einer grauen Flaeche. */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)] lg:items-stretch">
+        {/* Fix-Runde 3: Der Maps-Link steht JETZT in dieser Spalte, nicht mehr unter dem
+            Raster. Zwei Gruende, beide gemessen:
+            (a) Die Textspalte war 92px hoch, das Foto brauchte fuer ein unverzerrtes
+                3:2 rund 190px. Mit dem Link plus `justify-between` fuellt der Text die
+                Spalte selbst, statt dass eine der beiden Seiten gestreckt wird.
+            (b) Inhaltlich gehoert "Route oeffnen" neben das Feld "Ort", nicht 100px
+                darunter — es beantwortet genau dieses Feld. */}
+        <div className="flex flex-col justify-between gap-4">
+        <dl className="grid content-start gap-3 sm:grid-cols-2">
           <div>
             <dt className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink-muted)]">
               {de ? 'Ort' : 'Place'}
@@ -767,25 +874,58 @@ function CourseDetail({
             </dd>
           </div>
         </dl>
-        <div className="relative h-64 min-h-[16rem] overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-bg-soft)]">
-          <iframe
-            title={de ? 'Standort Salsaflow auf Google Maps' : 'Salsaflow location on Google Maps'}
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8000!2d7.5866!3d47.548917!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f14!3m3!1m2!1s0x4791b9bbe6210ca7%3A0xe24471415832cb62!2sSalsaflow%20Dance%20Company%20GmbH!5e0!3m2!1sde!2sch"
-            className="h-full w-full min-h-[16rem] border-0"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+        <a
+          href={CONTACT.anfahrt}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4"
+        >
+          {de ? 'Route in Google Maps öffnen' : 'Open route in Google Maps'}
+        </a>
+        </div>
+        {/* Fix-Runde 2, eigener Messbefund (nicht geschaetzt, /tmp/gap.cjs auf 1440):
+              dl-Kasten      304..496  = 192px hoch
+              letzte Zeile   356..396  -> Inhalt endet bei 396
+              Link darunter  508
+            Zwischen Textende und Link standen 112px Nichts. Grund: `min-h-[12rem]`
+            zwang die Bildspalte auf 192px, `items-stretch` zog die Textspalte auf
+            dieselbe Hoehe, und `content-start` liess den Rest der Textspalte leer.
+            Die Spalten waren also gleich HOCH, aber die Seite hatte ein Loch.
+
+            FIX-RUNDE 3. Runde 2 hatte das Loch geschlossen, indem sie das Bild auf die
+            92px der Textspalte zusammendrueckte — gemessen 3.4:1 statt 3:2, und im PNG
+            waren den Taenzerinnen die Koepfe abgeschnitten. Das verletzt SW4 ("Koepfe
+            nie abschneiden") und tauscht ein Layout-Problem gegen ein Bild-Problem.
+
+            Jetzt traegt die LINKE Spalte den Maps-Link mit und ist dadurch von selbst
+            so hoch wie ein unverzerrtes 3:2-Foto. Das Bild behaelt sein Verhaeltnis auf
+            JEDER Breite (`aspect-[3/2]`, kein lg-Sonderfall mehr), `self-stretch` haelt
+            die Unterkanten buendig. Keine Spalte wird mehr gestreckt oder gestaucht. */}
+        <div className="relative aspect-[3/2] self-stretch overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)]">
+          <img
+            src="/photos/r188-kursplan/kurs-studio-basel-1200.webp"
+            alt={de
+              ? 'Kursgruppe beim Training im Salsaflow-Studio in Basel'
+              : 'A class training at the Salsaflow studio in Basel'}
+            width={1200}
+            height={800}
+            // Fix-Runde 3: `loading="lazy"` war hier falsch. Dieses Bild steht auf
+            // /buchung IM FOLD — es ist beim Laden der Seite sofort sichtbar. Lazy hat
+            // es im Screenshot als leeren Kasten stehen lassen (belegt: die erste
+            // Fassung von d-step2.png zeigte einen weissen Rahmen), also genau den
+            // grauen Leerkasten, den KP6 beseitigen soll. Eager laedt es mit der Seite.
+            loading="eager"
+            decoding="async"
+            // absolute + inset-0: das Bild folgt der Hoehe, die die linke Spalte vorgibt
+            // (lg:items-stretch), statt sie mit seinem eigenen Seitenverhaeltnis zu
+            // diktieren. object-cover schneidet dabei sauber, object-center haelt die
+            // tanzende Gruppe in der Mitte des Ausschnitts.
+            className="absolute inset-0 h-full w-full object-cover object-center"
           />
         </div>
       </div>
-      <a
-        href={CONTACT.anfahrt}
-        target="_blank"
-        rel="noreferrer"
-        className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-[var(--color-salsa)] underline underline-offset-4"
-      >
-        {de ? 'Route in Google Maps öffnen' : 'Open route in Google Maps'}
-      </a>
-
+      {/* Der Maps-Link stand hier. Er ist in die linke Info-Spalte gewandert
+          (Begruendung dort), damit unter dem Raster kein Rest mehr haengt. */}
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <button type="button" onClick={onReserve} data-testid="reserve-spot" className="btn-base btn-primary px-6 py-2.5 text-sm">
           {full
@@ -1089,7 +1229,14 @@ function BookingForm({
            `dvh`; die Inline-Regel ueberschreibt sie dort, wo die Einheit bekannt ist.
            Kennt der Browser `dvh` nicht, verwirft er die Deklaration und die Klasse bleibt. */
         style={{ maxHeight: 'min(92dvh, 900px)' }}
-        className="my-auto flex max-h-[min(92vh,900px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-panel-in_180ms_ease-out]"
+        /* R188 KP4 (Raphael 21.08., Video 08:05): "Die obere Umrandung dunkel."
+           Der Dialog trug rundum `border-[var(--color-line)]` — eine helle Haarlinie.
+           Oben lief sie ueber die schwarze Kopfzeile und war dort ein heller Saum auf
+           dunklem Grund: die Kopfzeile wirkte oben angeschnitten statt gefasst.
+           JETZT traegt der Rahmen oben --color-ink (dieselbe Tinte wie die Kopfzeile),
+           die drei anderen Kanten bleiben hell auf dem Papierkoerper. Der Kopf ist
+           damit oben sauber abgeschlossen. */
+        className="my-auto flex max-h-[min(92vh,900px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] border-t-[3px] border-t-[var(--color-ink)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-panel-in_180ms_ease-out]"
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* R134/1: Der 4px-Salsa-Strich ueber der schwarzen Kopfzeile ist WEG (Raphael:
@@ -1098,8 +1245,19 @@ function BookingForm({
             Tiefenverlauf und eine Haarlinie nach unten, also eine Kante aus dem Aufbau
             statt einer Deko-Kappe. */}
         <div className="relative shrink-0 overflow-hidden border-b border-white/10 bg-[linear-gradient(180deg,#1a1a1a_0%,var(--color-ink)_100%)] px-4 py-3 text-white sm:px-5 sm:py-3.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
+          {/* R188 KP5 (Raphael 21.08., Video 08:12): "Titel mittig, Datum dazu."
+              VORHER stand der Titel linksbuendig neben dem Schliessen-Knopf, und das
+              Datum fehlte im Dialog komplett — man buchte einen Kurs, ohne zu sehen,
+              WANN er stattfindet (Frame f160 zeigt genau diesen Zustand).
+
+              JETZT ist der Kopf dreispaltig: links ein leeres 44px-Feld, mittig Titel
+              und Termin, rechts der Schliessen-Knopf. Die beiden aeusseren Spalten sind
+              gleich breit (w-11), deshalb steht der Titel auf der ECHTEN Mitte des
+              Dialogs und nicht nur in der Mitte des Restplatzes. Ein `justify-center`
+              ohne den linken Platzhalter haette ihn um 44px nach links versetzt. */}
+          <div className="flex items-start gap-3">
+            <span aria-hidden className="h-11 w-11 shrink-0" />
+            <div className="min-w-0 flex-1 text-center">
               {/* Kritik-Fund KRITISCH: Der Kursname stand in Salsa-Rot auf der fast schwarzen
                   Kopfzeile — im PNG gemessen rgb(173,24,39) auf rgb(19,19,19), Kontrast 2.6:1.
                   WCAG AA verlangt 4.5:1 fuer Fliesstext und 3.0:1 selbst fuer grosse Schrift.
@@ -1117,12 +1275,26 @@ function BookingForm({
               <h3 className="font-display text-lg font-extrabold leading-tight tracking-tight text-white sm:text-xl">
                 {courseLabel}
               </h3>
-              {/* R183: Wochentag, Uhrzeit und Lehrer sind WEG (Absprache 17.08.: die
-                  Kursseite traegt die Infos). Der Nutzer kommt aus der Kursliste oder von
-                  der Kursseite — dort stand genau diese Zeile schon, und er hat auf sie
-                  geklickt. Der Kursname allein beantwortet «bin ich richtig hier».
-                  Wann und Wo stehen nach dem Absenden wieder da, in der Bestaetigung
-                  (SuccessPanel, Fakten «Wann»/«Wo») — dort ist es neue Information. */}
+              {/* R188 KP5 — DAS DATUM KOMMT ZURUECK, und zwar begruendet gegen R183.
+                  R183 hatte Wochentag/Uhrzeit hier geloescht mit dem Argument: "stand in
+                  der Kursliste schon, der Nutzer hat darauf geklickt". Raphael widerspricht
+                  im Video ausdruecklich ("Datum dazumachen"), und er hat recht — zwischen
+                  Klick und Dialog liegt ein Overlay, das die Liste verdeckt. Wer den
+                  Termin pruefen will, muesste den Dialog schliessen.
+
+                  Der Unterschied zu vorher: es steht NICHT die alte Dreifach-Zeile
+                  (Tag + Zeit + Lehrer) da, sondern nur Wann. Der Lehrername gehoert
+                  weiterhin nicht hierher, er aendert die Buchung nicht.
+
+                  `nextDates[0]` ist der naechste konkrete Termin aus der API
+                  (server/public.ts rechnet die Reihe aus). Fehlt er — aeltere Datenquelle,
+                  eingebetteter Plan —, faellt die Zeile auf Wochentag + Uhrzeit zurueck
+                  statt zu verschwinden. */}
+              <p data-testid="booking-when" className="mt-1 text-xs font-medium text-white/70 sm:text-sm">
+                {course.nextDates?.[0]
+                  ? `${formatDateI18n(course.nextDates[0], lang)} · ${course.startTime}-${course.endTime}`
+                  : `${dayLabel} · ${course.startTime}-${course.endTime}`}
+              </p>
             </div>
             {/* h-11/w-11 statt h-10: 44px-Tap-Ziel fuer den Dialog-Schliessen-Knopf
                 (Critic Runde 16, Item 3). */}
@@ -1706,7 +1878,17 @@ function ChoiceTile({
       aria-invalid={invalid || undefined}
       onClick={onClick}
       className={cn(
-        'relative flex flex-1 flex-col items-start rounded-[var(--radius-card)] border px-3 py-2.5 text-left transition-colors sm:px-3.5 sm:py-3',
+        // R188 KP5 (Raphael 21.08.: "vielleicht eine andere Animation beim Auswaehlen").
+        // Die Kachel hatte nur `transition-colors` — die Wahl sprang farblich um und
+        // sonst passierte nichts. Jetzt kommt eine dezente Bewegung dazu:
+        //   1. `active:scale-[0.98]` — die Kachel gibt beim Druecken kurz nach.
+        //      0.98 statt 0.96, weil die Kacheln nebeneinander stehen: ein staerkerer
+        //      Sprung liest sich als Wackeln der ganzen Reihe.
+        //   2. Der Haken skaliert von 0 auf 1 (unten am <span>).
+        // BEIDES haengt an `motion-safe:`. Bei `prefers-reduced-motion: reduce`
+        // faellt die Bewegung komplett weg und die Auswahl bleibt rein farblich —
+        // die Funktion ist nie an die Animation gebunden.
+        'relative flex flex-1 flex-col items-start rounded-[var(--radius-card)] border px-3 py-2.5 text-left transition-[color,background-color,border-color,transform] duration-[var(--dur-fast)] motion-safe:active:scale-[0.98] sm:px-3.5 sm:py-3',
         active
           ? 'border-[var(--color-salsa)] bg-[var(--color-salsa)]'
           : 'border-[var(--color-line)] bg-[var(--color-bg-soft)] hover:border-[var(--color-salsa)]',
@@ -1716,10 +1898,13 @@ function ChoiceTile({
       <span
         aria-hidden
         className={cn(
-          'absolute right-2.5 top-2.5 flex h-4 w-4 items-center justify-center rounded-full border',
+          // R188 KP5: Der Haken wuchs vorher hart aus dem Nichts. Jetzt skaliert der
+          // Kreis von 75 % auf 100 %, sobald die Kachel aktiv wird. `motion-safe:`
+          // haelt das von reduced-motion fern; dort ist der Kreis sofort voll da.
+          'absolute right-2.5 top-2.5 flex h-4 w-4 items-center justify-center rounded-full border transition-[transform,background-color,border-color] duration-[var(--dur-fast)]',
           active
-            ? 'border-white bg-white text-[var(--color-salsa)]'
-            : 'border-[var(--color-line)] bg-white',
+            ? 'border-white bg-white text-[var(--color-salsa)] motion-safe:scale-100'
+            : 'border-[var(--color-line)] bg-white motion-safe:scale-75',
         )}
       >
         {active && (

@@ -19,8 +19,24 @@ import type { Faq, Crumb, HeroCta } from '@/public/subpage/kit';
 type Img = { src: string; alt: string };
 type Theme = { label: string; hint: string; href: string };
 export type FaqLink = { label: string; href: string };
-export type FaqItemData = Faq & { link?: FaqLink };
-export type FaqColumn = { title: string; items: FaqItemData[] };
+/** R188 F4: eine Antwort darf zwei Wege anbieten (z. B. Schnupperstunde ueber Kursplan
+ *  ODER ueber das Formular). Mehr als zwei waeren eine Linkliste, kein Satz. */
+export type FaqItemData = Faq & { link?: FaqLink; link2?: FaqLink };
+/** R188 F5: jeder FAQ-Block bekommt ein echtes Foto. `title` bleibt die Ueberschrift,
+ *  `blurb` sagt in einem Satz, worum es in diesem Block geht (F3: "klarere
+ *  Ueberschriften"), `image` ist das Motiv daneben. Alle Bilder liegen im Bestand und
+ *  sind vor dem Einbau einzeln angesehen worden. */
+/** R188, Kritiker-Befund /faq d-04 + d-05: "dasselbe blaue Social-Foto erscheint doppelt".
+ *  Gemessen (scratch/r188-faq-images.cjs) liegt im DOM KEIN doppeltes Bild — alle vier
+ *  Motive sind verschieden. Die Ursache ist das Sticky-Verhalten: das Bild einer Spalte
+ *  laeuft `lg:sticky` neben der Frageliste mit. Die dritte Spalte traegt 12 Fragen (die
+ *  erste nur 6) und ist damit ueber zwei volle 900px-Viewports hoch — dasselbe Foto stand
+ *  darum in Slice d-04 UND d-05 fest im Bild. Sichtbar ist das eine Doppelung, auch wenn
+ *  die Datei nur einmal existiert.
+ *
+ *  `image2` ist die Antwort: eine lange Spalte bekommt ein ZWEITES Motiv, das auf halber
+ *  Hoehe uebernimmt. Kurze Spalten lassen das Feld weg und bleiben unveraendert. */
+export type FaqColumn = { title: string; blurb: string; image: Img; image2?: Img; items: FaqItemData[] };
 
 export type FaqPageContent = {
   seo: SeoKey;
@@ -69,6 +85,8 @@ const R = {
   events: '/events',
   tanzschuhe: '/mehr/tanzschuhe',
   standort: '/kontakt/standort-raumvermietung',
+  /* R188 F4: Ziele der neuen Antwort-Links. Beide live geprueft (HTTP 200). */
+  heels: '/tanzkurse/heels',
 };
 
 export const FAQ_CONTENT = {
@@ -82,7 +100,12 @@ export const FAQ_CONTENT = {
       primary: { label: 'Frage stellen', href: R.kontakt },
       secondary: { label: 'Kursplan ansehen', href: R.kursplan },
       microcopy: 'Wenn deine Frage nicht dabei ist, schreib uns kurz.',
-      image: { src: '/photos/showcase/hp-05.webp', alt: 'Zwei Tanzpaare drehen sich in einem hellen Salsaflow Studio' },
+      /* R188 F6: der Hero zeigt jetzt ein echtes Bild rechts neben Text und Knoepfen.
+         hero-paar-dreh-01 ist scharf (1600x1066), quer und zeigt beide Gesichter ganz.
+         Bewusst ein ANDERES Motiv als der erste FAQ-Block darunter: in der ersten Runde
+         stand hier dasselbe Kursfoto wie in "Dein Einstieg", man sah es beim Scrollen
+         zweimal innerhalb einer Bildschirmhoehe (Beleg d-01/d-02 der ersten Runde). */
+      image: { src: '/photos/2026/hero-paar-dreh-01.webp', alt: 'Tanzpaar dreht sich gemeinsam im Salsaflow-Studio' },
       cardLabel: 'Gut zu wissen',
       cardText: 'Die häufigsten Fragen, direkt beantwortet.',
     },
@@ -107,36 +130,67 @@ export const FAQ_CONTENT = {
       items: [],
       columns: [
         {
-          title: 'Einstieg',
+          title: 'Dein Einstieg',
+          blurb: 'Ausprobieren, ohne Vorkenntnisse und ohne Tanzpartner.',
+          image: {
+            src: '/photos/2026/kurse-classfreude-01.webp',
+            alt: 'Beginner-Kurs im hellen Salsaflow-Studio, viele Menschen tanzen gemeinsam',
+          },
           items: [
+            /* R188 F4 (Video 00:50-01:10): "Antworten: mehr Infos + direkte Links."
+               Jede Antwort unten ist gegen bestehende Seiteninhalte geprueft; es steht
+               nichts drin, was nicht schon anderswo auf der Seite belegt ist:
+               - Gratis/unverbindlich/ohne Partner: courses/overview-content.ts:227-228
+               - 8 Wochen, eine Lektion a 60 Minuten: preise/content.ts:225
+               - Partnerwechsel im Kurs: home/content-v3.ts:218
+               - Studios am Bahnhof Basel SBB: home/content.ts:138
+               Die Links zeigen ausschliesslich auf Routen, die live 200 liefern. */
             {
               q: 'Kann ich einfach ausprobieren, ob Salsaflow zu mir passt?',
-              a: 'Ja. Die Gratis Schnupperstunde ist genau dafür gedacht. Du bekommst ein Gefühl für Kurs, Level und Atmosphäre, ohne dich direkt festlegen zu müssen.',
+              a: 'Ja. Die Gratis Schnupperstunde ist genau dafür gedacht: kostenlos, unverbindlich und auch ohne Tanzpartner. Du tanzt eine ganze Lektion in einem laufenden Kurs mit und bekommst ein Gefühl für Level, Tempo und die Leute, bevor du dich festlegst.',
+              link: { label: 'Schnupperstunde buchen', href: R.schnupper },
             },
             {
               q: 'Muss ich schon tanzen können?',
-              a: 'Nein. Beginner-Kurse starten ohne Vorkenntnisse. Wichtig ist nur, dass du offen bist, Schritt für Schritt zu lernen.',
+              a: 'Nein, und die meisten können es am ersten Abend nicht. Beginner-Kurse starten bei null: zuerst der Grundschritt, dann Führen und Folgen, dann die ersten Figuren. Wir wechseln im Kurs regelmässig die Partner durch, dadurch gewöhnst du dich schnell an verschiedene Tanzpartner statt nur an einen. Wenn du unsicher bist, welches Level passt, komm zur Schnupperstunde und wir schauen es gemeinsam an.',
+              link: { label: 'Kurse und Level ansehen', href: R.tanzkurse },
             },
             {
               q: 'Wie buche ich eine Schnupperstunde?',
-              a: 'Über den Kursplan oder das Schnupperformular auf der Schnupperseite.',
+              a: 'Auf zwei Wegen. Im Kursplan suchst du dir den Kurs aus, der zeitlich passt, und reservierst direkt deinen Platz. Oder du füllst das kurze Formular auf der Schnupperseite aus, dann melden wir uns mit einem passenden Termin bei dir.',
+              link: { label: 'Zum Kursplan', href: R.kursplan },
+              link2: { label: 'Zur Schnupperstunde', href: R.schnupper },
             },
             {
               q: 'Kann ich ohne Tanzpartner kommen?',
-              a: 'Ja. Du kannst dich auch alleine anmelden. Im Kurs wird auf eine gute Balance geachtet und du lernst mit wechselnden Partner:innen.',
+              a: 'Ja, und die allermeisten kommen ohne. Du meldest dich allein an, im Kurs wird auf eine gute Balance zwischen Leadern und Followern geachtet und die Partner wechseln regelmässig durch. So tanzt du mit allen und lernst schneller, als wenn du immer mit derselben Person übst.',
             },
             {
               q: 'Passe ich da rein, auch von meinem Alter her?',
-              a: 'Ja. Bei uns tanzen Menschen aller Altersgruppen. Du wirst vom ersten Abend an herzlich aufgenommen.',
+              a: 'Ja. Bei uns tanzen Menschen aller Altersgruppen nebeneinander im selben Kurs, von Studierenden bis weit darüber hinaus. Beim Partnerwechsel tanzt du im Lauf eines Abends ohnehin mit fast allen. Du wirst vom ersten Abend an herzlich aufgenommen.',
             },
             {
               q: 'Wo buche ich den Heels-Kurs?',
-              a: 'Unter Tanzkurse, Seite Heels.',
+              a: 'Auf der Heels-Seite unter Tanzkurse. Dort stehen der Aufbau, die aktuellen Termine und die Hinweise zu Schuhen und Sicherheit.',
+              link: { label: 'Zur Seite Heels', href: R.heels },
             },
           ],
         },
         {
-          title: 'Kurs, Partner, Level',
+          title: 'Kurs, Partner und Level',
+          blurb: 'Wie ein Kurs abläuft, wie lange er dauert und welches Level zu dir passt.',
+          /* R188: hier stand zuerst hero-paar-studiowand-01.webp. Im Screenshot
+             (worklog/shots/R188/team-faq-kontakt/faq/d-03.png der ersten Runde) war der
+             Kopf des Mannes oben abgeschnitten — und zwar NICHT durch das Fenster: die
+             Datei ist 1920x1280 (3:2), das 4:3-Fenster zeigt davon die volle Hoehe und
+             beschneidet nur die Breite (1706 von 1920 px). Der Anschnitt steckt in der
+             Quelle selbst, kein object-position kann ihn heilen.
+             event-social-couple-01.webp zeigt dieselbe Aussage (Fuehren und Folgen) mit
+             beiden Gesichtern ganz im Bild und ist nicht das Hero-Motiv. */
+          image: {
+            src: '/photos/2026/event-social-couple-01.webp',
+            alt: 'Tanzpaar führt und folgt an einem Salsaflow-Abend',
+          },
           items: [
             {
               q: 'Wie viele Figuren lerne ich am Anfang?',
@@ -148,7 +202,9 @@ export const FAQ_CONTENT = {
             },
             {
               q: 'Was ist, wenn ich mein Level nicht kenne?',
-              a: 'Dann frag uns kurz oder starte mit einer Schnupperstunde. Wir helfen dir, nicht zu hoch und nicht zu tief einzusteigen.',
+              a: 'Dann starte mit einer Schnupperstunde. Du tanzt eine Lektion mit und danach wissen wir beide, ob das Level passt. Das ist ehrlicher als jede Selbsteinschätzung. Wer schon getanzt hat und unsicher ist, schreibt uns kurz, was und wie lange, dann ordnen wir das ein.',
+              link: { label: 'Schnupperstunde buchen', href: R.schnupper },
+              link2: { label: 'Frag uns direkt', href: R.kontakt },
             },
             {
               q: 'Kann ich direkt in Intermediate starten?',
@@ -156,7 +212,8 @@ export const FAQ_CONTENT = {
             },
             {
               q: 'Wie lange dauert ein Kurs?',
-              a: 'Eine Kursstaffel dauert 8 Wochen mit einer Lektion à 60 Minuten pro Woche. Die aktuellen Staffeln findest du im Kursplan.',
+              a: 'Eine Kursstaffel dauert 8 Wochen mit einer Lektion à 60 Minuten pro Woche, also 8 Lektionen. Danach entscheidest du neu, ob du im selben Level bleibst oder eine Stufe weitergehst. Welche Staffeln gerade starten, steht im Kursplan.',
+              link: { label: 'Aktuelle Staffeln im Kursplan', href: R.kursplan },
             },
             {
               q: 'Was passiert, wenn ich eine Lektion verpasse?',
@@ -164,7 +221,8 @@ export const FAQ_CONTENT = {
             },
             {
               q: 'Wo finden die Kurse statt?',
-              a: 'In den Salsaflow-Studios direkt am Bahnhof Basel SBB. Auf der Kurskarte siehst du, in welchem Studio dein Kurs läuft.',
+              a: 'In unseren drei Studios direkt am Bahnhof Basel SBB. Auf der Kurskarte im Kursplan siehst du, in welchem Studio dein Kurs läuft. Die genaue Anfahrt steht auf der Standortseite.',
+              link: { label: 'Anfahrt und Standort', href: R.standort },
             },
             {
               q: 'Wie komme ich mit dem Zug zum Studio?',
@@ -173,15 +231,31 @@ export const FAQ_CONTENT = {
           ],
         },
         {
-          title: 'Preise, Events, Kontakt',
+          title: 'Preise, Events und Kontakt',
+          blurb: 'Was es kostet, was an den Abenden läuft und wie du uns erreichst.',
+          image: {
+            src: '/photos/2026/community-diversitaet-01.webp',
+            alt: 'Volle Tanzfläche an einer Danceflow Night',
+          },
+          /* Diese Spalte traegt 12 Fragen und ist ueber zwei Viewports hoch. Ohne zweites
+             Motiv stand das Foto oben in beiden Slices fest (Befund d-04 + d-05).
+             hp-28.webp (1800x1200) ist ein echtes Salsaflow-Showfoto aus dem Bestand,
+             sitewide an keiner Stelle als aktives `src` eingebunden, alle Koepfe ganz
+             im Bild. Es passt zum Thema Events und loest die zweite Bildhaelfte ab. */
+          image2: {
+            src: '/photos/showcase/hp-28.webp',
+            alt: 'Das Salsaflow-Team nach einer Show auf der Bühne',
+          },
           items: [
             {
               q: 'Was kostet ein Kurs?',
-              a: 'Alle aktuellen Preise findest du auf der Preisseite.',
+              a: 'Der Preis gilt für die ganze Kursstaffel, also 8 Lektionen à 60 Minuten, nicht pro Abend. Dazu gibt es Workshops, Pässe und Privatstunden mit eigenen Preisen. Alle aktuellen Beträge stehen auf der Preisseite.',
+              link: { label: 'Alle Preise ansehen', href: R.preise },
             },
             {
               q: 'Gibt es Studentenpreise?',
-              a: 'Ja. Für Schülerinnen, Schüler und Studierende gibt es reduzierte Preise. Die Details stehen auf der Preisseite.',
+              a: 'Ja. Für Schüler und Studenten kostet die Kursstaffel CHF 160 statt 190, für Paare CHF 270 statt 320. Die übrigen Angebote haben eigene reduzierte Sätze, alle stehen auf der Preisseite.',
+              link: { label: 'Zu den Preisen', href: R.preise },
             },
             {
               q: 'Was kostet die Danceflow Night?',
@@ -202,7 +276,8 @@ export const FAQ_CONTENT = {
             },
             {
               q: 'Was ist die Danceflow Night?',
-              a: 'Ein regelmässiger Social-Dance-Abend bei Salsaflow mit Salsa, Bachata und Community.',
+              a: 'Unser regelmässiger Social-Dance-Abend mit Salsa, Bachata und der ganzen Community. Hier tanzt du frei, was du im Kurs gelernt hast, mit wechselnden Partnern statt nach Programm. Genau dort geht das Gelernte am schnellsten in Fleisch und Blut über.',
+              link: { label: 'Termine bei den Events', href: R.events },
             },
             {
               q: 'Sind Events auch für Gäste offen?',
@@ -247,7 +322,7 @@ export const FAQ_CONTENT = {
       primary: { label: 'Ask a question', href: R.kontakt },
       secondary: { label: 'See the schedule', href: R.kursplan },
       microcopy: 'If your question is not here, just drop us a line.',
-      image: { src: '/photos/showcase/hp-05.webp', alt: 'Two dance couples turning in a bright Salsaflow studio' },
+      image: { src: '/photos/2026/hero-paar-dreh-01.webp', alt: 'Dance couple turning together in the Salsaflow studio' },
       cardLabel: 'Good to know',
       cardText: 'The most common questions, answered honestly.',
     },
@@ -273,6 +348,11 @@ export const FAQ_CONTENT = {
       columns: [
         {
           title: 'Getting started',
+          blurb: 'Try it out, with no experience and no dance partner.',
+          image: {
+            src: '/photos/2026/kurse-classfreude-01.webp',
+            alt: 'Beginner course in the bright Salsaflow studio, many people dancing together',
+          },
           items: [
             {
               q: 'Can I simply try out whether Salsaflow suits me?',
@@ -301,7 +381,12 @@ export const FAQ_CONTENT = {
           ],
         },
         {
-          title: 'Course, partner, level',
+          title: 'Course, partner and level',
+          blurb: 'How a course runs, how long it lasts and which level fits you.',
+          image: {
+            src: '/photos/2026/event-social-couple-01.webp',
+            alt: 'Dance couple leading and following at a Salsaflow night',
+          },
           items: [
             {
               q: 'How many figures do I learn at the start?',
@@ -338,7 +423,16 @@ export const FAQ_CONTENT = {
           ],
         },
         {
-          title: 'Prices, events, contact',
+          title: 'Prices, events and contact',
+          blurb: 'What it costs, what happens on the nights and how to reach us.',
+          image2: {
+            src: '/photos/showcase/hp-28.webp',
+            alt: 'The Salsaflow team on stage after a show',
+          },
+          image: {
+            src: '/photos/2026/community-diversitaet-01.webp',
+            alt: 'Full dance floor at a Danceflow Night',
+          },
           items: [
             {
               q: 'What does a course cost?',

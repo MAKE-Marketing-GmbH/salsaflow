@@ -28,7 +28,20 @@ export function LocationBand() {
             <img
               src="/photos/2026/event-party-dreh-01.webp"
               alt={de ? 'Kurs im hellen Studio vor den Fenstern, Bahnhof Basel SBB.' : 'Class in the bright studio by the windows, Basel SBB.'}
-              className="absolute inset-0 h-full w-full object-cover object-[center_45%]"
+              /* R188 / SW4a (Video 21.08.: "Koepfe nie abschneiden"): auf 1440px ist die
+                 Bildflaeche 674x585 (hochkant), das Motiv 1920x1280 (quer). object-cover
+                 skaliert deshalb ueber die HOEHE und zeigt nur 76.7% der Bildbreite — der
+                 Beschnitt ist horizontal, nicht vertikal. Bei `center` lag das Fenster auf
+                 x = 224..1696; die Kante bei 224 lief mitten durch das Gesicht der Frau am
+                 linken Rand (Beleg worklog/shots/R188/after-final/home/d-09.png).
+                 `object-[75%_45%]` legt das Fenster auf x = 336..1808: die angeschnittene
+                 Person liegt vollstaendig ausserhalb, das tanzende Paar und die lachende
+                 Frau stehen als ganze Figuren im Bild. 100% waere zu weit — dann schneidet
+                 die linke Kante den Ruecken des Taenzers an. Der Vertikalwert 45% bleibt
+                 unveraendert; er war nie der Befund (sichtbar sind 100% der Bildhoehe).
+                 Auf 390px ist die Flaeche 348x261 (quer) und zeigt 88.9% der Breite — dort
+                 war ohnehin kein Kopf angeschnitten, der Wert schadet nicht. */
+              className="absolute inset-0 h-full w-full object-cover object-[75%_45%]"
               width={1600}
               height={1200}
               loading="lazy"

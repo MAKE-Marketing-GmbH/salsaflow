@@ -169,7 +169,9 @@ const salsa = {
       image: { src: '/photos/gallery/kurse/02.jpg', alt: 'Salsa-Paar beim Partnerwork im Unterricht', position: 'center 25%' },
     },
     fit: {
-      title: 'Salsa passt zu dir, wenn du Energie suchst, nicht Perfektion',
+      // R188 ST4: dieselbe Regel wie auf der Bachata-Seite. Die Sektion beantwortet,
+      // ob Salsa passt oder ob eine Schnupperstunde der bessere erste Schritt ist.
+      title: 'Passt Salsa zu dir?',
       intro: 'Du musst kein Rhythmus-Profi sein. Hilfreich ist nur, dass du offen bist, regelmässig zu üben und dich auf Partnerwork einzulassen.',
       yesTitle: 'Passt zu dir, wenn',
       yes: [
@@ -188,7 +190,16 @@ const salsa = {
     },
     beginner: {
       eyebrow: 'Deine ersten Wochen',
-      title: 'Von den ersten Basics zu fliessenden Kombinationen',
+      /* R188 ST4, Raphael-Video 10:xx: «Ueberschriften nicht poetisch, konkret.»
+         Vorher: «Von den ersten Basics zu fliessenden Kombinationen» (Beleg
+         worklog/shots/R188/after-final2-tanzkurse/tanzkurse_salsa/d-03.png). Das ist
+         ein Bild, keine Aussage — «fliessend» beschreibt ein Gefuehl, und die Zeile
+         sagt nicht, was der Leser bekommt.
+         Jetzt die Nutzenfrage aus dem Auftrag («Muster: Was lernst du…?»), beantwortet
+         mit dem Zeitraum, den die vier Phasen darunter abdecken. Der Eyebrow «Deine
+         ersten Wochen» bleibt: er ist kein Deko-Kicker, sondern nennt die Kursphase,
+         und die Ueberschrift greift ihn jetzt woertlich auf. */
+      title: 'Was lernst du in den ersten Wochen?',
       body: 'Ein guter Salsa-Kurs beginnt nicht mit komplizierten Figuren. Er beginnt mit Rhythmus, Grundschritten und klaren Signalen, damit du dich sicher fühlst.',
       phases: [
         { tag: 'Phase 1', title: 'Rhythmus & Grundschritt', text: 'Du lernst den Grundrhythmus, einfache Gewichtswechsel und wie du zur Musik startest.' },
@@ -217,7 +228,19 @@ const salsa = {
       },
     },
     social: {
-      title: 'Du lernst nicht für den Spiegel. Du lernst für echte Tanzabende',
+      /* R188 ST4: Die Ueberschrift hiess «Du lernst nicht fuer den Spiegel. Du lernst
+         fuer echte Tanzabende». Das ist ein Slogan: er behauptet eine Haltung, nennt
+         aber nicht, worum es in der Sektion geht. Wer die Seite ueberfliegt, liest die
+         Ueberschrift und weiss danach nicht mehr als vorher.
+
+         Der Name des Abends steht NICHT in der Ueberschrift. Grund am Render geprueft:
+         StylePage.tsx:788-791 setzt direkt darueber ein festes Eyebrow «Danceflow Night».
+         Eine Ueberschrift, die mit «Danceflow Night:» beginnt, doppelt dieses Wort im
+         Abstand von einer Zeile. Der Name ist also schon gesetzt; die Ueberschrift muss
+         die Aussage tragen. Sie sagt jetzt konkret, was dort passiert: du tanzt das
+         Gelernte mit echten Menschen, statt es nur zu ueben. Bachata unten zieht in
+         derselben Bauform mit. */
+      title: 'Hier tanzt du, was du im Kurs gelernt hast',
       body: 'Die Danceflow Night ist der Ort, an dem du merkst, was im Kurs angekommen ist. Du tanzt mit Menschen aus der Community, übst in entspannter Atmosphäre und bleibst leichter dran.',
       bullets: [
         'Salsa und Bachata Socials',
@@ -305,7 +328,8 @@ const salsa = {
       image: { src: '/photos/gallery/kurse/02.jpg', alt: 'Salsa couple doing partner work in class', position: 'center 25%' },
     },
     fit: {
-      title: 'Salsa suits you if you are after energy, not perfection',
+      // R188 ST4: same rewrite as DE.
+      title: 'Is Salsa right for you?',
       intro: 'You do not need to be a rhythm pro. It only helps that you are open, practise regularly and are willing to engage with partner work.',
       yesTitle: 'It suits you if',
       yes: [
@@ -324,7 +348,8 @@ const salsa = {
     },
     beginner: {
       eyebrow: 'Your first weeks',
-      title: 'From the first basics to flowing combinations',
+      /* R188 ST4 — englische Fassung, siehe Begruendung am deutschen Block. */
+      title: 'What do you learn in your first weeks?',
       body: 'A good Salsa course does not begin with complicated figures. It begins with rhythm, basic steps and clear signals so you feel safe.',
       phases: [
         { tag: 'Phase 1', title: 'Rhythm & basic step', text: 'You learn the basic rhythm, simple weight changes and how to start with the music.' },
@@ -353,7 +378,8 @@ const salsa = {
       },
     },
     social: {
-      title: 'You do not learn for the mirror. You learn for real dance nights',
+      /* R188 ST4, siehe Begruendung an der deutschen Fassung oben. */
+      title: 'This is where you dance what you learned in class',
       body: 'The Danceflow Night is where you notice what stuck from class. You dance with people from the community, practise in a relaxed atmosphere and stay with it more easily.',
       bullets: [
         'Salsa and Bachata socials',
@@ -436,14 +462,17 @@ const bachata = {
       title: 'Bachata wirkt weich. Gute Bachata ist',
       titleAccent: 'präzise',
       body: 'Von aussen sieht Bachata oft nach Nähe und Flow aus. Im Kurs lernst du, was dahinter steckt: Timing, Körperspannung, klare Signale, Kontrolle und Respekt im Paartanz.',
-      // Runde 1 (Kritik 10.08.2026): mit nur zwei Bloecken endete die 1.15fr-Spalte im
-      // 0.85/1.15-Grid der WhySection weit vor der linken Spalte — grosse Leerflaeche
-      // (Beleg: tanzkurse__bachata-desktop-02-y750.png). Dritter Block wie bei Salsa,
-      // inhaltlich nur aus body/FAQ dieser Seite zusammengezogen, keine neue Zusage.
+      // R188 ST3, Raphael-Video 10:13: «Die ganzen Sachen weglassen bzw. stark kuerzen.»
+      // Hier standen drei nummerierte Blocks (01 Was man sieht / 02 Was du lernst /
+      // 03 Was sich aendert), zusammen 46 Woerter neben einem Fliesstext, der dasselbe
+      // schon sagt. Block 03 war ausserdem nur als Fueller fuer eine Leerflaeche
+      // entstanden (Notiz Runde 1, 10.08.2026) — der Grund faellt weg, weil das Bild
+      // jetzt rechts neben der Liste steht und die Spalte fuellt.
+      // Es bleiben zwei Blocks mit je einer Zeile: was man sieht, was man lernt.
+      // Keine neue Zusage, nur gekuerzt.
       blocks: [
         { title: 'Was man sieht', text: 'Nähe, weiche Bewegungen, Musikgefühl.' },
-        { title: 'Was du lernst', text: 'Basics, Gewicht, Führung und Folgen, Körperkontrolle, sichere Bewegungsqualität.' },
-        { title: 'Was sich ändert', text: 'Deine Bewegungen sehen weich aus, weil sie kontrolliert sind: Das Timing sitzt, Signale sind klar, Nähe bleibt respektvoll.' },
+        { title: 'Was du lernst', text: 'Timing, Gewicht, Führen und Folgen, Körperkontrolle.' },
       ],
       // R138, Raphael-Video 09:08: «Genauso hier bei Bachata, das war auch falsch
       // eingefaerbt.» gallery/kurse/03.jpg ist eine Club-Nacht-Aufnahme mit rotem
@@ -453,7 +482,11 @@ const bachata = {
       image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Bachata-Paar übt eine geführte Drehung im hellen Unterrichtsraum' },
     },
     fit: {
-      title: 'Bachata passt, wenn du Flow suchst, aber trotzdem Struktur brauchst',
+      // R188 ST4, Raphael-Video 10:26: «Ueberschriften nicht poetisch.» Er nennt genau
+      // diesen Satz als Beispiel («Bachata passt, wenn du Flow suchst, aber trotzdem
+      // Struktur brauchst»). Die Sektion vergleicht Bachata und Salsa und beantwortet
+      // eine Frage: Welcher von beiden passt zu mir? Die Ueberschrift stellt sie jetzt.
+      title: 'Bachata oder Salsa: Was passt zu dir?',
       intro: '',
       yesTitle: 'Passt zu dir, wenn',
       yes: [
@@ -473,14 +506,22 @@ const bachata = {
       eyebrow: 'Kursinhalte',
       title: 'Das lernst du im Bachata-Kurs',
       body: 'Der Kurs soll nicht nur Figuren liefern. Er soll dir ein Gefühl geben, wie Bachata sicher, musikalisch und angenehm getanzt wird.',
+      /* R188 ST3, Raphael-Video 10:13–10:21: «Die ganzen Sachen weglassen bzw. stark
+         kuerzen. Bild rechts, Inhalte links.»
+         Gemessen am Beleg worklog/shots/R188/after-final/tanzkurse_bachata/: die vier
+         Module liefen ueber die Schnitte d-03 und d-04, also gut zwei Bildschirmhoehen
+         auf 1440. Jeder Eintrag trug einen Zweizeiler mit «damit»-Nebensatz.
+         Jetzt drei Module mit je einem kurzen Satz. Modul 3 «Koerpergefuehl» ist nicht
+         gestrichen, sondern in «Connection» aufgegangen: Gewicht, Haltung und Fuehrung
+         beschreiben dieselbe koerperliche Sache am Partner, sie standen vorher nur in
+         zwei Kaesten. Keine neue Zusage, nur kuerzer gesagt. */
       phases: [
-        { tag: 'Modul 1', title: 'Grundschritte & Timing', text: 'Du lernst die Basis, damit du nicht bei jeder neuen Figur den Rhythmus verlierst.' },
-        { tag: 'Modul 2', title: 'Connection', text: 'Du lernst, wie Führung und Folgen ruhig und klar funktionieren, damit Paartanz nicht zur Kraftfrage wird.' },
-        { tag: 'Modul 3', title: 'Körpergefühl', text: 'Du baust Kontrolle in Oberkörper, Hüfte und Gewicht auf, damit Bewegungen weich aussehen, ohne unsicher zu werden.' },
-        { tag: 'Modul 4', title: 'Musikalität', text: 'Du verstehst, wie du auf Musik reagierst, damit sich Bachata weniger gezählt und mehr getanzt anfühlt.' },
+        { tag: 'Modul 1', title: 'Grundschritt & Timing', text: 'Du lernst die Basis und hältst den Rhythmus, auch bei neuen Figuren.' },
+        { tag: 'Modul 2', title: 'Connection', text: 'Führen und Folgen über Haltung und Gewicht statt über Kraft.' },
+        { tag: 'Modul 3', title: 'Musikalität', text: 'Du tanzt auf die Musik, statt im Kopf mitzuzählen.' },
       ],
       cta: { label: 'Bachata Kurse ansehen', href: R.bachataPlan },
-      image: { src: '/photos/gallery/kurse/04.jpg', alt: 'Zwei Tänzerinnen im Bachata-Kurs, Blickkontakt und Lachen' },
+      image: { src: '/photos/r188-tanzkurse/bachata-kursinhalte-studio-1800.webp', alt: 'Tanzpaar übt eine Bachata-Drehung im hellen Salsaflow Studio' },
     },
     levels: {
       title: 'Wir finden den Bachata-Kurs, der zu deinem',
@@ -496,7 +537,9 @@ const bachata = {
       cta: { label: 'Level klären', href: R.kursaufbau },
     },
     social: {
-      title: 'Bachata lernst du im Kurs. Sicher wirst du beim Tanzen',
+      /* R188 ST4: zieht mit der Salsa-Fassung mit (Begruendung dort). Gleiche Bauform:
+         Ereignis zuerst benennen, dann der konkrete Nutzen. */
+      title: 'Hier wird aus Bachata-Technik Sicherheit',
       body: 'Auf der Danceflow Night kannst du das Gelernte in entspannter Atmosphäre ausprobieren. Genau dort wird aus Technik Vertrauen: Du tanzt mit unterschiedlichen Menschen, hörst unterschiedliche Songs und merkst, was wirklich sitzt.',
       bullets: [
         'Salsa und Bachata Socials',
@@ -573,18 +616,17 @@ const bachata = {
       title: 'Bachata looks soft. Good Bachata is',
       titleAccent: 'precise',
       body: 'From the outside Bachata often looks like closeness and flow. In class you learn what is behind it: timing, body tension, clear signals, control and respect in partner dancing.',
-      // Round 1 (critique 2026-08-10): third block mirrors the DE fix — two blocks left a
-      // large empty area in the 0.85/1.15 why grid.
+      // R188 ST3: same cut as DE, see the reasoning there.
       blocks: [
         { title: 'What you see', text: 'Closeness, soft movement, a feel for the music.' },
-        { title: 'What you learn', text: 'Basics, weight transfer, leading and following, body control and safe technique.' },
-        { title: 'What changes', text: 'Your movement looks soft because it is controlled: the timing sits, signals are clear, closeness stays respectful.' },
+        { title: 'What you learn', text: 'Timing, weight transfer, leading and following, body control.' },
       ],
       // R138: gleiches Motiv wie DE, siehe Begruendung dort.
       image: { src: '/photos/gallery/kurse/01.jpg', alt: 'Bachata couple practising a led turn in the bright studio' },
     },
     fit: {
-      title: 'Bachata suits you if you want flow, but still need structure',
+      // R188 ST4: same rewrite as DE, see the reasoning there.
+      title: 'Bachata or Salsa: which one fits you?',
       intro: '',
       yesTitle: 'It suits you if',
       yes: [
@@ -604,14 +646,14 @@ const bachata = {
       eyebrow: 'Course content',
       title: 'What you learn in a Bachata class',
       body: 'The class teaches more than combinations. You develop safe technique, musicality and a comfortable connection with your partner.',
+      /* R188 ST3 — Begruendung siehe deutsche Fassung oben. */
       phases: [
-        { tag: 'Module 1', title: 'Basic steps & timing', text: 'You learn the base so you do not lose the rhythm with every new figure.' },
-        { tag: 'Module 2', title: 'Connection', text: 'You learn how leading and following work calmly and clearly, so partner dancing does not become a question of strength.' },
-        { tag: 'Module 3', title: 'Body awareness', text: 'You build control in the upper body, hips and weight, so movements look soft without becoming unsteady.' },
-        { tag: 'Module 4', title: 'Musicality', text: 'You understand how to react to the music, so Bachata feels less counted and more danced.' },
+        { tag: 'Module 1', title: 'Basic step & timing', text: 'You learn the base and hold the rhythm, even on new figures.' },
+        { tag: 'Module 2', title: 'Connection', text: 'Leading and following through posture and weight, not strength.' },
+        { tag: 'Module 3', title: 'Musicality', text: 'You dance to the music instead of counting in your head.' },
       ],
       cta: { label: 'See Bachata courses', href: R.bachataPlan },
-      image: { src: '/photos/gallery/kurse/04.jpg', alt: 'Two women dancing Bachata in class, eye contact and a smile' },
+      image: { src: '/photos/r188-tanzkurse/bachata-kursinhalte-studio-1800.webp', alt: 'Dance couple practising a Bachata turn in the bright Salsaflow studio' },
     },
     levels: {
       title: 'We help you find the Bachata class for your',
@@ -627,7 +669,8 @@ const bachata = {
       cta: { label: 'Clarify your level', href: R.kursaufbau },
     },
     social: {
-      title: 'You learn Bachata in class. You get confident while dancing',
+      /* R188 ST4, siehe Begruendung an der deutschen Fassung oben. */
+      title: 'This is where Bachata technique turns into confidence',
       body: 'At the Danceflow Night you can try what you learned in a relaxed atmosphere. That is where technique turns into trust: you dance with different people, hear different songs and notice what really sticks.',
       bullets: [
         'Salsa and Bachata socials',

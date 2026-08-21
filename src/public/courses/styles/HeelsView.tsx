@@ -103,39 +103,21 @@ type C = HeelsContent;
    `band.src`/`band.alt` ignoriert wurden; wer die Content-Datei aenderte, sah keine
    Wirkung (Sol-Fund R139). Diese Aufspaltung ist weg.
 
-   Das Asset (/photos/2026/kurse-heels-energie-card-960.webp, 960x1200) ist der
-   Hochformat-Zuschnitt desselben Shots wie das fruehere 21:9-Band — helle
-   Heels-Klasse vor der Salsaflow-Wand, Frauen, Energie. Vor dem Einbau per Read
-   geprueft: echtes Foto, natuerliche Haut- und Haarkanten, keine Matte-Linie und
-   kein kopfloser Koerper-Rest (R138 Fund 6), scharf, Tageslicht-Studio.
-   Hochformat ist Pflicht, damit object-cover vertikalen Ueberhang hat — sonst
-   waere 'center 12%' ein totes Feld (R138 Fund 2). */
+   Das Asset ist eine 1470x630-Ableitung aus dem echten 2100x900-Foto derselben
+   hellen Heels-Klasse. Der Crop entfernt nur die Quellränder. Haut, Haare, Licht
+   und Farbe bleiben unverändert; es gibt keine Skalierung und keinen KI-Eingriff. */
 
-/* Mobil 21/9, ab lg 4/3. Der Crop kommt NICHT aus dieser Klasse, sondern per
-   objectPosition aus heels-content.ts hero.band.position — sonst haette die Klasse
-   den Content-Wert still ueberstimmt.
-
-   Warum mobil so flach: der WhatsApp-Float ist fixed und sitzt bei 390x844 auf
-   y768-824 (x314-370). Mit dem vorherigen 3/2 endete das Foto bei y773 und lief bis
-   x369 — der Knopf steckte mitten im Motiv auf der zweiten Taenzerin (Sol-Fund R139,
-   live gemessen). Ein Lift half nicht: zwischen Bildunterkante und Chip-Oberkante
-   liegen strukturell nur 21px (grid gap-5), der Knopf ist 56px hoch.
-   21/9 (348x149) zieht die Bildkante auf y690. Chip-Zeile 1 laeuft dann y711-755 und
-   endet bei x172, die Knopf-Spalte ab x314 ist dort frei. Der Float bleibt bei
-   --whatsapp-lift 0 auf y768-824 und beruehrt weder Foto noch Chip.
-   Bei 360x800 gilt dasselbe: Bild endet y700, Float y724-780, kein Kontakt.
-
-   Beide Verhaeltnisse behalten bei 12% alle Gesichter inkl. Kinn — per Read am
-   simulierten Ausschnitt geprueft: 21/9 zeigt Quell-Y 95-506 von 1200, 4/3 zeigt
-   58-777. Die Kopfreihe liegt zwischen Y 90 und 400. */
+/* R188 Final-Crop: Die 1470x630-Ableitung hat bereits das mobile 21:9-Format.
+   Sie stammt ohne Skalierung aus dem echten 2100x900-Original. Der Zuschnitt
+   entfernt nur die zwei Personen an den Quellrändern, deren Köpfe dort enden.
+   Mobil bleibt damit frei vom WhatsApp-Kreis. Desktop schneidet nur seitlich. */
 const HEELS_HERO_IMG_CLASS = 'aspect-[21/9] w-full object-cover lg:aspect-[4/3]';
 
 function HeelsHero({ c }: { c: C }) {
   const { container, item } = useReveal();
   const h = c.hero;
-  /* Crop-Lock aus dem LIVE-Content (Brief Punkt 3): `position` steuert das Hero-Foto —
-     der Gate-Treffer auf 'center 12%' ist damit Buchstabe MIT Wirkung. Aendert jemand
-     den Wert in heels-content.ts, wandert der Bildausschnitt mit. */
+  /* Der LIVE-Content steuert den Crop. Mobil entspricht die Datei bereits 21:9.
+     Auf Desktop hält `30% center` den rechten Quellrand ausserhalb des 4:3-Rahmens. */
   const objectPosition = h.band.position;
   return (
     <section
@@ -200,8 +182,8 @@ function HeelsHero({ c }: { c: C }) {
                 alt={h.band.alt}
                 style={{ objectPosition }}
                 className={HEELS_HERO_IMG_CLASS}
-                width={960}
-                height={1200}
+                width={1470}
+                height={630}
                 loading="eager"
                 fetchPriority="high"
               />

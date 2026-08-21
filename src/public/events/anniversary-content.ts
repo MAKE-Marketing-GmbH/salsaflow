@@ -171,9 +171,9 @@ export const ANNIVERSARY = {
       eyebrow: 'Beweis durch Bilder',
       title: 'So fühlt sich ein Salsaflow-Wochenende an.',
       images: [
-        { src: '/photos/shows/show-11.webp', alt: 'Bühnenmoment einer Salsaflow-Show vor Publikum' },
+        { src: '/photos/premium/danceflow-home-1400-v3.webp', alt: 'Salsaflow-Tanzcompany und Gäste gemeinsam auf der Bühne' },
         { src: '/photos/events/event-02.jpg', alt: 'Volle Crowd und gute Laune bei einem Salsaflow-Event' },
-        { src: '/photos/showcase/hp-14.webp', alt: 'Lachende Tänzer:innen auf der Tanzfläche' },
+        { src: '/photos/party/party-31-v3.webp', alt: 'Tänzerin mit offenen Armen auf der Tanzfläche' },
         { src: '/photos/events/event-07.jpg', alt: 'Tanzfläche voller Menschen bei einem Salsaflow-Wochenende' },
       ],
       links: [
@@ -286,9 +286,9 @@ export const ANNIVERSARY = {
       eyebrow: 'Proof in pictures',
       title: 'How a Salsaflow weekend feels.',
       images: [
-        { src: '/photos/shows/show-11.webp', alt: 'Stage moment of a Salsaflow show in front of an audience' },
+        { src: '/photos/premium/danceflow-home-1400-v3.webp', alt: 'Salsaflow dance company and guests together on stage' },
         { src: '/photos/events/event-02.jpg', alt: 'Full crowd and good mood at a Salsaflow event' },
-        { src: '/photos/showcase/hp-14.webp', alt: 'Laughing dancers on the dance floor' },
+        { src: '/photos/party/party-31-v3.webp', alt: 'Dancer with open arms on the dance floor' },
         { src: '/photos/events/event-07.jpg', alt: 'Dance floor full of people at a Salsaflow weekend' },
       ],
       links: [
