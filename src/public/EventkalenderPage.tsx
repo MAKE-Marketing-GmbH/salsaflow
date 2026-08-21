@@ -45,6 +45,7 @@ export function EventkalenderPage() {
       <SubHero
         axis="left"
         dense
+        cookieSafeFold
         seoCrumbs={c.crumbs}
         title={c.hero.title}
         titleAccent={c.hero.titleAccent}

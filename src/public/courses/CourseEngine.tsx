@@ -778,7 +778,7 @@ function DayBar({
     // Leiste braucht also nicht mitzureisen — sie kostete 150px Dauer-Hoehe und lief beim
     // Scrollen sichtbar ueber die erste Uhrzeit (Beleg: /tmp/kursplan-cal-shots2/kursplan-desktop-01-y700.png,
     // "18:30" halb hinter der Leiste).
-    <div>
+    <div data-schedule-day-bar>
       {/* Tage. Bis Tabletbreite ein 3x2-Raster statt einer horizontal scrollenden Reihe: bei
           schmalen Viewports passen die ausgeschriebenen Daten nicht kollisionsfrei nebeneinander.
           Erst ab lg stehen alle sechs Tage in einer Reihe. */}

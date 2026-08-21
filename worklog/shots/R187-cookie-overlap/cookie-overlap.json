@@ -1,0 +1,671 @@
+{
+  "failures": [],
+  "results": [
+    {
+      "route": "/team",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "screenshot": "/root/clients/salsaflow/.claude/worktrees/r187-cookie-overlap/worklog/shots/R187-cookie-overlap/team-desktop.png",
+      "measurement": {
+        "banner": {
+          "x": 400,
+          "y": 652,
+          "width": 640,
+          "height": 66,
+          "top": 652,
+          "right": 1040,
+          "bottom": 718,
+          "left": 400
+        },
+        "bannerHeightVariable": "78px",
+        "headings": [
+          {
+            "tag": "H1",
+            "text": "Tanz lernt man leichter, wenn man sich willkommen fühlt.",
+            "rect": {
+              "x": 52,
+              "y": 76,
+              "width": 1280,
+              "height": 157,
+              "top": 76,
+              "right": 1332,
+              "bottom": 233,
+              "left": 52
+            },
+            "overlapsBanner": false
+          }
+        ],
+        "controls": [],
+        "dayBar": null,
+        "safeFoldPaddingBottom": "0px",
+        "schedulePhoto": null,
+        "cookiePointerEvents": {
+          "wrapper": "none",
+          "inner": "auto"
+        }
+      },
+      "postClear": {
+        "bannerPresent": false,
+        "safeFoldPaddingBottom": "0px",
+        "dayBarPaddingTop": null
+      },
+      "interactions": []
+    },
+    {
+      "route": "/team",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "screenshot": "/root/clients/salsaflow/.claude/worktrees/r187-cookie-overlap/worklog/shots/R187-cookie-overlap/team-mobile.png",
+      "measurement": {
+        "banner": {
+          "x": 12,
+          "y": 766,
+          "width": 290,
+          "height": 66,
+          "top": 766,
+          "right": 302,
+          "bottom": 832,
+          "left": 12
+        },
+        "bannerHeightVariable": "78px",
+        "headings": [
+          {
+            "tag": "H1",
+            "text": "Tanz lernt man leichter, wenn man sich willkommen fühlt.",
+            "rect": {
+              "x": 20,
+              "y": 66,
+              "width": 350,
+              "height": 169,
+              "top": 66,
+              "right": 370,
+              "bottom": 235,
+              "left": 20
+            },
+            "overlapsBanner": false
+          }
+        ],
+        "controls": [],
+        "dayBar": null,
+        "safeFoldPaddingBottom": "110px",
+        "schedulePhoto": null,
+        "cookiePointerEvents": {
+          "wrapper": "none",
+          "inner": "auto"
+        }
+      },
+      "postClear": {
+        "bannerPresent": false,
+        "safeFoldPaddingBottom": "0px",
+        "dayBarPaddingTop": null
+      },
+      "interactions": []
+    },
+    {
+      "route": "/events-workshops/eventkalender",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "screenshot": "/root/clients/salsaflow/.claude/worktrees/r187-cookie-overlap/worklog/shots/R187-cookie-overlap/eventkalender-desktop.png",
+      "measurement": {
+        "banner": {
+          "x": 400,
+          "y": 652,
+          "width": 640,
+          "height": 66,
+          "top": 652,
+          "right": 1040,
+          "bottom": 718,
+          "left": 400
+        },
+        "bannerHeightVariable": "78px",
+        "headings": [
+          {
+            "tag": "H1",
+            "text": "Was läuft als Nächstes?",
+            "rect": {
+              "x": 52,
+              "y": 100,
+              "width": 894,
+              "height": 69,
+              "top": 100,
+              "right": 946,
+              "bottom": 169,
+              "left": 52
+            },
+            "overlapsBanner": false
+          }
+        ],
+        "controls": [],
+        "dayBar": null,
+        "safeFoldPaddingBottom": "0px",
+        "schedulePhoto": null,
+        "cookiePointerEvents": {
+          "wrapper": "none",
+          "inner": "auto"
+        }
+      },
+      "postClear": {
+        "bannerPresent": false,
+        "safeFoldPaddingBottom": "0px",
+        "dayBarPaddingTop": null
+      },
+      "interactions": []
+    },
+    {
+      "route": "/events-workshops/eventkalender",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "screenshot": "/root/clients/salsaflow/.claude/worktrees/r187-cookie-overlap/worklog/shots/R187-cookie-overlap/eventkalender-mobile.png",
+      "measurement": {
+        "banner": {
+          "x": 12,
+          "y": 766,
+          "width": 290,
+          "height": 66,
+          "top": 766,
+          "right": 302,
+          "bottom": 832,
+          "left": 12
+        },
+        "bannerHeightVariable": "78px",
+        "headings": [
+          {
+            "tag": "H1",
+            "text": "Was läuft als Nächstes?",
+            "rect": {
+              "x": 20,
+              "y": 90,
+              "width": 350,
+              "height": 83,
+              "top": 90,
+              "right": 370,
+              "bottom": 173,
+              "left": 20
+            },
+            "overlapsBanner": false
+          }
+        ],
+        "controls": [],
+        "dayBar": null,
+        "safeFoldPaddingBottom": "110px",
+        "schedulePhoto": null,
+        "cookiePointerEvents": {
+          "wrapper": "none",
+          "inner": "auto"
+        }
+      },
+      "postClear": {
+        "bannerPresent": false,
+        "safeFoldPaddingBottom": "0px",
+        "dayBarPaddingTop": null
+      },
+      "interactions": []
+    },
+    {
+      "route": "/kursplan",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "screenshot": "/root/clients/salsaflow/.claude/worktrees/r187-cookie-overlap/worklog/shots/R187-cookie-overlap/kursplan-desktop.png",
+      "measurement": {
+        "banner": {
+          "x": 400,
+          "y": 652,
+          "width": 640,
+          "height": 66,
+          "top": 652,
+          "right": 1040,
+          "bottom": 718,
+          "left": 400
+        },
+        "bannerHeightVariable": "78px",
+        "headings": [
+          {
+            "tag": "H1",
+            "text": "Finde deinen Kurs.",
+            "rect": {
+              "x": 52,
+              "y": 102,
+              "width": 700,
+              "height": 69,
+              "top": 102,
+              "right": 752,
+              "bottom": 171,
+              "left": 52
+            },
+            "overlapsBanner": false
+          }
+        ],
+        "controls": [
+          {
+            "testid": "week-prev",
+            "disabled": true,
+            "inViewport": true,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 1134,
+              "y": 636,
+              "width": 44,
+              "height": 44,
+              "top": 636,
+              "right": 1178,
+              "bottom": 680,
+              "left": 1134
+            }
+          },
+          {
+            "testid": "week-next",
+            "disabled": false,
+            "inViewport": true,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 1184,
+              "y": 636,
+              "width": 44,
+              "height": 44,
+              "top": 636,
+              "right": 1228,
+              "bottom": 680,
+              "left": 1184
+            }
+          },
+          {
+            "testid": "day-mon",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 212,
+              "y": 791,
+              "width": 163,
+              "height": 93,
+              "top": 791,
+              "right": 375,
+              "bottom": 883,
+              "left": 212
+            }
+          },
+          {
+            "testid": "day-tue",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 383,
+              "y": 791,
+              "width": 163,
+              "height": 93,
+              "top": 791,
+              "right": 545,
+              "bottom": 883,
+              "left": 383
+            }
+          },
+          {
+            "testid": "day-wed",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 553,
+              "y": 791,
+              "width": 163,
+              "height": 93,
+              "top": 791,
+              "right": 716,
+              "bottom": 883,
+              "left": 553
+            }
+          },
+          {
+            "testid": "day-thu",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 724,
+              "y": 791,
+              "width": 163,
+              "height": 93,
+              "top": 791,
+              "right": 887,
+              "bottom": 883,
+              "left": 724
+            }
+          },
+          {
+            "testid": "day-fri",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 895,
+              "y": 791,
+              "width": 163,
+              "height": 93,
+              "top": 791,
+              "right": 1057,
+              "bottom": 883,
+              "left": 895
+            }
+          },
+          {
+            "testid": "day-sat",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 1065,
+              "y": 791,
+              "width": 163,
+              "height": 93,
+              "top": 791,
+              "right": 1228,
+              "bottom": 883,
+              "left": 1065
+            }
+          }
+        ],
+        "dayBar": {
+          "x": 212,
+          "y": 709,
+          "width": 1016,
+          "height": 281,
+          "top": 709,
+          "right": 1228,
+          "bottom": 989,
+          "left": 212
+        },
+        "safeFoldPaddingBottom": null,
+        "schedulePhoto": {
+          "height": "304px",
+          "objectPosition": "50% 22%"
+        },
+        "cookiePointerEvents": {
+          "wrapper": "none",
+          "inner": "auto"
+        }
+      },
+      "postClear": {
+        "bannerPresent": false,
+        "safeFoldPaddingBottom": null,
+        "dayBarPaddingTop": "0px"
+      },
+      "interactions": [
+        {
+          "testid": "day-mon",
+          "pressed": "true"
+        },
+        {
+          "testid": "day-tue",
+          "pressed": "true"
+        },
+        {
+          "testid": "day-wed",
+          "pressed": "true"
+        },
+        {
+          "testid": "day-thu",
+          "pressed": "true"
+        },
+        {
+          "testid": "day-fri",
+          "pressed": "true"
+        },
+        {
+          "testid": "day-sat",
+          "pressed": "true"
+        }
+      ]
+    },
+    {
+      "route": "/kursplan",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "screenshot": "/root/clients/salsaflow/.claude/worktrees/r187-cookie-overlap/worklog/shots/R187-cookie-overlap/kursplan-mobile.png",
+      "measurement": {
+        "banner": {
+          "x": 12,
+          "y": 766,
+          "width": 290,
+          "height": 66,
+          "top": 766,
+          "right": 302,
+          "bottom": 832,
+          "left": 12
+        },
+        "bannerHeightVariable": "78px",
+        "headings": [
+          {
+            "tag": "H1",
+            "text": "Finde deinen Kurs.",
+            "rect": {
+              "x": 20,
+              "y": 98,
+              "width": 350,
+              "height": 42,
+              "top": 98,
+              "right": 370,
+              "bottom": 140,
+              "left": 20
+            },
+            "overlapsBanner": false
+          }
+        ],
+        "controls": [
+          {
+            "testid": "week-prev",
+            "disabled": true,
+            "inViewport": true,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 20,
+              "y": 694,
+              "width": 44,
+              "height": 44,
+              "top": 694,
+              "right": 64,
+              "bottom": 738,
+              "left": 20
+            }
+          },
+          {
+            "testid": "week-next",
+            "disabled": false,
+            "inViewport": true,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 70,
+              "y": 694,
+              "width": 44,
+              "height": 44,
+              "top": 694,
+              "right": 114,
+              "bottom": 738,
+              "left": 70
+            }
+          },
+          {
+            "testid": "day-mon",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 20,
+              "y": 845,
+              "width": 113,
+              "height": 63,
+              "top": 845,
+              "right": 133,
+              "bottom": 908,
+              "left": 20
+            }
+          },
+          {
+            "testid": "day-tue",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 139,
+              "y": 845,
+              "width": 113,
+              "height": 63,
+              "top": 845,
+              "right": 251,
+              "bottom": 908,
+              "left": 139
+            }
+          },
+          {
+            "testid": "day-wed",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 257,
+              "y": 845,
+              "width": 113,
+              "height": 63,
+              "top": 845,
+              "right": 370,
+              "bottom": 908,
+              "left": 257
+            }
+          },
+          {
+            "testid": "day-thu",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 20,
+              "y": 914,
+              "width": 113,
+              "height": 63,
+              "top": 914,
+              "right": 133,
+              "bottom": 976,
+              "left": 20
+            }
+          },
+          {
+            "testid": "day-fri",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 139,
+              "y": 914,
+              "width": 113,
+              "height": 63,
+              "top": 914,
+              "right": 251,
+              "bottom": 976,
+              "left": 139
+            }
+          },
+          {
+            "testid": "day-sat",
+            "disabled": false,
+            "inViewport": false,
+            "overlapsBanner": false,
+            "hitSelf": true,
+            "rect": {
+              "x": 257,
+              "y": 914,
+              "width": 113,
+              "height": 63,
+              "top": 914,
+              "right": 370,
+              "bottom": 976,
+              "left": 257
+            }
+          }
+        ],
+        "dayBar": {
+          "x": 20,
+          "y": 763,
+          "width": 350,
+          "height": 419,
+          "top": 763,
+          "right": 370,
+          "bottom": 1182,
+          "left": 20
+        },
+        "safeFoldPaddingBottom": null,
+        "schedulePhoto": {
+          "height": "176px",
+          "objectPosition": "30% 20%"
+        },
+        "cookiePointerEvents": {
+          "wrapper": "none",
+          "inner": "auto"
+        }
+      },
+      "postClear": {
+        "bannerPresent": false,
+        "safeFoldPaddingBottom": null,
+        "dayBarPaddingTop": "0px"
+      },
+      "interactions": [
+        {
+          "testid": "day-mon",
+          "pressed": "true"
+        },
+        {
+          "testid": "day-tue",
+          "pressed": "true"
+        },
+        {
+          "testid": "day-wed",
+          "pressed": "true"
+        },
+        {
+          "testid": "day-thu",
+          "pressed": "true"
+        },
+        {
+          "testid": "day-fri",
+          "pressed": "true"
+        },
+        {
+          "testid": "day-sat",
+          "pressed": "true"
+        }
+      ]
+    }
+  ]
+}

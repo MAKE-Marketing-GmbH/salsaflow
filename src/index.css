@@ -850,6 +850,10 @@ html:has(.faq-page) {
     padding-bottom: var(--cookie-banner-height);
   }
 
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-cookie-safe-fold] {
+    padding-bottom: calc(var(--cookie-banner-height) + 2rem);
+  }
+
   /* /kursplan: die Wochen-Pfeile sitzen im ersten Fold, nicht am Dokumentende.
      Body-Polster schiebt sie nicht hoch. Bei sichtbarer Leiste das Foto-Band und
      den Kalender-Kopf so weit stauchen, dass die Pfeile über der Leiste bleiben. */
@@ -864,7 +868,7 @@ html:has(.faq-page) {
   }
 
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) #kursplan-list {
-    padding-top: 1.25rem;
+    padding-top: 0.25rem;
   }
 
   /* /buchung: Cookie schnitt die letzte Fold-Kurszeile. Foto stauchen.
@@ -877,6 +881,13 @@ html:has(.faq-page) {
     position: static;
     inset: auto;
   }
+}
+
+/* Der Kalender-Kopf bleibt sichtbar. Die Tagesleiste beginnt erst nach einer freien
+   Fläche in Höhe des Cookie-Hinweises. So liegt die Karte auf leerem Grund statt auf
+   Tages-Schaltern. Nach Akzeptieren oder dem ersten Scroll fällt die Fläche weg. */
+body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-day-bar] {
+  padding-top: calc(var(--cookie-banner-height) + 0.25rem);
 }
 
 /* Desktop-Fold: Cookie schnitt die Tageskarten, Foto-Band war 19rem.

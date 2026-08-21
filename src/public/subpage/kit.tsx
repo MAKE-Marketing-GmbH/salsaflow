@@ -231,6 +231,7 @@ export function SubHero({
   axis = 'split',
   media,
   dense = false,
+  cookieSafeFold = false,
   tightBottom = false,
 }: {
   seoCrumbs: Crumb[];
@@ -246,6 +247,8 @@ export function SubHero({
    *  positionClass: responsive object-position (z. B. Gruppenfoto, das je Breite anders
    *  schneiden muss) — gewinnt gegen `position`, weil Inline-Style keine Breakpoints kann. */
   media?: { src: string; alt: string; position?: string; positionClass?: string; heightClass?: string };
+  /** Reserviert mobil freien Hero-Grund unter dem festen Cookie-Hinweis. */
+  cookieSafeFold?: boolean;
   /** Kuerzerer Hero, damit ein kurzes Bildband noch in den 730er-Fold passt. */
   dense?: boolean;
   /** R84 (nur /schnupperstunde): kuerzt das Shell-Padding unten (Default pb-14/lg:pb-20),
@@ -258,6 +261,7 @@ export function SubHero({
       axis={axis}
       media={media}
       dense={dense}
+      cookieSafeFold={cookieSafeFold}
       tightBottom={tightBottom}
       crumbs={seoCrumbs}
       title={title}
@@ -286,6 +290,7 @@ export function HeroFrame({
   facts,
   media,
   dense = false,
+  cookieSafeFold = false,
   liftMedia = false,
   tightBottom = false,
   children,
@@ -300,6 +305,8 @@ export function HeroFrame({
   microcopy?: string;
   facts?: [string, string][];
   media?: { src: string; alt: string; position?: string; positionClass?: string; heightClass?: string };
+  /** Reserviert mobil freien Hero-Grund unter dem festen Cookie-Hinweis. */
+  cookieSafeFold?: boolean;
   /** Kuerzerer Hero, damit ein kurzes Bildband noch in den 730er-Fold passt. */
   dense?: boolean;
   /** R73-Nachzieh (nur /tanzkurse/salsa): hebt den Band-Top, indem der Typo-Block
@@ -422,6 +429,7 @@ export function HeroFrame({
 
   return (
     <section
+      data-cookie-safe-fold={cookieSafeFold ? '' : undefined}
       className="relative isolate overflow-hidden bg-[var(--color-paper-warm)] text-[var(--color-ink)]"
       style={{ paddingTop: topPad }}
     >

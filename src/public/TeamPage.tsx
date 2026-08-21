@@ -280,6 +280,7 @@ function TeamHero() {
     <HeroFrame
       axis="wide"
       dense
+      cookieSafeFold
       title={
         <>
           {h.titleA} {h.titleAccent}
