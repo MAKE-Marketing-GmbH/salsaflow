@@ -1,5 +1,7 @@
 import scheduleRaw from '../../db/seed/public-schedule.json?raw';
+import { z } from 'zod';
 import type { Lang } from '@/lib/i18n';
+import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 import {
   BUSINESS_ID,
   DEFAULT_SOCIAL_IMAGE,
@@ -13,39 +15,46 @@ import {
   type SeoKey,
 } from '@/lib/seo-config';
 
-type JsonLdNode = Record<string, unknown>;
-type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+type JsonLdScalar = string | number | boolean | null;
+type JsonLdValue = JsonLdScalar | JsonLdNode | readonly JsonLdValue[];
+type JsonLdNode = { [property: string]: JsonLdValue };
+
+const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+type Weekday = (typeof WEEKDAYS)[number];
 type CourseStyleKey = 'salsa' | 'bachata' | 'heels';
 type CoursePageKey = 'courses' | 'schedule' | CourseStyleKey;
 type EventPageKey = 'events' | 'danceflow' | 'anniversary' | 'floweekend' | 'eventkalender';
 
-type ScheduleTerm = {
-  id: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  phase: string;
-};
+const scheduleTermSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  startDate: z.string(),
+  endDate: z.string(),
+  phase: z.string(),
+});
 
-type ScheduleCourse = {
-  id: string;
-  termId: string;
-  styleKey: string;
-  styleDe: string;
-  styleEn: string;
-  levelDe: string;
-  levelEn: string;
-  weekday: Weekday;
-  startTime: string;
-  endTime: string;
-  locationName: string;
-  status: string;
-};
+const scheduleCourseSchema = z.object({
+  id: z.string(),
+  termId: z.string(),
+  styleKey: z.string(),
+  styleDe: z.string(),
+  styleEn: z.string(),
+  levelDe: z.string(),
+  levelEn: z.string(),
+  weekday: z.enum(WEEKDAYS),
+  startTime: z.string(),
+  endTime: z.string(),
+  locationName: z.string(),
+  status: z.string(),
+});
 
-type PublicSchedule = {
-  terms: ScheduleTerm[];
-  courses: ScheduleCourse[];
-};
+const publicScheduleSchema = z.object({
+  terms: z.array(scheduleTermSchema),
+  courses: z.array(scheduleCourseSchema),
+});
+
+type ScheduleTerm = z.infer<typeof scheduleTermSchema>;
+type ScheduleCourse = z.infer<typeof scheduleCourseSchema>;
 
 type ConfirmedEvent = {
   page: EventPageKey;
@@ -59,27 +68,20 @@ type ConfirmedEvent = {
   imageUrl?: string;
 };
 
-const scheduleSource: unknown = scheduleRaw;
-const schedule = (typeof scheduleSource === 'string' ? JSON.parse(scheduleSource) : scheduleSource) as PublicSchedule;
+const schedule = publicScheduleSchema.parse(JSON.parse(scheduleRaw));
 
 const COURSE_PAGES = new Set<SeoKey>(['courses', 'schedule', 'salsa', 'bachata', 'heels']);
 const EVENT_PAGES = new Set<SeoKey>(['events', 'danceflow', 'anniversary', 'floweekend', 'eventkalender']);
 
-const COURSE_STYLE_PAGE: Record<CourseStyleKey, CourseStyleKey> = {
-  salsa: 'salsa',
-  bachata: 'bachata',
-  heels: 'heels',
-};
-
-const COURSE_STYLES_BY_PAGE: Record<CoursePageKey, readonly CourseStyleKey[]> = {
+const COURSE_STYLES_BY_PAGE = {
   courses: ['salsa', 'bachata', 'heels'],
   schedule: ['salsa', 'bachata', 'heels'],
   salsa: ['salsa'],
   bachata: ['bachata'],
   heels: ['heels'],
-};
+} as const satisfies Record<CoursePageKey, readonly CourseStyleKey[]>;
 
-const DAY_INDEX: Record<Weekday, number> = {
+const DAY_INDEX = {
   sun: 0,
   mon: 1,
   tue: 2,
@@ -87,9 +89,9 @@ const DAY_INDEX: Record<Weekday, number> = {
   thu: 4,
   fri: 5,
   sat: 6,
-};
+} as const satisfies Record<Weekday, number>;
 
-const SCHEMA_DAY: Record<Weekday, string> = {
+const SCHEMA_DAY = {
   sun: 'https://schema.org/Sunday',
   mon: 'https://schema.org/Monday',
   tue: 'https://schema.org/Tuesday',
@@ -97,7 +99,7 @@ const SCHEMA_DAY: Record<Weekday, string> = {
   thu: 'https://schema.org/Thursday',
   fri: 'https://schema.org/Friday',
   sat: 'https://schema.org/Saturday',
-};
+} as const satisfies Record<Weekday, string>;
 
 /**
  * Nur explizit bestätigte Einzeltermine gehören hier hinein. Die aktuelle Website nennt
@@ -133,7 +135,7 @@ function firstWeeklyOccurrence(term: ScheduleTerm, weekday: Weekday): string | n
   return firstDate <= term.endDate ? firstDate : null;
 }
 
-function localBusinessNode(): JsonLdNode {
+function localBusinessNode() {
   return {
     '@type': 'LocalBusiness',
     '@id': BUSINESS_ID,
@@ -153,10 +155,20 @@ function localBusinessNode(): JsonLdNode {
       addressCountry: 'CH',
     },
     sameAs: ['https://www.instagram.com/salsaflowdc'],
-  };
+    /* Gleiche belegte Quelle wie in lib/schema.ts: src/public/site/reviews.ts.
+       Der Knoten macht die Bewertung maschinenlesbar. Er verspricht keine Review-Sterne,
+       weil Google sie bei selbst veröffentlichten LocalBusiness-Bewertungen meist ausblendet. */
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: GOOGLE_REVIEWS.rating,
+      reviewCount: GOOGLE_REVIEWS.count,
+      bestRating: 5,
+      worstRating: 1,
+    },
+  } satisfies JsonLdNode;
 }
 
-function websiteNode(): JsonLdNode {
+function websiteNode() {
   return {
     '@type': 'WebSite',
     '@id': WEBSITE_ID,
@@ -164,10 +176,10 @@ function websiteNode(): JsonLdNode {
     name: SITE_NAME,
     inLanguage: ['de-CH', 'en'],
     publisher: { '@id': BUSINESS_ID },
-  };
+  } satisfies JsonLdNode;
 }
 
-function webPageNode(page: SeoKey, lang: Lang, meta: Meta): JsonLdNode {
+function webPageNode(page: SeoKey, lang: Lang, meta: Meta) {
   const url = canonicalUrlFor(page);
   return {
     '@type': 'WebPage',
@@ -185,7 +197,7 @@ function webPageNode(page: SeoKey, lang: Lang, meta: Meta): JsonLdNode {
       height: DEFAULT_SOCIAL_IMAGE.height,
       caption: DEFAULT_SOCIAL_IMAGE.alt[lang],
     },
-  };
+  } satisfies JsonLdNode;
 }
 
 function isCoursePage(page: SeoKey): page is CoursePageKey {
@@ -248,7 +260,6 @@ function courseNodes(page: SeoKey, lang: Lang): JsonLdNode[] {
   const termById = new Map(eligibleTerms.map((term) => [term.id, term]));
 
   return COURSE_STYLES_BY_PAGE[page].flatMap((style) => {
-    const stylePage = COURSE_STYLE_PAGE[style];
     const matchingCourses = schedule.courses.filter(
       (course) => course.styleKey === style && course.status !== 'cancelled' && termById.has(course.termId),
     );
@@ -263,18 +274,18 @@ function courseNodes(page: SeoKey, lang: Lang): JsonLdNode[] {
         })
       : [];
 
-    return [
-      {
-        '@type': 'Course',
-        '@id': `${canonicalUrlFor(stylePage)}#course`,
-        url: canonicalUrlFor(stylePage),
-        name: courseStyleName(style, lang),
-        description: SEO_META[stylePage][lang].description,
-        inLanguage: lang === 'de' ? 'de-CH' : 'en',
-        provider: { '@id': BUSINESS_ID },
-        ...(instances.length > 0 ? { hasCourseInstance: instances } : {}),
-      },
-    ];
+    const courseNode = {
+      '@type': 'Course',
+      '@id': `${canonicalUrlFor(style)}#course`,
+      url: canonicalUrlFor(style),
+      name: courseStyleName(style, lang),
+      description: SEO_META[style][lang].description,
+      inLanguage: lang === 'de' ? 'de-CH' : 'en',
+      provider: { '@id': BUSINESS_ID },
+    } satisfies JsonLdNode;
+
+    if (instances.length === 0) return [courseNode];
+    return [{ ...courseNode, hasCourseInstance: instances } satisfies JsonLdNode];
   });
 }
 
@@ -285,28 +296,35 @@ function hasIsoStartDate(event: ConfirmedEvent): boolean {
 function eventNodes(page: SeoKey, lang: Lang): JsonLdNode[] {
   if (!EVENT_PAGES.has(page)) return [];
 
-  return CONFIRMED_EVENTS.filter((event) => event.page === page && hasIsoStartDate(event)).map((event) => ({
-    '@type': 'Event',
-    '@id': `${SITE_ORIGIN}${event.urlPath}#event-${event.id}`,
-    url: `${SITE_ORIGIN}${event.urlPath}`,
-    name: event.name[lang],
-    description: event.description[lang],
-    startDate: event.startDate,
-    ...(event.endDate ? { endDate: event.endDate } : {}),
-    ...(event.imageUrl ? { image: [event.imageUrl] } : {}),
-    location: {
-      '@type': 'Place',
-      name: event.locationName,
-      address: {
-        '@type': 'PostalAddress',
-        streetAddress: 'Elisabethenanlage 7',
-        postalCode: '4051',
-        addressLocality: 'Basel',
-        addressCountry: 'CH',
+  return CONFIRMED_EVENTS.filter((event) => event.page === page && hasIsoStartDate(event)).map((event) => {
+    const eventNode = {
+      '@type': 'Event',
+      '@id': `${SITE_ORIGIN}${event.urlPath}#event-${event.id}`,
+      url: `${SITE_ORIGIN}${event.urlPath}`,
+      name: event.name[lang],
+      description: event.description[lang],
+      startDate: event.startDate,
+      location: {
+        '@type': 'Place',
+        name: event.locationName,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Elisabethenanlage 7',
+          postalCode: '4051',
+          addressLocality: 'Basel',
+          addressCountry: 'CH',
+        },
       },
-    },
-    organizer: { '@id': BUSINESS_ID },
-  }));
+      organizer: { '@id': BUSINESS_ID },
+    } satisfies JsonLdNode;
+
+    if (event.endDate && event.imageUrl) {
+      return { ...eventNode, endDate: event.endDate, image: [event.imageUrl] } satisfies JsonLdNode;
+    }
+    if (event.endDate) return { ...eventNode, endDate: event.endDate } satisfies JsonLdNode;
+    if (event.imageUrl) return { ...eventNode, image: [event.imageUrl] } satisfies JsonLdNode;
+    return eventNode;
+  });
 }
 
 export type SeoJsonLd = {

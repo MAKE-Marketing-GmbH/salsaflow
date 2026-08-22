@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useLang } from '@/lib/i18n';
 import { GOOGLE_REVIEWS, WALL_REVIEWS, localizeReview } from '@/public/site/reviews';
 import { CtaArrow, GoogleRating, Shell, StarRating, sectionLead } from '@/public/site/primitives';
-import { Reveal, useReveal } from '@/public/home/motion';
+import { Reveal, RevealWords, useReveal } from '@/public/home/motion';
 import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +25,8 @@ const COPY = {
 
 export function WallOfLove() {
   const { lang } = useLang();
-  const { item } = useReveal();
+  // Item-Varianten nur noch fuer die Zitat-Gruppe (Stagger ueber drei Karten).
+  const { item: itemVariants } = useReveal({ stagger: 0.1 });
   const c = COPY[lang];
 
   return (
@@ -35,8 +36,12 @@ export function WallOfLove() {
     // Wechsel statt neuer Ton, der Zweiklang der Seite bleibt unveraendert.
     <section id="community" className={cn('scroll-mt-24 bg-[var(--color-paper-warm)]', SECTION_Y_HOME)}>
       <Shell>
-        <Reveal className="grid gap-7 lg:grid-cols-[1fr_auto] lg:items-end">
-          <motion.div variants={item} className="max-w-2xl">
+        {/* Hauptgeste der Sektion: die Headline. RevealWords loest das bisherige rise hier
+            ab — Wort-Stagger statt eines weiteren Fade-up, damit die Sektion sich vom
+            17-fach wiederholten Standard-Reveal abhebt. 4,9-Cluster bleibt unbewegt:
+            die Zahl ist Beleg, kein Schmuck. */}
+        <div className="grid gap-7 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="max-w-2xl max-sm:max-w-[18rem]">
             {/* Kritiker-Verdict r14, Punkt 3 ("Typo-Hierarchie in den Mittel-Sektionen klarer
                 stufen"). Gemessen mit `node scripts/aaa-r14-typo.cjs 1440` lief die Seite auf
                 DREI H2-Groessen ohne System: 64px (angebot), 52px (einstieg), 48px (community,
@@ -48,18 +53,18 @@ export function WallOfLove() {
                 48px -> 44px (text-4xl, sm:text-[2.75rem]) legt sie auf dieselbe Stufe wie
                 kurse/faq/price. Die Seite hat danach genau drei Stufen mit klarer Bedeutung:
                 64px Angebot (Hauptkapitel), 52px Einstieg, 44px alle Mittel-Sektionen. */}
-            <h2
+            <RevealWords
+              as="h2"
+              text={c.title}
               className={cn(
                 'type-h2 text-[var(--color-ink)]',
                 MEASURE_L,
               )}
-            >
-              {c.title}
-            </h2>
+            />
             {/* mt-4 -> mt-3: derselbe Kopfabstand wie im Kursplan-Block darueber
                 (`node scripts/aaa-r14-headgap.cjs` mass dort H2->lead=12, hier 16). */}
             <p className={`mt-3 max-w-xl ${sectionLead}`}>{c.lead}</p>
-          </motion.div>
+          </div>
           {/* Kritiker-Befund 2026-08-09, "Uebergang Reviews->Events: tote Weissflaeche straffen".
               Gemessen (Playwright, 1440px): die Zitat-Spalten enden bei y=4969, der Google-Link
               stand danach als eigene Zeile bei y=4990..5012 — ein 22px hoher Textlink mit einem
@@ -77,7 +82,7 @@ export function WallOfLove() {
               x=808..1472. Dazwischen stand eine leere Flaeche, und `items-end` legte die
               Zahl zusaetzlich unter die Sternzeile statt neben sie. Ab lg ist die Spalte
               `auto` breit und rechtsbuendig — dort bleibt alles unveraendert. */}
-          <motion.div variants={item} className="flex items-center gap-4 lg:flex-col lg:items-end lg:gap-2">
+          <motion.div className="flex items-center gap-4 lg:flex-col lg:items-end lg:gap-2">
             <span className="font-display text-[3.5rem] font-extrabold leading-[0.82] tracking-tight text-[var(--color-ink)] sm:text-[4.25rem]">
               {lang === 'de' ? '4,9' : '4.9'}
             </span>
@@ -94,7 +99,7 @@ export function WallOfLove() {
               </a>
             </div>
           </motion.div>
-        </Reveal>
+        </div>
 
         <div className="mt-10 flex items-center justify-between gap-4 border-t border-[var(--color-line)] pt-4">
           <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{c.cue}</span>
@@ -131,12 +136,16 @@ export function WallOfLove() {
               2) Das Anfuehrungszeichen ist Cal Sans in --color-line, also die vorhandene
                  Linienfarbe als Typo — keine neue Farbe, keine Deko-Flaeche (DESIGN.md).
                  aria-hidden, weil es semantisch nichts traegt; das <blockquote> tut das. */}
-        <div role="region" aria-label={c.rail} className="mt-2 grid sm:grid-cols-[1.25fr_1fr_1fr]">
+        {/* Reviewkarten gruppenweise rise: EINE Reveal-Gruppe mit Stagger ueber die drei
+            Zitate statt drei einzelner whileInView-Ticks. Die Gruppe traegt damit die
+            zweite (ruhige) Geste der Sektion — nicht jede Karte fuer sich. */}
+        <Reveal role="region" aria-label={c.rail} className="mt-2 grid sm:grid-cols-[1.25fr_1fr_1fr]" stagger={0.1}>
           {WALL_REVIEWS.slice(0, 3).map((review, index) => {
             const localized = localizeReview(review, lang);
             const lead = index === 0;
             return (
-              <figure
+              <motion.figure
+                variants={itemVariants}
                 key={`${review.name}-${index}`}
                 lang={lang}
                 className={cn(
@@ -197,10 +206,10 @@ export function WallOfLove() {
                     {localized.aspect}
                   </span>
                 </figcaption>
-              </figure>
+              </motion.figure>
             );
           })}
-        </div>
+        </Reveal>
       </Shell>
     </section>
   );

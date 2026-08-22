@@ -311,7 +311,8 @@ function TeamHero() {
         </>
       }
       lead={h.lead}
-      primary={{ href: SCHNUPPER_HREF, label: lang === 'de' ? 'Schnupperstunde buchen' : 'Book a trial class' }}
+      primary={{ href: '/kursplan', label: lang === 'de' ? 'Kursplan ansehen' : 'See the schedule' }}
+      secondary={{ href: SCHNUPPER_HREF, label: lang === 'de' ? 'Schnupperstunde buchen' : 'Book a trial class' }}
       media={{
         src: '/photos/showcase/hp-03-2880.webp',
         alt: 'Das Salsaflow-Team gemeinsam im hellen Studio',

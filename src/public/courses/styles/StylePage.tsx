@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
@@ -27,6 +27,7 @@ import {
   Reveal,
   useReveal,
 } from '@/public/subpage/kit';
+import { useRevealVariant, ClipReveal, useParallaxStyle } from '@/public/home/motion';
 
 export function StylePage({ data }: { data: Record<'de' | 'en', StyleContent> }) {
   const { lang } = useLang();
@@ -72,7 +73,7 @@ export function StylePage({ data }: { data: Record<'de' | 'en', StyleContent> })
                 justify-content: center;
                 gap: 0;
               }
-              body:has([data-split-hero-page]) a.whatsapp-float span {
+              body:has([data-split-hero-page]) a.whatsapp-float [data-whatsapp-label] {
                 display: none;
               }
             }
@@ -260,6 +261,13 @@ const BACHATA_HERO_PHOTO: SplitHeroPhoto = {
 function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
   const { lang } = useLang();
   const { container, item } = useReveal();
+  /* R189 Motion-Rollen: die H1 scharft sich ein statt mit Lead, CTA und Chips im
+     selben rise zu steigen. Gleiche Geste wie die HeroFrame-H1 in subpage/kit.tsx,
+     damit Salsa/Bachata (eigene Bauform) und die HeroFrame-Seiten denselben Eingang
+     zeigen. `h.title` kaeme als String, RevealWords scheidet trotzdem aus: daneben
+     steht TitleAccent im selben Heading und traegt den gemeinsamen Umbruch, auf den
+     MEASURE_XL ausgemessen ist. */
+  const { item: headBlur } = useRevealVariant('blur');
   const h = c.hero;
   /* R188 ST7: Beide Split-Hero-Routen tragen ihren Crop jetzt im Klassenstring
      (object-center). Der frueher hier verdrahtete Umweg ueber `hero.band.position`
@@ -286,7 +294,11 @@ function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
               6px unter dem 844er-Fold; die untere Rundung war angeschnitten. */}
           <div className={cn('grid gap-5 lg:gap-14', photo.columns)}>
             <div className="flex flex-col gap-4">
-              <motion.h1 variants={item} className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
+              <motion.h1
+                variants={headBlur}
+                data-reveal-variant="blur"
+                className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}
+              >
                 {h.title} {h.titleAccent ? <TitleAccent>{h.titleAccent}</TitleAccent> : null}
               </motion.h1>
               <motion.p
@@ -322,8 +334,16 @@ function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
 
             {/* R165: Foto ohne Stagger. Video 03:17 Beweis durch Bilder.
                 Gemessen: bei 700ms war die Spalte leer (item 7 im Stagger),
-                bei 2000ms sichtbar. Der Nutzer sieht sonst eine leere Rechte. */}
-            <div className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]">
+                bei 2000ms sichtbar. Der Nutzer sieht sonst eine leere Rechte.
+
+                R189: das bleibt so. ClipReveal haengt an `whileInView`, nicht am
+                Container-Stagger — das Foto steht also weiter NICHT hinter sieben
+                anderen Elementen in der Warteschlange. Es faehrt als Vorhang auf,
+                waehrend die Textspalte steigt: zwei Rollen, ein Eingang je Element.
+                clip statt rise ist hier Pflicht, nicht Geschmack — beide Routen sind
+                auf den Fold kalibriert (Salsa R137, Bachata R188 ST7), und ein
+                y-Versatz wuerde genau die gemessene Bildkante verschieben. */}
+            <ClipReveal className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]">
               {/* Fold-kalibriert pro Route. Der Klassenstring kommt VOLLSTAENDIG aus
                   photo.imgClass — kein cn()-Zusammenbau mehr, damit Salsa exakt den
                   R137-String rendert (GATES.md G1). */}
@@ -336,7 +356,7 @@ function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
                 loading="eager"
                 fetchPriority="high"
               />
-            </div>
+            </ClipReveal>
             {h.bullets.length ? (
               /* gap-2.5 statt gap-1.5 unter sm ist der Fold-Hebel: mit 6px Abstand begann
                  der dritte Chip bei y839 und stand als 5px-Sliver mit halber Rundung auf
@@ -416,6 +436,11 @@ function StyleHero({ c }: { c: StyleContent }) {
 /* -------------------------------------------------------------------- Warum */
 function WhySection({ c }: { c: StyleContent }) {
   const { item } = useReveal();
+  /* R189: das Sektionsbild clippt auf, der Text daneben steigt. Bewusst als Variante
+     im BESTEHENDEN Stagger-Container (`Reveal`), nicht als geschachtelter ClipReveal —
+     zwei whileInView-Huellen um dasselbe Bild waeren zwei Eingaenge auf einem Element,
+     genau das Doppel-Reveal, das der Auftrag verbietet. */
+  const { item: clipItem } = useRevealVariant('clip');
   const w = c.why;
   const isSalsa = c.seo === 'salsa';
   /* R137 nur Salsa: 1fr_1fr statt 0.85fr_1.15fr und die linke Spalte ohne
@@ -449,7 +474,7 @@ function WhySection({ c }: { c: StyleContent }) {
                 gestapelt, genau die Bauform aus Raphaels Kritik. Es steht jetzt wie auf
                 Bachata und Heels in der linken Textspalte, also neben den Blocks
                 («links, rechts»). Der Sonderzweig unten faellt damit weg. */}
-            <motion.div variants={item} className="mt-8 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]">
+            <motion.div variants={clipItem} data-reveal-variant="clip" className="mt-8 overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]">
               <img
                 src={w.image.src}
                 alt={w.image.alt}
@@ -506,6 +531,23 @@ function WhySection({ c }: { c: StyleContent }) {
 function WhySectionImageRight({ c }: { c: StyleContent }) {
   const { item } = useReveal();
   const w = c.why;
+  /* R189, das eine Parallax dieser Seite. Es sitzt genau hier, weil nur dieses Bild die
+     Voraussetzung mitbringt: es hat eine eigene Spalte, es ist hoch (5/6 ab lg) und es
+     laeuft neben einer Textspalte, gegen die die langsamere Bewegung ueberhaupt lesbar
+     wird. Auf einem Bild, das die volle Breite fuellt, sieht man Parallax nicht.
+
+     `distance` bleibt bei 44 statt der 48-Vorgabe: die Wanderstrecke ist symmetrisch
+     (22px hoch, 22px runter, siehe useParallax), und das Bild braucht den Ueberstand
+     dafuer. Der kommt hier NICHT aus einer groesseren Bildhoehe (das wuerde den
+     ausgemessenen 5/6-Rahmen brechen), sondern daraus, dass der Rahmen selbst wandert
+     und das Bild darin voll bleibt. Deshalb sitzt der transform auf dem Wrapper, nicht
+     auf dem <img>.
+
+     useParallaxStyle statt useParallax: der volle translate3d-String geht auf den
+     Compositor. Die Kurzform-Props (x/y) laufen im Haupt-Thread und verlieren Frames,
+     waehrend darunter die Kurs-Engine ihre Daten rendert. */
+  const frameRef = useRef<HTMLDivElement>(null);
+  const parallax = useParallaxStyle(frameRef, 44);
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
@@ -528,22 +570,26 @@ function WhySectionImageRight({ c }: { c: StyleContent }) {
           </Reveal>
 
           {/* Gleicher Rahmen wie jedes andere Bild der Stilseiten (ST5):
-              rounded-[var(--radius-media)] plus duenne Linie. */}
-          <Reveal>
-            <motion.div
-              variants={item}
-              className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]"
-            >
-              <img
-                src={w.image.src}
-                alt={w.image.alt}
-                className="aspect-[4/5] w-full object-cover object-[center_35%] sm:aspect-[4/3] lg:aspect-[5/6]"
-                width={1200}
-                height={1440}
-                loading="lazy"
-              />
+              rounded-[var(--radius-media)] plus duenne Linie.
+
+              R189: EIN Eingang (clip) plus die scroll-gebundene Wanderung. Das ist kein
+              zweiter Eingang — der Reveal zuendet einmal beim Eintritt, das Parallax
+              haengt danach dauerhaft an der Scroll-Position. Getrennte Ebenen: aussen
+              wandert (transform), innen clippt (clip-path). */}
+          <div ref={frameRef}>
+            <motion.div data-scroll-motion="style-why" style={parallax}>
+              <ClipReveal className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]">
+                <img
+                  src={w.image.src}
+                  alt={w.image.alt}
+                  className="aspect-[4/5] w-full object-cover object-[center_35%] sm:aspect-[4/3] lg:aspect-[5/6]"
+                  width={1200}
+                  height={1440}
+                  loading="lazy"
+                />
+              </ClipReveal>
             </motion.div>
-          </Reveal>
+          </div>
         </div>
       </Shell>
     </section>
@@ -643,11 +689,16 @@ function BeginnerSection({ c }: { c: StyleContent }) {
               <PrimaryCta href={b.cta.href}>{b.cta.label}</PrimaryCta>
             </motion.div>
           </Reveal>
-          <Reveal className="lg:sticky lg:top-28">
-            <motion.div variants={item} className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]">
+          {/* R189: das Bild der rechten Spalte clippt auf, waehrend links die nummerierte
+              Phasenliste steigt. Kein `Reveal`-Container mehr noetig — ClipReveal bringt
+              sein eigenes whileInView mit, und die Spalte enthaelt nur dieses eine
+              Element. Die lg:sticky-Klasse bleibt am aeusseren Element haengen, damit
+              das Mitlaufen beim Scrollen unveraendert funktioniert. */}
+          <div className="lg:sticky lg:top-28">
+            <ClipReveal className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]">
               <img src={b.image.src} alt={b.image.alt} className="aspect-[4/5] w-full object-cover object-[center_40%]" width={1200} height={1500} loading="lazy" />
-            </motion.div>
-          </Reveal>
+            </ClipReveal>
+          </div>
         </div>
       </Shell>
     </section>
@@ -776,12 +827,16 @@ export function StyleSlotsSection({ styleKey }: { styleKey: string }) {
 /* -------------------------------------------------------------------- Danceflow-Band (dunkler) */
 function SocialSection({ c }: { c: StyleContent }) {
   const { item } = useReveal();
+  /* R189: das Foto im dunklen Danceflow-Band clippt, der Textblock daneben steigt.
+     Wieder als Variante im bestehenden Reveal-Container, damit die beiden Spalten
+     denselben Takt teilen und das Bild keinen zweiten Eingang bekommt. */
+  const { item: clipItem } = useRevealVariant('clip');
   const s = c.social;
   return (
     <section className="bg-[var(--color-surface-dark)] py-20 text-white lg:py-32">
       <Shell>
         <Reveal className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-          <motion.div variants={item} className="order-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-white/10 lg:order-1">
+          <motion.div variants={clipItem} data-reveal-variant="clip" className="order-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-white/10 lg:order-1">
             <img src={s.image.src} alt={s.image.alt} style={s.image.position ? { objectPosition: s.image.position } : undefined} className="aspect-[16/11] w-full object-cover" width={1400} height={960} loading="eager" />
           </motion.div>
           <motion.div variants={item} className="order-1 max-w-xl lg:order-2">

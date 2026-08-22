@@ -21,7 +21,16 @@ export function Shell({
   className?: string;
   as?: ElementType;
 }) {
-  return <Tag className={cn('mx-auto w-full max-w-[1400px] px-5 sm:px-8', className)}>{children}</Tag>;
+  /* Rechtes Padding ist groesser als das linke: dort sitzt der fixe WhatsApp-Knopf
+     (48 px mobil right-1, 56 px ab sm right-6, plus Luft). pr-16 (64 px) liess auf
+     390 px nur 12 px zwischen Spaltenkante und Kreis — die Samstag-Reiterlinie auf
+     /kursplan las sich als auf dem Knopf (Opus+Grok auf m-00). pr-24 (96 px) haelt
+     44 px Luft. Desktop bleibt 5.5 rem. */
+  return (
+    <Tag className={cn('mx-auto w-full max-w-[1400px] pl-5 pr-24 sm:pl-8 sm:pr-[5.5rem]', className)}>
+      {children}
+    </Tag>
+  );
 }
 
 /** Fuenf Sterne in Salsa-Rot (Marken-Akzent, kein Gold - Farb-DNA bleibt Rot/Ink/Cream).

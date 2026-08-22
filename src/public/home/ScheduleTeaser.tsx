@@ -1,20 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useLang, WEEKDAY_LABEL, levelLabelI18n } from '@/lib/i18n';
+import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import {
   buildScheduleDays,
   buildScheduleSlots,
   fetchSchedule,
   weekdayKeyForISO,
-  type ScheduleCourse,
   type ScheduleResponse,
   type ScheduleSlot,
   type WeekdayKey,
   embeddedSchedule,
 } from '@/lib/schedule';
+// R189: dieselben Bausteine wie /kursplan. Siehe Kopf von CourseRow.tsx.
+import { CourseRow, CourseTimeBlock } from '@/public/courses/CourseRow';
 import { sectionTitle, sectionLead, Shell } from '@/public/site/primitives';
-import { Reveal, useReveal } from '@/public/home/motion';
+import { ClipReveal, Reveal, RevealWords, useReveal } from '@/public/home/motion';
 import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
 import { CoursePath } from '@/public/home/CoursePath';
 import { cn } from '@/lib/utils';
@@ -123,6 +124,21 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
   const activeDay = day ?? defaultDay;
   const activeSlots = activeDay ? byDay.get(activeDay) ?? [] : [];
   const activeLabel = days.find((d) => d.key === activeDay);
+
+  /* R189: Dieselbe Gruppierung wie im Kalender (CourseEngine gruppiert Bloecke nach
+   * Start- und Endzeit), damit zwei Kurse derselben Uhrzeit unter EINER Uhr stehen und die
+   * Startseite dieselbe Zeit nicht zweimal untereinander druckt.
+   * ROWS_PER_DAY zaehlt weiterhin ZEILEN, nicht Bloecke — der Teaser bleibt kompakt. */
+  const timeBlocks = useMemo(() => {
+    const blocks: { key: string; start: string; end: string; slots: ScheduleSlot[] }[] = [];
+    for (const slot of activeSlots.slice(0, ROWS_PER_DAY)) {
+      const key = `${slot.startTime}-${slot.endTime}`;
+      const last = blocks.at(-1);
+      if (last?.key === key) last.slots.push(slot);
+      else blocks.push({ key, start: slot.startTime, end: slot.endTime, slots: [slot] });
+    }
+    return blocks;
+  }, [activeSlots]);
   const hasData = state === 'ready' && slots.length > 0 && days.length > 0;
   const { item } = useReveal();
   const loadingLabel = de ? 'Kurse werden geladen ...' : 'Loading courses ...';
@@ -134,8 +150,15 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
             fixen WhatsApp-FAB (ab x=1294) — wie das Tages-Grid darunter
             (Critic Runde 15, Item 1). */}
         <Reveal className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:pr-36">
+          {/* R189: Die H2 steigt Wort fuer Wort ein. Sie darf das — anders als die H2 in
+              Offer — weil sie die Ueberschrift der Kursplan-Sektion ist, also der zweiten
+              tragenden Flaeche der Startseite, und weil sie eine echte Aussage traegt statt
+              eines Labels. Der Lead darunter behaelt den ruhigen `rise`-Default: zwei
+              Effekte in einem Block waeren einer zu viel.
+              `as="h2"` — RevealWords rendert das Element selbst, samt `sr-only`-Kopie des
+              vollen Satzes fuer Screenreader. */}
           <motion.div variants={item} className="max-w-2xl">
-            <h2 className={cn(sectionTitle, MEASURE_L)}>{s.title}</h2>
+            <RevealWords as="h2" text={s.title} className={cn(sectionTitle, MEASURE_L)} />
             <p className={`mt-3 ${sectionLead}`}>{s.lead}</p>
           </motion.div>
           <motion.a
@@ -185,7 +208,28 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
               </ul>
             </>
           ) : (
-            <>
+            /* R189: EIN Vorhang ueber die ganze Plan-Flaeche — Tagesleiste, Datumszeile und
+               Kursliste zusammen. Der Auftrag nennt den Grund, und die Messung stuetzt ihn:
+               vier Kurszeilen (ROWS_PER_DAY) einzeln von unten einfliegen zu lassen ergaebe
+               mit der Tagesleiste darueber fuenf gestaffelte Bewegungen in einem Block. Das
+               liest sich hektisch, und es ist auch sachlich falsch — die sechs Tage und die
+               vier Zeilen sind EIN Fahrplan, kein Stapel unabhaengiger Karten.
+
+               Warum `clip` und nicht `rise`: der Block ist eine grosse zusammenhaengende
+               Flaeche mit Haarlinien als Raster. Ein y-Versatz haette die Linien gegen die
+               Sektionskante darueber wandern lassen. Der Vorhang laesst jede Linie stehen,
+               wo sie ist, und deckt sie nur auf.
+
+               WICHTIG — der Vorhang liegt INNEN, nicht um den Live-Bereich herum. Der
+               umgebende <div> traegt `aria-busy` und `aria-live="polite"`; ein
+               Reveal-Wrapper darum wuerde beim Zuenden den ganzen Bereich als geaendert
+               melden und Screenreader die komplette Liste vorlesen lassen. So bleibt die
+               Live-Region unveraendert und nur der sichtbare Inhalt faehrt auf.
+
+               Nur der Datenfall bekommt den Vorhang. Der Lade- und der Fallback-Zweig
+               darueber bleiben ohne — eine Statusmeldung aufzudecken waere Deko auf einer
+               Information, die sofort da sein muss. */
+            <ClipReveal>
               {/* Die Wochen-Schiene. Sechs Spalten fester Breite ab sm (Mo bis Sa), damit die
                   Auswahl beim Tageswechsel nicht springt; darunter waagrecht scrollbar.
                   Datum kommt aus buildScheduleDays(today), also aus dem echten Kalender —
@@ -277,22 +321,50 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                 </span>
               </p>
 
-              <ul id="kurse-tagesliste" role="tabpanel" aria-labelledby="kurse-tagesliste-label" className="mt-1">
-                {activeSlots.slice(0, ROWS_PER_DAY).map((slot) => (
-                  <li key={slot.key}>
-                    {/* Die Zeile nennt Tag + Zeit, also landet der Klick auch auf genau diesem
-                        Tag im Kalender (?tag=), nicht auf dem Default-Montag. */}
-                    <TeaserCard
-                      course={slot.primary}
-                      full={slot.full}
-                      runningFull={slot.running?.status === 'full' && !slot.full}
-                      nextStart={slot.nextTerm?.startDate}
-                      href={`/kursplan?tag=${slot.weekday}${slot.primary.styleKey ? `&stil=${slot.primary.styleKey}` : ''}`}
-                      variant="rail"
-                    />
-                  </li>
+              {/* R189 (Raphael, Video): "Mach das einfach in EINEM Stil ... auf der Startseite
+                  sieht es GANZ ANDERS aus." Der Teaser rendert jetzt exakt die Bausteine des
+                  Kursplans — `CourseTimeBlock` (Zeitspalte links, roter Punkt, weisse Karte)
+                  und `CourseRow` (Lehrpersonen-Portrait, Badges, "Platz sichern", ganze Zeile
+                  faerbt bei Hover und Fokus auf --color-salsa). Weniger Zeilen als /kursplan
+                  ja (ROWS_PER_DAY), andere Optik nein.
+                  Die Faltung bleibt unangetastet: `activeSlots` kommt weiterhin aus
+                  `buildScheduleSlots` (siehe Kommentar oben, FEHLER 1). Hier wird nur nach
+                  Uhrzeit gruppiert.
+                  KEIN Datum ueber der Uhr: der gewaehlte Tag steht schon als volle Zeile ueber
+                  der Liste ("Freitag, 21. August"). Im Kalender fehlt diese Zeile, dort traegt
+                  der Block das Datum. */}
+              <div
+                id="kurse-tagesliste"
+                role="tabpanel"
+                aria-labelledby="kurse-tagesliste-label"
+                className="mt-1 border-t border-[var(--color-line)] lg:pr-36"
+              >
+                {timeBlocks.map((block) => (
+                  <CourseTimeBlock key={block.key} start={block.start} end={block.end}>
+                    {block.slots.map((slot) => (
+                      /* Die Zeile nennt Tag + Zeit, also landet der Klick auch auf genau
+                         diesem Tag im Kalender (?tag=), nicht auf dem Default-Montag. */
+                      <CourseRow
+                        key={slot.key}
+                        course={slot.primary}
+                        href={`/kursplan?tag=${slot.weekday}${slot.primary.styleKey ? `&stil=${slot.primary.styleKey}` : ''}`}
+                        full={slot.full}
+                        lateEntry={slot.lateEntry}
+                        /* "Plätze frei" allein war mehrdeutig (Runde 1, Nachmessung): `full`
+                           ist erst wahr, wenn ALLE Staffeln des Slots voll sind. Ist nur die
+                           laufende Staffel voll, sagt es der Zusatz-Badge mit dem Datum. */
+                        extraBadge={
+                          !slot.full && slot.running?.status === 'full' && slot.nextTerm?.startDate
+                            ? de
+                              ? `Wieder frei ab ${formatShortDate(slot.nextTerm.startDate, lang)}`
+                              : `Spots again from ${formatShortDate(slot.nextTerm.startDate, lang)}`
+                            : null
+                        }
+                      />
+                    ))}
+                  </CourseTimeBlock>
                 ))}
-              </ul>
+              </div>
 
               {activeSlots.length > ROWS_PER_DAY && (
                 <a
@@ -305,172 +377,12 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                   <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2} />
                 </a>
               )}
-            </>
+            </ClipReveal>
           )}
         </div>
 
         {withCoursePath && <CoursePath embedded />}
       </Shell>
     </section>
-  );
-}
-
-export function TeaserCard({
-  course,
-  href = '/kursplan',
-  variant = 'card',
-  full: fullOverride,
-  nextStart,
-  runningFull = false,
-}: {
-  course: ScheduleCourse;
-  href?: string;
-  variant?: 'card' | 'rail';
-  /** Slot-Status aus `buildScheduleSlots` (ausgebucht heisst: ALLE Staffeln dieses Slots
-   *  sind voll). Ohne den Wert faellt die Karte auf den Status des einzelnen Kurses zurueck —
-   *  genau die Verwechslung, die den falschen "Plätze frei"-Badge erzeugt hat. */
-  full?: boolean;
-  /** Startdatum der naechsten Staffel (ISO). Nur gesetzt, wenn es eine gibt. */
-  nextStart?: string;
-  /** Die LAUFENDE Staffel dieses Slots ist voll, die kommende nicht. */
-  runningFull?: boolean;
-}) {
-  const { lang, t } = useLang();
-  const level = levelLabelI18n(lang === 'de' ? course.levelDe : course.levelEn, course.onVariant);
-  const style = lang === 'de' ? course.styleDe : course.styleEn;
-  const full = fullOverride ?? course.status === 'full';
-  const availabilityClass = full ? 'bg-[var(--color-salsa)]' : 'bg-[var(--color-ink-muted)]';
-
-  if (variant === 'rail') {
-    // Angleich 2026-08-07 an den Kursplan-Kalender (CourseEngine): Tag + Zeit als linke
-    // Kalender-Spalte, Stil · Level in EINER Zeile mit rotem Level-Akzent, Status als Badge,
-    // rechts der rote Pill-CTA. Vorher war es ein anderes Zeilen-Muster (Wochentag doppelt,
-    // nackter Pfeil statt CTA) — zwei Optiken fuer dieselbe Sache.
-    //
-    // R188 / H3 (Video 21.08., 12:20): "Kursplan-Preview auf der Startseite = gleicher Look
-    // wie /kursplan (nach dessen Redesign)." Der Kursplan bekommt in derselben Welle KP3:
-    // die GANZE Zeile faerbt beim Hover auf --color-salsa, jede Textebene invertiert auf
-    // Weiss, und der rote Pill-CTA am Zeilenende faellt weg (die rote Hauptaktion gehoert
-    // dem Sektions-CTA, nicht jeder Zeile). Diese Zeile hier fuehrt jetzt genau dieselbe
-    // Geste — sonst haetten Startseite und Kursplan wieder zwei Optiken fuer dieselbe Sache,
-    // also exakt den Zustand, den der Angleich von 2026-08-07 schon einmal beseitigt hat.
-    //
-    // Bewusst gespiegelt statt importiert: `courses/CourseEngine.tsx` exportiert nur die
-    // ganze Engine (Filter, Wochenwahl, Modal, Buchungs-Flow), keine einzelne Zeile —
-    // gepruefte grep-Lage: genau ein `export function` in der Datei. Ein Import haette den
-    // vollen Kursplan in die Startseite gezogen; die Datei zu zerlegen waere ein Eingriff in
-    // fremden Owner-Code (parallel in Arbeit). Gespiegelt sind deshalb die WERTE, nicht der
-    // Code: dieselbe Fuellfarbe, dieselbe `focus-within`-Kopplung, dieselben Weiss-Stufen
-    // (Titel 100%, Sekundaertext 85%).
-    //
-    // KEIN Bild in der Zeile: der Kursplan verliert seine Lehrpersonen-Portraits in derselben
-    // Welle (KP1 "simpel, ohne Bild"). Die Startseite hatte hier ohnehin nie eines.
-    return (
-      <a
-        href={href}
-        className="group flex flex-col gap-3 border-b border-[var(--color-line)] px-3 py-5 transition-colors duration-[var(--dur-fast)] last:border-b-0 hover:border-[var(--color-salsa)] hover:bg-[var(--color-salsa)] focus-within:border-[var(--color-salsa)] focus-within:bg-[var(--color-salsa)] sm:flex-row sm:items-center sm:gap-6 sm:px-4 lg:pr-36"
-      >
-        <span className="flex shrink-0 items-baseline gap-2 sm:w-32 sm:flex-col sm:items-start sm:gap-1">
-          {/* Ohne tabular-nums: Cal Sans machte aus der Uhr "18 : 30" mit Loechern um den
-              Doppelpunkt (Critic Runde 14, Item 2 — wie CourseEngine). Die Tages-KACHELN
-              oben behalten tabular-nums: dort steht eine reine Zahl, gleiche Breite gewollt. */}
-          <span className="font-display text-2xl font-extrabold leading-none text-[var(--color-ink)] transition-colors group-hover:text-white group-focus-within:text-white">
-            {course.startTime}
-          </span>
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)] transition-colors group-hover:text-white/85 group-focus-within:text-white/85">
-            {WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday}
-          </span>
-        </span>
-        <span className="min-w-0 flex-1">
-          {/* Gleiche Gewichtung wie im Kalender (CourseEngine.SlotRow): Stil ruhig, Level fett.
-              Rot bleibt dem CTA. */}
-          <span className="block font-display text-lg leading-tight text-[var(--color-ink-muted)] transition-colors group-hover:text-white/85 group-focus-within:text-white/85 sm:text-xl">
-            {style}
-            {level && (
-              <span className="font-bold text-[var(--color-ink)] transition-colors group-hover:text-white group-focus-within:text-white">
-                {' '}
-                · {level}
-              </span>
-            )}
-          </span>
-          {/* EIN Verfuegbarkeits-Badge, der die ganze Wahrheit traegt.
-              Runde 1, Nachmessung: "Plätze frei" allein war mehrdeutig. `full` ist per
-              Definition (lib/schedule.ts buildScheduleSlots) erst wahr, wenn ALLE Staffeln des
-              Slots voll sind. Gemessen an der echten API vom 2026-08-07 ist Montag 18:30 Salsa
-              Intermediate 11 in der LAUFENDEN Staffel `full`, in der Sommerstaffel `open` —
-              die Zeile schrieb "Plätze frei", meinte aber den Termin ab September.
-              Erster Versuch war /kursplan nachzubauen (zweiter Badge "Nächster Start ...",
-              CourseEngine.tsx:598). Am Screenshot gemessen war das schlechter, aus zwei Gruenden:
-                - "Plätze frei" neben "Laufende Staffel voll" widerspricht sich woertlich,
-                - es existiert genau EINE kommende Staffel, also stand auf JEDER Zeile derselbe
-                  Text "Nächster Start 9. Sep." — 4 identische Pillen pro Tag, reines Rauschen.
-              Darum sagt der Badge den Zustand jetzt selbst: ausgebucht / erst ab Datum frei /
-              jetzt frei. Drei Zustaende, eine Pille, kein Widerspruch, keine Wiederholung. */}
-          {/* R188 / H3: auf der roten Flaeche traegt der Badge weder seinen hellgruenen
-              noch seinen grauen Grund — beide verschwinden bzw. flecken. Er wechselt auf
-              halbtransparentes Weiss mit weisser Schrift, dieselbe Loesung wie die Badges
-              im Kursplan (CourseEngine.Badge unter group-hover). */}
-          <span className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
-            <span
-              className={cn(
-                'inline-flex items-center rounded-full px-2.5 py-0.5 font-medium transition-colors',
-                'group-hover:bg-white/20 group-hover:text-white group-focus-within:bg-white/20 group-focus-within:text-white',
-                full || runningFull
-                  ? 'bg-[var(--color-bg-soft)] text-[var(--color-ink-muted)]'
-                  : 'bg-[color-mix(in_srgb,var(--color-flow-green)_13%,white)] text-[var(--color-flow-green)]',
-              )}
-            >
-              {full
-                ? t.fullyBooked
-                : runningFull && nextStart
-                  ? lang === 'de'
-                    ? `Ausgebucht, wieder frei ab ${formatShortDate(nextStart, lang)}`
-                    : `Full, spots again from ${formatShortDate(nextStart, lang)}`
-                  : t.spotsAvailable}
-            </span>
-          </span>
-        </span>
-        {/* lg:pr-36 an der Zeile: der fixe WhatsApp-Float (right-5/6, h-14) lag auf
-            «Termine ansehen» (S7-Shot home-desktop-03-y1500). Kopf und Tages-Tabs
-            nutzen dieselbe Naht. Float bleibt.
-
-            R188 / H3: hier stand ein GEFUELLTER roter Pill je Zeile. Auf der roten
-            Hover-Flaeche waere er unsichtbar (Rot auf Rot), und schon im Ruhezustand
-            waren es vier gefuellte Primaerknoepfe untereinander — DESIGN.md erlaubt
-            genau einen pro Sektion, und der gehoert dem «Zum ganzen Kursplan» im Kopf.
-            Der Kursplan hat dieselbe Entscheidung schon getroffen (CourseEngine:
-            "EIN ruhiger Zeilen-CTA fuer alle; die rote Hauptaktion gehoert dem
-            ScheduleBottomCta"). Jetzt derselbe ruhige Zeilen-CTA, der beim Hover mit
-            der Flaeche auf Weiss wechselt. */}
-        <span className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start px-1 text-sm font-semibold text-[var(--color-ink)] transition-colors group-hover:text-white group-focus-within:text-white sm:self-center">
-          {lang === 'de' ? 'Termine ansehen' : 'View dates'}
-          <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2} />
-        </span>
-      </a>
-    );
-  }
-
-  return (
-    <a href={href} className="flex h-full flex-col gap-3 rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)] p-5 shadow-sm hover:shadow-md">
-      <div className="flex items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-ink-muted)]">
-          <span aria-hidden className="h-2.5 w-[3px] rounded-full bg-[var(--color-salsa)]" />
-          {WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday}
-        </span>
-        <span className="whitespace-nowrap text-xs font-semibold uppercase tracking-wide tabular-nums text-[var(--color-ink-muted)]">
-          {course.startTime}
-        </span>
-      </div>
-      <div className="min-w-0">
-        <p className="type-h3 text-[var(--color-ink)]">{style}</p>
-        {level && <p className="mt-0.5 text-sm text-[var(--color-salsa)]">{level}</p>}
-      </div>
-      <span className="mt-auto flex items-center gap-2 border-t border-[var(--color-line)] pt-3 text-xs font-semibold">
-        <span aria-hidden className={`h-1.5 w-1.5 shrink-0 rounded-full ${availabilityClass}`} />
-        <span className={full ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink-muted)]'}>
-          {full ? t.fullyBooked : t.spotsAvailable}
-        </span>
-      </span>
-    </a>
   );
 }

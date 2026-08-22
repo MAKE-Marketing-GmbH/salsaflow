@@ -1,9 +1,17 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useRef } from 'react';
 import { useLang } from '@/lib/i18n';
 import { HOME, type OfferCard } from '@/public/home/content';
 import { Shell } from '@/public/site/primitives';
-import { Reveal, useReveal } from '@/public/home/motion';
+import {
+  BlurReveal,
+  ClipReveal,
+  Reveal,
+  type ParallaxStyle,
+  useParallaxStyle,
+  useReveal,
+} from '@/public/home/motion';
 import { MEASURE_L, MEASURE_M, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
@@ -38,7 +46,7 @@ function cardSize(key: string) {
   return { w: 1200, h: 1600 };
 }
 
-function StyleCard({ card }: { card: OfferCard }) {
+function StyleCard({ card, parallax }: { card: OfferCard; parallax: ParallaxStyle }) {
   const { lang } = useLang();
   const size = cardSize(card.key);
 
@@ -48,24 +56,30 @@ function StyleCard({ card }: { card: OfferCard }) {
       aria-label={`${card.title}: ${card.hint}`}
       className="group relative isolate flex min-h-[22rem] overflow-hidden rounded-[1.5rem] bg-[var(--color-ink)] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:rounded-[2rem] lg:min-h-[26rem]"
     >
-      <img
-        src={card.photo}
-        alt={card.alt}
-        /* R188 / H2: `photo-grade-bachata` ist hier raus. Die Klasse (index.css:480,
-           saturate .82 / contrast 1.14) war genau die "komische Toenung" aus dem Video —
-           sie lag ZUSAETZLICH auf einer schon nachbearbeiteten Datei. Das neue Bild ist eine
-           Groessenableitung des Originals und traegt sich ohne CSS-Filter. Kein Filter als
-           Bildersatz, dieselbe Entscheidung wie bei photo-grade-private auf /privatstunden
-           (privat/content.ts:181). */
-        className={cn(
-          'absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.025]',
-          card.key === 'privat' ? 'photo-grade-private' : undefined,
-          cardCrop(card.key),
-        )}
-        width={size.w}
-        height={size.h}
-        loading="lazy"
-      />
+      <motion.div
+        data-scroll-motion={`offer-${card.key}`}
+        style={parallax}
+        className="absolute inset-x-0 -top-5 h-[calc(100%+2.5rem)]"
+      >
+        <img
+          src={card.photo}
+          alt={card.alt}
+          /* R188 / H2: `photo-grade-bachata` ist hier raus. Die Klasse (index.css:480,
+             saturate .82 / contrast 1.14) war genau die "komische Toenung" aus dem Video —
+             sie lag ZUSAETZLICH auf einer schon nachbearbeiteten Datei. Das neue Bild ist eine
+             Groessenableitung des Originals und traegt sich ohne CSS-Filter. Kein Filter als
+             Bildersatz, dieselbe Entscheidung wie bei photo-grade-private auf /privatstunden
+             (privat/content.ts:181). */
+          className={cn(
+            'h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.025]',
+            card.key === 'privat' ? 'photo-grade-private' : undefined,
+            cardCrop(card.key),
+          )}
+          width={size.w}
+          height={size.h}
+          loading="lazy"
+        />
+      </motion.div>
       {/* Der Verlauf traegt den Text. Erster Versuch endete bei 25 % Deckung auf halber
           Hoehe — gemessen im Bild standen dann "HALTUNG UND CHOREOGRAFIE" (Heels) und
           "1:1 COACHING" (Privatstunden) weiss auf hellem Studio und waren unlesbar.
@@ -93,34 +107,58 @@ export function Offer() {
   const { lang } = useLang();
   const o = HOME[lang].offer;
   const { item } = useReveal({ stagger: 0.07 });
+  const sectionRef = useRef<HTMLElement>(null);
+  const cardParallax = useParallaxStyle(sectionRef, 32);
   // R186 (Dom, 20.08.): Der Filter `card.key !== 'privat'` aus R134/9 ist raus. Dom will
   // die Privatstunden auf der Startseite sehen, Desktop als vierte Karte ganz rechts.
   // Die Reihenfolge steht in content.ts: Salsa, Bachata, Heels, Privatstunden.
 
   return (
-    <section id="angebot" className={cn('relative scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}>
+    <section
+      ref={sectionRef}
+      id="angebot"
+      className={cn('relative scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}
+    >
       <Shell>
         {/* Titel und Lead gestapelt statt H2 links / Lead rechts (Split-Header-Ban,
             Critic 13.08.2026). */}
-        <Reveal>
-          <motion.h2
-            variants={item}
+        {/* R189: Der Sektionstitel bekommt `BlurReveal` statt des generischen item-Fades.
+            Die Wahl gegen `RevealWords` ist bewusst und folgt der Rollenteilung des
+            Motion-Systems: Wort-fuer-Wort gehoert der grossen H1 im Fold. Wuerde jede H2
+            der Seite ebenfalls Wort fuer Wort einsteigen, waere der Effekt kein Akzent
+            mehr, sondern der neue Default — und die H1 verlaere ihren Vorrang.
+            `blur` liest sich als "scharfstellen" (8px -> 0 plus 1.02 -> 1 scale, siehe
+            motion.tsx:285-292) und bleibt damit klar unterscheidbar vom Vorhang der
+            Karten darunter.
+
+            Der Lead behaelt bewusst den ruhigen `rise`-Default ueber `Reveal` + `item`:
+            eine Fliesstextzeile scharfstellen zu lassen waere derselbe Effekt an zwei
+            Stellen hintereinander — und Fliesstext ist genau der Fall, fuer den `rise`
+            der Default ist. */}
+        {/* Die visuelle Klasse bleibt am <h2>, nicht am Reveal-Wrapper: `type-h2` setzt
+            Schriftgrad und Zeilenhoehe, `MEASURE_L` das Zeilenmass in em. Beides auf einem
+            16px-Wrapper waere ein anderer Wert als auf der grossen Ueberschrift. Der
+            Wrapper traegt nur die Bewegung. */}
+        <BlurReveal>
+          <h2
             className={cn(
               'type-h2 text-[var(--color-ink)]',
               MEASURE_L,
             )}
           >
             {o.title}
-          </motion.h2>
-          {/* R186: Der Lead ist in content.ts leer. Ein leeres <p> traegt trotzdem seinen
-              mt-4 und die Zeilenhoehe, also 4rem Loch zwischen H2 und Karten. Darum
-              gar nicht erst rendern. */}
-          {o.lead ? (
+          </h2>
+        </BlurReveal>
+        {/* R186: Der Lead ist in content.ts leer. Ein leeres <p> traegt trotzdem seinen
+            mt-4 und die Zeilenhoehe, also 4rem Loch zwischen H2 und Karten. Darum
+            gar nicht erst rendern. */}
+        {o.lead ? (
+          <Reveal>
             <motion.p variants={item} className="mt-4 max-w-[65ch] text-pretty text-lg leading-relaxed text-[var(--color-ink-muted)]">
               {o.lead}
             </motion.p>
-          ) : null}
-        </Reveal>
+          </Reveal>
+        ) : null}
 
         {/* R186 (Dom, 20.08.): Vier gleich grosse Karten statt einer grossen und zwei
             Zeilen. Desktop vier Spalten, damit Privatstunden ganz rechts steht. Mobil
@@ -128,13 +166,17 @@ export function Offer() {
             Kein lg:pr-36 mehr: das Polster hielt frueher den WhatsApp-FAB vom rechten
             Zeilenende fern. Die Karten enden jetzt am Shell-Rand, der Text sitzt links
             unten in der Karte — der FAB liegt ueber der Bildflaeche, nicht auf Schrift. */}
-        <Reveal className="mt-10 grid gap-5 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4 lg:gap-6" stagger={0.07}>
+        {/* R189 Kritik-Runde 1: Vier einzelne ClipReveal mit 0.08s Abstand sahen im echten
+            Zwischenframe kaputt aus: Karte 1 stand schon, Karte 2 war nur ein grauer Streifen,
+            Karten 3 und 4 fehlten. Ein Reveal darf mitten im Lauf nicht wie fehlende Daten
+            aussehen. Deshalb oeffnet jetzt EIN Vorhang das ganze Raster. Die vier Angebote
+            erscheinen als zusammengehoerige Reihe; kein Motiv verschiebt sich, keine Spalte
+            aendert ihre Breite. */}
+        <ClipReveal className="mt-10 grid gap-5 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4 lg:gap-6">
           {o.cards.map((card) => (
-            <motion.div key={card.key} variants={item} className="min-w-0">
-              <StyleCard card={card} />
-            </motion.div>
+            <StyleCard key={card.key} card={card} parallax={cardParallax} />
           ))}
-        </Reveal>
+        </ClipReveal>
 
         <Reveal className="mt-10 lg:mt-12">
           <motion.a

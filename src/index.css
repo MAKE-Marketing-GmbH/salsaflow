@@ -580,11 +580,9 @@ main img.photo-grade-bachata-why {
   @keyframes whatsapp-float-in {
     from {
       opacity: 0;
-      transform: translateY(1rem);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
     }
   }
 
@@ -611,7 +609,7 @@ main img.photo-grade-bachata-why {
     gap: 0;
   }
 
-  body:has([data-privat-page]) a.whatsapp-float span {
+  body:has([data-privat-page]) a.whatsapp-float [data-whatsapp-label] {
     display: none;
   }
 }
@@ -631,7 +629,7 @@ main img.photo-grade-bachata-why {
     gap: 0;
   }
 
-  body:has([data-kursaufbau-page]) a.whatsapp-float span {
+  body:has([data-kursaufbau-page]) a.whatsapp-float [data-whatsapp-label] {
     display: none;
   }
 }
@@ -651,7 +649,7 @@ main img.photo-grade-bachata-why {
     gap: 0;
   }
 
-  body:has([data-events-page]) a.whatsapp-float span {
+  body:has([data-events-page]) a.whatsapp-float [data-whatsapp-label] {
     display: none;
   }
 }
@@ -672,7 +670,7 @@ main img.photo-grade-bachata-why {
     gap: 0;
   }
 
-  body:has([data-team-page]) a.whatsapp-float span {
+  body:has([data-team-page]) a.whatsapp-float [data-whatsapp-label] {
     display: none;
   }
 }
@@ -689,7 +687,7 @@ main img.photo-grade-bachata-why {
     gap: 0;
   }
 
-  body:has([data-faq-page]) a.whatsapp-float span {
+  body:has([data-faq-page]) a.whatsapp-float [data-whatsapp-label] {
     display: none;
   }
 }
@@ -706,7 +704,7 @@ main img.photo-grade-bachata-why {
     gap: 0;
   }
 
-  body:has([data-collabs-page]) a.whatsapp-float span {
+  body:has([data-collabs-page]) a.whatsapp-float [data-whatsapp-label] {
     display: none;
   }
 }
@@ -733,8 +731,8 @@ body:has([data-collabs-page]) header.fixed {
     gap: 0;
   }
 
-  body:has([data-tanzschuhe-page]) a.whatsapp-float span,
-  body:has([data-partys-page]) a.whatsapp-float span {
+  body:has([data-tanzschuhe-page]) a.whatsapp-float [data-whatsapp-label],
+  body:has([data-partys-page]) a.whatsapp-float [data-whatsapp-label] {
     display: none;
   }
 }
@@ -893,6 +891,36 @@ html:has(.faq-page) {
     padding-bottom: var(--cookie-banner-height);
   }
 
+  /* /kursplan R189: Unten lag die Cookie-Karte messbar auf drei Stil-Filtern
+     (Contemporary, Basics & Fundamentals, SFIT). Auf dieser Route sitzt sie direkt
+     unter der festen Navigation. Der Seitenstamm reserviert ihre gemessene Höhe.
+     Beim ersten Scroll verschwindet die Karte wie bisher. Das Polster fährt in 180 ms heraus.
+     data-kursplan markiert die Route eindeutig. */
+  body:has(main[data-kursplan]):has([data-testid='cookie-accept']) [data-cookie-banner] {
+    top: var(--nav-h);
+    bottom: auto;
+    padding: 0.5rem 0.75rem 0 !important;
+  }
+
+  body:has([data-testid='cookie-accept']) main[data-kursplan] {
+    padding-top: calc(var(--cookie-banner-height) + 0.5rem);
+    transition: padding-top 180ms ease;
+  }
+
+  /* /events R189: Die feste Karte lag auf den drei Fakten direkt unter dem Hero.
+     Sie sitzt jetzt wie auf /kursplan unter der Navigation. Der Seitenstamm reserviert
+     ihre echte Höhe, damit weder Text noch Link unter der Karte liegen. */
+  body:has([data-events-page]):has([data-testid='cookie-accept']) [data-cookie-banner] {
+    top: var(--nav-h);
+    bottom: auto;
+    padding: 0.5rem 0.75rem 0 !important;
+  }
+
+  body:has([data-events-page]):has([data-testid='cookie-accept']) main {
+    padding-top: calc(var(--cookie-banner-height) + 0.5rem);
+    transition: padding-top 180ms ease;
+  }
+
   /* /kursplan: die Wochen-Pfeile sitzen im ersten Fold, nicht am Dokumentende.
      Body-Polster schiebt sie nicht hoch. Bei sichtbarer Leiste das Foto-Band und
      den Kalender-Kopf so weit stauchen, dass die Pfeile über der Leiste bleiben. */
@@ -925,6 +953,31 @@ html:has(.faq-page) {
 /* Desktop-Fold: Cookie schnitt die Tageskarten, Foto-Band war 19rem.
    Stauchen hebt die Leiste über die Cookie-Zeile. */
 @media (width >= 40rem) {
+  /* /kursplan R189: Auch auf Desktop sitzt die Karte unter der Navigation. Der Seitenstamm
+     reserviert ihre gemessene Höhe, damit sie weder Hero noch Filter verdeckt. */
+  body:has(main[data-kursplan]):has([data-testid='cookie-accept']) [data-cookie-banner] {
+    top: var(--nav-h);
+    bottom: auto;
+    padding: 0.75rem 1.25rem 0 !important;
+  }
+
+  body:has([data-testid='cookie-accept']) main[data-kursplan] {
+    padding-top: calc(var(--cookie-banner-height) + 0.75rem);
+    transition: padding-top 180ms ease;
+  }
+
+  /* /events R189: Auch auf Desktop darf die Cookie-Karte nicht über der Faktenleiste liegen. */
+  body:has([data-events-page]):has([data-testid='cookie-accept']) [data-cookie-banner] {
+    top: var(--nav-h);
+    bottom: auto;
+    padding: 0.75rem 1.25rem 0 !important;
+  }
+
+  body:has([data-events-page]):has([data-testid='cookie-accept']) main {
+    padding-top: calc(var(--cookie-banner-height) + 0.75rem);
+    transition: padding-top 180ms ease;
+  }
+
   /* R179: 10rem = 160px schnitt Köpfe auf 1440 mit sichtbarer Leiste.
      14rem bleibt unter 18rem nach Accept. CookieBanner unangetastet. */
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {

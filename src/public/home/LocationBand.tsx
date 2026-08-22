@@ -6,11 +6,15 @@
 // schwebender Zwei-Foto-Komposition). 1400px-Shell. Calm Motion: ruhiger Reveal-Fade-up-Takt,
 // reduced-motion nur Fade. Adress-Platzhalter bleibt elegante Copy, kein roher [PLATZHALTER].
 
+import { motion } from 'framer-motion';
 import { MapPin, Phone } from 'lucide-react';
+import { useRef } from 'react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3, TRIAL_HREF } from '@/public/home/content-v3';
 import { CONTACT } from '@/public/site/SiteFooter';
-import { Eyebrow, Shell, CtaPill, WhatsAppGlyph } from '@/public/site/primitives';
+import { Eyebrow, Shell, CtaPill, CtaText, WhatsAppGlyph } from '@/public/site/primitives';
+import { HOME } from '@/public/home/content';
+import { ClipReveal, RiseReveal, useParallaxStyle } from '@/public/home/motion';
 import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
@@ -18,43 +22,59 @@ export function LocationBand() {
   const { lang } = useLang();
   const de = lang === 'de';
   const c = HOME_V3[lang].closer;
+  const sectionRef = useRef<HTMLElement>(null);
+  const photoParallax = useParallaxStyle(sectionRef, 40);
 
   return (
-    <section id="standort" className={cn('scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}>
+    <section
+      ref={sectionRef}
+      id="standort"
+      className={cn('scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}
+    >
       <Shell>
         <div className="grid overflow-hidden rounded-[2rem] border border-[var(--color-line)] bg-[var(--color-paper)] shadow-[0_30px_70px_-40px_rgba(17,17,17,0.28)] lg:grid-cols-[1.02fr_1fr]">
-          {/* LINKS: echtes Kurs-Foto, fuellt die Kartenkante (kein Freisteller, keine KI-Person). */}
-          <div className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[520px]">
-            <img
-              src="/photos/2026/event-party-dreh-01.webp"
-              alt={de ? 'Kurs im hellen Studio vor den Fenstern, Bahnhof Basel SBB.' : 'Class in the bright studio by the windows, Basel SBB.'}
-              /* R188 / SW4a (Video 21.08.: "Koepfe nie abschneiden"): auf 1440px ist die
-                 Bildflaeche 674x585 (hochkant), das Motiv 1920x1280 (quer). object-cover
-                 skaliert deshalb ueber die HOEHE und zeigt nur 76.7% der Bildbreite — der
-                 Beschnitt ist horizontal, nicht vertikal. Bei `center` lag das Fenster auf
-                 x = 224..1696; die Kante bei 224 lief mitten durch das Gesicht der Frau am
-                 linken Rand (Beleg worklog/shots/R188/after-final/home/d-09.png).
-                 `object-[75%_45%]` legt das Fenster auf x = 336..1808: die angeschnittene
-                 Person liegt vollstaendig ausserhalb, das tanzende Paar und die lachende
-                 Frau stehen als ganze Figuren im Bild. 100% waere zu weit — dann schneidet
-                 die linke Kante den Ruecken des Taenzers an. Der Vertikalwert 45% bleibt
-                 unveraendert; er war nie der Befund (sichtbar sind 100% der Bildhoehe).
-                 Auf 390px ist die Flaeche 348x261 (quer) und zeigt 88.9% der Breite — dort
-                 war ohnehin kein Kopf angeschnitten, der Wert schadet nicht. */
-              className="absolute inset-0 h-full w-full object-cover object-[75%_45%]"
-              width={1600}
-              height={1200}
-              loading="lazy"
-            />
+          {/* LINKS: echtes Kurs-Foto, fuellt die Kartenkante (kein Freisteller, keine KI-Person).
+              Hauptgeste der Sektion: ClipReveal auf dem Foto (Aufdecken statt Einschieben).
+              ClipReveal rendert motion.div und erbt die volle Flaeche — Aspect/Min-Hoehe
+              bleiben an derselben Box, der Clip wandert darueber. */}
+          <ClipReveal className="relative aspect-[4/3] lg:aspect-auto lg:min-h-[520px]">
+            <motion.div
+              data-scroll-motion="location-photo"
+              style={photoParallax}
+              className="absolute inset-x-0 -top-6 h-[calc(100%+3rem)]"
+            >
+              <img
+                src="/photos/2026/event-party-dreh-01.webp"
+                alt={de ? 'Kurs im hellen Studio vor den Fenstern, Bahnhof Basel SBB.' : 'Class in the bright studio by the windows, Basel SBB.'}
+                /* R188 / SW4a (Video 21.08.: "Koepfe nie abschneiden"): auf 1440px ist die
+                   Bildflaeche 674x585 (hochkant), das Motiv 1920x1280 (quer). object-cover
+                   skaliert deshalb ueber die HOEHE und zeigt nur 76.7% der Bildbreite — der
+                   Beschnitt ist horizontal, nicht vertikal. Bei `center` lag das Fenster auf
+                   x = 224..1696; die Kante bei 224 lief mitten durch das Gesicht der Frau am
+                   linken Rand (Beleg worklog/shots/R188/after-final/home/d-09.png).
+                   `object-[75%_45%]` legt das Fenster auf x = 336..1808: die angeschnittene
+                   Person liegt vollstaendig ausserhalb, das tanzende Paar und die lachende
+                   Frau stehen als ganze Figuren im Bild. 100% waere zu weit — dann schneidet
+                   die linke Kante den Ruecken des Taenzers an. Der Vertikalwert 45% bleibt
+                   unveraendert; er war nie der Befund (sichtbar sind 100% der Bildhoehe).
+                   Auf 390px ist die Flaeche 348x261 (quer) und zeigt 88.9% der Breite — dort
+                   war ohnehin kein Kopf angeschnitten, der Wert schadet nicht. */
+                className="h-full w-full object-cover object-[75%_45%]"
+                width={1600}
+                height={1200}
+                loading="lazy"
+              />
+            </motion.div>
             {/* Standort-Chip auf dem Foto, gleiche Trust-Chip-DNA wie im Hero. */}
             <div className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-white/95 px-3.5 py-2 shadow-[0_8px_22px_-6px_rgba(17,17,17,0.4)] backdrop-blur">
               <MapPin size={15} strokeWidth={2} aria-hidden className="text-[var(--color-salsa)]" />
               <span className="text-xs font-bold text-[var(--color-ink)]">Basel SBB</span>
             </div>
-          </div>
+          </ClipReveal>
 
-          {/* RECHTS: Kontakt + Abschluss-CTA. */}
-          <div className="p-8 sm:p-10 lg:p-14">
+          {/* RECHTS: Kontakt + Abschluss-CTA. RiseReveal als zweite, ruhigere Geste —
+              der Text steigt als EIN Block, keine Einzelzeilen-Stagger. */}
+          <RiseReveal className="p-8 sm:p-10 lg:p-14">
             <div>
               <div>
                 <Eyebrow>{c.eyebrow}</Eyebrow>
@@ -73,9 +93,10 @@ export function LocationBand() {
                 {c.body}
               </p>
 
-              {/* Runde 2, Issue 2: Glow-Halo raus, EINE Button-Definition (CtaPill). */}
-              <div className="mt-8">
-                <CtaPill href={TRIAL_HREF}>{c.cta}</CtaPill>
+              {/* Kursplan ist die Hauptaktion. Die Gratis-Stunde bleibt der Textlink. */}
+              <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-6">
+                <CtaPill href="/kursplan">{HOME[lang].cta.plan}</CtaPill>
+                <CtaText href={TRIAL_HREF}>{c.cta}</CtaText>
               </div>
 
               {/* Kontakt-Zeile: WhatsApp + Telefon, klickbar (5-Sekunden-Kontakt).
@@ -110,7 +131,7 @@ export function LocationBand() {
                 <p className="text-sm leading-relaxed text-[var(--color-ink-muted)]">{c.reassurance}</p>
               </div>
             </div>
-          </div>
+          </RiseReveal>
         </div>
       </Shell>
     </section>

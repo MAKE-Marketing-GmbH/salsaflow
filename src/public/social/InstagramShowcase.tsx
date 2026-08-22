@@ -286,11 +286,9 @@ export function InstagramShowcase({ compact = false, 'data-design-unit': designU
           <motion.div
             variants={item}
             className={cn(
-              'flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2',
+              'flex min-w-0 max-w-full snap-x snap-mandatory gap-3 overflow-x-auto pb-2 max-sm:pr-14',
               '[-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
-              // Die Karten stossen sonst hart an die Shell-Kante. Innenrand mitscrollen lassen.
-              '-mx-5 px-5 sm:mx-0 sm:px-0',
-              'sm:grid sm:snap-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:pb-0 lg:grid-cols-3',
+              'sm:grid sm:snap-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:pb-0 sm:pr-0 lg:grid-cols-3',
             )}
           >
             {posts.map((post) => (
@@ -304,7 +302,7 @@ export function InstagramShowcase({ compact = false, 'data-design-unit': designU
                   // denselben Rand wie den Einlauf (px-5 links) — der rechte Peek
                   // schwebt dann frei statt zu kleben, und das Scroll-Ende zeigt Luft.
                   // Ab sm laeuft das normale Raster ohne Slider-Rand.
-                  'last:mr-5 sm:last:mr-0',
+                  'sm:last:mr-0',
                 )}
               >
                 <InstagramVideoCard post={post} compact={onHome} />

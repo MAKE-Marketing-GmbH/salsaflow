@@ -1,11 +1,14 @@
 // Strukturierte Daten (P1.9, Teil 1): Organisations-Schema fuer die Home.
 // schema.org kennt KEIN "DanceSchool" (404) - korrekt ist LocalBusiness.
 // Nur belegte Fakten: Kontakt, Standort und Recht stehen im Impressum, die Preisspanne in
-// src/public/preise/content.ts. Keine erfundenen Oeffnungszeiten, keine erfundenen Bewertungen.
+// src/public/preise/content.ts. Keine erfundenen Oeffnungszeiten.
+// Bewertungen: ebenfalls nur belegt. Sie kommen aus src/public/site/reviews.ts (Google-Harvest
+// 2026-07-07) und stehen mit derselben Quelle sichtbar auf der Seite — nie hier hart eintippen.
 // priceRange spannt den kleinsten und groessten Preis der Preisseite: CHF 5.- (Danceflow Night
 // fuer Salsaflow-Schueler, content.ts:321) bis CHF 600.- (5 Privatstunden Paar, content.ts:268).
 
 import { createElement } from 'react';
+import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 
 const LOCAL_BUSINESS = {
   '@context': 'https://schema.org',
@@ -27,6 +30,17 @@ const LOCAL_BUSINESS = {
     addressCountry: 'CH',
   },
   sameAs: ['https://www.instagram.com/salsaflowdc'],
+  /* Maschinenlesbare Bewertungsdaten aus derselben Quelle wie die sichtbare Bewertung.
+     Google blendet bei selbst veröffentlichten LocalBusiness-Bewertungen in der Regel keine
+     Review-Sterne ein. Das Markup beschreibt deshalb die belegten Daten, ohne Sterne im
+     Suchergebnis zu versprechen. Steigt die Zahl, ändert sich reviews.ts und beides zieht mit. */
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: GOOGLE_REVIEWS.rating,
+    reviewCount: GOOGLE_REVIEWS.count,
+    bestRating: 5,
+    worstRating: 1,
+  },
 } as const;
 
 const HOME_SCHEMA = {

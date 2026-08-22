@@ -75,14 +75,48 @@
 // heller Link neben dem roten Pill statt als grauer Text-Link unter dem Banner-Rand.
 
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 import { CtaPill, CtaText, StarRating } from '@/public/site/primitives';
 
-import { EASE_OUT, useHydrated } from '@/public/home/motion';
+import { EASE_OUT, RevealWords, useHydrated, useParallaxStyle } from '@/public/home/motion';
 import { MEASURE_XL } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
+
+/* R189 — Parallax-Distanz des Hero-Fotos, nach Breite gestaffelt.
+   Desktop 44px, Mobil 24px. Der Unterschied ist keine Geschmacksfrage: `useParallaxStyle`
+   verteilt die Strecke symmetrisch (+d/2 beim Eintritt, -d/2 beim Austritt), also wandert
+   das Bild auf Desktop 22px nach unten und 22px nach oben. Auf Mobil klebt das Foto
+   full-bleed an der Fensterkante und traegt die H1 — dort sind 12px in jede Richtung das
+   Maximum, bevor der Versatz die Schrift gegen das Motiv verschiebt.
+
+   MEDIA-QUERY STATT CONDITIONAL HOOK: der Haken laeuft IMMER und IMMER genau einmal, nur
+   sein Argument aendert sich. Ein `if (mobile) useParallaxStyle(...)` waere ein Verstoss
+   gegen die Hook-Regeln und wuerde beim ersten Breitenwechsel die Hook-Reihenfolge
+   zerreissen. Darum liest ein eigener State die Media-Query und speist nur die ZAHL ein. */
+const PARALLAX_DESKTOP = 44;
+const PARALLAX_MOBILE = 24;
+const DESKTOP_QUERY = '(min-width: 640px)';
+
+/** Liefert die Parallax-Distanz fuer die aktuelle Breite. Serverseitig und vor der ersten
+ *  Messung gilt der Mobil-Wert — der kleinere von beiden, also der, der im Zweifel weniger
+ *  verschiebt. */
+function useParallaxDistance(): number {
+  const [desktop, setDesktop] = useState(false);
+  useEffect(() => {
+    /* Kein `typeof window.matchMedia`-Test: `useEffect` laeuft ausschliesslich im Browser,
+       und `matchMedia` ist dort seit Jahren ueberall da. Der Test haette nichts geprueft,
+       was hier noch offen waere — er haette nur so ausgesehen (oxlint no-runtime-typeof). */
+    const mq = window.matchMedia(DESKTOP_QUERY);
+    const apply = () => setDesktop(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+  return desktop ? PARALLAX_DESKTOP : PARALLAX_MOBILE;
+}
 
 export function Hero() {
   const { lang } = useLang();
@@ -91,6 +125,13 @@ export function Hero() {
   const h = HOME[lang].hero;
   const cta = HOME[lang].cta;
   const de = lang === 'de';
+
+  /* Der Messrahmen des Parallax ist die FOTO-BOX, nicht die Sektion. Auf Mobil ist die
+     Sektion rund 1.3 Bildschirme hoch, die Fotobox aber nur 68svh — waere die Sektion der
+     Rahmen, liefe der Effekt ueber eine Strecke, auf der das Foto laengst aus dem Bild
+     gescrollt ist, und die sichtbare Bewegung waere fast null. */
+  const photoRef = useRef<HTMLDivElement>(null);
+  const parallax = useParallaxStyle(photoRef, useParallaxDistance());
 
   const container: Variants = {
     hidden: {},
@@ -250,23 +291,59 @@ export function Hero() {
                 Verfuegbare Spalte: 1024px -> 452px, 1280px -> 552px, 1440px -> 612px.
                 Kontrolliert per getClientRects().length am span: jede Zeile muss genau EINE
                 Zeilenbox haben, sonst bricht der Satz um. */}
-            <motion.h1
-              variants={item}
+            {/* R189: Wort-fuer-Wort statt des generischen item-Fades. Die visuelle Klasse
+                bleibt Zeichen fuer Zeichen dieselbe (`type-h1 mt-2 ... MEASURE_XL`) — nur
+                die Art des Eintritts wechselt.
+
+                WARUM DREI `RevealWords` UND NICHT EINS: die drei Zeilenumbrueche sind
+                gemessen, nicht gesetzt (Rechenweg im Kommentar darueber: "Mitten in Basel."
+                misst 442px bei 72px Schrift, die Textspalte auf 1024px nur 452px). Ein
+                einziger String mit `flex-wrap` wuerde die Umbrueche dem Browser ueberlassen
+                und die Zeilen bei jeder Breite neu setzen. Ein `RevealWords` PRO ZEILE
+                haelt genau die drei gemessenen Bruchstellen und staffelt trotzdem
+                durchgehend.
+
+                Der Kaskaden-Effekt kommt ueber die STAGGER-BREITE, nicht ueber einen
+                Start-Versatz: `RevealWordsProps` kennt kein `delay` (motion.tsx:425-432),
+                und motion.tsx liegt ausserhalb dieses Auftrags — es wird hier nicht
+                angefasst. Stattdessen bekommt jede Zeile einen etwas weiteren Wort-Abstand
+                als die vorige (0.045 / 0.055 / 0.065). Alle drei starten gleichzeitig, aber
+                die untere Zeile laeuft laenger aus als die obere. Das Auge liest das als
+                Welle nach unten, ohne dass eine Zeile spaeter zuendet — was im Fold auch
+                falsch waere: die H1 ist beim Laden sofort im Bild und darf nicht
+                nacheinander erscheinen.
+
+                Screenreader: jede der drei Fassungen traegt ihre eigene `sr-only`-Kopie
+                (siehe RevealWords in motion.tsx), also liest VoiceOver drei
+                zusammenhaengende Teilsaetze statt neun Einzelwoerter.
+
+                `as="span"` plus die aeussere <h1>: es bleibt EINE Ueberschrift im
+                Dokument-Outline. Drei h1 nebeneinander waeren eine kaputte Gliederung. */}
+            {/* R134/11: Die drei Zeilen liefen mobil in ZWEI Farben — Zeile 1 weiss auf dem
+                Foto, Zeile 2 und 3 schwarz auf Papier, weil die Fotokante bei y=490 mitten
+                durch den Satz lief. Eine Ueberschrift, zwei Farben, harte Kante quer durch.
+                Die Kante liegt jetzt bei y=574, also 16px UNTER der letzten Zeile (gemessen
+                auf 390/360/430). Alle drei Zeilen stehen damit auf dem Foto und tragen
+                dieselbe Farbe — die H1 der Klasse gibt sie vor (max-sm:text-white). */}
+            <h1
               className={cn(
                 'type-h1 mt-2 text-[var(--color-ink)] max-sm:text-white',
                 MEASURE_XL,
               )}
             >
-              {/* R134/11: Die drei Zeilen liefen mobil in ZWEI Farben — Zeile 1 weiss auf dem
-                  Foto, Zeile 2 und 3 schwarz auf Papier, weil die Fotokante bei y=490 mitten
-                  durch den Satz lief. Eine Ueberschrift, zwei Farben, harte Kante quer durch.
-                  Die Kante liegt jetzt bei y=574, also 16px UNTER der letzten Zeile (gemessen
-                  auf 390/360/430). Alle drei Zeilen stehen damit auf dem Foto und tragen
-                  dieselbe Farbe — die H1 der Klasse gibt sie vor (max-sm:text-white). */}
-              <span className="block">{de ? 'Salsa, Bachata' : 'Salsa, bachata'}</span>
-              <span className="block">{de ? 'und Heels.' : 'and heels.'}</span>
-              <span className="block">{de ? 'Mitten in Basel.' : 'Here in Basel.'}</span>
-            </motion.h1>
+              {(de
+                ? ['Salsa, Bachata', 'und Heels.', 'Mitten in Basel.']
+                : ['Salsa, bachata', 'and heels.', 'Here in Basel.']
+              ).map((line, i) => (
+                <RevealWords
+                  key={line}
+                  as="span"
+                  text={line}
+                  className="block"
+                  stagger={0.045 + i * 0.01}
+                />
+              ))}
+            </h1>
 
             {/* Der Lead sagte vorher woertlich dasselbe wie die neue H1
                 ("Salsa, Bachata und Heels ..."). Zwei Mal dieselbe Aufzaehlung in vier Zeilen
@@ -325,7 +402,7 @@ export function Hero() {
                 INVARIANTS/HOME_V3 team.stats. */}
             <motion.dl
               variants={item}
-              className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--color-line)] pt-5 text-[0.9375rem] max-sm:mt-6 max-sm:pt-4 sm:mt-10"
+              className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--color-line)] pt-5 text-[0.9375rem] max-sm:mt-6 max-sm:pr-14 max-sm:pt-4 sm:mt-10"
             >
               <div className="flex items-center gap-2">
                 {/* Quelle vor dem Urteil: das G sagt WOHER die Zahl kommt, die Sterne sagen WIE
@@ -384,7 +461,27 @@ export function Hero() {
               nur die Geraetekante), und schliesst UNTEN mit --radius-media gegen das Papier
               ab — dieselbe Rundung wie die Karten darunter. Es bleibt full-bleed und traegt
               weiter die H1; nur die zwei sichtbaren Ecken folgen jetzt der Linie. */}
+          {/* R189 — echter scroll-gebundener Parallax auf GENAU diesem Foto.
+              Der Effekt sitzt am <img>, nicht an dieser Box: die Box definiert den
+              Ausschnitt (`overflow-hidden` plus Radius), das Bild wandert darin. Wanderte
+              die Box selbst, wuerde sie ihren eigenen Radius und ihre Kante mitnehmen.
+
+              DER 14px-STREIFEN AUS DEM KOMMENTAR OBEN (Zeile 105-110) IST HIER DER
+              ENTSCHEIDENDE PUNKT. Dort ist gemessen belegt, dass jeder Versatz nach unten
+              auf Mobil einen leeren Papierstreifen an der Oberkante freilegt, weil das Foto
+              full-bleed an der Fensterkante klebt. Parallax verschiebt symmetrisch, also
+              +22px nach unten auf Desktop und +12px auf Mobil — ohne Gegenmassnahme waere
+              der alte Fehler zurueck, nur groesser.
+              Gegenmassnahme: das Bild bekommt UEBERSTAND statt Passgenauigkeit. Es ist
+              `calc(100% + 64px)` hoch und sitzt `-32px` ueber der Boxoberkante. 32px sind
+              mehr als die groesste halbe Strecke (44/2 = 22), also bleibt an beiden Kanten
+              Material stehen, egal wohin der Scroll das Bild schiebt. Genau das meint der
+              Hinweis "das Element braucht Ueberstand" in useParallax (motion.tsx:156-159).
+
+              Die Deckkraft-Signatur bleibt: `photoItem` faehrt weiter rein ueber opacity,
+              ohne y — die Begruendung dafuer steht unveraendert bei `photoItem`. */}
           <motion.div
+            ref={photoRef}
             variants={photoItem}
             className="absolute inset-x-0 top-0 z-0 h-[var(--hero-photo-h)] overflow-hidden rounded-b-[var(--radius-media)] sm:relative sm:mx-8 sm:h-auto sm:aspect-[16/9] sm:rounded-[var(--radius-media)] lg:mr-8 lg:aspect-auto lg:h-full lg:min-h-[32rem] lg:rounded-[var(--radius-media)]"
           >
@@ -396,28 +493,40 @@ export function Hero() {
               aria-hidden
               className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(to_top,rgba(10,10,10,0.92)_0%,rgba(10,10,10,0.55)_28%,transparent_52%)] sm:hidden"
             />
-            <picture>
-              {/* < 640px: 4:5-Zuschnitt, formatgleich zur Box — object-cover schneidet nichts weg. */}
-              <source
-                media="(max-width: 639px)"
-                srcSet="/photos/2026/hero-paar-dreh-01-portrait.webp"
-                width={1080}
-                height={1350}
-              />
-              <img
-                src="/photos/2026/hero-paar-dreh-01.webp"
-                alt={alt}
-                // R126: mobil 38% schnitt Mund/Kinn der Frau. 26% dreht den Crop nach oben
-                // (Koepfe bei y 12..50 %, weniger Hals). sm+ unveraendert.
-                // lg:object-top statt 18%: bei 1440 sass der Scheitel des Mannes an der
-                // Foto-Kante (Critic 13.08.2026).
-                className="h-full w-full object-cover object-[50%_26%] sm:object-[50%_32%] lg:object-top"
-                width={1600}
-                height={1066}
-                loading="eager"
-                fetchPriority="high"
-              />
-            </picture>
+            {/* Der Parallax-Traeger. `motion.div` und nicht `motion.img`, weil <picture>
+                zwei Quellen fuehrt (Portrait unter 640px, Querformat darueber) — der
+                Wrapper laesst diese Wahl unberuehrt und bewegt beide gleich.
+                `-top-8` = -32px und `h-[calc(100%+4rem)]` = +64px: der Ueberstand aus dem
+                Kommentar an der Box. Er liegt ueber und unter der Box je 32px, damit keine
+                Richtung des Versatzes eine Kante freilegt. */}
+            <motion.div
+              data-scroll-motion="home-hero"
+              style={parallax}
+              className="absolute inset-x-0 -top-8 h-[calc(100%+4rem)] will-change-transform"
+            >
+              <picture>
+                {/* < 640px: 4:5-Zuschnitt, formatgleich zur Box — object-cover schneidet nichts weg. */}
+                <source
+                  media="(max-width: 639px)"
+                  srcSet="/photos/2026/hero-paar-dreh-01-portrait.webp"
+                  width={1080}
+                  height={1350}
+                />
+                <img
+                  src="/photos/2026/hero-paar-dreh-01.webp"
+                  alt={alt}
+                  // R126: mobil 38% schnitt Mund/Kinn der Frau. 26% dreht den Crop nach oben
+                  // (Koepfe bei y 12..50 %, weniger Hals). sm+ unveraendert.
+                  // lg:object-top statt 18%: bei 1440 sass der Scheitel des Mannes an der
+                  // Foto-Kante (Critic 13.08.2026).
+                  className="h-full w-full object-cover object-[50%_26%] sm:object-[50%_32%] lg:object-top"
+                  width={1600}
+                  height={1066}
+                  loading="eager"
+                  fetchPriority="high"
+                />
+              </picture>
+            </motion.div>
           </motion.div>
         </div>
       </motion.div>

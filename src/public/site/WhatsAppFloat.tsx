@@ -1,5 +1,6 @@
-// WhatsApp-Floating-Knopf (Sitewide-Shell, sitewide.md §7). Rundes, fixes Icon unten rechts,
-// rechts unten, weiss auf gruen, auch auf dem Handy. Direkter Draht zu +41 76 478 84 11.
+// WhatsApp-Floating-Knopf (Sitewide-Shell, sitewide.md §7). Fix unten rechts, direkter Draht
+// zu +41 76 478 84 11. Weiss auf WhatsApp-Gruen ist eine feste Kundenabsprache
+// (wiki/absprachen.md:21); Motion und Geometrie duerfen sie nicht ueberschreiben.
 // Liegt z-technisch unter dem Nav-Drawer (z-50), aber über dem
 // Seiteninhalt. Wenn der Cookie-Banner offen ist (Prop `raised`), weicht der Knopf nach oben aus,
 // damit er das Banner nicht überlappt (z-Order aus sitewide.md §7/§8).
@@ -7,12 +8,18 @@
 // Entry-CTA-Band einen eigenen WhatsApp-Button, den der Float sonst ueberlappt (Kritiker-
 // Befund kursplan d-mid, Runde 10) — gleiche Footer-Beobachtung wie CookieBanner.tsx.
 
-import { useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { WhatsAppIcon } from '@/public/site/BrandIcons';
+import { useHydrated } from '@/public/home/motion';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 
 const WHATSAPP_URL = 'https://wa.me/41764788411';
+
+type WhatsAppFloatStyle = CSSProperties & {
+  '--whatsapp-collision-lift': string;
+};
 
 /* Breite, die das Label "WhatsApp" plus Innenabstand der Pille belegt. Gemessen auf
    1440px: Pille 122px, Kreis 56px. Der Solver braucht die Zahl, um im kompakten Zustand
@@ -28,18 +35,40 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
   const [headerDocked, setHeaderDocked] = useState(false);
   const floatRef = useRef<HTMLAnchorElement>(null);
   const collisionLiftRef = useRef(0);
-  const collisionBlockedRef = useRef(false);
   const headerDockedRef = useRef(false);
+  // `compactRef` ist die Form, die gerade gezeichnet wird. Zwei unabhaengige Gruende
+  // koennen sie verlangen: Scrollen (weniger Flaeche ueber dem Inhalt) und der Solver
+  // (fuer die volle Pille ist am aktuellen Ort kein Platz).
   const compactRef = useRef(false);
+  const collisionCompactRef = useRef(false);
+  const scrollCompactRef = useRef(false);
   const [compact, setCompact] = useState(false);
   const [collisionLift, setCollisionLift] = useState(0);
-  const [collisionBlocked, setCollisionBlocked] = useState(false);
-  // R134/10, geschaerft R153: Raphael will keine 0815-Animation. Kein Puls, kein Ping-Ring,
-  // kein Scale, kein Wackeln. Der Knopf kommt EINMAL herein — nur opacity und translateY.
-  // Danach ist Ruhe; Bewegung gibt es nur noch auf Hover.
-  // Der Auftritt liegt in `.whatsapp-float` in index.css, innerhalb einer
-  // `prefers-reduced-motion: no-preference`-Media-Query. Kein React-State, kein
-  // `useReducedMotion` im Markup: Server und Client rendern damit dieselben Klassen.
+  const [placed, setPlaced] = useState(false);
+  const placedRef = useRef(false);
+  /* R134/10, geschaerft R153 und erneut aufgemacht in dieser Runde (Kundenkritik 21.08.:
+     "Der Button sieht tot aus — geile Animationen rein"). Aufloesung des Widerspruchs:
+     VERBOTEN bleibt, was ohne Anlass endlos laeuft — Dauer-Puls, Ping-Ring, Bounce,
+     Wackeln, alles nach Gratis-Widget. ERLAUBT ist Bewegung MIT Anlass, die auf den
+     Nutzer reagiert statt auf eine Schleife:
+       1. Eintritt: weicher Spring nach oben (framer-motion, bounce 0.18), einmalig.
+       2. Hover: Icon dreht ein paar Grad und zoomt leicht — EINE Geste, nicht zwei.
+       3. Scroll/Platz-Mangel: Pille <-> Kreis als Layout-Transition mit Spring.
+       4. Press: kurzes Rein- und Zurueckfedern (0.94), taktiles Feedback.
+       5. Ausweichen (collisionLift): gleitet, statt zu springen.
+     Alles laeuft ueber framer-motion und nur auf transform/opacity. SSR: der Server
+     rendert ohne JS den sichtbaren Endzustand (useHydrated-Pattern aus motion.tsx);
+     die Animation zuendet erst nach der Hydration, und `useReducedMotion` begrenzt
+     alles auf einen einfachen Fade. */
+  const reduced = useReducedMotion();
+  const hydrated = useHydrated();
+
+  const commitCompact = useCallback(() => {
+    const next = collisionCompactRef.current || scrollCompactRef.current;
+    if (compactRef.current === next) return;
+    compactRef.current = next;
+    setCompact(next);
+  }, []);
 
   useEffect(() => {
     const footer = document.querySelector('footer');
@@ -68,64 +97,161 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
     return () => obs?.disconnect();
   }, []);
 
-  /* R188 / AAA: Kollisionsschutz auf JEDEM Viewport, nicht nur mobil.
-   *
-   * Der Knopf schwebt fix ueber der Seite. Ob er etwas verdeckt, entscheidet allein die
-   * Frage, was gerade unter seiner Flaeche liegt — und die Antwort wechselt mit jeder
-   * Scrollposition und jeder Route. Genau daran sind die bisherigen Loesungen gescheitert:
-   * sieben Route-Sonderregeln in index.css (R101, R138, R139 ...) und eine kleinere Blase
-   * auf Mobil. Jede davon fixt eine einzelne Stelle, keine die Klasse.
-   *
-   * Gemessene Reste am 21.08. nach der mobilen Runde:
-   *   /tanzkurse/heels Desktop 1440: der Kreis lag mit rund 28px auf dem Kursinhalte-Foto
-   *     (Knopf x=1360..1416, Bild endet x=1387).
-   *   /tanzkurse/heels Mobil 390 im Fold: der Kreis lag auf dem Chip
-   *     "Level je nach aktuellem Kursplan" (Knopf x=330..378, Chip laeuft bis x=369).
-   * Beides sind KEINE Textknoten im bisherigen Sinn: das eine ist ein Bild, das andere
-   * ein Chip, dessen Text vor dem Knopf endet, dessen Rand aber darunter laeuft.
-   *
-   * Der Solver liest darum jetzt drei Arten von Inhalt:
-   *   1. sichtbare Text-Zeilen (unveraendert, inkl. Preise),
-   *   2. Bilder und Video-Flaechen,
-   *   3. abgegrenzte Flaechen mit eigenem Rand oder Fuellung (Chips, Karten, Knoepfe).
-   * Findet er unter dem Knopf etwas davon, steigt der Knopf in 56px-Schritten, bis der
-   * Platz frei ist. Er veraendert dabei kein Layout und keine Copy.
-   *
-   * Der Scan laeuft auf allen Breiten, aber nur bei Scroll/Resize und gebuendelt in
-   * requestAnimationFrame. Slots oberhalb der Kopfzeile sind gesperrt, solange die
-   * Kopfzeile steht. Ist der rechte Rand ueber die volle Hoehe belegt, blendet der Knopf
-   * fuer diesen Bildschirm aus und kehrt beim naechsten freien Zustand zurueck — lieber
-   * kurz weg als dauerhaft auf einem Gesicht. Reduced Motion: die bestehende CSS-Regel
-   * setzt die Transition-Dauer auf 0.01ms. */
+  /* Anlass statt Dauerloop: Beim Scrollen schrumpft die Desktop-Pille zum Kreis. Das
+     nimmt 66 px Breite vom Inhalt weg, während das Auge der Seite folgt. 2,4 Sekunden nach
+     dem letzten Scroll-Event darf das Label wiederkommen. Der Kollisionssolver kann den Kreis
+     länger halten. Dieses Fenster bleibt auch unter Browserlast klar länger als der
+     900-ms-Zwischenbeleg. Mobil ändert der Zustand keine sichtbare Geometrie. */
   useEffect(() => {
-    let frame = 0;
-    let settleTimer = 0;
+    let idleTimer = 0;
+    const onScroll = () => {
+      window.clearTimeout(idleTimer);
+      if (!scrollCompactRef.current) {
+        scrollCompactRef.current = true;
+        commitCompact();
+      }
+      idleTimer = window.setTimeout(() => {
+        scrollCompactRef.current = false;
+        commitCompact();
+      }, 2400);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.clearTimeout(idleTimer);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [commitCompact]);
 
-    const measure = () => {
-      frame = 0;
+  /* Der Kollisionsschutz hält eine Dokumentkarte der rechten Randzone im Speicher.
+     Text, Bilder und Bedienelemente werden beim Laden oder bei Layoutänderungen vermessen.
+     Beim Scrollen vergleicht der Solver nur Zahlen. Dadurch bleibt der Haupt-Thread frei. */
+  useEffect(() => {
+    type CollisionRect = { top: number; bottom: number; left: number; right: number };
+    /* `area` traegt die ungepolsterte Dokumentbox plus die sichtbare Breite. Damit entscheidet
+       jeder Frame per Rechnung neu, ob dieses Bild gerade Hintergrund ist — ohne DOM-Zugriff. */
+    type StaticBlocker = CollisionRect & { area?: { width: number; top: number; bottom: number } };
+    type DynamicBlocker =
+      | { kind: 'element'; element: HTMLElement }
+      | { kind: 'text'; range: Range; parent: HTMLElement };
+
+    /* Polster fuer Elemente, die beim Scrollen noch wandern. 24 px waren zu wenig: die
+       Parallax-Distanzen im Projekt gehen bis 44 px (StylePage-Why 44, Hero 44, Location 40,
+       Events 36, Team 36). Ein Foto konnte also 20 px unter den Knopf laufen, ohne dass die
+       Karte davon wusste — sie wird beim Scrollen nicht neu gebaut. 48 px deckt das Maximum. */
+    const MOTION_PAD = 48;
+    const CONTENT_SELECTOR =
+      'img, video, picture, a, button, input, select, textarea, summary, [role="button"], [role="tab"], [role="checkbox"], [data-cookie-banner], [data-sticky-cta]';
+    let frame = 0;
+    let revealTimer = 0;
+    let settleTimer = 0;
+    let rebuildTimer = 0;
+    let initialRebuildTimer = 0;
+    let active = true;
+    let staticBlockers: StaticBlocker[] = [];
+    let dynamicBlockers: DynamicBlocker[] = [];
+    let viewportAnchoredCache = new WeakMap<HTMLElement, boolean>();
+
+    const elementIsVisible = (element: HTMLElement, allowMotionOpacity: boolean) => {
+      if (element.closest('[hidden], [aria-hidden="true"], [inert]')) return false;
+      if (element.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return true;
+      return Boolean(
+        allowMotionOpacity &&
+        element.closest('[data-reveal], [data-scroll-motion]') &&
+        element.checkVisibility({ checkOpacity: false, checkVisibilityCSS: true }),
+      );
+    };
+
+    const viewportAnchored = (element: HTMLElement, knownStyle?: CSSStyleDeclaration): boolean => {
+      const cached = viewportAnchoredCache.get(element);
+      if (cached !== undefined) return cached;
+      const style = knownStyle ?? window.getComputedStyle(element);
+      const anchored =
+        style.position === 'fixed' ||
+        style.position === 'sticky' ||
+        element.matches('header, [data-cookie-banner], [data-sticky-cta]') ||
+        Boolean(element.parentElement && viewportAnchored(element.parentElement));
+      viewportAnchoredCache.set(element, anchored);
+      return anchored;
+    };
+
+    const movesInViewport = (element: HTMLElement, style: CSSStyleDeclaration) =>
+      style.transform !== 'none' || Boolean(element.closest('[data-reveal], [data-scroll-motion]'));
+
+    const CLIP_OVERFLOW = ['hidden', 'clip', 'auto', 'scroll'];
+
+    /* Naechster overflow-Ahn ist die sichtbare Kachel. Founder-Portraits liegen als
+       `img.absolute.max-w-none` in `div.aspect-square.overflow-hidden`: die img-Box
+       ist groesser als das Fenster. Blocker muss die Kachel sein, nicht der Ueberstand. */
+    /* Sichtbare Box = Schnitt aller overflow-Ahnen, nicht nur des naechsten.
+       Der naechste Clip ist oft die Karte selbst (Instagram-Peek, Founder-Kachel).
+       Die Karte ragt geometrisch unter den Knopf, der Slider schneidet sie aber ab.
+       Nur der sichtbare Rest darf blocken. */
+    const overflowClipBox = (element: HTMLElement): CollisionRect | null => {
+      let clipped: CollisionRect | null = null;
+      for (let ancestor = element.parentElement; ancestor && ancestor !== document.body; ancestor = ancestor.parentElement) {
+        const style = window.getComputedStyle(ancestor);
+        if (!CLIP_OVERFLOW.includes(style.overflowX) && !CLIP_OVERFLOW.includes(style.overflowY)) continue;
+        const box = ancestor.getBoundingClientRect();
+        clipped = clipped
+          ? {
+              top: Math.max(clipped.top, box.top),
+              bottom: Math.min(clipped.bottom, box.bottom),
+              left: Math.max(clipped.left, box.left),
+              right: Math.min(clipped.right, box.right),
+            }
+          : { top: box.top, bottom: box.bottom, left: box.left, right: box.right };
+      }
+      return clipped;
+    };
+
+    const addStaticRect = (
+      rect: { top: number; bottom: number; left: number; right: number },
+      scrollTop: number,
+      stripLeft: number,
+      stripRight: number,
+      moving: boolean,
+      areaChecked = false,
+    ) => {
+      if (rect.right - rect.left <= 1 || rect.bottom - rect.top <= 1 || rect.right <= stripLeft || rect.left >= stripRight) return;
+      const pad = moving ? MOTION_PAD : 0;
+      const top = rect.top + scrollTop;
+      const bottom = rect.bottom + scrollTop;
+      staticBlockers.push({
+        top: top - pad,
+        bottom: bottom + pad,
+        left: rect.left,
+        right: rect.right,
+        area: areaChecked
+          ? {
+              width: Math.max(0, Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0)),
+              top,
+              bottom,
+            }
+          : undefined,
+      });
+    };
+
+    const labelAllowed = () =>
+      window.innerWidth >= 640 &&
+      !document.querySelector(
+        '[data-split-hero-page], [data-events-page], [data-team-page], [data-faq-page], [data-kursaufbau-page], [data-privat-page], [data-collabs-page], [data-tanzschuhe-page], [data-partys-page], [data-heels-style-page]',
+      );
+
+    const rebuildBlockers = () => {
       const float = floatRef.current;
       if (!float) return;
-
       const current = float.getBoundingClientRect();
-      // Aktuelle Verschiebung herausrechnen: so bleibt der Ausgangspunkt stabil und der
-      // Knopf springt nicht zwischen zwei Slots hin und her.
-      const baseTop = current.top + collisionLiftRef.current;
-      const baseBottom = current.bottom + collisionLiftRef.current;
-      /* Der Knopf weicht nach OBEN aus (positive Werte) und, wenn noetig, nach UNTEN
-         (negative). Nur nach oben zu suchen war ein blinder Fleck: auf der Startseite
-         Desktop 1440 endet das Hero-Foto bei y=768, der Knopf sass bei y=746 und alle
-         Aufwaerts-Slots lagen im Foto. Frei waren die 132px DARUNTER. Ohne die negativen
-         Stufen blendete der Knopf auf dem wichtigsten Bildschirm der Seite aus.
-         Nach unten reichen kleine Schritte: viel Platz ist dort nie, sonst haette schon
-         Stufe 0 gepasst. */
-      const candidates = [0, -24, -48, 56, 112, 168, 224, 280, 336, 392, 448, 504, 560, 616, 672];
-      const blockers: Array<{ top: number; bottom: number; left: number; right: number }> = [];
-      const viewportH = window.innerHeight;
-      const push = (rect: DOMRect) => {
-        if (rect.width <= 1 || rect.height <= 1) return;
-        if (rect.bottom <= 0 || rect.top >= viewportH) return;
-        blockers.push({ top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right });
-      };
+      /* Mobil hat kein Label (`hidden sm:inline-block`). Mehrere Desktop-Routen zwingen
+         den Kreis per CSS (split-hero, events, team, faq, kursaufbau, privat, collabs,
+         tanzschuhe, partys, heels). LABEL_WIDTH dort draufzurechnen vermisst eine
+         Phantom-Pille. */
+      const pillWidth = labelAllowed() && compactRef.current ? current.width + LABEL_WIDTH : current.width;
+      const stripLeft = current.right - pillWidth - 8;
+      const stripRight = current.right + 8;
+      const scrollTop = window.scrollY;
+      staticBlockers = [];
+      dynamicBlockers = [];
+      viewportAnchoredCache = new WeakMap<HTMLElement, boolean>();
 
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       let node: Node | null;
@@ -133,41 +259,45 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
         const text = node.textContent?.trim();
         const parent = node.parentElement;
         if (!text || text.length < 2 || !parent || float.contains(parent)) continue;
-        const style = window.getComputedStyle(parent);
-        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) < 0.05) continue;
+        if (parent.closest('.sr-only')) continue;
         const range = document.createRange();
         range.selectNodeContents(node);
-        for (const rect of range.getClientRects()) push(rect);
+        const rects = [...range.getClientRects()].filter(
+          (rect) => rect.width > 1 && rect.height > 1 && rect.right > stripLeft && rect.left < stripRight,
+        );
+        if (!rects.length) continue;
+        if (!elementIsVisible(parent, true)) continue;
+        const style = window.getComputedStyle(parent);
+        if (viewportAnchored(parent, style)) {
+          dynamicBlockers.push({ kind: 'text', range, parent });
+          continue;
+        }
+        const moving = movesInViewport(parent, style);
+        const clip = overflowClipBox(parent);
+        for (const rect of rects) {
+          if (!clip) {
+            addStaticRect(rect, scrollTop, stripLeft, stripRight, moving);
+            continue;
+          }
+          const left = Math.max(rect.left, clip.left);
+          const right = Math.min(rect.right, clip.right);
+          const top = Math.max(rect.top, clip.top);
+          const bottom = Math.min(rect.bottom, clip.bottom);
+          if (right - left <= 1 || bottom - top <= 1) continue;
+          addStaticRect({ top, bottom, left, right }, scrollTop, stripLeft, stripRight, moving);
+        }
       }
 
-      /* Bilder und abgegrenzte Flaechen. Der Rahmen eines Chips gehoert genauso zum
-         sichtbaren Inhalt wie seine Schrift — der Heels-Fund m-01 lag exakt auf dem Rand,
-         nicht auf einem Buchstaben.
-         Ausgenommen ist nur, wovor der Knopf gar nicht ausweichen KANN — und das ist
-         nicht die Groesse allein, sondern die Frage, ob ueberhaupt Platz daneben bleibt.
-         Drei gemessene Faelle zeigen, warum eine einzelne Groessen-Grenze zu grob ist:
-           /tanzkurse/heels Desktop 1440: Foto 41.8 % breit, 83.6 % hoch → seitlich Platz,
-             muss zaehlen (war der 27px-Befund).
-           Home Desktop 1440: Hero 43.6 % breit, 71.6 % hoch → dasselbe.
-           /events-workshops/floweekend Mobil 390: Foto 100 % breit, endet aber bei y=784
-             → seitlich kein Platz, darunter schon; muss ebenfalls zaehlen (8px-Befund).
-         Eine reine Hoehen-Grenze haette die ersten beiden durchgewinkt, eine reine
-         Breiten-Grenze den dritten. Entscheidend ist deshalb die Flaeche: deckt ein
-         Element mehr als 70 % des Bildschirms ab, ist es Hintergrund oder Shell und es
-         gibt nirgends ein Ausweichen. Alles darunter zaehlt als Inhalt. */
-      const viewportArea = window.innerWidth * viewportH;
-      for (const el of document.querySelectorAll<HTMLElement>('img, svg, video, picture, li, button, [class*="rounded"]')) {
-        if (float.contains(el)) continue;
-        const style = window.getComputedStyle(el);
-        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) < 0.05) continue;
-        const isMedia = el.tagName === 'IMG' || el.tagName === 'SVG' || el.tagName === 'VIDEO' || el.tagName === 'PICTURE';
-        /* Eine Flaeche zaehlt nur, wenn sie wirklich eine ist: eigene Fuellung oder ein
-           umlaufender Rahmen. Eine einzelne Trennlinie ist keine.
-           Gemessen auf /tanzkurse Desktop 1440: ein `li ... border-t` ist 537px hoch und
-           traegt oben einen 1px-Strich. Zaehlte dieser Strich als Blockflaeche, war der
-           Knopf ueber 1200 Scroll-Pixel durchgehend ausgeblendet — der Nutzer haette auf
-           der wichtigsten Kursseite keinen WhatsApp-Knopf mehr gehabt. Der Strich selbst
-           verdeckt nichts; verdeckt wird nur, was Fuellung oder Kasten hat. */
+      for (const element of document.querySelectorAll<HTMLElement>(CONTENT_SELECTOR)) {
+        if (float.contains(element) || !elementIsVisible(element, true)) continue;
+        const style = window.getComputedStyle(element);
+        const isMedia =
+          element.tagName === 'IMG' ||
+          element.tagName === 'VIDEO' ||
+          element.tagName === 'PICTURE';
+        const isInteractive = element.matches(
+          'a, button, input, select, textarea, summary, [role="button"], [role="tab"], [role="checkbox"]',
+        );
         const boxed =
           style.borderTopWidth !== '0px' &&
           style.borderBottomWidth !== '0px' &&
@@ -176,129 +306,277 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
         const filled =
           (style.backgroundColor !== 'rgba(0, 0, 0, 0)' && style.backgroundColor !== 'transparent') ||
           style.backgroundImage !== 'none';
-        const hasSurface = boxed || filled;
-        if (!isMedia && !hasSurface) continue;
-        /* Deko ohne Maus-Annahme ist kein Inhalt. Auf /events-workshops/floweekend sperrte
-           ein `pointer-events-none absolute`-Div (Verlaufsschleier, Rechteck -160..416)
-           vier Slots am Stueck und drueckte den Knopf komplett aus der Seite. Ein Element,
-           das keinen Klick annimmt, kann auch nichts verdecken, was jemand braucht.
-           Bilder bleiben ausgenommen: ein Foto traegt Inhalt, auch ohne Maus-Annahme. */
+        if (!isMedia && !isInteractive && !boxed && !filled) continue;
         if (!isMedia && style.pointerEvents === 'none') continue;
-        const rect = el.getBoundingClientRect();
-        // Nur den sichtbaren Anteil messen: ein langes Bild, das oben aus dem Bild
-        // laeuft, ist auf diesem Schirm nicht Hintergrund.
-        const visW = Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0);
-        const visH = Math.min(rect.bottom, viewportH) - Math.max(rect.top, 0);
-        if (visW * visH > viewportArea * 0.7) continue;
-        push(rect);
-      }
 
-      /* Die Kopfzeile faehrt beim Runterscrollen aus dem Bild (SiteHeader translateY).
-         Solange sie steht, darf der Knopf nicht unter sie fahren; ist sie weg, ist der
-         Platz oben frei und wird gebraucht — auf /tanzkurse/heels ist der obere Rand
-         sonst der einzige freie Streifen. */
+        const raw = element.getBoundingClientRect();
+        /* Medien liegen oft als `img.absolute.max-w-none` in einer `overflow-hidden`-Kachel
+           (Founder-Portraits). Die img-Box ist dann groesser als das, was man sieht. Blocker
+           ist die Kachel; degeneriert die Schnittmenge, gilt die Kachel selbst. */
+        let rect: CollisionRect = { top: raw.top, bottom: raw.bottom, left: raw.left, right: raw.right };
+        const clip = overflowClipBox(element);
+        if (clip) {
+          const left = Math.max(raw.left, clip.left);
+          const right = Math.min(raw.right, clip.right);
+          const top = Math.max(raw.top, clip.top);
+          const bottom = Math.min(raw.bottom, clip.bottom);
+          if (right - left <= 1 || bottom - top <= 1) {
+            /* Medien: die Kachel selbst. Sonst: wirklich unsichtbar, kein Blocker. */
+            if (!isMedia) continue;
+            rect = { top: clip.top, bottom: clip.bottom, left: clip.left, right: clip.right };
+          } else {
+            rect = { top, bottom, left, right };
+          }
+        }
+        if (
+          rect.right - rect.left <= 1 ||
+          rect.bottom - rect.top <= 1 ||
+          rect.right <= stripLeft ||
+          rect.left >= stripRight
+        ) {
+          continue;
+        }
+        if (viewportAnchored(element, style)) {
+          dynamicBlockers.push({ kind: 'element', element });
+          continue;
+        }
+        /* Der Grossflaechen-Skip (Bild fuellt das Fenster, gilt also als Hintergrund) faellt
+           NICHT hier. Er haengt an der Scroll-Position: dasselbe Foto fuellt oben halb und in
+           der Mitte ganz. Frueher entschied der Solver einmal beim Aufbau und merkte sich das
+           Ergebnis fuer alle Positionen — so rutschten drei Fotos durch, die der Verifier an
+           seiner Position sehr wohl als Blocker sah. Jetzt entscheidet jeder Frame neu. */
+        addStaticRect(
+          rect,
+          scrollTop,
+          stripLeft,
+          stripRight,
+          movesInViewport(element, style),
+          true,
+        );
+      }
+    };
+
+    const dynamicRects = () => {
+      const rects: CollisionRect[] = [];
+      for (const blocker of dynamicBlockers) {
+        const owner = blocker.kind === 'text' ? blocker.parent : blocker.element;
+        if (!elementIsVisible(owner, false)) continue;
+        const liveRects = blocker.kind === 'text'
+          ? blocker.range.getClientRects()
+          : blocker.element.getClientRects();
+        const clip = overflowClipBox(owner);
+        for (const rect of liveRects) {
+          if (rect.width <= 1 || rect.height <= 1) continue;
+          if (!clip) {
+            rects.push({ top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right });
+            continue;
+          }
+          const left = Math.max(rect.left, clip.left);
+          const right = Math.min(rect.right, clip.right);
+          const top = Math.max(rect.top, clip.top);
+          const bottom = Math.min(rect.bottom, clip.bottom);
+          if (right - left <= 1 || bottom - top <= 1) continue;
+          rects.push({ top, bottom, left, right });
+        }
+      }
+      return rects;
+    };
+
+    const measure = () => {
+      frame = 0;
+      const float = floatRef.current;
+      if (!float) return;
+
+      const current = float.getBoundingClientRect();
+      const baseTop = current.top + collisionLiftRef.current;
+      const baseBottom = current.bottom + collisionLiftRef.current;
+      /* Der Korridor ist absichtlich kurz. Vorher reichte er bis 672 px, und genau das war
+         der Fehler: gemessen am 21.08. sass der Knopf auf /tanzkurse/salsa mobil am Ende bei
+         y=216 (auf der H1), auf /team desktop bei y=298, und der Hub sprang dort innerhalb
+         von zwei Sekunden 0 -> 560 -> 616 -> 560. Ein Knopf, der ins obere Drittel wandert,
+         ist nicht mehr der Knopf unten rechts aus wiki/absprachen.md:21 — er ist ein zweites,
+         zufaellig platziertes Element. Zwei Knopfhoehen sind die Grenze, ab der man das
+         Ausweichen noch als Ausweichen liest. */
+      const candidates = [0, 56, 112];
+      const viewportH = window.innerHeight;
+      const scrollTop = window.scrollY;
+      const liveBlockers = dynamicRects();
       const header = document.querySelector('header');
       const headerRect = header?.getBoundingClientRect();
       const headerVisible = Boolean(headerRect && headerRect.bottom > 0 && headerRect.height > 0);
       const ceiling = headerVisible && headerRect ? headerRect.bottom + 12 : 12;
-
-      /* Zwei Formen, in dieser Reihenfolge: erst die volle Pille mit Label, sonst der
-         kompakte Kreis. Der Auftrag erlaubt ausdruecklich eine kleinere, unaufdringliche
-         Darstellung — und auf Desktop ist genau die Breite das Problem, nicht die Hoehe.
-         Gemessen auf der Startseite 1440px: das Hero-Foto endet bei x=1408, rechts davon
-         bleiben 32px. Die Pille ist 122px breit und findet deshalb ueber den ganzen Fold
-         keinen Platz; der Knopf verschwand dort ab Sekunde 3 komplett. Als 56px-Kreis
-         steht er neben dem Foto statt darauf. Label weg ist besser als Knopf weg. */
-      /* Der Kreis ist so breit wie hoch. Die Verschmaelerung darf NICHT aus der aktuellen
-         Breite kommen: sobald der Knopf einmal kompakt ist, waere sie null und der
-         Solver haette den Kreis-Versuch verloren — er kippte dann sofort auf "kein Platz"
-         zurueck und blendete aus. Ausgangsbreite ist deshalb die Pillenbreite, die der
-         Knopf im Normalzustand hat. */
-      const pillWidth = compactRef.current ? current.width + LABEL_WIDTH : current.width;
+      const pillWidth = labelAllowed() && compactRef.current ? current.width + LABEL_WIDTH : current.width;
       const compactShift = Math.max(0, pillWidth - current.height);
       const searchLeft = current.right - pillWidth;
       let next: number | null = null;
-      let compact = false;
+      let needsCompact = false;
+
+      /* Kacheln (Founder-Portraits, Karten) bleiben Blocker. Breite Atmosphaere — Hero,
+         Band, volles Shell-Foto — darf der Knopf in der Ecke ueberlagern. Sonst bleibt
+         unten rechts kein Platz, und der Solver schiebt den Knopf in die Seite. */
+      const isBackgroundNow = (rect: StaticBlocker) => {
+        if (!rect.area) return false;
+        const height = rect.area.bottom - rect.area.top;
+        const ratio = height > 0 ? rect.area.width / height : 0;
+        const tile =
+          rect.area.width < window.innerWidth * 0.45 &&
+          height < viewportH * 0.5 &&
+          ratio > 0.75 &&
+          ratio < 1.35;
+        if (tile) return false;
+        if (rect.area.width <= window.innerWidth * 0.35) return false;
+        const visibleHeight = Math.max(
+          0,
+          Math.min(rect.area.bottom, scrollTop + viewportH) - Math.max(rect.area.top, scrollTop),
+        );
+        return visibleHeight > viewportH * 0.22;
+      };
+
       for (const shrink of [0, compactShift]) {
         for (const lift of candidates) {
           const top = baseTop - lift - 6;
           const bottom = baseBottom - lift + 6;
           const left = searchLeft + shrink - 6;
           const right = current.right + 6;
-          if (top < ceiling) continue;
-          // Nach unten nie aus dem Bild schieben: 12px Luft zur Viewportkante bleiben.
-          if (bottom > viewportH - 12) continue;
-          const blocked = blockers.some(
+          if (top < ceiling || bottom > viewportH - 12) continue;
+          const documentTop = top + scrollTop;
+          const documentBottom = bottom + scrollTop;
+          const blockedByStatic = staticBlockers.some(
+            (rect) =>
+              rect.right > left &&
+              rect.left < right &&
+              rect.bottom > documentTop &&
+              rect.top < documentBottom &&
+              !isBackgroundNow(rect),
+          );
+          const blockedByDynamic = liveBlockers.some(
             (rect) => rect.right > left && rect.left < right && rect.bottom > top && rect.top < bottom,
           );
-          if (!blocked) {
+          if (!blockedByStatic && !blockedByDynamic) {
             next = lift;
-            compact = shrink > 0;
+            needsCompact = shrink > 0;
             break;
           }
         }
-        if (next !== null) break;
-        if (compactShift === 0) break;
-      }
-      if (compactRef.current !== compact) {
-        compactRef.current = compact;
-        setCompact(compact);
+        if (next !== null || compactShift === 0) break;
       }
 
+      /* Findet der Solver im Korridor nichts Freies, faellt der Knopf auf den Grundplatz
+         unten rechts zurueck und wird zum Kreis. Vorher blendete er sich dann aus: gemessen
+         am 21.08. stand er auf der Startseite mobil bei 700, 1200 und 2000 ms auf
+         `visibility: hidden` und dazwischen sichtbar. Der Knopf flackerte und fehlte auf dem
+         ersten Fold ganz. Ein Messenger-Knopf, den es manchmal nicht gibt, ist schlechter als
+         einer, der am aeussersten Rand ueber einer Textzeile steht. */
+      if (next === null) {
+        next = 0;
+        needsCompact = compactShift > 0;
+      }
+      if (collisionCompactRef.current !== needsCompact) {
+        collisionCompactRef.current = needsCompact;
+        commitCompact();
+      }
       if (headerDockedRef.current !== headerVisible) {
         headerDockedRef.current = headerVisible;
         setHeaderDocked(headerVisible);
       }
-      const blocked = next === null;
-      if (collisionBlockedRef.current !== blocked) {
-        collisionBlockedRef.current = blocked;
-        setCollisionBlocked(blocked);
+      if (!placedRef.current) {
+        placedRef.current = true;
+        setPlaced(true);
       }
-      if (next !== null && collisionLiftRef.current !== next) {
+      if (collisionLiftRef.current !== next) {
         collisionLiftRef.current = next;
+        float.style.setProperty('--whatsapp-collision-lift', `${next}px`);
         setCollisionLift(next);
       }
     };
 
     const schedule = () => {
       if (!frame) frame = window.requestAnimationFrame(measure);
-      // Reveal-Animationen starten beim Scroll mit opacity:0. Der erste Frame darf diese
-      // Textknoten zu Recht ignorieren; nach 700ms sind sie sichtbar. Ohne zweiten Scan
-      // erschien z.B. «Festpreis pro Staffel.» erst NACH der Messung unter dem Knopf.
+      window.clearTimeout(revealTimer);
       window.clearTimeout(settleTimer);
+      revealTimer = window.setTimeout(() => {
+        if (!frame) frame = window.requestAnimationFrame(measure);
+      }, 140);
       settleTimer = window.setTimeout(() => {
         if (!frame) frame = window.requestAnimationFrame(measure);
       }, 700);
     };
+
+    const scheduleRebuild = () => {
+      if (!active) return;
+      window.clearTimeout(rebuildTimer);
+      rebuildTimer = window.setTimeout(() => {
+        rebuildTimer = 0;
+        rebuildBlockers();
+        schedule();
+      }, 120);
+    };
+
+    const onResize = () => {
+      scheduleRebuild();
+      schedule();
+    };
+    const mutationObserver = new MutationObserver((records) => {
+      const float = floatRef.current;
+      if (float && records.every((record) => float.contains(record.target))) return;
+      scheduleRebuild();
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+    mutationObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    const resizeObserver = new ResizeObserver(scheduleRebuild);
+    resizeObserver.observe(document.body);
+
+    rebuildBlockers();
     schedule();
+    initialRebuildTimer = window.setTimeout(scheduleRebuild, 700);
+    void document.fonts.ready.then(scheduleRebuild);
     window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule, { passive: true });
+    window.addEventListener('resize', onResize, { passive: true });
+    document.addEventListener('load', scheduleRebuild, true);
     document.addEventListener('animationend', schedule, true);
     document.addEventListener('transitionend', schedule, true);
+
     return () => {
+      active = false;
       if (frame) window.cancelAnimationFrame(frame);
+      window.clearTimeout(revealTimer);
       window.clearTimeout(settleTimer);
+      window.clearTimeout(rebuildTimer);
+      window.clearTimeout(initialRebuildTimer);
+      mutationObserver.disconnect();
+      resizeObserver.disconnect();
       window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', schedule);
+      window.removeEventListener('resize', onResize);
+      document.removeEventListener('load', scheduleRebuild, true);
       document.removeEventListener('animationend', schedule, true);
       document.removeEventListener('transitionend', schedule, true);
     };
-  }, []);
+  }, [commitCompact]);
 
   if (footerInView || dialogOpen) return null;
 
+  const floatStyle: WhatsAppFloatStyle = {
+    '--whatsapp-collision-lift': `${collisionLift}px`,
+    bottom: raised
+      ? 'calc(1.25rem + var(--sticky-cta-height, 0px) + var(--cookie-float-lift, 0px) + var(--whatsapp-lift, 0px) + var(--whatsapp-collision-lift))'
+      : 'calc(1.25rem + var(--sticky-cta-height, 0px) + var(--whatsapp-lift, 0px) + var(--whatsapp-collision-lift))',
+  };
+
   return (
-    <a
+    <motion.a
       ref={floatRef}
       href={WHATSAPP_URL}
       target="_blank"
       rel="noreferrer"
       aria-label={label}
-      aria-hidden={collisionBlocked || undefined}
-      tabIndex={collisionBlocked ? -1 : undefined}
       title={label}
+      initial={hydrated ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      transition={{ type: 'spring', bounce: 0.18, duration: reduced ? 0.2 : 0.55 }}
+      whileHover="hover"
+      whileTap={reduced ? undefined : { scale: 0.94 }}
       className={cn(
-        // Raphael 17.08.: rechts unten, weiss auf gruen. Auch auf dem Handy sichtbar.
+        // Rechts unten, weiss auf gruen und auf dem Handy sichtbar (Absprachen.md:21).
         /* R188 / AAA (Video-Runde 21.08.): mobil deckte die Blase Fliesstext ab — gemessen
            auf der Startseite 390px an 14 von 35 Scrollpositionen, 17 ueberdeckte Textzeilen
            (worklog/.r188f6-wa.mjs), auf /preise sogar einen Preis in der Zeile "Schueler
@@ -312,11 +590,13 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
            Sie belegt jetzt x=338..386 und damit im Wesentlichen den Aussenrand rechts der
            Textkante statt die Spalte selbst. Ab sm bleibt alles unveraendert (h-14, right-6,
            Pillenform mit Label) — Desktop war nie der Befund. */
-        'whatsapp-float fixed right-3 z-40 inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full px-0 sm:right-6 sm:h-14',
+        'whatsapp-float group/wa fixed right-1 z-40 inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full px-0 sm:right-6 sm:h-14',
         // Kompakt heisst: Kreis statt Pille, weil sonst kein Platz bleibt (siehe Solver).
         compact ? 'sm:w-14 sm:px-0' : 'sm:w-auto sm:px-4',
-        collisionBlocked && 'pointer-events-none opacity-0',
-        'bg-[var(--color-whatsapp)] text-white shadow-lg shadow-black/15 ring-1 ring-black/10',
+        // Vor der ersten Messung steht der Knopf noch auf dem Grundplatz, ohne zu wissen, was
+        // dort liegt. Er bleibt bis dahin unsichtbar; danach zuendet der Eintritt.
+        hydrated && !placed && 'invisible pointer-events-none opacity-0',
+        'bg-[var(--color-whatsapp)] text-white shadow-[0_10px_28px_rgba(17,17,17,0.16)] ring-1 ring-black/10',
         // R153: `t-hover-move` ist hier raus. Die Klasse deckte dieselben Eigenschaften ab
         // wie die Zeile darunter, setzte aber `transition-duration: var(--dur-base)` und
         // gewann per Reihenfolge gegen die Utility — gemessen 0.24s statt der gewollten
@@ -343,10 +623,9 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
         // R101: Seiten-Anker (z.B. /kursplan) setzt --whatsapp-lift per Media-Query auf :root.
         className,
       )}
-      // bottom ist inline, weil er zwei Hoehen-Variablen mitrechnet — eine Klasse koennte
-      // diesen Wert nicht ueberschreiben (inline schlaegt Klasse). Die Seiten-Korrektur laeuft
-      // deshalb ueber die dritte Variable --whatsapp-lift (Default 0px), NICHT ueber eine
-      // Klasse: /kursplan setzt sie mobil auf 5rem, damit der Float die Tages-Chips freigibt.
+      // bottom ist inline, weil er mehrere gemessene Höhen addiert. Der Solver schreibt
+      // --whatsapp-collision-lift sofort auf das Element. React übernimmt denselben Wert danach.
+      // So liegt der Knopf auch im Mess-Frame bereits im freien Slot.
       // --sticky-cta-height: der mobile Home-CTA-Balken (StickyCta) meldet seine Hoehe,
       // solange er sichtbar ist — der Float sass sonst genau auf dem roten Knopf.
       // R153: Der Cookie-Anteil laeuft ueber --cookie-float-lift, nicht mehr direkt ueber
@@ -354,18 +633,38 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
       // am Banner-Wrapper (CookieBanner.tsx) die Karte vom Knopf weg, und ein Vertikal-Lift
       // haette den Kreis auf den Hero-CTA «Schnupperstunde buchen» gehoben. Ab sm traegt die
       // Variable die gemessene Kartenhoehe und der Float steigt ueber die Karte.
-      style={{
-        bottom: raised
-          ? `calc(1.25rem + var(--sticky-cta-height, 0px) + var(--cookie-float-lift, 0px) + var(--whatsapp-lift, 0px) + ${collisionLift}px)`
-          : `calc(1.25rem + var(--sticky-cta-height, 0px) + var(--whatsapp-lift, 0px) + ${collisionLift}px)`,
-      }}
+      style={floatStyle}
     >
-      {/* Echtes WhatsApp-Zeichen im gruenen Kreis (vorher generische Lucide-Sprechblase). */}
-      <WhatsAppIcon className="h-6 w-6 shrink-0" />
-      {/* Das Label faellt nur weg, wenn der Solver keinen Platz fuer die Pille findet.
-          Das Icon bleibt, `aria-label` traegt den Namen weiter — der Knopf bleibt fuer
-          Screenreader und Tastatur unveraendert benannt. */}
-      {!compact && <span className="hidden text-sm font-semibold sm:inline">WhatsApp</span>}
-    </a>
+      {/* Echtes WhatsApp-Zeichen im gruenen Kreis (vorher generische Lucide-Sprechblase).
+          Hover ist EINE Geste: das Icon kippt ein paar Grad und zoomt minimal. Kein
+          zusaetzliches Verschieben, kein Doppeln. */}
+      <motion.span
+        className="inline-flex text-white"
+        variants={reduced ? undefined : { hover: { rotate: -10, scale: 1.12 } }}
+        transition={{ type: 'spring', bounce: 0.4, duration: 0.4 }}
+      >
+        <WhatsAppIcon className="h-6 w-6 shrink-0" />
+      </motion.span>
+      {/* Das Label faellt beim Scrollen und bei Platzmangel weg. Das Icon bleibt;
+          `aria-label` traegt den Namen weiter, also bleibt der Knopf fuer Screenreader und
+          Tastatur unveraendert benannt. Der Wechsel Pille <-> Kreis ist eine
+          Layout-Transition: Breite und Innenabstand federn weich, statt hart umzuschalten.
+          Bei reduced-motion bleibt nur der kurze Opacity-Fade des Labels. */}
+      <AnimatePresence initial={false}>
+        {!compact && (
+          <motion.span
+            layout
+            data-whatsapp-label
+            initial={reduced ? { opacity: 0 } : { opacity: 0, width: 0 }}
+            animate={{ opacity: 1, width: 'auto' }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, width: 0 }}
+            transition={{ type: 'spring', bounce: 0, duration: reduced ? 0.15 : 0.4 }}
+            className="hidden overflow-hidden text-sm font-semibold whitespace-nowrap sm:inline-block"
+          >
+            WhatsApp
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.a>
   );
 }

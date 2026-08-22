@@ -12,7 +12,7 @@
 // Fakten leben unveraendert auf /events-workshops/danceflow-night.
 
 import { type ReactNode } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowRight, CalendarDays, PartyPopper, Users, type LucideIcon } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { Seo } from '@/lib/seo';
@@ -21,7 +21,13 @@ import { SiteFooter, CONTACT } from '@/public/site/SiteFooter';
 import { cn } from '@/lib/utils';
 import { Eyebrow, Shell, CtaText, sectionTitle, sectionLead } from '@/public/site/primitives';
 import { ClosingInvite, MEASURE_L, HeroFrame } from '@/public/subpage/kit';
-import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
+import {
+  Reveal,
+  useReveal,
+  useRevealVariant,
+  ClipReveal,
+  RevealWords,
+} from '@/public/home/motion';
 import {
   EVENTS,
   EVENTFROG_URL,
@@ -61,25 +67,22 @@ export function EventsPage() {
   );
 }
 
-/* Ruhiger Foto-Fade beim Eintritt (whileInView). Reduced-motion nur Opacity, kein Versatz.
-   `data-reveal` erzwingt Sichtbarkeit im statischen Screenshot-Tool. */
+/* Eingang der grossen Einzelfotos (Anniversary, Floweekend).
+ *
+ * R189: das war eine handgeschriebene Kopie des Standard-rise — 22px Versatz, eigener
+ * useReducedMotion, eigener useHydrated, eigene Dauer. Genau der immergleiche Effekt,
+ * den der Auftrag ersetzen soll, nur ein zweites Mal ausformuliert.
+ *
+ * Jetzt ist es ClipReveal aus home/motion.tsx: ein Vorhang statt eines Versatzes. Der
+ * Unterschied ist auf diesen zwei Bildern besonders deutlich, weil beide ein
+ * Text-Overlay tragen (Anniversary) oder eng auf Gesichter geschnitten sind — ein
+ * y-Versatz schiebt das Motiv gegen seinen ausgemessenen Crop, clip nicht.
+ *
+ * Die Huelle bleibt als benannte Komponente stehen, damit die Aufrufstellen unveraendert
+ * lesen und die Rolle einen Namen behaelt. reduced-motion, Hydration und `data-reveal`
+ * kommen jetzt aus der geteilten Komponente statt aus dieser Datei. */
 function PhotoFade({ children, className }: { children: ReactNode; className?: string }) {
-  const reduced = useReducedMotion();
-  const hydrated = useHydrated();
-  return (
-    <motion.div
-      data-reveal
-      className={className}
-      // R155: 16px -> 22px Versatz, damit die Einzelfotos denselben spuerbaren Takt haben
-      // wie die gestaffelten Reveal-Gruppen. Reduced-motion bleibt bei y:0 (nur Fade).
-      initial={hydrated ? { opacity: 0, y: reduced ? 0 : 22 } : false}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={VIEWPORT}
-      transition={{ duration: reduced ? 0.32 : 0.6, ease: EASE_OUT }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <ClipReveal className={className}>{children}</ClipReveal>;
 }
 
 /* Wiederverwendbarer Eventfrog-Ticket-Button. EINE Stelle fuer Ziel + Verhalten:
@@ -288,14 +291,13 @@ function EventsPreviewSection() {
   return (
     <section id="danceflow" className="scroll-mt-24 bg-white py-16 lg:py-[6.25rem]">
       <Shell>
-        <Reveal className="max-w-xl" stagger={0.1} distance={22}>
-          <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
-            {p.title}
-          </motion.h2>
-          <motion.p variants={item} className={cn('mt-4 max-w-xl text-pretty', sectionLead)}>
-            {p.lead}
-          </motion.p>
-        </Reveal>
+        {/* Die erste Ueberschrift der Seite traegt die staerkste Geste: Wort-fuer-Wort statt
+            Blur. RevealWords bringt ein eigenes whileInView mit. Der Lead bleibt statisch und
+            voll deckend, damit der 220-ms-Zwischenstand keinen Geistertext zeigt. */}
+        <div className="max-w-xl">
+          <RevealWords text={p.title} className={cn(sectionTitle, MEASURE_L)} />
+          <p className={cn('mt-4 max-w-xl text-pretty', sectionLead)}>{p.lead}</p>
+        </div>
 
         <Reveal
           className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"
@@ -352,6 +354,7 @@ function GallerySection() {
   // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
   // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
   const { item } = useReveal({ stagger: 0.14, distance: 22 });
+  const { item: headline } = useRevealVariant('blur');
   const g = EVENTS[lang].gallery;
   /* R155, Karte 1 und 2 kappten die Stirn (Video 05:51, Beleg worklog/shots/S7-ux155/
      vorher/events-y1400.png).
@@ -399,7 +402,7 @@ function GallerySection() {
           <motion.div variants={item}>
             <Eyebrow>{g.eyebrow}</Eyebrow>
           </motion.div>
-          <motion.h2 variants={item} className={cn("mt-5", sectionTitle, MEASURE_L)}>
+          <motion.h2 variants={headline} className={cn("mt-5", sectionTitle, MEASURE_L)}>
             {g.title}
           </motion.h2>
           <motion.p variants={item} className={cn("mt-4 max-w-xl text-pretty", sectionLead)}>
@@ -435,9 +438,6 @@ function GallerySection() {
 /* ---------------------------------------------------------------------------- Workshops vor der Night */
 function WorkshopsSection() {
   const { lang } = useLang();
-  // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
-  // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
-  const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const w = EVENTS[lang].workshops;
   const flowSteps =
     lang === 'de'
@@ -454,17 +454,20 @@ function WorkshopsSection() {
   return (
     <section className="bg-[var(--color-paper-warm)] py-16 lg:py-24">
       <Shell>
-        <div className="grid overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_55px_rgba(17,17,17,0.07)] lg:grid-cols-[1.08fr_0.92fr]">
-          <Reveal className="p-7 sm:p-9 lg:p-12" stagger={0.1} distance={22}>
-            <motion.div variants={item}>
+        {/* R189: Ein einzelner Clip öffnet die ganze Workshop-Karte. Der frühere Innen-Stagger
+            ließ den Absatz im 220-ms-Beleg nur schwach grau erscheinen. Der Clip hält jeden
+            sichtbaren Text bei voller Deckkraft und vermeidet einen zweiten Animationstakt. */}
+        <ClipReveal className="grid overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_55px_rgba(17,17,17,0.07)] lg:grid-cols-[1.08fr_0.92fr]">
+          <div className="p-7 sm:p-9 lg:p-12">
+            <div>
               <Eyebrow>{w.eyebrow}</Eyebrow>
-            </motion.div>
-            <motion.h2 variants={item} className={cn("mt-5", sectionTitle, MEASURE_L)}>
+            </div>
+            <h2 className={cn("mt-5", sectionTitle, MEASURE_L)}>
               {w.title}
-            </motion.h2>
-            <motion.p variants={item} className={`mt-4 max-w-2xl ${sectionLead}`}>
+            </h2>
+            <p className={`mt-4 max-w-2xl ${sectionLead}`}>
               {w.body}
-            </motion.p>
+            </p>
 
             {/* R155: hier standen vier schmale Mini-Karten in sm:grid-cols-2 (Vorher-Shot
                 events-y2800.png). content.ts traegt inzwischen nur noch ZWEI Punkte, und
@@ -475,10 +478,7 @@ function WorkshopsSection() {
                 Lesen. Kein leerer Kasten mehr, egal ob content.ts einen, zwei oder drei
                 Punkte liefert. Bewusst dieselbe Leseliste-Geste wie die Danceflow-Fakten
                 oben (grid statt Kachel), damit die Seite EIN Listen-Muster hat. */}
-            <motion.div
-              variants={item}
-              className="mt-8 divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]"
-            >
+            <div className="mt-8 divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
               {w.points.map((point: string, i: number) => (
                 <div key={point} className="grid grid-cols-[2rem_1fr] gap-4 py-5">
                   <span className="font-display text-sm font-bold tabular-nums text-[var(--color-salsa)]">
@@ -487,9 +487,9 @@ function WorkshopsSection() {
                   <p className="text-sm leading-relaxed text-[var(--color-ink)]">{point}</p>
                 </div>
               ))}
-            </motion.div>
+            </div>
 
-            <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <EventfrogCta
                 label={lang === 'de' ? 'Workshops ansehen' : 'See workshops'}
                 variant="ghost"
@@ -497,8 +497,8 @@ function WorkshopsSection() {
               <ScrollDownLink href="#tickets">
                 {lang === 'de' ? 'Zum Kalender' : 'To the calendar'}
               </ScrollDownLink>
-            </motion.div>
-          </Reveal>
+            </div>
+          </div>
 
           <div className="relative min-h-[31rem] overflow-hidden bg-[var(--color-ink)] lg:min-h-0">
             <img
@@ -548,7 +548,7 @@ function WorkshopsSection() {
               </div>
             </div>
           </div>
-        </div>
+        </ClipReveal>
       </Shell>
     </section>
   );
@@ -561,6 +561,7 @@ function AnniversarySection() {
   // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
   // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
   const { item } = useReveal({ stagger: 0.1, distance: 22 });
+  const { item: headline } = useRevealVariant('blur');
   const a = EVENTS[lang].anniversary;
   const highlights =
     lang === 'de'
@@ -604,7 +605,7 @@ function AnniversarySection() {
         </PhotoFade>
 
         <Reveal className="order-1 max-w-xl lg:order-2" stagger={0.1} distance={22}>
-          <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
+          <motion.h2 variants={headline} className={cn(sectionTitle, MEASURE_L)}>
             {a.title}
           </motion.h2>
           <motion.p variants={item} className={cn("mt-4 max-w-xl text-pretty", sectionLead)}>
@@ -657,6 +658,7 @@ function FloweekendSection() {
   // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
   // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
   const { item } = useReveal({ stagger: 0.1, distance: 22 });
+  const { item: headline } = useRevealVariant('blur');
   const f = EVENTS[lang].floweekend;
   return (
     <section className="bg-[var(--color-paper-warm)] py-16 lg:py-24">
@@ -668,7 +670,7 @@ function FloweekendSection() {
               {f.badge}
             </span>
           </motion.div>
-          <motion.h2 variants={item} className={cn("mt-5", sectionTitle, MEASURE_L)}>
+          <motion.h2 variants={headline} className={cn("mt-5", sectionTitle, MEASURE_L)}>
             {f.title}
           </motion.h2>
           <motion.p variants={item} className={cn("mt-4 max-w-xl text-pretty", sectionLead)}>
@@ -703,6 +705,7 @@ function TicketsSection() {
   // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
   // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
   const { item } = useReveal({ stagger: 0.1, distance: 22 });
+  const { item: headline } = useRevealVariant('blur');
   const t = EVENTS[lang].tickets;
   const calendarItems =
     lang === 'de'
@@ -724,7 +727,7 @@ function TicketsSection() {
             <motion.div variants={item}>
               <Eyebrow>{t.eyebrow}</Eyebrow>
             </motion.div>
-            <motion.h2 variants={item} className={cn("mt-5", sectionTitle, MEASURE_L)}>
+            <motion.h2 variants={headline} className={cn("mt-5", sectionTitle, MEASURE_L)}>
               {t.title}
             </motion.h2>
             <motion.p variants={item} className={`mt-4 max-w-xl ${sectionLead}`}>

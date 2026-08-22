@@ -48,6 +48,7 @@
 //   Jetzt traegt der Fold auf JEDER Breite genau einen sichtbaren Schnupperstunde-CTA.
 
 import { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { Seo } from '@/lib/seo';
 import { useLang } from '@/lib/i18n';
 import { embeddedSchedule } from '@/lib/schedule';
@@ -153,12 +154,21 @@ export function SchedulePage() {
                     ? `${total} ${total === 1 ? t.resultOne : t.resultMany} ${de ? 'pro Woche' : 'per week'}.`
                     : t.loading}
                 </span>
+                {/* Kursplan bleibt die gefuellte Hauptaktion. Der mobile Ersatz fuer den
+                    versteckten Header-CTA behaelt 44px Klickhoehe, aber weder rote Fuellung
+                    noch Outline-Pille (absprachen.md:13). */}
                 <a
                   data-schedule-trial-cta
                   href="/schnupperstunde"
-                  className="btn-base btn-outline-salsa self-start px-4 py-2 text-sm sm:hidden"
+                  className="group inline-flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-4 sm:hidden"
                 >
                   {de ? 'Neu? Gratis Schnupperstunde' : 'New here? Free trial class'}
+                  <ArrowRight
+                    aria-hidden
+                    size={16}
+                    strokeWidth={2.25}
+                    className="transition-transform duration-[var(--dur-fast)] group-hover:translate-x-0.5"
+                  />
                 </a>
               </div>
             </div>
@@ -188,7 +198,7 @@ export function SchedulePage() {
         {/* pb: der dunkle ScheduleBottomCta stand vorher direkt auf dem schwarzen Footer —
             zwei grosse Dunkelflaechen ohne Fuge (Kritik-Runde 10.08.2026). Papier-Luft dazwischen. */}
         <section id="kursplan-list" className="scroll-mt-24 bg-[var(--color-bg-soft)] pb-14 pt-2 sm:pb-16 sm:pt-10 lg:pt-5">
-          <div className="mx-auto max-w-[1080px] px-5 sm:px-8">
+          <div className="mx-auto max-w-[1080px] pl-5 pr-24 sm:pl-8 sm:pr-[5.5rem]">
             <CourseEngine onTotal={setTotal} />
           </div>
         </section>

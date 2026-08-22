@@ -63,22 +63,31 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
     return () => window.removeEventListener('scroll', onScroll);
   }, [acknowledged]);
 
-  // Kurze Seiten (z.B. /buchung Leer-Tag): Footer ist ohne Scroll im Viewport und
-  // wuerde von der fixen Leiste durchschnitten. Sobald der Footer den unteren Rand
-  // beruehrt, raeumt die Leiste freiraum.
+  // Kurze Seiten: Der Footer kann ohne Scroll im Viewport stehen. Erst nach einer kurzen
+  // Ruhephase ausblenden. Datenrouten wie /kursplan sind beim ersten Render ebenfalls kurz,
+  // wachsen aber direkt danach. Ein sofortiges Ausblenden liess den Hinweis dort nur blitzen.
   useEffect(() => {
     if (acknowledged) return;
     const footer = document.querySelector('footer');
     if (!footer || typeof IntersectionObserver === 'undefined') return;
+    let clearTimer = 0;
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) setClearedByScroll(true);
+        window.clearTimeout(clearTimer);
+        if (!entry?.isIntersecting) return;
+        clearTimer = window.setTimeout(() => {
+          const footerStillVisible = footer.getBoundingClientRect().top < window.innerHeight;
+          const pageStillShort = document.documentElement.scrollHeight <= window.innerHeight + 1;
+          if (footerStillVisible && pageStillShort) setClearedByScroll(true);
+        }, 700);
       },
-      // Frueh genug, bevor die Leiste Primary-CTAs im Footer schneidet.
       { root: null, rootMargin: '0px 0px -48px 0px', threshold: 0 },
     );
     io.observe(footer);
-    return () => io.disconnect();
+    return () => {
+      window.clearTimeout(clearTimer);
+      io.disconnect();
+    };
   }, [acknowledged]);
 
   // Buchungs-Dialog (aria-modal): Cookie unter dem Overlay aus dem DOM nehmen.
@@ -159,7 +168,7 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
       // Kreis (3.5rem) bei right-5 (1.25rem) plus 0.75rem Luft = 5.5rem. Ab sm ist er eine
       // Pille mit Label «WhatsApp» bei right-6 und braucht mehr: 10.5rem.
       // Kein `left` am Float — der Knopf bleibt sitewide rechts unten im Gutter.
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pr-[5.5rem] sm:px-5 sm:pb-5"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pr-[5.5rem] sm:px-5 sm:pb-5 sm:pr-[10.5rem]"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
     >
       <div className="pointer-events-auto mx-auto flex w-full max-w-[640px] items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)]/95 px-4 py-2.5 shadow-[0_10px_30px_rgba(17,17,17,0.14)] backdrop-blur-sm sm:px-5">

@@ -45,7 +45,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useLang, WEEKDAY_LABEL, formatDateI18n, levelLabelI18n, type Lang } from '@/lib/i18n';
+import { useLang, WEEKDAY_LABEL, formatDateI18n, type Lang } from '@/lib/i18n';
 import {
   addDaysISO,
   fetchSchedule,
@@ -58,6 +58,8 @@ import {
 } from '@/lib/schedule';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 import { WhatsAppIcon } from '@/public/site/BrandIcons';
+// R189: EINE Kurs-Zeile fuer Startseite und Kursplan. Siehe Kopf von CourseRow.tsx.
+import { CourseRow, CourseTimeBlock } from '@/public/courses/CourseRow';
 
 const WEEKDAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 type WeekdayKey = (typeof WEEKDAY_ORDER)[number];
@@ -187,40 +189,6 @@ function termWeeks(term: ScheduleTerm, courses: ScheduleCourse[]): string[] {
     }
   }
   return [...mondays].sort();
-}
-
-type PhotoLookup = Record<string, string>;
-
-function definePhotoLookup(photos: PhotoLookup): PhotoLookup {
-  return photos;
-}
-
-const TEACHER_PHOTOS = definePhotoLookup({
-  aleks: '/photos/team/teacher-aleksandra.webp',
-  aleksandra: '/photos/team/teacher-aleksandra.webp',
-  claudia: '/photos/founders/claudia.webp',
-  fabio: '/photos/founders/fabio.webp',
-  jelena: '/photos/team/teacher-jelena.webp',
-  maarten: '/photos/team/teacher-maarten.webp',
-  sebas: '/photos/founders/sebastian.webp',
-  sebastian: '/photos/founders/sebastian.webp',
-  tobi: '/photos/team/teacher-tobias.webp',
-  tobias: '/photos/team/teacher-tobias.webp',
-  vanessa: '/photos/founders/vanessa.webp',
-});
-
-const STYLE_PHOTOS = definePhotoLookup({
-  bachata: '/photos/premium/offer-bachata-800.webp',
-  heels: '/photos/premium/offer-heels-800.webp',
-  salsa: '/photos/premium/offer-salsa-800.webp',
-});
-
-function portraitFor(teacher: ScheduleCourse['teachers'][number] | undefined, styleKey: string) {
-  if (teacher?.photoUrl) return { src: teacher.photoUrl, named: true };
-  const name = teacher?.displayName.trim().toLowerCase();
-  const teacherPhoto = name ? TEACHER_PHOTOS[name] : undefined;
-  if (teacherPhoto) return { src: teacherPhoto, named: true };
-  return { src: STYLE_PHOTOS[styleKey] ?? '/photos/premium/offer-salsa-800.webp', named: false };
 }
 
 /* Kurzes Start-Datum fuer die Badge ("9. Sep." / "Sep 9"). Das lange Format aus
@@ -1026,35 +994,13 @@ function TimeBlock({
   children: React.ReactNode;
 }) {
   const { lang } = useLang();
-  const until = CAL[lang].until;
   const weekdayShort = WEEKDAY_LABEL[lang][weekday]?.short;
   const dateLabel = date ? [weekdayShort, shortDate(date, lang)].filter(Boolean).join(' ') : null;
+  // R189: Die Zeitspalte selbst liegt in CourseRow.tsx, weil die Startseite dieselbe zeigt.
   return (
-    <div className="grid gap-1.5 border-b border-[var(--color-line)] py-3 sm:grid-cols-[8.5rem_minmax(0,1fr)] sm:gap-5 sm:py-5 lg:grid-cols-[10rem_minmax(0,1fr)]">
-      <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 sm:block sm:self-stretch sm:border-r sm:border-[var(--color-line)] sm:pr-5">
-        {/* Das Datum steht ueber der Uhr — erst WANN, dann um wie viel Uhr. Fett und in
-            Ink, damit es dieselbe Ebene traegt wie die Uhrzeit und nicht als Beschriftung
-            gelesen wird. Mobil laeuft es in derselben Zeile mit, damit die Kopfzeile des
-            Blocks nicht auf drei Zeilen waechst. */}
-        {dateLabel ? (
-          <span className="order-first w-full text-sm font-bold text-[var(--color-ink)] sm:mb-1.5 sm:block">
-            {dateLabel}
-          </span>
-        ) : null}
-        {/* Ohne tabular-nums: Cal Sans reserviert sonst Ziffernbreite fuer den Doppelpunkt
-            — die Uhr las sich als "18 : 30" (Critic Runde 14, Item 2). */}
-        <span className="inline-flex items-center gap-2 font-display text-[2rem] font-extrabold leading-none text-[var(--color-ink)]">
-          <span aria-hidden className="h-2 w-2 rounded-full bg-[var(--color-salsa)]" />
-          {start}
-        </span>
-        <span className="text-sm font-semibold tabular-nums text-[var(--color-ink-muted)] sm:ml-4 sm:mt-1.5 sm:block">
-          {until} {end}
-        </span>
-      </p>
-      <div className="min-w-0 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white">
-        {children}
-      </div>
-    </div>
+    <CourseTimeBlock start={start} end={end} dateLabel={dateLabel}>
+      {children}
+    </CourseTimeBlock>
   );
 }
 
@@ -1064,131 +1010,32 @@ function TimeBlock({
  * jeder Zeile einen eigenen visuellen Anker, auch wenn die API kein Foto liefert.
  * -------------------------------------------------------------------------- */
 function SlotRow({ slot }: { slot: WeekSlot }) {
-  const { lang } = useLang();
-  const c = CAL[lang];
-  const course = slot.primary;
-  const level = levelLabelI18n(lang === 'de' ? course.levelDe : course.levelEn, course.onVariant);
-  const style = lang === 'de' ? course.styleDe : course.styleEn;
-  const teachers = course.teachers.map((tea) => tea.displayName.split(' ')[0]).join(' & ');
-  const label = slot.full ? c.waitlist : c.book;
-  const beginner = course.levelCategory === 'beginner';
-
   return (
     /* Der Buchungs-Flow ist bewusst UNVERAENDERT: /buchung liest genau einen Parameter
        (`kurs`, BookingPanel.tsx:125). Eine eigene Termin-Uebergabe waere ein Umbau dieses
        Flows und ist hier nicht beauftragt — sie ist auch nicht noetig, weil jede Kurs-ID zu
        genau EINER Staffel gehoert (server/public.ts:119 setzt `termId` je Kurs). Der Klick
        aus der Oktober-Ansicht traegt also die Oktober-Kurs-ID und damit die richtige Staffel.
-       Was der Flow heute nicht kennt, ist die einzelne Lektion innerhalb der Staffel. */
-    <a
+
+       R189 (Raphael, Video): "Mach das einfach in EINEM Stil." Die Darstellung dieser Zeile
+       liegt jetzt in CourseRow.tsx, weil die Startseite exakt dieselbe Zeile zeigt. Hier
+       bleibt nur die Zuordnung Slot -> Anzeige-Werte. Die data-Attribute sind unveraendert;
+       der Klicktest liest sie dort. Das Badge haengt weiterhin an `slot.full` und nicht an
+       `course.status` — das ist der Unterschied, den nur der Kalender kennt. */
+    <CourseRow
+      course={slot.primary}
       href={`/buchung?kurs=${encodeURIComponent(slot.cta.id)}`}
-      data-testid="course-card"
-      data-course-id={slot.primary.id}
-      data-cta-course-id={slot.cta.id}
-      data-phase={slot.phase}
-      data-weekday={slot.weekday}
-      data-date={slot.date ?? undefined}
-      data-style={slot.styleKey}
-      className={cn(
-        // R188 KP3 (Raphael 21.08., Video 07:52): "Wenn ich mit der Maus drueber gehe,
-        // soll die GANZE Karte rot werden — passend zum Platz-reservieren-Look."
-        //
-        // VORHER wechselte nur die Textfarbe des CTA rechts; die Zeile selbst ging auf
-        // ein helles Grau. Man sah nicht, dass die ganze Zeile das Klickziel ist.
-        //
-        // JETZT faerbt `group-hover` die komplette Flaeche auf --color-salsa (#AD1827,
-        // das Marken-Rot aus index.css — KEIN Pastellrot, Raphael-Lock 17.08.). Jede
-        // Textebene darin invertiert mit: Titel, Lehrer-Zeile, CTA auf Weiss, die
-        // Badges auf halbtransparentes Weiss. Der gemessene Kontrast Weiss auf #AD1827
-        // ist 7.4:1 und damit ueber WCAG AA fuer Fliesstext (4.5:1).
-        //
-        // `focus-within` haengt am selben Zustand: wer mit der Tastatur durch die Liste
-        // geht, sieht dieselbe Fuellung wie mit der Maus. Ohne das waere die Rueckmeldung
-        // eine reine Maus-Funktion.
-        //
-        // duration/reducedMotion: die Faerbung laeuft ueber `transition-colors` mit
-        // --dur-fast. Bei `prefers-reduced-motion: reduce` schaltet index.css die Dauer
-        // global auf 0.01ms — die Farbe springt dann, sie verschwindet nicht.
-        'group flex flex-col gap-2 border-b border-[var(--color-line)] px-4 py-3 transition-colors duration-[var(--dur-fast)] last:border-b-0 hover:border-[var(--color-salsa)] hover:bg-[var(--color-salsa)] focus-within:border-[var(--color-salsa)] focus-within:bg-[var(--color-salsa)] sm:flex-row sm:items-center sm:gap-5 sm:px-5 sm:py-3.5',
-        beginner ? 'bg-[var(--color-paper-warm)]' : 'bg-white',
-      )}
-    >
-      <span className="flex min-w-0 flex-1 items-start gap-3">
-        <TeacherPortrait styleKey={slot.styleKey} style={style} teachers={course.teachers} />
-        <span className="min-w-0 flex-1">
-          <span className="flex flex-wrap items-center gap-2">
-            <span className="font-display text-lg leading-tight text-[var(--color-ink)] transition-colors group-hover:text-white group-focus-within:text-white sm:text-xl">{style}</span>
-            {level && <Badge tone="level">{level}</Badge>}
-          </span>
-          <span className="mt-1 block break-words text-sm leading-snug text-[var(--color-ink-muted)] transition-colors group-hover:text-white/85 group-focus-within:text-white/85">
-            {teachers || c.teacherTba} · {course.locationName}
-          </span>
-          <span className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
-            <Badge tone={slot.full ? 'muted' : 'strong'}>{slot.full ? c.full : c.free}</Badge>
-            {beginner && <Badge tone="outline">{c.beginner}</Badge>}
-            {slot.lateEntry && <Badge tone="outline">{c.lateEntry}</Badge>}
-            {/* R188 ST2: Hier stand der Datums-Chip ({shortDate(slot.date)}). Er ist in
-                die linke Zeitspalte gewandert (TimeBlock oben) und steht dort gleichwertig
-                zur Uhrzeit, wie Raphael es verlangt. Ein zweites Mal im Tag-Rudel waere
-                derselbe Termin doppelt in derselben Zeile. `data-date` am <a> bleibt
-                unveraendert — der Klicktest liest es dort. */}
-          </span>
-        </span>
-      </span>
-      {/* Kritik-Runde 10.08.2026: vorher trug NUR die erste Zeile des Tages einen roten
-          Pill-CTA, alle weiteren einen Textlink — sah aus wie zwei Buchungs-Systeme.
-          Jetzt EIN ruhiger Zeilen-CTA fuer alle; die rote Hauptaktion gehoert dem
-          ScheduleBottomCta. */}
-      {/* R188 KP3: Auf der roten Flaeche kann der CTA nicht mehr rot werden — er wuerde
-          verschwinden. Er wird weiss, wie der Rest der Zeile. */}
-      <span className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start px-1 text-sm font-semibold text-[var(--color-ink)] transition-colors group-hover:text-white group-focus-within:text-white sm:self-center">
-        {label}
-        <ArrowRight size={16} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
-      </span>
-    </a>
-  );
-}
-
-function TeacherPortrait({
-  styleKey,
-  style,
-  teachers,
-}: {
-  styleKey: string;
-  style: string;
-  teachers: ScheduleCourse['teachers'];
-}) {
-  const shown = (teachers.length ? teachers : [undefined]).slice(0, 2);
-
-  return (
-    <span aria-hidden data-style-mark={styleKey} className="flex h-14 w-[4.5rem] shrink-0 items-end">
-      {shown.map((teacher, index) => {
-        const portrait = portraitFor(teacher, styleKey);
-        return (
-          <span
-            key={teacher?.id ?? `${styleKey}-studio`}
-            title={portrait.named ? teacher?.displayName : style}
-            className={cn(
-              // R188 KP3: Der 2px-Trennring bleibt weiss — auf der roten Hover-Flaeche
-              // liest er sich als saubere Kontur um das Portrait statt als heller Fleck,
-              // und er trennt die beiden gestapelten Koepfe weiterhin voneinander.
-              'relative h-14 w-12 overflow-hidden rounded-[1rem] border-2 border-white bg-[var(--color-bg-soft)] transition-colors',
-              index > 0 && '-ml-5 h-12',
-            )}
-          >
-            <img
-              src={portrait.src}
-              alt=""
-              loading="lazy"
-              // object-cover statt contain: die Freisteller sind Ganzkoerper-Fotos —
-              // contain steckte Mini-Figuren in die 48x56-Kachel, cover+top zeigt das
-              // Gesicht (Critic 13.08.2026).
-              className={cn('h-full w-full object-cover', portrait.named && 'object-top')}
-            />
-          </span>
-        );
-      })}
-    </span>
+      full={slot.full}
+      lateEntry={slot.lateEntry}
+      dataAttrs={{
+        'data-course-id': slot.primary.id,
+        'data-cta-course-id': slot.cta.id,
+        'data-phase': slot.phase,
+        'data-weekday': slot.weekday,
+        'data-date': slot.date ?? undefined,
+        'data-style': slot.styleKey,
+      }}
+    />
   );
 }
 
@@ -1260,40 +1107,6 @@ function ScheduleBottomCta({ nextStart }: { nextStart: string | null }) {
         </div>
       </div>
     </section>
-  );
-}
-
-/** Metadaten bleiben neutral. Salsa-Rot markiert nur die erste Buchungsaktion. */
-function Badge({
-  tone,
-  children,
-}: {
-  tone: 'strong' | 'level' | 'muted' | 'outline';
-  children: React.ReactNode;
-}) {
-  return (
-    <span
-      className={cn(
-        // R188 KP3: Jeder Ton bekommt eine Rot-Fassung. Ohne die blieben auf der roten
-        // Zeile weisse und graue Kaestchen stehen und die Karte waere nur halb gefaerbt —
-        // genau das Fleckige, das Raphael im Video "nicht ganz rot" nennen wuerde.
-        // Auf Rot traegt jede Badge dieselbe Sprache: 1px weisser Rand bei 45 %,
-        // Schrift Weiss, keine eigene Fuellung. Die "Plaetze frei"-Badge (tone strong)
-        // dreht sich um: sie ist auf Papier die dunkle und auf Rot die weisse Flaeche,
-        // damit sie in beiden Zustaenden die auffaelligste bleibt.
-        'inline-flex items-center rounded-full px-2.5 py-0.5 font-medium transition-colors',
-        tone === 'strong'
-          && 'bg-[var(--color-ink)] text-white group-hover:bg-white group-hover:text-[var(--color-salsa)] group-focus-within:bg-white group-focus-within:text-[var(--color-salsa)]',
-        tone === 'level'
-          && 'bg-[var(--color-bg-soft)] font-semibold text-[var(--color-ink)] group-hover:bg-white/15 group-hover:text-white group-focus-within:bg-white/15 group-focus-within:text-white',
-        tone === 'muted'
-          && 'bg-[var(--color-bg-soft)] text-[var(--color-ink-muted)] group-hover:bg-white/15 group-hover:text-white group-focus-within:bg-white/15 group-focus-within:text-white',
-        tone === 'outline'
-          && 'border border-[var(--color-line)] bg-white text-[var(--color-ink-muted)] group-hover:border-white/45 group-hover:bg-transparent group-hover:text-white group-focus-within:border-white/45 group-focus-within:bg-transparent group-focus-within:text-white',
-      )}
-    >
-      {children}
-    </span>
   );
 }
 

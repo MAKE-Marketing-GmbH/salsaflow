@@ -20,14 +20,16 @@
 // sonst ungenutzt (geprueft per grep 2026-08-07). hp-03 bleibt dem /team-Hero.
 //
 // Motion: ruhiger Fade-up-Takt (Reveal/useReveal), Bild steigt leicht groesser rein.
-// Reduced-motion: nur Fade, kein Versatz, kein Scale (via useReveal/useReducedMotion).
+// Reduced-motion: nur Fade, kein Versatz, kein Scale. Die Abfrage liegt jetzt komplett in
+// useReveal/ClipReveal; die Komponente selbst liest die Praeferenz nicht mehr selbst aus.
 
-import { motion, useReducedMotion, type Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3 } from '@/public/home/content-v3';
 import { FounderCards } from '@/public/team/FounderRow';
 import { Eyebrow, Shell, BeatMark, CtaArrow } from '@/public/site/primitives';
-import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
+import { ClipReveal, Reveal, RevealWords, useReveal, useParallaxStyle } from '@/public/home/motion';
 import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
@@ -43,16 +45,16 @@ function onImgError(e: React.SyntheticEvent<HTMLImageElement>) {
 export function TeamBlock() {
   const { lang } = useLang();
   const de = lang === 'de';
-  const reduced = useReducedMotion();
   const t = HOME_V3[lang].team;
   const { item } = useReveal();
 
-  // Bild-Reveal: Fade + leichter Anstieg + minimales Grosswerden (wie im Hero-Anker).
-  const hydrated = useHydrated();
-  const imgReveal: Variants = {
-    hidden: hydrated ? { opacity: 0, y: reduced ? 0 : 20, scale: reduced ? 1 : 0.99 } : { opacity: 1, y: 0, scale: 1 },
-    show: { opacity: 1, y: 0, scale: 1, transition: { duration: reduced ? 0.3 : 0.7, ease: EASE_OUT } },
-  };
+  // Hauptgesten der Sektion (max. zwei, Auftrag 21.08.):
+  //   1) Headline als RevealWords (Wort-Stagger statt Standard-rise).
+  //   2) Teamfoto als ClipReveal (Vorhang statt Fade-up) plus EIN dezenter Parallax
+  //      auf dem Bild (36px, Grenze des Auftrags). Das Foto braucht dafuer Ueberstand,
+  //      siehe h-[calc(100%+36px)] unten.
+  const bandRef = useRef<HTMLDivElement | null>(null);
+  const bandParallax = useParallaxStyle(bandRef, 36);
 
   return (
     <section
@@ -114,15 +116,14 @@ export function TeamBlock() {
               <motion.div variants={item}>
                 <Eyebrow>{t.eyebrow}</Eyebrow>
               </motion.div>
-              <motion.h2
-                variants={item}
+              <RevealWords
+                as="h2"
+                text={t.title}
                 className={cn(
                   'type-h2 mt-5',
                   MEASURE_L,
                 )}
-              >
-                {t.title}
-              </motion.h2>
+              />
             </div>
             <motion.p
               variants={item}
@@ -231,18 +232,21 @@ export function TeamBlock() {
           H2 INNERHALB von #angebot, also inklusive deren Sektionspolster, nicht bis zur
           Sektionskante. Die Kante selbst ist 64px. */}
       <Shell>
-        <motion.figure
-          data-reveal
+        {/* ClipReveal loest den bisherigen imgReveal-Fade-up ab: das Band wird aufgedeckt
+            statt eingeschoben. Die Ref haengt am Wrapper, der Parallax am Bild — so bleibt
+            die Clip-Kante statisch und nur das Motiv wandert (36px gesamt). */}
+        {/* Das alte motion.figure trug `relative`; ClipReveal rendert ein motion.div mit
+            `relative` ueber className — Layout, Radius und Clip bleiben identisch. */}
+        <ClipReveal
           className="relative mt-12 w-full overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] lg:mt-16"
-          variants={imgReveal}
-          initial="hidden"
-          whileInView="show"
-          viewport={VIEWPORT}
         >
-          <img
-            src="/photos/r188-home/team-band-original-2800.webp"
-            onError={onImgError}
-            alt={de ? 'Vier Menschen aus dem Salsaflow-Team sitzen zusammen im Studio.' : 'Four members of the Salsaflow team sitting together in the studio.'}
+          <div ref={bandRef} className="relative h-[15rem] w-full sm:h-auto sm:aspect-[16/9]">
+            <motion.img
+              data-scroll-motion="team-band"
+              style={bandParallax}
+              src="/photos/r188-home/team-band-original-2800.webp"
+              onError={onImgError}
+              alt={de ? 'Vier Menschen aus dem Salsaflow-Team sitzen zusammen im Studio.' : 'Four members of the Salsaflow team sitting together in the studio.'}
             /* R188 / H5: hp-29.webp hatte auf Desktop nur 1800px fuer 1323px CSS-Breite
                (Dichte 1,36 statt 2,0) und wirkte dadurch weich. Dieses echte Salsaflow-Foto
                stammt aus hp-27-3840.webp und liegt als reine 2800px-Groessenableitung im
@@ -266,12 +270,13 @@ export function TeamBlock() {
                Unter sm bleibt die feste Hoehe (240px) unveraendert: dort ist das Feld
                350x240 und zeigt bereits 97.2% der Breite bei voller Hoehe (gemessen
                worklog/.r188f6-crop.mjs), es war nie der Befund. */
-            className="h-[15rem] w-full object-cover object-center sm:aspect-[16/9] sm:h-auto"
+              className="absolute inset-x-0 -top-[18px] h-[calc(100%+36px)] w-full object-cover object-center"
             width={2800}
             height={1867}
             loading="lazy"
           />
-        </motion.figure>
+          </div>
+        </ClipReveal>
       </Shell>
 
       <Shell>

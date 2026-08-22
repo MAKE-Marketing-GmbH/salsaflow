@@ -27,7 +27,13 @@ import {
   sectionTitle,
   sectionLead,
 } from '@/public/site/primitives';
-import { Reveal, useReveal } from '@/public/home/motion';
+import {
+  Reveal,
+  useReveal,
+  useRevealVariant,
+  ClipReveal,
+  RevealWords,
+} from '@/public/home/motion';
 import { SECTION_Y } from '@/public/home/kit';
 
 // EIN CTA-Ziel sitewide (Master-Plan): Schnupperstunden-Anker auf /kontakt.
@@ -314,6 +320,15 @@ export function HeroFrame({
   children?: ReactNode;
 }) {
   const { container, item } = useReveal();
+  /* R189 Motion-Rollen: die H1 bekommt den blur-Eingang statt desselben rise wie jede
+     Zeile darunter. Sie scharft sich ein (blur 8->0, scale 1.02->1), waehrend Lead, CTA
+     und Zahlen ruhig steigen — damit hat der Hero einen Fokuspunkt statt eines
+     gleichfoermigen Stapels. Bewusst NICHT RevealWords: `title` ist hier ein ReactNode
+     (die Seiten reichen `<>{titleA} {titleAccent}</>` herein) plus optional TitleAccent
+     daneben; RevealWords kann nur einen String in Woerter schneiden, ohne Markup zu
+     zerlegen. Die Klassenliste der H1 bleibt Byte fuer Byte unveraendert — das hier ist
+     ein Variantentausch, keine Layout-Aenderung. */
+  const { item: headingItem } = useRevealVariant('blur');
   const center = axis === 'center';
   const wide = axis === 'wide';
   const split = axis === 'split';
@@ -338,7 +353,8 @@ export function HeroFrame({
 
   const heading = (
     <motion.h1
-      variants={item}
+      variants={headingItem}
+      data-reveal-variant="blur"
       className={cn(
         // .type-h1 = die EINE H1-Groesse (src/index.css). `wide` behaelt seine groessere
         // Stufe: dort traegt die H1 die volle Shell allein, das ist Seiten-Charakter,
@@ -505,8 +521,18 @@ export function HeroFrame({
            bis an beide Viewport-Kanten. Es steht unter der Typo, nicht daneben, und traegt
            deshalb keine Schrift (die gehoert dem Home-Hero).
            heightClass: Seiten mit Cookie-Ueberdeckung (z. B. /tanzkurse) koennen das Band
-           hoeher ziehen, damit unter den Stats mehr als ein Kopfstreifen bleibt. */
-        <div className="relative w-full overflow-hidden">
+           hoeher ziehen, damit unter den Stats mehr als ein Kopfstreifen bleibt.
+
+           R189 Motion-Rollen: das Band faehrt jetzt als Vorhang auf (ClipReveal) statt
+           mit dem Rest der Seite zu steigen. Der Grund steht in motion.tsx: ein y-Versatz
+           verschiebt das MOTIV, und bei einem full-bleed Band, dessen Crop auf Kinnlinien
+           kalibriert ist (R71/R174/R181), ist genau das schaedlich. clip laesst das Bild
+           an seinem Platz stehen und vergroessert nur die sichtbare Flaeche — der Crop
+           bleibt exakt, wo er gemessen wurde.
+
+           Der Wrapper traegt weiter `relative w-full overflow-hidden`; ClipReveal rendert
+           ein motion.div darum, das keine eigene Geometrie mitbringt. */
+        <ClipReveal className="relative w-full overflow-hidden">
           <img
             src={media.src}
             alt={media.alt}
@@ -521,7 +547,7 @@ export function HeroFrame({
             loading="eager"
             fetchPriority="high"
           />
-        </div>
+        </ClipReveal>
       ) : null}
     </section>
   );
@@ -549,6 +575,9 @@ export function SectionHead({
       Reiner Abstand-Hebel, Default false = alle anderen Seiten unveraendert. */
   tight?: boolean;
 }) {
+  /* Nur fuer den Akzent-Fall (siehe Kommentar am Heading unten). Der Haken laeuft
+     bedingungslos, weil React-Hooks nicht hinter einem `if` stehen duerfen. */
+  const { item: headBlur } = useRevealVariant('blur');
   return (
     <div className={cn(center ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl', className)}>
       {eyebrow ? (
@@ -556,9 +585,39 @@ export function SectionHead({
           <Eyebrow>{eyebrow}</Eyebrow>
         </div>
       ) : null}
-      <h2 className={cn(tight ? 'mt-0' : 'mt-5', sectionTitle, MEASURE_L, center && 'mx-auto')}>
-        {title} {titleAccent ? <TitleAccent>{titleAccent}</TitleAccent> : null}
-      </h2>
+      {/* R189 Motion-Rollen: die Sektions-H2 staffelt Wort fuer Wort statt als ein Block
+          mit dem Eyebrow zu steigen. Das ist der groesste Hebel dieser Datei — SectionHead
+          traegt die H2 auf allen Unterseiten, und bisher fuhr sie im exakt gleichen rise
+          wie Lead, Liste und Karte darunter.
+
+          Zwei Faelle, und die Fallunterscheidung ist keine Bequemlichkeit:
+
+          OHNE Akzent ist `title` ein reiner String — genau das, was RevealWords braucht,
+          um an Leerzeichen zu schneiden. Klassenliste und Tag bleiben identisch, die
+          Komponente rendert `<h2 className=...>` selbst.
+
+          MIT Akzent bleibt das <h2> unveraendert stehen. `TitleAccent` rendert eigenes
+          Markup in font-script auf 1.22em; wuerde man den Akzent aus dem Heading
+          herausziehen, um den Rest zu staffeln, braeche der gemeinsame Zeilenumbruch —
+          und genau darauf sind MEASURE_L und text-balance ausgemessen (Kommentar oben,
+          Messwerte 2026-08-06). Statt das Layout fuer einen Effekt zu opfern, bekommt
+          dieser Fall den blur-Eingang: scharfstellen statt hereinsteigen. Auch das ist
+          eine andere Rolle als der rise darunter, und es kostet keinen Umbruch. */}
+      {titleAccent ? (
+        <motion.h2
+          variants={headBlur}
+          data-reveal-variant="blur"
+          className={cn(tight ? 'mt-0' : 'mt-5', sectionTitle, MEASURE_L, center && 'mx-auto')}
+        >
+          {title} <TitleAccent>{titleAccent}</TitleAccent>
+        </motion.h2>
+      ) : (
+        <RevealWords
+          as="h2"
+          text={title}
+          className={cn(tight ? 'mt-0' : 'mt-5', sectionTitle, MEASURE_L, center && 'mx-auto')}
+        />
+      )}
       {lead ? <p className={cn(tight ? 'mt-2' : 'mt-4', 'text-pretty', sectionLead)}>{lead}</p> : null}
     </div>
   );
@@ -790,6 +849,11 @@ export function ClosingInvite({
   dense?: boolean;
 }) {
   const { item } = useReveal();
+  /* R189: der Abbinder ist der letzte Fokuspunkt der Seite. Seine H2 bekommt denselben
+     blur-Eingang wie die Hero-H1, damit Anfang und Ende dieselbe Geste tragen — und
+     nicht denselben rise wie die drei Zeilen darunter. `titleNode` darf ReactNode sein
+     (Akzent mitten im Satz), Wort-Stagger scheidet hier also aus. */
+  const { item: headBlur } = useRevealVariant('blur');
   const night = surface === 'night';
   return (
     <section
@@ -857,7 +921,8 @@ export function ClosingInvite({
             </motion.div>
           ) : null}
           <motion.h2
-            variants={item}
+            variants={headBlur}
+            data-reveal-variant="blur"
             className={cn(
               'type-h2 mx-auto mt-5',
               night ? 'text-white' : 'text-[var(--color-ink)]',

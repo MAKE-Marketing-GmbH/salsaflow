@@ -68,7 +68,16 @@ export type HomeStrings = {
     soonTitle: string;
     soonText: string;
   };
-  events: { eyebrow: string; title: string; body: string; cta: string };
+  events: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    cta: string;
+    /** Preis am CTA, du-Form. */
+    price: string;
+    /** Drei scannbare Fakten: Label + Wert. */
+    facts: [string, string][];
+  };
   community: { eyebrow: string; title: string; body: string; google: string };
   location: {
     eyebrow: string;
@@ -206,13 +215,29 @@ export const HOME = defineHomeContent({
       // passiert in der Community.» waren zwei Slogan-Zeilen statt Information.
       // forbidden-check.py meldete dazu [A1] Staccato-Verdacht (4+5 Woerter).
       // Die Zeile sagt jetzt, was nach dem Kurs konkret passiert. Der Satz darunter nennt
-      // die Danceflow Night ohnehin schon — die H2 fuehrt jetzt darauf hin, statt eine
-      // Stimmung zu behaupten. Check auf der neuen Zeile: 0 harte Verstoesse.
+      // die Danceflow Night ohnehin schon. Die H2 führt jetzt darauf hin, statt eine
+      // Stimmung zu behaupten. Check auf der neuen Zeile: 0 harte Verstöße.
       // Die /events-Seite traegt ihre eigene Zeile (events/content.ts) und ist nicht Teil
       // von Welle 1 (Route / + Buchungs-Flow).
-      title: 'Nach dem Kurs geht es auf der Danceflow Night weiter.',
-      body: 'Bei der Danceflow Night triffst du Freunde, übst das Gelernte und tanzt in entspannter Atmosphäre. Vor ausgewählten Abenden finden Workshops statt.',
+      title: 'Dein Kurs endet nicht nach der Stunde.',
+      // Faktenprüfung 22.08.2026, zwei Familien unabhängig (opus-critic und grok-worker) gegen
+      // die Kundenquelle `docs/bilder/redesign-2026-08/eingang/make-onboarding-2026-08-07.json`
+      // Zeile 103 und 109. Gedeckt sind Termin, Preis, Salsa/Bachata, Workshop davor und
+      // wörtlich: "wir haben eigene DJs und nicht playlists".
+      // Drei Stellen waren nicht gedeckt und sind hier korrigiert:
+      // 1. "bis in die Nacht": die Quelle nennt keine Endzeit. Raus.
+      // 2. "DJs aus dem Studio": die Quelle sagt "eigene DJs". "aus dem Studio" war erfunden
+      //    und stand zweimal auf demselben Bildschirm (Fliesstext und Faktenzeile).
+      // 3. Die englische Fassung sagte im zweiten Satz "at any level", die deutsche etwas
+      //    anderes. Jetzt tragen beide Sprachen denselben Inhalt in derselben Reihenfolge.
+      body: 'Am 1., 3. und 5. Freitag öffnen wir die Türen und unsere eigenen DJs legen auf. Du tanzt Salsa und Bachata, auf jedem Level. Vor ausgewählten Abenden findet ein Workshop statt.',
       cta: 'Alle Events ansehen',
+      price: 'Salsaflow-Schüler zahlen 5 CHF, Gäste 10 CHF.',
+      facts: [
+        ['Wann', '1., 3. und 5. Freitag'],
+        ['Musik', 'Eigene DJs, keine Playlist'],
+        ['Für wen', 'Jedes Level, auch allein'],
+      ],
     },
     community: {
       eyebrow: 'Unsere Community',
@@ -322,9 +347,15 @@ export const HOME = defineHomeContent({
     },
     events: {
       eyebrow: 'Events & workshops',
-      title: 'After class the Danceflow Night keeps going.',
-      body: 'At the Danceflow Night you meet friends, practise what you learned and dance in a relaxed atmosphere. Workshops take place before selected evenings.',
+      title: 'There is more dancing after class.',
+      body: 'On the 1st, 3rd and 5th Friday, we open the doors and our own DJs play. Dance Salsa and Bachata, at any level. Selected evenings start with a workshop.',
       cta: 'See all events',
+      price: 'Salsaflow students pay CHF 5; guests pay CHF 10.',
+      facts: [
+        ['When', '1st, 3rd and 5th Friday'],
+        ['Music', 'Our own DJs, no playlist'],
+        ['Who', 'Any level, come alone'],
+      ],
     },
     community: {
       eyebrow: 'Our community',

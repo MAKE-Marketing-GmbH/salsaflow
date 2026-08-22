@@ -317,10 +317,12 @@ function CoursesHero() {
                   {h.lead}
                 </motion.p>
                 <motion.div variants={item} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <PrimaryCta href={SCHNUPPER_HREF}>
-                    {de ? 'Gratis Schnupperstunde buchen' : 'Book a free trial class'}
+                  <PrimaryCta href="/kursplan">
+                    {de ? 'Kursplan ansehen' : 'See the schedule'}
                   </PrimaryCta>
-                  <CtaText href="#kurskalender">{de ? 'Kursplan ansehen' : 'See the schedule'}</CtaText>
+                  <CtaText href={SCHNUPPER_HREF}>
+                    {de ? 'Gratis Schnupperstunde buchen' : 'Book a free trial class'}
+                  </CtaText>
                 </motion.div>
                 {wide ? (
                   <motion.dl

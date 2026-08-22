@@ -115,7 +115,7 @@ function FaqHero({ c }: { c: FaqPageContent }) {
           {/* Text UND Knoepfe im selben Block (F6). */}
           <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
-            <GhostCta href="#faq" down>
+            <GhostCta href={h.secondary.href} down={h.secondary.href.startsWith('#')}>
               {h.secondary.label}
             </GhostCta>
           </motion.div>
@@ -211,10 +211,9 @@ function FaqSection({ c }: { c: FaqPageContent }) {
             Bildschirmrand, damit sichtbar ist, dass es rechts weitergeht.
             Ab `sm` ist wieder Umbruch aktiv: dort ist die Zeile breit genug fuer mehrere
             Pillen nebeneinander, und Desktop bleibt exakt wie freigegeben. */}
-        {/* `-mx-5 px-5` spiegelt exakt das mobile Shell-Padding (`px-5` in
-            site/primitives.tsx:24). Es gibt dafuer kein Token — die 1.25rem stehen dort
-            als Utility. Aendert sich das Shell-Padding, muss dieser Wert mitziehen. */}
-        <Reveal className="-mx-5 mt-8 flex snap-x snap-mandatory gap-2 overflow-x-auto px-5 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:snap-none sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+        {/* Linkes Minus-Margin spiegelt `pl-5` der Shell. Rechts bleibt die WhatsApp-Spur
+            (`pr-14`) stehen — die Pillen sollen nicht unter den Kreis laufen. */}
+        <Reveal className="-ml-5 mt-8 flex snap-x snap-mandatory gap-2 overflow-x-auto pl-5 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:ml-0 sm:snap-none sm:flex-wrap sm:overflow-visible sm:pl-0 sm:pb-0">
           {c.themes.items.map((theme) => (
             <motion.a
               key={theme.href}
@@ -227,94 +226,80 @@ function FaqSection({ c }: { c: FaqPageContent }) {
           ))}
         </Reveal>
 
-        {/* R188 F5 (Video 01:05): "Abwechselnd layouten: links FAQ / rechts Bild, dann
-            rechts FAQ / links Bild usw." Der Wechsel haengt am Index: bei geradem Index
-            steht die Frageliste links, bei ungeradem rechts. Umgesetzt ueber
-            `lg:order-*` statt ueber zwei getrennte Bloecke — so gibt es genau EINE
-            Bauform, und mobil stapelt alles in der Lesereihenfolge (Bild, dann Fragen).
-            `items-start` plus `lg:sticky` laesst das Bild neben langen Listen mitlaufen,
-            statt oben allein stehen zu bleiben. */}
+        {/* R189 F2 (d-03/d-04): Der Kapitelkopf stand als Zweispalter, Foto links,
+            Titel rechts. Der Titel braucht zwei Zeilen, das Foto 480 Pixel Hoehe — daneben
+            blieben rund 400 Pixel leere Cremeflaeche. Das war schon die zweite Fassung
+            desselben Fehlers: davor hing das Foto `sticky` und die Luecke stand darunter.
+            Ein Zweispalter kann das nicht loesen, solange eine Spalte kurzer Text und die
+            andere ein hohes Bild ist.
+            Jetzt laeuft alles auf voller Breite untereinander: Bildband, Titel plus Blurb,
+            Accordion. Es gibt keine zweite Spalte mehr, also auch keine Spalte, die leer
+            bleiben kann. Zwei Bilder stehen nebeneinander und sind gleich hoch. */}
         <div className="mt-16 flex flex-col gap-20 lg:mt-20 lg:gap-28">
-          {f.columns.map((column, ci) => {
-            const imageRight = ci % 2 === 0;
-            return (
-              <Reveal
-                key={column.title}
-                className="grid items-start gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16"
-                stagger={0.06}
+          {f.columns.map((column, ci) => (
+            <Reveal key={column.title} stagger={0.06}>
+              <motion.div
+                variants={item}
+                className={cn('grid gap-4', column.image2 && 'sm:grid-cols-2 sm:gap-6')}
               >
-                <motion.div
-                  variants={item}
-                  className={cn('min-w-0', imageRight ? 'lg:order-1' : 'lg:order-2')}
-                >
-                  <h3 className="type-h3 text-[var(--color-ink)]">{column.title}</h3>
-                  {/* F3: eine Zeile Erklaerung unter jeder Ueberschrift. Sie sagt, was
-                      dieser Block beantwortet — vorher stand dort nur ein Wort. */}
-                  <p className="mt-3 max-w-xl text-pretty text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">
-                    {column.blurb}
-                  </p>
-                  <div className="mt-7 divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
-                    {column.items.map((faq, i) => (
-                      <FaqItem
-                        key={faq.q}
-                        q={faq.q}
-                        a={faq.a}
-                        defaultOpen={ci === 0 && i === 0}
-                        link={faq.link}
-                        link2={faq.link2}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-
-                {/* Zwei Motive bei langen Spalten (Befund d-04 + d-05, Ursache in
-                    faq/content.ts bei `image2`).
-
-                    Warum NICHT zwei sticky Bilder untereinander: gemessen pinnen zwei
-                    `sticky`-Geschwister mit demselben `top` auf genau derselben Hoehe und
-                    liegen dann uebereinander, statt sich abzuloesen (bei scrollY 3600
-                    standen beide auf top=20). Zwei Sticky-Elemente koennen sich nicht
-                    gegenseitig abloesen.
-
-                    Darum traegt nur das ZWEITE Bild `sticky`. Das erste scrollt normal mit
-                    der oberen Haelfte der Liste weg; sobald es oben raus ist, ist das
-                    zweite an seiner Stelle und bleibt fuer die untere Haelfte stehen.
-                    Ohne `image2` bleibt die Spalte exakt wie vorher: EIN Bild, sticky
-                    ueber die ganze Liste. */}
-                <motion.div
-                  variants={item}
-                  className={cn(imageRight ? 'lg:order-2' : 'lg:order-1', 'flex flex-col gap-8')}
-                >
-                  <figure className={cn(!column.image2 && 'lg:sticky lg:top-[calc(var(--nav-h)+2rem)]')}>
-                    <div className="overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
-                      <img
-                        src={column.image.src}
-                        alt={column.image.alt}
-                        className="aspect-[4/3] w-full object-cover object-[center_35%]"
-                        width={1920}
-                        height={1280}
-                        loading="lazy"
-                      />
-                    </div>
+                <figure className="overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
+                  <img
+                    src={column.image.src}
+                    alt={column.image.alt}
+                    className={cn(
+                      'w-full object-cover object-[center_35%]',
+                      column.image2 ? 'aspect-[4/3]' : 'aspect-[16/9] lg:aspect-[21/9]',
+                    )}
+                    width={1920}
+                    height={1280}
+                    loading="lazy"
+                  />
+                </figure>
+                {column.image2 ? (
+                  <figure className="overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
+                    <img
+                      src={column.image2.src}
+                      alt={column.image2.alt}
+                      className="aspect-[4/3] w-full object-cover object-[center_35%]"
+                      width={1800}
+                      height={1200}
+                      loading="lazy"
+                    />
                   </figure>
-                  {column.image2 ? (
-                    <figure className="lg:sticky lg:top-[calc(var(--nav-h)+2rem)]">
-                      <div className="overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
-                        <img
-                          src={column.image2.src}
-                          alt={column.image2.alt}
-                          className="aspect-[4/3] w-full object-cover object-[center_35%]"
-                          width={1800}
-                          height={1200}
-                          loading="lazy"
-                        />
-                      </div>
-                    </figure>
-                  ) : null}
-                </motion.div>
-              </Reveal>
-            );
-          })}
+                ) : null}
+              </motion.div>
+
+              {/* Die Textspalte ist schmaler als das Bildband, aus zwei Gruenden.
+                  Lesbarkeit: ueber die volle Shell waeren die Zeilen rund 1340 Pixel breit,
+                  weit jenseits einer angenehmen Zeilenlaenge.
+                  Und Platz: die Aufklapp-Pfeile sassen bei voller Breite ganz rechts am
+                  Rand, Zeile fuer Zeile ueber die ganze Seitenhoehe. Damit belegten sie
+                  genau die Spur, in der der WhatsApp-Knopf ausweicht — er fand keine
+                  einzige freie Stelle mehr und blendete sich aus
+                  (Beleg: worklog/shots/R189/whatsapp-collisions/faq-desktop-hidden.png). */}
+              <motion.div variants={item} className="mt-8 max-w-4xl lg:mt-10">
+                <h3 className="type-h3 text-[var(--color-ink)]">{column.title}</h3>
+                <p className="mt-3 text-pretty text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">
+                  {column.blurb}
+                </p>
+              </motion.div>
+
+              <motion.div variants={item} className="mt-8 min-w-0 max-w-4xl lg:mt-10">
+                <div className="divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
+                  {column.items.map((faq, i) => (
+                    <FaqItem
+                      key={faq.q}
+                      q={faq.q}
+                      a={faq.a}
+                      defaultOpen={ci === 0 && i === 0}
+                      link={faq.link}
+                      link2={faq.link2}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            </Reveal>
+          ))}
         </div>
       </Shell>
     </section>

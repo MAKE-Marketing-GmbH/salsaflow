@@ -12,7 +12,7 @@ import { ChevronDown } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3 } from '@/public/home/content-v3';
 import { Shell, sectionTitle, sectionLead, CtaArrow } from '@/public/site/primitives';
-import { Reveal, useReveal } from '@/public/home/motion';
+import { Reveal, RevealWords, useReveal } from '@/public/home/motion';
 import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
@@ -47,11 +47,12 @@ export function Faq() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <Shell>
         <div className="grid gap-y-10 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] lg:gap-x-16 xl:gap-x-24">
-          {/* LINKS: Kopf-Schiene, bleibt beim Scrollen des Accordions stehen. */}
+          {/* LINKS: Kopf-Schiene, bleibt beim Scrollen des Accordions stehen.
+              Hauptgeste der Sektion: Headline als RevealWords (Wort-Stagger). Das
+              Akkordeon rechts behaelt seinen gruppierten rise-Reveal; pro Klick kommt
+              NICHTS dazu (bestehende Grid-Trick-Motion bleibt unangetastet). */}
           <Reveal className="lg:sticky lg:top-[calc(var(--nav-h)+2rem)] lg:self-start">
-            <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
-              {f.title}
-            </motion.h2>
+            <RevealWords as="h2" text={f.title} className={cn(sectionTitle, MEASURE_L)} />
             <motion.p variants={item} className={`mt-5 max-w-sm ${sectionLead}`}>
               {lead}
             </motion.p>

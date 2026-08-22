@@ -97,8 +97,8 @@ export const FAQ_CONTENT = {
       eyebrow: 'FAQ',
       title: 'Unsicher ist normal. Unklar muss es nicht bleiben.',
       lead: 'Hier findest du Antworten zu Einstieg, Tanzpartner, Level, Preisen, Kursablauf, Schuhen, Events und Kontakt.',
-      primary: { label: 'Frage stellen', href: R.kontakt },
-      secondary: { label: 'Kursplan ansehen', href: R.kursplan },
+      primary: { label: 'Kursplan ansehen', href: R.kursplan },
+      secondary: { label: 'Frage stellen', href: R.kontakt },
       microcopy: 'Wenn deine Frage nicht dabei ist, schreib uns kurz.',
       /* R188 F6: der Hero zeigt jetzt ein echtes Bild rechts neben Text und Knoepfen.
          hero-paar-dreh-01 ist scharf (1600x1066), quer und zeigt beide Gesichter ganz.
@@ -319,8 +319,8 @@ export const FAQ_CONTENT = {
       eyebrow: 'FAQ',
       title: 'Feeling unsure is normal. Staying unclear does not have to be.',
       lead: 'Here you find answers about getting started, dance partner, level, prices, how courses run, shoes, events and contact.',
-      primary: { label: 'Ask a question', href: R.kontakt },
-      secondary: { label: 'See the schedule', href: R.kursplan },
+      primary: { label: 'See the schedule', href: R.kursplan },
+      secondary: { label: 'Ask a question', href: R.kontakt },
       microcopy: 'If your question is not here, just drop us a line.',
       image: { src: '/photos/2026/hero-paar-dreh-01.webp', alt: 'Dance couple turning together in the Salsaflow studio' },
       cardLabel: 'Good to know',

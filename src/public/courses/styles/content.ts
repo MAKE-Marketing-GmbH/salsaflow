@@ -117,8 +117,8 @@ const salsa = {
       // im 844er-Fold nur Stirn und Dutt. Brief erlaubt: Pills weichen, wenn
       // sie das Band aus dem Fold druecken. EN-Bullets bleiben unveraendert.
       bullets: [],
-      primary: { label: 'Salsa Schnupperstunde buchen', href: R.schnupper },
-      secondary: { label: 'Salsa Kursplan ansehen', href: R.salsaPlan },
+      primary: { label: 'Salsa Kursplan ansehen', href: R.salsaPlan },
+      secondary: { label: 'Salsa Schnupperstunde buchen', href: R.schnupper },
       microcopy: 'Kostenlos · unverbindlich · wir helfen dir beim passenden Level.',
       image: { src: '/photos/premium/offer-salsa-1200.webp', alt: 'Lachendes Salsa-Paar in Bewegung im hellen Salsaflow Studio' },
       band: {
@@ -160,9 +160,9 @@ const salsa = {
       eyebrow: 'Warum Salsa',
       title: 'Salsa ist Energie, Führung und Musik in',
       titleAccent: 'Bewegung',
-      body: 'Salsa gibt dir schnell das Gefühl, wirklich zu tanzen. Du lernst nicht nur Schritte auswendig, sondern verstehst Rhythmus, Verbindung und einfache Signale zwischen Leader und Follower.',
+      body: 'Salsa gibt dir schnell das Gefühl, auf der Tanzfläche anzukommen. Du lernst Schritte und verstehst Rhythmus, Verbindung sowie klare Signale zwischen Leader und Follower.',
       blocks: [
-        { title: 'Rhythmus', text: 'Du lernst, Musik nicht nur zu hören, sondern mit dem Körper zu zählen und zu fühlen.' },
+        { title: 'Rhythmus', text: 'Du hörst, zählst und fühlst die Musik mit dem Körper.' },
         { title: 'Partnerwork', text: 'Du verstehst, wie Führung und Folgen funktionieren, ohne dass es verkrampft oder kompliziert wirkt.' },
         { title: 'Social Dance', text: 'Salsa bleibt nicht im Kursraum. Du kannst das Gelernte auf Danceflow Nights und Socials direkt ausprobieren.' },
       ],
@@ -193,18 +193,17 @@ const salsa = {
       /* R188 ST4, Raphael-Video 10:xx: «Ueberschriften nicht poetisch, konkret.»
          Vorher: «Von den ersten Basics zu fliessenden Kombinationen» (Beleg
          worklog/shots/R188/after-final2-tanzkurse/tanzkurse_salsa/d-03.png). Das ist
-         ein Bild, keine Aussage — «fliessend» beschreibt ein Gefuehl, und die Zeile
-         sagt nicht, was der Leser bekommt.
-         Jetzt die Nutzenfrage aus dem Auftrag («Muster: Was lernst du…?»), beantwortet
-         mit dem Zeitraum, den die vier Phasen darunter abdecken. Der Eyebrow «Deine
-         ersten Wochen» bleibt: er ist kein Deko-Kicker, sondern nennt die Kursphase,
-         und die Ueberschrift greift ihn jetzt woertlich auf. */
+         eine unklare Aussage. «Fliessend» beschreibt ein Gefühl. Die Zeile sagte nicht,
+         was der Leser bekommt.
+         Jetzt folgt die Nutzenfrage aus dem Auftrag («Muster: Was lernst du…?»). Die vier
+         Phasen darunter beantworten sie. Der Eyebrow «Deine ersten Wochen» bleibt. Er nennt
+         die Kursphase. Die Überschrift greift ihn jetzt wörtlich auf. */
       title: 'Was lernst du in den ersten Wochen?',
       body: 'Ein guter Salsa-Kurs beginnt nicht mit komplizierten Figuren. Er beginnt mit Rhythmus, Grundschritten und klaren Signalen, damit du dich sicher fühlst.',
       phases: [
         { tag: 'Phase 1', title: 'Rhythmus & Grundschritt', text: 'Du lernst den Grundrhythmus, einfache Gewichtswechsel und wie du zur Musik startest.' },
         { tag: 'Phase 2', title: 'Führung & Folgen', text: 'Du verstehst, wie Hände, Körperrichtung und Timing zusammenwirken.' },
-        { tag: 'Phase 3', title: 'Erste Drehungen', text: 'Du lernst einfache Drehungen und Kombinationen, die du wirklich auf der Tanzfläche nutzen kannst.' },
+        { tag: 'Phase 3', title: 'Erste Drehungen', text: 'Du lernst einfache Drehungen und Kombinationen für die Tanzfläche.' },
         { tag: 'Phase 4', title: 'Social-Dance-Gefühl', text: 'Du übst, mit wechselnden Partner:innen ruhig, klar und freundlich zu tanzen.' },
       ],
       cta: { label: 'Salsa Beginner ansehen', href: R.salsaPlan },
@@ -255,8 +254,8 @@ const salsa = {
       title: 'Bereit für deine erste',
       titleAccent: 'Salsa-Stunde?',
       body: 'Buche eine Gratis Schnupperstunde oder öffne direkt den Kursplan. Du musst nicht wissen, ob Salsa dein ganzes Leben wird. Es reicht, wenn du den ersten Abend testest.',
-      primary: { label: 'Salsa Schnupperstunde buchen', href: R.schnupper },
-      secondary: { label: 'Salsa Kursplan ansehen', href: R.salsaPlan },
+      primary: { label: 'Salsa Kursplan ansehen', href: R.salsaPlan },
+      secondary: { label: 'Salsa Schnupperstunde buchen', href: R.schnupper },
       microcopy: 'Kostenlos · unverbindlich · auch ohne Tanzpartner möglich.',
     },
     faqEyebrow: 'Salsa FAQ',
@@ -294,8 +293,8 @@ const salsa = {
         'Right by Basel SBB station',
         'Danceflow Night to practise in a real social',
       ],
-      primary: { label: 'Book a Salsa trial class', href: R.schnupper },
-      secondary: { label: 'See the Salsa schedule', href: R.salsaPlan },
+      primary: { label: 'See the Salsa schedule', href: R.salsaPlan },
+      secondary: { label: 'Book a Salsa trial class', href: R.schnupper },
       microcopy: 'Free · without obligation · we help you find the right level.',
       image: { src: '/photos/premium/offer-salsa-1200.webp', alt: 'Smiling Salsa couple dancing in the bright Salsaflow studio' },
       band: {
@@ -394,8 +393,8 @@ const salsa = {
       title: 'Ready for your first',
       titleAccent: 'Salsa class?',
       body: 'Book a free trial class or open the schedule right away. You do not have to know whether Salsa will become your whole life. It is enough to test the first evening.',
-      primary: { label: 'Book a Salsa trial class', href: R.schnupper },
-      secondary: { label: 'See the Salsa schedule', href: R.salsaPlan },
+      primary: { label: 'See the Salsa schedule', href: R.salsaPlan },
+      secondary: { label: 'Book a Salsa trial class', href: R.schnupper },
       microcopy: 'Free · without obligation · no dance partner needed.',
     },
     faqEyebrow: 'Salsa FAQ',
@@ -437,8 +436,8 @@ const bachata = {
         'Ohne Tanzpartner möglich',
         'Social-Dance-Anbindung über Danceflow Night',
       ],
-      primary: { label: 'Bachata Schnupperstunde buchen', href: R.schnupper },
-      secondary: { label: 'Bachata Kursplan ansehen', href: R.bachataPlan },
+      primary: { label: 'Bachata Kursplan ansehen', href: R.bachataPlan },
+      secondary: { label: 'Bachata Schnupperstunde buchen', href: R.schnupper },
       microcopy: 'Wir helfen dir, sicher und passend einzusteigen.',
       image: { src: '/photos/premium/offer-bachata-1200.webp', alt: 'Bachata-Paar mit ruhiger, warmer Verbindung im Salsaflow Studio' },
       band: {
@@ -554,8 +553,8 @@ const bachata = {
       title: 'Probiere Bachata in einer',
       titleAccent: 'Gratis-Schnupperstunde',
       body: 'Starte mit einer Schnupperstunde oder öffne direkt den Kursplan. Wenn du unsicher bist, welcher Kurs passt, frag uns kurz. Lieber richtig starten als lange überlegen.',
-      primary: { label: 'Bachata Schnupperstunde buchen', href: R.schnupper },
-      secondary: { label: 'Bachata Kursplan ansehen', href: R.bachataPlan },
+      primary: { label: 'Bachata Kursplan ansehen', href: R.bachataPlan },
+      secondary: { label: 'Bachata Schnupperstunde buchen', href: R.schnupper },
       microcopy: 'Kostenlos · unverbindlich · auch ohne Tanzpartner möglich.',
     },
     faqEyebrow: 'Bachata FAQ',
@@ -598,8 +597,8 @@ const bachata = {
         'Works without a dance partner',
         'Social-dance link through the Danceflow Night',
       ],
-      primary: { label: 'Book a Bachata trial class', href: R.schnupper },
-      secondary: { label: 'See the Bachata schedule', href: R.bachataPlan },
+      primary: { label: 'See the Bachata schedule', href: R.bachataPlan },
+      secondary: { label: 'Book a Bachata trial class', href: R.schnupper },
       microcopy: 'We help you get in safely and at the right level.',
       image: { src: '/photos/premium/offer-bachata-1200.webp', alt: 'Bachata couple with a calm, warm connection in the Salsaflow studio' },
       band: {
@@ -685,8 +684,8 @@ const bachata = {
       title: 'Try Bachata in a free',
       titleAccent: 'trial class',
       body: 'Start with a trial class or open the schedule. If you are unsure which class fits, send us a quick message and we will help you choose.',
-      primary: { label: 'Book a Bachata trial class', href: R.schnupper },
-      secondary: { label: 'See the Bachata schedule', href: R.bachataPlan },
+      primary: { label: 'See the Bachata schedule', href: R.bachataPlan },
+      secondary: { label: 'Book a Bachata trial class', href: R.schnupper },
       microcopy: 'Free · without obligation · no dance partner needed.',
     },
     faqEyebrow: 'Bachata FAQ',
