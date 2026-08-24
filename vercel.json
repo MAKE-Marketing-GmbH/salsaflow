@@ -5,7 +5,7 @@
   "functions": {
     "api/index.ts": {
       "maxDuration": 10,
-      "includeFiles": ["db/seed/public-schedule.json", "drizzle/**"]
+      "includeFiles": "{db/seed/public-schedule.json,drizzle/**}"
     }
   },
   "redirects": [
