@@ -103,9 +103,40 @@ export function EventsManager({ readonly, showToast }: { readonly: boolean; show
       </div>
 
       <Banner tone="salsa">
-        Ablauf: Event als Entwurf anlegen, in Ruhe prüfen und anschließend auf „Veröffentlicht“ setzen.
-        Vergangene Termine verschwinden automatisch aus dem öffentlichen Kalender.
+        Ein Event wird live angezeigt, sobald sein Status „Veröffentlicht“ ist und das End- bzw. Startdatum
+        nicht in der Vergangenheit liegt. Entwürfe und abgesagte Events bleiben unsichtbar.
       </Banner>
+
+      <Card className="p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold">So kommt ein Event auf die Website</h2>
+            <ol className="mt-3 grid gap-3 text-sm text-neutral-600 sm:grid-cols-3">
+              <li><strong className="block text-neutral-900">1. Anlegen</strong>„Neues Event“ öffnen und Datum, Texte sowie Links eintragen.</li>
+              <li><strong className="block text-neutral-900">2. Veröffentlichen</strong>Im Feld „Status“ die Option „Veröffentlicht“ wählen und speichern.</li>
+              <li><strong className="block text-neutral-900">3. Prüfen</strong>Das Event erscheint im Eventkalender und als nächster Termin auf der Eventseite.</li>
+            </ol>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href="/events-workshops/eventkalender"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-10 items-center justify-center rounded-md border border-neutral-300 bg-white px-4 text-sm font-semibold hover:bg-neutral-50"
+            >
+              Eventkalender öffnen
+            </a>
+            <a
+              href="/events"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-10 items-center justify-center rounded-md border border-neutral-300 bg-white px-4 text-sm font-semibold hover:bg-neutral-50"
+            >
+              Eventseite öffnen
+            </a>
+          </div>
+        </div>
+      </Card>
 
       {events.length === 0 ? (
         <Card className="p-8 text-center">
@@ -199,6 +230,16 @@ function EventCard({
         <div className="mt-auto flex flex-wrap gap-2 pt-5">
           <Button onClick={onEdit}>{readonly ? 'Ansehen' : 'Bearbeiten'}</Button>
           {!readonly && <Button variant="ghost" onClick={onDuplicate}>Duplizieren</Button>}
+          {event.status === 'published' && (
+            <a
+              href="/events-workshops/eventkalender"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-100"
+            >
+              Live prüfen
+            </a>
+          )}
           {!readonly && !confirmDelete && (
             <Button variant="ghost" onClick={() => setConfirmDelete(true)}>Löschen</Button>
           )}

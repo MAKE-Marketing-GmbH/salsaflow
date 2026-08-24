@@ -1,52 +1,10 @@
-// Motion-Bausteine der Startseite (Home-Redesign 2026-07, Motion AN laut INVARIANTS).
-// Edle Framer-Motion je Element: Reveal beim Eintritt, Stagger im 4-und-8-Beat, Count-up,
-// eine einzige erlaubte Dauer-Schleife (Foto-Marquee). IMMER reduced-motion-Fallback
-// (useReducedMotion -> nur Fade, kein Versatz, kein Loop, kein Count-up).
-//
-// Wichtig fuer die Verify-Schleife: jeder Reveal-Container traegt `data-reveal`. Das
-// statische Screenshot-Tool (docs/verify/_tools/shot-static.cjs) erzwingt darueber die
-// Sichtbarkeit, sonst waeren Reveal-on-Scroll-Shots leer. Zusaetzlich laeuft das Tool mit
-// reducedMotion:'reduce', darum rendern die Elemente ohnehin im Endzustand.
-//
-// Motion-Tokens folgen dem Design-Vertrag (00-DESIGN-SYSTEM.md Kap. 11): nur transform +
-// opacity, Eingang 0.4-0.7s, once:true, Distanzen <= 24px, Easing ease.out [0.22,1,0.36,1].
-
-//
-// -------------------------------------------------------------------------------------------
-// Ausbau 2026-08-21 (Auftrag "Wo ist meine Scroll-Animation?"). Gemessener Befund davor:
-//   grep -rn "useScroll" src/public --include=*.tsx | wc -l  ->  0
-//   17x whileInView, jedes davon derselbe Effekt: opacity 0->1 + y 14px, 0.45s, once:true.
-// Es gab also keine einzige scroll-GEBUNDENE Bewegung — nur einen einzigen Trigger-Effekt,
-// 17 Mal wiederholt. Screenshots 220ms nach jedem Scroll-Sprung zeigten alles fertig stehen.
-//
-// Dazugekommen sind vier Dinge, alle in dieser Datei, keine neue Abhaengigkeit:
-//   1. useParallax     — an useScroll gebunden, laeuft WAEHREND des Scrollens, nicht danach.
-//   2. Reveal-Varianten 'rise' | 'clip' | 'blur' | 'letters' — vier unterscheidbare Effekte
-//      statt einem. 'rise' bleibt der unveraenderte Default, damit die 23 bestehenden
-//      Aufrufstellen ihr Verhalten exakt behalten.
-//   3. useScrollProgress — 0..1 fuer eine Sektion, als Andockpunkt fuer andere Pakete.
-//   4. useParallaxStyle — die hardware-beschleunigte Fassung von useParallax (siehe unten).
-//
-// Drei Regeln, die JEDE neue Variante einhaelt (sie sind der Grund, warum die Datei so
-// ausfuehrlich kommentiert ist — sie wurden hier schon einmal teuer gelernt):
-//
-//   A. `prefers-reduced-motion` neutralisiert ALLES. Nur Fade bleibt: kein Versatz, kein
-//      Blur, kein clip-path, kein Parallax, kein Wort-Stagger. Nicht "gedaempft", sondern
-//      aus. Reduced-Motion-Nutzer bekommen denselben INHALT, nur ohne Bewegung.
-//   B. Der `useHydrated`-Haken ist Pflicht, nicht Kuer (siehe Kommentar unten). Jede
-//      Variante rendert vor der Hydration ihren ENDZUSTAND. Sonst schreibt der Prerender
-//      opacity:0 / clipPath:inset(...100%...) ins HTML und die Seite ist ohne JavaScript leer.
-//   C. Nur transform, opacity, filter, clip-path. Nie width/height/top/left — die drei
-//      loesen Layout + Paint aus und fallen unter Last aus dem Frame-Budget.
-// -------------------------------------------------------------------------------------------
-
 import {
   motion,
-  useReducedMotion,
   useInView,
+  useMotionTemplate,
+  useReducedMotion,
   useScroll,
   useTransform,
-  useMotionTemplate,
   type MotionValue,
   type Variants,
 } from 'framer-motion';
@@ -60,36 +18,12 @@ import {
   type RefObject,
 } from 'react';
 
-/* R190, zweite Kritikrunde: zwei unabhaengige Kritiker meldeten dasselbe Bild —
-   Elemente stehen an ihrer Endposition und sind trotzdem noch halb durchsichtig.
-   Sichtbar ist dann kein Hereingleiten, sondern ein Aufhellen an Ort und Stelle.
-   Genau das nennt Raphael "das ploppt einfach ein".
+/** Ruhiger Basistakt: kurze Wege, hohe Startdeckkraft, kein sichtbares „Ploppen“. */
+export const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+export const VIEWPORT = { once: true, margin: '0px 0px -5% 0px' } as const;
 
-   Nachgerechnet an der alten Kurve [0.22, 1, 0.36, 1]: sie legt bei 27 % der
-   Laufzeit bereits 79 % des Weges zurueck. Von 14 px Versatz bleiben dort
-   2,9 px — bei gleichzeitig 79 % Deckkraft. Die Bewegung ist also praktisch
-   vorbei, waehrend das Auge das Element noch als grau wahrnimmt.
-   (27 % ist kein zufaelliger Punkt: die Motion-Screenshots messen 120 ms von
-   450 ms, und die Kritiker haben genau diese Bilder beurteilt.)
-
-   Neu [0.33, 1, 0.68, 1] — dieselbe Familie, aber flacher. Bei 27 % sind es
-   61 % Weg, es bleiben 7,8 px von 20. Die Bewegung reicht damit sichtbar in
-   die Zeit hinein, in der das Element schon lesbar ist.
-   Kein linearer Verlauf: der bremst am Ende nicht ab und wirkt mechanisch. */
-export const EASE_OUT = [0.33, 1, 0.68, 1] as const;
-
-/**
- * Laeuft der Code schon im Browser?
- *
- * Der Grund fuer diesen Haken: Die Reveal-Varianten starten bei `opacity: 0`. Beim Prerender
- * landet dieser Startwert als Inline-Stil im ausgelieferten HTML — auf der Startseite 47 Mal,
- * darunter die H1 und der Haupt-CTA. Wer die Seite ohne JavaScript oeffnet, oder bevor das
- * Bundle da ist, sieht eine leere Flaeche.
- *
- * `useSyncExternalStore` gibt auf dem Server false und im Browser true. Damit rendert der
- * Server den sichtbaren Endzustand, und die Animation zuendet erst nach der Hydration.
- */
 const emptySubscribe = () => () => {};
+
 export function useHydrated() {
   return useSyncExternalStore(
     emptySubscribe,
@@ -97,300 +31,113 @@ export function useHydrated() {
     () => false,
   );
 }
-/* R190 (Raphael 22.08.: "Es soll so ein Scroll-Reveal sein, aber das ploppt einfach
-   ein. Das sieht überhaupt nicht gut aus.")
-   Vorher: `{ once: true, margin: '-8% 0px' }`.
 
-   Die negative Margin SCHRUMPFT den Auslösebereich. Das Element musste also 8 % der
-   Fensterhöhe TIEF im Bild stehen, bevor überhaupt etwas anfing — auf 900 px sind
-   das 72 px. Bis dahin stand es unsichtbar da, dann sprang der Effekt an und lief
-   auf seiner eigenen Uhr ab. Genau diesen Ablauf beschreibt Raphael als Ploppen:
-   die Bewegung hat nie etwas mit dem Scrollen zu tun, sie wird nur davon gestartet.
+function endState() {
+  return {
+    opacity: 1,
+    transform: 'none',
+    filter: 'blur(0px)',
+    clipPath: 'inset(0% 0% 0% 0%)',
+  };
+}
 
-   Neu steht die Margin auf 0: der Reveal zündet genau dann, wenn das Element die
-   Fensterkante berührt. Die Bewegung beginnt also, während es hereinfährt.
-
-   ZWISCHENSCHRITT, DER NICHT FUNKTIONIERT HAT — und der Grund, warum hier eine Zahl
-   und keine größere steht. Erster Versuch war `12% 0px -8% 0px`, also ein Auslöser
-   deutlich UNTERHALB der Fensterkante. Gemessen mit `scripts/r190-reveal-timing.cjs`
-   kippte das den Fehler nur auf die andere Seite: 10 von 11 Reveals standen mit
-   Deckkraft 1.000 an der Fensterkante, waren also fertig, BEVOR man sie sehen
-   konnte. Sichtbar ist das dasselbe Nichts wie vorher — nur diesmal, weil die
-   Animation zu früh statt zu spät lief.
-
-   Der brauchbare Bereich ist schmal: zu spät heißt Ploppen, zu früh heißt
-   unsichtbar. 0 trifft ihn, weil die Reveal-Dauern (0,45 bis 0,72 s) ohnehin so
-   lang sind, dass die Geste ins Bild hineinreicht.
-
-   `once: true` bleibt. Ein Reveal, der beim Zurückscrollen erneut spielt, macht die
-   Seite unruhig und wiederholt bei jedem Richtungswechsel dieselbe Geste. */
-export const VIEWPORT = { once: true, margin: '0px' } as const;
-
-/** Container- + Item-Varianten, an prefers-reduced-motion gebunden.
- *  container: staggerChildren. item: y-Versatz + Fade (bei reduced nur Fade).
- *  EIN Takt fuer die ganze Seite (Geil-Pass): 20px, 0.58s, Stagger 0.07.
- *
- *  R190: 14 -> 20 px. Zusammen mit der flacheren EASE_OUT (Begruendung dort)
- *  bleibt bei 27 % der Laufzeit fast dreimal so viel Restweg stehen wie vorher
- *  (7,8 px statt 2,9). Der Reveal bekommt damit einen sichtbaren Weg, statt nur
- *  aufzuhellen. Mehr als 20 px waere zu viel: der Text schoebe sich dann so weit,
- *  dass die Zeile beim Lesen springt. */
 export function useReveal(opts?: { stagger?: number; distance?: number; duration?: number }) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotion() === true;
   const hydrated = useHydrated();
-  const stagger = opts?.stagger ?? 0.07;
-  const distance = opts?.distance ?? 20;
-  // Derselbe Wert wie `VARIANT_DURATION.rise` — die zwei Haken sind EIN Takt.
-  const duration = opts?.duration ?? 0.58;
+  const stagger = opts?.stagger ?? 0.045;
+  const distance = Math.min(opts?.distance ?? 10, 14);
+  const duration = opts?.duration ?? 0.42;
+
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.03 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.015 } },
   };
-  const item: Variants = {
-    // Vor der Hydration ist `hidden` der Endzustand. Sonst schreibt der Prerender
-    // opacity:0 ins HTML und die Seite bleibt ohne JavaScript leer.
-    /* R190: Start-Deckkraft 0,55 statt 0 — dieselbe Zahl wie clip und blur.
-       opus-critic Runde 6 hat live gemessen: das Offer-Raster stand 250 ms im
-       Bild bei opacity 0 und Hoehe 416. Sichtbar war eine leere Flaeche, dann
-       kamen die Karten. Das IST das Ploppen, nur ohne Vorhang. Mit 0,55 sind
-       die Karten von der ersten Frame an als Karten da und fahren 20 px ein. */
-    hidden: hydrated ? { opacity: 0.55, y: reduced ? 0 : distance } : { opacity: 1, y: 0 },
-    show: { opacity: 1, y: 0, transition: { duration: reduced ? 0.3 : duration, ease: EASE_OUT } },
-  };
+  const item: Variants = hydrated
+    ? {
+        hidden: reduced ? { opacity: 1 } : { opacity: 0.88, y: distance },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: reduced ? 0 : duration, ease: EASE_OUT },
+        },
+      }
+    : { hidden: endState(), show: endState() };
+
   return { container, item, reduced, hydrated };
 }
 
-// ============================================================================================
-// SCROLL-GEBUNDENE BEWEGUNG
-//
-// Der Unterschied zu allem darueber: `whileInView` ist ein TRIGGER — es zuendet einmal und
-// laeuft dann auf seiner eigenen Uhr ab. `useScroll` ist eine BINDUNG — der Wert haengt an
-// der Scroll-Position, bewegt sich mit dem Finger und steht still, wenn der Nutzer stillsteht.
-// Genau dieses Zweite hat der Seite gefehlt.
-// ============================================================================================
-
-/** Der Standard-Messbereich einer Sektion: 0 = Oberkante betritt den Viewport von unten,
- *  1 = Unterkante verlaesst ihn nach oben. Als Konstante, damit alle Haken hier denselben
- *  Bereich messen und sich Effekte verschiedener Pakete nicht gegeneinander verschieben.
- *
- *  Bewusst KEIN `as const`: `useScroll` erwartet ein veraenderliches Array, ein readonly-Tupel
- *  laesst sich dort nicht zuweisen (TS4104). */
 const SECTION_OFFSET: ['start end', 'end start'] = ['start end', 'end start'];
 
-/**
- * Fortschritt einer Sektion als 0..1, gebunden an die Scroll-Position.
- *
- * Der Andockpunkt fuer alles, was "waehrend" statt "beim Eintritt" passieren soll:
- * Fortschrittsbalken, mitlaufende Zahlen, Farbwechsel, ein Bild, das sich mitdreht.
- *
- * Bei reduced-motion gibt der Haken einen eingefrorenen MotionValue auf 0 zurueck — nicht
- * `null`. Der Grund: der Aufrufer soll `useTransform` darauf immer bedingungsfrei aufrufen
- * koennen. Ein Haken, der mal einen Wert und mal nichts liefert, zwingt jede Aufrufstelle in
- * eine Fallunterscheidung, und genau dort wird die Reduced-Motion-Regel dann vergessen.
- */
 export function useScrollProgress(ref: RefObject<HTMLElement | null>): MotionValue<number> {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotion() === true;
   const { scrollYProgress } = useScroll({ target: ref, offset: SECTION_OFFSET });
   const frozen = useTransform(scrollYProgress, () => 0);
   return reduced ? frozen : scrollYProgress;
 }
 
-/**
- * Parallax: das Element wandert langsamer als die Seite.
- *
- * `distance` ist die GESAMTE Wanderstrecke in Pixeln ueber den vollen Durchlauf der Sektion,
- * symmetrisch um die Mitte verteilt (+d/2 beim Eintritt, -d/2 beim Austritt). Bei 48 bewegt
- * sich das Element also 24px nach unten und 24px nach oben — nie mehr als die Haelfte in eine
- * Richtung.
- *
- * Warum das Maximum bei rund 60 liegt: darueber loest sich das Bild sichtbar von seinem
- * Rahmen, man sieht die Kante des Containers durchscheinen und der Effekt kippt von "teuer"
- * nach "Baukasten". 40-60 ist der Bereich, in dem es wirkt, ohne sich zu zeigen.
- *
- * WICHTIG fuer den Aufrufer: das Element braucht Ueberstand, sonst schiebt der Versatz eine
- * leere Kante ins Bild. Bei einem Bild in einer Box mit `overflow-hidden` heisst das:
- * das Bild etwas hoeher machen als die Box (z. B. `h-[calc(100%+60px)] -top-[30px]`).
- */
+/** Parallax bleibt nur als kaum merkbare Tiefenstaffelung; Lenis steuert die Scrollphysik. */
 export function useParallax(ref: RefObject<HTMLElement | null>, distance = 48): MotionValue<number> {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotion() === true;
   const { scrollYProgress } = useScroll({ target: ref, offset: SECTION_OFFSET });
-  const half = reduced ? 0 : distance / 2;
-  return useTransform(scrollYProgress, [0, 1], [half, -half]);
+  const travel = reduced ? 0 : Math.min(Math.abs(distance) * 0.25, 14);
+  return useTransform(scrollYProgress, [0, 1], [travel / 2, -travel / 2]);
 }
 
-/** Der Rueckgabetyp von `useParallaxStyle`.
- *
- *  Warum ein eigener Typ statt `CSSProperties`: React kennt `transform` nur als String,
- *  Framer Motion nimmt an derselben Stelle einen `MotionValue<string>` und loest ihn selbst
- *  auf. Ein Cast auf `CSSProperties` waere also eine Luege ueber den Laufzeitwert. Der eigene
- *  Typ beschreibt, was wirklich drin liegt, und passt auf die `style`-Prop jedes
- *  `motion.*`-Elements — genau dort, wo er hingehoert. */
 export type ParallaxStyle = { transform: MotionValue<string> };
 
-/**
- * Dieselbe Bewegung wie `useParallax`, aber als fertiger `transform`-String.
- *
- * Der Grund fuer die zweite Fassung: Framer Motions Kurzform-Props (`x`, `y`, `scale`) laufen
- * ueber requestAnimationFrame im Haupt-Thread und sind NICHT hardware-beschleunigt. Bei einem
- * Parallax laeuft die Bewegung ueber die gesamte Sektionshoehe mit — genau waehrend der
- * Browser Bilder dekodiert und Schrift nachlaedt. Der volle `transform`-String geht dagegen
- * auf den Compositor und bleibt glatt, wenn der Haupt-Thread beschaeftigt ist.
- *
- * Fuer Parallax auf Bildern deshalb DIESEN Haken nehmen, nicht `useParallax`:
- *   const style = useParallaxStyle(ref, 56);
- *   <motion.img style={style} ... />
- */
 export function useParallaxStyle(ref: RefObject<HTMLElement | null>, distance = 48): ParallaxStyle {
   const y = useParallax(ref, distance);
   const transform = useMotionTemplate`translate3d(0, ${y}px, 0)`;
   return { transform };
 }
 
-// ============================================================================================
-// REVEAL-VARIANTEN
-//
-// Vier Effekte statt einem. Die Zuordnung ist keine Geschmacksfrage, sondern folgt daraus,
-// was das Element IST:
-//
-//   rise    Fliesstext, Listen, alles Uebrige. Der ruhige Default. Unveraendert.
-//   clip    Bilder und Karten. Der Inhalt wird aufgedeckt statt eingeblendet — als ob ein
-//           Vorhang hochgeht. Wirkt teuer, weil sich das Element nicht bewegt: nur seine
-//           sichtbare Flaeche waechst. Genau deshalb funktioniert es auf Fotos, wo ein
-//           y-Versatz das Motiv verschiebt und billig aussieht.
-//   blur    Ueberschriften. Blur 3->0 plus ein Hauch scale (1.01->1). Der Text bleibt auch
-//           im Zwischenbild lesbar und wirkt trotzdem wie ein Scharfstellen.
-//   letters Grosse H1/H2. WORT-fuer-Wort, nie Buchstabe fuer Buchstabe.
-//
-// Warum Woerter und nicht Buchstaben — das ist der teuerste Fehler in dieser Familie von
-// Effekten, und er kostet zwei Dinge:
-//   1. Umlaute und Ligaturen. Ein deutscher Text pro Buchstabe in <span> zerlegt bricht die
-//      Formung; je nach Schrift und Normalisierung reisst es Diakritika vom Grundzeichen.
-//      "Tanzschueler" mit echtem Umlaut wird dann zu Grundzeichen plus freistehendem Punktepaar.
-//   2. Screenreader. Jeder <span> ist eine eigene Textbox. VoiceOver und NVDA buchstabieren
-//      dann "T-a-n-z-s-c-h-u-e-l-e-r" statt das Wort zu sprechen. Bei Woertern bleibt jedes
-//      Wort als Einheit stehen, und die Wortgrenzen sind genau da, wo der Screenreader
-//      ohnehin trennt.
-// ============================================================================================
-
-/** Die drei Element-Effekte. Der vierte Effekt ist `RevealWords`, weil nur diese benannte
- *  Komponente einen String sicher in Woerter teilen kann. Ein generischer ReactNode laesst
- *  sich nicht zerlegen, ohne Markup und Barrierefreiheit zu zerstoeren. */
 export type RevealVariant = 'rise' | 'clip' | 'blur';
 
-/** Wie lange ein Element-Effekt laeuft. clip braucht mehr Zeit als rise: dort wandert eine
- *  sichtbare Kante ueber das ganze Element. Unter 0.7s wirkt sie gehetzt statt ruhig. */
-/* R190: `rise` von 0,45 auf 0,58 s. Der Effekt traegt den Fliesstext und damit
-   den groessten Teil der Seite; bei 0,45 s war die Geste vorbei, bevor das Auge
-   sie als Bewegung gelesen hat. `clip` und `blur` bleiben — der eine ist mit
-   0,72 s ohnehin der langsamste, der andere arbeitet ueber Schaerfe statt Weg. */
-const VARIANT_DURATION = {
-  rise: 0.58,
-  clip: 0.72,
-  blur: 0.48,
-} satisfies Record<RevealVariant, number>;
-
-/** Wort-Stagger hat eine eigene Dauer, weil er kein generischer Element-Effekt ist. */
-const WORD_DURATION = 0.5;
-
-/**
- * Die Item-Variante eines Effekts.
- *
- * `hydrated === false` liefert bei JEDEM Effekt den vollen Endzustand — sichtbar, unverzerrt,
- * ungeclippt. Das ist Regel B oben und der Grund, warum diese Funktion die Fallunterscheidung
- * an genau einer Stelle trifft statt in vier.
- *
- * `reduced === true` liefert reines Fade: kein y, kein Blur, kein scale, kein clip-path.
- * Auch clip faellt auf Fade zurueck — ein wandernder Ausschnitt IST Bewegung, auch wenn sich
- * das Element selbst nicht verschiebt.
- */
-function variantItem(
+function revealVariantItem(
   variant: RevealVariant,
   opts: { reduced: boolean; hydrated: boolean; distance: number; duration: number; delay: number },
 ): Variants {
   const { reduced, hydrated, distance, duration, delay } = opts;
-  const transition = {
-    duration: reduced ? 0.3 : duration,
-    delay: reduced ? 0 : delay,
-    ease: EASE_OUT,
-  };
+  if (!hydrated) return { hidden: endState(), show: endState() };
+  if (reduced) return { hidden: { opacity: 1 }, show: { opacity: 1 } };
 
-  if (!hydrated) {
-    // Vor der Hydration: Endzustand. Alle Eigenschaften explizit neutral, damit kein Rest
-    // stehen bleibt, wenn ein Aufrufer die Variante zur Laufzeit wechselt.
-    const end = {
-      opacity: 1,
-      transform: 'none',
-      filter: 'blur(0px)',
-      clipPath: 'inset(0% 0% 0% 0%)',
-    };
-    return { hidden: end, show: end };
-  }
-
-  if (reduced) {
-    return { hidden: { opacity: 0 }, show: { opacity: 1, transition } };
-  }
-
+  const transition = { duration, delay, ease: EASE_OUT };
   if (variant === 'clip') {
     return {
-      /* inset(top right bottom left): 100% unten heisst "von der Unterkante komplett
-         weggeschnitten". Der Vorhang faehrt also nach oben auf.
-
-         R190: Der Startvorhang steht auf 88 statt 100 %, und die Deckkraft laeuft mit.
-         Vorher stand hier `opacity: 1` in BEIDEN Zustaenden. Ergebnis, von opus-critic
-         am laufenden Server gemessen und in `home-desktop-01-motion.png` sichtbar: eine
-         416 px hohe Sektion stand als leeres Rechteck im Bild, `inset(0% 0% 100%)` bei
-         Deckkraft 1, und klappte dann auf. Das IST Raphaels "das ploppt einfach ein" —
-         eine leere Flaeche faehrt herein, danach erscheint der Inhalt.
-         Mit 45 % ist von Anfang an mehr als die Haelfte des Inhalts da. 88 %
-         (erster Versuch) zeigte in home-desktop-01-motion.png weiter nur einen
-         Foto-Streifen ueber 400 px Leere — Raphael wuerde das immer noch
-         "ploppen" nennen. 45 % laesst die Karten als Karten lesen, der Vorhang
-         oeffnet den Rest. */
-      hidden: { opacity: 0.55, clipPath: 'inset(0% 0% 45% 0%)' },
+      hidden: { opacity: 0.92, clipPath: 'inset(0% 0% 10% 0%)' },
       show: { opacity: 1, clipPath: 'inset(0% 0% 0% 0%)', transition },
     };
   }
-
   if (variant === 'blur') {
     return {
-      // Der Start bleibt lesbar. Ein starker Blur erzeugte im 220-ms-Beleg nur graue
-      // Geisterzeilen. 3px plus 1% Skalierung zeigt die Geste ohne Textverlust.
-      hidden: { opacity: 0.55, filter: 'blur(3px)', transform: 'scale(1.01)' },
-      show: { opacity: 1, filter: 'blur(0px)', transform: 'scale(1)', transition },
+      hidden: { opacity: 0.9, filter: 'blur(0.8px)', transform: 'translate3d(0, 4px, 0)' },
+      show: { opacity: 1, filter: 'blur(0px)', transform: 'translate3d(0, 0, 0)', transition },
     };
   }
-
   return {
-    hidden: { opacity: 0.55, transform: `translate3d(0, ${distance}px, 0)` },
-    show: { opacity: 1, transform: 'translate3d(0, 0px, 0)', transition },
+    hidden: { opacity: 0.88, transform: `translate3d(0, ${distance}px, 0)` },
+    show: { opacity: 1, transform: 'translate3d(0, 0, 0)', transition },
   };
 }
 
-/** Container + Item fuer rise, clip oder blur. Die Variantenfassung von `useReveal`.
- *  `useReveal` selbst bleibt unveraendert — 23 Dateien haengen daran. */
 export function useRevealVariant(
   variant: RevealVariant = 'rise',
   opts?: { stagger?: number; distance?: number; duration?: number; delay?: number },
 ) {
   const reduced = useReducedMotion() === true;
   const hydrated = useHydrated();
-  const stagger = opts?.stagger ?? 0.07;
-  // R190: 14 -> 20 px, derselbe Wert wie in `useReveal`. Die zwei Haken teilen
-  // sich einen Takt; laufen sie auseinander, bewegt sich die halbe Seite anders.
-  const distance = opts?.distance ?? 20;
-  const duration = opts?.duration ?? VARIANT_DURATION[variant];
+  const stagger = opts?.stagger ?? 0.045;
+  const distance = Math.min(opts?.distance ?? 10, 14);
+  const duration = opts?.duration ?? (variant === 'clip' ? 0.5 : 0.42);
   const delay = opts?.delay ?? 0;
-
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.03 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.015 } },
   };
-  const item = variantItem(variant, { reduced, hydrated, distance, duration, delay });
+  const item = revealVariantItem(variant, { reduced, hydrated, distance, duration, delay });
   return { container, item, reduced, hydrated };
 }
 
-/** Standard-Reveal-Gruppe (motion.div). Kinder mit `variants={item}` steigen gestaffelt ein.
- *  Diese Schnittstelle bleibt exakt kompatibel; 23 Dateien importieren sie bereits. */
 export function Reveal({
   children,
   className,
@@ -405,10 +152,6 @@ export function Reveal({
   id?: string;
   stagger?: number;
   distance?: number;
-  /** Landmark-Rolle fuer den Wrapper. Reveal rendert oft das Grid einer Sektion; ein
-   *  zusaetzliches div nur fuer die Rolle wuerde dieses Grid brechen. Deshalb reicht
-   *  Reveal genau diese zwei ARIA-Props durch — kein Spread, damit nicht beliebige
-   *  Attribute still an einem Motion-Wrapper landen. */
   role?: string;
   'aria-label'?: string;
 }) {
@@ -430,8 +173,6 @@ export function Reveal({
   );
 }
 
-/** Props eines einzelnen Element-Reveals. Exportiert, damit Aufrufer Wrapper bauen koennen,
- *  ohne die Schnittstelle ein zweites Mal abzuschreiben. */
 export type RevealOneProps = {
   children: ReactNode;
   className?: string;
@@ -442,12 +183,6 @@ export type RevealOneProps = {
   duration?: number;
 };
 
-/**
- * Ein einzelnes Element mit rise, clip oder blur, ohne Gruppe drumherum.
- *
- * Fuer den haeufigsten Fall: EIN Bild, EINE Karte, EINE Ueberschrift. Wer eine Gruppe mit
- * Stagger braucht, nimmt `Reveal` als Huelle und `useRevealVariant().item` an den Kindern.
- */
 export function RevealOne({
   children,
   className,
@@ -474,8 +209,6 @@ export function RevealOne({
   );
 }
 
-/** Benannte, unverwechselbare Fassungen fuer direkte Nutzung. Jeder Wrapper behaelt
- *  `data-reveal`, weil RevealOne ihn rendert. */
 export function RiseReveal(props: Omit<RevealOneProps, 'variant'>) {
   return <RevealOne {...props} variant="rise" />;
 }
@@ -488,20 +221,6 @@ export function BlurReveal(props: Omit<RevealOneProps, 'variant'>) {
   return <RevealOne {...props} variant="blur" />;
 }
 
-/**
- * Wort-fuer-Wort-Stagger fuer eine grosse Ueberschrift.
- *
- * `text` ist bewusst ein String und kein ReactNode: die Komponente muss an Leerzeichen
- * trennen koennen, und ein beliebiger Kindbaum laesst sich nicht zuverlaessig in Woerter
- * schneiden, ohne fremdes Markup zu zerlegen.
- *
- * Barrierefreiheit: die zerlegte Fassung ist `aria-hidden`, daneben steht der vollstaendige
- * Satz in einer `sr-only`-Kopie. Screenreader lesen damit einen zusammenhaengenden Satz,
- * Augen sehen den Stagger. Ohne diese Kopie liest VoiceOver jedes Wort als eigenen Absatz.
- *
- * Bei reduced-motion faellt die Komponente auf EIN Fade des ganzen Textes zurueck: kein
- * Versatz, kein Blur, kein Stagger.
- */
 export type RevealWordsProps = {
   text: string;
   className?: string;
@@ -509,19 +228,6 @@ export type RevealWordsProps = {
   stagger?: number;
   distance?: number;
   duration?: number;
-  /** R209 (Raphael 23.08. 20:20, "Hero-Erstframe ohne Opacity-Fade — Foto+Rot sofort"):
-   *  ueberspringt den Reveal vollstaendig, das Wort steht ab dem ersten Frame fertig da.
-   *
-   *  Nur fuer Text IM FOLD. Der Reveal hier ist als Eintritts-Geste gebaut: er soll laufen,
-   *  waehrend ein Element von unten ins Bild faehrt. Ein Hero ist beim Laden schon im Bild —
-   *  dort gibt es keinen Eintritt, den man begleiten koennte, sondern nur eine Verzoegerung
-   *  vor dem ersten Eindruck.
-   *
-   *  Warum ein Flag und nicht `useHydrated` reparieren: `useHydrated` ist RICHTIG. Es
-   *  verhindert, dass der Prerender opacity:0 ins HTML schreibt und die Seite ohne
-   *  JavaScript leer bleibt (Regel B im Kopfkommentar). Der Fehler war nie der Haken,
-   *  sondern dass der Fold ueberhaupt animiert. Am Haken zu drehen wuerde die 23 anderen
-   *  Aufrufstellen unterhalb des Folds mit beschaedigen. */
   instant?: boolean;
 };
 
@@ -529,71 +235,47 @@ export function RevealWords({
   text,
   className,
   as: Tag = 'h2',
-  stagger = 0.045,
-  distance = 18,
-  duration,
+  stagger = 0.022,
+  distance = 8,
+  duration = 0.4,
   instant = false,
 }: RevealWordsProps) {
   const reduced = useReducedMotion() === true;
-  const hydratedRaw = useHydrated();
-  // `instant` wirkt wie "noch nicht hydriert": beide Zustaende rendern den Endzustand.
-  const hydrated = hydratedRaw && !instant;
+  const hydrated = useHydrated() && !instant;
   const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
-  const dur = duration ?? WORD_DURATION;
-
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.02 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.01 } },
   };
   const word: Variants = hydrated
     ? {
-        hidden: reduced
-          ? { opacity: 0 }
-          : {
-              opacity: 0.72,
-              transform: `translate3d(0, ${distance}px, 0)`,
-              filter: 'blur(0px)',
-            },
-        show: reduced
-          ? { opacity: 1, transition: { duration: 0.3, ease: EASE_OUT } }
-          : {
-              opacity: 1,
-              transform: 'translate3d(0, 0px, 0)',
-              filter: 'blur(0px)',
-              transition: { duration: dur, ease: EASE_OUT },
-            },
+        hidden: reduced ? { opacity: 1 } : { opacity: 0.9, y: Math.min(distance, 10) },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: reduced ? 0 : duration, ease: EASE_OUT },
+        },
       }
-    : {
-        hidden: { opacity: 1, transform: 'none', filter: 'blur(0px)' },
-        show: { opacity: 1, transform: 'none', filter: 'blur(0px)' },
-      };
+    : { hidden: endState(), show: endState() };
 
   return (
     <Tag className={className} data-reveal data-reveal-variant="letters">
       <span className="sr-only">{text}</span>
       <motion.span
         aria-hidden
-        // inline-flex statt inline: ein reines <span> nimmt keinen transform an, und ohne
-        // flex-wrap braechen lange Ueberschriften nicht mehr um.
         className="inline-flex flex-wrap"
         variants={container}
-        /* R209: bei `instant` steht schon der INITIAL-Zustand auf `show`. Es reicht nicht,
-           nur die Varianten auf den Endwert zu setzen — `initial="hidden"` wuerde weiterhin
-           einen Frame im Hidden-Zustand rendern, und genau dieser eine Frame ist das, was
-           auf dem Erstbild als leere Flaeche zu sehen war. */
         initial={instant ? 'show' : 'hidden'}
         {...(instant ? { animate: 'show' } : { whileInView: 'show', viewport: VIEWPORT })}
       >
-        {words.map((w, i) => (
+        {words.map((wordText, index) => (
           <motion.span
-            // Der Index gehoert hier in den Key: derselbe Text kann dasselbe Wort mehrfach
-            // enthalten ("Tanz fuer Tanz"), reine Woerter waeren also keine eindeutigen Keys.
-            key={`${w}-${i}`}
+            key={`${wordText}-${index}`}
             variants={word}
             className="inline-block whitespace-pre"
           >
-            {w}
-            {i < words.length - 1 ? ' ' : ''}
+            {wordText}
+            {index < words.length - 1 ? ' ' : ''}
           </motion.span>
         ))}
       </motion.span>
@@ -601,55 +283,43 @@ export function RevealWords({
   );
 }
 
-/** Benannter vierter Effekt. Der Name entspricht `rise | clip | blur | letters`; intern
- *  bleibt `RevealWords` als selbsterklaerende API erhalten. */
 export function LettersReveal(props: RevealWordsProps) {
   return <RevealWords {...props} />;
 }
 
-/** Zaehlt eine Zahl ab Sichtbarkeit hoch (Count-up). Bei reduced sofort Endwert. */
-export function useCountUp(target: number, duration = 1.1) {
-  const reduced = useReducedMotion();
+export function useCountUp(target: number, duration = 0.9) {
+  const reduced = useReducedMotion() === true;
   const ref = useRef<HTMLSpanElement>(null);
-  /* R190: stand auf `margin: '-15% 0px'`. Das ist genau die negative Margin, die
-     `VIEWPORT` (oben) als Ursache des Ploppens hatte und die dort auf '0px'
-     gezogen wurde — hier war sie uebersehen worden, und zwar in der schlimmeren
-     Form: 15 % statt 8 %. Auf 900 px Fensterhoehe fing die Zahl also erst an zu
-     laufen, wenn die Kachel 135 px tief im Bild stand.
-     Jetzt derselbe Wert wie ueberall: der Count-up startet, wenn die Zahl die
-     Fensterkante beruehrt. Befund von opus-critic, nachgeprueft. */
   const inView = useInView(ref, { once: true, margin: '0px' });
   const [val, setVal] = useState(reduced ? target : 0);
+
   useEffect(() => {
     if (!inView) return;
     if (reduced) {
       setVal(target);
       return;
     }
-    let raf = 0;
+    let frame = 0;
     const start = performance.now();
-    const ms = duration * 1000;
+    const milliseconds = duration * 1000;
     const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / ms);
-      const eased = 1 - Math.pow(1 - t, 3);
+      const progress = Math.min(1, (now - start) / milliseconds);
+      const eased = 1 - Math.pow(1 - progress, 3);
       setVal(Math.round(eased * target));
-      if (t < 1) raf = requestAnimationFrame(tick);
+      if (progress < 1) frame = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [inView, reduced, target, duration]);
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [duration, inView, reduced, target]);
+
   return { ref, val };
 }
 
-/** Zahlen-Bühne: zeigt einen Prefix (z.B. "~"), zaehlt die Zahl hoch, dann Suffix. */
 export function CountStat({ value, className }: { value: string; className?: string }) {
-  // Trennt fuehrende Nicht-Ziffern (z.B. "~") von der Zahl. "~40" -> prefix "~", num 40.
   const match = value.match(/^(\D*)(\d+)(\D*)$/);
-  if (!match) {
-    return <span className={className}>{value}</span>;
-  }
+  if (!match) return <span className={className}>{value}</span>;
   const [, prefix, digits, suffix] = match;
-  const { ref, val } = useCountUp(parseInt(digits, 10));
+  const { ref, val } = useCountUp(Number.parseInt(digits, 10));
   return (
     <span ref={ref} className={className}>
       {prefix}
@@ -659,22 +329,16 @@ export function CountStat({ value, className }: { value: string; className?: str
   );
 }
 
-/** Foto-Marquee: die EINE erlaubte Dauer-Schleife der Seite. Zwei identische Spuren laufen
- *  nahtlos nach links. Bei reduced-motion steht das Band still (seitlich scrollbar). */
 export function Marquee({
   children,
   className,
-  duration = 42,
+  duration = 48,
 }: {
   children: ReactNode;
   className?: string;
   duration?: number;
 }) {
-  const reduced = useReducedMotion();
-  // Struktur bleibt in beiden Faellen gleich: der Server kennt die Motion-Praeferenz
-  // nicht, und ein Struktur-Wechsel beim Hydrieren wirft den ganzen Baum weg (Fehler 418).
-  // Ohne Bewegung steht das Band still und laesst sich seitlich scrollen; der doppelte
-  // Kinder-Satz bleibt drin, weil er sonst wieder die Knotenzahl aendern wuerde.
+  const reduced = useReducedMotion() === true;
   return (
     <div aria-hidden className={`${reduced ? 'overflow-x-auto' : 'overflow-hidden'} ${className ?? ''}`}>
       <motion.div
