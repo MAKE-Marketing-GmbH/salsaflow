@@ -25,3 +25,5 @@ Scope: Nur den harten rechten Rand-Crop des Hero-Bildes auf `/tanzkurse` mobil b
   CHECK: node /root/clients/salsaflow-w1/scripts/r188-clicktest.cjs
   EXPECT: PASS:
   EVIDENCE: PASS: 21 Routen, Kontakt, FAQ, Kursplan, Buchung und Stilseite. Exit 0.
+
+ABANDON: leftover-other-round nicht R189-Rest

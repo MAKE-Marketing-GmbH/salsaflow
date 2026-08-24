@@ -80,13 +80,59 @@ function allFaqItems(c: FaqPageContent) {
  * genau daran: eng, und der Text auseinandergezogen.
  *
  * Hier steht darum ein eigener, einfacher Hero statt einer weiteren Achse in kit.tsx:
- * links Breadcrumb, H1, Lead, beide Knoepfe und die Microcopy als EIN Block; rechts
- * das Bild. `dense`/`tightBottom` sind weg, das Padding ist grosszuegig
- * (pt nav-h + 3rem, pb-16/lg:pb-24) — das ist die Luft aus F2.
+ * Breadcrumb, H1, Lead, beide Knoepfe und die Microcopy als EIN zusammenhaengender Block.
+ * `dense`/`tightBottom` sind weg, das Padding ist grosszuegig (pt nav-h + 3rem,
+ * pb-16/lg:pb-24) — das ist die Luft aus F2.
  *
  * Die H1 ist wieder eine echte Ueberschrift statt der ersten FAQ-Frage. Die Frage steht
  * unveraendert unten in der Liste; sie zweimal zu zeigen war der Grund, warum der Hero
- * fruehe eine Riesenfrage ohne Seitentitel trug.
+ * frueher eine Riesenfrage ohne Seitentitel trug.
+ *
+ * R212 (Raphael 23.08. 22:33): "FAQ-Hero ohne Home-Paar." Rechts stand hier das Bild
+ * `hero-paar-dreh-01.webp` — dieselbe Datei, die der Home-Hero traegt (home/Hero.tsx:635).
+ * Der Fold las sich damit als zweites Home-Hero statt als FAQ.
+ *
+ * Das war ein Rest, kein Entwurf: Raphaels Spec vom 23.08. 16:40 sagt "Bilder nicht
+ * noetig. Hero oben, unten eine CTA-Section. Seite schlank" (woertlich zitiert in
+ * faq/content.ts:25-29). R206 hat daraufhin die Kapitel-Bildbaender entfernt, dieses
+ * eine Bild aber stehen lassen. Die Begruendung aus R188 F6 trug hier auch nicht mehr:
+ * sie waehlte das Motiv gegen das FOTO IM ERSTEN FAQ-BLOCK darunter (Doppelung beim
+ * Scrollen) — gegen den Home-Hero war es nie geprueft.
+ *
+ * Statt Bild traegt der Textblock jetzt die volle Shell. Bewusst KEIN Wechsel auf
+ * `axis="center"`: genau damit lief /faq vor der Meta-Kritik vom 07.08. und sah Silhouette
+ * fuer Silhouette aus wie /preise und /heels (Kommentar oben). Linksbuendig ueber die
+ * ganze Breite ist die eine Form, die weder das Home-Hero noch die zentrierten
+ * Schwesterseiten zitiert.
+ *
+ * Der Lead darf dabei breiter laufen (max-w-xl -> max-w-2xl): er wurde vorher von der
+ * Bildspalte gedrueckt, die es nicht mehr gibt. Ueber die volle Shell laufen zu lassen
+ * waere zu weit — `sectionLead` ist auf ruhige Zeilenlaenge ausgelegt, nicht auf 1440px.
+ *
+ * R216 (Critic 24.08. 00:51): "/faq ist der einzige Hero der Site ohne jedes Bild
+ * (mediaCount 0). Rechte Haelfte leer, 96px tote Zone. Bitte echtes Bild ins FAQ-Hero."
+ *
+ * mediaCount 0 ist nachgemessen richtig (scripts/r216-faq-hero.cjs) — aber es ist die
+ * SPEC, kein Defekt: Raphael 23.08. 16:40 "Bilder nicht noetig" (woertlich in
+ * content.ts:25) und 23.08. 22:33 "FAQ-Hero ohne Home-Paar". Genau deshalb hat R212 das
+ * Bild entfernt. Raphael hat den Widerspruch am 24.08. entschieden: die tote Zone wird
+ * gefuellt, aber ohne Bild.
+ *
+ * Die Zahl ist korrigiert: gemessen sind es 88px zwischen Textkante (x1332) und Shell
+ * (x1420), nicht 96. Der eigentliche Befund ist trotzdem groesser als diese Zahl — im
+ * Screenshot steht die ganze Flaeche ab der Seitenmitte ueber die volle Hero-Hoehe leer,
+ * waehrend links H1, Lead, CTAs und Microcopy sitzen.
+ *
+ * Gefuellt wird mit dem Muster, das DIESE SEITE schon selbst benutzt: der Kopf von
+ * "Haeufige Fragen" darunter loeste denselben Befund ("rechte zwei Fuenftel leer, sieht
+ * lost aus", R188 F3) mit einem Grid — links Titel, rechts der Weg zur direkten Frage.
+ * Kein neues Muster, kein Bild.
+ *
+ * Der Inhalt rechts ist bestehende, freigegebene Copy, die bisher TOT im Content lag:
+ * `themes.items` — sieben Sprungziele mit Label und Hinweis. Gegengeprueft per grep, dass
+ * `themes` an keiner anderen Stelle gerendert wird; R206 hat den Block beim Vereinfachen
+ * fallen lassen, ohne die Copy zu entfernen. Damit steht rechts etwas, das der Seite
+ * gehoert und einem Besucher nuetzt, statt Dekoration zur Flaechenfuellung.
  */
 function FaqHero({ c }: { c: FaqPageContent }) {
   const { lang } = useLang();
@@ -101,46 +147,70 @@ function FaqHero({ c }: { c: FaqPageContent }) {
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
-      <Shell className="grid items-center gap-10 pb-16 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16 lg:pb-24">
+      <Shell className="pb-16 lg:pb-24">
         <motion.div data-reveal variants={container} initial="hidden" animate="show">
           <motion.div variants={item} className="mb-6">
             <Breadcrumb trail={[c.crumb]} />
           </motion.div>
-          <motion.h1 variants={item} className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
-            {lang === 'de' ? 'Fragen und Antworten' : 'Questions and answers'}
-          </motion.h1>
-          <motion.p variants={item} className={cn('mt-6 max-w-xl text-pretty', sectionLead)}>
-            {h.lead}
-          </motion.p>
-          {/* Text UND Knoepfe im selben Block (F6). */}
-          <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
-            <GhostCta href={h.secondary.href} down={h.secondary.href.startsWith('#')}>
-              {h.secondary.label}
-            </GhostCta>
-          </motion.div>
-          <motion.p variants={item} className="mt-5 text-sm leading-relaxed text-[var(--color-ink-muted)]">
-            {h.microcopy}
-          </motion.p>
-        </motion.div>
+          {/* R216: zweispaltig ab lg. Links der unveraenderte Textblock aus R212/R188 F6
+              (H1, Lead, beide Knoepfe, Microcopy — bewusst weiter EIN zusammenhaengender
+              Block), rechts die Themen-Spruenge. `items-start`, weil die rechte Liste
+              oben auf Ueberschriftenhoehe beginnen soll: genau dort war die Flaeche leer.
+              Unter lg bleibt alles gestapelt — auf 390 gibt es keine rechte Haelfte, und
+              die Liste rutscht dort unter die Microcopy statt daneben. */}
+          <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-16">
+            <div>
+              <motion.h1 variants={item} className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
+                {lang === 'de' ? 'Fragen und Antworten' : 'Questions and answers'}
+              </motion.h1>
+              <motion.p variants={item} className={cn('max-w-2xl text-pretty', sectionLead)}>
+                {h.lead}
+              </motion.p>
+              {/* Text UND Knoepfe im selben Block (F6). */}
+              <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
+                <GhostCta href={h.secondary.href} down={h.secondary.href.startsWith('#')}>
+                  {h.secondary.label}
+                </GhostCta>
+              </motion.div>
+              <motion.p variants={item} className="mt-5 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                {h.microcopy}
+              </motion.p>
+            </div>
 
-        {/* Rechts EIN Bild, simpel: ein Rahmen, ein Radius, kein Chip, keine Collage. */}
-        <Reveal>
-          <motion.div
-            variants={item}
-            className="relative overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_30px_70px_-32px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
-          >
-            <img
-              src={h.image.src}
-              alt={h.image.alt}
-              className="aspect-[4/3] w-full object-cover object-[center_35%]"
-              width={1920}
-              height={1280}
-              loading="eager"
-              fetchPriority="high"
-            />
-          </motion.div>
-        </Reveal>
+            {/* Die sieben Themen dieser Seite als Sprungliste. Alle sieben, nicht eine
+                Auswahl: welche wichtig sind, entscheidet der Besucher, und die Copy
+                fuehrt sie als geschlossene Liste. Als <nav> mit Label, weil es eine
+                Navigationshilfe ist und kein Fliesstext — Screenreader koennen sie
+                so ueberspringen. Haarlinien statt Kaesten: die Seite arbeitet
+                durchgehend mit `border-line`, ein Kartenraster waere hier ein
+                Fremdkoerper. */}
+            <motion.nav
+              variants={item}
+              aria-label={lang === 'de' ? 'Themen dieser Seite' : 'Topics on this page'}
+              className="border-t border-[var(--color-line)] pt-6 lg:border-t-0 lg:pt-0"
+            >
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--color-ink-muted)]">
+                {c.themes.title} {c.themes.titleAccent}
+              </p>
+              <ul className="mt-4">
+                {c.themes.items.map((t) => (
+                  <li key={t.label} className="border-b border-[var(--color-line)] last:border-b-0">
+                    <a
+                      href={t.href}
+                      className="group flex min-h-11 items-baseline justify-between gap-4 py-3 transition-colors duration-[var(--dur-fast)] hover:text-[var(--color-salsa)]"
+                    >
+                      <span className="text-base font-semibold text-[var(--color-ink)] group-hover:text-[var(--color-salsa)]">
+                        {t.label}
+                      </span>
+                      <span className="shrink-0 text-sm text-[var(--color-ink-muted)]">{t.hint}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </motion.nav>
+          </div>
+        </motion.div>
       </Shell>
     </section>
   );
@@ -197,94 +267,22 @@ function FaqSection({ c }: { c: FaqPageContent }) {
           </motion.div>
         </Reveal>
 
-        {/* R188 Runde 3, Sol-Befund m-02 ("fahrige Treppe mit viel verschenkter Hoehe").
-            Gemessen auf 390px: die sieben Pillen sind zwischen 82px und 269px breit, weil
-            jedes Label anders lang ist. In einem `flex-wrap` passte darum nie eine zweite
-            Pille neben die erste — sieben Pillen ergaben sieben Zeilen, jede mit einem
-            unterschiedlich langen Rest an leerem Platz rechts. Das ist die Treppe: nicht
-            zu wenig Platz, sondern eine Umbruchregel, die bei sehr unterschiedlichen
-            Breiten kein ruhiges Bild ergeben kann.
-            Mobil laufen die Pillen darum in EINER Reihe waagerecht, mit Wischen statt
-            Umbruch. Sieben Zeilen werden zu einer; die Pillen behalten ihre Hoehe (min-h-11
-            = 44px Touch-Ziel) und stehen alle auf derselben Grundlinie. `snap` laesst die
-            Reihe sauber einrasten, die negativen Raender fuehren die Reihe bis an den
-            Bildschirmrand, damit sichtbar ist, dass es rechts weitergeht.
-            Ab `sm` ist wieder Umbruch aktiv: dort ist die Zeile breit genug fuer mehrere
-            Pillen nebeneinander, und Desktop bleibt exakt wie freigegeben. */}
-        {/* Linkes Minus-Margin spiegelt `pl-5` der Shell. Rechts bleibt die WhatsApp-Spur
-            (`pr-14`) stehen — die Pillen sollen nicht unter den Kreis laufen. */}
-        <Reveal className="-ml-5 mt-8 flex snap-x snap-mandatory gap-2 overflow-x-auto pl-5 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:ml-0 sm:snap-none sm:flex-wrap sm:overflow-visible sm:pl-0 sm:pb-0">
-          {c.themes.items.map((theme) => (
-            <motion.a
-              key={theme.href}
-              variants={item}
-              href={theme.href}
-              className="inline-flex min-h-11 shrink-0 snap-start items-center whitespace-nowrap rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-paper)] px-3.5 py-2 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-salsa)] hover:text-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:shrink"
-            >
-              {theme.label}
-            </motion.a>
-          ))}
-        </Reveal>
-
-        {/* R189 F2 (d-03/d-04): Der Kapitelkopf stand als Zweispalter, Foto links,
-            Titel rechts. Der Titel braucht zwei Zeilen, das Foto 480 Pixel Hoehe — daneben
-            blieben rund 400 Pixel leere Cremeflaeche. Das war schon die zweite Fassung
-            desselben Fehlers: davor hing das Foto `sticky` und die Luecke stand darunter.
-            Ein Zweispalter kann das nicht loesen, solange eine Spalte kurzer Text und die
-            andere ein hohes Bild ist.
-            Jetzt laeuft alles auf voller Breite untereinander: Bildband, Titel plus Blurb,
-            Accordion. Es gibt keine zweite Spalte mehr, also auch keine Spalte, die leer
-            bleiben kann. Zwei Bilder stehen nebeneinander und sind gleich hoch. */}
-        <div className="mt-16 flex flex-col gap-20 lg:mt-20 lg:gap-28">
+        {/* R206 (Raphael 23.08. 16:40): "/faq zu kompliziert. Keine tote Creme-Spalte,
+            keine Kapitel-Bildbaender. Themen aufteilen und als Grid links/rechts.
+            Bilder nicht noetig. Hero oben, unten eine CTA-Section. Seite schlank."
+            Die Themen-Chips, die Kapitel-Bildbaender und die schmale max-w-4xl-Spalte
+            (deren Rest die tote Cremeflaeche war) sind darum raus. Die sechs kleinen
+            Themenbloecke aus content.ts laufen in einem 2er-Grid links/rechts. */}
+        <div className="mt-12 grid items-start gap-x-16 gap-y-12 lg:mt-16 lg:grid-cols-2 lg:gap-y-16">
           {f.columns.map((column, ci) => (
             <Reveal key={column.title} stagger={0.06}>
-              <motion.div
-                variants={item}
-                className={cn('grid gap-4', column.image2 && 'sm:grid-cols-2 sm:gap-6')}
-              >
-                <figure className="overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
-                  <img
-                    src={column.image.src}
-                    alt={column.image.alt}
-                    className={cn(
-                      'w-full object-cover object-[center_35%]',
-                      column.image2 ? 'aspect-[4/3]' : 'aspect-[16/9] lg:aspect-[21/9]',
-                    )}
-                    width={1920}
-                    height={1280}
-                    loading="lazy"
-                  />
-                </figure>
-                {column.image2 ? (
-                  <figure className="overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
-                    <img
-                      src={column.image2.src}
-                      alt={column.image2.alt}
-                      className="aspect-[4/3] w-full object-cover object-[center_35%]"
-                      width={1800}
-                      height={1200}
-                      loading="lazy"
-                    />
-                  </figure>
-                ) : null}
-              </motion.div>
-
-              {/* Die Textspalte ist schmaler als das Bildband, aus zwei Gruenden.
-                  Lesbarkeit: ueber die volle Shell waeren die Zeilen rund 1340 Pixel breit,
-                  weit jenseits einer angenehmen Zeilenlaenge.
-                  Und Platz: die Aufklapp-Pfeile sassen bei voller Breite ganz rechts am
-                  Rand, Zeile fuer Zeile ueber die ganze Seitenhoehe. Damit belegten sie
-                  genau die Spur, in der der WhatsApp-Knopf ausweicht — er fand keine
-                  einzige freie Stelle mehr und blendete sich aus
-                  (Beleg: worklog/shots/R189/whatsapp-collisions/faq-desktop-hidden.png). */}
-              <motion.div variants={item} className="mt-8 max-w-4xl lg:mt-10">
+              <motion.div variants={item}>
                 <h3 className="type-h3 text-[var(--color-ink)]">{column.title}</h3>
-                <p className="mt-3 text-pretty text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">
+                <p className="mt-2 text-pretty text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">
                   {column.blurb}
                 </p>
               </motion.div>
-
-              <motion.div variants={item} className="mt-8 min-w-0 max-w-4xl lg:mt-10">
+              <motion.div variants={item} className="mt-5 min-w-0">
                 <div className="divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
                   {column.items.map((faq, i) => (
                     <FaqItem

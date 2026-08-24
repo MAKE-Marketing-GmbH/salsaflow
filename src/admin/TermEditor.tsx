@@ -23,7 +23,7 @@ import {
   TextInput,
 } from '@/admin/ui';
 
-const WEEKDAY_INDEX: Record<string, number> = {
+const WEEKDAY_INDEX = {
   mon: 0,
   tue: 1,
   wed: 2,
@@ -31,10 +31,12 @@ const WEEKDAY_INDEX: Record<string, number> = {
   fri: 4,
   sat: 5,
   sun: 6,
-};
+} satisfies Record<string, number>;
 
 function courseDateRange(startDate: string, endDate: string, weekday: string): string | null {
-  const target = WEEKDAY_INDEX[weekday];
+  // SAFETY: `weekday in WEEKDAY_INDEX` prueft die Mitgliedschaft zur Laufzeit; nur dann
+  // wird der String als Schluessel gelesen. Unbekannte Wochentage liefern null.
+  const target = weekday in WEEKDAY_INDEX ? WEEKDAY_INDEX[weekday as keyof typeof WEEKDAY_INDEX] : undefined;
   if (target === undefined) return null;
   const toDate = (iso: string) => new Date(`${iso}T00:00:00Z`);
   const start = toDate(startDate);
@@ -73,7 +75,7 @@ export function TermEditor({
   const [form, setForm] = useState<{ mode: 'new' } | { mode: 'edit'; course: AdminCourse } | null>(null);
   const [editTerm, setEditTerm] = useState(false);
   const reducedMotion = useReducedMotion();
-  const reveal: { container: Variants; item: Variants } = {
+  const reveal = {
     container: {
       hidden: {},
       show: { transition: { staggerChildren: reducedMotion ? 0 : 0.07, delayChildren: 0.03 } },
@@ -82,7 +84,7 @@ export function TermEditor({
       hidden: { opacity: 0, y: reducedMotion ? 0 : 14 },
       show: { opacity: 1, y: 0, transition: { duration: reducedMotion ? 0.01 : 0.45, ease: [0.22, 1, 0.36, 1] } },
     },
-  };
+  } satisfies { container: Variants; item: Variants };
 
   const reload = useCallback(async () => {
     const d = await api.get<TermDetail>(`/api/admin/terms/${termId}`);
@@ -595,7 +597,14 @@ function CourseForm({
 
         {isSalsa && (
           <Field label="Salsa-Timing">
-            <Select value={onVariant} onChange={(e) => setOnVariant(e.target.value as 'on1' | 'on2')}>
+            <Select
+              value={onVariant}
+              onChange={(e) => {
+                // SAFETY: Das Select enthaelt genau die zwei Optionen on1/on2 —
+                // e.target.value kann zur Laufzeit keinen anderen Wert tragen.
+                setOnVariant(e.target.value as 'on1' | 'on2');
+              }}
+            >
               <option value="on1">On1</option>
               <option value="on2">On2</option>
             </Select>
@@ -631,7 +640,14 @@ function CourseForm({
             </Select>
           </Field>
           <Field label="Veröffentlichung" hint="Entwurf bleibt intern; veröffentlicht ist im Kursplan buchbar.">
-            <Select value={status} onChange={(e) => setStatus(e.target.value as AdminCourse['status'])}>
+            <Select
+              value={status}
+              onChange={(e) => {
+                // SAFETY: Die Optionen unten sind exakt die Werte aus AdminCourse['status'] —
+                // e.target.value kann zur Laufzeit keinen anderen Wert tragen.
+                setStatus(e.target.value as AdminCourse['status']);
+              }}
+            >
               <option value="open">Veröffentlicht</option>
               <option value="draft">Entwurf</option>
               <option value="full">Ausgebucht (Warteliste)</option>

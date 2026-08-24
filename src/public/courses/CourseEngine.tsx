@@ -45,7 +45,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useLang, WEEKDAY_LABEL, formatDateI18n, type Lang } from '@/lib/i18n';
+import { useLang, weekdayLabel, formatDateI18n, type Lang } from '@/lib/i18n';
 import {
   addDaysISO,
   fetchSchedule,
@@ -599,7 +599,7 @@ export function CourseEngine({ onTotal, fixedStyle }: { onTotal?: (total: number
       <section className="mt-6 sm:mt-8" aria-labelledby="kursplan-day-title">
         <h2 id="kursplan-day-title" className="sr-only">
           {activeDay
-            ? `${WEEKDAY_LABEL[lang][activeDay]?.long ?? activeDay} — ${daySlots.length} ${daySlots.length === 1 ? c.classOne : c.classMany}`
+            ? `${weekdayLabel(lang, activeDay)?.long ?? activeDay} — ${daySlots.length} ${daySlots.length === 1 ? c.classOne : c.classMany}`
             : c.noCoursesDay}
         </h2>
 
@@ -830,7 +830,11 @@ function DayBar({
         // direkt auf der Chip-Reihe. Die gemeinsame Grundlinie sitzt jetzt am Container
         // (border-b), und darunter liegen 1.25rem Luft (siehe mt-5 an der Chip-Zeile).
         // gap-y-3 trennt zusaetzlich die beiden Raster-Reihen auf Mobil.
-        className="grid grid-cols-3 gap-x-2 gap-y-3 border-b border-[var(--color-line)] pb-1 lg:flex lg:gap-6 lg:pb-0"
+        /* R190: mobil `pr-14`, damit die Sa-Spalte links vom WhatsApp-Knopf
+           endet. Ohne das sass der Kreis auf "Sa 22.08. · 1"
+           (kursplan-mobil-settled.png, Grok Runde 4 und 5). Ab lg steht der
+           Knopf im 88-px-Shellrand und braucht das nicht. */
+        className="grid grid-cols-3 gap-x-2 gap-y-3 border-b border-[var(--color-line)] pb-1 max-sm:pr-14 lg:flex lg:gap-6 lg:pb-0"
       >
         {days.map((d) => {
           const on = d.key === active;
@@ -865,7 +869,7 @@ function DayBar({
               {/* Mobil bleibt die Abkuerzung kompakt, aber das konkrete Datum steht trotzdem im
                   HTML. Desktop zeigt direkt das verlangte Format "Samstag, 9. August". */}
               <span className={cn('font-display text-base leading-none tracking-tight sm:text-lg', on ? 'font-extrabold' : 'font-bold')}>
-                <span className="lg:hidden">{WEEKDAY_LABEL[lang][d.key]?.short ?? d.key}</span>
+                <span className="lg:hidden">{weekdayLabel(lang, d.key)?.short ?? d.key}</span>
                 <span className="hidden lg:inline">{formatScheduleDay(d.date, lang)}</span>
               </span>{' '}
               <span
@@ -994,7 +998,7 @@ function TimeBlock({
   children: React.ReactNode;
 }) {
   const { lang } = useLang();
-  const weekdayShort = WEEKDAY_LABEL[lang][weekday]?.short;
+  const weekdayShort = weekdayLabel(lang, weekday)?.short;
   const dateLabel = date ? [weekdayShort, shortDate(date, lang)].filter(Boolean).join(' ') : null;
   // R189: Die Zeitspalte selbst liegt in CourseRow.tsx, weil die Startseite dieselbe zeigt.
   return (
@@ -1072,18 +1076,31 @@ function ScheduleBottomCta({ nextStart }: { nextStart: string | null }) {
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">
           {lang === 'de' ? 'Dein Einstieg bei Salsaflow' : 'Your start at Salsaflow'}
         </p>
-        <h2 className="type-h2 mt-3 max-w-xl">
+        {/* R190 (Raphael 22.08.: "Es soll einheitlich sein, ob wir jetzt eine Überschrift
+            mehr dazu haben, keine Überschrift, Eyebrows, Subtitles."): Dieser Kopf baute
+            seine drei Zeilen von Hand mit `mt-3`. Gemessen auf /tanzkurse/bachata stand
+            Eyebrow→Titel hier auf 12 px, an den uebrigen Koepfen derselben Seite auf 20 px
+            (scripts/r190-section-rhythm.cjs). Jetzt traegt er dieselben Abstaende wie
+            jeder andere Sektionskopf: `mt-5` unter dem Eyebrow, `mt-4` ueber der Subline.
+
+            Die Farben bleiben, wie sie sind — der Block steht auf dunklem Grund, dort
+            traegt Weiss/70 die Zeile (Kontrast 9.2:1, siehe Kommentar oben). Vereinheitlicht
+            wird der Rhythmus, nicht die Farbwelt. */}
+        <h2 className="type-h2 mt-5 max-w-xl">
           {lang === 'de' ? 'Nicht länger suchen. Deinen Platz sichern.' : 'Stop searching. Save your spot.'}
         </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
+        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
           {lang === 'de'
             ? 'Wähle deinen Kurs direkt aus dem Plan. Du reservierst online und zahlst entspannt vor Ort.'
             : 'Choose your class directly from the schedule. Reserve online and pay comfortably on site.'}
         </p>
 
-        <div className="mt-7 grid grid-cols-3 border-y border-white/15">
+        {/* R205 Runde 2 (Grok, m360): drei Spalten quetschten "8 Wochen" zu "8 Woch…"
+            (truncate bei ~106px Spaltenbreite). Unter sm stapeln die Fakten deshalb
+            untereinander mit Trennlinien; ab sm bleibt die Drei-Spalten-Leiste. */}
+        <div className="mt-7 grid border-y border-white/15 max-sm:divide-y max-sm:divide-white/15 sm:grid-cols-3">
           {facts.map((fact) => (
-            <div key={fact.label} className="min-w-0 border-r border-white/15 px-2 py-4 first:pl-0 last:border-r-0 sm:px-4 sm:first:pl-0">
+            <div key={fact.label} className="min-w-0 py-3 sm:border-r sm:border-white/15 sm:px-4 sm:py-4 sm:first:pl-0 sm:last:border-r-0">
               <div className="truncate font-display text-base font-extrabold sm:text-xl">{fact.value}</div>
               <div className="mt-1 text-[11px] leading-tight text-white/55 sm:text-xs">{fact.label}</div>
             </div>

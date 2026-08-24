@@ -94,7 +94,7 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
           >
             {h.title}
           </motion.h1>
-          <motion.p variants={item} className={`mt-3 max-w-xl ${sectionLead}`}>
+          <motion.p variants={item} className={`max-w-xl ${sectionLead}`}>
             {h.lead}
           </motion.p>
           <motion.ul variants={item} className="mt-4 flex flex-wrap gap-2">
@@ -186,7 +186,7 @@ function OccasionsSection({ c }: { c: ShowsAnimContent }) {
           <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
             {o.titleA} <TitleAccent>{o.titleAccent}</TitleAccent> {o.titleB}
           </motion.h2>
-          <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+          <motion.p variants={item} className={`${sectionLead}`}>
             {o.lead}
           </motion.p>
 

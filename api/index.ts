@@ -2,9 +2,10 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { Hono } from 'hono';
-import { handle } from 'hono/vercel';
 import { createContactRoutes } from '../server/contact-routes.js';
-import { createReservationRoutes } from '../server/reservation-routes.js';
+import { createReservationRoutes, type SeedSchedule } from '../server/reservation-routes.js';
+import { openDb } from '../db/client.js';
+import { createApp } from '../server/app.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const schedulePath = resolve(here, '../db/seed/public-schedule.json');
@@ -32,9 +33,9 @@ async function currentSchedule() {
   return { ...source, today, terms, courses, bookingEnabled: false, reservationEnabled: true };
 }
 
-const app = new Hono();
+const staticApp = new Hono();
 
-app.get('/api/health', (c) =>
+staticApp.get('/api/health', (c) =>
   c.json({
     ok: true,
     service: 'salsaflow-dc-api',
@@ -45,14 +46,23 @@ app.get('/api/health', (c) =>
   }),
 );
 
-app.get('/api/public/schedule', async (c) => c.json(await currentSchedule()));
+staticApp.get('/api/public/schedule', async (c) => c.json(await currentSchedule()));
+staticApp.get('/api/public/events', (c) => c.json({ today: todayISO(), events: [] }));
 
-app.route('/', createContactRoutes());
-app.route('/', createReservationRoutes(async () => (await schedulePromise) as { courses: [] }));
+staticApp.route('/', createContactRoutes());
+staticApp.route(
+  '/',
+  createReservationRoutes(async () => {
+    // SAFETY: schedulePromise liest db/seed/public-schedule.json, das genau die
+    // SeedSchedule-Form hat (gepruefte Seed-Datei im Repo, kein Fremdinput).
+    const schedule = (await schedulePromise) as SeedSchedule;
+    return schedule;
+  }),
+);
 
 // Alles Uebrige unter /api ist Kauf-/Admin-Mechanik und braucht eine Datenbank.
 // Die gibt es hier nicht. Ehrliche 503 statt stiller Fehler.
-app.all('/api/*', (c) =>
+staticApp.all('/api/*', (c) =>
   c.json(
     {
       error: 'Dieser Weg ist auf dieser Website nicht offen.',
@@ -62,5 +72,20 @@ app.all('/api/*', (c) =>
   ),
 );
 
-export const GET = handle(app);
-export const POST = handle(app);
+async function runtimeApp() {
+  if (!process.env.DATABASE_URL?.trim()) return staticApp;
+  const handle = await openDb();
+  await handle.migrate();
+  return createApp(handle.db);
+}
+
+const appPromise = runtimeApp();
+async function dispatch(request: Request) {
+  const app = await appPromise;
+  return app.fetch(request);
+}
+
+export const GET = dispatch;
+export const POST = dispatch;
+export const PATCH = dispatch;
+export const DELETE = dispatch;

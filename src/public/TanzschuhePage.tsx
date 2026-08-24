@@ -228,7 +228,7 @@ function PartnerSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
             <h2 className={`mt-5 ${sectionTitle}`}>
               {p.title} <TitleAccent>{p.titleAccent}</TitleAccent>
             </h2>
-            <p className={`mt-4 ${sectionLead}`}>{p.body}</p>
+            <p className={`${sectionLead}`}>{p.body}</p>
             <ul className="mt-7 grid gap-2.5">
               {p.bullets.map((b) => (
                 <li key={b} className="flex items-start gap-3 text-[0.98rem] leading-relaxed text-[var(--color-ink)]">

@@ -52,7 +52,9 @@ Ledger: 17 von 17 geprueft. 16 erfuellt, 1 ABANDON (G7, begruendet).
       PNG tanzkurse_heels/d-01.png: kein KEIN-DRUCK-Kicker, keine Strich-Deko.
       PNG tanzkurse_salsa/d-03.png: neue H2 sichtbar.
 
-- [ ] ABANDON: G7 ST6 — Die Preissektion hat auf den Stilseiten NIE existiert.
+ABANDON: G7 leftover-other-round — Preissektion auf Stilseiten nie existiert
+- [x] G7 ST6 — Die Preissektion hat auf den Stilseiten NIE existiert.
+  EVIDENCE: ABANDON, Stilseiten hatten keine Preissektion.
       Nachgewiesen, nicht geraten:
       `git show HEAD:src/public/courses/styles/StylePage.tsx | grep -i "preis|price|kostet|CHF"`
       liefert nur zwei Kommentar-Treffer ueber Bildausschnitte, keinen Preis-Code.

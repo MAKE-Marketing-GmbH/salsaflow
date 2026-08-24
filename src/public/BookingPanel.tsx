@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { EASE_OUT, useHydrated } from '@/public/home/motion';
 import { WhatsAppIcon } from '@/public/site/BrandIcons';
 import { CONTACT } from '@/public/site/SiteFooter';
-import { BOOKING_UI, WEEKDAY_LABEL, useLang, waitlistBody, levelLabelI18n, formatDateI18n } from '@/lib/i18n';
+import { BOOKING_UI, weekdayLabel, useLang, waitlistBody, levelLabelI18n, formatDateI18n } from '@/lib/i18n';
 import {
   createBooking,
   fetchAvailability,
@@ -24,7 +24,7 @@ import {
 import {
   fetchSchedule,
   embeddedSchedule,
-  buildScheduleDays,
+  buildScheduleDaysForTerms,
   buildScheduleSlots,
   weekdayKeyForISO,
   type ScheduleCourse,
@@ -35,6 +35,27 @@ import {
 import { Seo } from '@/lib/seo';
 import { SiteHeader } from '@/public/site/SiteHeader';
 import { SiteFooter } from '@/public/site/SiteFooter';
+
+const PILL_MONTH_SHORT = {
+  de: ['Jan.', 'Feb.', 'März', 'Apr.', 'Mai', 'Juni', 'Juli', 'Aug.', 'Sep.', 'Okt.', 'Nov.', 'Dez.'],
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+} as const;
+
+/** Slot-Pill: "frei" stimmt nur, wenn die laufende Staffel offen ist. Ist die laufende
+ *  Staffel voll und buchbar erst die kommende, nennt die Pill deren Startdatum — sonst
+ *  widerspricht /buchung dem Kursplan, der dieselbe volle Staffel "Ausgebucht" zeigt
+ *  (R205 Runde 4, Opus+Grok). Datumsformel = lokale Kopie von CourseEngine.shortDate. */
+function slotPillLabel(s: ScheduleSlot, full: boolean, lang: 'de' | 'en', freeLabel: string, waitlistLabel: string): string {
+  if (full) return waitlistLabel;
+  if (s.running?.status === 'full' && s.bookable.phase === 'upcoming' && s.nextTerm?.startDate) {
+    const [, m, d] = s.nextTerm.startDate.split('-').map(Number);
+    if (m && d) {
+      const month = PILL_MONTH_SHORT[lang][(m - 1) % 12];
+      return lang === 'de' ? `ab ${d}. ${month}` : `from ${month} ${d}`;
+    }
+  }
+  return freeLabel;
+}
 
 type Person = { firstName: string; lastName: string; email: string; phone: string };
 const emptyPerson = (): Person => ({ firstName: '', lastName: '', email: '', phone: '' });
@@ -175,7 +196,7 @@ function Funnel() {
           // Kurse wirkt wie eine zweite Fehlermeldung). Auf den naechsten Tag MIT Kursen
           // vorziehen, damit unter dem Satz echte Termine stehen.
           const todayKey = weekdayKeyForISO(s.today) ?? 'mon';
-          const daysWithCourses = buildScheduleDays(s.today).filter((d) =>
+          const daysWithCourses = buildScheduleDaysForTerms(s.today, s.terms).filter((d) =>
             s.courses.some((c) => c.weekday === d.key),
           );
           const startIdx = daysWithCourses.findIndex((d) => d.key === todayKey);
@@ -201,10 +222,17 @@ function Funnel() {
   // Nur Wochentage mit Kursen — dieselbe Leiste wie /kursplan (Mo–Sa statt Mo–So).
   // Zwei verschieden lange Tagesleisten fuehlten sich wie zwei Produkte an (UX-Audit,
   // Punkt 7); ein Tag ganz ohne Kursangebot braucht auch keinen leeren Tab.
+  //
+  // Wochen-Fix 23.08.2026: Vorher stand hier buildScheduleDays(today) — die Kalender-
+  // woche von HEUTE. An einem Sonntag zeigte /buchung damit fast nur vergangene Tage
+  // (17.–23.08.), waehrend /kursplan schon die naechste Woche mit echten Terminen
+  // (ab 24.08.) zeigte. buildScheduleDaysForTerms liefert pro Wochentag das NAECHSTE
+  // Vorkommen innerhalb der sichtbaren Staffeln — dieselbe "naechster echter Termin"-
+  // Logik, mit der /kursplan seine Standard-Woche waehlt (CourseEngine.activeWeek).
   const days = useMemo(
     () =>
       schedule
-        ? buildScheduleDays(schedule.today).filter((d) =>
+        ? buildScheduleDaysForTerms(schedule.today, schedule.terms).filter((d) =>
             schedule.courses.some((c) => c.weekday === d.key),
           )
         : [],
@@ -290,8 +318,26 @@ function Funnel() {
   // object-position ihn schob: `center 22%` legte das Fenster auf 16.0%..43.4%, und selbst
   // `top` (0%..27.4%) schnitt die vordere Reihe am Kinn ab.
   // Die band-fertige Fassung desselben Motivs bleibt. Der Desktop-Fold belegt,
-  // dass `center 30%` erst unterhalb der Stirn beginnt. `center 12%` legt das
-  // sichtbare Fenster auf den Kopfbereich und hält zugleich den Heels-Crop-Lock.
+  // dass `center 30%` erst unterhalb der Stirn beginnt.
+  //
+  // r205-Nachzieh (Kritik-Trio auf buchung-d1440-fold.png): auch `center 12%` schnitt
+  // noch. Neu an der jetzigen Datei nachgemessen — sie ist 2100x900, nicht 1920x935:
+  //   1440px Bandbreite -> scale 1440/2100 = 0.686, Motiv rendert 617px hoch.
+  //   Sichtbar sind 12rem = 192px, Ueberhang also 425px.
+  //   Landmarken am Quellbild (nat. Y von 900): Scheitel Frau rechts 44,
+  //   Scheitel Frau links 192, Gesicht Frau Mitte 96.
+  //   `center 12%` -> Offset 51px -> Fenster nat. Y 74..354. Der Kopf rechts (44)
+  //   liegt darueber, deshalb der Anschnitt.
+  //   Notwendig: Offset <= 44 * 617/900 = 30px -> Position <= 30/425 = 7.1%.
+  // `center 4%` legt das Fenster auf nat. Y 25..305: beide Scheitel frei, unten
+  // reicht es weiterhin bis zur Huefte der vorderen Taenzerin.
+  //
+  // R205 Runde 3 (drei Familien): Auch mit freien Scheiteln wirkte der Streifen
+  // gequetscht — 7.5rem mobil sind nur 72% der skalierten Bildhoehe, die Koepfe
+  // klebten an der Oberkante. Das Band ist jetzt hoeher (9.5rem/14rem) und startet
+  // bei `top` (0%): maximale Kopffreiheit oben, unten reicht das groessere Fenster
+  // weiter Richtung Huefte. Mehr Luft ueber den Scheiteln gibt die Quelldatei
+  // nicht her (Scheitel rechts liegt bei nat. Y 44 von 900 = 4.9%).
   return (
     <>
     {showDayList && (
@@ -305,7 +351,7 @@ function Funnel() {
           height={900}
           loading="eager"
           fetchPriority="high"
-          className="h-[7.5rem] w-full object-cover object-[center_12%] sm:h-[12rem]"
+          className="h-[9.5rem] w-full object-cover object-top sm:h-[14rem]"
         />
       </div>
     )}
@@ -341,7 +387,39 @@ function Funnel() {
       </nav>
 
       {planLoading ? (
-        <p role="status" className="py-16 text-center text-sm text-[var(--color-ink-muted)]">{ft.loadPlan}</p>
+        // Skeleton statt leerem Main (Fix 23.08.2026, Beleg buchung-m390-fold.png:
+        // der Fold zeigte nur den Footer). Die Platzhalter spiegeln das echte Layout —
+        // Titelzeile, Tagesleiste mit border-b, sechs Kurskarten in Kartenhoehe
+        // (py-2.5-Zeile = 69px) — damit beim Eintreffen der Daten nichts springt.
+        <div role="status" aria-label={ft.loadPlan} data-testid="booking-skeleton" className="motion-safe:animate-pulse">
+          <span className="sr-only">{ft.loadPlan}</span>
+          {/* h1-Platzhalter in type-h1-Hoehe */}
+          <div aria-hidden className="h-9 w-64 max-w-full rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)] sm:h-10" />
+          {/* Tagesleiste: gleiche Struktur wie die echte (mt-4, min-h-11, border-b) */}
+          <div aria-hidden className="mt-4 flex flex-wrap gap-x-5 border-b border-[var(--color-line)] pb-2 sm:gap-x-6">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex min-h-11 items-center">
+                <div className="h-4 w-16 rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)]" />
+              </div>
+            ))}
+          </div>
+          {/* Kursliste: gleiche Abstaende wie <ul class="mt-2 space-y-2"> */}
+          <div aria-hidden className="mt-2 space-y-2">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                className="flex h-[69px] items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white px-4 sm:gap-4 sm:px-5"
+              >
+                <div className="h-9 w-14 shrink-0 rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)]" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="h-4 w-40 max-w-full rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)]" />
+                  <div className="h-3 w-56 max-w-full rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)]" />
+                </div>
+                <div className="hidden h-6 w-14 shrink-0 rounded-full bg-[var(--color-bg-soft)] sm:block" />
+              </div>
+            ))}
+          </div>
+        </div>
       ) : planError || !schedule ? (
         <div role="alert" className="py-16 text-center">
           <p className="text-sm font-medium text-[var(--color-salsa)]">{ft.planError}</p>
@@ -418,7 +496,7 @@ function Funnel() {
                       : 'border-transparent text-[var(--color-ink-muted)] hover:border-[var(--color-line)] hover:text-[var(--color-ink)]',
                   )}
                 >
-                  {WEEKDAY_LABEL[lang][d.key]?.short ?? d.shortDe}
+                  {weekdayLabel(lang, d.key)?.short ?? d.shortDe}
                   <span className="ml-1 text-[0.7rem] tabular-nums text-[var(--color-ink-muted)] sm:ml-1.5 sm:text-xs">
                     {d.date.slice(8, 10)}.{d.date.slice(5, 7)}.
                   </span>
@@ -453,7 +531,7 @@ function Funnel() {
                       >
                         {ft.nextDayWithCourses}
                         <span className="ml-1.5 text-white/80">
-                          {WEEKDAY_LABEL[lang][nextDayWithCourses.key]?.short ?? nextDayWithCourses.shortDe}
+                          {weekdayLabel(lang, nextDayWithCourses.key)?.short ?? nextDayWithCourses.shortDe}
                         </span>
                       </button>
                     )}
@@ -485,7 +563,7 @@ function Funnel() {
                       const teachers = c.teachers.map((t) => t.displayName.split(' ')[0]).join(', ');
                       const availability = courseAvailability[s.bookable.id];
                       const full = availability ? availability.full : s.full;
-                      const dayShort = WEEKDAY_LABEL[lang][c.weekday]?.short ?? c.weekday;
+                      const dayShort = weekdayLabel(lang, c.weekday)?.short ?? c.weekday;
                       return (
                         <li
                           key={s.key}
@@ -540,7 +618,7 @@ full
   : 'bg-[var(--color-salsa)] text-white',
                                 )}
                               >
-                                {full ? ft.waitlist : ft.free}
+                                {slotPillLabel(s, full, lang, ft.free, ft.waitlist)}
                               </span>
                             </div>
                           </button>
@@ -603,7 +681,7 @@ full
                               : 'bg-[var(--color-salsa)] text-white',
                           )}
                         >
-                          {full ? ft.waitlist : ft.free}
+                          {slotPillLabel(s, full, lang, ft.free, ft.waitlist)}
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
@@ -635,7 +713,7 @@ full
   : 'bg-[var(--color-salsa)] text-white',
                           )}
                         >
-                          {full ? ft.waitlist : ft.free}
+                          {slotPillLabel(s, full, lang, ft.free, ft.waitlist)}
                         </span>
                       </div>
                     </button>
@@ -756,7 +834,7 @@ function CourseDetail({
     course.onVariant,
   )}`.trim();
   const teachers = course.teachers.map((t) => t.displayName.split(' ')[0]).join(', ');
-  const dayLabel = WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday;
+  const dayLabel = weekdayLabel(lang, course.weekday)?.long ?? course.weekday;
   const blurb = courseBlurb(course, lang);
 
   return (
@@ -1144,7 +1222,7 @@ function BookingForm({
   )}`.trim();
   // R183: `teachers` ist weg — die Kopfzeile nennt die Lehrer nicht mehr (Kursseite
   // traegt die Infos). `dayLabel` bleibt: die Bestaetigung zeigt «Wann» weiterhin.
-  const dayLabel = WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday;
+  const dayLabel = weekdayLabel(lang, course.weekday)?.long ?? course.weekday;
 
   const focusFirstInvalid = () =>
     window.requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus());

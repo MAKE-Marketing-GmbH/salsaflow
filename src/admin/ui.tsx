@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode, type ButtonHTMLAttributes } from 'react';
+import { useEffect, useId, useRef, type ReactNode, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 /* ----------------------------------------------------------------------------
@@ -104,17 +104,44 @@ export function Modal({
   footer?: ReactNode;
   wide?: boolean;
 }) {
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
   useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+  useEffect(() => {
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') onCloseRef.current();
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = [...dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      )].filter((element) => element.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+    window.setTimeout(() => {
+      const preferred = dialogRef.current?.querySelector<HTMLElement>('input:not([disabled]), select:not([disabled]), textarea:not([disabled])');
+      const fallback = dialogRef.current?.querySelector<HTMLElement>('button:not([disabled]), a[href]');
+      (preferred ?? fallback)?.focus();
+    }, 0);
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      previous?.focus();
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div
@@ -122,11 +149,15 @@ export function Modal({
       onMouseDown={onClose}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         className={cn('w-full rounded-2xl bg-white shadow-xl', wide ? 'max-w-3xl' : 'max-w-lg')}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
-          <h2 className="text-lg font-bold tracking-tight">{title}</h2>
+          <h2 id={titleId} className="text-lg font-bold tracking-tight">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Schliessen"

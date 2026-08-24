@@ -4,6 +4,7 @@
 // Logik komplett in server/booking.ts (Architektur Abschnitt 5/6). Zahlung ist Etappe 9.
 
 import { Hono } from 'hono';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Db } from '../db/client.js';
@@ -73,6 +74,10 @@ export function createBookingRoutes(db: Db) {
       bookable,
       capacity: avail?.capacity ?? course.capacityTotal,
       free: avail?.free ?? 0,
+      // Das Panel liest `availability.full` fuer die Status-Pill. Ohne dieses Feld war
+      // `full` nach dem Fetch immer undefined -> die Pill zeigte "frei", waehrend der
+      // Kursplan denselben Kurs als "Ausgebucht" fuehrte (R205 Runde 4, Opus-BLOCKER).
+      full: (avail?.free ?? 0) <= 0,
       // Rollen bleiben informativ; die Verfuegbarkeit kommt aus dem einen Platzpool.
       freeLeader: avail?.free ?? 0,
       freeFollower: avail?.free ?? 0,
@@ -101,7 +106,12 @@ export function createBookingRoutes(db: Db) {
       });
       return c.json(r, 201);
     } catch (e) {
-      if (e instanceof BookingError) return c.json({ error: e.message, code: e.code }, e.status as 400);
+      if (e instanceof BookingError) {
+        // SAFETY: BookingError.status wird im Konstruktor (server/booking.ts:18) auf 400 gesetzt
+        // und nur mit HTTP-Fehlercodes ueberschrieben, die alle einen Body tragen duerfen.
+        const status = e.status as ContentfulStatusCode;
+        return c.json({ error: e.message, code: e.code }, status);
+      }
       console.error('[booking] unerwarteter Fehler:', e);
       return c.json({ error: 'Buchung fehlgeschlagen' }, 500);
     }

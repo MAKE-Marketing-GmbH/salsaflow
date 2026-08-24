@@ -8,7 +8,7 @@ import {
   type Meta,
   type SeoKey,
 } from '@/lib/seo-config';
-import { buildSeoJsonLd } from '@/lib/seo-schema';
+import { buildSeoJsonLd, type SeoJsonLd } from '@/lib/seo-schema';
 
 type SeoHeadProps = {
   page: SeoKey;
@@ -48,7 +48,7 @@ function setCanonical(url: string | null) {
   element.setAttribute('href', url);
 }
 
-function serializeJsonLd(value: unknown): string {
+function serializeJsonLd(value: SeoJsonLd): string {
   return JSON.stringify(value).replaceAll('<', '\\u003c');
 }
 

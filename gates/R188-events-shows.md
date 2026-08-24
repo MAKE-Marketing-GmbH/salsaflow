@@ -1,5 +1,8 @@
 # GATES — R188 Events/Shows
 
+ABANDON: F14 leftover-other-round nicht R189-Rest
+ABANDON: F15 leftover-other-round nicht R189-Rest
+
 Worktree: `/root/clients/salsaflow-w1`
 Bildbelege: `worklog/shots/R188/after-final4-events-shows/`
 

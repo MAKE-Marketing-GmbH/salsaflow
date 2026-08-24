@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { MiddlewareHandler } from 'hono';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { getCookie } from 'hono/cookie';
 import { and, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
@@ -11,6 +12,7 @@ import {
   courses,
   coursePrices,
   courseTeachers,
+  events,
   levelRungs,
   locations,
   styles,
@@ -26,8 +28,14 @@ import { refundBooking } from './payment-service.js';
 // Kontext-Typ für eingeloggte Admins (von der Auth-Middleware gesetzt).
 type AdminCtx = { id: string; role: string; email: string; displayName: string };
 
+// Freiform-JSON des Audit-Logs (db/schema.ts:108 jsonb) und die Teil-Updates der PATCH-Routen.
+type AuditMeta = typeof auditLog.$inferInsert['meta'];
+type TermPatch = Partial<typeof terms.$inferInsert>;
+type CoursePatch = Partial<typeof courses.$inferInsert>;
+type EventPatch = Partial<typeof events.$inferInsert>;
+
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
-const WEEKDAY_DE: Record<string, string> = {
+const WEEKDAY_DE = {
   mon: 'Montag',
   tue: 'Dienstag',
   wed: 'Mittwoch',
@@ -35,7 +43,7 @@ const WEEKDAY_DE: Record<string, string> = {
   fri: 'Freitag',
   sat: 'Samstag',
   sun: 'Sonntag',
-};
+} satisfies Record<string, string>;
 const COURSE_STATUS = ['draft', 'open', 'full', 'cancelled', 'finished'] as const;
 const BOOKING_TYPE = ['leader_follower', 'open'] as const;
 
@@ -106,11 +114,47 @@ const courseBodySchema = z.object({
 
 const coursePatchSchema = courseBodySchema.partial().omit({ termId: true });
 
+const nullableTime = timeStr.nullable();
+const nullableText = (max: number) => z.string().max(max).nullable();
+const eventFields = {
+  slug: z.string().min(2).max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug nur klein, Zahlen und Bindestriche'),
+  format: z.enum(['danceflow', 'workshop', 'anniversary', 'floweekend', 'other']),
+  titleDe: z.string().min(2).max(160),
+  titleEn: z.string().min(2).max(160),
+  summaryDe: z.string().min(10).max(1200),
+  summaryEn: z.string().min(10).max(1200),
+  startDate: dateStr,
+  endDate: dateStr.nullable(),
+  startTime: nullableTime,
+  endTime: nullableTime,
+  location: z.string().min(2).max(240),
+  ticketUrl: nullableText(1000),
+  detailUrl: nullableText(1000),
+  imageUrl: nullableText(1000),
+  imageAltDe: nullableText(300),
+  imageAltEn: nullableText(300),
+  featured: z.boolean(),
+  status: z.enum(['draft', 'published', 'cancelled']),
+  sort: z.number().int().min(-9999).max(9999),
+};
+const eventDatesOrdered = (d: { startDate?: string; endDate?: string | null }) =>
+  !d.startDate || !d.endDate || d.endDate >= d.startDate;
+const eventCreateSchema = z.object(eventFields).refine(eventDatesOrdered, dateOrderMsg);
+const eventPatchSchema = z.object(eventFields).partial().refine(eventDatesOrdered, dateOrderMsg);
+
 /* ----------------------------------------------------------------------------
  * Hilfsfunktionen
  * -------------------------------------------------------------------------- */
 function normTime(t: string): string {
   return t.length === 5 ? `${t}:00` : t;
+}
+
+function eventJson(event: typeof events.$inferSelect) {
+  return {
+    ...event,
+    startTime: event.startTime?.slice(0, 5) ?? null,
+    endTime: event.endTime?.slice(0, 5) ?? null,
+  };
 }
 
 async function audit(
@@ -119,7 +163,7 @@ async function audit(
   action: string,
   entity: string,
   entityId: string,
-  meta?: unknown,
+  meta?: AuditMeta,
 ) {
   try {
     await db.insert(auditLog).values({
@@ -127,7 +171,7 @@ async function audit(
       action,
       entity,
       entityId,
-      meta: (meta ?? null) as never,
+      meta: meta ?? null,
     });
   } catch {
     // Audit darf die Hauptaktion nie blockieren.
@@ -201,7 +245,7 @@ async function loadCoursesForTerm(db: Db, termId: string) {
   }
 
   // Sortiert nach Wochentag, dann Startzeit -> wie im Plan.
-  const order = (wd: string) => WEEKDAYS.indexOf(wd as (typeof WEEKDAYS)[number]);
+  const order = (wd: string) => WEEKDAYS.findIndex((known) => known === wd);
   return courseRows
     .map((c) => {
       const style = styleById.get(c.styleId);
@@ -395,17 +439,15 @@ export function createAdminRoutes(db: Db) {
     const existing = await db.select().from(terms).where(eq(terms.id, id)).limit(1);
     if (!existing[0]) return c.json({ error: 'Staffel nicht gefunden' }, 404);
     const d = parsed.data;
-    await db
-      .update(terms)
-      .set({
-        ...(d.name !== undefined ? { name: d.name.trim() } : {}),
-        ...(d.startDate !== undefined ? { startDate: d.startDate } : {}),
-        ...(d.endDate !== undefined ? { endDate: d.endDate } : {}),
-        ...(d.weekCount !== undefined ? { weekCount: d.weekCount } : {}),
-        ...(d.isSummer !== undefined ? { isSummer: d.isSummer } : {}),
-        ...(d.status !== undefined ? { status: d.status } : {}),
-      })
-      .where(eq(terms.id, id));
+    // Nur die wirklich gesendeten Felder schreiben; fehlende bleiben unveraendert.
+    const termPatch: TermPatch = {};
+    if (d.name !== undefined) termPatch.name = d.name.trim();
+    if (d.startDate !== undefined) termPatch.startDate = d.startDate;
+    if (d.endDate !== undefined) termPatch.endDate = d.endDate;
+    if (d.weekCount !== undefined) termPatch.weekCount = d.weekCount;
+    if (d.isSummer !== undefined) termPatch.isSummer = d.isSummer;
+    if (d.status !== undefined) termPatch.status = d.status;
+    await db.update(terms).set(termPatch).where(eq(terms.id, id));
 
     // Veröffentlichen heisst "live gehen": die beim Duplizieren als Entwurf
     // angelegten Kurse (status 'draft') werden mit-aktiviert (-> 'open'), damit
@@ -669,9 +711,90 @@ export function createAdminRoutes(db: Db) {
       });
       return c.json(r);
     } catch (e) {
-      if (e instanceof BookingError) return c.json({ error: e.message, code: e.code }, e.status as 400);
+      if (e instanceof BookingError) {
+        // SAFETY: BookingError.status wird im Konstruktor (server/booking.ts:18) auf 400 gesetzt
+        // und nur mit HTTP-Fehlercodes ueberschrieben, die alle einen Body tragen duerfen.
+        const status = e.status as ContentfulStatusCode;
+        return c.json({ error: e.message, code: e.code }, status);
+      }
       throw e;
     }
+  });
+
+  /* --- Events / CMS ------------------------------------------------------ */
+  admin.get('/api/admin/events', async (c) => {
+    const rows = await db.select().from(events);
+    return c.json({
+      events: rows
+        .map(eventJson)
+        .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.sort - b.sort),
+    });
+  });
+
+  admin.post('/api/admin/events', async (c) => {
+    const parsed = eventCreateSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
+    const d = parsed.data;
+    const id = randomUUID();
+    try {
+      await db.insert(events).values({
+        id,
+        ...d,
+        startTime: d.startTime ? normTime(d.startTime) : null,
+        endTime: d.endTime ? normTime(d.endTime) : null,
+      });
+    } catch (error) {
+      if (String(error).toLowerCase().includes('unique')) return c.json({ error: 'Dieser Slug ist bereits vergeben.' }, 409);
+      throw error;
+    }
+    await audit(db, c.get('admin').id, 'create', 'event', id, { slug: d.slug });
+    return c.json({ id }, 201);
+  });
+
+  admin.patch('/api/admin/events/:id', async (c) => {
+    const id = c.req.param('id');
+    const parsed = eventPatchSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
+    const existing = await db.select().from(events).where(eq(events.id, id)).limit(1);
+    if (!existing[0]) return c.json({ error: 'Event nicht gefunden' }, 404);
+    const d = parsed.data;
+    const patch: EventPatch = { updatedAt: new Date() };
+    if (d.slug !== undefined) patch.slug = d.slug;
+    if (d.format !== undefined) patch.format = d.format;
+    if (d.titleDe !== undefined) patch.titleDe = d.titleDe;
+    if (d.titleEn !== undefined) patch.titleEn = d.titleEn;
+    if (d.summaryDe !== undefined) patch.summaryDe = d.summaryDe;
+    if (d.summaryEn !== undefined) patch.summaryEn = d.summaryEn;
+    if (d.startDate !== undefined) patch.startDate = d.startDate;
+    if (d.endDate !== undefined) patch.endDate = d.endDate;
+    if (d.location !== undefined) patch.location = d.location;
+    if (d.ticketUrl !== undefined) patch.ticketUrl = d.ticketUrl;
+    if (d.detailUrl !== undefined) patch.detailUrl = d.detailUrl;
+    if (d.imageUrl !== undefined) patch.imageUrl = d.imageUrl;
+    if (d.imageAltDe !== undefined) patch.imageAltDe = d.imageAltDe;
+    if (d.imageAltEn !== undefined) patch.imageAltEn = d.imageAltEn;
+    if (d.featured !== undefined) patch.featured = d.featured;
+    if (d.status !== undefined) patch.status = d.status;
+    if (d.sort !== undefined) patch.sort = d.sort;
+    if (d.startTime !== undefined) patch.startTime = d.startTime ? normTime(d.startTime) : null;
+    if (d.endTime !== undefined) patch.endTime = d.endTime ? normTime(d.endTime) : null;
+    try {
+      await db.update(events).set(patch).where(eq(events.id, id));
+    } catch (error) {
+      if (String(error).toLowerCase().includes('unique')) return c.json({ error: 'Dieser Slug ist bereits vergeben.' }, 409);
+      throw error;
+    }
+    await audit(db, c.get('admin').id, 'update', 'event', id);
+    return c.json({ ok: true });
+  });
+
+  admin.delete('/api/admin/events/:id', async (c) => {
+    const id = c.req.param('id');
+    const existing = await db.select().from(events).where(eq(events.id, id)).limit(1);
+    if (!existing[0]) return c.json({ error: 'Event nicht gefunden' }, 404);
+    await db.delete(events).where(eq(events.id, id));
+    await audit(db, c.get('admin').id, 'delete', 'event', id);
+    return c.json({ ok: true });
   });
 
   /* --- Kurse -------------------------------------------------------------- */
@@ -709,21 +832,19 @@ export function createAdminRoutes(db: Db) {
     const existing = await db.select().from(courses).where(eq(courses.id, id)).limit(1);
     if (!existing[0]) return c.json({ error: 'Kurs nicht gefunden' }, 404);
     const d = parsed.data;
-    await db
-      .update(courses)
-      .set({
-        ...(d.styleId !== undefined ? { styleId: d.styleId } : {}),
-        ...(d.levelRungId !== undefined ? { levelRungId: d.levelRungId } : {}),
-        ...(d.onVariant !== undefined ? { onVariant: d.onVariant } : {}),
-        ...(d.weekday !== undefined ? { weekday: d.weekday } : {}),
-        ...(d.startTime !== undefined ? { startTime: normTime(d.startTime) } : {}),
-        ...(d.endTime !== undefined ? { endTime: normTime(d.endTime) } : {}),
-        ...(d.locationId !== undefined ? { locationId: d.locationId } : {}),
-        ...(d.bookingType !== undefined ? { bookingType: d.bookingType } : {}),
-        ...(d.capacityTotal !== undefined ? { capacityTotal: d.capacityTotal } : {}),
-        ...(d.status !== undefined ? { status: d.status } : {}),
-      })
-      .where(eq(courses.id, id));
+    // Nur die wirklich gesendeten Felder schreiben; fehlende bleiben unveraendert.
+    const coursePatch: CoursePatch = {};
+    if (d.styleId !== undefined) coursePatch.styleId = d.styleId;
+    if (d.levelRungId !== undefined) coursePatch.levelRungId = d.levelRungId;
+    if (d.onVariant !== undefined) coursePatch.onVariant = d.onVariant;
+    if (d.weekday !== undefined) coursePatch.weekday = d.weekday;
+    if (d.startTime !== undefined) coursePatch.startTime = normTime(d.startTime);
+    if (d.endTime !== undefined) coursePatch.endTime = normTime(d.endTime);
+    if (d.locationId !== undefined) coursePatch.locationId = d.locationId;
+    if (d.bookingType !== undefined) coursePatch.bookingType = d.bookingType;
+    if (d.capacityTotal !== undefined) coursePatch.capacityTotal = d.capacityTotal;
+    if (d.status !== undefined) coursePatch.status = d.status;
+    await db.update(courses).set(coursePatch).where(eq(courses.id, id));
     await setCourseRelations(db, id, d.teacherIds, d.prices);
     await audit(db, c.get('admin').id, 'update', 'course', id);
     return c.json({ ok: true });

@@ -5,11 +5,13 @@ import { TermsList } from '@/admin/TermsList';
 import { TermEditor } from '@/admin/TermEditor';
 import { DuplicateView } from '@/admin/DuplicateView';
 import { BalanceView } from '@/admin/BalanceView';
+import { EventsManager } from '@/admin/EventsManager';
 
 type AdminUser = { id: string; email: string; displayName: string; role: string };
 
 type View =
   | { name: 'list' }
+  | { name: 'events' }
   | { name: 'editor'; termId: string }
   | { name: 'duplicate'; termId: string }
   | { name: 'balance'; termId: string };
@@ -41,12 +43,12 @@ export function AdminApp({ user, onLogout }: { user: AdminUser; onLogout: () => 
   return (
     <div className="min-h-screen bg-neutral-50 text-black">
       <header className="border-b border-neutral-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-3">
           <button
             onClick={() => setView({ name: 'list' })}
             className="text-left text-base font-bold tracking-tight"
           >
-            Salsaflow <span className="text-[var(--color-salsa)]">Kursplan</span>
+            Salsaflow <span className="text-[var(--color-salsa)]">Redaktion</span>
           </button>
           <div className="flex items-center gap-3 text-sm text-neutral-600">
             <span className="hidden sm:inline">{user.displayName}</span>
@@ -55,6 +57,30 @@ export function AdminApp({ user, onLogout }: { user: AdminUser; onLogout: () => 
             </button>
           </div>
         </div>
+        <nav aria-label="Redaktionsbereiche" className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-5">
+          <button
+            onClick={() => setView({ name: 'list' })}
+            aria-current={view.name !== 'events' ? 'page' : undefined}
+            className={`min-h-11 whitespace-nowrap border-b-2 px-3 text-sm font-semibold ${
+              view.name !== 'events'
+                ? 'border-[var(--color-salsa)] text-[var(--color-salsa)]'
+                : 'border-transparent text-neutral-600 hover:text-black'
+            }`}
+          >
+            Kurse &amp; Staffeln
+          </button>
+          <button
+            onClick={() => setView({ name: 'events' })}
+            aria-current={view.name === 'events' ? 'page' : undefined}
+            className={`min-h-11 whitespace-nowrap border-b-2 px-3 text-sm font-semibold ${
+              view.name === 'events'
+                ? 'border-[var(--color-salsa)] text-[var(--color-salsa)]'
+                : 'border-transparent text-neutral-600 hover:text-black'
+            }`}
+          >
+            Events &amp; Workshops
+          </button>
+        </nav>
       </header>
 
       {toast && (
@@ -68,6 +94,8 @@ export function AdminApp({ user, onLogout }: { user: AdminUser; onLogout: () => 
       <main className="mx-auto max-w-5xl px-5 py-8">
         {!meta || !terms ? (
           <Loading label="Kursplan wird geladen..." />
+        ) : view.name === 'events' ? (
+          <EventsManager readonly={readonly} showToast={showToast} />
         ) : view.name === 'list' ? (
           <TermsList
             terms={terms}

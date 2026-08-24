@@ -12,7 +12,7 @@ import { useRef } from 'react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3, TRIAL_HREF } from '@/public/home/content-v3';
 import { CONTACT } from '@/public/site/SiteFooter';
-import { Eyebrow, Shell, CtaPill, CtaText, WhatsAppGlyph } from '@/public/site/primitives';
+import { Eyebrow, Shell, CtaPill, CtaText, WhatsAppGlyph, sectionLead } from '@/public/site/primitives';
 import { HOME } from '@/public/home/content';
 import { ClipReveal, RiseReveal, useParallaxStyle } from '@/public/home/motion';
 import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
@@ -29,7 +29,7 @@ export function LocationBand() {
     <section
       ref={sectionRef}
       id="standort"
-      className={cn('scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}
+      className={cn('scroll-mt-24 bg-[var(--color-paper-warm)]', SECTION_Y_HOME)}
     >
       <Shell>
         <div className="grid overflow-hidden rounded-[2rem] border border-[var(--color-line)] bg-[var(--color-paper)] shadow-[0_30px_70px_-40px_rgba(17,17,17,0.28)] lg:grid-cols-[1.02fr_1fr]">
@@ -89,7 +89,10 @@ export function LocationBand() {
               >
                 {c.titleA} {c.titleAccent} {c.titleB}
               </h2>
-              <p className="mt-5 max-w-md text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
+              {/* R190: stand hier als handgeschriebene Kopie von `sectionLead` plus
+                  eigenem `mt-5` und mass darum 20 px statt der 16 px, die jede andere
+                  Sektion traegt. Jetzt die Rolle, das `mt` kommt aus ihr. */}
+              <p className={cn(sectionLead, 'max-w-md text-pretty')}>
                 {c.body}
               </p>
 
@@ -129,6 +132,18 @@ export function LocationBand() {
                 </p>
                 <p className="mt-1.5 text-sm leading-relaxed text-[var(--color-ink-muted)]">{c.address}</p>
                 <p className="text-sm leading-relaxed text-[var(--color-ink-muted)]">{c.reassurance}</p>
+                {/* R207 (Raphael 23.08. 17:10): "Studios: Google Maps einfügen." Echte
+                    Maps-Ansicht direkt in der Sektion statt nur der Adresszeile.
+                    loading=lazy, die Karte blockiert keinen Render. */}
+                <div className="mt-4 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)]">
+                  <iframe
+                    title={de ? 'Karte: Salsaflow, Elisabethenanlage 7, Basel' : 'Map: Salsaflow, Elisabethenanlage 7, Basel'}
+                    src="https://www.google.com/maps?q=Elisabethenanlage%207%2C%204051%20Basel&output=embed"
+                    className="aspect-[4/3] w-full border-0"
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                  />
+                </div>
               </div>
             </div>
           </RiseReveal>

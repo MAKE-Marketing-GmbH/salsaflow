@@ -140,13 +140,18 @@ function HeelsHero({ c }: { c: C }) {
               Labels (laengster 190px gegen Bachatas Zeile); mit 1.05fr bleiben der
               Textspalte 672px und die Chips brechen auf zwei Zeilen statt drei. */}
           <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14">
-            <div className="flex flex-col gap-4">
+            {/* R190: `gap-6` wie in StylePage — der Gap traegt den Hero-Abstand allein,
+                seit das `mt-4` aus `sectionLead` am Lead aufgehoben ist. Begruendung
+                ausformuliert in StylePage.tsx an derselben Stelle. */}
+            <div className="flex flex-col gap-6">
               <motion.h1 variants={item} className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
                 {h.title} {h.titleAccent ? <TitleAccent>{h.titleAccent}</TitleAccent> : null}
               </motion.h1>
+              {/* `mt-0`: Flex-Kind unter `gap-4`, der Gap traegt den Abstand.
+                  Begruendung wie in subpage/kit.tsx und StylePage.tsx. */}
               <motion.p
                 variants={item}
-                className={cn('text-pretty max-w-xl', sectionLead)}
+                className={cn('text-pretty max-w-xl', sectionLead, 'mt-0')}
                 style={{ lineHeight: 1.4 }}
               >
                 {h.lead}
@@ -282,7 +287,7 @@ function TrainingSection({ c }: { c: C }) {
             <motion.h2 variants={item} className={cn("mt-5", sectionTitle, MEASURE_L)}>
               {t.title} {t.titleAccent ? <TitleAccent>{t.titleAccent}</TitleAccent> : null}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {t.body}
             </motion.p>
             {/* Runde 3, Issue 9 ("Auf /heels dasselbe Muster: 4er-Kartenblock
@@ -337,7 +342,7 @@ function ShoesSection({ c }: { c: C }) {
             <motion.h2 variants={item} className={cn("mt-5", sectionTitle, MEASURE_L)}>
               {s.title} {s.titleAccent ? <TitleAccent>{s.titleAccent}</TitleAccent> : null}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {s.body}
             </motion.p>
             <motion.div variants={item} className="mt-7 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white p-6 shadow-[0_14px_40px_rgba(17,17,17,0.04)]">
@@ -371,7 +376,7 @@ function AtmosphereSection({ c }: { c: C }) {
             <h2 className={cn(sectionTitle, MEASURE_L)}>
               {a.title} {a.titleAccent ? <TitleAccent>{a.titleAccent}</TitleAccent> : null}
             </h2>
-            <p className={`mt-4 ${sectionLead}`}>{a.body}</p>
+            <p className={`${sectionLead}`}>{a.body}</p>
           </motion.div>
           <motion.div variants={item} className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]">
             <img src={a.image.src} alt={a.image.alt} className="aspect-[5/4] w-full object-cover object-[center_35%]" width={1400} height={1120} loading="lazy" />

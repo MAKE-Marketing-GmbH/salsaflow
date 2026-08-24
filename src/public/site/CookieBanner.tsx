@@ -176,7 +176,7 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
           <span>{c.text}</span>
           <a
             href="/datenschutz"
-            className="ml-1 whitespace-nowrap font-semibold text-[var(--color-salsa)] underline underline-offset-2 sm:ml-1.5"
+            className="ml-1 inline-flex min-h-6 items-center whitespace-nowrap font-semibold text-[var(--color-salsa)] underline underline-offset-2 sm:ml-1.5"
           >
             {c.privacy}
           </a>

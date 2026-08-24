@@ -5,9 +5,8 @@ import { useLang } from '@/lib/i18n';
 import { HOME, type OfferCard } from '@/public/home/content';
 import { Shell } from '@/public/site/primitives';
 import {
-  BlurReveal,
-  ClipReveal,
   Reveal,
+  RiseReveal,
   type ParallaxStyle,
   useParallaxStyle,
   useReveal,
@@ -117,29 +116,20 @@ export function Offer() {
     <section
       ref={sectionRef}
       id="angebot"
-      className={cn('relative scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}
+      className={cn('relative scroll-mt-24 bg-[var(--color-paper-warm)]', SECTION_Y_HOME)}
     >
       <Shell>
         {/* Titel und Lead gestapelt statt H2 links / Lead rechts (Split-Header-Ban,
             Critic 13.08.2026). */}
-        {/* R189: Der Sektionstitel bekommt `BlurReveal` statt des generischen item-Fades.
-            Die Wahl gegen `RevealWords` ist bewusst und folgt der Rollenteilung des
-            Motion-Systems: Wort-fuer-Wort gehoert der grossen H1 im Fold. Wuerde jede H2
-            der Seite ebenfalls Wort fuer Wort einsteigen, waere der Effekt kein Akzent
-            mehr, sondern der neue Default — und die H1 verlaere ihren Vorrang.
-            `blur` liest sich als "scharfstellen" (8px -> 0 plus 1.02 -> 1 scale, siehe
-            motion.tsx:285-292) und bleibt damit klar unterscheidbar vom Vorhang der
-            Karten darunter.
-
-            Der Lead behaelt bewusst den ruhigen `rise`-Default ueber `Reveal` + `item`:
-            eine Fliesstextzeile scharfstellen zu lassen waere derselbe Effekt an zwei
-            Stellen hintereinander — und Fliesstext ist genau der Fall, fuer den `rise`
-            der Default ist. */}
+        {/* R190: Titel und Karten dieselbe Geste (`rise`). `blur` auf der H2
+           zeigte in home-desktop-02/03-motion.png eine graue Ueberschrift, die
+           danach einspringt — opus-critic Runde 7, Raphaels "ploppt".
+           Wort-fuer-Wort bleibt der H1 im Fold. */}
         {/* Die visuelle Klasse bleibt am <h2>, nicht am Reveal-Wrapper: `type-h2` setzt
             Schriftgrad und Zeilenhoehe, `MEASURE_L` das Zeilenmass in em. Beides auf einem
-            16px-Wrapper waere ein anderer Wert als auf der grossen Ueberschrift. Der
+            16px-Wrapper waere ein anderer Wert als auf der großen Ueberschrift. Der
             Wrapper traegt nur die Bewegung. */}
-        <BlurReveal>
+        <RiseReveal>
           <h2
             className={cn(
               'type-h2 text-[var(--color-ink)]',
@@ -148,7 +138,7 @@ export function Offer() {
           >
             {o.title}
           </h2>
-        </BlurReveal>
+        </RiseReveal>
         {/* R186: Der Lead ist in content.ts leer. Ein leeres <p> traegt trotzdem seinen
             mt-4 und die Zeilenhoehe, also 4rem Loch zwischen H2 und Karten. Darum
             gar nicht erst rendern. */}
@@ -166,17 +156,20 @@ export function Offer() {
             Kein lg:pr-36 mehr: das Polster hielt frueher den WhatsApp-FAB vom rechten
             Zeilenende fern. Die Karten enden jetzt am Shell-Rand, der Text sitzt links
             unten in der Karte — der FAB liegt ueber der Bildflaeche, nicht auf Schrift. */}
-        {/* R189 Kritik-Runde 1: Vier einzelne ClipReveal mit 0.08s Abstand sahen im echten
-            Zwischenframe kaputt aus: Karte 1 stand schon, Karte 2 war nur ein grauer Streifen,
-            Karten 3 und 4 fehlten. Ein Reveal darf mitten im Lauf nicht wie fehlende Daten
-            aussehen. Deshalb oeffnet jetzt EIN Vorhang das ganze Raster. Die vier Angebote
-            erscheinen als zusammengehoerige Reihe; kein Motiv verschiebt sich, keine Spalte
-            aendert ihre Breite. */}
-        <ClipReveal className="mt-10 grid gap-5 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4 lg:gap-6">
+        {/* R189: Vier einzelne ClipReveal mit 0.08s Abstand sahen kaputt aus
+            (Karte 2 grauer Streifen, 3 und 4 fehlten). Deshalb EIN Effekt fuer
+            das ganze Raster.
+
+            R190: der eine Effekt darf nicht `clip` sein. Ein Vorhang auf 416 px
+            Hoehe zeigt 120 ms nach dem Sprung vier Foto-Streifen ueber 400 px
+            Leere (home-desktop-01-motion.png, opus-critic + visual-kritiker
+            Runde 5). `rise` bewegt das Raster 20 px; die Karten sind von
+            Anfang an als Karten lesbar. */}
+        <RiseReveal className="mt-10 grid gap-5 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4 lg:gap-6">
           {o.cards.map((card) => (
             <StyleCard key={card.key} card={card} parallax={cardParallax} />
           ))}
-        </ClipReveal>
+        </RiseReveal>
 
         <Reveal className="mt-10 lg:mt-12">
           <motion.a

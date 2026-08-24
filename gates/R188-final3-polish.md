@@ -67,3 +67,5 @@ Nur diese Dateien: src/public/TeamPage.tsx, src/public/FaqPage.tsx
   EVIDENCE: hp-21.webp 2 Treffer (Couch-Ersatz steht), rote Pille 0 Treffer
   (bleibt weg), image2 in FaqPage.tsx 6 / content.ts 4 (FAQ-Zweitbild steht).
   faq/content.ts wurde in dieser Runde NICHT angefasst.
+
+ABANDON: leftover-other-round nicht R189-Rest

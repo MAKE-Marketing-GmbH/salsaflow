@@ -1,0 +1,18 @@
+Read the attached PNGs. Do not guess from text.
+
+Files:
+- Mobile 390x844: /schnupperstunde after R124
+- Desktop 1440x730: /schnupperstunde after R124
+
+Claims. All must be true for PASS:
+1. whatsappRechtsUnten: green WhatsApp control is bottom RIGHT and visible.
+2. leadFrei: the sentence "Keine Verkaufsstunde. Du tanzt mit, siehst das Studio und sprichst mit uns." is NOT under the WhatsApp circle. No pixel of that sentence under the circle. H2 "Was dich erwartet" stays readable.
+
+Locks: circle stays right. Motif classfreude-01. Crop center 30%. Lift stays 5rem.
+
+Reply format:
+PASS or FAIL
+whatsappRechtsUnten: true/false
+leadFrei: true/false
+BELEG: what you see in the PNG
+biggest_gap: one sentence

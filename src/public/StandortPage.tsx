@@ -83,7 +83,7 @@ function AnfahrtSection({ c }: { c: StandortContent }) {
             <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
               {a.title} {a.titleAccent ? <TitleAccent>{a.titleAccent}</TitleAccent> : null}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {a.body}
             </motion.p>
             <motion.a
@@ -214,7 +214,7 @@ function RentalSection({ c }: { c: StandortContent }) {
             <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
               {r.title} {r.titleAccent ? <TitleAccent>{r.titleAccent}</TitleAccent> : null}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {r.subline}
             </motion.p>
             <motion.p

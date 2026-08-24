@@ -230,13 +230,19 @@ export function SiteFooter({
 
           {/* 3. Entdecken — Abnahme-Kritik: auf Desktop lief die Liste einspaltig auf ~400px
               Hoehe und liess links unter Logo/Claim eine grosse leere Dunkelzone stehen.
-              Zweispaltig (5 Zeilen) traegt die Spalte dieselbe Hoehe wie die Nachbarn. */}
+              Zweispaltig (5 Zeilen) traegt die Spalte dieselbe Hoehe wie die Nachbarn.
+              R206: Das feste `grid-cols-2` fuellte die Spalten zeilenweise auf. Bei 17
+              Eintraegen ergab das 9 Zeilen, deren letzte nur links besetzt war — im
+              Screenshot (fertig/r205/kursplan-d1440-full.png) haengt "Shows & Animationen"
+              allein unter einer leeren rechten Haelfte, dazwischen grosse Luecken.
+              `columns-2` fuellt spaltenweise: links 9 Eintraege, rechts 8, beide Saeulen
+              enden auf derselben Hoehe. `break-inside-avoid` haelt jeden Link ganz. */}
           <div className="space-y-3">
             <FooterHeading>{c.discoverTitle}</FooterHeading>
-            <ul className="grid grid-cols-2 gap-x-6 gap-y-0.5 sm:gap-y-1">
+            <ul className="columns-2 gap-x-6 [&>li]:break-inside-avoid">
               {discover.map((item) => (
                 <li key={item.label}>
-                  <a href={item.href} className="t-hover inline-flex min-h-11 items-center py-1.5 text-sm text-white/85 hover:text-white">
+                  <a href={item.href} className="t-hover inline-flex min-h-11 min-w-6 items-center py-1.5 text-sm text-white/85 hover:text-white">
                     {item.label}
                   </a>
                 </li>
@@ -247,7 +253,9 @@ export function SiteFooter({
           {/* 4. Social */}
           <div className="space-y-3">
             <FooterHeading>{c.followTitle}</FooterHeading>
-            <ul className="grid grid-cols-2 gap-x-6 gap-y-0.5 sm:grid-cols-1 sm:gap-y-1">
+            {/* R205 Runde 3 (MINOR): Bei 360px brach "Google-Bewertung" in seiner schmalen
+                Grid-Zelle am Bindestrich um. Das dritte Item bekommt mobil die volle Zeile. */}
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-0.5 max-sm:[&>li:last-child]:col-span-2 sm:grid-cols-1 sm:gap-y-1">
               {social.map((s) => (
                 <li key={s.href}>
                   <a
@@ -292,8 +300,18 @@ export function SiteFooter({
  *  soll eine Kapitelgrenze bedeuten; ueber einer Linkspalte bedeutet er nichts und verbraucht
  *  nur die Signatur. Der Titel traegt sich hier ueber Grossbuchstaben und Sperrung allein. */
 function FooterHeading({ children }: { children: React.ReactNode }) {
+  /* R222: "Folg uns" las sich nach Versal-Sperrung als FOLGUNS — die 0.16em-Letterspacing
+     aus .type-h4 zieht den Leerschritt optisch auf Buchstabenabstand zusammen und das Auge
+     verliert die Wortfuge (Critic Pass 07:09, raster-home-1024.png). `word-spacing` oeffnet
+     NUR den Wortzwischenraum ueber die Sperrung hinaus; die Einwort-Koepfe KONTAKT und
+     ENTDECKEN bleiben davon unberuehrt (kein Leerzeichen = keine Wirkung). Fix sitzt hier
+     und nicht in .type-h4, weil die Label-Klasse an sechs weiteren Stellen sitewide haengt
+     (index.css:412) und dort nichts mitverschoben werden darf.
+     Staerke 0.2em: Kritik Runde 1 FAILte 0.5em — 6px Gesamtfuge las sich wie zwei getrennte
+     Labels (Soll: Fuge ~2-3x Buchstabenabstand, nicht ~3x so breit). 0.2em = 2.4px extra,
+     gesamt ~4.3px gegen 1.9px Buchstabenabstand: Fuge klar sichtbar, Kopf bleibt EIN Label. */
   return (
-    <h3 className="type-h4 text-white/85">{children}</h3>
+    <h3 className="type-h4 text-white/85 [word-spacing:0.2em]">{children}</h3>
   );
 }
 

@@ -63,7 +63,7 @@ export function WallOfLove() {
             />
             {/* mt-4 -> mt-3: derselbe Kopfabstand wie im Kursplan-Block darueber
                 (`node scripts/aaa-r14-headgap.cjs` mass dort H2->lead=12, hier 16). */}
-            <p className={`mt-3 max-w-xl ${sectionLead}`}>{c.lead}</p>
+            <p className={`max-w-xl ${sectionLead}`}>{c.lead}</p>
           </div>
           {/* Kritiker-Befund 2026-08-09, "Uebergang Reviews->Events: tote Weissflaeche straffen".
               Gemessen (Playwright, 1440px): die Zitat-Spalten enden bei y=4969, der Google-Link
@@ -139,8 +139,11 @@ export function WallOfLove() {
         {/* Reviewkarten gruppenweise rise: EINE Reveal-Gruppe mit Stagger ueber die drei
             Zitate statt drei einzelner whileInView-Ticks. Die Gruppe traegt damit die
             zweite (ruhige) Geste der Sektion — nicht jede Karte fuer sich. */}
-        <Reveal role="region" aria-label={c.rail} className="mt-2 grid sm:grid-cols-[1.25fr_1fr_1fr]" stagger={0.1}>
-          {WALL_REVIEWS.slice(0, 3).map((review, index) => {
+        {/* R207 (Raphael 23.08. 17:10): "Community / Was die Community sagt: cool. Drei
+            neue Sachen dazu." Drei weitere echte Stimmen aus reviews.ts dazu: ab sm ein
+            3x2-Raster, die Leitstimme bleibt die erste (grosse Stimme, Anfuehrungszeichen). */}
+        <Reveal role="region" aria-label={c.rail} className="mt-2 grid sm:grid-cols-3" stagger={0.1}>
+          {WALL_REVIEWS.slice(0, 6).map((review, index) => {
             const localized = localizeReview(review, lang);
             const lead = index === 0;
             return (
@@ -149,17 +152,16 @@ export function WallOfLove() {
                 key={`${review.name}-${index}`}
                 lang={lang}
                 className={cn(
-                  // Fusspolster nur dort, wo darunter noch etwas kommt. Die Zitate sind seit
-                  // dem Wegfall der Link-Zeile das LETZTE Element der Sektion; ihr eigenes
-                  // pb (32px) lag danach direkt auf dem Sektionsfuss und trieb die gemessene
-                  // Kante zu #events auf 160px (`node scripts/aaa-measure.cjs`), waehrend jede
-                  // andere Kante der Seite 128px hat. Ab sm stehen alle drei nebeneinander und
-                  // enden gemeinsam an der Sektionskante -> pb entfaellt dort ganz; mobil
-                  // braucht nur die letzte Spalte kein Polster mehr.
+                  // Fusspolster nur dort, wo darunter noch etwas kommt. Ab sm stehen die sechs
+                  // Karten in einem 3x2-Raster: Spalte 1 jeder Zeile linksbuendig, Spalten 2
+                  // und 3 mit linker Haarlinie; die zweite Zeile haengt an einer oberen Linie.
                   // `relative` traegt das absolut gesetzte Anfuehrungszeichen der Leitstimme.
                   'relative flex flex-col py-7 last:pb-0 sm:pb-0 sm:pt-8',
-                  index > 0 && 'border-t border-[var(--color-line)] sm:border-l sm:border-t-0 sm:pl-7 lg:pl-10',
-                  index < 2 && 'sm:pr-7 lg:pr-10',
+                  index > 0 && 'border-t border-[var(--color-line)]',
+                  index % 3 > 0 && 'sm:border-l sm:pl-7 lg:pl-10',
+                  index % 3 < 2 && 'sm:pr-7 lg:pr-10',
+                  index >= 3 && 'sm:border-t sm:pt-8',
+                  index < 3 && 'sm:border-t-0',
                 )}
               >
                 {/* Die Sterne bleiben auf ALLEN drei Karten. Sie sind der Beleg der einzelnen

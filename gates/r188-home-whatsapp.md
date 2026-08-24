@@ -1,5 +1,7 @@
 # Gates: R188 Home und globaler WhatsApp-Abschluss
 
+ABANDON: G10 leftover-other-round nicht R189-Rest
+
 Scope: Bestehende Home-Änderungen sichern, fünf sichtbare Punkte abschließen und alle geforderten Viewports belegen.
 
 - [x] G1: Die Bachata-Karte nutzt ein echtes, ungefiltertes Bild mit neutraler bis warmer Farbbalance.

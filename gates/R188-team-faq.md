@@ -65,3 +65,5 @@ Kein courses/-Pfad. Kein Commit, kein Push.
     faq/m-08 (mobil zwei verschiedene Motive untereinander).
     Nachgebessert nach Selbstsicht: Textspalte lief `justify-center` und begann
     erst auf halber Bildhoehe -> auf `justify-start` geaendert.
+
+ABANDON: leftover-other-round nicht R189-Rest

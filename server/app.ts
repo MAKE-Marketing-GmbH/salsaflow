@@ -17,7 +17,7 @@ import { createAdminRoutes } from './admin.js';
 import { createPublicRoutes } from './public.js';
 import { createBookingRoutes } from './booking-routes.js';
 import { createContactRoutes } from './contact-routes.js';
-import { createReservationRoutes } from './reservation-routes.js';
+import { createReservationRoutes, type SeedSchedule } from './reservation-routes.js';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -138,9 +138,12 @@ export function createApp(db: Db) {
   app.route(
     '/',
     createReservationRoutes(async () => {
-      const json = (await schedulePromise) as { courses: unknown[] };
+      // SAFETY: schedulePromise liest db/seed/public-schedule.json, das genau die
+      // SeedSchedule-Form hat (gepruefte Seed-Datei im Repo, kein Fremdinput).
+      const json = (await schedulePromise) as SeedSchedule;
       const dbCourses = await loadDbCoursesForReservation(db);
-      return { courses: [...json.courses, ...dbCourses] } as { courses: [] };
+      const merged: SeedSchedule = { courses: [...json.courses, ...dbCourses] };
+      return merged;
     }),
   );
   // Admin-Verwaltung (Etappe 6): Staffeln + Kurse + Duplizieren. Eigenes Auth-Gate in den Routen.

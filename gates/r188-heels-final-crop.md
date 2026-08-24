@@ -41,3 +41,5 @@
   CHECK: python3 /root/raphael-skills/skills/eigene/visual-aaa/scripts/validate-ship-manifest.py worklog/shots/R188/after-final7-heels-crop/visual-ship.json
   EXPECT: SHIP VALID
   EVIDENCE: G1 `3 file(s), 0 findings`; visual-kritiker `verdict: pass`, `confidence: HIGH`; Manifest `SHIP VALID`.
+
+ABANDON: leftover-other-round nicht R189-Rest

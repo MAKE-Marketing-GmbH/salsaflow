@@ -6,15 +6,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { api, levelLabel, type CourseBalance, type TermBalance } from '@/lib/api';
 import { Badge, Banner, Button, Card, Loading } from '@/admin/ui';
 
-const STATUS_DE: Record<string, string> = {
+const STATUS_DE = {
   pending_payment: 'Vorgemerkt',
   waitlisted: 'Warteliste',
   confirmed: 'Bestätigt',
   cancelled: 'Storniert',
   expired: 'Abgelaufen',
+  refunded: 'Erstattet',
   completed: 'Abgeschlossen',
-};
-const ROLE_DE: Record<string, string> = { leader: 'Leader', follower: 'Follower' };
+} satisfies Record<string, string>;
+const ROLE_DE = { leader: 'Leader', follower: 'Follower' } satisfies Record<string, string>;
 
 export function BalanceView({
   termId,
@@ -189,7 +190,9 @@ function BookingRow({
     ? 'Offene Klasse'
     : booking.mode === 'couple'
       ? `Paar${booking.partnerName ? ` (mit ${booking.partnerName})` : ''}`
-      : ROLE_DE[booking.role ?? ''] ?? '-';
+      : booking.role
+        ? ROLE_DE[booking.role]
+        : '-';
 
   async function cancel() {
     setBusy(true);

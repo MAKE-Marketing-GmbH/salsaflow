@@ -223,7 +223,9 @@ function styleKeyFromRaw(raw: string): string {
   throw new Error(`Unbekannter Stil im Seed: "${raw}"`);
 }
 
-const WEEKDAYS: Record<string, string> = {
+type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+
+const WEEKDAYS = {
   montag: 'mon',
   dienstag: 'tue',
   mittwoch: 'wed',
@@ -231,10 +233,13 @@ const WEEKDAYS: Record<string, string> = {
   freitag: 'fri',
   samstag: 'sat',
   sonntag: 'sun',
-};
-function weekdayFromRaw(raw: string): string {
+} satisfies Record<string, Weekday>;
+
+function weekdayFromRaw(raw: string): Weekday {
   const key = raw.toLowerCase().trim();
-  const wd = WEEKDAYS[key];
+  // SAFETY: Object.hasOwn prueft die Mitgliedschaft zur Laufzeit; nur dann wird der
+  // String als Schluessel gelesen.
+  const wd = Object.hasOwn(WEEKDAYS, key) ? WEEKDAYS[key as keyof typeof WEEKDAYS] : undefined;
   if (!wd) throw new Error(`Unbekannter Wochentag im Seed: "${raw}"`);
   return wd;
 }
@@ -270,6 +275,8 @@ function rungOrdinalFor(ladderKey: string, levelRaw: string | null): number | nu
  * Seed-Lauf
  * ------------------------------------------------------------------------- */
 export async function runSeed() {
+  // SAFETY: SOURCE_PATH ist die versionierte Seed-Datei dieses Repos; ihre Struktur
+  // ist SeedSource. Abweichungen lassen den Seed sofort und sichtbar scheitern.
   const source = JSON.parse(await readFile(SOURCE_PATH, 'utf8')) as SeedSource;
   const handle = await openDb();
   const { db } = handle;
@@ -394,7 +401,7 @@ export async function runSeed() {
         styleId,
         levelRungId,
         onVariant: styleKey === 'salsa' ? c.on_variant : null,
-        weekday: weekdayFromRaw(c.weekday) as 'mon',
+        weekday: weekdayFromRaw(c.weekday),
         startTime: `${c.start_time ?? '00:00'}:00`,
         endTime: `${c.end_time ?? '00:00'}:00`,
         locationId,

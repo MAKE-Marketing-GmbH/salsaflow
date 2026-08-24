@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CalendarDays, Sparkles, Star } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
+import type { PublicEvent } from '@/lib/api';
 import { EVENTKALENDER, type EventkalenderContent } from '@/public/events/eventkalender-content';
 import {
   ClosingInvite,
@@ -33,6 +34,21 @@ import {
 export function EventkalenderPage() {
   const { lang } = useLang();
   const c = EVENTKALENDER[lang];
+  const [events, setEvents] = useState<PublicEvent[] | null>(null);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/public/events')
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`))))
+      .then((body: { events?: PublicEvent[] }) => {
+        if (active) setEvents(Array.isArray(body.events) ? body.events : []);
+      })
+      .catch(() => {
+        if (active) setEvents([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
   return (
     <SubPageShell seo={c.seo}>
       {/* Runde 2, Issue 1: Typo-Hero statt Foto-Split. Achse 'wide' — die H1 laeuft ueber die
@@ -62,7 +78,7 @@ export function EventkalenderPage() {
       <FilterSection c={c} />
       <CardsSection c={c} />
       <FeaturedSection c={c} />
-      <EmptyStateSection c={c} />
+      <CalendarSection c={c} events={events} />
       <ClosingSection c={c} />
       <FaqBlock title={c.faqTitle} items={c.faq} />
     </SubPageShell>
@@ -80,7 +96,7 @@ function FilterSection({ c }: { c: EventkalenderContent }) {
           <motion.h2 variants={item} className={sectionTitle}>
             {f.title} {f.titleAccent ? <TitleAccent>{f.titleAccent}</TitleAccent> : null}
           </motion.h2>
-          <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+          <motion.p variants={item} className={`${sectionLead}`}>
             {f.body}
           </motion.p>
         </Reveal>
@@ -199,7 +215,7 @@ function FeaturedSection({ c }: { c: EventkalenderContent }) {
             <h2 className={`mt-5 ${sectionTitle}`}>
               {f.title} {f.titleAccent ? <TitleAccent>{f.titleAccent}</TitleAccent> : null}
             </h2>
-            <p className={`mt-4 ${sectionLead}`}>{f.body}</p>
+            <p className={`${sectionLead}`}>{f.body}</p>
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
               <PrimaryCta href={f.cta.href}>{f.cta.label}</PrimaryCta>
               <div className="flex flex-wrap gap-x-6 gap-y-2">
@@ -238,7 +254,32 @@ function nextDanceflowNight(from: Date): Date {
   return d;
 }
 
-function EmptyStateSection({ c }: { c: EventkalenderContent }) {
+function formatEventDate(event: PublicEvent, lang: 'de' | 'en') {
+  const locale = lang === 'de' ? 'de-CH' : 'en-GB';
+  const start = new Date(`${event.startDate}T12:00:00Z`).toLocaleDateString(locale, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+  const end = event.endDate && event.endDate !== event.startDate
+    ? new Date(`${event.endDate}T12:00:00Z`).toLocaleDateString(locale, {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      })
+    : null;
+  return `${start}${end ? ` – ${end}` : ''}${event.startTime ? ` · ${event.startTime}${event.endTime ? `–${event.endTime}` : ''}` : ''}`;
+}
+
+const EVENT_FORMAT_LABEL = {
+  de: { danceflow: 'Danceflow Night', workshop: 'Workshop', anniversary: 'Anniversary Weekend', floweekend: 'Flow Weekend', other: 'Event' },
+  en: { danceflow: 'Danceflow Night', workshop: 'Workshop', anniversary: 'Anniversary Weekend', floweekend: 'Flow Weekend', other: 'Event' },
+} as const;
+
+function CalendarSection({ c, events }: { c: EventkalenderContent; events: PublicEvent[] | null }) {
   const { item } = useReveal();
   const { lang } = useLang();
   const e = c.empty;
@@ -251,6 +292,93 @@ function EmptyStateSection({ c }: { c: EventkalenderContent }) {
       d.toLocaleDateString(lang === 'de' ? 'de-CH' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' }),
     );
   }, [lang]);
+
+  if (events === null) {
+    return (
+      <section id="kalender" aria-busy="true" className="scroll-mt-24 bg-[var(--color-paper-warm)] py-16 lg:py-24">
+        <Shell>
+          <div className="h-56 animate-pulse rounded-[var(--radius-media)] bg-white" />
+        </Shell>
+      </section>
+    );
+  }
+
+  if (events.length > 0) {
+    return (
+      <section id="kalender" className="scroll-mt-24 bg-[var(--color-paper-warm)] py-16 lg:py-24">
+        <Shell>
+          <Reveal className="max-w-2xl">
+            <motion.div variants={item}><Eyebrow>{lang === 'de' ? 'Kommende Termine' : 'Upcoming dates'}</Eyebrow></motion.div>
+            <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
+              {lang === 'de' ? 'Die nächsten Events bei Salsaflow.' : 'The next events at Salsaflow.'}
+            </motion.h2>
+            <motion.p variants={item} className={sectionLead}>
+              {lang === 'de'
+                ? 'Termine, Orte und Ticketlinks werden direkt vom Salsaflow-Team gepflegt.'
+                : 'Dates, locations and ticket links are maintained directly by the Salsaflow team.'}
+            </motion.p>
+          </Reveal>
+          <Reveal className="mt-12 grid gap-5 lg:grid-cols-2" stagger={0.08}>
+            {events.map((event) => {
+              const title = lang === 'de' ? event.titleDe : event.titleEn;
+              const summary = lang === 'de' ? event.summaryDe : event.summaryEn;
+              const href = event.ticketUrl || event.detailUrl || '/kontakt#events';
+              const imageAlt = lang === 'de' ? event.imageAltDe : event.imageAltEn;
+              return (
+                <motion.article
+                  key={event.id}
+                  variants={item}
+                  className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]"
+                >
+                  {event.imageUrl && (
+                    <img
+                      src={event.imageUrl}
+                      alt={imageAlt || ''}
+                      className="aspect-[16/8] w-full object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-[1.015]"
+                      width={1200}
+                      height={600}
+                      loading="lazy"
+                    />
+                  )}
+                  <div className="flex flex-1 flex-col p-7 sm:p-8">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-[var(--color-salsa)]/10 px-3 py-1 text-xs font-semibold text-[var(--color-salsa)]">
+                        {EVENT_FORMAT_LABEL[lang][event.format]}
+                      </span>
+                      {event.featured && (
+                        <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
+                          {lang === 'de' ? 'Highlight' : 'Featured'}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-5 flex items-center gap-2 text-sm font-semibold text-[var(--color-salsa)]">
+                      <CalendarDays size={16} aria-hidden />
+                      {formatEventDate(event, lang)}
+                    </p>
+                    <h3 className="mt-3 type-h3 text-[var(--color-ink)]">{title}</h3>
+                    <p className="mt-3 text-[0.98rem] leading-relaxed text-[var(--color-ink-muted)]">{summary}</p>
+                    <p className="mt-4 text-sm text-[var(--color-ink-muted)]">{event.location}</p>
+                    <a
+                      href={href}
+                      target={href.startsWith('http') ? '_blank' : undefined}
+                      rel={href.startsWith('http') ? 'noreferrer' : undefined}
+                      className="mt-auto inline-flex min-h-12 items-center gap-1.5 pt-6 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
+                    >
+                      {event.ticketUrl
+                        ? lang === 'de' ? 'Tickets & Details' : 'Tickets & details'
+                        : lang === 'de' ? 'Mehr erfahren' : 'Learn more'}
+                      <CtaArrow className="transition-transform duration-[var(--dur-fast)] group-hover:translate-x-0.5" />
+                    </a>
+                  </div>
+                </motion.article>
+              );
+            })}
+          </Reveal>
+        </Shell>
+      </section>
+    );
+  }
+
   return (
     <section id="kalender" className="scroll-mt-24 bg-[var(--color-paper-warm)] py-16 lg:py-24">
       <Shell>

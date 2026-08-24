@@ -1,0 +1,19 @@
+Read the attached PNGs. Do not guess from text.
+
+Six files, three routes after R123:
+- /tanzkurse mobile + desktop
+- /tanzkurse/salsa mobile + desktop
+- /preise mobile + desktop
+
+Claim. Must be true for PASS:
+1. whatsappRechtsUnten: on EVERY image a green WhatsApp control is bottom RIGHT and visible.
+
+Locks: circle stays right. No left: 1.25rem. Do not discuss Salsa crop.
+
+Reply format:
+PASS or FAIL
+tanzkurse: true/false
+salsa: true/false
+preise: true/false
+BELEG: what you see in the PNGs
+biggest_gap: one sentence

@@ -147,8 +147,11 @@ export const COURSES_OVERVIEW = defineOverviewContent({
         },
         {
           key: 'workshops',
-          title: 'Ein Thema gezielt vertiefen',
-          text: 'Workshops passen, wenn du dich an einem Abend gezielt auf Technik, Styling, Musikalität oder neue Figuren konzentrieren willst.',
+          // R208 (Raphael 23.08. 17:14): "Ueberschrift BENENNEN, z.B. 'Unsere Workshops' /
+          // 'Workshops'. Nicht als Erklaerung." Die alte Zeile beschrieb, was ein Workshop
+          // tut; der Text darunter sagt dasselbe noch einmal als Satz.
+          title: 'Unsere Workshops',
+          text: 'Ein Abend, ein Thema: Technik, Styling, Musikalität oder neue Figuren. Workshops laufen unabhängig von den Kursstaffeln, du buchst einzeln und brauchst keinen laufenden Kurs.',
           href: '/events',
           cta: 'Workshops ansehen',
           accent: true,
@@ -159,7 +162,10 @@ export const COURSES_OVERVIEW = defineOverviewContent({
       eyebrow: 'Level & Aufbau',
       title: 'Du musst dein Level nicht kennen. Wir finden es gemeinsam',
       titleAccent: 'heraus.',
-      lead: 'Wenn du zwischen zwei Levels stehst oder nach einer Pause zurückkommst, helfen dir eine Schnupperstunde oder eine kurze Nachricht bei der Einordnung.',
+      // R208 (Raphael 23.08. 17:14): "Viel genauer erklaeren. Sieht uebelst komisch aus."
+      // Der alte Lead nannte nur zwei Sonderfaelle (zwischen zwei Levels, nach einer Pause)
+      // und liess offen, was praktisch passiert. Jetzt steht der Ablauf da.
+      lead: 'Ganz neu? Dann startest du im Beginner Stufe 1, ohne Vorkenntnisse und ohne Partner. Wenn du schon getanzt hast, zwischen zwei Levels stehst oder nach einer Pause zurückkommst, schreib uns kurz, wie lange und was du bisher gelernt hast. Wir sagen dir dann, welche Stufe passt. In der Schnupperstunde siehst du es selbst, bevor du dich für eine Staffel entscheidest.',
       flowNoteBeginner: 'Beginner Flow heisst: die Grundschritte festigen, bis sie sicher sitzen.',
       flowNoteIntermediate: 'Intermediate Flow heisst: die Figuren variieren und frei kombinieren.',
       tracks: [
@@ -232,8 +238,14 @@ export const COURSES_OVERVIEW = defineOverviewContent({
     },
     privat: {
       eyebrow: 'Privatstunden',
-      title: 'Persönlich schneller weiterkommen',
-      body: 'Für Technik, Hochzeitstanz, Level-Feinschliff oder ein konkretes Ziel.',
+      // R208 (Raphael 23.08. 17:14): "'Persoenlich schneller weiterkommen' anders machen,
+      // nicht cool." Zwei Gruende, am Shot belegt: der Kicker «PRIVATSTUNDEN» ist in R188
+      // weggefallen, seither trug die Zeile die Sektion allein — und sie versprach ein
+      // Ergebnis, statt die Sache zu benennen. Auf derselben Seite hat Raphael das schon
+      // fuer den Workshop-Block verlangt ("Ueberschrift BENENNEN, nicht erklaeren").
+      // Die H2 nennt jetzt das Angebot, der Satz darunter sagt weiter, wofuer es taugt.
+      title: 'Privatstunden',
+      body: 'Eine Lehrperson nur für dich, allein oder zu zweit. Für Technik, Hochzeitstanz, Level-Feinschliff oder ein konkretes Ziel.',
       points: ['Einzeln oder zu zweit', 'Alle Salsa-Styles', 'Flexible Termine', 'Hochzeitstanz möglich'],
     },
     calendar: {
@@ -286,8 +298,8 @@ export const COURSES_OVERVIEW = defineOverviewContent({
         },
         {
           key: 'workshops',
-          title: 'Go deep on one topic',
-          text: 'Workshops suit you when you want to focus on technique, styling, musicality or new figures in a single evening.',
+          title: 'Our workshops',
+          text: 'One evening, one topic: technique, styling, musicality or new figures. Workshops run independently of the course terms. You book them individually and do not need to be in a running class.',
           href: '/events',
           cta: 'See the workshops',
           accent: true,
@@ -298,7 +310,7 @@ export const COURSES_OVERVIEW = defineOverviewContent({
       eyebrow: 'Level & path',
       title: 'You do not need to know your level. We find it',
       titleAccent: 'together.',
-      lead: 'If you are between two levels or returning after a break, a trial class or a quick message will help us place you correctly.',
+      lead: 'Completely new? Then you start at Beginner stage 1, with no experience and no partner needed. If you have danced before, sit between two levels or are coming back after a break, send us a short message about how long you danced and what you learned, and we will tell you which stage fits. In the trial class you see it for yourself before committing to a term.',
       flowNoteBeginner: 'Beginner Flow means: reinforcing the basic steps until they feel secure.',
       flowNoteIntermediate: 'Intermediate Flow means: varying the figures and combining them freely.',
       tracks: [

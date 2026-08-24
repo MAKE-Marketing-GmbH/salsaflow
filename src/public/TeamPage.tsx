@@ -303,6 +303,30 @@ function TeamHero() {
     <HeroFrame
       axis="wide"
       dense
+      /* R208 (Raphael 23.08. 17:14): "Unter dem Button viel zu wenig Platz, gleicher
+         Fehler wie beim Events-Hero." Der dense+media-Zweig gab 24px zwischen CTA und
+         Bandkante; gemessen am Vorher-Shot waren es 22px sichtbare Luft. */
+      airBelowCta
+      /* R213 (Raphael 23.08. 22:33): "Ueber-uns-Hero Luft oben und unten." Der Befund
+         lag OBEN, nicht unten — nachgemessen mit scripts/r213-team-hero.cjs gegen den
+         Produktions-Build:
+
+           Route              Luft oben 1440 / 390     Luft unter CTA
+           /team                    8 /  7                  64
+           /events                 40 / 39                  64
+           /tanzkurse              61 / 56                   -
+           /preise                 84 / 79                 128
+           salsa/bachata/heels     68 /  -                   -
+
+         /team hatte als einzige Route einstellige Luft ueber der H1; unter der CTA lag
+         sie mit 64px exakt auf /events, also im Rahmen. Der Grund fuer den Ausreisser
+         oben ist die fehlende Breadcrumb (Begruendung an der Prop in kit.tsx).
+
+         KORREKTUR AM URTEIL: der Kritiker nannte "44 px unter der CTA". Gemessen sind es
+         64. Der Unterschied ist der Messpunkt — ab der Pill sind es 44, ab dem tiefer
+         reichenden Textlink daneben 64. Genau diese Falle steht schon im R208-Kommentar
+         unten in kit.tsx; hier faellt sie zugunsten der groesseren Zahl aus. */
+      airAboveTitle
       title={
         <>
           {h.titleA} {h.titleAccent}
@@ -319,7 +343,16 @@ function TeamHero() {
         // Parent nach R180c: vh-Höhe bleibt als Fold-Rest. Der freigegebene
         // Zuschnitt 38 % zeigt bei 1440x730 alle Köpfe und hält das Logo lesbar.
         position: 'center 38%',
-        heightClass: 'h-[16rem] sm:h-[24rem] lg:h-[calc(100vh-24.08rem)]',
+        // R190: ab lg traegt das Seitenverhaeltnis, nicht mehr die vh-Rechnung.
+        // `lg:h-[calc(100vh-24.08rem)]` lieferte bei 1440x730 nur 345px Band und damit
+        // src 23.3%..62.0% — die kniende vordere Reihe war ab Oberschenkel weg. Das ist
+        // exakt der Fall, den die Messreihe oben (Zeile 258-269) schon fuer feste
+        // rem-Hoehen belegt hat: bei object-cover haengt der Ausschnitt am Verhaeltnis
+        // Breite/Hoehe, also kann keine feste Hoehe ihn ueber die Breiten halten.
+        // `aspect-[21/9]` zeigt bei 1280..2560px identisch src 12.0%..81.2% — Scheitel
+        // (25.1%) und Schuhe (80.0%) liegen auf jeder Breite im Fenster.
+        // `center 38%` bleibt unangetastet (LOCK, siehe R187 oben).
+        heightClass: 'h-[16rem] sm:h-[24rem] lg:h-auto lg:aspect-[21/9]',
       }}
     />
   );
@@ -364,7 +397,7 @@ function FounderSection() {
             <motion.h2 variants={item} className={cn(g.eyebrow ? 'mt-5' : 'mt-0', sectionTitle, MEASURE_L, 'pr-16 sm:pr-0')}>
               {g.title}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 pr-16 text-pretty sm:pr-0 ${sectionLead}`}>
+            <motion.p variants={item} className={`pr-16 text-pretty sm:pr-0 ${sectionLead}`}>
               {g.lead}
             </motion.p>
           </Reveal>
@@ -592,9 +625,16 @@ function TeamPhotoSection() {
 
         {/* T4 (Runde 3): `items-stretch` bleibt, die Hoehe gibt aber ab lg die TEXTSPALTE
             vor, nicht mehr das Bild. Siehe Kopfkommentar der Sektion. */}
+        {/* R208 Nachzieh: `items-start` statt `items-stretch`. Seit der Text oben startet
+            (statt per `lg:justify-end` unten zu haengen) ist die Textspalte rund 230px
+            kuerzer als das 3:2-Bild daneben — `stretch` zog sie trotzdem auf Bildhoehe,
+            und unter dem letzten Absatz stand genau diese Leerflaeche als Loch im Papier
+            (gemessen am Nachher-Shot team-d1440-full.png). Das Bild behaelt sein
+            Verhaeltnis (Kopfkommentar an der figure: Koepfe nicht abschneiden), also
+            traegt ab jetzt jede Spalte ihre eigene Inhaltshoehe. */}
         <motion.div
           data-reveal
-          className="mt-10 grid items-stretch gap-8 lg:mt-14 lg:grid-cols-2 lg:gap-14"
+          className="mt-10 grid items-start gap-8 lg:mt-14 lg:grid-cols-2 lg:gap-14"
           variants={imgReveal}
           initial="hidden"
           whileInView="show"
@@ -618,13 +658,49 @@ function TeamPhotoSection() {
               als Loch. Unterkante Text und Unterkante Bild liegen exakt aufeinander.
               Unterhalb lg stapeln die Spalten untereinander; dort beginnt der Text wie
               gewohnt oben (`justify-start`). */}
-          <div className="flex flex-col justify-start gap-6 lg:h-full lg:justify-end">
+          {/* R208 (Raphael 23.08. 17:14): "'Unsere Geschichte' sieht verloren aus."
+              Der `lg:justify-end` schob die beiden Absaetze an die UNTERkante der Zeile,
+              um sie buendig zum Bild abzuschliessen. Sichtbare Folge (Vorher-Shot
+              team-d1440-full.png): unter der H2 stand rund 300px leere Flaeche, dann erst
+              der Text — die Ueberschrift hing allein oben in der Sektion, genau das
+              "verloren". Buendigkeit unten ist eine Messgroesse, Lesbarkeit die Aussage.
+              Der Text startet jetzt oben, direkt unter seiner Ueberschrift. */}
+          <div className="flex flex-col justify-start gap-6">
             <p className="text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
               {s.body}
             </p>
             <p className="text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
               {s.body2}
             </p>
+
+            {/* R208 Runde 2 (Opus-Kritik, Befund 2): Die Textspalte endete rund 110px
+                ueber der Bildunterkante, daneben stand eine leere Spalte — der Block las
+                sich, als fehle ein drittes Element.
+                Der Kopfkommentar dieser Sektion verbietet einen erfundenen dritten Absatz,
+                und das gilt weiter. Diese drei Zahlen sind NICHT erfunden: sie stehen
+                belegt in team/content.ts (hero.stats) und tragen genau das, was der Text
+                daneben erzaehlt — vier Freunde am Anfang, heute rund 40 Kurse in drei
+                Studios. Sie stuetzen die Aussage, statt Flaeche zu fuellen. */}
+            {/* Kein eigenes `variants={item}`: der Elternteil dieser Spalte ist ein
+                motion.div mit `imgReveal`, das die ganze Zeile gemeinsam einblendet.
+                Eine zweite Variante ohne passenden Provider bliebe wirkungslos. */}
+            {/* R208 Runde 2 (Linien-Befund): `border-t` raus. Dieselbe Kennzahlenleiste
+                steht im Hero von /tanzkurse und ist dort gleich behandelt — Raphael
+                (23.08. 17:14) wollte die horizontalen Linien weg, und ein Strich, der
+                auf einer Seite faellt und auf der anderen stehen bleibt, liest sich als
+                Nachlaessigkeit. `pt-6` bleibt: der Abstand traegt die Trennung. */}
+            <dl className="mt-2 grid grid-cols-3 gap-4 pt-6">
+              {TEAM[lang].hero.stats.map((stat) => (
+                <div key={stat.l}>
+                  <dt className="font-display text-2xl font-extrabold leading-none text-[var(--color-salsa)] sm:text-3xl">
+                    {stat.v}
+                  </dt>
+                  <dd className="mt-2 text-xs leading-snug text-balance text-[var(--color-ink-muted)] [overflow-wrap:normal] [word-break:keep-all]">
+                    {stat.l}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
           {/* Das Bild behaelt sein echtes Seitenverhaeltnis 3:2 (Datei 1800x1200) und
@@ -668,8 +744,13 @@ function TeamPhotoSection() {
                     Absatz ("Daraus ist ein Team geworden ... rund 40 Kurse pro Woche"). Die
                     Zahl ist belegt: sie steht woertlich im Story-Text (team/content.ts) und
                     im Home-TeamBlock. 2018 bleibt sichtbar — im ersten Absatz direkt daneben. */}
+                {/* R208 Runde 2: Der Chip sagte "Heute: rund 40 Kurse pro Woche" — exakt
+                    dieselbe Zahl, die seit dieser Runde als Kennzahl links unter dem Text
+                    steht. Zwei Nennungen derselben Zahl auf einem Screen. Der Chip nennt
+                    jetzt das, was das Foto zeigt und keine Kennzahl daneben doppelt: das
+                    heutige Team. Beide Aussagen bleiben belegt (Story-Text nebenan). */}
                 <p className="text-xs font-bold text-[var(--color-ink)]">
-                  {lang === 'de' ? 'Heute: rund 40 Kurse pro Woche' : 'Today: around 40 classes a week'}
+                  {lang === 'de' ? 'Das Team heute' : 'The team today'}
                 </p>
               </figcaption>
             </div>
@@ -715,7 +796,13 @@ function TrialBand() {
   return (
     <section className="bg-[var(--color-bg-soft)] pb-0 pt-10 lg:pt-14">
       <Shell>
-        <Reveal className="flex flex-col gap-5 border-y border-[var(--color-line)] py-8 sm:flex-row sm:items-center sm:justify-between sm:gap-10">
+        {/* R208 (Raphael 23.08. 17:14): "'Am schnellsten lernst du uns kennen, indem du
+            einmal mittanzt': als Container-Sektion, NICHT in Rot."
+            Vorher war das eine nackte Zeile zwischen zwei Haarlinien — sie las sich als
+            Trennstrich mit Text, nicht als eigene Einladung. Jetzt eine eigene helle
+            Container-Flaeche (paper-warm auf bg-soft), gerundet, ohne die zwei Linien.
+            Rot bleibt allein auf dem CTA-Knopf, die Flaeche selbst ist es NICHT. */}
+        <Reveal className="flex flex-col gap-5 rounded-[2rem] bg-[var(--color-paper-warm)] p-8 sm:flex-row sm:items-center sm:justify-between sm:gap-10 sm:p-10">
           <motion.p
             variants={item}
             className="type-h3 max-w-[26em] text-[var(--color-ink)]"
@@ -803,19 +890,10 @@ function RoleFaces({ anchor, lang }: { anchor: { href: string; photos: string[] 
 
 function RolesSection() {
   const { lang } = useLang();
-  const reduced = useReducedMotion();
   const r = TEAM[lang].roles;
   const { item } = useReveal();
-  const supportVisual =
-    lang === 'de'
-      ? { title: 'Viele Rollen, ein gemeinsamer Kursabend.', alt: 'Salsaflow Kursgruppe im hellen Studio' }
-      : { title: 'Many roles, one shared class evening.', alt: 'Salsaflow class group in the studio' };
-
-  const hydrated = useHydrated();
-  const imgReveal: Variants = {
-    hidden: hydrated ? { opacity: 0, y: reduced ? 0 : 18, scale: reduced ? 1 : 0.99 } : { opacity: 1, y: 0, scale: 1 },
-    show: { opacity: 1, y: 0, scale: 1, transition: { duration: reduced ? 0.3 : 0.65, ease: EASE_OUT } },
-  };
+  /* R208: `supportVisual` (Titel + Alt des Beleg-Fotos) und `imgReveal` (dessen eigene
+     Reveal-Variante) sind mit dem Bild weggefallen — sie hatten sonst keinen Leser. */
 
   return (
     <section id="rollen" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-16 lg:py-20">
@@ -829,64 +907,18 @@ function RolesSection() {
           <motion.h2 variants={item} className={cn(r.eyebrow ? 'mt-5' : 'mt-0', sectionTitle, MEASURE_L)}>
             {r.title}
           </motion.h2>
-          <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
+          <motion.p variants={item} className={`text-pretty ${sectionLead}`}>
             {r.lead}
           </motion.p>
         </Reveal>
 
-        {/* Beleg-Foto als eigenes, breites Bild UEBER der Liste (Kritik-Fix): es steht damit
-            auf derselben Achse wie Titel und Liste und muss sich an keiner Kartenkante mehr
-            ausrichten. */}
-        {/* Radius + overflow-hidden gehoeren an das BILD, nicht an die figure: liegen sie
-            aussen, schneidet die runde Ecke in die Bildunterschrift. Gemessen war das erste
-            Zeichen von "AUF DER FLAECHE" angeschnitten (figcaption.left == figure.left bei
-            border-radius 24px und overflow:hidden). */}
-        <motion.figure
-          data-reveal
-          className="mt-10"
-          variants={imgReveal}
-          initial="hidden"
-          whileInView="show"
-          viewport={VIEWPORT}
-        >
-          {/* Design-Kritik Runde 3, Issue 3: hier stand /photos/gallery/kurse/03.jpg,
-              dasselbe Foto wie im Home-Hero, auf /kontakt, auf der Bachata-Kachel und in
-              der Galerie. Jetzt ein echter Kursmoment vor der Salsaflow-Wand
-              (Luminanz 159/255 statt 53/255) — er zeigt, was die Sektion behauptet:
-              viele Menschen, ein gemeinsamer Kursabend. */}
-          {/* R156 (Video 07:03, "niemand am Rand halb"): hier stand
-              kurse-heels-energie-01.webp in einem 21:9-Fenster. Die blonde Frau links war
-              angeschnitten — und zwar nicht durch das Fenster, sondern durch die DATEI: sie
-              steht im Quellbild selbst am linken Rand und ist dort bereits halbiert
-              (1920x935, Raster-Check auf der Quelldatei). Ein anderer Crop kann das nicht
-              heilen, weil die fehlende Bildhaelfte gar nicht existiert. Bei 2.05:1 Quelle in
-              einem 2.33:1 Fenster schneidet object-cover ausserdem nur HOEHE weg, nie Breite.
-              Darum der Tausch auf ein vorhandenes Kursfoto, kein neues Motiv:
-              kurse-classfreude-01.webp (1920x1280, 3:2). Es zeigt dieselbe Aussage — viele
-              Menschen, ein gemeinsamer Kursabend — hat aber an beiden Raendern ganze Figuren
-              und dank 3:2 genug Hoehe fuer einen Crop.
-              Fenster 16/9 statt 21/9 und `center 30%`: gemessen zeigt das src 4.7%..89.1%,
-              also erhobene Haende oben komplett und Fuesse plus Boden unten. Das flachere
-              21:9 haette bei jeder Position entweder die Haende oder die Fuesse gekappt
-              (bei 30%: nur 10.7%..75.0%). */}
-          <img
-            src="/photos/2026/kurse-classfreude-01.webp"
-            alt={supportVisual.alt}
-            className="aspect-[16/9] w-full rounded-[var(--radius-media)] object-cover object-[center_30%]"
-            /* Echtes Seitenverhaeltnis der Datei melden, sonst reserviert der Browser die
-               falsche Hoehe (CLS) — gleicher Grund wie zuvor, neue Masse. */
-            width={1920}
-            height={1280}
-            loading="lazy"
-          />
-          {/* Runde 1 (2026-08-07), Eyebrow-Drosselung: hier stand zusaetzlich das Label
-              "AUF DER FLAECHE" ueber der Bildunterschrift. Im selben Viewport lagen damit
-              der Sektions-Eyebrow, dieses Label und darunter fuenf Rollen-Labels — sechs
-              Kapitaelchen-Zeilen, die alle gleich laut rufen. Die Unterschrift traegt den
-              Satz allein. */}
-          <figcaption className="mt-3 text-[0.95rem] text-[var(--color-ink-muted)]">{supportVisual.title}</figcaption>
-        </motion.figure>
-
+        {/* R208 (Raphael 23.08. 17:14): "Team nach Rollen: Bild weg, nur die Zahlen
+            ('ein paar von uns'), boom, fertig."
+            Hier stand ein 16:9-Kursfoto mit Bildunterschrift ueber der Rollen-Liste. Es
+            belegte nichts, was die Liste nicht selbst sagt, und schob die Zahlen — den
+            eigentlichen Inhalt der Sektion — rund 500px nach unten. Ersatzlos raus.
+            Die Gesichter-Stapel IN den Zeilen bleiben: sie fuehren zu den Menschen mit
+            Namen und sind damit Navigation, keine Deko. */}
         {/* Die fuenf Rollen als EINE Liste: Ziffer links, Rolle und Text rechts, Trennlinien
             statt Karten. Alle Zeilen tragen dieselbe Struktur — darum gibt es weder
             unterschiedliche Kartenhoehen noch einen Links-Rechts-Sprung. */}
@@ -1026,7 +1058,7 @@ function FacesSection() {
           <motion.div variants={item}>
             <Eyebrow>{f.eyebrow}</Eyebrow>
             <h2 className={cn('mt-5', sectionTitle, MEASURE_L)}>{f.title}</h2>
-            <p className={`mt-4 text-pretty ${sectionLead}`}>{f.lead}</p>
+            <p className={`text-pretty ${sectionLead}`}>{f.lead}</p>
           </motion.div>
         </Reveal>
 

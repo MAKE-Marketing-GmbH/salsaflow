@@ -25,7 +25,12 @@ export function App() {
       .catch(() => setHealth('down'));
     fetch('/api/auth/me', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d?.user && setUser(d.user as AdminUser))
+      .then((d) => {
+        if (!d?.user) return;
+        // SAFETY: /api/auth/me liefert bei r.ok genau { user: AdminUser } (server/auth.ts);
+        // ohne Session kommt kein ok und d bleibt null.
+        setUser(d.user as AdminUser);
+      })
       .catch(() => {});
   }, []);
 
@@ -45,6 +50,8 @@ export function App() {
         setError(data?.error ?? 'Login fehlgeschlagen');
         return;
       }
+      // SAFETY: Bei res.ok antwortet /api/auth/login genau mit { user: AdminUser }
+      // (server/auth.ts); der !res.ok-Zweig ist oben schon abgefangen.
       setUser(data.user as AdminUser);
       setPassword('');
     } catch {

@@ -83,7 +83,7 @@ function KursaufbauHero({ c }: { c: KursaufbauContent }) {
           >
             {h.title} {h.titleAccent ? <TitleAccent>{h.titleAccent}</TitleAccent> : null}
           </motion.h1>
-          <motion.p variants={item} className={`mt-6 max-w-xl ${sectionLead}`}>
+          <motion.p variants={item} className={`max-w-xl ${sectionLead}`}>
             {h.lead}
           </motion.p>
           <motion.ul variants={item} className="mt-7 flex flex-wrap gap-2">
@@ -167,7 +167,7 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
               <h2 className={`mt-5 ${sectionTitle}`}>
                 {l.title} {l.titleAccent ? <TitleAccent>{l.titleAccent}</TitleAccent> : null}
               </h2>
-              <p className={`mt-4 ${sectionLead}`}>{l.body}</p>
+              <p className={`${sectionLead}`}>{l.body}</p>
 
               <div className="mt-8">
                 <p className="max-w-md text-[0.95rem] leading-relaxed text-[var(--color-ink-muted)]">{l.stylesIntro}</p>
@@ -378,7 +378,7 @@ function TermSection({ c }: { c: KursaufbauContent }) {
             <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
               {t.title} {t.titleAccent ? <TitleAccent>{t.titleAccent}</TitleAccent> : null}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {t.body}
             </motion.p>
             <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -462,7 +462,7 @@ function MissSection({ c }: { c: KursaufbauContent }) {
             <h2 className={`mt-5 ${sectionTitle}`}>
               {m.title} {m.titleAccent ? <TitleAccent>{m.titleAccent}</TitleAccent> : null}
             </h2>
-            <p className={`mt-4 ${sectionLead}`}>{m.body}</p>
+            <p className={`${sectionLead}`}>{m.body}</p>
             {/* Festes Papier statt Glas (Sweep 14.08.2026). Aus dem Foto-Overlay in die
                 Textspalte gezogen: dort verdeckte die Karte Tanzende, hier fuellt sie den
                 Rest der Spalte mit Inhalt, der ohnehin zur Sektion gehoert. */}

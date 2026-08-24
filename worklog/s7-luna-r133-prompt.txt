@@ -1,0 +1,27 @@
+Write EXACTLY /root/clients/salsaflow-w1/worklog/s7-luna-r133.md
+
+Read:
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux133/heels-mobil-390.png
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux133/heels-desktop-1440.png
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux133/heels-fold.json
+- /root/clients/salsaflow-w1/src/public/courses/styles/heels-content.ts DE band position
+
+Claims. Default false:
+- heelsKoepfe390: faces visible in 390x844 fold, not just hair/forehead
+- kinnSichtbar390: chin of the front person visible in 390 photo
+- ctaSichtbar390: H1 plus at least one CTA fully in 390 fold
+- cropBleibt12: DE band position center 12%
+
+File ONLY:
+pass: true
+or
+pass: false
+heelsKoepfe390: true|false
+kinnSichtbar390: true|false
+ctaSichtbar390: true|false
+cropBleibt12: true|false
+BELEG: one sentence
+biggest_gap: one sentence
+
+First line pass: true only if all four true.
+No look. No code. work_type: mass.

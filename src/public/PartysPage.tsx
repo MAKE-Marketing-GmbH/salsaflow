@@ -39,9 +39,30 @@ export function PartysPage() {
           Mobil 13rem/18% bleibt. Desktop-WA Kreis ueber den Marker.
           R151: Crop 10 %, Band 20rem. Quelle Y 90–544: hinterer Scheitel und Kinn.
           Desktop-CSS blendet Microcopy aus, damit das Band im 730-Fold endet. */}
+      {/* R215 (Raphael 24.08. 00:05): "Luft zwischen Breadcrumb und H1, und Luft
+          zwischen CTA und Fotoband, im Rhythmus der anderen Hero-Seiten."
+
+          OBEN — `airAboveTitle` ist derselbe Hebel wie auf /team (R213). Gemessen
+          (scripts/r215-partys-hero.cjs, Produktions-Build) lag /mehr/partys bei 32px
+          zwischen Pillen-Unterkante und H1, waehrend die anderen Crumb-Seiten bei
+          68 (salsa/bachata/heels) und 84 (/preise) liegen. Ursache ist der
+          tight-Zweig in kit.tsx: er setzt paddingTop auf das nackte var(--nav-h).
+          +2.5rem hebt die H1 in den Korridor, ohne den Zweig selbst anzufassen —
+          derselbe Zweig traegt vier weitere Seiten mit kalibriertem Band-Crop.
+
+          KORREKTUR ZUR URTEILSZAHL: Der Kritiker nennt "Breadcrumb-unten 107,
+          H1-top 100, Luft -7", also eine Ueberlappung. Am <nav> gemessen sind es
+          crumbUK 96 gegen h1Top 100, also +4 — knapp, aber keine Ueberlappung.
+          Der Unterschied ist der Messpunkt: die Crumb-Anker tragen eine 44px-
+          Tap-Flaeche, die ueber die Textzeile hinausreicht. Der Befund "zu wenig
+          Luft" traegt trotzdem: 4px ist der kleinste Wert im ganzen Feld
+          (salsa/bachata/heels 16, /preise 12). Behoben wird also der belegte
+          Abstand, nicht die Zahl. */}
       <SubHero
         axis="wide"
         dense
+        airAboveTitle
+        airBelowCta
         seoCrumbs={c.crumbs}
         title={c.hero.title}
         titleAccent={c.hero.titleAccent}
@@ -68,10 +89,12 @@ export function PartysPage() {
 
 /* ------------------------------------------------------------------ Danceflow Night als Start */
 function DanceflowSection({ c }: { c: (typeof PARTYS)['de'] }) {
-  // Takt dieser Seite: 0.7s statt 0.45s, Stagger 0.1 — ruhiger als die Startseite.
-  // Der Versatz bleibt bei den 14px der Repo-Signatur (home/motion.tsx:49). R151 hatte
-  // ihn hier auf 8px gezogen; das war eine stille Abweichung vom EINEN Takt und ist raus.
-  const { container, item } = useReveal({ duration: 0.7, distance: 14, stagger: 0.1 });
+  /* Takt dieser Seite: 0.7s, Stagger 0.1 — ruhiger als die Startseite.
+     R151 hatte den Versatz hier auf 8px gezogen; das war eine stille Abweichung vom
+     EINEN Takt und ist raus. R190 nimmt auch die 14px raus: der Token steht auf 20
+     (home/motion.tsx), und jede eigene Zahl hier ist wieder eine stille Abweichung.
+     Die Dauer bleibt bewusst gesetzt, sie ist der Charakter dieser Seite. */
+  const { container, item } = useReveal({ duration: 0.7, stagger: 0.1 });
   const d = c.danceflow;
   /* R163: Dieser Block beginnt bei y=825, der Fold endet bei 900. Mit dem Default-
      Viewport (-8%) zuendete er sofort beim Laden: gemessen lief die Opazitaet ohne
@@ -111,7 +134,7 @@ function DanceflowSection({ c }: { c: (typeof PARTYS)['de'] }) {
             <h2 className={`mt-5 ${sectionTitle}`}>
               {d.title} <TitleAccent>{d.titleAccent}</TitleAccent>
             </h2>
-            <p className={`mt-4 ${sectionLead}`}>{d.body}</p>
+            <p className={`${sectionLead}`}>{d.body}</p>
             <dl className="mt-8 grid grid-cols-3 gap-4 border-t border-[var(--color-line)] pt-6">
               {d.facts.map((f) => (
                 <div key={f.label}>
@@ -133,7 +156,7 @@ function DanceflowSection({ c }: { c: (typeof PARTYS)['de'] }) {
 /* ------------------------------------------------------------------ Weitere Orte (kuratiert) */
 function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
   // Gleicher Takt wie im Danceflow-Block: 0.7s, Stagger 0.1, Versatz 14px (Repo-Signatur).
-  const { item } = useReveal({ duration: 0.7, distance: 14, stagger: 0.1 });
+  const { item } = useReveal({ duration: 0.7, stagger: 0.1 });
   const m = c.more;
   return (
     <section className="bg-[var(--color-paper-warm)] py-16 lg:py-24">
@@ -145,7 +168,7 @@ function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
             <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
               {m.title} <TitleAccent>{m.titleAccent}</TitleAccent>
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {m.body}
             </motion.p>
             <motion.div variants={item} className="mt-7">
@@ -181,7 +204,7 @@ function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
 /* ------------------------------------------------------------------ Zum ersten Mal (Tipps) */
 function FirstTimeSection({ c }: { c: (typeof PARTYS)['de'] }) {
   // Gleicher Takt wie im Danceflow-Block: 0.7s, Stagger 0.1, Versatz 14px (Repo-Signatur).
-  const { item } = useReveal({ duration: 0.7, distance: 14, stagger: 0.1 });
+  const { item } = useReveal({ duration: 0.7, stagger: 0.1 });
   const f = c.firstTime;
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
@@ -194,7 +217,7 @@ function FirstTimeSection({ c }: { c: (typeof PARTYS)['de'] }) {
             <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
               {f.title} <TitleAccent>{f.titleAccent}</TitleAccent>
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {f.body}
             </motion.p>
             <motion.ul variants={item} className="mt-8 grid gap-3">

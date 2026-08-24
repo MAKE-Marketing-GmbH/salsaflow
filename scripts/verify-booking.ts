@@ -107,22 +107,41 @@ async function main() {
   check('Admin-Login fuer Balance-Sicht', loginRes.status === 200 && cookie.length > 0, `status ${loginRes.status}`);
 
   // Helfer: oeffentlich buchen / Verfuegbarkeit / Admin-Balance / Storno.
-  type BookBody = Record<string, unknown>;
+  // Genau die Felder, die /api/public/bookings entgegennimmt (server/public-routes.ts).
+  type BookBody = {
+    courseId: string;
+    role: 'leader' | 'follower' | null;
+    mode: 'solo' | 'couple';
+    participant: { firstName: string; lastName: string; email: string };
+    partner?: { firstName: string; lastName: string; email: string };
+    tariffKey?: string;
+    needsAushilfe?: boolean;
+  };
   async function book(body: BookBody) {
     const res = await app.request('/api/public/bookings', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
     });
+    // SAFETY: Jedes Feld von BookingResponse ist optional, und der catch liefert bei
+    // ungueltigem JSON {}. Die Assertion behauptet damit nichts ueber den Inhalt; die
+    // Checks lesen jedes Feld einzeln und schlagen bei einer anderen Form fehl.
     const json = (await res.json().catch(() => ({}))) as BookingResponse;
     return { status: res.status, json };
   }
   async function availability() {
     const res = await app.request(`/api/public/courses/${courseId}/availability`);
+    // SAFETY: courseId stammt aus dem oben selbst eingefuegten Kurs, existiert also.
+    // Die oeffentliche Availability-Route liefert dafuer ihren Erfolgs-Body; die Checks
+    // vergleichen jedes gelesene Feld gegen einen erwarteten Wert.
     return (await res.json()) as AvailabilityResponse;
   }
   async function balance() {
     const res = await app.request(`/api/admin/terms/${termId}/balance`, { headers: { cookie } });
+    // SAFETY: Das Admin-Cookie ist oben per Check als gueltig belegt, termId stammt aus
+    // dem selbst eingefuegten Term. Die Balance-Route liefert dafuer ihren Erfolgs-Body;
+    // availability ist als nullable deklariert, wie es die Route fuer Kurse ohne
+    // Kapazitaet zurueckgibt.
     const json = (await res.json()) as {
       courses: { courseId: string; availability: BalanceAvailability | null }[];
     };
@@ -134,6 +153,9 @@ async function main() {
       headers: { 'content-type': 'application/json', cookie },
       body: '{}',
     });
+    // SAFETY: Aufgerufen wird sie nur mit bookingIds aus zuvor bestaetigten 201-Antworten,
+    // mit dem oben geprueften Admin-Cookie. Die Storno-Route liefert dafuer ihren
+    // Erfolgs-Body { ok, promoted }; die Checks pruefen beide Werte einzeln.
     return (await res.json()) as { ok: boolean; promoted: number };
   }
   const person = (n: string) => ({ firstName: n, lastName: 'Test', email: `${n.toLowerCase()}${TEST_DOMAIN}` });

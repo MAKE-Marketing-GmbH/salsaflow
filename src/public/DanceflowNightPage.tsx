@@ -156,7 +156,7 @@ function WhySection({ c }: { c: DanceflowContent }) {
           <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
             {w.title} {w.titleAccent ? <TitleAccent>{w.titleAccent}</TitleAccent> : null}
           </motion.h2>
-          <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+          <motion.p variants={item} className={`${sectionLead}`}>
             {w.body}
           </motion.p>
         </Reveal>
@@ -262,7 +262,7 @@ function BeginnerSection({ c }: { c: DanceflowContent }) {
             <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
               {b.title} {b.titleAccent ? <TitleAccent>{b.titleAccent}</TitleAccent> : null}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {b.body}
             </motion.p>
             <motion.div variants={item} className="mt-8">

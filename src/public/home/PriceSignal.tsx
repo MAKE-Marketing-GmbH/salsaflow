@@ -6,7 +6,7 @@
 import { Check, Gift } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3 } from '@/public/home/content-v3';
-import { sectionTitle, CtaArrow, Shell } from '@/public/site/primitives';
+import { sectionTitle, sectionLead, CtaArrow, Shell } from '@/public/site/primitives';
 import { BlurReveal } from '@/public/home/motion';
 import { MEASURE_L } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
@@ -62,9 +62,12 @@ export function PriceSignal() {
   const p = HOME_V3[lang].price;
 
   return (
-    <section className={cn('scroll-mt-24 bg-[var(--color-bg-soft)]', 'py-9 lg:py-4')}>
+    <section className={cn('scroll-mt-24 bg-white', 'py-9 lg:py-4')}>
       <Shell>
-        <div className="overflow-hidden rounded-[1.5rem] border border-[var(--color-line)] bg-[var(--color-paper-warm)]">
+        {/* R207 (Raphael 23.08. 17:10): "Preisblock: Hintergrund NICHT creme, einfach
+            weiss." Sektion UND Panel laufen jetzt auf Weiss. Die gift-Pille traegt darum
+            wieder bg-soft, damit sie sich vom weissen Panel abhebt (siehe Kommentar unten). */}
+        <div className="overflow-hidden rounded-[1.5rem] border border-[var(--color-line)] bg-white">
           <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
             {/* Links: Erklaerung + Wege. */}
             <div className="p-7 sm:p-10 lg:p-12">
@@ -73,7 +76,9 @@ export function PriceSignal() {
               <BlurReveal>
                 <h2 className={cn(sectionTitle, MEASURE_L)}>{p.title}</h2>
               </BlurReveal>
-              <p className="mt-5 max-w-md text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
+              {/* R190: war eine wortgleiche Kopie von `sectionLead` mit eigenem `mt-5`
+                  und mass 20 px gegen 16 px im Rest der Seite. Jetzt die Rolle. */}
+              <p className={cn(sectionLead, 'max-w-md')}>
                 {p.body}
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -116,11 +121,8 @@ export function PriceSignal() {
                 ))}
               </ul>
               <div className="mt-7 flex flex-wrap items-center gap-3">
-                {/* Die Pille hebt sich vom Panel ab, nicht von der Sektion. Solange das Panel
-                    bg-soft war, trug sie paper; jetzt ist das Panel paper-warm, und paper
-                    (#fdfcfa) auf paper-warm (#fbfaf8) waere ein 2/2/2-Unterschied, also
-                    unsichtbar. Sie laeuft darum auf bg-soft — derselbe Zweiklang, nur richtig
-                    herum. Kein neuer Token. */}
+                {/* Die Pille hebt sich vom Panel ab: das Panel ist seit R207 weiss, sie
+                    traegt darum bg-soft — derselbe Zweiklang, kein neuer Token. */}
                 <span className="inline-flex items-center gap-2 rounded-full bg-[var(--color-bg-soft)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)] shadow-sm">
                   <Gift size={16} strokeWidth={1.75} aria-hidden className="text-[var(--color-salsa)]" />
                   {p.freeAnchor}

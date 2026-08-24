@@ -1,0 +1,15 @@
+Nur Look. Keine Gates. Keine Ja/Nein-Liste.
+
+Oeffne NUR diese sechs PNGs mit Read:
+1. /root/clients/salsaflow-w1/worklog/shots/S7-ux123/tanzkurse-mobil-390.png
+2. /root/clients/salsaflow-w1/worklog/shots/S7-ux123/tanzkurse-desktop-1440.png
+3. /root/clients/salsaflow-w1/worklog/shots/S7-ux123/salsa-mobil-390.png
+4. /root/clients/salsaflow-w1/worklog/shots/S7-ux123/salsa-desktop-1440.png
+5. /root/clients/salsaflow-w1/worklog/shots/S7-ux123/preise-mobil-390.png
+6. /root/clients/salsaflow-w1/worklog/shots/S7-ux123/preise-desktop-1440.png
+
+Der gruener WhatsApp-Kreis unten rechts ist Absicht.
+
+Schreibe:
+look: was am Bild stoert (Typo, Raster, Leere, Schnitt)
+biggest_gap: ein Satz

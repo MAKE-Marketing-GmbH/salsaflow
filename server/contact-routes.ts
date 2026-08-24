@@ -15,7 +15,7 @@ import { INFO_EMAIL, sendMail } from './mail.js';
 import { clientKey, rateLimit } from './rate-limit.js';
 
 // Erlaubte Anliegen (das Formular bietet sie als Auswahl; freier Text ist die Nachricht).
-const TOPIC_LABEL: Record<string, string> = {
+const TOPIC_LABEL = {
   kontakt: 'Allgemeine Frage',
   schnupperstunde: 'Schnupperstunde',
   kurs: 'Kurs & Anmeldung',

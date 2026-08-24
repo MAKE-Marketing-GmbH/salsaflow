@@ -11,10 +11,11 @@
 // Stelle steht die Preview aller vier Event-Wege (EventsPreviewSection). Die Danceflow-
 // Fakten leben unveraendert auf /events-workshops/danceflow-night.
 
-import { type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, CalendarDays, PartyPopper, Users, type LucideIcon } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
+import type { PublicEvent } from '@/lib/api';
 import { Seo } from '@/lib/seo';
 import { SiteHeader } from '@/public/site/SiteHeader';
 import { SiteFooter, CONTACT } from '@/public/site/SiteFooter';
@@ -54,7 +55,9 @@ export function EventsPage() {
       <main id="main" tabIndex={-1}>
         <EventsHero />
         <EventsPreviewSection />
-        <GallerySection />
+        {/* R207 (Raphael 23.08. 17:10): "Sektion 'Was möchtest du als Nächstes erleben?'
+            KOMPLETT weg." GallerySection entfernt — die Foto-Galerie war Deko, die Seite
+            verliert keine Information. */}
         <WorkshopsSection />
         <AnniversarySection />
         <FloweekendSection />
@@ -141,16 +144,6 @@ function ScrollDownLink({ href, children }: { href: string; children: ReactNode 
 function EventsHero() {
   const { lang } = useLang();
   const h = EVENTS[lang].hero;
-  /* R188 E2 (Video 03:02 "diesen Text hier wegmachen, ein bisschen simpler"):
-     die Zeile trug je Wert eine zweite Zeile Begleittext ("Freitag im Monat",
-     "von Salsaflow", "direkt am Bahnhof"). Die drei Werte sagen es allein —
-     "1. 3. 5." neben "Basel SBB" liest sich als Termin und Ort ohne Erklaerung.
-     Der Begleittext ist deshalb raus, nicht nur kleiner gesetzt. Die Fakten
-     selbst bleiben wortgleich (Pflichtfakten laut content.ts). */
-  const facts: string[] =
-    lang === 'de'
-      ? ['1. 3. 5.', 'DJs', 'Basel SBB']
-      : ['1st 3rd 5th', 'DJs', 'Basel SBB'];
   /* Design-Kritik Runde 2, Issue 1: auch dieser Hero war eine eigene Kopie der Einheits-
      Bauform (Text links / gerahmtes Foto rechts / drei rote Zahlen). Er laeuft jetzt ueber
      HeroFrame mit Achse 'wide' — die H1 steht ueber die volle Shell, und das Eventfoto
@@ -159,19 +152,11 @@ function EventsHero() {
      klare Abstand zum Home-Hero, der als einziger Text AUF dem Bild traegt. */
   /* R174, Video 05:26 ("Leute abgeschnitten"). Gemessen bei 1440x900:
      Band-Top 533, Hoehe 448 -> Ende 981. Die Viewport-Kante 900 lag MITTEN im Band
-     und kappte die Koerper auf Huefthoehe.
-
-     Der Hebel ist der Platz UEBER dem Band, nicht der Crop. Die drei Fakten sassen
-     im HeroFrame zwischen CTA und Band und kosteten dort 104px plus 24px Abstand.
-     Sie laufen jetzt UNTER dem Band: dieselbe Information, dieselbe Reihenfolge im
-     Lesefluss, aber der Platz kommt dem Foto zugute.
-
-     Nachgerechnet mit der finalen Staffelung (Werte live gemessen):
-       H1-Top 96 (Nav-Freiraum, siehe pt-5 unten) -> Band-Top 405
-       Band 25rem = 400px            -> Band-Ende 805
-       Fakten py-4 = 88px            -> Fakten-Ende 893
-     Damit liegt das ganze Band im Fold (805 <= 900) UND die Fakten stehen
-     vollstaendig darueber lesbar, statt an der Falz abzureissen. */
+     und kappte die Koerper auf Huefthoehe. Der Hebel war der Platz UEBER dem Band,
+     nicht der Crop: die drei Fakten sassen im HeroFrame zwischen CTA und Band und
+     kosteten dort 104px plus 24px Abstand. R174 verschob sie unter das Band, R211
+     hat sie ganz entfernt (Begruendung unten am Ende der Komponente). Der gewonnene
+     Platz bleibt dem Foto — Band-Top 405, Band-Ende 805, alles im Fold bei 900. */
   return (
     <>
     {/* R174: ohne `facts` schaltet HeroFrame auf tight (dense+media+!facts+!split) und
@@ -180,10 +165,17 @@ function EventsHero() {
         bis ~y100) lag auf der Versalhoehe von "Dein Kurs". Diese 20px Papier-Luft geben
         der H1 ihren alten Start bei y96 zurueck. Reiner Abstand, kein Eingriff in
         kit.tsx (dort haengen bachata/salsa/partys am selben tight-Zweig). */}
-    <div className="bg-[var(--color-paper-warm)] pt-5" />
+    {/* R207 (Raphael 23.08. 17:10): "Unter den Buttons fehlt komplett Platz. Mehr Luft."
+        pt-5 -> pt-8, damit zwischen CTA-Zeile und Band mehr Ruhe liegt. */}
+    <div className="bg-[var(--color-paper-warm)] pt-8" />
     <HeroFrame
       axis="wide"
       dense
+      /* R208-Nachzieh: der Spacer oben war der falsche Hebel — er sitzt VOR dem Hero und
+         gibt Luft ueber der H1, nicht unter dem CTA. Gemessen am Nachher-Shot
+         events-d1440-fold.png standen zwischen CTA-Unterkante und Bandkante weiterhin
+         ~30px. `airBelowCta` greift an derselben Stelle wie auf /team (kit.tsx). */
+      airBelowCta
       title={
         <>
           {h.titleA} {h.titleAccent}
@@ -233,8 +225,24 @@ function EventsHero() {
         // Band start bleibt y=445 (H1-Ende 213, Fold 844). 16.25rem waere volle Bildhoehe
         // (260px, nichts abgeschnitten) — 15rem oeffnet deutlich mehr Koerper, ohne das
         // Band auf Bildhoehe zu ziehen. sm:16rem, damit das Band ab 640px nicht auf
-        // 11rem zurueckfaellt. positionClass 20% und lg:28rem unveraendert.
-        positionClass: 'object-[center_20%]',
+        // 11rem zurueckfaellt. lg:28rem unveraendert.
+        //
+        // r205-Nachzieh (Kritik-Trio auf events-d1440-fold.png): der Crop-Wert 20 % und
+        // die Landmarke "Scheitel nat. Y 225" stammten noch von `party-47.webp` (1500x1000).
+        // Die eingebaute Datei ist `events-hero-2048.webp` mit 2048x1365 — dieselbe Zahl
+        // meint dort einen anderen Punkt. Neu an dieser Datei gemessen:
+        //   hoechster Scheitel nat. Y 286, hoechste Fingerspitze nat. Y 236.
+        //   Desktop 1440px: scale 1440/2048 = 0.703, Motiv rendert 959px hoch.
+        //   Fenster lg 28rem = 448px, Ueberhang 511px.
+        //   20 % -> Offset 102px -> Fenster nat. Y 145..782. Rechnerisch passt der
+        //   Scheitel — sichtbar schneidet er trotzdem, weil das Band oben unter der
+        //   Sub-Navigation sitzt und die oberen ~40px verdeckt sind.
+        // Gemessen im Browser (scratch/crop-measure.mjs): Box 1440x448, gerendert
+        // 1440x960, overflowY 512px. 10 % gab zu viel leere Wand ueber den Koepfen
+        // (/tmp/crop/fix1/events-band.png). 14 % -> Offset 72px -> Fenster nat. Y
+        // 102..739: rund 130 nat. Y Luft ueber der hoechsten Fingerspitze (236),
+        // Koepfe (286) frei, unten weiterhin bis unter das Knie.
+        positionClass: 'object-[center_14%]',
         heightClass: 'h-[15rem] sm:h-[16rem] lg:h-[28rem]',
       }}
     >
@@ -243,28 +251,30 @@ function EventsHero() {
         <ScrollDownLink href="#danceflow">{h.ctaScroll}</ScrollDownLink>
       </div>
     </HeroFrame>
-    {/* R174: die drei Hero-Fakten standen vorher IM HeroFrame ueber dem Band. Hier
-        unten tragen sie dieselbe Rolle (Hero-Meta, gleiche Reihenfolge, gleiche Typo),
-        kosten das Band aber keinen Platz mehr. Bewusst KEINE Kacheln — dieselbe
-        offene Leiste wie im HeroFrame, nur an anderer Stelle.
-        R188 E2: ohne die zweite Zeile ist aus dem dl eine ul geworden. Ein Wert je
-        Spalte ist kein Begriff-Beschreibung-Paar mehr, also traegt ihn auch kein dl.
-        py-5 statt py-4: die Zeile ist um die Label-Zeile kuerzer, die Luft darum
-        bleibt damit gleich. */}
-    <div className="bg-[var(--color-paper-warm)]">
-      <Shell>
-        <ul className="grid grid-cols-1 gap-3 border-t border-[var(--color-line)] py-5 md:grid-cols-3 md:gap-4">
-          {facts.map((value) => (
-            <li
-              key={value}
-              className="font-display text-2xl font-extrabold leading-none text-[var(--color-salsa)] sm:text-3xl"
-            >
-              {value}
-            </li>
-          ))}
-        </ul>
-      </Shell>
-    </div>
+    {/* R211 (Raphael 23.08. 22:03): "Events-Leiste weg." Hier stand die Leiste
+        «WANN 1. 3. 5. · MUSIK DJs · WO Basel SBB» direkt unter dem Foto-Band.
+
+        Es ist die dritte Runde an derselben Stelle, und die ersten beiden haben das
+        Urteil nicht getroffen: R188 E2 nahm den Begleittext weg, R207 (auf denselben
+        Satz «sieht dumm aus») ergaenzte kleine Labels ueber den Werten. Beide Male
+        blieb die Leiste. Diesmal ist die Ansage nicht «anders», sondern «weg».
+
+        Warum sie nicht zu retten war: «1. 3. 5.» ist ohne den Traeger «Freitag im
+        Monat» keine Datumsangabe, die jemand lesen kann — genau dieser Traeger fiel
+        in R188 E2 weg. «DJs» als Antwort auf «Musik» sagt nichts, was ein Gast nicht
+        erwartet. Drei so duenne Werte auf 1440px Breite verteilt ergeben viel Band
+        fuer wenig Aussage.
+
+        KEIN INHALTSVERLUST, vor dem Entfernen geprueft: alle drei Angaben stehen
+        weiter unten auf derselben Seite, dort ausgeschrieben und verstaendlich —
+        content.ts:75 «Jeden 1., 3. und 5. Freitag am Bahnhof Basel SBB» in den
+        Danceflow-Eckdaten, content.ts:94/95 in der Event-Karte («Jeden 1., 3. und 5.
+        Freitag» / «Der Social-Dance-Abend am Bahnhof Basel SBB, mit eigenen DJs»)
+        und content.ts:174 im FAQ-Text. Die Leiste war die schlechteste von vier
+        Fassungen derselben Information.
+
+        `facts` ist mit ihr raus. HeroFrame bekommt die Liste seit R174 ohnehin nicht
+        mehr (der Kommentar dort erklaert, warum der tight-Zweig greift). */}
     </>
   );
 }
@@ -346,95 +356,6 @@ function EventsPreviewSection() {
   );
 }
 
-/* ---------------------------------------------------------------------------- Foto-Galerie (echte Party-Fotos)
-   Erfuellt "gallery of real party photos": statisches, responsives Raster aus echten Danceflow-
-   Fotos (kein Duoton, kein Filter). Keine neue Dauer-Schleife (die EINE Marquee lebt auf der Home). */
-function GallerySection() {
-  const { lang } = useLang();
-  // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
-  // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
-  const { item } = useReveal({ stagger: 0.14, distance: 22 });
-  const { item: headline } = useRevealVariant('blur');
-  const g = EVENTS[lang].gallery;
-  /* R155, Karte 1 und 2 kappten die Stirn (Video 05:51, Beleg worklog/shots/S7-ux155/
-     vorher/events-y1400.png).
-
-     ROOT CAUSE, nicht Symptom: die ersten drei Quellen sind QUERFORMAT (2048x1360, 1.506),
-     der Rahmen ist HOCHFORMAT (aspect-4/5, 0.8). Bei object-fit:cover skaliert der Browser
-     dann ueber die HOEHE, nicht ueber die Breite. Nachgerechnet fuer die 4-Spalten-Reihe
-     auf 1440px (Shell 1336, 3x16px Gap -> Spalte 322px, Rahmen 322x402):
-       scale = 402/1360 = 0.296 -> skaliert 606x402
-       Ueberhang Y = 0, Ueberhang X = 284
-     Die volle Bildhoehe ist also IMMER sichtbar. Der Y-Anteil in object-[center_35%] war
-     damit wirkungslos — er konnte die Stirn gar nicht retten, weil es vertikal nichts zu
-     verschieben gibt. Geschnitten wird ausschliesslich LINKS und RECHTS.
-
-     Fix ist deshalb der X-Wert, gemessen am gerenderten Ausschnitt:
-       Karte 1 (party-06): 50% -> 38%. Bei 50% lief der Kopf des Mannes an der rechten
-         Kante an und das Gesicht der Frau klebte links auf der Kante. Bei 38% (nat. X
-         149-1237) stehen beide Koepfe frei, die Frau bekommt Luft nach links.
-       Karte 2 (party-17): 50% -> 50% X, aber der Rahmen zeigte die erhobenen Haende
-         angeschnitten; 20% Y bleibt wirkungslos, deshalb hier nur der Y-Wert auf 20%
-         korrigiert, damit die Klasse nicht laenger etwas behauptet, was sie nicht tut.
-       Karte 3 (danceflow/10): unveraendert mittig, beide Koepfe stehen ohnehin frei.
-     Karte 4 (danceflow/05) ist als EINZIGE Hochformat (1360x2048): dort greift der Y-Wert
-     wirklich (Ueberhang Y 82px), 22% haelt Kopf und Haare komplett im Rahmen.
-     Alle vier Werte gegen den 2-Spalten-Fall auf 390px gegengeprueft (Rahmen 169x211):
-     jeder Kopf steht dort ebenfalls vollstaendig mit Luft nach oben. */
-  const photos: [string, string, string, number, number][] =
-    lang === 'de'
-      ? [
-          ['/photos/party/party-06-v3.webp', 'Frau im roten Top tanzt mit ihrem Partner', 'object-[38%_30%]', 2048, 1360],
-          ['/photos/party/party-17-v3.webp', 'Zwei Frauen tanzen zusammen und lachen', 'object-[50%_20%]', 2048, 1360],
-          ['/photos/gallery/danceflow/10-v3.webp', 'Paar dreht sich auf der Tanzfläche im grünen Licht', 'object-[50%_30%]', 2048, 1360],
-          ['/photos/party/party-31-v3.webp', 'Frau tanzt mit offenen Armen auf einer Danceflow Night', 'object-center', 2048, 1360],
-        ]
-      : [
-          ['/photos/party/party-06-v3.webp', 'Woman in a red top dancing with her partner', 'object-[38%_30%]', 2048, 1360],
-          ['/photos/party/party-17-v3.webp', 'Two women dancing together and laughing', 'object-[50%_20%]', 2048, 1360],
-          ['/photos/gallery/danceflow/10-v3.webp', 'Couple turning on the dance floor in green light', 'object-[50%_30%]', 2048, 1360],
-          ['/photos/party/party-31-v3.webp', 'Woman dancing with open arms at a Danceflow Night', 'object-center', 2048, 1360],
-        ];
-  return (
-    <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
-      <Shell>
-        <Reveal className="max-w-xl" stagger={0.14} distance={22}>
-          <motion.div variants={item}>
-            <Eyebrow>{g.eyebrow}</Eyebrow>
-          </motion.div>
-          <motion.h2 variants={headline} className={cn("mt-5", sectionTitle, MEASURE_L)}>
-            {g.title}
-          </motion.h2>
-          <motion.p variants={item} className={cn("mt-4 max-w-xl text-pretty", sectionLead)}>
-            {g.lead}
-          </motion.p>
-        </Reveal>
-
-        {/* R155: die vier Fotos sind die deutlichste Stelle fuer eine sichtbare Staffelung —
-            gleiche Kacheln, gleiche Groesse, sie laufen als Reihe nacheinander ein. */}
-        <Reveal className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" stagger={0.14} distance={22}>
-          {photos.map(([src, alt, pos, width, height]) => (
-            <motion.figure
-              key={src}
-              variants={item}
-              className="overflow-hidden rounded-[var(--radius-card)] ring-1 ring-black/5 shadow-[0_16px_40px_-22px_rgba(17,17,17,0.45)]"
-            >
-              <img
-                src={src}
-                alt={alt}
-                className={`aspect-[4/5] w-full object-cover ${pos}`}
-                width={width}
-                height={height}
-                loading="lazy"
-              />
-            </motion.figure>
-          ))}
-        </Reveal>
-      </Shell>
-    </section>
-  );
-}
-
 /* ---------------------------------------------------------------------------- Workshops vor der Night */
 function WorkshopsSection() {
   const { lang } = useLang();
@@ -465,7 +386,7 @@ function WorkshopsSection() {
             <h2 className={cn("mt-5", sectionTitle, MEASURE_L)}>
               {w.title}
             </h2>
-            <p className={`mt-4 max-w-2xl ${sectionLead}`}>
+            <p className={`max-w-2xl ${sectionLead}`}>
               {w.body}
             </p>
 
@@ -702,13 +623,27 @@ function FloweekendSection() {
 /* ---------------------------------------------------------------------------- Tickets: Eventfrog-Hub */
 function TicketsSection() {
   const { lang } = useLang();
+  const [upcoming, setUpcoming] = useState<PublicEvent[]>([]);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/public/events')
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`))))
+      .then((body: { events?: PublicEvent[] }) => {
+        if (active) setUpcoming(Array.isArray(body.events) ? body.events.slice(0, 3) : []);
+      })
+      .catch(() => {
+        if (active) setUpcoming([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
   // R155: staerkerer Takt (22px Versatz, 0.10s Stagger) statt Default 14px/0.07s —
   // bei langen Textspalten liegt der Default unter der Wahrnehmungsschwelle.
   const { item } = useReveal({ stagger: 0.1, distance: 22 });
   const { item: headline } = useRevealVariant('blur');
   const t = EVENTS[lang].tickets;
-  const calendarItems =
-    lang === 'de'
+  const fallbackItems = lang === 'de'
       ? [
           ['Danceflow Nights', '1., 3. und 5. Freitag'],
           ['Workshops', 'oft direkt vor der Night'],
@@ -719,6 +654,17 @@ function TicketsSection() {
           ['Workshops', 'often right before the night'],
           ['Weekends', 'Anniversary and Floweekend'],
         ];
+  const calendarItems = upcoming.length > 0
+    ? upcoming.map((event) => {
+        const date = new Date(`${event.startDate}T12:00:00Z`).toLocaleDateString(lang === 'de' ? 'de-CH' : 'en-GB', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          timeZone: 'UTC',
+        });
+        return [lang === 'de' ? event.titleDe : event.titleEn, `${date}${event.startTime ? ` · ${event.startTime}` : ''}`];
+      })
+    : fallbackItems;
   return (
     <section id="tickets" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
@@ -730,7 +676,7 @@ function TicketsSection() {
             <motion.h2 variants={headline} className={cn("mt-5", sectionTitle, MEASURE_L)}>
               {t.title}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 max-w-xl ${sectionLead}`}>
+            <motion.p variants={item} className={`max-w-xl ${sectionLead}`}>
               {t.body}
             </motion.p>
 
@@ -756,7 +702,9 @@ function TicketsSection() {
             </motion.div>
 
             <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <EventfrogCta label={t.cta} />
+              <CtaText href="/events-workshops/eventkalender">
+                {lang === 'de' ? 'Eventkalender öffnen' : 'Open event calendar'}
+              </CtaText>
               <ScrollDownLink href="#danceflow">
                 {lang === 'de' ? 'Danceflow ansehen' : 'See Danceflow'}
               </ScrollDownLink>

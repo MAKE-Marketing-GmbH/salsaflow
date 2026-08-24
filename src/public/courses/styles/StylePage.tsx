@@ -144,7 +144,7 @@ type SplitHeroPhoto = {
 
 const SALSA_HERO_PHOTO: SplitHeroPhoto = {
   src: '/photos/kurse/kurs-03.jpg',
-  de: 'Laechelnde Taenzerin im hellen Salsaflow Studio vor dem Spiegel',
+  de: 'Lächelnde Tänzerin im hellen Salsaflow Studio vor dem Spiegel',
   en: 'Smiling dancer in the bright Salsaflow studio in front of the mirror',
   /* R137-Original, woertlich aus GATES.md G1 uebernommen. Nicht anfassen, nicht
      umsortieren — sonst reisst der Vergleich gegen S7-ux137/salsa-desktop-1440.png. */
@@ -293,7 +293,16 @@ function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
               gap-5 mobil statt gap-7: mit gap-7 endete die Bildkante bei y=850, also
               6px unter dem 844er-Fold; die untere Rundung war angeschnitten. */}
           <div className={cn('grid gap-5 lg:gap-14', photo.columns)}>
-            <div className="flex flex-col gap-4">
+            {/* R190 (Raphael 22.08.: "wobei ich gerne zum Beispiel unter der Subline
+                mehr Platz ist"): `gap-4` auf `gap-6`. Vorher trug dieser Hero 32 px
+                zwischen H1 und Lead — aber nur zufaellig, als Summe aus `gap-4` (16)
+                und dem `mt-4`, das `sectionLead` mitbringt. Diese Addition ist raus
+                (siehe `mt-0` am Lead unten), sonst laufen die Hero-Abstaende je Seite
+                auseinander: gemessen 40 px auf /preise, 36 px auf /team, 32 px hier.
+                Der Gap traegt den Abstand jetzt allein und sichtbar an EINER Stelle —
+                24 px, also mehr Luft als die 16 px, die nach dem Wegfall uebrig
+                waeren, und ein Wert, der fuer alle Kinder dieser Achse gilt. */}
+            <div className="flex flex-col gap-6">
               <motion.h1
                 variants={headBlur}
                 data-reveal-variant="blur"
@@ -301,9 +310,13 @@ function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
               >
                 {h.title} {h.titleAccent ? <TitleAccent>{h.titleAccent}</TitleAccent> : null}
               </motion.h1>
+              {/* `mt-0`: der Lead ist Flex-Kind (`gap-4` am Container oben), dort
+                  traegt der Gap den Abstand. Ohne diese Aufhebung addiert sich das
+                  `mt-4` aus `sectionLead` und der Hero-Abstand liefe pro Seite
+                  auseinander — dieselbe Begruendung wie in subpage/kit.tsx. */}
               <motion.p
                 variants={item}
-                className={cn('text-pretty max-w-xl', sectionLead)}
+                className={cn('text-pretty max-w-xl', sectionLead, 'mt-0')}
                 style={{ lineHeight: 1.4 }}
               >
                 {h.lead}
@@ -467,7 +480,7 @@ function WhySection({ c }: { c: StyleContent }) {
             <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
               {w.title} {w.titleAccent ? <TitleAccent>{w.titleAccent}</TitleAccent> : null}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
+            <motion.p variants={item} className={`text-pretty ${sectionLead}`}>
               {w.body}
             </motion.p>
             {/* R137: Salsa hatte das Bild als 16/7-Streifen UNTER dem Grid — wieder
@@ -556,7 +569,7 @@ function WhySectionImageRight({ c }: { c: StyleContent }) {
             <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>
               {w.title} {w.titleAccent ? <TitleAccent>{w.titleAccent}</TitleAccent> : null}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
+            <motion.p variants={item} className={`text-pretty ${sectionLead}`}>
               {w.body}
             </motion.p>
             <motion.dl variants={item} className="mt-8 grid gap-5 border-t border-[var(--color-line)] pt-6 sm:grid-cols-2">
@@ -653,6 +666,13 @@ function FitSection({ c }: { c: StyleContent }) {
 function BeginnerSection({ c }: { c: StyleContent }) {
   const { item } = useReveal();
   const b = c.beginner;
+  /* R190: Messrahmen des Parallax ist die BILDBOX, nicht die Sektion. Die Sektion ist
+     hier deutlich hoeher als das Bild (links steht eine nummerierte Phasenliste); waere
+     sie der Rahmen, liefe die Bewegung ueber eine Strecke, auf der das Foto laengst aus
+     dem Bild gescrollt ist, und man saehe fast nichts. Dieselbe Begruendung wie beim
+     Hero-Foto in home/Hero.tsx. */
+  const buildRef = useRef<HTMLDivElement>(null);
+  const buildParallax = useParallaxStyle(buildRef, 36);
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>
@@ -664,7 +684,7 @@ function BeginnerSection({ c }: { c: StyleContent }) {
             <motion.h2 variants={item} className={cn('mt-5', sectionTitle, MEASURE_L)}>
               {b.title} {b.titleAccent ? <TitleAccent>{b.titleAccent}</TitleAccent> : null}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 text-pretty ${sectionLead}`}>
+            <motion.p variants={item} className={`text-pretty ${sectionLead}`}>
               {b.body}
             </motion.p>
 
@@ -694,9 +714,36 @@ function BeginnerSection({ c }: { c: StyleContent }) {
               sein eigenes whileInView mit, und die Spalte enthaelt nur dieses eine
               Element. Die lg:sticky-Klasse bleibt am aeusseren Element haengen, damit
               das Mitlaufen beim Scrollen unveraendert funktioniert. */}
+          {/* R190: Das Bild bekommt zusaetzlich eine scroll-GEBUNDENE Bewegung.
+              Vorher trug diese Route genau EIN gebundenes Element (`style-why`) gegen
+              18 Trigger-Reveals — gemessen mit scripts/r190-reveal-timing.cjs. Beim
+              Scrollen folgte damit praktisch nichts dem Finger, alles zuendete nur.
+              Genau das beschreibt Raphael als "ploppt einfach ein".
+
+              Die Rollen bleiben getrennt und ueberlagern sich nicht: `ClipReveal`
+              deckt das Bild EINMAL beim Eintritt auf (Vorhang, an der Clip-Box), der
+              Parallax bewegt das MOTIV darin dauerhaft mit dem Scroll. Zwei
+              Eigenschaften, zwei Elemente — kein Doppel-Reveal auf demselben Knoten,
+              das die Regel im Kommentar bei `clipItem` verbietet.
+
+              36 px Gesamtstrecke, also 18 px in jede Richtung. Der Ueberstand
+              (`h-[calc(100%+2.5rem)]`, `-top-5` = 20 px) ist groesser als die halbe
+              Strecke — sonst legt der Versatz eine leere Kante frei. Diese Regel
+              steht ausformuliert bei `useParallax` in motion.tsx. */}
           <div className="lg:sticky lg:top-28">
             <ClipReveal className="overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_24px_70px_-30px_rgba(17,17,17,0.4)]">
-              <img src={b.image.src} alt={b.image.alt} className="aspect-[4/5] w-full object-cover object-[center_40%]" width={1200} height={1500} loading="lazy" />
+              <div ref={buildRef} className="relative aspect-[4/5] w-full overflow-hidden">
+                <motion.img
+                  data-scroll-motion="style-build"
+                  style={buildParallax}
+                  src={b.image.src}
+                  alt={b.image.alt}
+                  className="absolute inset-x-0 -top-5 h-[calc(100%+2.5rem)] w-full object-cover object-[center_40%]"
+                  width={1200}
+                  height={1500}
+                  loading="lazy"
+                />
+              </div>
             </ClipReveal>
           </div>
         </div>
@@ -810,7 +857,7 @@ export function StyleSlotsSection({ styleKey }: { styleKey: string }) {
           <h2 className={cn(sectionTitle, MEASURE_L)}>
             {lang === 'de' ? 'Kurse und Termine' : 'Classes and dates'}
           </h2>
-          <p className={`mt-4 text-pretty ${sectionLead}`}>
+          <p className={`text-pretty ${sectionLead}`}>
             {lang === 'de'
               ? 'Wähle einen Termin und buche deinen Platz direkt.'
               : 'Choose a date and book your spot directly.'}
@@ -832,12 +879,42 @@ function SocialSection({ c }: { c: StyleContent }) {
      denselben Takt teilen und das Bild keinen zweiten Eingang bekommt. */
   const { item: clipItem } = useRevealVariant('clip');
   const s = c.social;
+  /* R190: dritte scroll-gebundene Stelle dieser Route. Rollen wie in BeginnerSection —
+     `clipItem` deckt die Box einmal auf, der Parallax bewegt das Motiv darin mit dem
+     Scroll.
+
+     RESERVE RICHTIG GERECHNET: `h-[calc(100%+2.5rem)]` gibt 40 px ZUSATZHOEHE
+     insgesamt, `-top-5` haengt das Bild 20 px hoch. Der Ueberstand betraegt damit
+     20 px pro Kante, nicht 40. Der Parallax laeuft +-16 px um die Mitte (Amplitude
+     32 geteilt durch zwei), also bleiben an beiden Kanten 4 px Material stehen.
+     Knapp, aber nie nackt — und wer eine vierte Bindung baut, muss gegen die
+     20 px pro Kante rechnen, nicht gegen 40. */
+  const socialRef = useRef<HTMLDivElement>(null);
+  const socialParallax = useParallaxStyle(socialRef, 32);
   return (
     <section className="bg-[var(--color-surface-dark)] py-20 text-white lg:py-32">
       <Shell>
         <Reveal className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <motion.div variants={clipItem} data-reveal-variant="clip" className="order-2 overflow-hidden rounded-[var(--radius-media)] ring-1 ring-white/10 lg:order-1">
-            <img src={s.image.src} alt={s.image.alt} style={s.image.position ? { objectPosition: s.image.position } : undefined} className="aspect-[16/11] w-full object-cover" width={1400} height={960} loading="eager" />
+            <div ref={socialRef} className="relative aspect-[16/11] w-full overflow-hidden">
+              {/* `objectPosition` MUSS in dasselbe style-Objekt wie der Parallax.
+                  Zwei style-Props auf einem Element ueberschreiben sich, und der
+                  Bildausschnitt dieser Route haengt an genau diesem Wert. */}
+              <motion.img
+                data-scroll-motion="style-social"
+                style={
+                  s.image.position
+                    ? { ...socialParallax, objectPosition: s.image.position }
+                    : socialParallax
+                }
+                src={s.image.src}
+                alt={s.image.alt}
+                className="absolute inset-x-0 -top-5 h-[calc(100%+2.5rem)] w-full object-cover"
+                width={1400}
+                height={960}
+                loading="eager"
+              />
+            </div>
           </motion.div>
           <motion.div variants={item} className="order-1 max-w-xl lg:order-2">
             <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-white/70">

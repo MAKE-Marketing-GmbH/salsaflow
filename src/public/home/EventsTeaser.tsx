@@ -18,7 +18,7 @@ import { useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
-import { Eyebrow, Shell } from '@/public/site/primitives';
+import { Eyebrow, Shell, sectionLead } from '@/public/site/primitives';
 import {
   EASE_OUT,
   Reveal,
@@ -56,62 +56,86 @@ export function EventsTeaser() {
       )}
     >
       <Shell>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.62fr_1fr] lg:gap-5">
+        {/* R190: `items-start`. Der Grid-Default `stretch` zog die linke Hauptkarte auf
+            die Hoehe der hoeheren Zeile. Ihr Inhalt (Eyebrow, H2, Body, CTA, Fakten)
+            endete aber rund 220px darueber, und darunter stand eine tote schwarze Zone
+            — dasselbe Bild, das der Kommentar bei `min-h` weiter unten schon einmal
+            beschreibt. Mit `items-start` traegt jede Spalte ihre eigene Inhaltshoehe:
+            gemessen 528px links (Inhalt) gegen 659px rechts (zwei Belegfotos).
+            Der Beleg-Streifen rechts bekommt bewusst KEIN `self-stretch` zurueck: das
+            waere die alte Zeilenhoehe unter neuem Namen. */}
+        {/* R207: `items-stretch` statt `items-start`. Mit dem Textcontainer UNTER dem Foto
+            (statt als Overlay darauf) ist die linke Spalte rund 250px hoeher als der
+            Beleg-Streifen rechts — unter dem zweiten Belegfoto stand eine tote schwarze
+            Zone (gemessen am Nachher-Shot home-d1440-full.png). Die zwei Belegfotos tragen
+            die Zeilenhoehe jetzt mit; ihr `h-full` unten verteilt sie auf beide Kacheln.
+            Das ist NICHT die alte gestreckte Leerkarte von R190: gestreckt wird eine
+            Bildflaeche, die den Platz auch fuellt, keine leere Textspalte. */}
+        <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-[1.62fr_1fr] lg:gap-5">
           {/* HAUPTFLAECHE: ein grosses Foto traegt die Sektion, der Text liegt darauf.
               Das ist das Gewicht, das nach dem Hero fehlte. */}
+          {/* R207 (Raphael 23.08. 17:10): "'Dein Kurs endet nicht nach der Stunde' sieht lost
+              aus — den gesamten Text in EINEN Container packen und nach unten, nicht ueber
+              die Koepfe legen."
+              Vorher lag der komplette Textblock als Overlay auf dem Nacht-Foto: zwei
+              Verdunkelungs-Gradienten mussten die Taenzer ueberdecken, damit die Schrift
+              4.5:1 erreicht — genau das ist "ueber die Koepfe". Jetzt traegt das Foto seine
+              eigene Flaeche oben (unbeschriftet, kein Schleier, die Gesichter bleiben frei),
+              der gesamte Text steht als EIN Container darunter auf der Nacht-Flaeche.
+              Der Parallax bleibt: er sass am Foto, nicht am Overlay. */}
           <RevealOne
             variant="clip"
-            className="relative overflow-hidden rounded-[var(--radius-media)]"
+            className="overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-night)]"
           >
-            <motion.div
-              data-scroll-motion="events-photo"
-              style={photoParallax}
-              className="absolute inset-x-0 -top-5 h-[calc(100%+2.5rem)]"
-            >
-              <img
-                src="/photos/party/party-31-v3.webp"
-                alt={
-                  de
-                    ? 'Fröhliches Paar tanzt vor voller Tanzfläche bei einer Danceflow Night'
-                    : 'Happy couple dancing in front of a packed floor at a Danceflow Night'
-                }
-                className="h-full w-full object-cover object-[center_38%]"
-                width={2048}
-                height={1360}
-                loading="lazy"
+            <div className="relative h-56 overflow-hidden sm:h-72 lg:h-80">
+              <motion.div
+                data-scroll-motion="events-photo"
+                style={photoParallax}
+                className="absolute inset-x-0 -top-5 h-[calc(100%+2.5rem)]"
+              >
+                <img
+                  src="/photos/party/party-31-v3.webp"
+                  alt={
+                    de
+                      ? 'Fröhliches Paar tanzt vor voller Tanzfläche bei einer Danceflow Night'
+                      : 'Happy couple dancing in front of a packed floor at a Danceflow Night'
+                  }
+                  className="h-full w-full object-cover object-[center_38%]"
+                  width={2048}
+                  height={1360}
+                  loading="lazy"
+                />
+              </motion.div>
+              {/* Nur noch ein kurzer Auslauf an der Unterkante, damit Foto und Textflaeche
+                  nicht als harte Kante aufeinanderstossen. Er liegt auf dem unteren
+                  Bildviertel, nicht auf den Gesichtern. */}
+              <div
+                aria-hidden
+                className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--color-night)] to-transparent"
               />
-            </motion.div>
-            {/* Lesbarkeits-Schleier, kein Deko-Gradient. ZWEI Lagen, weil eine Lage in
-                Runde 1 gescheitert ist: der Text sass auf dem hellen Gesicht der Taenzerin
-                und der Body-Text kam unter 4.5:1.
-                Lage 1 dunkelt von unten (traegt Fakten + CTA), Lage 2 von links (traegt
-                H2 + Body). So bleibt die rechte Bildhaelfte offen und das Foto lesbar. */}
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-t from-[var(--color-night)] via-[var(--color-night)]/75 to-transparent"
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-r from-[var(--color-night)]/92 via-[var(--color-night)]/55 to-transparent sm:via-[var(--color-night)]/45"
-            />
+            </div>
 
-            {/* min-h in Runde 1 war 38rem und damit ~180px hoeher als der Inhalt: unten
-                stand eine tote schwarze Zone. Jetzt traegt der Inhalt die Hoehe, das min-h
-                ist nur noch der Boden fuer genug Bildflaeche ueber dem Text.
-                Runde 3: mobil 21rem statt 26rem. Der Text fuellt dort ohnehin mehr als
-                21rem, das min-h zog also nur eine leere Bildzone ueber die Schrift. */}
-            <Reveal className="relative flex min-h-[21rem] flex-col justify-end p-6 sm:min-h-[30rem] sm:p-9 lg:min-h-[33rem] lg:p-11">
+            <Reveal className="flex flex-col p-6 sm:p-9 lg:p-11">
               <motion.div variants={item}>
                 <Eyebrow dark>{e.eyebrow}</Eyebrow>
               </motion.div>
 
-              <motion.h2 variants={item} className={cn('type-h2 mt-4 text-white', MEASURE_L)}>
+              {/* R190: Der Kopf stand hier auf `mt-4` und war damit der einzige
+                  Eyebrow→Titel-Abstand der Startseite, der nicht 20 px mass — der
+                  Instagram-Block daneben traf den geteilten Wert (`mt-5`, siehe
+                  subpage/kit.tsx:622) bereits. Gemessen: events 16 px gegen 9 = 20 px.
+                  Genau diese Ungleichheit meint Raphael mit "es soll einheitlich sein,
+                  ob wir jetzt eine Ueberschrift mehr dazu haben". */}
+              <motion.h2 variants={item} className={cn('type-h2 mt-5 text-white', MEASURE_L)}>
                 {e.title}
               </motion.h2>
 
+              {/* Der Abstand kommt aus `sectionLead`, nicht aus einem eigenen `mt-4`.
+                  Der Wert ist derselbe — die Rolle traegt ihn ab jetzt aber zentral,
+                  sonst wandert dieser Block beim naechsten Takt-Wechsel wieder aus. */}
               <motion.p
                 variants={item}
-                className="mt-4 max-w-lg text-base leading-relaxed text-[var(--color-night-muted)] sm:text-lg"
+                className={cn(sectionLead, 'max-w-lg text-[var(--color-night-muted)]')}
               >
                 {e.body}
               </motion.p>
@@ -160,13 +184,15 @@ export function EventsTeaser() {
               unveraendert zweispaltig. */}
           <motion.div
             data-reveal
-            className="hidden gap-4 lg:grid lg:grid-cols-1 lg:grid-rows-2 lg:gap-5"
+            // R207: h-full + zwei gleiche Zeilen (1fr), damit der Streifen die volle
+            // Zeilenhoehe traegt und unten keine schwarze Restflaeche bleibt.
+            className="hidden h-full gap-4 lg:grid lg:grid-cols-1 lg:grid-rows-[1fr_1fr] lg:gap-5"
             initial={hydrated ? { opacity: 0, y: reduced ? 0 : 20 } : false}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={VIEWPORT}
             transition={{ duration: reduced ? 0.32 : 0.6, ease: EASE_OUT, delay: reduced ? 0 : 0.1 }}
           >
-            <figure className="overflow-hidden rounded-[var(--radius-media)]">
+            <figure className="min-h-0 overflow-hidden rounded-[var(--radius-media)]">
               <img
                 src="/photos/party/party-46-v3.webp"
                 alt={
@@ -180,7 +206,7 @@ export function EventsTeaser() {
                 loading="lazy"
               />
             </figure>
-            <figure className="overflow-hidden rounded-[var(--radius-media)]">
+            <figure className="min-h-0 overflow-hidden rounded-[var(--radius-media)]">
               <img
                 src="/photos/party/party-50-v4.webp"
                 alt={

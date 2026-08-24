@@ -56,7 +56,10 @@ export async function computeAvailability(db: Database, courseId: string): Promi
   const rows = await db.select().from(bookings).where(eq(bookings.courseId, courseId));
   const active = rows.filter(occupies);
   const confirmed = active.reduce((sum, booking) => sum + seatsOf(booking), 0);
-  const free = Math.max(0, course.capacityTotal - confirmed);
+  // Kurs-Status 'full' ist ein Admin-Override: der Kurs gilt als voll, auch wenn die
+  // Online-Buchungen die Kapazitaet nicht ausschoepfen (extern gefuellte Kurse). Ohne
+  // das zeigte /kursplan "Ausgebucht" und /buchung gleichzeitig "frei" (R205 Runde 3).
+  const free = course.status === 'full' ? 0 : Math.max(0, course.capacityTotal - confirmed);
   const waitlisted = rows.filter((booking) => booking.status === 'waitlisted');
   const single = (role: BookingRole) => active.filter((booking) => booking.mode === 'solo' && booking.role === role).length;
   const wait = (role: BookingRole) => waitlisted.filter((booking) => booking.mode === 'solo' && booking.role === role).length;
@@ -89,11 +92,18 @@ export async function computeAvailability(db: Database, courseId: string): Promi
 }
 
 type PersonInput = { firstName: string; lastName: string; email: string; phone?: string | null };
+type ParticipantUpdate = { firstName: string; lastName: string; phone?: string };
 async function upsertParticipant(db: Database, person: PersonInput): Promise<string> {
   const email = person.email.toLowerCase().trim();
   const existing = (await db.select().from(participants).where(eq(participants.email, email)).limit(1))[0];
   if (existing) {
-    await db.update(participants).set({ firstName: person.firstName.trim(), lastName: person.lastName.trim(), ...(person.phone ? { phone: person.phone.trim() } : {}) }).where(eq(participants.id, existing.id));
+    // Telefonnummer nur schreiben, wenn eine kam. Sonst bleibt die gespeicherte stehen.
+    const update: ParticipantUpdate = {
+      firstName: person.firstName.trim(),
+      lastName: person.lastName.trim(),
+    };
+    if (person.phone) update.phone = person.phone.trim();
+    await db.update(participants).set(update).where(eq(participants.id, existing.id));
     return existing.id;
   }
   const id = randomUUID();
@@ -166,7 +176,10 @@ export type PaymentReceipt = { amountChf: string; method: string | null };
 export async function confirmBooking(db: Db, bookingId: string, kind: 'booking_confirmation' | 'waitlist_promoted' = 'booking_confirmation', _receipt?: PaymentReceipt) {
   const booking = (await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1))[0];
   if (!booking) throw new BookingError('booking_not_found', 'Buchung nicht gefunden', 404);
-  if (booking.status === 'confirmed' || booking.status === 'completed') return { ok: true, alreadyConfirmed: true, sent: [] as { to: string; kind: string; ok: boolean }[] };
+  if (booking.status === 'confirmed' || booking.status === 'completed') {
+    const sent: { to: string; kind: string; ok: boolean }[] = [];
+    return { ok: true, alreadyConfirmed: true, sent };
+  }
   if (booking.status !== 'pending_payment') throw new BookingError('not_confirmable', 'Buchung ist in keinem bestätigbaren Status.', 409);
   await db.update(bookings).set({ status: 'confirmed', confirmedAt: new Date(), paymentDeadline: null, waitlistPosition: null }).where(eq(bookings.id, bookingId));
   const sent = await sendConfirmation(db, bookingId, kind);
@@ -222,7 +235,7 @@ export async function bookingsForCourse(db: Database, courseId: string): Promise
   const rows = await db.select().from(bookings).where(eq(bookings.courseId, courseId));
   const people = new Map((await db.select().from(participants)).map((person) => [person.id, person]));
   const name = (id: string | null) => { const person = id ? people.get(id) : null; return person ? `${person.firstName} ${person.lastName}`.trim() : null; };
-  return rows.map((booking) => ({ id: booking.id, participantName: name(booking.participantId) ?? 'Unbekannt', participantEmail: people.get(booking.participantId)?.email ?? '', role: booking.role as BookingRole | null, mode: booking.mode as BookingModeT, partnerName: name(booking.partnerParticipantId), needsAushilfe: booking.needsAushilfe, status: booking.status, waitlistPosition: booking.waitlistPosition, createdAt: booking.createdAt.toISOString() })).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  return rows.map((booking) => ({ id: booking.id, participantName: name(booking.participantId) ?? 'Unbekannt', participantEmail: people.get(booking.participantId)?.email ?? '', role: booking.role, mode: booking.mode, partnerName: name(booking.partnerParticipantId), needsAushilfe: booking.needsAushilfe, status: booking.status, waitlistPosition: booking.waitlistPosition, createdAt: booking.createdAt.toISOString() })).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
 export type BookingDisplay = { bookingId: string; participantName: string; participantEmail: string; styleDe: string; styleEn: string; levelDe: string | null; levelEn: string | null; weekday: string; startTime: string; endTime: string; termName: string; language: 'de' | 'en' };
@@ -236,9 +249,14 @@ export async function loadBookingDisplay(db: Db, bookingId: string): Promise<Boo
   const participant = (await db.select().from(participants).where(eq(participants.id, booking.participantId)).limit(1))[0];
   return { bookingId, participantName: participant ? `${participant.firstName} ${participant.lastName}`.trim() : 'Gast', participantEmail: participant?.email ?? '', styleDe: style?.nameDe ?? '', styleEn: style?.nameEn ?? '', levelDe: rung?.labelDe ?? null, levelEn: rung?.labelEn ?? null, weekday: course?.weekday ?? 'mon', startTime: course?.startTime.slice(0, 5) ?? '', endTime: course?.endTime.slice(0, 5) ?? '', termName: term?.name ?? '', language: booking.language === 'en' ? 'en' : 'de' };
 }
-const DAYS_DE: Record<string, string> = { mon: 'Montag', tue: 'Dienstag', wed: 'Mittwoch', thu: 'Donnerstag', fri: 'Freitag', sat: 'Samstag', sun: 'Sonntag' };
-const DAYS_EN: Record<string, string> = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
-export function courseLine(display: BookingDisplay, language: 'de' | 'en'): string { return `${language === 'de' ? display.styleDe : display.styleEn}${(language === 'de' ? display.levelDe : display.levelEn) ? ` ${language === 'de' ? display.levelDe : display.levelEn}` : ''} - ${language === 'de' ? DAYS_DE[display.weekday] : DAYS_EN[display.weekday]} ${display.startTime}-${display.endTime}`; }
+const DAYS_DE = { mon: 'Montag', tue: 'Dienstag', wed: 'Mittwoch', thu: 'Donnerstag', fri: 'Freitag', sat: 'Samstag', sun: 'Sonntag' } satisfies Record<string, string>;
+const DAYS_EN = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' } satisfies Record<string, string>;
+type DayKey = keyof typeof DAYS_DE;
+// SAFETY: `weekday in DAYS_DE` prueft die Mitgliedschaft zur Laufzeit; nur dann wird der
+// String als Schluessel gelesen. Unbekannte Werte fallen auf 'mon' zurueck — derselbe
+// Fallback, den loadBookingDisplay fuer fehlende Kurse setzt.
+const asDayKey = (weekday: string): DayKey => (weekday in DAYS_DE ? (weekday as DayKey) : 'mon');
+export function courseLine(display: BookingDisplay, language: 'de' | 'en'): string { return `${language === 'de' ? display.styleDe : display.styleEn}${(language === 'de' ? display.levelDe : display.levelEn) ? ` ${language === 'de' ? display.levelDe : display.levelEn}` : ''} - ${language === 'de' ? DAYS_DE[asDayKey(display.weekday)] : DAYS_EN[asDayKey(display.weekday)]} ${display.startTime}-${display.endTime}`; }
 
 async function sendConfirmation(db: Db, bookingId: string, kind: 'booking_confirmation' | 'waitlist_promoted') {
   const display = await loadBookingDisplay(db, bookingId);

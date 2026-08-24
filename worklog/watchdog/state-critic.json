@@ -1,0 +1,33 @@
+{
+  "session_id": "3e60fc23-a8b9-41a4-9c22-79c7a9a39d88",
+  "orca_handle": "term_0cd243b8-0f4c-4523-a84b-bb3fd06058d2",
+  "title": "Raphael Unified · salsaflow-critic",
+  "role": "critic",
+  "status": "failover_grok46_after_503",
+  "updated": "2026-08-23T15:20:42Z",
+  "worktree": "/root/clients/salsaflow-w1",
+  "repo": "/root/clients/salsaflow",
+  "pid": 473015,
+  "pane_id": "pts/2",
+  "orca_pane_key": "f75a386a-ea20-4233-a7a2-90beb5c4ac76:02f0cdbf-5a13-41a0-b9f5-d90031461cdb",
+  "tmux_sock": null,
+  "tmux_note": "measured after spawn: /tmp/tmux-997/default and /tmp/tmux-0/default have no server; TERM_PROGRAM=Orca. Paste via TIOCSTI on /dev/pts/2, not orca-ide terminal send.",
+  "pty": "/dev/pts/2",
+  "model": "grok-4.6",
+  "effort": "xhigh",
+  "handoff": "/root/clients/salsaflow-w1/worklog/watchdog/HANDOFF-2026-08-23-critic.md",
+  "paste_landed": true,
+  "jsonl": "/root/.claude/projects/-root-clients-salsaflow-w1/3e60fc23-a8b9-41a4-9c22-79c7a9a39d88.jsonl",
+  "note": "New critic TUI. Builder 5cf2e897 left alone. Dead w1 5227c5b4 not resumed. Did not overwrite state.json.",
+  "siblings_untouched": [
+    "1ab17523",
+    "e9b8fda4",
+    "1d4d7442",
+    "5cf2e897",
+    "e963b534",
+    "5227c5b4"
+  ],
+  "jsonl_age_note": "jsonl frozen 16:26 CEST after /goal; pid live ep_poll; TUI prompt with leftover stopp text; no CRITIC-2026-08-23.md; no paste this tick",
+  "acted": true,
+  "acted_note": "opus[1m] 503 all-routes; fable timeout; grok-4.6 200. TIOCSTI /model grok-4.6 + continue Raphael 16:41 self-critique. No orca-ide terminal send. Did not spawn 5227c5b4."
+}

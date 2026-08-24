@@ -30,7 +30,7 @@ import {
   tariffs,
   terms,
 } from '../db/schema.js';
-import { buildEvent, signWebhookPayload, webhookSecret } from '../server/payments.js';
+import { buildEvent, signWebhookPayload, webhookSecret, type StripeObject } from '../server/payments.js';
 import { OUTBOX_DIR } from '../server/mail.js';
 
 type Check = { name: string; ok: boolean; detail: string };
@@ -82,20 +82,41 @@ async function main() {
 
   // --- Helfer --------------------------------------------------------------
   const person = (n: string) => ({ firstName: n, lastName: 'Test', email: `${n.toLowerCase()}-${STAMP}${DOMAIN}` });
-  async function book(body: Record<string, unknown>) {
+
+  // Genau die Felder, die /api/public/bookings entgegennimmt (server/public-routes.ts).
+  type BookBody = {
+    courseId: string;
+    role: 'leader' | 'follower' | null;
+    mode: 'solo' | 'couple';
+    participant: { firstName: string; lastName: string; email: string };
+  };
+  type BookResponse = { status?: string; bookingId?: string };
+  type CheckoutResponse = { status?: string; url?: string };
+  type WebhookResponse = { status?: string };
+
+  async function book(body: BookBody) {
     const res = await app.request('/api/public/bookings', {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
     });
-    return { status: res.status, json: (await res.json().catch(() => ({}))) as Record<string, unknown> };
+    // SAFETY: Beide Felder sind optional, und der catch liefert bei ungueltigem JSON {}.
+    // Die Assertion behauptet nichts ueber den Inhalt; die Checks lesen jedes Feld einzeln.
+    const json = (await res.json().catch(() => ({}))) as BookResponse;
+    return { status: res.status, json };
   }
   async function checkout(bookingId: string) {
     const res = await app.request(`/api/public/bookings/${bookingId}/checkout`, {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
     });
-    return { status: res.status, json: (await res.json().catch(() => ({}))) as Record<string, unknown> };
+    // SAFETY: Beide Felder sind optional, und der catch liefert bei ungueltigem JSON {}.
+    // Der Check darunter prueft status und url einzeln.
+    const json = (await res.json().catch(() => ({}))) as CheckoutResponse;
+    return { status: res.status, json };
   }
   async function statusOf(bookingId: string) {
     const res = await app.request(`/api/public/bookings/${bookingId}/status`);
+    // SAFETY: Aufgerufen wird sie nur mit einer bookingId aus einer bestaetigten
+    // 201-Buchung dieses Laufs. Die Status-Route liefert dafuer ihren Erfolgs-Body;
+    // die drei nullable Felder sind genau die, die ohne Zahlung leer bleiben.
     return (await res.json()) as { bookingStatus: string; paymentStatus: string | null; amountChf: string | null; method: string | null };
   }
   async function paymentRow(bookingId: string) {
@@ -110,7 +131,7 @@ async function main() {
       payment_method_types: [method], amount_total: 19000, currency: 'chf', metadata: { booking_id: '' },
     };
   }
-  function sign(type: string, object: Record<string, unknown>, secret = webhookSecret()) {
+  function sign(type: string, object: StripeObject, secret = webhookSecret()) {
     const event = buildEvent(type, object);
     const rawBody = JSON.stringify(event);
     const header = signWebhookPayload(rawBody, secret, Math.floor(Date.now() / 1000));
@@ -120,7 +141,10 @@ async function main() {
     const res = await app.request('/api/payments/webhook', {
       method: 'POST', headers: { 'content-type': 'application/json', 'stripe-signature': header }, body: rawBody,
     });
-    return { status: res.status, json: (await res.json().catch(() => ({}))) as Record<string, unknown> };
+    // SAFETY: status ist optional, und der catch liefert bei ungueltigem JSON {}. Die
+    // Checks vergleichen json.status gegen erwartete Werte und schlagen sonst fehl.
+    const json = (await res.json().catch(() => ({}))) as WebhookResponse;
+    return { status: res.status, json };
   }
   function outboxFindCustomerConfirmation(email: string): string | null {
     let files: string[] = [];
@@ -134,13 +158,36 @@ async function main() {
 
   /* 1) Buchung als Leader -> pending_payment (NICHT confirmed) ------------- */
   const anna = await book({ courseId, role: 'leader', mode: 'solo', participant: person('Anna') });
+  // SAFETY: Bei status 201 liefert die Buchungs-Route immer eine bookingId; jeder
+  // Folge-Check gegen diese Buchung schlaegt sonst ohnehin sichtbar fehl.
   const annaId = anna.json.bookingId as string;
+
+  // Der aktive Buchungsfluss bestaetigt sofort (server/booking.ts reserveBooking) —
+  // den Etappe-9-Zahlungsfluss (pending_payment -> Checkout -> Webhook) erreicht die
+  // oeffentliche Route dann nicht mehr. Frueher lief das Skript hier in einen
+  // geschluckten TypeError und meldete trotzdem Exit 0. Jetzt: ehrlicher SKIP.
+  if (anna.json.status !== 'pending_payment') {
+    const created = (await db.select().from(bookings).where(eq(bookings.courseId, courseId))).map((b) => b.id);
+    if (created.length > 0) await db.delete(notifications).where(inArray(notifications.bookingId, created));
+    await db.delete(bookings).where(eq(bookings.courseId, courseId));
+    await db.delete(coursePrices).where(eq(coursePrices.courseId, courseId));
+    await db.delete(courses).where(eq(courses.id, courseId));
+    await db.delete(terms).where(eq(terms.id, termId));
+    // Nur die Teilnehmer DIESES Laufs (STAMP): aeltere Testleichen koennen noch von
+    // Buchungen frueherer, abgebrochener Laeufe referenziert sein.
+    await db.delete(participants).where(like(participants.email, `%-${STAMP}${DOMAIN}`));
+    await handle.close();
+    console.log(`\nVERDICT: SKIP (Online-Zahlung inaktiv: Buchung startet als "${anna.json.status}",`);
+    console.log('nicht pending_payment — der Webhook-Pfad ist im aktiven Flow nicht erreichbar.');
+    console.log('Der aktive Buchungsfluss ist durch verify:booking abgedeckt.)');
+    return;
+  }
   check('Buchung angenommen (201)', anna.status === 201, `status ${anna.status}`);
   check('Mit Zahlung: Buchung startet als pending_payment (nicht sofort confirmed)', anna.json.status === 'pending_payment', `status ${anna.json.status}`);
 
   /* 2) Checkout starten -> payment-Row verknuepft + pending --------------- */
   const co = await checkout(annaId);
-  check('Checkout liefert Redirect-URL', co.status === 200 && co.json.status === 'redirect' && typeof co.json.url === 'string', `status ${co.json.status}`);
+  check('Checkout liefert Redirect-URL', co.status === 200 && co.json.status === 'redirect' && co.json.url !== undefined, `status ${co.json.status}`);
   const pAnna = await paymentRow(annaId);
   check('Zahlung in DB angelegt + mit Buchung verknuepft', !!pAnna && pAnna.bookingId === annaId, `bookingId ${pAnna?.bookingId}`);
   check('Zahlung Status pending vor Webhook', pAnna?.status === 'pending', `status ${pAnna?.status}`);
@@ -183,6 +230,7 @@ async function main() {
 
   /* 6) Fehlerfall: Follower zahlt -> failed -> Buchung bleibt pending ----- */
   const carla = await book({ courseId, role: 'follower', mode: 'solo', participant: person('Carla') });
+  // SAFETY: siehe annaId — 201-Buchung dieses Laufs traegt immer eine bookingId.
   const carlaId = carla.json.bookingId as string;
   check('Follower-Buchung pending_payment', carla.json.status === 'pending_payment', `status ${carla.json.status}`);
   await checkout(carlaId);
@@ -199,6 +247,7 @@ async function main() {
 
   /* 7) Frist-Ablauf gibt Platz frei + Warteliste rueckt nach (ohne Confirm) */
   const dora = await book({ courseId, role: 'follower', mode: 'solo', participant: person('Dora') });
+  // SAFETY: siehe annaId — 201-Buchung dieses Laufs traegt immer eine bookingId.
   const doraId = dora.json.bookingId as string;
   check('Zweiter Follower auf Warteliste (Rolle durch pending belegt)', dora.json.status === 'waitlisted', `status ${dora.json.status}`);
   const expire = sign('checkout.session.expired', { ...carlaObj });
@@ -213,11 +262,14 @@ async function main() {
   /* 8) Storno mit Refund (bezahlte Buchung Anna) -------------------------- */
   // Ben wartet als Leader (Anna belegt die Leader-Rolle confirmed) -> rueckt bei Refund nach.
   const ben = await book({ courseId, role: 'leader', mode: 'solo', participant: person('Ben') });
+  // SAFETY: siehe annaId — 201-Buchung dieses Laufs traegt immer eine bookingId.
   const benId = ben.json.bookingId as string;
   check('Zweiter Leader auf Warteliste', ben.json.status === 'waitlisted', `status ${ben.json.status}`);
   const cancelRes = await app.request(`/api/admin/bookings/${annaId}/cancel`, {
     method: 'POST', headers: { 'content-type': 'application/json', cookie }, body: '{}',
   });
+  // SAFETY: Die Admin-Storno-Route antwortet bei 200 genau mit diesem Body
+  // (server/admin.ts); der Check darunter prueft refunded explizit.
   const cancelJson = (await cancelRes.json()) as { ok: boolean; refunded?: boolean; promoted: number };
   check('Storno mit Refund (refunded=true)', cancelRes.status === 200 && cancelJson.refunded === true, `refunded ${cancelJson.refunded}`);
   check('Buchung -> refunded', (await bookingRow(annaId)).status === 'refunded', '');

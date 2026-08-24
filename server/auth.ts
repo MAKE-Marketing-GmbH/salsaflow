@@ -31,6 +31,18 @@ export function issueSession(userId: string, ttlSeconds = 60 * 60 * 8): string {
   return `${payload}.${sig}`;
 }
 
+// Rohform des signierten Session-Tokens. Die Felder sind erst nach den Guards unten belastbar.
+type SessionField = string | number | boolean | null | undefined;
+type SessionPayload = { sub?: SessionField; exp?: SessionField };
+
+function isNumber(value: SessionField): value is number {
+  return typeof value === 'number';
+}
+
+function isNonEmptyString(value: SessionField): value is string {
+  return typeof value === 'string' && value.length > 0;
+}
+
 export function verifySession(token: string | undefined | null): { sub: string } | null {
   if (!token) return null;
   const dot = token.indexOf('.');
@@ -42,12 +54,11 @@ export function verifySession(token: string | undefined | null): { sub: string }
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
   try {
-    const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
-      sub?: unknown;
-      exp?: unknown;
-    };
-    if (typeof data.exp !== 'number' || data.exp * 1000 < Date.now()) return null;
-    if (typeof data.sub !== 'string' || data.sub.length === 0) return null;
+    // SAFETY: Der Payload wurde eine Zeile darueber per HMAC gegen SECRET geprueft, stammt also
+    // von uns. JSON.parse liefert trotzdem nur `unknown`-Felder; beide werden unten geprueft.
+    const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as SessionPayload;
+    if (!isNumber(data.exp) || data.exp * 1000 < Date.now()) return null;
+    if (!isNonEmptyString(data.sub)) return null;
     return { sub: data.sub };
   } catch {
     return null;

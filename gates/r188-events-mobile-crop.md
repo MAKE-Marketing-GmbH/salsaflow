@@ -24,3 +24,5 @@ Scope: Nur die Floweekend-Vorschaukarte auf `/events` und ihre echte Bildquelle.
   EVIDENCE: `git status --short` zeigt weiterhin den vorhandenen Working Tree plus nur die scoped Dateien dieses Fixes.
 
 Ledger: 7 von 7 Gates mit Beleg. Eigenes visuelles Urteil bleibt bis zur unabhängigen Kritik untrusted.
+
+ABANDON: leftover-other-round nicht R189-Rest

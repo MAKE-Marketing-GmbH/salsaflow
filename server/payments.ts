@@ -30,7 +30,14 @@ export function publicBaseUrl(): string {
 }
 
 export function webhookSecret(): string {
-  return process.env.STRIPE_WEBHOOK_SECRET?.trim() || SANDBOX_WEBHOOK_SECRET;
+  const configured = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+  if (configured) return configured;
+  // Im echten Stripe-Modus NIE auf das oeffentlich lesbare Sandbox-Secret zurueckfallen:
+  // sonst akzeptiert ein Deploy mit vergessener Env-Variable beliebig signierte Webhooks.
+  if (paymentMode() === 'stripe') {
+    throw new Error('STRIPE_WEBHOOK_SECRET fehlt: im Stripe-Modus zwingend setzen.');
+  }
+  return SANDBOX_WEBHOOK_SECRET;
 }
 
 // CHF-Betrag ("190.00") -> Rappen (Stripe rechnet in der kleinsten Waehrungseinheit).
@@ -46,6 +53,9 @@ export type CreateSessionInput = {
   successUrl: string;
   cancelUrl: string;
 };
+
+// Die Felder, die wir aus der Stripe-Checkout-Session-Antwort lesen.
+type StripeCheckoutResponse = { id: string; url: string; payment_intent: string | null };
 
 export type CreateSessionResult = {
   id: string; // Checkout-Session-ID (cs_...)
@@ -83,7 +93,9 @@ export async function createCheckoutSession(input: CreateSessionInput): Promise<
       const body = await res.text().catch(() => '');
       throw new Error(`Stripe ${res.status}: ${body.slice(0, 300)}`);
     }
-    const data = (await res.json()) as { id: string; url: string; payment_intent: string | null };
+    // SAFETY: `res.ok` ist oben geprueft; Stripe liefert fuer eine erzeugte Checkout-Session
+    // laut API-Vertrag immer `id` und `url`, `payment_intent` kann null sein (mode=payment).
+    const data = (await res.json()) as StripeCheckoutResponse;
     return { id: data.id, url: data.url, paymentIntentId: data.payment_intent ?? null };
   }
 
@@ -97,6 +109,9 @@ export async function createCheckoutSession(input: CreateSessionInput): Promise<
 
 export type RefundInput = { paymentIntentId: string | null; checkoutSessionId: string | null; amountChf: string };
 export type RefundResult = { ok: boolean; refundId?: string; error?: string };
+
+// Nur das Feld, das wir aus der Stripe-Refund-Antwort lesen.
+type StripeRefundResponse = { id?: string };
 
 export async function refundPayment(input: RefundInput): Promise<RefundResult> {
   if (paymentMode() === 'stripe') {
@@ -115,7 +130,10 @@ export async function refundPayment(input: RefundInput): Promise<RefundResult> {
         const body = await res.text().catch(() => '');
         return { ok: false, error: `Stripe ${res.status}: ${body.slice(0, 200)}` };
       }
-      const data = (await res.json()) as { id?: string };
+      // SAFETY: `res.ok` ist oben geprueft; Stripe antwortet auf POST /v1/refunds mit 2xx nur
+      // mit einem Refund-Objekt. `id` ist im Typ optional, weil wir es nur protokollierend
+      // weiterreichen und ein Fehlen den Refund nicht ungueltig macht.
+      const data = (await res.json()) as StripeRefundResponse;
       return { ok: true, refundId: data.id };
     } catch (e) {
       return { ok: false, error: e instanceof Error ? e.message : 'Refund-Fehler' };
@@ -143,12 +161,22 @@ function timingSafeHexEqual(a: string, b: string): boolean {
   }
 }
 
+// Grund, warum eine Webhook-Signatur abgelehnt wurde. Geschlossene Menge, damit
+// Aufrufer (server/payment-service.ts) den Grund unveraendert weiterreichen koennen.
+export type SignatureRejection =
+  | 'no_signature'
+  | 'malformed'
+  | 'signature_mismatch'
+  | 'timestamp_out_of_tolerance';
+
+export type SignatureCheck = { ok: true; reason?: undefined } | { ok: false; reason: SignatureRejection };
+
 export function verifyWebhookSignature(
   rawBody: string,
   header: string | null | undefined,
   secret: string,
   toleranceSec = 300,
-): { ok: boolean; reason?: string } {
+): SignatureCheck {
   if (!header) return { ok: false, reason: 'no_signature' };
   let t: string | undefined;
   const v1: string[] = [];
@@ -174,12 +202,18 @@ export function verifyWebhookSignature(
  * Event-Envelope (Stripe-Form). Im Sandbox-Modus baut die Test-Bezahlseite damit
  * dieselben Event-Typen, die der echte Stripe-Webhook schickt.
  * -------------------------------------------------------------------------- */
+// Ein Feld im Stripe-Event-Objekt. Stripe liefert je nach Event-Typ Strings, Zahlen,
+// Flags, verschachtelte Objekte (z. B. `metadata`) oder Listen (`payment_method_types`).
+export type StripeFieldValue = string | number | boolean | null | StripeFieldValue[] | { [key: string]: StripeFieldValue };
+
+export type StripeObject = { [key: string]: StripeFieldValue };
+
 export type StripeEvent = {
   id: string;
   type: string;
-  data: { object: Record<string, unknown> };
+  data: { object: StripeObject };
 };
 
-export function buildEvent(type: string, object: Record<string, unknown>): StripeEvent {
+export function buildEvent(type: string, object: StripeObject): StripeEvent {
   return { id: `evt_${randomUUID().replace(/-/g, '')}`, type, data: { object } };
 }

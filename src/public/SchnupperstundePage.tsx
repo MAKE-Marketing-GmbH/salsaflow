@@ -95,7 +95,12 @@ function FactsSection({ de }: { de: boolean }) {
   return (
     <section className="bg-[var(--color-bg-soft)] pt-4 pb-2 lg:pt-4 lg:pb-2">
       <Shell>
-        <Reveal className="max-w-2xl pr-24 lg:pr-0">
+        {/* R190: `pr-24 lg:pr-0` ist raus. Das war eine Kompensation fuer den alten
+            96-px-Gutter der Shell; unter lg endete diese Spalte dadurch 116 px vom
+            rechten Rand, waehrend der Rest derselben Seite bei 20 px endete — genau
+            das gemeldete "Breite kaputt". Die Reserve fuer den WhatsApp-Knopf traegt
+            jetzt die Shell selbst (primitives.tsx), einmal und fuer alle Seiten. */}
+        <Reveal className="max-w-2xl">
           <SectionHead
             tight
             title={de ? 'Was dich erwartet' : 'What to expect'}

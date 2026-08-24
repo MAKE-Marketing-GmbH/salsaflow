@@ -35,7 +35,19 @@ async function main() {
   const handle = await openDb();
   const app = createApp(handle.db);
 
-  async function post(body: unknown) {
+  // Das Formular-Payload, das /api/public/contact entgegennimmt. Absichtlich mit
+  // optionalen Feldern, weil die Gate-Faelle unten genau die unvollstaendigen und
+  // die leeren Bodies gegen die Validierung fahren.
+  type ContactBody = {
+    name?: string;
+    email?: string | null;
+    phone?: string;
+    topic?: string;
+    message?: string;
+    language?: string;
+    website?: string;
+  } | null;
+  async function post(body: ContactBody) {
     return app.request('/api/public/contact', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -54,6 +66,9 @@ async function main() {
     message: `Hallo, ich interessiere mich. Marker ${token}`,
     language: 'de',
   });
+  // SAFETY: Der catch macht die null-Haelfte wahr, alle Felder sind optional. Die
+  // Assertion behauptet nichts ueber den Inhalt; die Checks lesen mit ?. und schlagen
+  // bei jeder anderen Form fehl.
   const body = (await res.json().catch(() => null)) as { ok?: boolean; driver?: string; id?: string } | null;
   check('Gueltige Anfrage: Status 200', res.status === 200, `status ${res.status}`);
   check('Gueltige Anfrage: ok=true', body?.ok === true, JSON.stringify(body));
@@ -86,6 +101,8 @@ async function main() {
     message: `Schnupperstunde. Marker ${phoneToken}`,
     language: 'de',
   });
+  // SAFETY: Der catch macht die null-Haelfte wahr, ok ist optional. Der Check darunter
+  // liest phoneBody?.ok und schlaegt bei jeder anderen Form fehl.
   const phoneBody = (await resPhone.json().catch(() => null)) as { ok?: boolean } | null;
   check('Telefon-Anfrage ohne E-Mail: Status 200', resPhone.status === 200, `status ${resPhone.status}`);
   check('Telefon-Anfrage ohne E-Mail: ok=true', phoneBody?.ok === true, JSON.stringify(phoneBody));
@@ -125,6 +142,9 @@ async function main() {
     message: 'Spam Spam Spam Nachricht',
     website: 'http://spam.example',
   });
+  // SAFETY: Der catch macht die null-Haelfte wahr, beide Felder sind optional. Genau das
+  // braucht der Check darunter: Er belegt, dass skipped im Body FEHLT (undefined), und
+  // wuerde ein vorhandenes skipped als Leak melden.
   const hpBody = (await resHp.json().catch(() => null)) as { ok?: boolean; skipped?: boolean } | null;
   check('Honeypot: Status 200 (Bot lernt nichts)', resHp.status === 200, `status ${resHp.status}`);
   // Die Antwort ist absichtlich zeichengleich mit dem Erfolgsfall (contact-routes.ts):

@@ -5,7 +5,7 @@
 // Keine Animationen (statisch). Pfeile/Chevrons via Lucide.
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, ChevronDown, Languages, Menu, X } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronLeft, ChevronRight, Languages, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
@@ -164,7 +164,11 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
           16+1+16 = 33px ab sm (Shell px-8 = 32). Vorher 10/20 -> Logo lag 4-5px rechts der H1. */}
       {/* py statt pt: die Pille hatte oben 9px/10px Abstand und unten keinen — sie sass
           sichtbar zu hoch in der 76px-Leiste. Oben und unten jetzt gleich. */}
-      <div className="mx-auto max-w-[1400px] px-[5px] py-[9px] sm:px-[15px] sm:py-[10px]">
+      {/* Raphael 23.08. 16:40, Punkt 4: das offene Menue darf keine Creme-Karte im Hero
+          sein (Container im Container), und Hero-CTAs/WhatsApp duerfen nicht darunter
+          bzw. darueber liegen. Offen wird die Leiste darum full-bleed: kein Aussen-
+          Padding, keine Rundung, und das Panel fuellt den ganzen Viewport (unten). */}
+      <div className={cn('mx-auto max-w-[1400px]', open ? 'px-0 py-0' : 'px-[5px] py-[9px] sm:px-[15px] sm:py-[10px]')}>
         {/* ROOT-CAUSE des bekannten Dropdown-Bugs, gemessen mit scripts/nav-probe.cjs:
             Das Desktop-Submenu ging immer auf (`opacity: 1`, `visibility: visible`), wurde
             aber von GENAU dieser Pille abgeschnitten. Sie traegt `overflow-hidden` (noetig
@@ -183,7 +187,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
              546px hoch (gemessen) — dann las man den Seitentext als Schleier quer durch die
              Navigation. Offen darum deckend und ohne Blur. Betrifft nur Mobil: `open` steuert
              ausschliesslich das Burger-Menu, der Burger ist `lg:hidden`. */
-          className="t-acc w-full overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-[var(--color-paper-warm)]/95 text-[var(--color-ink)] shadow-[0_8px_28px_rgba(17,17,17,0.1)] backdrop-blur data-[open=true]:bg-[var(--color-paper-warm)] data-[open=true]:backdrop-blur-none lg:overflow-visible lg:rounded-full"
+          className="t-acc w-full overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-[var(--color-paper-warm)]/95 text-[var(--color-ink)] shadow-[0_8px_28px_rgba(17,17,17,0.1)] backdrop-blur data-[open=true]:rounded-none data-[open=true]:border-transparent data-[open=true]:bg-[var(--color-paper-warm)] data-[open=true]:shadow-none data-[open=true]:backdrop-blur-none lg:overflow-visible lg:rounded-full"
         >
           <div className="t-acc-head h-12 gap-3 pl-3.5 pr-1.5 sm:h-14 sm:gap-4 sm:pl-4 sm:pr-3">
           <a href="/" className="flex shrink-0 items-center" aria-label={de ? 'Salsaflow Dance Company - Startseite' : 'Salsaflow Dance Company - Home'}>
@@ -233,6 +237,10 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
               {c.cta.plan}
               <ArrowRight size={16} strokeWidth={2.25} aria-hidden />
             </a>
+            {/* Raphael 23.08. 16:40, Punkt 1: der Knopf traegt KEINEN Kasten — kein
+                Border, keine weisse Pille, kein Schatten. Offen steht nur das X
+                (ohne Text), zu der Burger mit "Menü". min-h/min-w-11 halten das
+                44px-Tap-Ziel ohne sichtbare Flaeche. */}
             <button
               ref={menuButtonRef}
               type="button"
@@ -240,23 +248,26 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
               aria-expanded={open}
               aria-controls="mobile-navigation"
               aria-label={open ? (de ? 'Menü schliessen' : 'Close menu') : de ? 'Menü' : 'Menu'}
-              // min-h-11 statt h-10: 40px Menue-Knopf unter dem Tap-Ziel (Critic Runde 7, Item 5).
-              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border border-[var(--color-line)] bg-[var(--color-paper)] px-3 text-[var(--color-ink)] shadow-sm lg:hidden"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-2 text-[var(--color-ink)] lg:hidden"
             >
-              {/* Raphael 20.08.: EIN Knopf im Header. Offen = X + "Schliessen", zu = Burger
-                  + "Menü". Das frühere Chevron daneben war ein zweites Zeichen für denselben
-                  Zustand — der Knopf sagte "Schliessen" und der Pfeil zeigte nach oben. */}
               {open ? (
-                <X size={18} strokeWidth={2} aria-hidden />
+                <X size={22} strokeWidth={2} aria-hidden />
               ) : (
-                <Menu size={18} strokeWidth={2} aria-hidden />
+                <>
+                  <Menu size={20} strokeWidth={2} aria-hidden />
+                  <span className="text-xs font-semibold">{de ? 'Menü' : 'Menu'}</span>
+                </>
               )}
-              <span className="text-xs font-semibold">{open ? (de ? 'Schliessen' : 'Close') : (de ? 'Menü' : 'Menu')}</span>
             </button>
           </div>
           </div>
 
-          {/* Mobile Navigation: dieselbe Header-Flaeche waechst nach unten. */}
+          {/* Mobile Navigation (Raphael 23.08. 16:40): das Panel fuellt den Viewport
+              (Punkt 4 — nichts vom Hero scheint mehr darunter, WhatsApp/Sticky-CTA auf
+              z-30/40 liegen unter der z-50-Flaeche). Untermenues oeffnen NACH RECHTS als
+              zweite Ebene (Punkt 3), nicht mehr als Akkordeon nach unten — die Menuehoehe
+              bleibt konstant. Unterpunkte stehen auf derselben Kante wie die Hauptpunkte,
+              ohne Einrueckung und ohne Border-Schiene (Punkt 2). */}
           <div
           id="mobile-navigation"
           aria-hidden={!open}
@@ -265,87 +276,104 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
           className="t-acc-panel lg:hidden"
           >
             <div className="t-acc-panel-inner">
-          {/* Kein eigener max-w-Cap mehr (war max-w-6xl = 1152px): die Leiste sitzt schon in der
-              1400px-Shell, ein zweiter Container darin war das dritte Raster (Kritik Runde 2). */}
-          <nav className="flex max-h-[calc(100dvh-var(--nav-h)-1rem)] flex-col gap-1 overflow-y-auto border-t border-[var(--color-line)] px-4 pb-4 pt-3 sm:px-6" aria-label={de ? 'Mobile Navigation' : 'Mobile navigation'}>
-            {nav.map((item) =>
-              item.children ? (
-                <div key={item.label} className="t-acc" data-open={openGroup === item.label}>
+          <div className="relative h-[calc(100dvh-3rem)] overflow-hidden border-t border-[var(--color-line)] sm:h-[calc(100dvh-3.5rem)]">
+            {/* Ebene 1: Hauptpunkte. Bei offener Gruppe schiebt sie nach links raus. */}
+            <nav
+              aria-label={de ? 'Mobile Navigation' : 'Mobile navigation'}
+              aria-hidden={openGroup !== null}
+              inert={openGroup !== null}
+              className={cn(
+                'flex h-full flex-col gap-1 overflow-y-auto px-4 pb-6 pt-3 transition-transform duration-[var(--dur-base)] ease-out motion-reduce:transition-none sm:px-6',
+                openGroup !== null ? '-translate-x-full' : 'translate-x-0',
+              )}
+            >
+              {nav.map((item) =>
+                item.children ? (
                   <button
+                    key={item.label}
                     type="button"
-                    onClick={() => setOpenGroup((v) => (v === item.label ? null : item.label))}
+                    onClick={() => setOpenGroup(item.label)}
                     aria-expanded={openGroup === item.label}
                     className={cn(
-                      't-acc-head t-hover rounded-[var(--radius-chip)] px-3 py-2.5 text-base font-medium hover:bg-[var(--color-bg-soft)]',
+                      't-hover flex min-h-11 items-center justify-between rounded-[var(--radius-chip)] px-2 py-2.5 text-base font-medium hover:bg-[var(--color-bg-soft)]',
                       groupActive(item) ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
                     )}
                   >
                     {item.label}
-                    <ChevronDown
-                      size={16}
-                      strokeWidth={2}
-                      className="t-acc-chevron"
-                      aria-hidden
-                    />
+                    <ChevronRight size={16} strokeWidth={2} aria-hidden />
                   </button>
-                  <div className="t-acc-panel" aria-hidden={openGroup !== item.label} inert={openGroup !== item.label}>
-                    <div className="t-acc-panel-inner">
-                    <div className="ml-3 flex flex-col gap-0.5 border-l border-[var(--color-line)] pb-2 pl-3">
-                      {item.children.map((ch) => (
-                        /* Aktiv-Zustand fehlte im Mobile-Menu komplett: die aktuelle
-                           Unterseite war dort nicht zu erkennen (Desktop-Dropdown und
-                           Leaf-Links markieren sie laengst). */
-                        <a
-                          key={ch.href}
-                          href={ch.href}
-                          onClick={closeMenu}
-                          aria-current={leafActive(ch.href) ? 'page' : undefined}
-                          className={cn(
-                            't-hover flex min-h-11 items-center rounded-[var(--radius-chip)] px-2 py-2 text-[0.95rem] font-medium hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]',
-                            leafActive(ch.href)
-                              ? 'bg-[var(--color-bg-soft)] text-[var(--color-salsa)]'
-                              : 'text-[var(--color-ink-muted)]',
-                          )}
-                        >
-                          {ch.label}
-                        </a>
-                      ))}
-                    </div>
-                    </div>
-                  </div>
-                </div>
-              ) : item.href ? (
-                <MobileLink key={item.href} item={{ label: item.label, href: item.href }} active={leafActive(item.href)} onClick={closeMenu} />
-              ) : null,
-            )}
+                ) : item.href ? (
+                  <MobileLink key={item.href} item={{ label: item.label, href: item.href }} active={leafActive(item.href)} onClick={closeMenu} />
+                ) : null,
+              )}
 
-            <div className="mt-3 flex items-center justify-between gap-4 border-t border-[var(--color-line)] px-3 pt-4">
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-ink)]">
-                <Languages aria-hidden className="h-4 w-4 text-[var(--color-salsa)]" />
-                {de ? 'Sprache' : 'Language'}
-              </span>
-              <LangToggle lang={lang} setLang={setLang} />
+              <div className="mt-3 flex items-center justify-between gap-4 border-t border-[var(--color-line)] px-2 pt-4">
+                <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-ink)]">
+                  <Languages aria-hidden className="h-4 w-4 text-[var(--color-salsa)]" />
+                  {de ? 'Sprache' : 'Language'}
+                </span>
+                <LangToggle lang={lang} setLang={setLang} />
+              </div>
+              {/* Der rote Full-Width-Knopf gehoert dem Kursplan (Raphael 20.08.); die
+                  Hero-CTAs sind bei offenem Menue nicht mehr sichtbar, es gibt also
+                  genau EIN Kursplan/Schnupper-Paar im Bild. */}
+              <a
+                href="/kursplan"
+                onClick={closeMenu}
+                className="btn-base btn-primary mt-2 px-4 py-3 text-base"
+              >
+                {c.cta.plan}
+                <ArrowRight size={18} strokeWidth={2.25} aria-hidden />
+              </a>
+              <a
+                href="/schnupperstunde"
+                onClick={closeMenu}
+                className="mt-1 inline-flex items-center justify-center px-4 py-3 text-base font-semibold text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-ink)]"
+              >
+                {c.cta.trial}
+              </a>
+            </nav>
+
+            {/* Ebene 2: Unterpunkte der offenen Gruppe, kommt von rechts herein. */}
+            <div
+              data-mobile-subnav
+              aria-hidden={openGroup === null}
+              inert={openGroup === null}
+              className={cn(
+                'absolute inset-0 flex flex-col gap-1 overflow-y-auto bg-[var(--color-paper-warm)] px-4 pb-6 pt-3 transition-transform duration-[var(--dur-base)] ease-out motion-reduce:transition-none sm:px-6',
+                openGroup !== null ? 'translate-x-0' : 'translate-x-full',
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => setOpenGroup(null)}
+                className="t-hover mb-1 flex min-h-11 items-center gap-1.5 rounded-[var(--radius-chip)] px-2 py-2.5 text-base font-semibold text-[var(--color-ink)] hover:bg-[var(--color-bg-soft)]"
+              >
+                <ChevronLeft size={18} strokeWidth={2} aria-hidden />
+                {openGroup}
+              </button>
+              {nav
+                .find((item) => item.label === openGroup)
+                ?.children?.map((ch) => (
+                  /* Aktiv-Zustand bleibt markiert: die aktuelle Unterseite ist auch in
+                     der zweiten Ebene zu erkennen. */
+                  <a
+                    key={ch.href}
+                    href={ch.href}
+                    onClick={closeMenu}
+                    aria-current={leafActive(ch.href) ? 'page' : undefined}
+                    className={cn(
+                      't-hover flex min-h-11 items-center rounded-[var(--radius-chip)] px-2 py-2 text-base font-medium hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]',
+                      leafActive(ch.href)
+                        ? 'bg-[var(--color-bg-soft)] text-[var(--color-salsa)]'
+                        : 'text-[var(--color-ink-muted)]',
+                    )}
+                  >
+                    {ch.label}
+                  </a>
+                ))}
             </div>
-            {/* Gleiche Hierarchie wie im Desktop-Header (Raphael 20.08.): der rote
-                Full-Width-Knopf gehoert dem Kursplan. Die Schnupperstunde steht darunter
-                als ruhiger Link — sie bleibt voll erreichbar und behaelt mit py-3 ihre
-                44px-Trefferflaeche, konkurriert aber nicht mehr um denselben Blick. */}
-            <a
-              href="/kursplan"
-              onClick={closeMenu}
-              className="btn-base btn-primary mt-2 px-4 py-3 text-base"
-            >
-              {c.cta.plan}
-              <ArrowRight size={18} strokeWidth={2.25} aria-hidden />
-            </a>
-            <a
-              href="/schnupperstunde"
-              onClick={closeMenu}
-              className="mt-1 inline-flex items-center justify-center px-4 py-3 text-base font-semibold text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-ink)]"
-            >
-              {c.cta.trial}
-            </a>
-          </nav>
+          </div>
             </div>
           </div>
         </div>

@@ -80,7 +80,7 @@ function HowSection({ c }: { c: (typeof COLLABS)['de'] }) {
             <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
               {h.title} <TitleAccent>{h.titleAccent}</TitleAccent>
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {h.body}
             </motion.p>
           </Reveal>
@@ -120,7 +120,7 @@ function PartnerSection({ c }: { c: (typeof COLLABS)['de'] }) {
             <h2 className={`mt-5 ${sectionTitle}`}>
               {p.title} <TitleAccent>{p.titleAccent}</TitleAccent>
             </h2>
-            <p className={`mt-4 ${sectionLead}`}>{p.body}</p>
+            <p className={`${sectionLead}`}>{p.body}</p>
             <ul className="mt-7 grid gap-2.5">
               {p.bullets.map((b) => (
                 <li key={b} className="flex items-start gap-3 text-[0.98rem] leading-relaxed text-[var(--color-ink)]">
@@ -203,7 +203,7 @@ function RequestSection({ c }: { c: (typeof COLLABS)['de'] }) {
           <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
             {r.title} <TitleAccent>{r.titleAccent}</TitleAccent>
           </motion.h2>
-          <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+          <motion.p variants={item} className={`${sectionLead}`}>
             {r.body}
           </motion.p>
           <motion.p variants={item} className="mt-8 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">

@@ -71,6 +71,9 @@ async function main() {
     /* 1) Oeffentlich erreichbar OHNE Login -------------------------------------- */
     const res = await app.request('/api/public/schedule');
     check('Oeffentlich ohne Login erreichbar (200)', res.status === 200, `status ${res.status}`);
+    // SAFETY: Der catch macht die null-Haelfte wahr, und der Check darunter bricht ab,
+    // wenn data null ist. Die Schedule-Haelfte gilt nur, wenn die Route oben 200 lieferte;
+    // sie spiegelt den Response-Typ von /api/public/schedule aus server/public-routes.ts.
     const data = (await res.json().catch(() => null)) as Schedule | null;
     if (!data) {
       console.log('VERDICT: FAIL (keine Antwort)');

@@ -60,7 +60,23 @@ import {
   type RefObject,
 } from 'react';
 
-export const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+/* R190, zweite Kritikrunde: zwei unabhaengige Kritiker meldeten dasselbe Bild —
+   Elemente stehen an ihrer Endposition und sind trotzdem noch halb durchsichtig.
+   Sichtbar ist dann kein Hereingleiten, sondern ein Aufhellen an Ort und Stelle.
+   Genau das nennt Raphael "das ploppt einfach ein".
+
+   Nachgerechnet an der alten Kurve [0.22, 1, 0.36, 1]: sie legt bei 27 % der
+   Laufzeit bereits 79 % des Weges zurueck. Von 14 px Versatz bleiben dort
+   2,9 px — bei gleichzeitig 79 % Deckkraft. Die Bewegung ist also praktisch
+   vorbei, waehrend das Auge das Element noch als grau wahrnimmt.
+   (27 % ist kein zufaelliger Punkt: die Motion-Screenshots messen 120 ms von
+   450 ms, und die Kritiker haben genau diese Bilder beurteilt.)
+
+   Neu [0.33, 1, 0.68, 1] — dieselbe Familie, aber flacher. Bei 27 % sind es
+   61 % Weg, es bleiben 7,8 px von 20. Die Bewegung reicht damit sichtbar in
+   die Zeit hinein, in der das Element schon lesbar ist.
+   Kein linearer Verlauf: der bremst am Ende nicht ab und wirkt mechanisch. */
+export const EASE_OUT = [0.33, 1, 0.68, 1] as const;
 
 /**
  * Laeuft der Code schon im Browser?
@@ -81,19 +97,51 @@ export function useHydrated() {
     () => false,
   );
 }
-// Geil-Pass 2026-07-07: -8% statt -12%, damit Reveals frueher zuenden und nicht
-// mitten im Scroll-Glide "nachschwimmen".
-export const VIEWPORT = { once: true, margin: '-8% 0px' } as const;
+/* R190 (Raphael 22.08.: "Es soll so ein Scroll-Reveal sein, aber das ploppt einfach
+   ein. Das sieht überhaupt nicht gut aus.")
+   Vorher: `{ once: true, margin: '-8% 0px' }`.
+
+   Die negative Margin SCHRUMPFT den Auslösebereich. Das Element musste also 8 % der
+   Fensterhöhe TIEF im Bild stehen, bevor überhaupt etwas anfing — auf 900 px sind
+   das 72 px. Bis dahin stand es unsichtbar da, dann sprang der Effekt an und lief
+   auf seiner eigenen Uhr ab. Genau diesen Ablauf beschreibt Raphael als Ploppen:
+   die Bewegung hat nie etwas mit dem Scrollen zu tun, sie wird nur davon gestartet.
+
+   Neu steht die Margin auf 0: der Reveal zündet genau dann, wenn das Element die
+   Fensterkante berührt. Die Bewegung beginnt also, während es hereinfährt.
+
+   ZWISCHENSCHRITT, DER NICHT FUNKTIONIERT HAT — und der Grund, warum hier eine Zahl
+   und keine größere steht. Erster Versuch war `12% 0px -8% 0px`, also ein Auslöser
+   deutlich UNTERHALB der Fensterkante. Gemessen mit `scripts/r190-reveal-timing.cjs`
+   kippte das den Fehler nur auf die andere Seite: 10 von 11 Reveals standen mit
+   Deckkraft 1.000 an der Fensterkante, waren also fertig, BEVOR man sie sehen
+   konnte. Sichtbar ist das dasselbe Nichts wie vorher — nur diesmal, weil die
+   Animation zu früh statt zu spät lief.
+
+   Der brauchbare Bereich ist schmal: zu spät heißt Ploppen, zu früh heißt
+   unsichtbar. 0 trifft ihn, weil die Reveal-Dauern (0,45 bis 0,72 s) ohnehin so
+   lang sind, dass die Geste ins Bild hineinreicht.
+
+   `once: true` bleibt. Ein Reveal, der beim Zurückscrollen erneut spielt, macht die
+   Seite unruhig und wiederholt bei jedem Richtungswechsel dieselbe Geste. */
+export const VIEWPORT = { once: true, margin: '0px' } as const;
 
 /** Container- + Item-Varianten, an prefers-reduced-motion gebunden.
  *  container: staggerChildren. item: y-Versatz + Fade (bei reduced nur Fade).
- *  EIN Takt fuer die ganze Seite (Geil-Pass): 14px, 0.45s, Stagger 0.07. */
+ *  EIN Takt fuer die ganze Seite (Geil-Pass): 20px, 0.58s, Stagger 0.07.
+ *
+ *  R190: 14 -> 20 px. Zusammen mit der flacheren EASE_OUT (Begruendung dort)
+ *  bleibt bei 27 % der Laufzeit fast dreimal so viel Restweg stehen wie vorher
+ *  (7,8 px statt 2,9). Der Reveal bekommt damit einen sichtbaren Weg, statt nur
+ *  aufzuhellen. Mehr als 20 px waere zu viel: der Text schoebe sich dann so weit,
+ *  dass die Zeile beim Lesen springt. */
 export function useReveal(opts?: { stagger?: number; distance?: number; duration?: number }) {
   const reduced = useReducedMotion();
   const hydrated = useHydrated();
   const stagger = opts?.stagger ?? 0.07;
-  const distance = opts?.distance ?? 14;
-  const duration = opts?.duration ?? 0.45;
+  const distance = opts?.distance ?? 20;
+  // Derselbe Wert wie `VARIANT_DURATION.rise` — die zwei Haken sind EIN Takt.
+  const duration = opts?.duration ?? 0.58;
   const container: Variants = {
     hidden: {},
     show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.03 } },
@@ -101,7 +149,12 @@ export function useReveal(opts?: { stagger?: number; distance?: number; duration
   const item: Variants = {
     // Vor der Hydration ist `hidden` der Endzustand. Sonst schreibt der Prerender
     // opacity:0 ins HTML und die Seite bleibt ohne JavaScript leer.
-    hidden: hydrated ? { opacity: 0, y: reduced ? 0 : distance } : { opacity: 1, y: 0 },
+    /* R190: Start-Deckkraft 0,55 statt 0 — dieselbe Zahl wie clip und blur.
+       opus-critic Runde 6 hat live gemessen: das Offer-Raster stand 250 ms im
+       Bild bei opacity 0 und Hoehe 416. Sichtbar war eine leere Flaeche, dann
+       kamen die Karten. Das IST das Ploppen, nur ohne Vorhang. Mit 0,55 sind
+       die Karten von der ersten Frame an als Karten da und fahren 20 px ein. */
+    hidden: hydrated ? { opacity: 0.55, y: reduced ? 0 : distance } : { opacity: 1, y: 0 },
     show: { opacity: 1, y: 0, transition: { duration: reduced ? 0.3 : duration, ease: EASE_OUT } },
   };
   return { container, item, reduced, hydrated };
@@ -226,8 +279,12 @@ export type RevealVariant = 'rise' | 'clip' | 'blur';
 
 /** Wie lange ein Element-Effekt laeuft. clip braucht mehr Zeit als rise: dort wandert eine
  *  sichtbare Kante ueber das ganze Element. Unter 0.7s wirkt sie gehetzt statt ruhig. */
+/* R190: `rise` von 0,45 auf 0,58 s. Der Effekt traegt den Fliesstext und damit
+   den groessten Teil der Seite; bei 0,45 s war die Geste vorbei, bevor das Auge
+   sie als Bewegung gelesen hat. `clip` und `blur` bleiben — der eine ist mit
+   0,72 s ohnehin der langsamste, der andere arbeitet ueber Schaerfe statt Weg. */
 const VARIANT_DURATION = {
-  rise: 0.45,
+  rise: 0.58,
   clip: 0.72,
   blur: 0.48,
 } satisfies Record<RevealVariant, number>;
@@ -275,9 +332,21 @@ function variantItem(
 
   if (variant === 'clip') {
     return {
-      // inset(top right bottom left): 100% unten heisst "von der Unterkante komplett
-      // weggeschnitten". Der Vorhang faehrt also nach oben auf.
-      hidden: { opacity: 1, clipPath: 'inset(0% 0% 100% 0%)' },
+      /* inset(top right bottom left): 100% unten heisst "von der Unterkante komplett
+         weggeschnitten". Der Vorhang faehrt also nach oben auf.
+
+         R190: Der Startvorhang steht auf 88 statt 100 %, und die Deckkraft laeuft mit.
+         Vorher stand hier `opacity: 1` in BEIDEN Zustaenden. Ergebnis, von opus-critic
+         am laufenden Server gemessen und in `home-desktop-01-motion.png` sichtbar: eine
+         416 px hohe Sektion stand als leeres Rechteck im Bild, `inset(0% 0% 100%)` bei
+         Deckkraft 1, und klappte dann auf. Das IST Raphaels "das ploppt einfach ein" —
+         eine leere Flaeche faehrt herein, danach erscheint der Inhalt.
+         Mit 45 % ist von Anfang an mehr als die Haelfte des Inhalts da. 88 %
+         (erster Versuch) zeigte in home-desktop-01-motion.png weiter nur einen
+         Foto-Streifen ueber 400 px Leere — Raphael wuerde das immer noch
+         "ploppen" nennen. 45 % laesst die Karten als Karten lesen, der Vorhang
+         oeffnet den Rest. */
+      hidden: { opacity: 0.55, clipPath: 'inset(0% 0% 45% 0%)' },
       show: { opacity: 1, clipPath: 'inset(0% 0% 0% 0%)', transition },
     };
   }
@@ -292,7 +361,7 @@ function variantItem(
   }
 
   return {
-    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0)` },
+    hidden: { opacity: 0.55, transform: `translate3d(0, ${distance}px, 0)` },
     show: { opacity: 1, transform: 'translate3d(0, 0px, 0)', transition },
   };
 }
@@ -306,7 +375,9 @@ export function useRevealVariant(
   const reduced = useReducedMotion() === true;
   const hydrated = useHydrated();
   const stagger = opts?.stagger ?? 0.07;
-  const distance = opts?.distance ?? 14;
+  // R190: 14 -> 20 px, derselbe Wert wie in `useReveal`. Die zwei Haken teilen
+  // sich einen Takt; laufen sie auseinander, bewegt sich die halbe Seite anders.
+  const distance = opts?.distance ?? 20;
   const duration = opts?.duration ?? VARIANT_DURATION[variant];
   const delay = opts?.delay ?? 0;
 
@@ -438,6 +509,20 @@ export type RevealWordsProps = {
   stagger?: number;
   distance?: number;
   duration?: number;
+  /** R209 (Raphael 23.08. 20:20, "Hero-Erstframe ohne Opacity-Fade — Foto+Rot sofort"):
+   *  ueberspringt den Reveal vollstaendig, das Wort steht ab dem ersten Frame fertig da.
+   *
+   *  Nur fuer Text IM FOLD. Der Reveal hier ist als Eintritts-Geste gebaut: er soll laufen,
+   *  waehrend ein Element von unten ins Bild faehrt. Ein Hero ist beim Laden schon im Bild —
+   *  dort gibt es keinen Eintritt, den man begleiten koennte, sondern nur eine Verzoegerung
+   *  vor dem ersten Eindruck.
+   *
+   *  Warum ein Flag und nicht `useHydrated` reparieren: `useHydrated` ist RICHTIG. Es
+   *  verhindert, dass der Prerender opacity:0 ins HTML schreibt und die Seite ohne
+   *  JavaScript leer bleibt (Regel B im Kopfkommentar). Der Fehler war nie der Haken,
+   *  sondern dass der Fold ueberhaupt animiert. Am Haken zu drehen wuerde die 23 anderen
+   *  Aufrufstellen unterhalb des Folds mit beschaedigen. */
+  instant?: boolean;
 };
 
 export function RevealWords({
@@ -447,9 +532,12 @@ export function RevealWords({
   stagger = 0.045,
   distance = 18,
   duration,
+  instant = false,
 }: RevealWordsProps) {
   const reduced = useReducedMotion() === true;
-  const hydrated = useHydrated();
+  const hydratedRaw = useHydrated();
+  // `instant` wirkt wie "noch nicht hydriert": beide Zustaende rendern den Endzustand.
+  const hydrated = hydratedRaw && !instant;
   const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
   const dur = duration ?? WORD_DURATION;
 
@@ -489,9 +577,12 @@ export function RevealWords({
         // flex-wrap braechen lange Ueberschriften nicht mehr um.
         className="inline-flex flex-wrap"
         variants={container}
-        initial="hidden"
-        whileInView="show"
-        viewport={VIEWPORT}
+        /* R209: bei `instant` steht schon der INITIAL-Zustand auf `show`. Es reicht nicht,
+           nur die Varianten auf den Endwert zu setzen — `initial="hidden"` wuerde weiterhin
+           einen Frame im Hidden-Zustand rendern, und genau dieser eine Frame ist das, was
+           auf dem Erstbild als leere Flaeche zu sehen war. */
+        initial={instant ? 'show' : 'hidden'}
+        {...(instant ? { animate: 'show' } : { whileInView: 'show', viewport: VIEWPORT })}
       >
         {words.map((w, i) => (
           <motion.span
@@ -520,7 +611,14 @@ export function LettersReveal(props: RevealWordsProps) {
 export function useCountUp(target: number, duration = 1.1) {
   const reduced = useReducedMotion();
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-15% 0px' });
+  /* R190: stand auf `margin: '-15% 0px'`. Das ist genau die negative Margin, die
+     `VIEWPORT` (oben) als Ursache des Ploppens hatte und die dort auf '0px'
+     gezogen wurde — hier war sie uebersehen worden, und zwar in der schlimmeren
+     Form: 15 % statt 8 %. Auf 900 px Fensterhoehe fing die Zahl also erst an zu
+     laufen, wenn die Kachel 135 px tief im Bild stand.
+     Jetzt derselbe Wert wie ueberall: der Count-up startet, wenn die Zahl die
+     Fensterkante beruehrt. Befund von opus-critic, nachgeprueft. */
+  const inView = useInView(ref, { once: true, margin: '0px' });
   const [val, setVal] = useState(reduced ? target : 0);
   useEffect(() => {
     if (!inView) return;

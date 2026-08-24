@@ -8,6 +8,7 @@
 //   POST /api/sandbox/checkout/:sessionId/complete   -> Aktion (bezahlen/fehlschlagen/abbrechen).
 
 import { Hono } from 'hono';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { z } from 'zod';
 import type { Db } from '../db/client.js';
 import { paymentMode, publicBaseUrl } from './payments.js';
@@ -53,7 +54,12 @@ export function createPaymentRoutes(db: Db) {
       const r = await startCheckout(db, id, { baseUrl: baseFrom(c) });
       return c.json(r);
     } catch (e) {
-      if (e instanceof BookingError) return c.json({ error: e.message, code: e.code }, e.status as 400);
+      if (e instanceof BookingError) {
+        // SAFETY: BookingError.status wird im Konstruktor (server/booking.ts:18) auf 400 gesetzt
+        // und nur mit HTTP-Fehlercodes ueberschrieben, die alle einen Body tragen duerfen.
+        const status = e.status as ContentfulStatusCode;
+        return c.json({ error: e.message, code: e.code }, status);
+      }
       console.error('[payment] checkout-Fehler:', e);
       return c.json({ error: 'Zahlung konnte nicht gestartet werden.' }, 500);
     }

@@ -57,7 +57,7 @@ function MoreHero() {
             <TitleAccent>{h.titleAccent}</TitleAccent>
             {h.titleB}
           </motion.h1>
-          <motion.p variants={item} className={`mt-6 max-w-xl ${sectionLead}`}>{h.lead}</motion.p>
+          <motion.p variants={item} className={`max-w-xl ${sectionLead}`}>{h.lead}</motion.p>
           <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
               href={h.primaryHref}
@@ -99,7 +99,8 @@ const CARD_ICONS = [ShoppingBag, Footprints, PartyPopper, HelpCircle];
 function HubCards() {
   const { lang } = useLang();
   const cards = MORE_PAGE[lang].cards;
-  const { item } = useReveal({ stagger: 0.08, distance: 14 });
+  /* R190: `distance: 14` raus, der Token steht auf 20 (motion.tsx). Siehe Faq.tsx. */
+  const { item } = useReveal({ stagger: 0.08 });
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
       <Shell>

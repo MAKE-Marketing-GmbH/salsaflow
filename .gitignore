@@ -25,3 +25,18 @@ scratch/
 .orca/
 .marathon/
 .taste-check-report.txt
+
+# Lokale Browser-/Agentenprofile und OS-Metadaten
+.grok/
+.playwright-mcp/
+.unlazy-hook-state.json
+._*
+**/._*
+worklog/.codex-home-*/
+
+# Lokale visuelle QA-Ausgaben (mehrere GB, keine Quellartefakte)
+fertig/
+worklog/shots/
+
+# Rein lokale Dev-Server-Konfiguration
+vite.dev.local.config.ts

@@ -33,7 +33,9 @@ fs.writeFileSync(
     '// Stand der lokalen API beim letzten Lauf des Skripts. Wird in main.tsx als\n' +
     '// globalThis.__EMBEDDED_SCHEDULE__ gesetzt (Dev-Startwert, Fetch aktualisiert).\n' +
     "import type { ScheduleResponse } from '@/lib/schedule';\n\n" +
-    `export const embeddedScheduleData = ${body} as unknown as ScheduleResponse;\n`,
+    // Annotation statt Assertion: tsc prueft die Zuweisung wirklich; passt die API-Antwort
+    // nicht mehr zum Typ, bricht der Typecheck statt still zu luegen.
+    `export const embeddedScheduleData: ScheduleResponse = ${body};\n`,
 );
 console.log(
   `schedule-embedded.ts geschrieben: ${schedule.courses?.length ?? 0} Kurse, ${schedule.terms?.length ?? 0} Staffeln, ${body.length} B`,

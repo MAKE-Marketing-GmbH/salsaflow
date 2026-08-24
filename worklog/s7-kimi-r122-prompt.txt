@@ -1,0 +1,11 @@
+Nur Look. Keine Ja/Nein-Liste. Kein Claim-Urteil.
+
+Lies mit Read:
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux122/kursplan-mobil-390.png
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux122/kursplan-desktop-1440.png
+
+Kontext: Mobil liegen die Wochen-Pfeile links unter «Woche ab». Der gruener WhatsApp-Kreis bleibt unten rechts. Das ist Absicht.
+
+Antwort:
+look: 2-5 Saetze
+biggest_gap: ein Satz

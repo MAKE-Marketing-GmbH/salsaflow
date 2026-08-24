@@ -106,7 +106,7 @@ function AnniversaryHero({ c }: { c: AnniversaryContent }) {
             <TitleAccent>{h.h1.accent}</TitleAccent>
             {h.h1.post}
           </motion.h1>
-          <motion.p variants={item} className={`mt-6 max-w-xl ${sectionLead}`}>
+          <motion.p variants={item} className={`max-w-xl ${sectionLead}`}>
             {h.lead}
           </motion.p>
           {/* R188 E6, Fix-Runde 3. Die Runde-2-Aenderung hat den Knopf nicht bewegt:
@@ -205,7 +205,7 @@ function AboutSection({ c }: { c: AnniversaryContent }) {
             <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
               {a.title} {a.titleAccent ? <TitleAccent>{a.titleAccent}</TitleAccent> : null}
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {a.body}
             </motion.p>
             <motion.div variants={item} className="mt-8 grid gap-4">

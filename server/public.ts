@@ -16,6 +16,7 @@ import type { Db } from '../db/client.js';
 import {
   courses,
   courseTeachers,
+  events,
   levelRungs,
   locations,
   styles,
@@ -30,9 +31,9 @@ function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-const WEEKDAY_INDEX: Record<(typeof WEEKDAYS)[number], number> = {
+const WEEKDAY_INDEX = {
   mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, sun: 0,
-};
+} satisfies Record<(typeof WEEKDAYS)[number], number>;
 
 // Alle noch anstehenden konkreten Daten eines woechentlichen Kurses innerhalb seiner Staffel.
 function upcomingDates(startDate: string, endDate: string, weekday: (typeof WEEKDAYS)[number], today: string): string[] {
@@ -51,6 +52,35 @@ function upcomingDates(startDate: string, endDate: string, weekday: (typeof WEEK
 export function createPublicRoutes(db: Db) {
   const pub = new Hono();
 
+  pub.get('/api/public/events', async (c) => {
+    const today = todayISO();
+    const rows = await db.select().from(events);
+    const visible = rows
+      .filter((event) => event.status === 'published' && (event.endDate ?? event.startDate) >= today)
+      .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.sort - b.sort)
+      .map((event) => ({
+        id: event.id,
+        slug: event.slug,
+        format: event.format,
+        titleDe: event.titleDe,
+        titleEn: event.titleEn,
+        summaryDe: event.summaryDe,
+        summaryEn: event.summaryEn,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        startTime: event.startTime?.slice(0, 5) ?? null,
+        endTime: event.endTime?.slice(0, 5) ?? null,
+        location: event.location,
+        ticketUrl: event.ticketUrl,
+        detailUrl: event.detailUrl,
+        imageUrl: event.imageUrl,
+        imageAltDe: event.imageAltDe,
+        imageAltEn: event.imageAltEn,
+        featured: event.featured,
+      }));
+    return c.json({ today, events: visible });
+  });
+
   pub.get('/api/public/schedule', async (c) => {
     const today = todayISO();
 
@@ -64,7 +94,7 @@ export function createPublicRoutes(db: Db) {
         startDate: t.startDate,
         endDate: t.endDate,
         isSummer: t.isSummer,
-        phase: (t.startDate <= today ? 'running' : 'upcoming') as 'running' | 'upcoming',
+        phase: t.startDate <= today ? ('running' as const) : ('upcoming' as const),
       }));
     const termById = new Map(visibleTerms.map((t) => [t.id, t]));
     const termIds = visibleTerms.map((t) => t.id);
@@ -106,7 +136,8 @@ export function createPublicRoutes(db: Db) {
     }
 
     // 3) Nur sichtbare Kurse, angereichert + sortiert (Wochentag, dann Startzeit, dann Stil).
-    const order = (wd: string) => WEEKDAYS.indexOf(wd as (typeof WEEKDAYS)[number]);
+    // Sortier-Index eines Wochentags. Unbekannte Werte liefern -1, genau wie zuvor.
+    const order = (wd: string) => WEEKDAYS.findIndex((known) => known === wd);
     const visibleCourses = courseRows
       .filter((co) => PUBLIC_COURSE_STATUS.has(co.status))
       .map((co) => {
@@ -163,8 +194,8 @@ export function createPublicRoutes(db: Db) {
     // Einzelstufe: vermeidet einen Chip-Dschungel und doppelte Labels (z.B. zwei
     // "Intermediate" aus verschiedenen Leitern). Die exakte Stufe steht weiter auf der Karte.
     const CATEGORY_ORDER = ['beginner', 'intermediate', 'advanced', 'heels', 'open'];
-    const presentCategories = [...new Set(visibleCourses.map((co) => co.levelCategory).filter(Boolean))]
-      .map((key) => key as string)
+    const presentCategories = [...new Set(visibleCourses.map((co) => co.levelCategory))]
+      .filter((key): key is NonNullable<typeof key> => key !== null && key.length > 0)
       .sort((a, b) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b));
 
     return c.json({

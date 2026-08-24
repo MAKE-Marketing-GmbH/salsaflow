@@ -22,6 +22,7 @@ import { Faq } from '@/public/home/Faq';
 import { LocationBand } from '@/public/home/LocationBand';
 import { InstagramShowcase } from '@/public/social/InstagramShowcase';
 import { StickyCta } from '@/public/home/StickyCta';
+import { CoursePath } from '@/public/home/CoursePath';
 
 export function HomePage() {
   // Kritiker-Runde 3, Befunde d-11 / m-01 / m-05 / m-07 / m-08: die fixe Cookie-Leiste
@@ -102,7 +103,13 @@ export function HomePage() {
             Zeilen: die Einfuhr oben und <WhyGrid /> hier. */}
         <Hero />
         <Offer />
-        <ScheduleTeaser withCoursePath />
+        {/* R207 (Raphael 23.08. 17:10): "'Vom ersten Grundschritt zur sicheren Tanzfläche':
+            mehr Abstand zwischen den Sektionen. Ideal abwechselnde Farben." Der CoursePath
+            wird aus dem ScheduleTeaser herausgeloest und steht jetzt als eigene Sektion auf
+            bg-soft zwischen ScheduleTeaser (paper-warm) und WallOfLove (paper-warm) — die
+            drei Bloecke alternieren wieder statt auf einem Ton zu verschmelzen. */}
+        <ScheduleTeaser />
+        <CoursePath />
         <WallOfLove />
         <EventsTeaser />
         <TeamBlock />

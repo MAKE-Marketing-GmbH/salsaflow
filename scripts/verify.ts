@@ -32,6 +32,7 @@ const EXPECTED_TABLES = [
   'course_teachers',
   'tariffs',
   'course_prices',
+  'events',
   'participants',
   'bookings',
   'payments',
@@ -50,6 +51,9 @@ async function main() {
   const { db } = handle;
 
   /* 1) Migration: alle Tabellen vorhanden -------------------------------- */
+  // SAFETY: Die SELECT-Liste dieser Abfrage besteht aus genau der Spalte table_name,
+  // und information_schema.tables deklariert sie als NOT NULL vom Typ sql_identifier.
+  // Jede Zeile hat daher genau die Form { table_name: string }.
   const tableRows = (
     await db.execute(
       sql`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`,
@@ -58,9 +62,9 @@ async function main() {
   const present = new Set(tableRows.map((r) => r.table_name));
   const missing = EXPECTED_TABLES.filter((t) => !present.has(t));
   check(
-    'Migration: alle 16 Tabellen vorhanden',
+    `Migration: alle ${EXPECTED_TABLES.length} Tabellen vorhanden`,
     missing.length === 0,
-    missing.length === 0 ? `${EXPECTED_TABLES.length}/16 da` : `fehlt: ${missing.join(', ')}`,
+    missing.length === 0 ? `${EXPECTED_TABLES.length}/${EXPECTED_TABLES.length} da` : `fehlt: ${missing.join(', ')}`,
   );
 
   /* 2) Seed: Stammdaten + Staffel ---------------------------------------- */
@@ -79,6 +83,9 @@ async function main() {
   const termRows = await db.select().from(terms).where(eq(terms.name, 'Staffel Januar 2026'));
   check('Seed: Staffel Januar 2026 in DB', termRows.length === 1, `${termRows.length} Term`);
 
+  // SAFETY: SOURCE_PATH zeigt auf die repo-eigene db/seed/januar-2026.json. Die Datei ist
+  // die Quelle, aus der scripts/seed.ts dieselbe courses[].is_workshop-Struktur liest;
+  // ein Struktur-Bruch laesst den nachfolgenden filter() sofort auffallen.
   const source = JSON.parse(await readFile(SOURCE_PATH, 'utf8')) as {
     courses: { is_workshop: boolean }[];
   };
@@ -128,6 +135,9 @@ async function main() {
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ email: 'admin@salsaflow-dc.com', password: adminPassword }),
   });
+  // SAFETY: Alle Felder sind optional, und der catch liefert bei ungueltigem JSON {}.
+  // Die Assertion behauptet daher nichts ueber den Inhalt; der Check unten liest
+  // user?.email defensiv und schlaegt bei jeder anderen Form fehl.
   const okBody = (await okRes.clone().json().catch(() => ({}))) as { user?: { email?: string } };
   check(
     'HTTP: Login mit richtigem Passwort -> 200',

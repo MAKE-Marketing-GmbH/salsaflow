@@ -20,7 +20,11 @@ export function Faq() {
   const { lang } = useLang();
   const f = HOME_V3[lang].faq;
   const a = HOME_V3[lang].answer;
-  const { item } = useReveal({ stagger: 0.06, distance: 12 });
+  /* R190: `distance: 12` raus. Der Token steht auf 20 (motion.tsx), und 12 war
+     genau der Wert, bei dem die Geste vorbei ist, bevor das Auge sie liest —
+     Raphaels "das ploppt einfach ein" auf dieser Seite. Der Stagger bleibt eng,
+     weil die FAQ-Liste viele kurze Zeilen hat. */
+  const { item } = useReveal({ stagger: 0.06 });
   const [open, setOpen] = useState<number | null>(null);
 
   // Geretteter AnswerBox-Kern (Frage + SEO-Antwort) als erste Frage, danach die bestehende FAQ.
@@ -53,7 +57,7 @@ export function Faq() {
               NICHTS dazu (bestehende Grid-Trick-Motion bleibt unangetastet). */}
           <Reveal className="lg:sticky lg:top-[calc(var(--nav-h)+2rem)] lg:self-start">
             <RevealWords as="h2" text={f.title} className={cn(sectionTitle, MEASURE_L)} />
-            <motion.p variants={item} className={`mt-5 max-w-sm ${sectionLead}`}>
+            <motion.p variants={item} className={`max-w-sm ${sectionLead}`}>
               {lead}
             </motion.p>
             {/* min-h-12: der Textlink mass nur 24px Hoehe (Critic Runde 17, Item 2). */}

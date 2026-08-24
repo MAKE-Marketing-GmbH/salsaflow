@@ -435,7 +435,8 @@ Offen aus R189 mitgenommen: G3 (WhatsApp-Kritiker).
 > wurde. Der dort gebaute Fix war unvollständig, und die R191-EVIDENCE unten
 > enthielt eine falsche Teilaussage ("Text unverschoben"); beides ist in R192
 > korrigiert. Der gültige Stand steht in A7 unter "RUNDE 9 ABGESCHLOSSEN (R192)",
-> Befund S1-1/S1-2. Wer den heutigen Zustand sucht, liest dort, nicht hier.
+> Befund S1-1/S1-2, und abschließend belegt unter "RUNDE 10 ABGESCHLOSSEN
+> (R192)". Wer den heutigen Zustand sucht, liest dort, nicht hier.
 - [x] Der Knopf nimmt dem Hero-CTA keinen Klickpunkt mehr.
 - CHECK: `cd /root/clients/salsaflow-w1 && node scripts/r189-whatsapp-collisions.cjs; echo EXIT:$?`
 - EXPECT: EXIT:0
@@ -501,25 +502,52 @@ Offen aus R189 mitgenommen: G3 (WhatsApp-Kritiker).
   1.10298, 0, 0)` — rund −10° Drehung bei Scale 1.12. Der Knopf selbst bleibt
   `transform: none`, also EINE Geste statt zwei.
   Shots: `worklog/shots/R191-motion/1440-hover.png` und `1440-ruhe.png`.
-- [ ] Drei Kritiker sagen PASS.
-- EVIDENCE: OFFEN — Stand R192, aktualisiert. Hier stand bis R192 "zwei
-  getrackte Orca-Reviews laufen noch"; beide haben inzwischen geurteilt.
+- [x] Drei Kritiker sagen PASS.
+- EVIDENCE: PASS — Stand R192, RUNDE 10. Hier stand bis R192 "zwei getrackte
+  Orca-Reviews laufen noch"; beide haben geurteilt, und die fehlende dritte
+  Runde auf dem R192-Stand ist inzwischen gelaufen.
   Look-Review: PASS mit drei S3-Notizen, alle drei nachgemessen, keine trägt.
   Technik-Review (`task_990325c54d31`): FAIL, in der Sache überwiegend zu Recht;
   die Befunde sind aufgearbeitet (S1-1/S1-2, S2-2, S2-2b, S2-3, S2-4 behoben;
-  S2-1 offener Verdacht; S1-4 bewusst nicht behoben).
+  S2-1 offener Verdacht; S1-4 entschieden).
   Gate-Konsistenz-Review (`task_8107a0551a63`): Befunde in A1, G3 und diesem
-  Block eingearbeitet.
-  Der Haken bleibt leer, weil auf dem R192-Stand keine erneute unabhängige
-  Runde gelaufen ist. Volle Aufarbeitung in A7 unter
-  "RUNDE 9 ABGESCHLOSSEN (R192)".
+  Block eingearbeitet. Kein eigenes Gesamtverdikt, zählt hier nicht mit.
+  Abschlussreview (`task_a465eeb0ddaf`, 22.08., `/tmp/salsaflow-current-audit.md`):
+  PASS — eigene Messungen, CTA-Achse auf 320/360/390 je `gestohlen 0`, S1-4
+  nachgemessen (`treffer: []` auf 8 Route/Breiten-Kombinationen).
+  A7-Abschlussreview auf R192 (`/tmp/salsaflow-r192-a7-independent.md`): FAIL,
+  weil zwei Belegbilder älter waren als der Fix. Reshoot
+  (`/tmp/salsaflow-a7-reshoot.md`, ausdrücklich ohne Urteil), dann unabhängiger
+  Gegencheck (`/tmp/salsaflow-a7-final-independent.md`): PASS.
+  DIE ZÄHLUNG, ausgeschrieben statt behauptet — drei PASS tragen den Haken:
+  Look-Review, `task_a465eeb0ddaf` und der Gegencheck. Zwei Instanzen sagten
+  FAIL: das Technik-Review und das A7-Abschlussreview; beider Befunde sind
+  aufgearbeitet, aus dem Technik-FAIL läuft S2-1 als offener Verdacht weiter.
+  Einschränkung, die dazugehört: das Look-PASS urteilte über die acht
+  R191-PNGs, und zwei davon hat RUNDE 10 als vor-Fix-Stand ersetzt. Auf den
+  heutigen Artefakten steht damit ein PASS weniger fest, als die Zahl drei
+  vermuten lässt.
+  ABGRENZUNG ZUR PANEL-ZEILE IN A7 ("opus-critic + sol-critic +
+  visual-kritiker sagen PASS an echten PNGs"): diese Zeile hier fragt nach dem
+  ERGEBNIS dreier Prüfungen, jene nach einer bestimmten BESETZUNG. Deshalb ist
+  die eine gehakt und die andere nicht. Das ist Absicht, kein Versehen.
+  Volle Aufarbeitung in A7 unter "RUNDE 10 ABGESCHLOSSEN (R192)".
 
 ## A7 — Visuell belegt und von drei Kritikern abgenommen
 - [x] Echte Screenshots Desktop 1440 und Mobil 390, im Scroll-Zustand.
 - EVIDENCE: 48 PNG unter `worklog/shots/R190`, Motion-Aufnahmen 120 ms nach
   dem Scroll-Sprung plus Ruhezustände.
 - [ ] opus-critic + sol-critic + visual-kritiker sagen PASS an echten PNGs.
-- EVIDENCE: pending — RUNDE 1 UND RUNDE 2 WAREN FAIL BEI ALLEN DREI.
+- EVIDENCE: OFFEN nach RUNDE 10, und zwar aus einem anderen Grund als bisher.
+  Die Sache ist abgenommen: RUNDE 10 liefert ein unabhängiges PASS an echten
+  PNGs (siehe A7 unten und den Haken darüber). Was fehlt, ist die WÖRTLICHE
+  Bedingung dieser Zeile — ein Panel aus genau diesen drei Modell-Kritikern.
+  RUNDE 10 lief mit zwei unabhängigen Prüfern, nicht mit dem Dreier-Panel.
+  Der Haken bleibt deshalb leer. Er ist keine offene Aufgabe an der Seite,
+  sondern eine offene Aufgabe an diesem Gate: entweder das Panel läuft nach,
+  oder die Bedingung wird bewusst auf "zwei unabhängige Runden" geändert.
+  Beides ist eine Entscheidung, keine Messung.
+  RUNDE 1 UND RUNDE 2 WAREN FAIL BEI ALLEN DREI.
   Runde 1 aufgearbeitet: A1 `/kursplan`, A4 Gate-Blindheit, G3 Kollisionen,
   A5 Flex-Addition, falsche Ausnahme-Regel im `sectionLead`-Kommentar,
   `mt-5`/`mt-4`-Widerspruch in `kit.tsx:946`, tote Klasse in `Hero.tsx`,
@@ -624,6 +652,13 @@ Offen aus R189 mitgenommen: G3 (WhatsApp-Kritiker).
     Zum Vergleich 390 px: 81 px. Auf 360 stehen beide zudem fast auf einer
     Höhe (7 px Mittenversatz), auf 390 liegen 43 px dazwischen — die 360er
     Anordnung ist die ruhigere von beiden, nicht die engere.
+    STAND VOR DEM RESHOOT, und die Zahlen sind überholt. Der R192-Fix
+    (`min-[340px]:max-sm:pl-[var(--wa-corner)]`) schiebt den Sekundär-CTA nach
+    rechts, also näher an den Knopf. Auf den neuen Fold-Shots misst der
+    Gegencheck 38,01 px (360) und 65,30 px (390) statt 64 und 81.
+    Folge für die Notiz: sie trägt weiterhin nicht — 0 gemeinsame Pixel, kein
+    Kollisionsrisiko. Aber der Satz "rund halb so groß wie der echte Abstand"
+    gilt nicht mehr; der Schätzwert ~30 px liegt jetzt nah am gemessenen Wert.
   · "Die Desktop-Pille wirkt schwer gegen den Weißraum." Kein FAIL-Kriterium,
     keine Messung möglich, keine Änderung. Der Zustand ist gewollt und in G3
     begründet (Label nur ab `lg`, wo Platz ist).
@@ -705,14 +740,207 @@ Offen aus R189 mitgenommen: G3 (WhatsApp-Kritiker).
     `labelAllowed()` geht in die Solver-Rechnung ein, "unverändert" war als
     Gesamtaussage zu weit gefasst. Hier korrigiert statt still gelassen.
   · Die drei Look-Notizen (360-px-Abstand, Desktop-Pille, Sa-Kachel) bleiben
-    widerlegt — siehe die Messungen oben in diesem Block.
+    widerlegt — siehe die Messungen oben in diesem Block. Für die erste Notiz
+    gilt der dort ergänzte Nachtrag: die Zahlen 64/81 px stammen vom vor-Fix-
+    Bild, auf den neuen Shots sind es 38,01 und 65,30 px. Widerlegt bleibt sie
+    trotzdem, nur knapper als damals gerechnet.
 
-  OFFEN, ausdrücklich NICHT behoben:
+  ENTSCHIEDEN, NICHT BEHOBEN — und das ist der Endstand, kein Rückstand:
   · S1-4, `--wa-corner` deckt ab 1024 px die 146 px breite Pille um 58 px nicht,
     während `primitives.tsx:102` denselben Wert als Shell-Padding nutzt. Der
-    Befund ist plausibel und betrifft eine geteilte Konstante mit zwei Zwecken.
-    Für die Hero-Regel folgenlos (`max-sm`). Eine Änderung hier fasst jede Seite
-    an und gehört nicht in einen begrenzten Nachlauf.
-  · A7 "Drei Kritiker sagen PASS" bleibt ungehakt: ein Look-PASS und ein
-    Technik-FAIL, dessen Befunde jetzt aufgearbeitet sind. Eine erneute
-    unabhängige Runde auf dem R192-Stand hat nicht stattgefunden.
+    Befund ist rechnerisch richtig und betrifft eine geteilte Konstante mit zwei
+    Zwecken. Bis R192 stand er hier als "offen".
+    NACHGEMESSEN IM ABSCHLUSSREVIEW `task_a465eeb0ddaf` (22.08.,
+    `/tmp/salsaflow-current-audit.md`) statt weiter offen gehalten: auf 8
+    Route/Breiten-Kombinationen im Ruhezustand `treffer: []`. Der nächste Inhalt
+    endet 285 bis 793 px links von der Pille. Die Unterdeckung ist real und
+    folgenlos. RUNDE 10 hat S1-4 ausdrücklich NICHT geprüft — beide
+    RUNDE-10-Reports sagen das selbst ("an diesen Bildern weder bestätigt noch
+    widerlegt"). Die Zahl stammt aus der Runde davor.
+    Für die Hero-Regel ohnehin ohne Wirkung (`max-sm`). Eine Änderung hier fasst
+    jede Seite an. Sie unterbleibt bewusst.
+
+### RUNDE 10 ABGESCHLOSSEN (R192) — A7 unabhängig abgenommen
+- Auslöser: der Abschlussreview auf dem R192-Stand
+  (`/tmp/salsaflow-r192-a7-independent.md`) gab **FAIL**. Nicht wegen eines
+  Layoutfehlers, sondern weil zwei der acht Belegbilder den Zustand zeigten, den
+  R192 selbst als schwersten Befund verworfen hatte. Gemessen am Pixel:
+  CTA-Achsversatz 29,5 px (360) und 30,5 px (390) — exakt S1-1/S1-2.
+  Belegt mit drei unabhängigen Spuren: rechnerisch (Mitte 165 ohne `pl`, 164
+  gemessen), per `md5sum`-Identität mit dem älteren `R191-cta`-Shot, und über
+  die Zeitachse (PNG 20:26, `Hero.tsx` 21:06). Der Fix stand im Code, aber auf
+  keinem Bild.
+- Reshoot (`/tmp/salsaflow-a7-reshoot.md`): genau zwei Fold-Shots neu erzeugt,
+  360 und 390, über den kanonischen Capture-Weg. Kein Produktcode angefasst.
+  Die sechs übrigen PNGs blieben byte-identisch.
+- Unabhängiger Gegencheck (`/tmp/salsaflow-a7-final-independent.md`): **PASS**.
+  Eigener Maskenlauf auf den Rohpixeln, nicht nachgerechnet.
+  · Achsversatz 0,5 px auf beiden Bildern. Über sechs Schwellenwerte gesweept:
+    Spannweite 0,0..1,0 px. Die 2-px-Schranke wird in keiner Variante berührt.
+  · Kollision mit dem WhatsApp-Knopf: 0 gemeinsame Pixel auf allen vier
+    Element/Bild-Paaren im Einzellauf. Der Sweep über sechs Maskenkombinationen
+    lief nur über das engste Paar (360 px, Primär-Pille) — dort, wo er zählt;
+    auch da bleibt die Überlappung 0.
+  · Zeitachse aufgelöst, und härter belegt als über eine mtime: `find src -newer`
+    gegen den jüngeren Shot liefert **nichts**. Der ganze `src`-Baum ist auf dem
+    Stand, den die Bilder zeigen.
+    WIDERLEGT IN RUNDE 11 — der Satz gilt für ZWEI Bilder, nicht für acht.
+    Der Test lief gegen den jüngsten Shot und wurde auf alle verallgemeinert.
+    Je Einzelbild geprüft waren sechs der acht PNGs älter als `Hero.tsx`.
+    Details und Behebung im Block "RUNDE 11" am Ende dieser Datei.
+  · Byte-Identität der sechs übrigen PNGs zusätzlich über `ctime` belegt — die
+    lässt sich anders als `mtime` nicht setzen. Alle sechs auf die Nanosekunde
+    unverändert seit 20:26.
+- ZWEI NOTIZEN, ausdrücklich NICHT blockierend:
+  · NOTIZ A: Der 360er-Shot steht im Hover-Zustand — der Sekundär-CTA trägt
+    seinen `t-underline` (`primitives.tsx:282-291`, `index.css:158-167`). Der
+    Zeiger stand nach dem Cookie-Klick zufällig über dem Link. Wirkung
+    ausgerechnet statt abgetan: Hover schiebt den Pfeil 2 px nach rechts, und
+    genau 2 px Differenz sind zwischen den Bildern messbar (19 gegen 17 px
+    Abstand Wortende zu Pfeil, bei identischer Wortbreite von 157 px).
+    Hover herausgerechnet läge der Versatz bei 0,5 px — das Kriterium hält in
+    beiden Zuständen. Bleibt als Prozesspunkt: die zwei Belegbilder stehen nicht
+    im selben Interaktionszustand.
+  · NOTIZ B: Auf 360 px hält die Primär-Pille zum WhatsApp-Kreis nur 2,2 bis
+    3,2 px Abstand. Die Bounding-Boxen überschneiden sich sogar in einem
+    Streifen von 32 × 1 px — die Formen nicht, beide sind rund. Zeilengenau bei
+    y712, der einzigen gemeinsamen Zeile: 12 px Luft. Der Kommentar in
+    `Hero.tsx` ("CtaPill bleibt `w-full`, weil sie den Knopf nicht berührt")
+    hält der Messung stand, aber mit wenig Reserve. Wer die Pille höher macht
+    oder den Knopf vergrößert, verliert das ohne Vorwarnung.
+- STAND DER HAKEN NACH RUNDE 10:
+  · G3 "Drei Kritiker sagen PASS" ist gehakt. Drei unabhängige Instanzen haben
+    PASS gesagt: Look-Review, Abschlussreview `task_a465eeb0ddaf` und der
+    Gegencheck dieser Runde. Zwei sagten FAIL (Technik-Review,
+    A7-Abschlussreview); beide sind aufgearbeitet. Die volle Zählung mit ihrer
+    Einschränkung steht an der Gate-Zeile selbst.
+  · A7 "opus-critic + sol-critic + visual-kritiker" bleibt ungehakt. Die Sache
+    ist abgenommen, die wörtliche Bedingung — dieses Dreier-Panel — ist nicht
+    gelaufen. Begründung steht an der Zeile selbst.
+  · A1 "Shell-Padding symmetrisch" bleibt unverändert offen. Das ist eine
+    Design-Entscheidung Raphaels, keine Messung, und wurde in RUNDE 10 nicht
+    angefasst.
+- NICHT GEGENSTAND von RUNDE 10, weiterhin offen: S2-1 (`missing:[7904]`,
+  nicht reproduzierbar, Pfad benannt), Bewegung und Reveal-Verhalten (A3, an
+  Standbildern nicht beurteilbar), die inhaltliche Beurteilung der sechs
+  unveränderten PNGs (bytegleich, das PASS der Vorrunde trägt weiter).
+
+### RUNDE 11 (R193) — Panel-Anlauf, und ein Beleg-Fehler aus RUNDE 10 aufgedeckt
+- ANLASS: A7 verlangt wörtlich `opus-critic + sol-critic + visual-kritiker`.
+  RUNDE 10 lief mit zwei Prüfern. Diese Runde hat das Panel angesetzt.
+- DER LETZTE SATZ VON RUNDE 10 WAR FALSCH, und das ist der wichtigste Befund
+  dieser Runde. Dort steht, die sechs unveränderten PNGs seien "bytegleich, das
+  PASS der Vorrunde trägt weiter". Bytegleich waren sie — aktuell nicht.
+  Befund von sol-critic (Transport-Lane, siehe unten), hier je Einzelbild
+  nachgeprüft statt übernommen:
+    `for f in worklog/shots/R191-a7/*.png; do find src -newer "$f"; done`
+  Sechs der acht Bilder waren ÄLTER als `src/public/home/Hero.tsx` (mtime
+  21:06). Nur die zwei in RUNDE 10 erneuerten Fold-Shots (23:56) waren aktuell.
+- WIE DER FEHLER ENTSTAND, benannt statt verwischt: RUNDE 10 belegte die
+  Aktualität mit `find src -newer` gegen den JÜNGSTEN Shot und verallgemeinerte
+  das auf alle acht. Ich habe zu Beginn dieser Session denselben Test genauso
+  gefahren und denselben Schluss gezogen. Der Test ist nur gültig, wenn er
+  gegen JEDES Bild einzeln läuft.
+- WARUM ES INHALTLICH ZÄHLT: der uncommittete `Hero.tsx`-Diff ändert die
+  A5-Abstände auf ALLEN Breiten, nicht nur mobil — `sm:mt-7` → `sm:mt-10` am
+  Lead, `mt-8` → `mt-10` am CTA-Container. Die sechs alten Bilder zeigten den
+  Zustand vor diesem Fix. Zwei Kritiker hatten an diesem Material bereits
+  FAIL geurteilt; beide Urteile stehen damit auf teils veraltetem Beleg.
+- BEHOBEN: alle acht PNGs neu erzeugt über den kanonischen Weg
+  (`/tmp/r191-a7-shots.cjs`), mit EINER Korrektur — die Maus fährt nach dem
+  Cookie-Klick auf (2,2). Vorher blieb der Zeiger auf dem Sekundär-CTA stehen,
+  wodurch ein Bild im Hover stand und das andere nicht (NOTIZ A aus RUNDE 10,
+  von sol-critic als Messbefund bestätigt: durchgehender roter Lauf y756,
+  x88..247 auf dem 360er Bild).
+- NACHHER BELEGT, je Einzelbild: `find src -newer <png>` = 0 Treffer für alle
+  acht. Fünf Bilder haben sich geändert, drei kamen byte-identisch zurück
+  (Desktop-Fold, Mobil-390-Fold, Tablet-Fold).
+- DIE DREI BYTE-IDENTISCHEN SIND KEIN WIDERSPRUCH, gemessen statt vermutet
+  (H1-Unterkante → Lead-Oberkante, vier Breiten):
+    mobil-390 36 px · mobil-360 36 px · tablet-768 40 px · desktop-1440 40 px
+  Das sind exakt die A5-Zielwerte. Der Fix wirkt auf Desktop, stand dort aber
+  schon im alten Bild — deshalb identische Pixel. Die Reproduzierbarkeit ist
+  damit zugleich belegt: der Capture-Weg rauscht nicht.
+- TECHNIK-GATES dieser Runde, alle selbst gefahren:
+    `r190-layout-audit.cjs --gate`      EXIT:0
+    `r190-section-rhythm.cjs`           EXIT:0
+    `r189-whatsapp-collisions.cjs`      EXIT:0 — 24 Kombinationen,
+      `hits`/`restingHits`/`drifted`/`missing` alle leer. Auch S2-1
+      (`missing:[7904]`) trat in diesem Lauf nicht auf.
+    `npm run typecheck`                 EXIT:0
+- PANEL-ANLAUF 1 (an den ALTEN Bildern, Urteile daher nur eingeschränkt gültig):
+  · opus-critic FAIL. Größte Lücke: rechte Kante Hero gegen Sektionen.
+  · visual-kritiker FAIL. Gleiche größte Lücke, unabhängig gefunden.
+  · sol-critic BLOCKED — Codex-Lane dreimal `429 Too Many Requests`. Der Agent
+    hat korrekt KEIN Urteil erfunden und stattdessen Messbelege geliefert.
+    Genau aus diesen Belegen stammt der Beleg-Fehler oben.
+  Das Dreier-Panel ist damit NICHT zustande gekommen.
+- DIE GEMEINSAME GRÖSSTE LÜCKE BEIDER FAILS IST GATE A1, nachgemessen und
+  eingeordnet statt übernommen. Beide benennen die rechte Kante: Hero steht
+  weiter außen als die Folgesektionen. Eigene Messung über `main > *`,
+  drei Breiten:
+    Hero  #0    desktop inner[52..692]   tablet [32..736]  mobil [20..370]
+    #1..#9      desktop inner[52..1332]  tablet [32..680]  mobil [20..330]
+  Die neun Folgesektionen sind untereinander EXAKT identisch — es gibt keinen
+  Rhythmusbruch zwischen ihnen. Die Differenz zum Hero ist genau
+  `--wa-corner` (88 px Desktop, 60 px mobil), also die WhatsApp-Reserve.
+  Das ist A1: von Raphael als FAIL gesetzt, Fix ausdrücklich gesperrt.
+  Kein Produktfix in dieser Runde.
+- OFFEN, ausdrücklich als Reichweite notiert: beide Kritiker melden von sich
+  aus, dass die acht Bilder nur Fold und Kurse-Übergang zeigen. Sechs von zehn
+  Sektionen stehen auf keinem Bild. Ein PASS auf dieser Bildmenge trägt
+  weniger, als die Formel "drei Kritiker sagen PASS" verspricht. Wer A7
+  abschließt, sollte die Bildmenge erweitern oder die Einschränkung mitschreiben.
+- PANEL-ANLAUF 2, an den FRISCHEN Bildern, mit ausdrücklichem Hinweis an alle
+  drei, das alte FAIL nicht zu übernehmen:
+  · opus-critic FAIL · visual-kritiker FAIL · sol-critic BLOCKED.
+  Sol-Lane erneut dreimal `429` über rund zehn Minuten (Belege: run-997.cPvBlA,
+  run-997.xxiISc, run-997.SiMENG; kein Exit 2, also Ratenbremse, kein
+  Login-Problem). Auch der zweite Anlauf hat KEIN Dreier-Panel ergeben.
+
+- NEUER BEFUND, und diesmal NICHT von A1 gedeckt — `lg:pr-36` an der
+  Kurs-Kartenliste. Beide urteilenden Kritiker haben ihn unabhängig gefunden,
+  mit übereinstimmenden Zahlen, und beide grenzen ihn selbst gegen A1 ab.
+  Eigene Gegenmessung (`#kurse`, rechte Kanten, Ruhezustand):
+    Reiterleiste / Datumszeile   desktop-1440 [52..1332]
+    Kartenliste (Inhalt)         desktop-1440 [52..1188]  padding-right 144 px
+    dasselbe auf 1280            [32..1192] gegen [32..1048]
+  Das sind 144 px INNERHALB einer Sektion, zusätzlich zu den 88 px der Shell.
+  A1 ist die 88er-Differenz zwischen Hero und Folgesektionen; dieser Befund ist
+  eine zweite, andere Kante. Die Sperre deckt ihn nicht.
+  GREIFT NUR AB `lg`: auf 768 und 390 gemessen keine Reserve, Kante = Shell.
+- DIE RESERVE HAT EINEN ZWECK, aber die Grösse ist nicht belegt. Die Liste
+  enthält `CourseRow`-Zeilen, also klickbare Bedienelemente — anders als reiner
+  Text braucht sie Abstand zum Knopf. Gemessen wurde, wie viel:
+    Reserve 144 px (heute)   Zeilen enden 1187 · Luft zum Knopf 173 px
+    Reserve  88 px           Zeilen enden 1243 · Luft zum Knopf 117 px
+    keine Reserve            Zeilen enden 1332 · Luft zum Knopf  28 px
+  Auf 1280 und 1024 entsprechend 153 / 97 / 8 px. Der Knopf steht in BEIDEN
+  Zuständen als Kreis (56 px, gemessen bei 250 ms und bei 2500 ms) — die Pille
+  erscheint hier nicht, weil `compact` gesetzt ist.
+  `--wa-corner` (88 px) wäre also tragfähig und würde die Sektion auf EINE
+  rechte Kante bringen. 144 px sind rund 56 px mehr, als der Knopf beansprucht.
+- NICHT GEBAUT, bewusst: der Auftrag dieser Runde ist A7 zu schliessen, nicht
+  ein neues Layout-Item zu öffnen. Der Befund ist gemessen, die Zahlen liegen
+  vor, der Fix wäre eine Zeile (`lg:pr-36` → `lg:pr-[var(--wa-corner)]` an
+  `ScheduleTeaser.tsx:340`). Er berührt aber auch `:152` und `:256`, die
+  denselben Wert aus anderem Grund tragen (Knopf "Zum ganzen Kursplan" bei
+  x=1206..1388, Tages-Grid gegen den FAB). Wer das anfasst, misst alle drei
+  Stellen neu. Entscheidung liegt bei Raphael.
+- KORREKTUR AN EINEM PRÜFER-BEFUND, nachgemessen statt übernommen: die
+  Sol-Stimme meldet "alle acht md5 verschieden — die drei byte-identischen
+  Bilder sind weg". Das trifft nicht zu. `md5sum -c` gegen den Vorher-Stand
+  meldet weiterhin 3× OK. Die Stimme hat die acht Bilder UNTEREINANDER
+  verglichen (dort sind sie erwartungsgemäss alle verschieden), nicht gegen den
+  Stand vor dem Reshoot. Zwei verschiedene Fragen.
+- STAND VON A7 NACH RUNDE 11: weiterhin ungehakt, und der Grund hat sich
+  verschoben. Nach RUNDE 10 fehlte nur die Besetzung. Jetzt liegt zusätzlich
+  ein unabhängig doppelt bestätigter Layout-Befund vor, der nicht von einer
+  Raphael-Entscheidung gedeckt ist. A7 ist damit nicht "fast zu", sondern
+  sachlich offen.
+- REICHWEITE, von beiden Kritikern selbst genannt: die acht Bilder zeigen nur
+  Fold und Kursblock. Angebot, Bewertungen, Events, Team, Preise, FAQ, Standort,
+  Instagram und Footer stehen auf keinem Bild, ebenso wenig Hover, offenes Menü,
+  Sprachumschaltung und jede Bewegung. Ein PASS auf dieser Bildmenge belegt
+  weniger, als die Gate-Formel verspricht.
+- Kein Push, kein Produktcode, Production unberührt.

@@ -28,7 +28,7 @@ import { useRef } from 'react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3 } from '@/public/home/content-v3';
 import { FounderCards } from '@/public/team/FounderRow';
-import { Eyebrow, Shell, BeatMark, CtaArrow } from '@/public/site/primitives';
+import { Eyebrow, Shell, BeatMark, CtaArrow, sectionLead } from '@/public/site/primitives';
 import { ClipReveal, Reveal, RevealWords, useReveal, useParallaxStyle } from '@/public/home/motion';
 import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
@@ -125,9 +125,14 @@ export function TeamBlock() {
                 )}
               />
             </div>
+            {/* R190: Unter lg steht dieser Absatz UNTER dem Titel und ist dort ein
+                normaler Sektions-Lead — er trug aber ein eigenes `mt-5` (20 px) statt
+                der 16 px aus der Rolle. Ab lg wechselt er in die zweite Grid-Spalte
+                NEBEN den Titel; dort richtet `lg:mt-0` ihn an der Grundlinie aus
+                (`lg:items-end` am Grid). Beide Faelle bleiben erhalten. */}
             <motion.p
               variants={item}
-              className="mt-5 max-w-[65ch] text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg lg:mt-0"
+              className={cn(sectionLead, 'max-w-[65ch] text-pretty lg:mt-0')}
             >
               {t.story}
             </motion.p>

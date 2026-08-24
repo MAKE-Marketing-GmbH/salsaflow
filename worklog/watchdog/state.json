@@ -1,0 +1,22 @@
+{
+  "worktree": "/root/clients/salsaflow-w1",
+  "repo": "/root/clients/salsaflow",
+  "raphael_spec_2026_08_23_1640": "menu+faq pasted into live builder e963b534/5cf2e897 pts/42 pid 3038094 at 14:43:34Z as queue-operation; see MENU-SPEC-2026-08-23.md",
+  "spec_note_updated": "2026-08-23T14:44:09Z",
+  "session_id": "3785d8f7-9e51-4b0d-bcdc-c1d2482d9dfa",
+  "prev_session_id": "e963b534",
+  "critic_session_id": "3e60fc23-a8b9-41a4-9c22-79c7a9a39d88",
+  "watchdog_dir": "worklog/watchdog",
+  "pid": 3187934,
+  "pane_id": "pts/6",
+  "critic_pid": 473015,
+  "critic_pane_id": "pts/2",
+  "orca_handle_builder": "term_9fac99b8-abf4-4530-8b96-af12332d6c0b",
+  "orca_handle_critic": "term_0cd243b8-0f4c-4523-a84b-bb3fd06058d2",
+  "status": "plateau_idle",
+  "last_gap": "KEINE \u2014 Plateau (Pass 08:48 FOLGUNS/raster/IG halten)",
+  "spend_stop": "Plateau",
+  "updated": "2026-08-24T08:30:00Z",
+  "note": "Tick 24.08 ~08:30Z/10:30 CEST: builder 3785d8f7 pts/6 pid 3187934 ALIVE IDLE kimi-k3 xhigh last asst 06:28:13Z R222; critic 3e60fc23 pts/2 pid 473015 ALIVE IDLE opus medium last asst 07:03:53Z Pass 08:48; Urteil mtime 07:03:33Z unchanged gap KEINE; plateau tick 3+ zero injects. w1 5227c5b4 DEAD wait A7 no spawn. Old e963b534 dead. alpen pts/32 live SID 2ba1fc7c (993e4669 gone) WORKING leave.",
+  "dead_waiting_A7": "5227c5b4-d507-4e05-9da0-046015d827e0"
+}

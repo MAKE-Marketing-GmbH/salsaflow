@@ -175,7 +175,7 @@ export function Breadcrumb({ trail, compact = false }: { trail: Crumb[]; compact
                 // min-h-11: die Crumb-Anker massen 20px — zu kleines Tap-Ziel
                 // (Critic Runde 8, Item 4). compact (nur bachata-Hero) nimmt das
                 // Polster wieder raus, damit das Foto-Band in den Fold kommt.
-                <a href={c.href} className={cn('t-hover inline-flex items-center hover:text-[var(--color-salsa)]', compact ? 'min-h-5' : 'min-h-11')}>
+                <a href={c.href} className={cn('t-hover inline-flex min-w-6 items-center hover:text-[var(--color-salsa)]', compact ? 'min-h-6' : 'min-h-11')}>
                   {c.label}
                 </a>
               )}
@@ -238,6 +238,8 @@ export function SubHero({
   media,
   dense = false,
   tightBottom = false,
+  airAboveTitle = false,
+  airBelowCta = false,
 }: {
   seoCrumbs: Crumb[];
   title: string;
@@ -258,6 +260,13 @@ export function SubHero({
       damit der Anfrage-Block #anfrage in den 730er-Fold rueckt. Reiner Abstand-Hebel,
       Default false = alle anderen Seiten unveraendert. */
   tightBottom?: boolean;
+  /** R215: durchgereicht an HeroFrame. Beide Flags existierten dort seit R208/R213,
+      waren ueber SubHero aber nicht erreichbar — die Seiten, die sie bisher nutzen
+      (/team, /events), bauen ihren Hero mit eigenem Code direkt auf HeroFrame.
+      /mehr/partys geht ueber SubHero und brauchte deshalb die Durchreichung.
+      Doku der Wirkung steht an den HeroFrame-Props, nicht doppelt hier. */
+  airAboveTitle?: boolean;
+  airBelowCta?: boolean;
 }) {
   return (
     <HeroFrame
@@ -265,6 +274,8 @@ export function SubHero({
       media={media}
       dense={dense}
       tightBottom={tightBottom}
+      airAboveTitle={airAboveTitle}
+      airBelowCta={airBelowCta}
       crumbs={seoCrumbs}
       title={title}
       titleAccent={titleAccent}
@@ -293,6 +304,8 @@ export function HeroFrame({
   media,
   dense = false,
   liftMedia = false,
+  airBelowCta = false,
+  airAboveTitle = false,
   tightBottom = false,
   children,
 }: {
@@ -313,6 +326,33 @@ export function HeroFrame({
       Kein negatives Band-Margin (wuerde Chips/CTA ueberdecken), keine neue Copy,
       Crop und Band-Hoehe bleiben. Wirkt nur zusammen mit dense+media. */
   liftMedia?: boolean;
+  /** R208 (Raphael 23.08. 17:14, "UEBER UNS - unter dem Button viel zu wenig Platz"):
+      gibt dem Band unter der CTA-Reihe Papier-Luft statt der 24px aus `pb-6`.
+      Opt-in und nicht global, weil derselbe Zweig /preise, /mehr/tanzschuhe und
+      /mehr/collabs traegt — dort sitzt unter dem CTA eine Zahlen- bzw. Preisleiste,
+      die den Abstand schon selbst mitbringt (R70). Auf /team steht der Button nackt
+      auf der Bandkante. */
+  airBelowCta?: boolean;
+  /** R213 (Raphael 23.08. 22:33, "Ueber-uns-Hero Luft oben und unten"): gibt der H1
+      Papier-Luft unter der Navigations-Pille.
+
+      Gemessen am laufenden DOM (scripts/r213-team-hero.cjs, gegen den Produktions-Build)
+      lag /team als EINZIGE Route bei 8px (Desktop) bzw. 7px (390) zwischen Pillen-
+      Unterkante und H1-Oberkante. Zum Vergleich in derselben Messung: /events 40,
+      /tanzkurse 61, /preise 84, die tight-Schwestern salsa/bachata/heels 68.
+
+      Die Ursache ist nicht der tight-Zweig selbst, sondern eine FEHLENDE Breadcrumb:
+      tight setzt `paddingTop: var(--nav-h)` und `pt-0`, der Abstand zur H1 entsteht auf
+      den Schwesterseiten allein aus dem `mb-1` der Crumb-Zeile. /team traegt keine Crumb,
+      also faellt dieser Puffer ersatzlos weg und die H1 startet exakt auf var(--nav-h) —
+      76px, waehrend die Pille (`.t-acc`) erst bei 68px endet und mit ihrer Rundung
+      optisch noch tiefer reicht. Deshalb liest sich der Fold als Ueberlappung.
+
+      Opt-in statt Aenderung am tight-Zweig: derselbe Zweig traegt /tanzkurse/salsa,
+      /bachata, /heels und /mehr/partys, deren Band-Crop laut R71/R159/R174 auf
+      Kinnlinien kalibriert ist. Ein globaler Griff dort verschoebe vier fremde Crops
+      fuer einen Fehler, den nur /team hat. */
+  airAboveTitle?: boolean;
   /** R84 (nur /schnupperstunde): kuerzt das Shell-Padding unten, damit #anfrage in den
       730er-Fold rueckt. Reiner Abstand-Hebel, Default false = andere Seiten unveraendert. */
   tightBottom?: boolean;
@@ -345,11 +385,22 @@ export function HeroFrame({
   /* R73-Nachzieh: liftMedia (nur salsa) zieht den Section-Top auf var(--nav-h) — wie
      tight, aber unabhaengig davon geschaltet, damit bachata (tight) unveraendert bleibt. */
   const lift = Boolean(liftMedia && dense && media);
-  const topPad = tight || lift || tightBottom
-    ? 'var(--nav-h)'
-    : dense
-      ? 'calc(var(--nav-h) + 0.5rem)'
-      : 'calc(var(--nav-h) + 1.5rem)';
+  /* R213: `airAboveTitle` steht bewusst VOR dem tight/lift-Zweig — genau wie R208 es bei
+     `airBelowCta` lernen musste. /team erfuellt `tight` (dense+media, keine facts, nicht
+     split) und landete deshalb auf dem nackten `var(--nav-h)`; ein Flag HINTER dem Zweig
+     waere wirkungslos geblieben.
+     +2.5rem = 40px sind kein runder Wunschwert, sondern der gemessene Korridor der
+     Schwesterseiten: /events 40, salsa/bachata/heels 68, /tanzkurse 61. 40px hebt die H1
+     auf y116 (Desktop) bzw. y106 (390) und damit 48px bzw. 47px unter die Pillen-
+     Unterkante — knapp ueber /events, deutlich unter /preise. Mehr waere Platz, den das
+     Band im 730er-Fold braucht. */
+  const topPad = airAboveTitle
+    ? 'calc(var(--nav-h) + 2.5rem)'
+    : tight || lift || tightBottom
+      ? 'var(--nav-h)'
+      : dense
+        ? 'calc(var(--nav-h) + 0.5rem)'
+        : 'calc(var(--nav-h) + 1.5rem)';
 
   const heading = (
     <motion.h1
@@ -362,7 +413,10 @@ export function HeroFrame({
         'type-h1 text-[var(--color-ink)]',
         wide
           ? 'text-[2.7rem] leading-[0.98] sm:text-[4rem] lg:text-[5rem] max-w-[16em]'
-          : MEASURE_XL,
+          /* R205 Runde 2 (Grok, /preise m390): bei 41.6px blieb die Script-Accent-Zeile
+             «Privatstunden.» allein als letzte Zeile stehen — sie war breiter als jede
+             mögliche Mitzeile. Eine Stufe kleiner auf Mobil laesst «und» davor passen. */
+          : cn(MEASURE_XL, 'max-sm:text-[2.25rem] max-sm:leading-[1.06]'),
         center && 'mx-auto',
       )}
     >
@@ -370,10 +424,22 @@ export function HeroFrame({
     </motion.h1>
   );
 
+  /* `mt-0` hebt das `mt-4` aus `sectionLead` gezielt auf.
+   *
+   * Diese Subline ist Flex-Kind (siehe die beiden Achsen unten, `gap-2.5`/`gap-4`/
+   * `gap-6` bzw. `gap-6` in der Split-Schiene). Dort traegt der Gap den Abstand,
+   * ein zusaetzlicher Rand addiert sich einfach dazu. Gemessen am gerenderten DOM
+   * mit dem Rand: H1→Lead stand auf /preise bei 40 px, /team 36 px,
+   * /tanzkurse/salsa 32 px — drei Werte fuer dieselbe Rolle auf drei Seiten.
+   * Ohne ihn liegt der Abstand wieder allein am Gap der jeweiligen Achse und ist
+   * damit pro Achse eine einzige Entscheidung.
+   *
+   * `sectionLead` bleibt trotzdem die Quelle fuer Schriftgroesse, Zeilenhoehe und
+   * Farbe — nur der Abstand kommt hier aus dem Layout statt aus der Rolle. */
   const leadEl = lead ? (
     <motion.p
       variants={item}
-      className={cn('text-pretty', sectionLead, center ? 'mx-auto max-w-2xl' : 'max-w-xl')}
+      className={cn('text-pretty', sectionLead, 'mt-0', center ? 'mx-auto max-w-2xl' : 'max-w-xl')}
       // R73-Nachzieh: auf salsa (lift) die Lead-Zeilenhoehe dichter, damit das Band
       // hoeher sitzt und die Koepfe Luft unter dem Kinn bekommen. Nur Anzeige-Straffung.
       style={lift ? { lineHeight: 1.32 } : undefined}
@@ -460,7 +526,19 @@ export function HeroFrame({
         // microToBand 0 -> 32, Koepfe bleiben im Fold: sichtbar 217px, zwei Koepfe
         // vorn inkl. Kinn). salsa/bachata/heels (tight) haben keine Microcopy ->
         // bleiben pb-0. Tanzschuhe/Collabs (dense+media, nicht tight) behalten pb-6.
-        media ? (dense ? (tight ? (microcopy ? 'pb-8' : 'pb-0') : 'pb-6 sm:pb-6') : 'pb-10 sm:pb-12') : (tightBottom ? 'pb-6 lg:pb-8' : 'pb-14 sm:pb-16 lg:pb-20'),
+        // R208: `airBelowCta` (/team, /events) gibt dem Band Papier-Luft unter der
+        // CTA-Reihe. Es steht bewusst VOR dem `tight`-Zweig: /team und /events erfuellen
+        // `tight` (dense+media, keine facts, nicht split) und landeten deshalb auf `pb-0`.
+        // Am laufenden DOM gemessen (1440x900) waren es 3px zwischen der Unterkante des
+        // sekundaeren Textlinks und der Bandoberkante — der erste Anlauf dieser Runde
+        // setzte das Flag hinter `tight` und blieb damit wirkungslos. Gemessen wird ab
+        // dem TIEFSTEN Element der CTA-Reihe, nicht ab der Pill: der Textlink daneben
+        // reicht weiter nach unten als der Button.
+        media
+          ? (dense
+              ? (airBelowCta ? 'pb-14 lg:pb-16' : tight ? (microcopy ? 'pb-8' : 'pb-0') : 'pb-6 sm:pb-6')
+              : 'pb-10 sm:pb-12')
+          : (tightBottom ? 'pb-6 lg:pb-8' : 'pb-14 sm:pb-16 lg:pb-20'),
       )}>
         <motion.div
           data-reveal
@@ -500,7 +578,17 @@ export function HeroFrame({
               </div>
             </div>
           ) : (
-            <div className={cn('flex flex-col', center ? 'items-center gap-6' : (dense ? (tight ? 'gap-2.5' : 'gap-4') : 'gap-6'), wide && (dense ? 'gap-5' : 'gap-7'))}>
+            /* R190, zweite Kritikrunde: dieser Gap traegt den Abstand H1->Lead, weil
+               `leadEl` daneben auf `mt-0` steht. Er hing aber an einer fuenffachen
+               Bedingung aus `center`, `dense`, `tight` und `wide`. Gemessen ergab das
+               H1->Lead: /preise 24 px, /tanzkurse/salsa 24 px, /team 20 px — `/team`
+               ist die einzige Route mit `axis="wide" dense` und landete auf `gap-5`.
+               Der Lead-Abstand hing damit an einer LAYOUT-Achse statt an seiner Rolle,
+               und das ist Raphaels Punkt (3) wortwoertlich.
+               `wide` bekommt jetzt denselben Wert wie der Normalfall; `dense`
+               (24 -> 16 px) und `tight` (10 px) bleiben, das sind bewusste
+               Verdichtungen mit eigener Begruendung weiter unten. */
+            <div className={cn('flex flex-col', center ? 'items-center gap-6' : (dense ? (tight ? 'gap-2.5' : 'gap-4') : 'gap-6'), wide && (dense ? 'gap-6' : 'gap-7'))}>
               {heading}
               {leadEl}
               {ctas}
@@ -618,7 +706,11 @@ export function SectionHead({
           className={cn(tight ? 'mt-0' : 'mt-5', sectionTitle, MEASURE_L, center && 'mx-auto')}
         />
       )}
-      {lead ? <p className={cn(tight ? 'mt-2' : 'mt-4', 'text-pretty', sectionLead)}>{lead}</p> : null}
+      {/* R190: Der Normalabstand steckt in `sectionLead` (primitives.tsx) und wird hier
+          nicht wiederholt. `tight` bleibt als bewusste Ausnahme und muss deshalb NACH
+          `sectionLead` stehen — `cn` ist tailwind-merge, dort gewinnt die spaetere
+          Klasse. Stuende `mt-2` davor, waere die Ausnahme wirkungslos. */}
+      {lead ? <p className={cn('text-pretty', sectionLead, tight && 'mt-2')}>{lead}</p> : null}
     </div>
   );
 }
@@ -935,10 +1027,16 @@ export function ClosingInvite({
               </>
             )}
           </motion.h2>
+          {/* R190: Hier stand `mt-5` VOR der Variante. Im Light-Zweig loeste
+              tailwind-merge das gegen das `mt-4` aus `sectionLead` auf, im
+              Night-Zweig blieb `mt-5` stehen — dieselbe Komponente rendert
+              damit 16 px oder 20 px, je nach Farbwelt. Genau die Uneinheitlichkeit,
+              die diese Runde beseitigen soll. Der Abstand steht jetzt fuer beide
+              Zweige gleich; nur Schriftfarbe und -groesse unterscheiden sich. */}
           <motion.p
             variants={item}
             className={cn(
-              'mx-auto mt-5 max-w-xl text-pretty',
+              'mx-auto mt-4 max-w-xl text-pretty',
               night ? 'text-base leading-relaxed text-white/80 sm:text-lg' : sectionLead,
             )}
           >

@@ -41,7 +41,8 @@ export type ScheduleCourse = {
 
 export type ScheduleFilters = {
   weekdays: string[];
-  styles: { key: string; de: string; en: string }[];
+  // `sort` kommt aus der Stil-Tabelle mit (server/public.ts) und traegt die Anzeige-Reihenfolge.
+  styles: { key: string; de: string; en: string; sort: number }[];
   // Level-Filter nach Kategorie-Schluessel (beginner/intermediate/advanced/heels/open).
   levelCategories: string[];
 };
@@ -57,7 +58,12 @@ export type ScheduleResponse = {
 export const WEEKDAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 export type WeekdayKey = (typeof WEEKDAY_ORDER)[number];
 
-const WEEKDAY_NAMES: Record<'de' | 'en', Record<WeekdayKey, string>> = {
+// Sortierrang eines Wochentags. Unbekannte Werte landen wie zuvor auf -1 (also ganz vorn).
+function weekdayRank(weekday: string): number {
+  return WEEKDAY_ORDER.findIndex((known) => known === weekday);
+}
+
+const WEEKDAY_NAMES = {
   de: {
     mon: 'Montag',
     tue: 'Dienstag',
@@ -78,7 +84,7 @@ const WEEKDAY_NAMES: Record<'de' | 'en', Record<WeekdayKey, string>> = {
   },
 };
 
-const MONTH_NAMES: Record<'de' | 'en', string[]> = {
+const MONTH_NAMES = {
   de: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
   en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 };
@@ -117,7 +123,7 @@ export function weekdayKeyForISO(iso: string): WeekdayKey | null {
  * Gleiche Rechnung wie `upcomingDates` in server/public.ts — hier als Zaehler, weil die
  * Live-Daten (api/index.ts, JSON-Seed) kein `nextDates` mitliefern. */
 export function remainingLessons(today: string, term: ScheduleTerm, weekday: string): number {
-  const target = WEEKDAY_ORDER.indexOf(weekday as WeekdayKey);
+  const target = WEEKDAY_ORDER.findIndex((known) => known === weekday);
   if (target < 0) return 0;
   let cursor = term.startDate > today ? term.startDate : today;
   const fromKey = weekdayKeyForISO(cursor);
@@ -265,7 +271,7 @@ export function buildScheduleSlots(courses: ScheduleCourse[], terms: ScheduleTer
 
   return slots.sort(
     (a, b) =>
-      WEEKDAY_ORDER.indexOf(a.weekday as WeekdayKey) - WEEKDAY_ORDER.indexOf(b.weekday as WeekdayKey)
+      weekdayRank(a.weekday) - weekdayRank(b.weekday)
       || a.startTime.localeCompare(b.startTime)
       || a.endTime.localeCompare(b.endTime),
   );
@@ -278,18 +284,27 @@ export function buildScheduleSlots(courses: ScheduleCourse[], terms: ScheduleTer
  * Startwert im Browser, damit die Seite nicht mit "wird geladen" beginnt. Der Netz-Aufruf
  * laeuft trotzdem und ueberschreibt ihn mit dem Live-Stand.
  */
+// Die zwei Globals, die Prerender und Client-Bootstrap zusaetzlich auf globalThis legen.
+type ScheduleScope = typeof globalThis & {
+  __SCHEDULE__?: ScheduleResponse;
+  __EMBEDDED_SCHEDULE__?: ScheduleResponse;
+  // Strukturell statt `Document`, weil die Server-tsconfig ohne DOM-Lib kompiliert und
+  // dieses Modul auf beiden Seiten laeuft. Im Browser ist das echte document zuweisbar.
+  document?: { getElementById(id: string): { textContent: string | null } | null };
+};
+
 export function embeddedSchedule(): ScheduleResponse | null {
   // Beim Prerender laeuft kein Browser: dort setzt scripts/prerender.mjs den Plan als
   // globalThis.__SCHEDULE__, damit die Komponenten schon serverseitig echte Zeiten rendern.
-  const scope = globalThis as {
-    __SCHEDULE__?: ScheduleResponse;
-    __EMBEDDED_SCHEDULE__?: ScheduleResponse;
-    document?: { getElementById(id: string): { textContent: string | null } | null };
-  };
+  // SAFETY: scripts/prerender.mjs und src/main.tsx setzen genau diese zwei Globals; das
+  // Standard-`globalThis` kennt sie nicht, darum die Sicht auf die erweiterte Form.
+  const scope = globalThis as ScheduleScope;
   if (scope.__SCHEDULE__) return scope.__SCHEDULE__;
   const node = scope.document?.getElementById('schedule-data');
   if (node?.textContent) {
     try {
+      // SAFETY: Der Inhalt von #schedule-data stammt aus scripts/prerender.mjs und wird dort
+      // aus derselben ScheduleResponse serialisiert. Kaputtes JSON faengt der catch-Zweig.
       return JSON.parse(node.textContent) as ScheduleResponse;
     } catch {
       return null;

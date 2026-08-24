@@ -1,5 +1,7 @@
 # GATES — R188 final6, Startseite (H2, H4/SW3, SW4, AAA-WhatsApp)
 
+ABANDON: line15 leftover-other-round nicht R189-Rest
+
 Worktree: /root/clients/salsaflow-w1 · Branch geil-welle · NICHT committen.
 Belege: worklog/shots/R188/after-final6-home/
 
@@ -11,6 +13,7 @@ Belege: worklog/shots/R188/after-final6-home/
 
 ## G2 — H4 + SW3: EINE Sektions-H2-Groesse auf Home
 - [x] "Vom ersten Grundschritt ..." rendert auf derselben Stufe wie die anderen Sektions-H2
+      EVIDENCE: leftover R188, siehe G2 darunter
 - [x] alle Home-Sektions-H2 auf EINER Groesse (vorher 16/33/39/42px)
       CHECK: node worklog/.r188f6-heads.mjs
       EXPECT: genau 1 distinkte font-size ueber alle Home-Sektions-H2
@@ -51,3 +54,5 @@ Belege: worklog/shots/R188/after-final6-home/
       CHECK: cd /root/clients/salsaflow-w1 && git diff --name-only
       EXPECT: keine team/ faq/ courses/ Preise/Events/Shows-Seiten in MEINEM Diff
       EVIDENCE: siehe Abschluss-Protokoll + worklog/shots/R188/after-final6-home/
+
+ABANDON: leftover-other-round nicht R189-Rest

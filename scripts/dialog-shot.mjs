@@ -40,13 +40,17 @@ const problems = [];
 const browser = await chromium.launch();
 
 for (const vp of VIEWPORTS) {
-  const context = await browser.newContext({
+  const contextOptions = {
     viewport: { width: vp.width, height: vp.height },
     deviceScaleFactor: 2,
     isMobile: vp.mobile,
     hasTouch: vp.mobile,
-    ...(vp.mobile ? devices['iPhone 13'].userAgent ? { userAgent: devices['iPhone 13'].userAgent } : {} : {}),
-  });
+  };
+  const mobileUserAgent = devices['iPhone 13'].userAgent;
+  if (vp.mobile && mobileUserAgent) {
+    contextOptions.userAgent = mobileUserAgent;
+  }
+  const context = await browser.newContext(contextOptions);
   const page = await context.newPage();
 
   await page.goto(`${BASE}/buchung`, { waitUntil: 'networkidle' });

@@ -113,11 +113,10 @@ html {
   scroll-padding-top: var(--nav-h);
 }
 
-/* Wenn Lenis aktiv ist (Desktop), uebernimmt Lenis das Smooth-Scrollen komplett.
-   Natives smooth wuerde bei Anker-Spruengen doppelt easen. */
-html.lenis-active {
-  scroll-behavior: auto;
-}
+/* R190: Hier stand eine Regel fuer `html.lenis-active`. Lenis ist am 13.08.2026
+   ausgebaut worden (Begruendung in SmoothScroll.tsx), die Klasse setzt seitdem
+   niemand mehr. Eine Regel fuer einen Zustand, den es nicht gibt, liest sich wie
+   eine getroffene Entscheidung und ist keine — entfernt. */
 
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -482,6 +481,16 @@ form h3.type-h3,
     background-color: var(--color-salsa-700);
   }
 
+  /* Warte-Zustand des Wizard-Weiter-Knopfs (R205 Runde 2, Opus + Kimi):
+   * opacity-55 auf dem roten Pill las sich als kaputtes Rotbraun. Voll deckender
+   * neutraler Pill; der Hover zeigt weiter Primaer-Rot (Knopf bleibt anklickbar,
+   * ein Klick nennt das fehlende Feld). */
+  .btn-primary.is-waiting:not(:hover) {
+    border-color: var(--color-line);
+    background-color: var(--color-bg-soft);
+    color: var(--color-ink-muted);
+  }
+
   .btn-outline {
     border-color: var(--color-ink);
     background-color: transparent;
@@ -753,28 +762,204 @@ body:has([data-partys-page]) section.relative.isolate.overflow-hidden > div.poin
   height: 12rem !important;
 }
 
-/* R151: microcopy-pb-8 schob das 19rem-Band unter den 730-Fold. Padding weg, Band bleibt. */
-body:has([data-partys-page]) section.relative.isolate.overflow-hidden > div:not([aria-hidden]) {
-  padding-bottom: 0 !important;
-}
+/* R215 (Raphael 24.08. 00:05): Hier stand seit R151 `padding-bottom: 0 !important` auf
+ * allen Viewports, mit der Begruendung "microcopy-pb-8 schob das 19rem-Band unter den
+ * 730-Fold. Padding weg, Band bleibt."
+ *
+ * Genau diese Regel war die Ursache des Befunds. Sie hat das `pb-8` aus R77 sitewide
+ * ausgehebelt — R77 hatte es fuer tight-Seiten MIT Microcopy gesetzt, weil der Satz
+ * "Du musst nicht perfekt sein..." sonst auf der Foto-Naht klebt. Gemessen am
+ * Produktions-Build (scripts/r215-partys-hero.cjs) stand /mehr/partys damit auf 0px
+ * zwischen letztem Ink-Element und Bandoberkante — auf 1440 UND auf 390, als einzige
+ * Route mit Foto-Band. Der Korridor der Geschwister: /events 64, /team 64, /preise 24
+ * (dort traegt die Preisleiste den Abstand mit).
+ *
+ * Der Zielkonflikt ist echt: 64px Luft schieben das 20rem-Band unter den 730er-Fold,
+ * dessen Crop auf Kinnlinien kalibriert ist (R150b). Raphaels Entscheidung 24.08.:
+ * Luft hat Vorrang, das Band wird dafuer gekuerzt. Die Kuerzung steht unten im
+ * lg-Block; hier faellt nur die Padding-Sperre weg, damit `airBelowCta` aus R208
+ * ueberhaupt wirken kann. Ohne das waere das Flag wirkungslos — dieselbe Falle, in
+ * die R208 schon einmal gelaufen ist. */
 
 /* R150b /mehr/partys Desktop 1440×730: 22rem bei Band-Top y484 ragt unter den Fold
  * und schneidet das Kinn; 15rem/18% schnitt den hinteren Scheitel. party-31-v3
  * (2048×1360) braucht Quell-Y 90–544 fuer beide Koepfe. Microcopy aus dem Fold,
  * Shell-pb weg, Band 20rem bei object-position 10% — Fenster endet vor y730. */
 @media (min-width: 1024px) {
-  body:has([data-partys-page]) section.relative.isolate.overflow-hidden > div.mx-auto {
-    padding-bottom: 0;
-  }
+  /* R215: `padding-bottom: 0` ist hier raus (siehe Begruendung ueber diesem Block).
+   * Den Abstand setzt jetzt `airBelowCta` in kit.tsx auf 64px — derselbe Wert, den
+   * /events und /team tragen. */
 
   body:has([data-partys-page]) section.relative.isolate.overflow-hidden p.text-sm {
     display: none;
   }
 
+  /* R215: Band 20rem -> 13rem. Die 64px Luft ueber dem Band kommen aus der Bandhoehe,
+   * nicht aus dem Fold (Raphaels Entscheidung 24.08.: "Luft, Band schrumpfen").
+   * Am laufenden DOM gemessen: Band-Top steigt durch die Luft von 417 auf 521. Mit
+   * 13rem = 208px endet das Band bei 729 und damit 1px ueber dem 730er-Fold.
+   * 16rem war der erste Versuch und ragte gemessen 47px unter den Fold — der Wert
+   * steht hier, weil er gemessen wurde, nicht weil er gerechnet war.
+   *
+   * `object-position` 10% -> 8%: Das ist eine ECHTE EINBUSSE, keine Feinjustierung,
+   * und sie gehoert benannt statt versteckt. R150b hat fuer party-31-v3 (2048x1360)
+   * den Bereich Quell-Y 90-544 als noetig belegt, damit beide Koepfe inkl. Kinn im
+   * Bild sind — 454px Motiv. Ein 208px hohes Fenster zeigt bei dieser Skalierung nur
+   * 296px Quellhoehe. Der kalibrierte Ausschnitt passt also bei KEINER
+   * object-position mehr hinein; gerechnet ueber 0% bis 20% deckt keiner 90-544 ab.
+   *
+   * Der Wert ist an Bildern gesucht, nicht gerechnet (scripts/r215-crop.cjs legt je
+   * Position einen Fold-Shot ab, alle angesehen):
+   *   15% (Quell-Y 160-455) schnitt der Frau vorn mitten durchs Gesicht — schlechter
+   *        als der Zustand vor dieser Runde.
+   *    0% (Quell-Y 0-296) zeigt den Mann ganz, die Frau vorn fehlt komplett.
+   *    8% (Quell-Y 85-381) ist der beste Kompromiss: der Mann steht vollstaendig
+   *        inkl. Kinn im Bild, die Frau vorn ist an der Haarlinie angeschnitten
+   *        statt auf Nasenhoehe.
+   *
+   * Ehrlich benannt: kein Wert loest es ganz. Das Motiv hat zwei Tiefenebenen, 296px
+   * Quellhoehe fassen nur eine. Wer beide Kopfreihen zurueckwill, braucht ein anderes
+   * Bild oder einen anderen Fold-Vertrag — nicht eine weitere object-position. */
   body:has([data-partys-page]) section.relative.isolate.overflow-hidden img[fetchpriority='high'] {
-    height: 20rem !important;
-    object-position: 50% 10% !important;
+    height: 13rem !important;
+    object-position: 50% 8% !important;
   }
+}
+
+/* ================================================================= WHATSAPP-RESERVE (R190)
+ *
+ * Raphael 22.08.: "die Breite der Seite ist übelst kaputt nach dem Hero."
+ *
+ * Die Ursache lag in der Shell: sie trug `pl-5 pr-24` — links 20 px gegen rechts 96 px,
+ * über die GANZE Seitenlänge, nur damit unten rechts nichts unter dem WhatsApp-Knopf
+ * liegt. Gemessen kam das als sechs verschiedene rechte Textkanten auf der Startseite an.
+ * Die Shell steht deshalb jetzt symmetrisch (`px-5 sm:px-8`, siehe primitives.tsx).
+ *
+ * Damit fehlt die Reserve, die der Knopf braucht. Gemessen nach der Umstellung:
+ * `scripts/r189-whatsapp-collisions.cjs` meldete 13 Route/Viewport-Kombinationen mit
+ * verdeckten Bedienelementen — darunter der Link "Alle 104 Bewertungen auf Google".
+ * Derselbe Lauf gegen den unveränderten Stand (HEAD) war grün. Die Kollisionen stammen
+ * also aus der Symmetrie, nicht aus einem Altbestand.
+ *
+ * DIESE REGEL ERSETZT DAS SEITEN-GUTTER DURCH EINE ECKE.
+ *
+ * Der Knopf ist `fixed` und belegt eine feste Fläche unten rechts im FENSTER:
+ *   Desktop  right-6 (24 px) + 56 px Kreis = rechte 80 px
+ *   Mobil    right-1 ( 4 px) + 48 px Kreis = rechte 52 px
+ * Er verdeckt also eine Ecke, keine Spalte. Die Reserve gilt darum nur für Inhalt, der
+ * im unteren Bereich der Seite endet — nicht für jede Zeile auf jeder Höhe.
+ *
+ * Warum nicht anders gelöst (beide Techniker kamen unabhängig auf denselben Schluss):
+ *   - `padding-bottom` am Seitenende wirkt nicht: der Knopf ist `fixed` und schwebt
+ *     über dem Fluss, nicht am Dokumentende.
+ *   - Ausweich-Korridor verlängern: am 21.08. gemessen wanderte der Knopf dabei auf
+ *     y=216 bzw. y=298 — ins obere Drittel, also weg von "unten rechts".
+ *   - Beim Scrollen ausblenden: erzeugte Flackern (Messung 21.08., Kommentar in
+ *     WhatsAppFloat.tsx:464).
+ *
+ * Der Laufzeit-Solver in WhatsAppFloat.tsx bleibt unverändert: er weicht weiter
+ * 0/56/112 px aus. Diese Regel gibt ihm nur den Platz, den er zum Ausweichen braucht. */
+:root {
+  /* Mobil: right-1 (4 px) + 48 px Kreis = 52 px Fussabdruck, plus 8 px Luft.
+     Ein Label gibt es dort nicht (`hidden sm:inline-block`). */
+  --wa-corner: 3.75rem;
+  /* R206: Grundabstand des Floats zur rechten Fensterkante, als Variable statt nur als
+     Tailwind-Klasse. Findet der Kollisionssolver keinen freien Slot mehr, parkt er den
+     Knopf halb ueber der Kante (`--whatsapp-collision-slide`) und rechnet gegen diesen
+     Wert. Ohne die Variable muesste die Rechnung `right-1` bzw. `sm:right-6` erraten. */
+  --whatsapp-base-right: 0.25rem;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --whatsapp-base-right: 1.5rem;
+  }
+}
+
+@media (min-width: 640px) {
+  :root {
+    /* Desktop: right-6 (24 px) + Kreis 56 px = 80 px Fussabdruck, plus 8 px Luft.
+       Bewusst NICHT auf die Pillenbreite (146 px) aufgeblasen: eine Reserve von
+       154 px waere breiter als das alte `pr-24`, das diese Runde gerade abschafft —
+       damit waere Raphaels Befund "die Breite ist übelst kaputt" zurueck, nur
+       schlimmer. Die ruhende Pille wird stattdessen am KNOPF begrenzt, nicht am
+       Seitenrahmen (siehe `.whatsapp-float` weiter unten). */
+    --wa-corner: 5.5rem;
+  }
+}
+
+/* ================================================================= KONTAKT MOBIL (Paket A)
+ *
+ * Befund 23.08.2026 an /kontakt, gemessen mit scripts/fixA-verify.cjs:
+ *   390px: FAB x=338..386, Formularkarte endet x=330 -> 8 px Luft.
+ *   360px: FAB x=308..356, Formularkarte endet x=300 -> 8 px Luft.
+ * Acht Pixel sind rechnerisch kein Treffer, optisch aber einer: der Knopf traegt
+ * `shadow-[0_10px_28px]` plus `ring-1`, beides laeuft ueber die Kartenkante. Im Fold-Shot
+ * (fertig/r205/kontakt-m390-fold.png) sitzt der gruene Kreis sichtbar auf der Karte und
+ * direkt neben dem Chip «Kursanmeldung».
+ *
+ * Der Hebel sitzt an der Karte, nicht am Knopf — genau wie bei R140/R142/R146/R150 daneben.
+ * Ein `--whatsapp-lift` waere hier falsch: das Formular ist hoch, jede Hoehe trifft eine
+ * andere Chipreihe. Ein globales `padding-bottom` wirkt gar nicht, der Knopf ist `fixed`
+ * (steht schon oben im WHATSAPP-RESERVE-Block, dort am 21.08. gemessen).
+ *
+ * Nachgemessen: die Shell traegt bereits `pr-[var(--wa-corner)]` (60 px mobil), die Karte
+ * endet dadurch bei x=330 und der Knopf beginnt bei x=338. Die Reserve EXISTIERT also —
+ * ein zweites `margin-right` an der Karte wurde probiert und wieder entfernt, es haette
+ * denselben Platz doppelt abgezogen und das Chipraster unnoetig gestaucht.
+ *
+ * Es bleibt der optische Ueberhang von Schatten und Ring. Der Hebel dagegen sitzt am
+ * Knopf und kostet keine Layoutbreite: unter sm faellt der weiche Schlagschatten weg und
+ * die Kante wird eine ruhige, deckende Linie. Der Kreis bleibt gleich gross, gleich hell
+ * und an derselben Stelle — er hoert nur auf, ueber die Kartenkante zu bluten. */
+@media (max-width: 639px) {
+  .contact-page ~ * a.whatsapp-float,
+  body:has(.contact-page) a.whatsapp-float {
+    box-shadow: 0 2px 8px rgba(17, 17, 17, 0.22);
+  }
+
+  /* Das Formular bekommt beim Anspringen Luft nach unten, damit der letzte Knopf nie
+     hinter der Ecke landet, wenn der Browser genau an die Kante scrollt. */
+  .contact-page form {
+    scroll-margin-bottom: var(--wa-corner);
+  }
+}
+
+/* Chips im Kontakt-Wizard: nie mitten im Wort brechen.
+ *
+ * Befund: «Schnupperstunde» stand als «Schnupperstun / de» im Chip (Beleg
+ * fertig/r205/kontakt-m390-fold.png). Ursache gemessen: das Label traegt
+ * `hyphens: auto` (Tailwind `hyphens-auto` in InquiryWizard.tsx ChoiceCard). Der Browser
+ * trennt damit nach deutschen Silbenregeln und laesst bei dieser Schrift den sichtbaren
+ * Trennstrich weg — uebrig bleibt ein zerrissenes Wort.
+ *
+ * `hyphens: none` schaltet die Silbentrennung ab. `overflow-wrap: normal` verbietet
+ * zusaetzlich den harten Bruch innerhalb eines Wortes. Lange Woerter brauchen deshalb
+ * Platz: darum gilt die Regel zusammen mit der Karten-Reserve oben, die dem Raster die
+ * fehlende Breite zurueckgibt. Umbruch zwischen WOERTERN bleibt erlaubt
+ * («Events & Workshops» faellt weiter sauber auf zwei Zeilen). */
+@media (max-width: 639px) {
+  .contact-page form label span {
+    hyphens: none;
+    -webkit-hyphens: none;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
+
+/* «Weiter» im aktiven Zustand darf nicht wie ausgegraut wirken.
+ *
+ * Befund: der Knopf trug `opacity-55` auf dem GANZEN Element, solange kein Anliegen
+ * gewaehlt war (InquiryWizard.tsx, aria-disabled). Gemessen: opacity 0.55 auf
+ * rgb(173,24,39) — im Shot ein blasses Rosa, das niemand als klickbar liest.
+ * Der aktive Zustand sah damit aus wie der gesperrte.
+ *
+ * R205 Runde 2 (Opus + Kimi): das gedeckte Grau-Rot aus dem ersten Fix las sich
+ * als kaputtes Rotbraun, nicht als Zustand. Der Wartezustand ist jetzt die
+ * .is-waiting-Regel bei .btn-primary (neutraler Pill: Linie + gedaempfte Tinte,
+ * Hover zeigt Primaer-Rot). Hier bleibt nur der Schutz gegen Transparenz. */
+.contact-page [data-testid='inquiry-next'] {
+  opacity: 1;
 }
 
 /* R150, /mehr/tanzschuhe Mobil: FAB lag auf der H2 «Der richtige Schuh»
@@ -886,7 +1071,143 @@ html:has(.faq-page) {
  * feste Bottom-CTAs verwenden dieselbe Variable als Offset. Nach dem Akzeptieren setzt
  * die Komponente die Variable wieder auf 0px. */
 
+/* R210 (Raphael 23.08. 21:00): Startseite — der Hinweis lag im Fold auf dem
+ * Conversion-Bereich. GEMESSEN als Rechteck-Schnitt im DOM (scripts/r210-cookie-overlap.cjs),
+ * nicht am Screenshot geschaetzt:
+ *   390x844   93 % des sekundaeren CTA «Schnupperstunde buchen» verdeckt, sein Label 100 %
+ *   1440x730  «seit 2018 in Basel» und «rund 40 Kurse pro Woche» je 100 % weg,
+ *             «aus 104 Google-Bewertungen» zu 23 % angeschnitten
+ *   1440x800  frei — das Problem haengt an der knappen Fold-Hoehe, nicht an der Breite
+ *
+ * WARUM DAS VORHANDENE POLSTER NICHT REICHT (und die Regel darunter trotzdem bleibt):
+ * `[data-hero-fold] { padding-bottom }` greift nachweislich (matched, 78px kommen an), aber
+ * es verlaengert den Fold nach UNTEN — bei 844px Viewport von 949 auf 1027px. Der Link steht
+ * unveraendert bei y=764. Ein Bodenpolster schiebt die naechste Sektion weg; es holt keinen
+ * Inhalt nach oben. Gegen eine Leiste, die IM Viewport liegt, ist es das falsche Werkzeug.
+ *
+ * GEGENPROBE OHNE HINWEIS (scripts/r210-nobanner.cjs, localStorage vorgesetzt) — sie trennt
+ * «Hinweis verdeckt» von «passt ohnehin nicht»:
+ *   1440x730  Trust-Zeile endet bei 711 bei 730 Viewport — sie PASST, mit 19px Luft.
+ *             Der Hinweis ist dort die alleinige Ursache.
+ *   390x844   sekundaerer CTA endet bei 808 und passt; die Trust-Zeile endet bei 872 und
+ *             liegt schon OHNE Hinweis ausserhalb. Fuer sie ist der Hinweis nicht die
+ *             Ursache — siehe die offene Notiz am Ende dieses Blocks.
+ *
+ * ENTSCHEIDUNG: Der Hinweis bleibt unten, wird aber im Fold der Startseite schmal und
+ * weicht waagerecht aus, statt mittig ueber dem Textblock zu liegen. Der Textblock steht
+ * links (bis ~x966 reichte die Karte bisher hinein); rechts daneben steht das Foto, und
+ * ueber einem Foto verdeckt die Karte keine Information. Damit bleibt der Hinweis vor der
+ * ersten Interaktion sichtbar — er nimmt nur keinen Text mehr weg.
+ *
+ * NICHT gewaehlt, jeweils mit Grund:
+ * - Float/Banner vertikal anheben: auf Mobil ausdruecklich verworfen (WhatsAppFloat.tsx:699).
+ *   Ein Lift haette den WhatsApp-Kreis genau auf «Schnupperstunde buchen» gesetzt — derselbe
+ *   Fehler, nur mit anderem Element.
+ * - Fold stauchen wie auf /kursplan: dort ist ein Foto-Band der Puffer. Im Home-Hero haengt
+ *   die Hoehe an --hero-photo-h und einem gemessenen pt-Wert, der die H1-Naht traegt
+ *   (Hero.tsx:256-273, ausdruecklich als «darf nicht kleiner werden» markiert).
+ * - Hinweis erst nach Scroll zeigen: er soll vor der ersten Interaktion sichtbar sein.
+ * - Hinweis unter die Navigation wie /kursplan und /events (Regeln weiter unten): GEBAUT
+ *   UND WIEDER VERWORFEN. Nachgemessen lag er dann auf der Navigation selbst: Desktop 100 %
+ *   ueber «Danceflow Night» und «Collabs», 98 % «Salsa», 87 % «Uebersicht»/«FAQ», Mobil 81 %
+ *   auf dem «Tanzkurse»-Knopf. Auf /kursplan geht das Muster auf, weil dort im selben Band
+ *   kein aufgeklapptes Menue sitzt. Auf der Startseite tauscht es nur ein verdecktes Element
+ *   gegen sieben andere.
+ *
+ * `[data-hero-fold]` ist der Routen-Haken: das Attribut steht nur im Home-Hero. */
+
+/* Desktop: Die Karte laeuft bisher mittig (max-w-640 zentriert, gemessen x326..966) und
+   liegt damit genau ueber der Trust-Zeile des linken Textblocks. Ab lg steht rechts das
+   Hero-Foto — dort verdeckt sie keine Information. `margin-left: auto` schiebt sie in
+   ihrem vorhandenen Wrapper nach rechts, ohne an `position` oder `max-width` zu ruehren.
+   Unter lg ist der Hero einspaltig, es gibt keine freie Spalte, also greift die Regel
+   erst ab lg. */
+@media (width >= 64rem) {
+  body:has([data-hero-fold]):has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true']))
+    [data-cookie-banner] > * {
+    margin-right: 0;
+    margin-left: auto;
+    /* Rechtsbuendig allein reichte nicht: mit max-w-640 begann die Karte bei x632, die
+       Textspalte endet bei x692 — 60px Rest-Ueberlappung auf «rund 40 Kurse pro Woche»
+       (gemessen, scripts/r210-gap.cjs).
+       Ein fester rem-Wert loest das aber nur fuer eine Breite. Gemessen (r210-col.cjs)
+       reicht der freie Platz rechts der Textspalte von 540px bei 1024 bis 988px bei 1920 —
+       34rem waren bei 1440 richtig und bei 1024/1180 zu breit (dort blieben 17 % auf der
+       Bewertungszeile und 100 % auf «seit 2018 in Basel» stehen).
+       Gemessen (r210-probe.cjs) endet die Textspalte bei jeder Breite ab lg konsistent bei
+       47–48 % der Fensterbreite: 484 von 1024, 692 von 1440. Die Karte darf also hoechstens
+       den Rest einnehmen.
+       Zwei Anlaeufe davor waren falsch, beide aus demselben Grund — sie rechneten gegen den
+       FENSTERRAND, obwohl der Karten-Wrapper rechts bereits 10.5rem Gutter fuer den
+       WhatsApp-Knopf abzieht (CookieBanner.tsx:171). `min(40rem, 50vw - 4rem)` liess bei
+       1440 die alten 640px stehen (Deckel gewann), `calc(50vw - 3rem)` ergab 672px und war
+       damit immer noch 80px zu breit.
+       Statt eine dritte Formel zu raten: die Karte bekommt keinen eigenen Maximalwert mehr,
+       sondern genau den Platz rechts der Textspalte. `50%` bezieht sich auf den Wrapper und
+       traegt dessen Gutter automatisch mit; die Textspalte endet bei 47–48 %, die 3rem Abzug
+       sind die Luft dazwischen. Damit stimmt der Wert bei jeder Breite ab lg, ohne
+       Sonderfall. */
+    max-width: calc(50% - 3rem);
+  }
+}
+
+/* Querformat-Mobil (breit genug fuer die Tablet-Regeln, aber sehr flach): Hier gibt es
+   keine freie Spalte — der Hero ist einspaltig und die Textspalte laeuft ueber die volle
+   Breite (gemessen 844x390 und 932x430: freier Platz rechts = 0px). Waagerecht ausweichen
+   geht also nicht, und die Mobil-Regel unten greift nicht, weil sie an < 40rem haengt.
+   Gemessen lag die Karte auf dem Lead-Text (50 % bei 844x390, 82 % bei 932x430).
+   Zwei Hebel wurden hier probiert und BEIDE gemessen verworfen:
+   - `--hero-photo-h` verkleinern: wirkungslos. Ab sm ist das Foto nicht mehr die absolut
+     positionierte Flaeche hinter dem Text (Hero.tsx:591 schaltet auf `relative` mit eigenem
+     Seitenverhaeltnis), die Variable traegt den Textversatz dort also nicht mehr.
+   - `padding-bottom` an der Section: kommt an (gemessen 94px), wirkt aber am Sectionsende
+     bei y=1161 — weit unterhalb eines 390px hohen Fensters. Es schafft Platz dort, wo das
+     Problem nicht ist.
+   Bei 390px Fensterhoehe fuellen Foto, Headline und Lead den Bildschirm; unten ist kein
+   Raum, in den die Karte ausweichen koennte. Deshalb geht sie hier nach OBEN unter die
+   Navigation — dasselbe Muster wie /kursplan und /events. Auf der Startseite war das fuer
+   normale Fenster falsch, weil dort die aufgeklappten Menues im selben Band liegen; im
+   Querformat mit dieser Fensterhoehe ist die Navigation zusammengeklappt und das Band frei.
+   Der Seitenstamm reserviert die gemessene Hoehe, damit die Karte nichts ueberdeckt. */
+@media (width >= 40rem) and (height <= 32rem) {
+  body:has([data-hero-fold]):has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true']))
+    [data-cookie-banner] {
+    top: var(--nav-h);
+    bottom: auto;
+  }
+
+  body:has([data-hero-fold]):has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true']))
+    main {
+    padding-top: calc(var(--cookie-banner-height) + 0.5rem);
+  }
+}
+
+/* Mobil: keine freie Spalte, der Hero ist einspaltig. Hier muss der Inhalt hoch.
+   Der Vorlauf ueber dem Textblock ist `calc(var(--hero-photo-h) - 12.625rem)` und mass
+   372px; der Fold ragt 106px ueber den 844er-Viewport hinaus. Statt an dem gemessenen
+   pt-Wert zu drehen — er traegt die Naht zwischen H1 und Lead und ist in Hero.tsx:256-273
+   ausdruecklich als «darf nicht kleiner werden» markiert — verkuerzt diese Regel das Foto
+   darueber. `--hero-photo-h` ist genau der Wert, von dem der pt abgezogen wird: ein
+   kleineres Foto zieht den ganzen Textblock mit nach oben, die Naht bleibt unveraendert.
+   Der Wert wurde in zwei Schritten gemessen, nicht geschaetzt: 4.5rem holten den
+   sekundaeren CTA frei, liessen aber die Trust-Zeile in den Kartenbereich rutschen (danach
+   100 % verdeckt). Nachgemessen fehlten weitere 34px, also 4.5 + 2.125 = 6.625rem. Auf
+   7.5rem aufgerundet, damit die Zeile nicht auf der Kartenkante klebt.
+   Der Wert gilt nur, solange der Hinweis steht; nach dem Akzeptieren faellt die Regel weg
+   und das Foto hat wieder seine volle Hoehe.
+   Die Variable wird auf DEMSELBEN Element neu gesetzt, das sie definiert (Hero.tsx:213
+   traegt `[--hero-photo-h:68svh]` direkt an der section). Eine Regel auf `body` waere von
+   dort ueberschrieben worden und haette nichts getan. */
 @media (width < 40rem) {
+  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true']))
+    section:has([data-hero-fold]) {
+    --hero-photo-h: calc(68svh - 7.5rem);
+  }
+}
+
+@media (width < 40rem) {
+  /* R210: Das Bodenpolster bleibt. Es traegt weiterhin den Abstand zur naechsten Sektion,
+     wenn der Hinweis oben sitzt — nur die Ueberdeckung im Fold loest es nicht. */
   body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-hero-fold] {
     padding-bottom: var(--cookie-banner-height);
   }

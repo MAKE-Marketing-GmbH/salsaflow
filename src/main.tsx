@@ -10,6 +10,9 @@ import type { ScheduleResponse } from '@/lib/schedule';
 // globale, BEVOR irgendeine Komponente rendert — embeddedSchedule() findet ihn dann.
 import { embeddedScheduleData } from '@/generated/schedule-embedded';
 
+// SAFETY: Erweitert globalThis nur um das eine optionale Feld, das embeddedSchedule()
+// in src/lib/schedule.ts unter genau diesem Namen wieder liest — dieselbe Struktur
+// wie dort in ScheduleScope dokumentiert.
 (globalThis as { __EMBEDDED_SCHEDULE__?: ScheduleResponse }).__EMBEDDED_SCHEDULE__ ??=
   embeddedScheduleData;
 

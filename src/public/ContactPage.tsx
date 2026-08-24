@@ -297,14 +297,23 @@ function ContactHero() {
               className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_20px_48px_-26px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
             >
               <img
-                src="/photos/premium/offer-salsa-wide-1400.webp"
+                src="/photos/premium/offer-salsa-1200.webp"
                 alt={lang === 'de'
                   ? 'Tanzpaar in der Salsa-Haltung, Frau mit blonden Locken im Vordergrund, heller Übungsraum'
                   : 'Dancing couple in salsa hold, woman with blonde curls in the foreground, bright practice room'}
-                // 1400x1000 (7:5) in 4/3: Crop nur minimal links/rechts. object-center haelt beide Koepfe frei.
-                className="h-full w-full object-cover object-center"
-                width={1400}
-                height={1000}
+                // r205 Runde 2: hier lag `offer-salsa-wide-1400.webp` (1400x1000). Gemessen im
+                // Browser (scratch/r205b-kontakt.mjs): Box 292x219, gerendert 306x219,
+                // overflowY 0 — die volle Bildhoehe war schon sichtbar, der Haarknoten der
+                // Frau ist in DIESER Quelldatei oben angeschnitten. Kein object-position-Wert
+                // kann das holen, was in der Datei fehlt. Die Schwester-Datei
+                // `offer-salsa-1200.webp` (1200x1600) zeigt dieselbe Szene mit vollem Kopf und
+                // Luft darueber. Rechnung 4/3-Slot: scale 292/1200 = 0.243, Motiv rendert
+                // 292x389, overflowY 170. Fenster 219px = 900 nat. Y. `center 10%` setzt die
+                // Oberkante auf 0.10*700 = 70 nat. Y — der Haarknoten (ca. 105 nat. Y) liegt
+                // darunter, unten bleibt die Huefte im Bild.
+                className="h-full w-full object-cover object-[center_10%]"
+                width={1200}
+                height={1600}
                 loading="eager"
               />
             </motion.div>
@@ -363,7 +372,7 @@ function LocationSection() {
         {/* Text + Maps-Button */}
         <Reveal>
           <motion.h2 variants={item} className={cn(sectionTitle, MEASURE_L)}>{l.title}</motion.h2>
-          <motion.p variants={item} className={`mt-4 max-w-xl text-pretty ${sectionLead}`}>{l.body}</motion.p>
+          <motion.p variants={item} className={`max-w-xl text-pretty ${sectionLead}`}>{l.body}</motion.p>
           <motion.div variants={item}>
             <a
               href={CONTACT.anfahrt}

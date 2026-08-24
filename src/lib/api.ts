@@ -1,5 +1,8 @@
 // Typisierter Zugriff auf die Admin-API (Etappe 6). Alle Calls laufen ueber den Vite-Proxy nach /api.
 
+// Fehlerform aller API-Routen dieses Projekts.
+type ApiErrorBody = { error?: string };
+
 export class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -15,18 +18,29 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
   });
   if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    // SAFETY: Alle Fehlerantworten dieser API liefern `{ error: string }` (siehe
+    // server/*-routes.ts); der Fallback deckt kaputtes oder leeres JSON ab.
+    const body = (await res.json().catch(() => ({}))) as ApiErrorBody;
     throw new ApiError(body.error ?? `Fehler ${res.status}`, res.status);
   }
-  if (res.status === 204) return undefined as T;
+  if (res.status === 204) {
+    // SAFETY: 204 heisst "kein Inhalt". Aufrufer typisieren solche Routen als `void`.
+    const empty = undefined as T;
+    return empty;
+  }
+  // SAFETY: Der Aufrufer benennt mit `T` den Vertrag der jeweiligen Route. Ueber die
+  // HTTP-Grenze kann TypeScript diesen Vertrag nicht selbst pruefen.
   return (await res.json()) as T;
 }
 
+// Was in einem JSON-Request-Body stehen darf. Genau der Wertebereich von JSON.stringify.
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
 export const api = {
   get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body: unknown) =>
+  post: <T>(path: string, body: JsonValue) =>
     request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
-  patch: <T>(path: string, body: unknown) =>
+  patch: <T>(path: string, body: JsonValue) =>
     request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
   del: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 };
@@ -91,6 +105,37 @@ export type AdminCourse = {
 export type TermDetail = {
   term: TermListItem;
   courses: AdminCourse[];
+};
+
+export type EventFormat = 'danceflow' | 'workshop' | 'anniversary' | 'floweekend' | 'other';
+export type EventStatus = 'draft' | 'published' | 'cancelled';
+
+export type PublicEvent = {
+  id: string;
+  slug: string;
+  format: EventFormat;
+  titleDe: string;
+  titleEn: string;
+  summaryDe: string;
+  summaryEn: string;
+  startDate: string;
+  endDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  location: string;
+  ticketUrl: string | null;
+  detailUrl: string | null;
+  imageUrl: string | null;
+  imageAltDe: string | null;
+  imageAltEn: string | null;
+  featured: boolean;
+};
+
+export type AdminEvent = PublicEvent & {
+  status: EventStatus;
+  sort: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type DuplicatePreview = {
@@ -166,7 +211,7 @@ export type TermBalance = { term: TermListItem; courses: CourseBalance[] };
 /* ----------------------------------------------------------------------------
  * Anzeige-Helfer
  * -------------------------------------------------------------------------- */
-const ON_SUFFIX: Record<string, string> = { on1: ' On1', on2: ' On2' };
+const ON_SUFFIX = { on1: ' On1', on2: ' On2' } satisfies Record<string, string>;
 
 // Setzt das Level-Label inkl. On1/On2-Suffix zusammen (z.B. "Advanced Flow On2").
 export function levelLabel(levelDe: string | null, onVariant: 'on1' | 'on2' | null): string {
@@ -176,7 +221,7 @@ export function levelLabel(levelDe: string | null, onVariant: 'on1' | 'on2' | nu
   return levelDe;
 }
 
-export const STATUS_LABEL: Record<string, string> = {
+export const STATUS_LABEL = {
   draft: 'Entwurf',
   published: 'Veröffentlicht',
   archived: 'Archiviert',
@@ -184,7 +229,7 @@ export const STATUS_LABEL: Record<string, string> = {
   full: 'Ausgebucht',
   cancelled: 'Abgesagt',
   finished: 'Beendet',
-};
+} satisfies Record<string, string>;
 
 // "2026-01-05" -> "5. Januar 2026"
 const MONTHS_DE = [

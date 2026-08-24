@@ -1,0 +1,18 @@
+Read the attached PNGs. Do not guess from text.
+
+Files:
+- Mobile 390x844: / Home after R125
+- Desktop 1440x730: / Home after R125
+
+Claims. All must be true for PASS:
+1. whatsappRechtsUnten: green WhatsApp control is bottom RIGHT and visible.
+2. homeKursplanFrei: the ghost CTA "Kursplan ansehen" is NOT under the WhatsApp circle. No pixel of that label under the circle.
+
+Locks: circle stays right. Lift stays 5rem. Do not discuss Salsa crop.
+
+Reply format:
+PASS or FAIL
+whatsappRechtsUnten: true/false
+homeKursplanFrei: true/false
+BELEG: what you see in the PNG
+biggest_gap: one sentence

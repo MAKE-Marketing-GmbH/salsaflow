@@ -44,11 +44,17 @@ export async function openDb(): Promise<DbHandle> {
   }
   mkdirSync(dirname(DATA_DIR), { recursive: true }); // PGlite legt nur das Blatt an
   const client = new PGlite(DATA_DIR);
-  const db = pgliteDrizzle(client, { schema }) as unknown as Db;
+  const pgliteDb: unknown = pgliteDrizzle(client, { schema });
+  // SAFETY: pgliteDrizzle liefert denselben Query-Builder ueber demselben `schema` wie der
+  // node-postgres-Treiber, nur mit PGlite-eigenem Session-Typ. Beide Formen sind hier
+  // austauschbar; TypeScript kann die Gleichheit ueber die Treibergrenze nicht selbst zeigen.
+  const db = pgliteDb as Db;
   return {
     db,
-    driver: 'pglite',
+    // SAFETY: pgliteMigrate erwartet seine eigene Datenbank-Instanz, die oben zu `Db` verengt
+    // wurde. Zur Laufzeit ist es dasselbe Objekt aus pgliteDrizzle.
     migrate: () => pgliteMigrate(db as never, { migrationsFolder: MIGRATIONS_FOLDER }),
+    driver: 'pglite',
     close: () => client.close(),
   };
 }

@@ -1,0 +1,27 @@
+Write EXACTLY /root/clients/salsaflow-w1/worklog/s7-luna-r132.md
+
+Read these images and JSON yourself:
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux132/bachata-mobil-390.png
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux132/bachata-desktop-1440.png
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux132/bachata-fold.json
+- /root/clients/salsaflow-w1/src/public/courses/styles/content.ts  (DE bachata band position)
+
+Claims. Default false if unsure:
+- bachataKoepfe390: both heads visible in the 390x844 fold, not just forehead/hair
+- kinnSichtbar390: chins of the two people are visible in the 390 photo (not cut at fold)
+- ctaSichtbar390: H1 plus at least one CTA fully in the 390 fold
+- cropBleibt20: content.ts DE bachata band still has position center 20%
+
+File ONLY:
+pass: true
+or
+pass: false
+bachataKoepfe390: true|false
+kinnSichtbar390: true|false
+ctaSichtbar390: true|false
+cropBleibt20: true|false
+BELEG: one sentence
+biggest_gap: one sentence
+
+First line pass: true only if all four true.
+No look. No code. work_type: mass. Ja/Nein only.

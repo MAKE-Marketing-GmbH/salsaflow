@@ -1,0 +1,20 @@
+Read the attached PNGs. Do not guess from text.
+
+Files:
+- Mobile 390x844: / Home after R126 crop
+- Desktop 1440x730: / Home after R126 crop
+
+Claims. All must be true for PASS:
+1. whatsappRechtsUnten: green WhatsApp control is bottom RIGHT and visible.
+2. kinnSichtbar: on mobile, the woman's mouth and chin are visible. No crop through mouth or chin. Both faces complete in the fold.
+3. homeKursplanFrei: the ghost CTA "Kursplan ansehen" is NOT under the WhatsApp circle.
+
+Locks: circle stays right. Lift stays 5rem. Motif stays hero-paar-dreh-01-portrait. Do not discuss Salsa crop.
+
+Reply format:
+PASS or FAIL
+whatsappRechtsUnten: true/false
+kinnSichtbar: true/false
+homeKursplanFrei: true/false
+BELEG: what you see in the PNG
+biggest_gap: one sentence

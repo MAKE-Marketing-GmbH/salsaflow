@@ -119,7 +119,7 @@ function PrivatHero({ c }: { c: PrivatContent }) {
               FAB deckte «näch» in «nächste Level»). pr-20 gilt nur unter sm,
               nicht auf einer Flex-Zeile (R138 Fund 7/8). Ab sm faellt der
               Abstand, weil der Desktop-Float ein Kreis rechts unten ist. */}
-          <motion.p variants={item} className={`mt-8 max-w-xl pr-20 sm:pr-0 ${sectionLead}`}>
+          <motion.p variants={item} className={`max-w-xl pr-20 sm:pr-0 ${sectionLead}`}>
             {h.lead}
           </motion.p>
           <motion.ul variants={item} className="mt-8 hidden flex-wrap gap-2 lg:flex">
@@ -181,7 +181,7 @@ function WhenSection({ c }: { c: PrivatContent }) {
           <motion.h2 variants={item} className={sectionTitle}>
             <Accented text={w.title} accent={w.titleAccent} />
           </motion.h2>
-          <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+          <motion.p variants={item} className={`${sectionLead}`}>
             {w.intro}
           </motion.p>
         </Reveal>
@@ -283,7 +283,7 @@ function FlowSection({ c }: { c: PrivatContent }) {
             <motion.h2 variants={item} className={`mt-5 ${sectionTitle}`}>
               <Accented text={f.title} accent={f.titleAccent} />
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {f.body}
             </motion.p>
             <motion.ol variants={item} className="mt-8 space-y-3">
@@ -389,7 +389,7 @@ function PricesSection({ c }: { c: PrivatContent }) {
             <motion.h2 variants={item} className={sectionTitle}>
               <Accented text={p.title} accent={p.titleAccent} />
             </motion.h2>
-            <motion.p variants={item} className={`mt-4 ${sectionLead}`}>
+            <motion.p variants={item} className={`${sectionLead}`}>
               {p.body}
             </motion.p>
             <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">

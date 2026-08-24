@@ -290,7 +290,20 @@ export function InquiryWizard({
   const topicLabel = topicCardLabel(activeTopic, topics.find((entry) => entry.key === activeTopic)?.label ?? activeTopic, de);
   const fields = DETAIL_FIELDS[activeTopic];
   const emailValid = !email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const contactValid = Boolean(name.trim() && (email.trim() || phone.trim()) && emailValid);
+  /* Welcher der drei Faelle gerissen ist. Text und Feldmarkierung kommen aus
+     derselben Entscheidung — sonst zeigt die Meldung auf ein anderes Feld als
+     der rote Rahmen. Reihenfolge = Lesereihenfolge des Formulars. */
+  const contactGap: 'name' | 'reach' | 'email' | null = !name.trim()
+    ? 'name'
+    : !emailValid
+      ? 'email'
+      : !email.trim() && !phone.trim()
+        ? 'reach'
+        : null;
+  /* Markiert wird erst nach einem Absendeversuch, nie beim Tippen. `error` ist
+     hier der Ausloeser: jede Eingabe loescht ihn bereits, damit verschwindet der
+     rote Rahmen im selben Moment wie die Meldung. */
+  const showGap = Boolean(error) && contactGap !== null;
   /* R188 K1: ohne Anliegen geht es nicht weiter. Die Wahl ist damit eine echte Frage,
      kein stillschweigend gesetzter Default. */
   const canAdvance = step > 0 || Boolean(topic);
@@ -349,8 +362,8 @@ export function InquiryWizard({
       setError(copy.topicError);
       return;
     }
-    if (!contactValid) {
-      setError(copy.contactError);
+    if (contactGap) {
+      setError(contactGap === 'name' ? copy.nameError : contactGap === 'email' ? copy.emailError : copy.reachError);
       return;
     }
     if (!privacy) {
@@ -434,9 +447,9 @@ export function InquiryWizard({
         </fieldset>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Input testId="contact-name" label={copy.name} value={name} onChange={(value) => { setName(value); setError(''); }} autoComplete="given-name" />
-          <Input label={copy.phone} value={phone} onChange={(value) => { setPhone(value); setError(''); }} type="tel" autoComplete="tel" />
-          <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" className="sm:col-span-2" />
+          <Input testId="contact-name" label={copy.name} value={name} onChange={(value) => { setName(value); setError(''); }} autoComplete="given-name" invalid={showGap && contactGap === 'name'} />
+          <Input label={copy.phone} value={phone} onChange={(value) => { setPhone(value); setError(''); }} type="tel" autoComplete="tel" invalid={showGap && contactGap === 'reach'} />
+          <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" invalid={showGap && (contactGap === 'email' || contactGap === 'reach')} className="sm:col-span-2" />
         </div>
         <PrivacyCheck checked={privacy} onChange={(next) => { setPrivacy(next); setError(''); }} label={copy.privacyLabel} />
         <Honeypot value={website} onChange={setWebsite} />
@@ -580,9 +593,11 @@ export function InquiryWizard({
                 <h3 ref={headingRef} tabIndex={-1} className="type-h3 text-[var(--color-ink)] outline-none">{copy.contactTitle}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.contactLead}</p>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <Input testId="contact-name" label={copy.name} value={name} onChange={(value) => { setName(value); setError(''); }} autoComplete="given-name" />
-                  <Input label={copy.phone} value={phone} onChange={(value) => { setPhone(value); setError(''); }} type="tel" autoComplete="tel" />
-                  <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" invalid={!emailValid} className="sm:col-span-2" />
+                  {/* Beim Fall `reach` fehlt genau einer von zwei Wegen. Beide zu markieren
+                      ist ehrlicher als einen auszuwaehlen: keiner der beiden ist der falsche. */}
+                  <Input testId="contact-name" label={copy.name} value={name} onChange={(value) => { setName(value); setError(''); }} autoComplete="given-name" invalid={showGap && contactGap === 'name'} />
+                  <Input label={copy.phone} value={phone} onChange={(value) => { setPhone(value); setError(''); }} type="tel" autoComplete="tel" invalid={showGap && contactGap === 'reach'} />
+                  <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" invalid={showGap && (contactGap === 'email' || contactGap === 'reach')} className="sm:col-span-2" />
                 </div>
 
                 <fieldset className="mt-6">
@@ -642,7 +657,11 @@ export function InquiryWizard({
           /* R188 K1: ohne Anliegen ist der Knopf sichtbar gedaempft. Er bleibt anklickbar
              (kein `disabled`), damit ein Klick die Meldung ausloest statt ins Leere zu
              gehen — ein toter Knopf sagt nicht, was fehlt. aria-disabled meldet den
-             Zustand an Screenreader. */
+             Zustand an Screenreader.
+             R205 Runde 2 (Opus + Kimi): opacity-55 auf dem roten Pill las sich als
+             kaputtes Rotbraun, nicht als Zustand. Jetzt ein voll deckender neutraler
+             Pill (Linie + gedaempfte Tinte); der Hover zeigt weiter das Primaer-Rot
+             und signalisiert damit die Klickbarkeit. */
           <button
             key="wizard-next"
             type="submit"
@@ -650,7 +669,7 @@ export function InquiryWizard({
             aria-disabled={!canAdvance || undefined}
             className={cn(
               'btn-base btn-primary min-h-12 gap-2 px-7 text-base',
-              !canAdvance && 'opacity-55',
+              !canAdvance && 'is-waiting',
             )}
           >
             {copy.next}<ArrowRight aria-hidden className="h-4 w-4" />
@@ -871,18 +890,25 @@ function Spinner() {
   );
 }
 
-const fieldClass = 'mt-1.5 w-full rounded-[var(--radius-chip)] border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 text-base text-[var(--color-ink)] outline-none focus:border-[var(--color-salsa)] focus:ring-2 focus:ring-[var(--color-salsa)]/25';
+const fieldClass = 'mt-1.5 w-full rounded-[var(--radius-chip)] border bg-[var(--color-paper)] px-4 py-3 text-base text-[var(--color-ink)] outline-none focus:border-[var(--color-salsa)] focus:ring-2 focus:ring-[var(--color-salsa)]/25';
+
+/* Der Rahmen des bemaengelten Feldes. Bewusst `border` und nicht `ring`:
+   index.css:348-352 loescht unter 640px jeden box-shadow in `main`, und ein
+   Tailwind-Ring IST ein box-shadow — die Markierung waere auf 390 still weg.
+   Zwei Pixel, damit der Unterschied zur Haarlinie ohne Farbvergleich auffaellt. */
+const fieldInvalidClass = 'border-2 border-[var(--color-salsa)]';
+const fieldNormalClass = 'border-[var(--color-line)]';
 
 // Feste Kennung der Fehlerzeile. Felder zeigen per aria-describedby darauf, sobald ein Fehler
 // steht — sonst liest ein Screenreader die Meldung vor, ohne zu sagen, wozu sie gehoert.
 const ERROR_ID = 'inquiry-error';
 
 function Input({ label, value, onChange, type = 'text', autoComplete, placeholder, optional, className, testId, invalid }: { label: string; value: string; onChange: (value: string) => void; type?: string; autoComplete?: string; placeholder?: string; optional?: boolean; className?: string; testId?: string; invalid?: boolean }) {
-  return <label className={className}><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><input className={fieldClass} type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} placeholder={placeholder} data-testid={testId} aria-invalid={invalid || undefined} aria-describedby={invalid ? ERROR_ID : undefined} /></label>;
+  return <label className={className}><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><input className={cn(fieldClass, invalid ? fieldInvalidClass : fieldNormalClass)} type={type} value={value} onChange={(event) => onChange(event.target.value)} autoComplete={autoComplete} placeholder={placeholder} data-testid={testId} aria-invalid={invalid || undefined} aria-describedby={invalid ? ERROR_ID : undefined} /></label>;
 }
 
 function TextArea({ label, value, onChange, placeholder, optional, invalid }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; optional?: boolean; invalid?: boolean }) {
-  return <label className="block"><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><textarea className={cn(fieldClass, 'min-h-28 resize-y')} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} aria-invalid={invalid || undefined} aria-describedby={invalid ? ERROR_ID : undefined} /></label>;
+  return <label className="block"><span className="text-sm font-semibold text-[var(--color-ink)]">{label}{optional && <span className="font-normal text-[var(--color-ink-muted)]"> optional</span>}</span><textarea className={cn(fieldClass, invalid ? fieldInvalidClass : fieldNormalClass, 'min-h-28 resize-y')} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} aria-invalid={invalid || undefined} aria-describedby={invalid ? ERROR_ID : undefined} /></label>;
 }
 
 /**
@@ -958,7 +984,12 @@ function wizardCopy(de: boolean, topic: TopicKey) {
     // requestLabel steht in der Mail an das Studio, nicht auf der Seite.
     requestLabel: de ? 'Anliegen' : 'Request',
     topicError: de ? 'Bitte wähle zuerst dein Anliegen.' : 'Please choose your request first.',
-    contactError: de ? 'Bitte gib deinen Vornamen und eine E-Mail oder Handynummer an.' : 'Please add your first name and either an email or mobile number.',
+    /* Drei Faelle statt einem Sammelsatz. Vorher stand hier fuer alle drei
+       dieselbe Zeile — wer nur den Vornamen vergessen hatte, las trotzdem etwas
+       ueber E-Mail und Handynummer und suchte im falschen Feld. */
+    nameError: de ? 'Bitte gib deinen Vornamen an.' : 'Please add your first name.',
+    reachError: de ? 'Bitte gib eine E-Mail oder eine Handynummer an, damit wir antworten können.' : 'Please add an email or mobile number so we can reply.',
+    emailError: de ? 'Diese E-Mail-Adresse sieht nicht vollständig aus. Bitte prüfe sie kurz.' : 'This email address looks incomplete. Please check it.',
     privacyError: de ? 'Bitte setze das Häkchen beim Datenschutz.' : 'Please tick the privacy box.',
     back: de ? 'Zurück' : 'Back',
     next: de ? 'Weiter' : 'Continue',

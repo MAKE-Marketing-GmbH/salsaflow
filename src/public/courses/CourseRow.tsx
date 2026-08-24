@@ -20,7 +20,7 @@
 import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useLang, WEEKDAY_LABEL, levelLabelI18n } from '@/lib/i18n';
+import { useLang, weekdayLabel as lookupWeekday, levelLabelI18n } from '@/lib/i18n';
 import type { ScheduleCourse } from '@/lib/schedule';
 
 /* ----------------------------------------------------------------------------
@@ -252,7 +252,7 @@ export function CourseRow({
   const teachers = course.teachers.map((tea) => tea.displayName.split(' ')[0]).join(' & ');
   const label = full ? c.waitlist : c.book;
   const beginner = course.levelCategory === 'beginner';
-  const weekdayLabel = WEEKDAY_LABEL[lang][course.weekday]?.long ?? course.weekday;
+  const weekdayLabel = lookupWeekday(lang, course.weekday)?.long ?? course.weekday;
   const [hot, setHot] = useState(false);
 
   return (
@@ -322,7 +322,12 @@ export function CourseRow({
             {teachers || c.teacherTba} · {course.locationName}
           </span>
           <span className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
-            <CourseBadge tone={full ? 'muted' : 'strong'}>{full ? c.full : c.free}</CourseBadge>
+            {/* "Plätze frei" NEBEN "Wieder frei ab 12. Okt." widerspricht sich auf derselben
+                Karte (R205 Runde 4, Opus+Grok). Traegt der Aufrufer einen Zusatz-Zustand,
+                ersetzt der die Frei-Badge statt sie zu doppeln. */}
+            {(full || !extraBadge) && (
+              <CourseBadge tone={full ? 'muted' : 'strong'}>{full ? c.full : c.free}</CourseBadge>
+            )}
             {extraBadge && <CourseBadge tone="muted">{extraBadge}</CourseBadge>}
             {beginner && <CourseBadge tone="outline">{c.beginner}</CourseBadge>}
             {lateEntry && <CourseBadge tone="outline">{c.lateEntry}</CourseBadge>}

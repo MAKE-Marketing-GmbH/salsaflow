@@ -1,0 +1,19 @@
+LOOK only. Write EXACTLY /root/clients/salsaflow-w1/worklog/s7-kimi-r133.md
+
+Read these PNGs yourself:
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux133/heels-mobil-390.png
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux133/heels-desktop-1440.png
+
+Route /tanzkurse/heels. First fold only.
+
+File ONLY:
+LOOK
+pass: true|false
+BELEG: one sentence
+biggest_gap: one sentence
+
+pass true only if a visitor sees a real heels class photo with faces including chin plus H1 plus a clear CTA in the 390 fold, and desktop still shows photo + H1 + CTA.
+
+WhatsApp circle bottom-right is a lock, not FAIL.
+No code. No Ja/Nein. No legal.
+Motivwechsel forbidden. Crop 12% is a lock.

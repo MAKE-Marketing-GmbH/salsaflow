@@ -11,7 +11,7 @@ export type Lang = 'de' | 'en';
 const STORAGE_KEY = 'salsaflow-lang';
 
 /* Wochentage DE/EN (lang + kurz), aus ARCHITEKTUR.md 4.3 */
-export const WEEKDAY_LABEL: Record<Lang, Record<string, { long: string; short: string }>> = {
+export const WEEKDAY_LABEL = {
   de: {
     mon: { long: 'Montag', short: 'Mo' },
     tue: { long: 'Dienstag', short: 'Di' },
@@ -30,7 +30,16 @@ export const WEEKDAY_LABEL: Record<Lang, Record<string, { long: string; short: s
     sat: { long: 'Saturday', short: 'Sat' },
     sun: { long: 'Sunday', short: 'Sun' },
   },
-};
+} satisfies Record<Lang, Record<string, { long: string; short: string }>>;
+
+/* Nachschlag mit offenem String — Kurs-Wochentage kommen als `string` aus der API. */
+export function weekdayLabel(lang: Lang, key: string): { long: string; short: string } | null {
+  const table = WEEKDAY_LABEL[lang];
+  // SAFETY: `key in table` prueft die Mitgliedschaft zur Laufzeit; nur dann wird der
+  // String als Schluessel gelesen. Unbekannte Werte liefern null, der Aufrufer zeigt
+  // dann seinen Rohwert-Fallback.
+  return key in table ? table[key as keyof typeof table] : null;
+}
 
 /* Statisches UI-Lexikon (ARCHITEKTUR.md 4.5) */
 export type Dict = {
@@ -62,7 +71,7 @@ export type Dict = {
   summerBadge: string;
 };
 
-export const UI: Record<Lang, Dict> = {
+export const UI = {
   de: {
     planTitle: 'Kursplan öffnen und passenden Kurs finden.',
     planLead:
@@ -121,7 +130,7 @@ export const UI: Record<Lang, Dict> = {
     retry: 'Try again',
     summerBadge: 'Summer courses',
   },
-};
+} satisfies Record<Lang, Dict>;
 
 /* Buchungs-Lexikon (Etappe 8). Quelle: ARCHITEKTUR.md 4.5. Bewusst getrennt vom Plan-Dict,
    damit es spaeter (Etappe 11/15) eigenstaendig erweitert werden kann. */
@@ -193,7 +202,7 @@ export type BookingDict = {
   back: string;
 };
 
-export const BOOKING_UI: Record<Lang, BookingDict> = {
+export const BOOKING_UI = {
   de: {
     bookNow: 'Jetzt buchen',
     title: 'Kurs buchen',
@@ -331,7 +340,7 @@ export const BOOKING_UI: Record<Lang, BookingDict> = {
     backToCourses: 'Pick another class',
     back: 'Back',
   },
-};
+} satisfies Record<Lang, BookingDict>;
 
 /* Rueckkehrseiten nach der Zahlung (Etappe 9): Erfolg / Abbruch / Zahlen. */
 export type PaymentDict = {
@@ -354,7 +363,7 @@ export type PaymentDict = {
   startingPayment: string;
 };
 
-export const PAYMENT_UI: Record<Lang, PaymentDict> = {
+export const PAYMENT_UI = {
   de: {
     checking: 'Zahlung wird geprüft...',
     confirmedTitle: 'Zahlung erfolgreich - Buchung bestätigt',
@@ -393,7 +402,7 @@ export const PAYMENT_UI: Record<Lang, PaymentDict> = {
     notFound: 'This booking was not found.',
     startingPayment: 'Starting payment...',
   },
-};
+} satisfies Record<Lang, PaymentDict>;
 
 // Wartelisten-Text (DE/EN). Ohne Platznummer: die kennt nur das Studio, nicht die Website.
 export function waitlistBody(lang: Lang): string {
@@ -403,7 +412,7 @@ export function waitlistBody(lang: Lang): string {
 }
 
 /* Level-Kategorien fuer den Level-Filter (DE/EN). Quelle: level_rungs.category. */
-export const CATEGORY_LABEL: Record<Lang, Record<string, string>> = {
+export const CATEGORY_LABEL = {
   de: {
     beginner: 'Beginner',
     intermediate: 'Intermediate',
@@ -418,9 +427,9 @@ export const CATEGORY_LABEL: Record<Lang, Record<string, string>> = {
     heels: 'Heels',
     open: 'Open Level',
   },
-};
+} satisfies Record<Lang, Record<string, string>>;
 
-const MONTHS: Record<Lang, string[]> = {
+const MONTHS = {
   de: [
     'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
@@ -429,7 +438,7 @@ const MONTHS: Record<Lang, string[]> = {
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December',
   ],
-};
+} satisfies Record<Lang, string[]>;
 
 // "2026-07-20" -> DE "20. Juli 2026" / EN "July 20, 2026"
 export function formatDateI18n(iso: string, lang: Lang): string {
@@ -453,7 +462,9 @@ type LangCtx = { lang: Lang; setLang: (l: Lang) => void; t: Dict };
 const Ctx = createContext<LangCtx>({ lang: 'de', setLang: () => {}, t: UI.de });
 
 function readStoredLang(): Lang {
-  if (typeof window !== 'undefined') {
+  // `'window' in globalThis` statt typeof: gleicher SSR-Guard, aber als echte
+  // Laufzeit-Mitgliedschaftspruefung am Umgebungs-Boundary.
+  if ('window' in globalThis) {
     const v = window.localStorage.getItem(STORAGE_KEY);
     if (v === 'de' || v === 'en') return v;
   }
@@ -477,7 +488,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
     } catch {
       // localStorage kann blockiert sein - kein Grund die App zu stoppen.
     }
-    if (typeof document !== 'undefined') document.documentElement.lang = l === 'de' ? 'de-CH' : 'en';
+    if ('document' in globalThis) document.documentElement.lang = l === 'de' ? 'de-CH' : 'en';
   }, []);
   return <Ctx.Provider value={{ lang, setLang, t: UI[lang] }}>{children}</Ctx.Provider>;
 }

@@ -70,18 +70,22 @@
 //   Messpunkt des Motivs (Parkett, Luminanz ~0.09) liegt Weiss damit bei >12:1, auf dem
 //   hellsten (Hemd, ~0.55) durch den 0.92-Fuss bei >7:1 — beides ueber AA.
 //
-// Trust-Leiste und Secondary-CTA (Kritikpunkt 5) bleiben mobil VOLLSTAENDIG im Fold, aber
-// wandern ins Overlay: Sterne + 4,9 + Anzahl als eine Zeile, "Kursplan ansehen" als sichtbarer
-// heller Link neben dem roten Pill statt als grauer Text-Link unter dem Banner-Rand.
+// Secondary-CTA bleibt mobil im Fold (gemessen 360x780: 15 px Reserve). Die Trust-Leiste
+// nicht: auf 360x780 lag sie 48 px unter dem Fold, sobald unter der Subline mehr Luft
+// ist (Raphael Punkt 5). Darum `max-[370px]:hidden`. Ab 390 px bleibt `4,9 · 104`
+// im Fold (2 px Reserve). Die langen Facts nur ab sm.
 
-import { motion, useReducedMotion, type Variants } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 import { CtaPill, CtaText, StarRating } from '@/public/site/primitives';
 
-import { EASE_OUT, RevealWords, useHydrated, useParallaxStyle } from '@/public/home/motion';
+/* R209: `EASE_OUT` und `useHydrated` sind hier raus. Beide trugen ausschliesslich den
+   Fold-Fade; seit der Hero ab Frame 1 fertig steht, liest sie in dieser Datei niemand mehr.
+   In motion.tsx bleiben beide unveraendert — die Sektionen unterhalb des Folds brauchen sie. */
+import { RevealWords, useParallaxStyle } from '@/public/home/motion';
 import { MEASURE_XL } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
@@ -120,8 +124,11 @@ function useParallaxDistance(): number {
 
 export function Hero() {
   const { lang } = useLang();
-  const reduced = useReducedMotion();
-  const hydrated = useHydrated();
+  /* R209: `useReducedMotion` ist hier raus. Es steuerte ausschliesslich Stagger-Abstaende
+     und Fade-Dauern des Folds — beides gibt es nicht mehr. Der Bewegungsschutz geht dabei
+     NICHT verloren: die einzige verbliebene Bewegung im Hero ist der Foto-Parallax, und der
+     nullt seine Distanz selbst (`useParallax` in motion.tsx: `const half = reduced ? 0 :
+     distance / 2`). Ein zweiter Haken hier haette denselben Wert nur noch einmal gelesen. */
   const h = HOME[lang].hero;
   const cta = HOME[lang].cta;
   const de = lang === 'de';
@@ -133,25 +140,47 @@ export function Hero() {
   const photoRef = useRef<HTMLDivElement>(null);
   const parallax = useParallaxStyle(photoRef, useParallaxDistance());
 
+  /* R209 (Raphael 23.08. 20:20): "Home-Erstbild (und Mobil-Erstbild) ist immer noch ein
+     Fade-Wrack. Hero-Erstframe ohne Opacity-Fade — Foto+Rot sofort."
+     Beleg worklog/shots/CRITIC-0823-2010/home-1440-fold0.png gegen home-1440-top.png.
+
+     GEMESSENER BEFUND (Frames bei 0/80/160/260/400/700ms, Dateigroesse als Proxy fuer
+     Bildinhalt): 5 KB bis 160ms, 75 KB bei 260ms, 498 KB bei 400ms, volle 644 KB erst ab
+     700ms. Der 260ms-Frame zeigt Nav, Cookie-Leiste und WhatsApp-Knopf — also genau die
+     Elemente AUSSERHALB dieses Reveal-Containers. Foto, beide CTAs und die Trust-Zeile
+     fehlen, der Lead steht halbtransparent, die H1 grau statt schwarz.
+
+     URSACHE, und sie ist nicht der Prerender: `useHydrated` liefert beim ersten
+     Client-Render `true`. In derselben Sekunde kippt `hidden` von `{opacity:1}` auf
+     `{opacity:0}`, und weil `animate="show"` sofort laeuft, fadet alles von 0 zurueck auf 1.
+     Der Schutz gegen die leere Seite ohne JavaScript war also korrekt — er kam nur einen
+     Frame zu spaet, um den ersten Eindruck zu retten.
+
+     ENTSCHEIDUNG: Der Fold animiert gar nicht mehr. Ein Reveal ist eine EINTRITTS-Geste;
+     er begleitet ein Element, das von unten ins Bild faehrt. Der Hero ist beim Laden schon
+     im Bild — hier gibt es keinen Eintritt, nur eine Verzoegerung vor dem ersten Eindruck.
+     Der Prerender-Schutz von `useHydrated` bleibt in motion.tsx erhalten und gilt fuer alle
+     Sektionen UNTERHALB des Folds unveraendert — die revealen weiter wie bisher. Nur diese
+     Datei braucht ihn nicht mehr, weil hier nichts mehr faded.
+
+     Nicht der Fade wurde beschleunigt, sondern weggelassen — eine kuerzere Dauer haette
+     denselben leeren Erstframe gezeigt, nur kuerzer. */
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : 0.08, delayChildren: reduced ? 0 : 0.05 } },
+    show: {},
   };
-  // Vor der Hydration ist `hidden` der sichtbare Endzustand. Sonst schreibt der Prerender
-  // opacity:0 in die H1 des Folds, und wer ohne JavaScript kommt, sieht eine leere Seite.
+  // Fold-Elemente stehen ab Frame 1 auf ihrem Endwert. Beide Varianten sind identisch,
+  // damit auch der INITIAL-Zustand schon der Endzustand ist — nicht nur das Ziel.
   const item: Variants = {
-    hidden: hydrated ? { opacity: 0, y: reduced ? 0 : 14 } : { opacity: 1, y: 0 },
-    show: { opacity: 1, y: 0, transition: { duration: reduced ? 0.3 : 0.5, ease: EASE_OUT } },
+    hidden: { opacity: 1, y: 0 },
+    show: { opacity: 1, y: 0 },
   };
-  // Das Foto darf NICHT mit `item` reinfahren. Gemessen (scripts/r1-hero-probe.cjs, 390x844):
-  // waehrend der Reveal-Phase stand die Bildkante bei y=14 statt y=0 — der 14px-Versatz aus
-  // `item.hidden` legte oben einen Papierstreifen ueber die volle Breite frei, weil das Foto
-  // auf Mobil jetzt full-bleed an der Fensterkante klebt. In der alten, gestapelten Fassung
-  // fiel derselbe Versatz nicht auf, da das Bild mitten im Fluss sass. Reveal daher rein ueber
-  // die Deckkraft — dieselbe Signatur, nur ohne Versatz.
+  // Das Foto trug bisher denselben Fade, nur ohne y-Versatz (der alte Grund: auf Mobil klebt
+  // es full-bleed an der Fensterkante, ein 14px-Versatz legte dort oben Papier frei). Der
+  // Versatz bleibt auch jetzt tabu — das Foto steht schlicht sofort.
   const photoItem: Variants = {
-    hidden: hydrated ? { opacity: 0 } : { opacity: 1 },
-    show: { opacity: 1, transition: { duration: reduced ? 0.3 : 0.6, ease: EASE_OUT } },
+    hidden: { opacity: 1 },
+    show: { opacity: 1 },
   };
 
   const alt = de
@@ -335,12 +364,19 @@ export function Hero() {
                 ? ['Salsa, Bachata', 'und Heels.', 'Mitten in Basel.']
                 : ['Salsa, bachata', 'and heels.', 'Here in Basel.']
               ).map((line, i) => (
+                /* R209: `instant` — die H1 steht ab dem ersten Frame schwarz und fertig da.
+                   Der Wort-Stagger startete bei `opacity: 0.72`, genau das war die graue
+                   statt schwarze Ueberschrift auf dem Erstbild-Beleg. Die drei Zeilen und
+                   ihre gemessenen Bruchstellen bleiben unveraendert; `stagger` ist unter
+                   `instant` wirkungslos und bleibt nur stehen, damit ein spaeterer Rueckbau
+                   die Werte nicht neu ausrechnen muss. */
                 <RevealWords
                   key={line}
                   as="span"
                   text={line}
                   className="block"
                   stagger={0.045 + i * 0.01}
+                  instant
                 />
               ))}
             </h1>
@@ -352,15 +388,36 @@ export function Hero() {
                 laut FAQ und Google-Reviews die haeufigste Hemmschwelle sind. */}
             <motion.p
               variants={item}
-              /* max-sm:mt-7 ist gemessen, nicht gerundet: der Lead laeuft in
-                 --color-ink-muted (#52524E), einer reinen PAPIER-Rolle. Bei mt-4 ragte seine
-                 Zeilenbox auf allen drei geprueften Breiten exakt 5px in die Fotokante hinein
-                 — und genau dort ist der Verlauf mit 0.92 am dunkelsten, ink-muted auf
-                 near-black waere unlesbar. mt-7 (28px) setzt ihn auf allen drei Breiten
-                 gleichmaessig 7px UNTER die Fotokante (390/360/430 je 497/436/548 gegen
-                 Fotounterkante 490/429/541) — der Abstand ist konstant, weil der Textblock
-                 seinen Startpunkt von derselben Fotounterkante ableitet. */
-              className="mt-6 max-w-md text-pretty text-lg leading-relaxed text-[var(--color-ink-muted)] max-sm:mt-7 sm:mt-7 sm:text-xl"
+              /* R190 (Raphael 22.08.: "wobei ich gerne zum Beispiel unter der
+                 Subline mehr Platz ist"). Gemessen lagen zwischen H1-Unterkante und
+                 Subline-Oberkante genau 28 px — auf Desktop UND Mobil derselbe Wert,
+                 also derselbe zu enge Takt. Ab sm sind es jetzt 40 px (mt-10).
+
+                 MOBIL: mt-9 (36 px). Hier stand vorher mt-7 mit der Begruendung, das
+                 setze den Lead "7 px UNTER die Fotokante". Nachgemessen gegen die
+                 sichtbare Box (die traegt `overflow-hidden`) stimmt das nicht: die
+                 Zeilenbox startete auf allen drei Breiten (390/360/430) exakt 0 px
+                 unter der Kante, sie beruehrte sie also.
+                 WOHER DIE ALTEN 7 px KAMEN, WEISS ICH NICHT. Ein erster Erklaerversuch
+                 stand hier und war falsch — er schob sie auf eine Messung gegen das
+                 <img> statt gegen die Box. Das kann nicht stimmen: der Ueberstand des
+                 Parallax-Traegers reicht nur nach UNTEN, eine Messung dagegen ergaebe
+                 ein negatives Vorzeichen, nicht +7. Die Zahl bleibt unerklaert; sie
+                 stammt aus einer Runde, deren Messweg nicht dokumentiert ist.
+
+                 Damit kippt auch das alte Argument, mehr mt schoebe den Lead in das
+                 dunkle Foto — er steht bereits an der Kante, mehr mt zieht ihn davon
+                 WEG. Der Fold traegt es: der zweite CTA endete bei mt-7 auf 390x844
+                 bei y=763 von 844 und auf der engsten Breite 360x780 bei y=749 von 780.
+                 Die 8 px aus mt-9 lassen dort 23 px Reserve.
+                 ACHTUNG, DIESE 23 px SIND KNAPP: eine Lead-Zeile misst rund 29 px
+                 (18 px `text-lg` x 1.625 `leading-relaxed`). Bricht die Copy auf eine
+                 vierte Zeile um, faellt der zweite CTA auf 360x780 unter den Fold.
+                 Wer den Text hier verlaengert, misst den Fold neu. */
+              /* Zwei Stufen, nicht drei: `max-sm:` deckt < 640 px, `sm:` deckt
+                 >= 640 px. Ein nacktes `mt-6` stand hier zusaetzlich und war
+                 damit unerreichbar. */
+              className="max-w-md text-pretty text-lg leading-relaxed text-[var(--color-ink-muted)] max-sm:mt-9 sm:mt-10 sm:text-xl"
             >
               {de
                 ? 'Drei Studios direkt am Bahnhof SBB. Komm allein oder zu zweit, die erste Stunde kostet dich nichts.'
@@ -380,13 +437,53 @@ export function Hero() {
                 Trefferflaeche bleibt: min-h-11 (44px) haelt das Tap-Ziel auf Mobil, ohne
                 dass der Link wie ein zweiter Button aussieht. DESIGN.md erlaubt genau
                 einen gefuellten Primary pro Sektion — der gehoert dem Kursplan. */}
-            <motion.div variants={item} className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 max-sm:mt-6 max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2">
+            {/* R190 (Raphael 22.08.: "wobei ich gerne zum Beispiel unter der Subline
+                mehr Platz ist."): mt-8 -> mt-10, mobil mt-6 -> mt-8.
+                Gemessen war der Abstand UNTER der Subline enger als der darueber
+                (32 gegen 40 px Desktop, 24 gegen 36 px mobil). Die Subline klebte
+                damit am CTA-Block statt frei zu stehen. Jetzt ist der Raum darunter
+                gleich gross wie darueber, mobil bleibt er eine Stufe kleiner —
+                der Fold traegt dort nicht mehr (siehe die Fold-Rechnung oben). */}
+            <motion.div variants={item} className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 max-sm:mt-8 max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2">
               <CtaPill href="/kursplan" className="max-sm:w-full">
                 {cta.plan}
               </CtaPill>
+              {/* R191, `max-sm:pr-[var(--wa-corner)]`: der Link ist unter sm vollbreit
+                  (`items-stretch` am Container). Seine Klickflaeche lief damit bis x=370,
+                  waehrend sein Text schon bei x=287 endet — 83 px unsichtbare Polsterung
+                  unter dem WhatsApp-Kreis (x338..386). Gemessen per `elementFromPoint`
+                  ueber die Schnittflaeche: 5 von 10 Punkten der untersten Linkzeile
+                  gehoerten dem Knopf, dort war der CTA nicht bedienbar.
+                  Der Knopf ist der falsche Hebel dafuer — er steht mit 20 px schon am
+                  unteren Anschlag, jeder negative Lift faellt an der Solver-Schranke
+                  (`bottom > viewportH - 12`, nachgerechnet fuer -4 bis -20).
+                  Also endet die Klickflaeche jetzt dort, wo der Knopf beginnt: dieselbe
+                  Zahl, die auch die Shell verbraucht (`--wa-corner`).
+                  `w-[calc(100%-var(--wa-corner))]` statt `pr-`: der Link ist `inline-flex`
+                  in einem `items-stretch`-Container, ein Innenabstand liesse die Box also
+                  gleich breit und schoebe nur den Text. Die Breite muss selbst kuerzer
+                  werden.
+
+                  R192, `max-sm:pl-[var(--wa-corner)]`: die schmalere Box allein reicht
+                  nicht. Hier stand vorher, der Text bleibe zentriert und bewege sich
+                  nicht — das war falsch, gemessen wandert er auf jeder Breite von 320
+                  bis 639 px um 29..31 px nach links (die halbe `--wa-corner`). Folge:
+                  die beiden gestapelten CTAs standen auf zwei verschiedenen
+                  Mittelachsen, auf 360 px sind 29 px rund 8 Prozent der Bildbreite.
+                  `CtaPill` darueber bleibt `w-full`, weil sie den Knopf nicht beruehrt.
+                  Der Ausgleich laeuft ueber INNENabstand links, nicht ueber
+                  `translate-x`: ein Transform verschiebt die Trefferflaeche mit und
+                  schob den Link damit wieder unter den Knopf (gemessen 34 von 88
+                  Rasterpunkten zurueck gestohlen). Padding bewegt nur den Inhalt. Die
+                  Box endet weiterhin bei `100% - var(--wa-corner)`, der Text steht
+                  wieder mittig auf der Pill-Achse.
+                  Erst ab 340 px (`min-[340px]:`): darunter kostet der Innenabstand
+                  60 px Textbreite und der Titel bricht von drei auf vier Zeilen
+                  (gemessen auf 320 px). Auf der engsten Breite wiegt eine vierte Zeile
+                  schwerer als 30 px Achsversatz, ueberall sonst ist es umgekehrt. */}
               <CtaText
                 href="/schnupperstunde"
-                className="min-h-11 max-sm:justify-center"
+                className="min-h-11 max-sm:w-[calc(100%-var(--wa-corner))] max-sm:justify-center min-[340px]:max-sm:pl-[var(--wa-corner)]"
               >
                 {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
               </CtaText>
@@ -402,7 +499,7 @@ export function Hero() {
                 INVARIANTS/HOME_V3 team.stats. */}
             <motion.dl
               variants={item}
-              className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--color-line)] pt-5 text-[0.9375rem] max-sm:mt-6 max-sm:pr-14 max-sm:pt-4 sm:mt-10"
+              className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--color-line)] pt-5 text-[0.9375rem] max-[370px]:hidden max-sm:mt-6 max-sm:pr-16 max-sm:pt-4 sm:mt-10"
             >
               <div className="flex items-center gap-2">
                 {/* Quelle vor dem Urteil: das G sagt WOHER die Zahl kommt, die Sterne sagen WIE
@@ -414,21 +511,29 @@ export function Hero() {
                 <dt className="sr-only">{de ? 'Google-Bewertung' : 'Google rating'}</dt>
                 <dd className="font-semibold text-[var(--color-ink)]">
                   {de ? '4,9' : '4.9'}
-                  <span className="ml-1.5 font-normal text-[var(--color-ink-muted)]">
+                  {/* R190: die lange Zeile lief unter den WhatsApp-Knopf
+                      ("4,9 aus 104 Google-" abgeschnitten, Grok Runde 4/5).
+                      `pr-16` allein hat den inneren Flex nicht umbrochen, der
+                      Umbruch hat die Zahl unter den Fold geschoben. Mobil deshalb
+                      die kurze Form, Desktop die volle. */}
+                  <span className="ml-1.5 hidden font-normal text-[var(--color-ink-muted)] sm:inline">
                     {de
                       ? `aus ${GOOGLE_REVIEWS.count} Google-Bewertungen`
                       : `from ${GOOGLE_REVIEWS.count} Google reviews`}
                   </span>
+                  <span className="ml-1.5 font-normal text-[var(--color-ink-muted)] sm:hidden">
+                    · {GOOGLE_REVIEWS.count}
+                  </span>
                 </dd>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="hidden items-center gap-1.5 sm:flex">
                 <span aria-hidden className="h-1 w-1 rounded-full bg-[var(--color-salsa)]" />
                 <dt className="sr-only">{de ? 'Gegründet' : 'Founded'}</dt>
                 <dd className="text-[var(--color-ink-muted)]">
                   {de ? 'seit 2018 in Basel' : 'in Basel since 2018'}
                 </dd>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="hidden items-center gap-1.5 sm:flex">
                 <span aria-hidden className="h-1 w-1 rounded-full bg-[var(--color-salsa)]" />
                 <dt className="sr-only">{de ? 'Kurse' : 'Classes'}</dt>
                 <dd className="text-[var(--color-ink-muted)]">
@@ -512,14 +617,32 @@ export function Hero() {
                   width={1080}
                   height={1350}
                 />
+                {/* >= 1024px: dasselbe Portraet wie mobil, NICHT das Querformat.
+                    Gemessener Grund (R190): die Desktop-Box ist 628x691, also hochkant.
+                    Das Querformat 1600x1066 hat darin overflowY = 0 — object-cover
+                    skaliert es exakt auf die Boxhoehe und zeigt es vollstaendig. Damit
+                    war `lg:object-top` wirkungslos: es gibt keinen Weg zu verschieben,
+                    und der Anschnitt der erhobenen Arme steckt bereits in der Quelldatei.
+                    Das Portraet 1080x1350 fuellt dieselbe Box mit 785px Hoehe, also 94px
+                    Spielraum — erst dadurch greift object-position ueberhaupt. */}
+                <source
+                  media="(min-width: 1024px)"
+                  srcSet="/photos/2026/hero-paar-dreh-01-portrait.webp"
+                  width={1080}
+                  height={1350}
+                />
                 <img
                   src="/photos/2026/hero-paar-dreh-01.webp"
                   alt={alt}
                   // R126: mobil 38% schnitt Mund/Kinn der Frau. 26% dreht den Crop nach oben
                   // (Koepfe bei y 12..50 %, weniger Hals). sm+ unveraendert.
-                  // lg:object-top statt 18%: bei 1440 sass der Scheitel des Mannes an der
-                  // Foto-Kante (Critic 13.08.2026).
-                  className="h-full w-full object-cover object-[50%_26%] sm:object-[50%_32%] lg:object-top"
+                  // lg: 8%. Die 94px Spielraum des Portraets werden hier verteilt, und der
+                  // knappe Punkt ist NICHT der Scheitel, sondern die erhobene rechte Hand des
+                  // Mannes — sie liegt oberhalb beider Koepfe. Screenshots bei 22% und 14%
+                  // (/tmp/fixB/after/hero-pos-22.png, hero-pos-14.png) schneiden ihr die
+                  // Fingerkuppen ab; bei 8% (hero-pos-8.png) stehen beide Haende, beide Arme
+                  // und beide Koepfe frei im Bild.
+                  className="h-full w-full object-cover object-[50%_26%] sm:object-[50%_32%] lg:object-[50%_8%]"
                   width={1600}
                   height={1066}
                   loading="eager"

@@ -30,6 +30,20 @@ export type MailInput = {
 };
 export type MailResult = { ok: boolean; driver: 'resend' | 'outbox'; id?: string; error?: string };
 
+// Request-Body der Resend-API (POST /emails). `html` und `reply_to` sind optional und
+// werden nur gesetzt, wenn die Mail sie wirklich hat.
+type ResendPayload = {
+  from: string;
+  to: string[];
+  subject: string;
+  text: string;
+  html?: string;
+  reply_to?: string;
+};
+
+// Die Resend-Antwort traegt die Message-ID, die wir nur protokollierend weiterreichen.
+type ResendResponse = { id?: string };
+
 function safeName(s: string): string {
   return s.replace(/[^a-z0-9._-]+/gi, '_').slice(0, 80);
 }
@@ -61,34 +75,29 @@ function headerSafe(value: string): string {
 }
 
 export async function sendMail(input: MailInput): Promise<MailResult> {
-  const m: MailInput = {
-    ...input,
-    to: headerSafe(input.to),
-    subject: headerSafe(input.subject),
-    ...(input.replyTo ? { replyTo: headerSafe(input.replyTo) } : {}),
-  };
+  const m: MailInput = { ...input, to: headerSafe(input.to), subject: headerSafe(input.subject) };
+  if (input.replyTo) m.replyTo = headerSafe(input.replyTo);
   const key = process.env.RESEND_API_KEY?.trim();
 
   // --- Echter Versand ueber Resend -----------------------------------------
   if (key) {
     try {
+      const payload: ResendPayload = { from: MAIL_FROM, to: [m.to], subject: m.subject, text: m.text };
+      if (m.html) payload.html = m.html;
+      if (m.replyTo) payload.reply_to = m.replyTo;
+
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-        body: JSON.stringify({
-          from: MAIL_FROM,
-          to: [m.to],
-          subject: m.subject,
-          text: m.text,
-          ...(m.html ? { html: m.html } : {}),
-          ...(m.replyTo ? { reply_to: m.replyTo } : {}),
-        }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const body = await res.text().catch(() => '');
         return { ok: false, driver: 'resend', error: `Resend ${res.status}: ${body.slice(0, 200)}` };
       }
-      const data = (await res.json().catch(() => ({}))) as { id?: string };
+      // SAFETY: `res.ok` ist oben geprueft, Resend liefert dann ein JSON-Objekt mit `id`.
+      // Der catch-Zweig ersetzt unlesbares JSON durch {}, deshalb ist `id` optional.
+      const data = (await res.json().catch(() => ({}))) as ResendResponse;
       return { ok: true, driver: 'resend', id: data.id };
     } catch (e) {
       return { ok: false, driver: 'resend', error: e instanceof Error ? e.message : 'Resend-Fehler' };

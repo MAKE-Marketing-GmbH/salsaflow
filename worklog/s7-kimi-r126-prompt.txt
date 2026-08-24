@@ -1,0 +1,11 @@
+Nur Look. Kein Write. Kein Memory. Kein Bash. Keine Gates. Keine Ja/Nein-Liste.
+
+NUR Read auf genau diese zwei Dateien:
+1. /root/clients/salsaflow-w1/worklog/shots/S7-ux126w/home-mobil-390.png
+2. /root/clients/salsaflow-w1/worklog/shots/S7-ux126w/home-desktop-1440.png
+
+Der gruene WhatsApp-Kreis unten rechts ist Absicht.
+
+Danach NUR Text, keine Tools:
+look: was am Bild stoert (Typo, Raster, Leere, Schnitt)
+biggest_gap: ein Satz

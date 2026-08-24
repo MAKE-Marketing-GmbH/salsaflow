@@ -53,7 +53,7 @@ export function LegalView({ doc, seoKey }: { doc: Record<'de' | 'en', LegalDoc>;
           <header className="mb-12">
             <Eyebrow>{d.lastUpdated}</Eyebrow>
             <h1 className={`mt-4 ${sectionTitle}`}>{d.pageTitle}</h1>
-            <p className={`mt-5 ${sectionLead}`}>{d.intro}</p>
+            <p className={sectionLead}>{d.intro}</p>
           </header>
 
           <div className="space-y-10">

@@ -56,8 +56,32 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
 
   const body = (
     <>
-        <RevealGroup className="max-w-3xl">
-          <motion.div variants={item}>
+        {/* R214 (Raphael 23.08. 23:34): "Home-Levels rechte Haelfte auf Ueberschriftenhoehe
+            fuellen." Der Kopf dieser Sektion lief als EIN einspaltiger Block auf `max-w-3xl`:
+            H2, Lead und der Link "Welches Level passt zu mir?" untereinander, alles links.
+            Gemessen vom Critic: H2 bei y2842, das erste Element rechts von x>=700 ist erst
+            das Foto bei y3127 — 285px hoch stand rechts nichts.
+
+            Der direkte Nachbar darueber macht es bereits richtig. `ScheduleTeaser` (Sektion
+            "Finde deinen naechsten Kurs in wenigen Minuten.") setzt seinen Kopf auf
+            `grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end` und haengt den CTA rechts
+            auf Lead-Hoehe. Genau diese Bauform steht jetzt auch hier — uebernommen, nicht
+            neu erfunden: zwei Kapitelkoepfe derselben Seite sollen gleich gebaut sein, sonst
+            ist der naechste Ausreisser schon angelegt.
+
+            `lg:pr-36` kommt mit und ist kein Zierrat: der fixe WhatsApp-Knopf liegt rechts,
+            und genau deshalb traegt der Nachbar diesen Rechtsabstand (Critic Runde 15,
+            Item 1). Nachgemessen auf 1440 statt geglaubt: Knopf-Linkskante 1360,
+            Link-Rechtskante 1188, also 172px Abstand. Ohne das `pr-36` liefe der Link
+            hier in dieselbe Zone.
+
+            `items-end` statt `items-center`: der Link soll auf der Grundlinie des Leads
+            sitzen, nicht mittig zwischen H2 und Lead schweben.
+
+            Unter lg bleibt alles wie bisher einspaltig gestapelt — auf 390 war die Sektion
+            laut Urteil ohne Befund, und diese Aenderung fasst das mobile Layout nicht an. */}
+        <RevealGroup className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:pr-36">
+          <motion.div variants={item} className="max-w-3xl">
             <Heading
               /* R188 / H4 + SW3 (Video 21.08.): "Ueberschriften ueberall gleiche Groesse.
                  'Vom ersten Grundschritt zur sicheren Tanzflaeche' faellt raus."
@@ -82,14 +106,21 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
             >
               {c.title}
             </Heading>
+            {/* Lead in denselben linken Block wie die H2: sie gehoeren zusammen und bilden
+                die linke Grid-Spalte. Vorher waren beide plus der Link drei Geschwister
+                eines einspaltigen Stapels. */}
+            <p className={`max-w-xl ${sectionLead}`}>{c.lead}</p>
           </motion.div>
-          <motion.p variants={item} className={`mt-4 max-w-xl ${sectionLead}`}>
-            {c.lead}
-          </motion.p>
+          {/* Der Link bleibt ein Textlink und wird NICHT zur roten Pille wie beim Nachbarn.
+              Dort ist "Zum ganzen Kursplan" die Hauptaktion der Kursplan-Sektion; hier ist
+              "Welches Level passt zu mir?" eine Orientierungshilfe zur Level-Treppe darunter.
+              Zwei rote Pillen in zwei aufeinanderfolgenden Sektionen wuerden die eine
+              Hauptaktion der Seite verwaessern — die Stufe der Aktion bleibt, nur ihr Platz
+              aendert sich. `mt-6` faellt weg: den Abstand traegt jetzt der Grid-Gap. */}
           <motion.a
             variants={item}
             href="/kursaufbau"
-            className="group mt-6 inline-flex min-h-11 items-center gap-2 text-base font-semibold text-[var(--color-salsa)]"
+            className="group inline-flex min-h-11 w-fit items-center gap-2 text-base font-semibold text-[var(--color-salsa)]"
           >
             {c.cta}
             <ArrowRight size={17} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" aria-hidden />
@@ -199,7 +230,10 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
   }
 
   return (
-    <section id="kursaufbau" className={cn('scroll-mt-24 bg-[var(--color-paper)]', SECTION_Y)}>
+    /* R207 (Raphael 23.08. 17:10): eigene Sektion zwischen ScheduleTeaser (bg-soft) und
+       WallOfLove (paper-warm). bg-paper-warm statt bg-paper — das war vorher auf
+       /kursaufbau der Papier-Ton; hier ist der Wechsel die gewuenschte Alternation. */
+    <section id="kursaufbau" className={cn('scroll-mt-24 bg-[var(--color-paper-warm)]', SECTION_Y)}>
       <Shell>{body}</Shell>
     </section>
   );

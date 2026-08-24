@@ -35,16 +35,57 @@ type Packed = { photo: Photo; index: number };
 // lebt weiter im alt-Attribut und im aria-label des Foto-Buttons — Screenreader verlieren
 // nichts, das Auge bekommt ein ruhiges Raster.
 
+// Der Zeilenabstand (gap-3/4 bei ~320px Spaltenbreite) zaehlt pro Foto mit in die
+// Spaltenhoehe — ohne den Term rechnet der Packer Spalten mit vielen kleinen Fotos
+// systematisch zu kurz.
+const GAP_RATIO = 0.05;
+
 function packColumns(items: Packed[], n: number): Packed[][] {
+  const ratioOf = (item: Packed) =>
+    (item.photo.height ?? 1350) / (item.photo.width ?? 1080) + GAP_RATIO;
+  // Endkante glaetten (R205 Runde 4, Opus+Grok): der reine Greedy-Packer laesst die
+  // Spalten enden, wo das letzte Foto zufaellig faellt — gemessen d1440 bis ~330px
+  // Versatz, rechts unten ein L-foermiges Loch vor der "122 Fotos"-Zeile. Ein
+  // Einzel-Move-Nachlauf reicht nicht: bei 4 Spalten ist jedes Foto (~400px) hoeher
+  // als der Versatz, kein einzelner Zug verkleinert ihn. Darum: Kopf greedy, und fuer
+  // die letzten 2n Fotos (max 4^8 Kombinationen, einmalig im useMemo) die Zuordnung,
+  // die den Hoehenunterschied der Spaltenenden minimiert. Die Reihenfolge der Fotos
+  // innerhalb jeder Spalte bleibt die Listenreihenfolge.
+  const tailCount = Math.min(items.length, n * 2);
+  const head = items.slice(0, items.length - tailCount);
+  const tail = items.slice(items.length - tailCount);
+
   const cols: Packed[][] = Array.from({ length: n }, () => []);
   const heights = Array.from({ length: n }, () => 0);
-  for (const item of items) {
-    const ratio = (item.photo.height ?? 1350) / (item.photo.width ?? 1080);
+  for (const item of head) {
     let slot = 0;
     for (let i = 1; i < n; i++) if (heights[i] < heights[slot]) slot = i;
     cols[slot].push(item);
-    heights[slot] += ratio;
+    heights[slot] += ratioOf(item);
   }
+
+  const assign = Array.from({ length: tailCount }, () => 0);
+  let best: number[] = assign.slice();
+  let bestSpread = Infinity;
+  const search = (i: number) => {
+    if (i === tailCount) {
+      const spread = Math.max(...heights) - Math.min(...heights);
+      if (spread < bestSpread) {
+        bestSpread = spread;
+        best = assign.slice();
+      }
+      return;
+    }
+    const r = ratioOf(tail[i]);
+    for (let col = 0; col < n; col++) {
+      assign[i] = col;
+      heights[col] += r;
+      search(i + 1);
+      heights[col] -= r;
+    }
+  };
+  search(0);
+  best.forEach((col, i) => cols[col].push(tail[i]));
   return cols;
 }
 
@@ -188,7 +229,14 @@ export function PhotosPage() {
                   variants={item}
                   className="rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-3 shadow-[0_18px_55px_rgba(17,17,17,0.06)] sm:p-4"
                 >
-                  <div className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                  {/* Spaltenzahl kommt aus colCount (JS-Packing), nicht aus festen
+                      Breakpoint-Klassen: der Prerender packt 2 Spalten, und ein festes
+                      lg:grid-cols-4 liesse vor der Hydration die Spalten 3+4 leer —
+                      genau das zeigten die Sweep-PNGs (Kritik R205 Runde 2). */}
+                  <div
+                    className="grid items-start gap-3 sm:gap-4"
+                    style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}
+                  >
                     {packed.map((col, ci) => (
                       <ul key={ci} className="flex flex-col gap-3 sm:gap-4">
                         {col.map(({ photo: p, index: i }, rowIndex) => (
@@ -224,7 +272,14 @@ export function PhotosPage() {
                                 className="block h-auto w-full transition-transform duration-[var(--dur-slow)] ease-out group-hover:scale-[1.04]"
                                 width={p.width ?? 1080}
                                 height={p.height ?? 1350}
-                                loading="lazy"
+                                /* R190: die ersten ~12 Kacheln liegen bei jedem Viewport
+                                   im oder direkt am ersten Screen. `lazy` liess sie erst
+                                   nach dem Layout starten, das Raster baute sich sichtbar
+                                   auf. Der Rest bleibt lazy — die Galerie hat mehrere
+                                   hundert Fotos. `i` ist der Index in der ungepackten
+                                   Liste, nicht die Spaltenposition, also trifft die
+                                   Grenze die tatsaechlich ersten Fotos. */
+                                loading={i < 12 ? 'eager' : 'lazy'}
                               />
                               <span
                                 aria-hidden

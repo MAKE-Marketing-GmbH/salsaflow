@@ -22,21 +22,12 @@ export type FaqLink = { label: string; href: string };
 /** R188 F4: eine Antwort darf zwei Wege anbieten (z. B. Schnupperstunde ueber Kursplan
  *  ODER ueber das Formular). Mehr als zwei waeren eine Linkliste, kein Satz. */
 export type FaqItemData = Faq & { link?: FaqLink; link2?: FaqLink };
-/** R188 F5: jeder FAQ-Block bekommt ein echtes Foto. `title` bleibt die Ueberschrift,
- *  `blurb` sagt in einem Satz, worum es in diesem Block geht (F3: "klarere
- *  Ueberschriften"), `image` ist das Motiv daneben. Alle Bilder liegen im Bestand und
- *  sind vor dem Einbau einzeln angesehen worden. */
-/** R188, Kritiker-Befund /faq d-04 + d-05: "dasselbe blaue Social-Foto erscheint doppelt".
- *  Gemessen (scratch/r188-faq-images.cjs) liegt im DOM KEIN doppeltes Bild — alle vier
- *  Motive sind verschieden. Die Ursache ist das Sticky-Verhalten: das Bild einer Spalte
- *  laeuft `lg:sticky` neben der Frageliste mit. Die dritte Spalte traegt 12 Fragen (die
- *  erste nur 6) und ist damit ueber zwei volle 900px-Viewports hoch — dasselbe Foto stand
- *  darum in Slice d-04 UND d-05 fest im Bild. Sichtbar ist das eine Doppelung, auch wenn
- *  die Datei nur einmal existiert.
- *
- *  `image2` ist die Antwort: eine lange Spalte bekommt ein ZWEITES Motiv, das auf halber
- *  Hoehe uebernimmt. Kurze Spalten lassen das Feld weg und bleiben unveraendert. */
-export type FaqColumn = { title: string; blurb: string; image: Img; image2?: Img; items: FaqItemData[] };
+/** R206 (Raphael 23.08. 16:40): "/faq zu kompliziert. Keine tote Creme-Spalte, keine
+ *  Kapitel-Bildbaender. Themen aufteilen und als Grid links/rechts. Bilder nicht noetig."
+ *  Die frueheren Kapitel-Fotos (`image`/`image2`, R188 F5) sind damit raus — die Felder
+ *  bleiben optional im Typ, werden aber nicht mehr gesetzt oder gerendert. Statt drei
+ *  grosser Kapitel tragen die Sprachen sechs kleine Themenbloecke fuer das 2er-Grid. */
+export type FaqColumn = { title: string; blurb: string; image?: Img; image2?: Img; items: FaqItemData[] };
 
 export type FaqPageContent = {
   seo: SeoKey;
@@ -132,10 +123,6 @@ export const FAQ_CONTENT = {
         {
           title: 'Dein Einstieg',
           blurb: 'Ausprobieren, ohne Vorkenntnisse und ohne Tanzpartner.',
-          image: {
-            src: '/photos/2026/kurse-classfreude-01.webp',
-            alt: 'Beginner-Kurs im hellen Salsaflow-Studio, viele Menschen tanzen gemeinsam',
-          },
           items: [
             /* R188 F4 (Video 00:50-01:10): "Antworten: mehr Infos + direkte Links."
                Jede Antwort unten ist gegen bestehende Seiteninhalte geprueft; es steht
@@ -177,20 +164,8 @@ export const FAQ_CONTENT = {
           ],
         },
         {
-          title: 'Kurs, Partner und Level',
+          title: 'Kurs und Level',
           blurb: 'Wie ein Kurs abläuft, wie lange er dauert und welches Level zu dir passt.',
-          /* R188: hier stand zuerst hero-paar-studiowand-01.webp. Im Screenshot
-             (worklog/shots/R188/team-faq-kontakt/faq/d-03.png der ersten Runde) war der
-             Kopf des Mannes oben abgeschnitten — und zwar NICHT durch das Fenster: die
-             Datei ist 1920x1280 (3:2), das 4:3-Fenster zeigt davon die volle Hoehe und
-             beschneidet nur die Breite (1706 von 1920 px). Der Anschnitt steckt in der
-             Quelle selbst, kein object-position kann ihn heilen.
-             event-social-couple-01.webp zeigt dieselbe Aussage (Fuehren und Folgen) mit
-             beiden Gesichtern ganz im Bild und ist nicht das Hero-Motiv. */
-          image: {
-            src: '/photos/2026/event-social-couple-01.webp',
-            alt: 'Tanzpaar führt und folgt an einem Salsaflow-Abend',
-          },
           items: [
             {
               q: 'Wie viele Figuren lerne ich am Anfang?',
@@ -219,6 +194,12 @@ export const FAQ_CONTENT = {
               q: 'Was passiert, wenn ich eine Lektion verpasse?',
               a: 'Melde dich frühzeitig. Ob du eine Lektion nachholen kannst, hängt von Kurs, Level und freiem Platz ab. Sag uns kurz Bescheid, dann finden wir eine Lösung.',
             },
+          ],
+        },
+        {
+          title: 'Studios und Anfahrt',
+          blurb: 'Drei Studios direkt am Bahnhof Basel SBB.',
+          items: [
             {
               q: 'Wo finden die Kurse statt?',
               a: 'In unseren drei Studios direkt am Bahnhof Basel SBB. Auf der Kurskarte im Kursplan siehst du, in welchem Studio dein Kurs läuft. Die genaue Anfahrt steht auf der Standortseite.',
@@ -228,24 +209,19 @@ export const FAQ_CONTENT = {
               q: 'Wie komme ich mit dem Zug zum Studio?',
               a: 'Die Studios liegen direkt am Bahnhof Basel SBB. Die Anfahrt steht auf der Standortseite.',
             },
+            {
+              q: 'Wo ist Salsaflow?',
+              a: 'Direkt am Bahnhof Basel SBB. Die genaue Anfahrt findest du auf der Standortseite.',
+            },
+            {
+              q: 'Kann ich Räume mieten?',
+              a: 'Ja. Räume kannst du für Tanz, Workshops oder Proben anfragen. Die Details stehen auf der Standort- und Raumvermietungsseite.',
+            },
           ],
         },
         {
-          title: 'Preise, Events und Kontakt',
-          blurb: 'Was es kostet, was an den Abenden läuft und wie du uns erreichst.',
-          image: {
-            src: '/photos/2026/community-diversitaet-01.webp',
-            alt: 'Volle Tanzfläche an einer Danceflow Night',
-          },
-          /* Diese Spalte traegt 12 Fragen und ist ueber zwei Viewports hoch. Ohne zweites
-             Motiv stand das Foto oben in beiden Slices fest (Befund d-04 + d-05).
-             hp-28.webp (1800x1200) ist ein echtes Salsaflow-Showfoto aus dem Bestand,
-             sitewide an keiner Stelle als aktives `src` eingebunden, alle Koepfe ganz
-             im Bild. Es passt zum Thema Events und loest die zweite Bildhaelfte ab. */
-          image2: {
-            src: '/photos/showcase/hp-28.webp',
-            alt: 'Das Salsaflow-Team nach einer Show auf der Bühne',
-          },
+          title: 'Preise',
+          blurb: 'Was Kurse, Pässe und Abende kosten.',
           items: [
             {
               q: 'Was kostet ein Kurs?',
@@ -261,6 +237,12 @@ export const FAQ_CONTENT = {
               q: 'Was kostet die Danceflow Night?',
               a: 'Für die Danceflow Night gibt es unterschiedliche Preise für Salsaflow-Schüler:innen und Gäste. Die aktuellen Beträge stehen auf der Preisseite.',
             },
+          ],
+        },
+        {
+          title: 'Schuhe und Kleidung',
+          blurb: 'Was du für den Start anziehst und mitbringst.',
+          items: [
             {
               q: 'Brauche ich Tanzschuhe für den Start?',
               a: 'Nicht zwingend. Für die erste Stunde reichen oft saubere, bequeme Schuhe. Später können Tanzschuhe helfen, besonders bei Drehungen und Heels.',
@@ -274,6 +256,12 @@ export const FAQ_CONTENT = {
               q: 'Kann ich mit Strassenschuhen ins Studio?',
               a: 'Nur wenn sie sauber und für drinnen geeignet sind. So schützen wir den Tanzboden.',
             },
+          ],
+        },
+        {
+          title: 'Events und Kontakt',
+          blurb: 'Was an den Abenden läuft und wie du uns erreichst.',
+          items: [
             {
               q: 'Was ist die Danceflow Night?',
               a: 'Unser regelmässiger Social-Dance-Abend mit Salsa, Bachata und der ganzen Community. Hier tanzt du frei, was du im Kurs gelernt hast, mit wechselnden Partnern statt nach Programm. Genau dort geht das Gelernte am schnellsten in Fleisch und Blut über.',
@@ -290,14 +278,6 @@ export const FAQ_CONTENT = {
             {
               q: 'Wie erreiche ich Salsaflow?',
               a: 'Über das Kontaktformular, per E-Mail an info@salsaflow-dc.com, telefonisch oder über Social Media. Alle Wege findest du auf der Kontaktseite.',
-            },
-            {
-              q: 'Wo ist Salsaflow?',
-              a: 'Direkt am Bahnhof Basel SBB. Die genaue Anfahrt findest du auf der Standortseite.',
-            },
-            {
-              q: 'Kann ich Räume mieten?',
-              a: 'Ja. Räume kannst du für Tanz, Workshops oder Proben anfragen. Die Details stehen auf der Standort- und Raumvermietungsseite.',
             },
           ],
         },
@@ -349,10 +329,6 @@ export const FAQ_CONTENT = {
         {
           title: 'Getting started',
           blurb: 'Try it out, with no experience and no dance partner.',
-          image: {
-            src: '/photos/2026/kurse-classfreude-01.webp',
-            alt: 'Beginner course in the bright Salsaflow studio, many people dancing together',
-          },
           items: [
             {
               q: 'Can I simply try out whether Salsaflow suits me?',
@@ -381,12 +357,8 @@ export const FAQ_CONTENT = {
           ],
         },
         {
-          title: 'Course, partner and level',
+          title: 'Course and level',
           blurb: 'How a course runs, how long it lasts and which level fits you.',
-          image: {
-            src: '/photos/2026/event-social-couple-01.webp',
-            alt: 'Dance couple leading and following at a Salsaflow night',
-          },
           items: [
             {
               q: 'How many figures do I learn at the start?',
@@ -412,6 +384,12 @@ export const FAQ_CONTENT = {
               q: 'What happens if I miss a lesson?',
               a: 'Let us know early. Whether you can catch up a lesson depends on the course, level and free spots. Send us a quick note and we find a solution.',
             },
+          ],
+        },
+        {
+          title: 'Studios and directions',
+          blurb: 'Three studios right by Basel SBB station.',
+          items: [
             {
               q: 'Where do the courses take place?',
               a: 'In the Salsaflow studios right by Basel SBB station. The course card shows you which studio your course is in.',
@@ -420,19 +398,19 @@ export const FAQ_CONTENT = {
               q: 'How do I get to the studio by train?',
               a: 'The studios sit right by Basel SBB station. Directions are on the location page.',
             },
+            {
+              q: 'Where is Salsaflow?',
+              a: 'Right by Basel SBB station. You find the exact directions on the location page.',
+            },
+            {
+              q: 'Can I rent rooms?',
+              a: 'Yes. You can request rooms for dance, workshops or rehearsals. The details are on the location and room rental page.',
+            },
           ],
         },
         {
-          title: 'Prices, events and contact',
-          blurb: 'What it costs, what happens on the nights and how to reach us.',
-          image2: {
-            src: '/photos/showcase/hp-28.webp',
-            alt: 'The Salsaflow team on stage after a show',
-          },
-          image: {
-            src: '/photos/2026/community-diversitaet-01.webp',
-            alt: 'Full dance floor at a Danceflow Night',
-          },
+          title: 'Prices',
+          blurb: 'What courses, passes and nights cost.',
           items: [
             {
               q: 'What does a course cost?',
@@ -446,6 +424,12 @@ export const FAQ_CONTENT = {
               q: 'What does the Danceflow Night cost?',
               a: 'The Danceflow Night has different prices for Salsaflow students and guests. The current amounts are on the prices page.',
             },
+          ],
+        },
+        {
+          title: 'Shoes and clothing',
+          blurb: 'What to wear and bring for the start.',
+          items: [
             {
               q: 'Do I need dance shoes to start?',
               a: 'Not necessarily. For the first class, clean, comfortable shoes are often enough. Later, dance shoes can help, especially with turns and heels.',
@@ -459,6 +443,12 @@ export const FAQ_CONTENT = {
               q: 'Can I wear street shoes in the studio?',
               a: 'Only if they are clean and suitable for indoors. That way we protect the dance floor.',
             },
+          ],
+        },
+        {
+          title: 'Events and contact',
+          blurb: 'What happens on the nights and how to reach us.',
+          items: [
             {
               q: 'What is the Danceflow Night?',
               a: 'A regular social-dance evening at Salsaflow with Salsa, Bachata and community.',
@@ -474,14 +464,6 @@ export const FAQ_CONTENT = {
             {
               q: 'How do I reach Salsaflow?',
               a: 'Through the contact form, by email at info@salsaflow-dc.com, by phone or via social media. You find all ways on the contact page.',
-            },
-            {
-              q: 'Where is Salsaflow?',
-              a: 'Right by Basel SBB station. You find the exact directions on the location page.',
-            },
-            {
-              q: 'Can I rent rooms?',
-              a: 'Yes. You can request rooms for dance, workshops or rehearsals. The details are on the location and room rental page.',
             },
           ],
         },

@@ -1,0 +1,18 @@
+Read the attached PNGs. Do not guess from text.
+
+Files:
+- Mobile 390x844: /kursplan
+- Desktop 1440x730: /kursplan
+
+Claims for PASS:
+1. whatsappRechtsUnten: green WhatsApp control is bottom RIGHT.
+2. Page is /kursplan (calendar / week plan visible).
+3. Mobile: the circle does not sit on the day chips (Mo Di Mi).
+
+Reply format:
+PASS or FAIL
+whatsappRechtsUnten: true/false
+kursplanSichtbar: true/false
+kreisNichtAufChips: true/false
+BELEG: what you see in the PNG
+biggest_gap: one sentence

@@ -40,6 +40,14 @@ export const levelCategory = pgEnum('level_category', [
   'heels',
 ]);
 export const termStatus = pgEnum('term_status', ['draft', 'published', 'archived']);
+export const eventStatus = pgEnum('event_status', ['draft', 'published', 'cancelled']);
+export const eventFormat = pgEnum('event_format', [
+  'danceflow',
+  'workshop',
+  'anniversary',
+  'floweekend',
+  'other',
+]);
 export const bookingType = pgEnum('booking_type', ['leader_follower', 'open']);
 export const onVariant = pgEnum('on_variant', ['on1', 'on2']);
 export const courseStatus = pgEnum('course_status', [
@@ -231,6 +239,38 @@ export const coursePrices = pgTable(
 );
 
 /* =========================================================================
+ * Bereich B2 - Events / Redaktionssystem
+ * ========================================================================= */
+export const events = pgTable(
+  'events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: text('slug').notNull().unique(),
+    format: eventFormat('format').notNull().default('other'),
+    titleDe: text('title_de').notNull(),
+    titleEn: text('title_en').notNull(),
+    summaryDe: text('summary_de').notNull(),
+    summaryEn: text('summary_en').notNull(),
+    startDate: date('start_date').notNull(),
+    endDate: date('end_date'),
+    startTime: time('start_time'),
+    endTime: time('end_time'),
+    location: text('location').notNull().default('Elisabethenanlage 7, 4051 Basel'),
+    ticketUrl: text('ticket_url'),
+    detailUrl: text('detail_url'),
+    imageUrl: text('image_url'),
+    imageAltDe: text('image_alt_de'),
+    imageAltEn: text('image_alt_en'),
+    featured: boolean('featured').notNull().default(false),
+    status: eventStatus('status').notNull().default('draft'),
+    sort: integer('sort').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('events_status_date_idx').on(t.status, t.startDate)],
+);
+
+/* =========================================================================
  * Bereich C - Buchungen (Teilnehmer, Buchung, Warteliste)
  * ========================================================================= */
 export const participants = pgTable('participants', {
@@ -333,6 +373,7 @@ export const schema = {
   courseTeachers,
   tariffs,
   coursePrices,
+  events,
   participants,
   bookings,
   payments,

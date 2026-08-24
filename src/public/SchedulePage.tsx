@@ -191,16 +191,33 @@ export function SchedulePage() {
               geloescht statt konserviert. Die Historie steht im Git-Log. */}
         </section>
 
-        {/* Der Kalender. max-w 1080px statt der sitewide 1400px: eine Kurszeile ist
+        {/* Der Kalender. Die Zeilen bleiben auf 1080px begrenzt: eine Kurszeile ist
             Zeit + Kurs + CTA und braucht keine 1400px — bei voller Breite stand ein 700px
             breites Nichts zwischen Kursname und Button (Beleg:
-            /tmp/kursplan-cal-shots3/kursplan-desktop-01-y700.png). */}
+            /tmp/kursplan-cal-shots3/kursplan-desktop-01-y700.png).
+
+            R190 (Raphael 22.08.: "die Breite der Seite ist übelst kaputt nach dem Hero"):
+            Die Begrenzung war vorher ein EIGENER zentrierter Container (`mx-auto` +
+            `pl-5 pr-24`). Damit stand die H1 der Seite auf 52 px und alles darunter —
+            Wochenzeile, Stil-Chips, Kurskarten — auf 213 px. Ein Sprung von 161 px direkt
+            unter dem Hero, an der auffälligsten Stelle der Seite. Rechts lief es
+            auseinander: die Kurskarte endete bei 1143, der Fließtext oben bei 1387.
+
+            Jetzt trägt die Sektion dieselbe `Shell` wie jede andere — gleiche linke Kante,
+            gleicher Rahmen. Die 1080px wirken als `max-w` INNERHALB der Shell und ohne
+            `mx-auto`: die Zeilen bleiben kurz, beginnen aber auf der Seitenkante statt
+            in der Mitte. Das alte `pr-24` fällt mit, aus demselben Grund wie in
+            primitives.tsx — der WhatsApp-Knopf ist `fixed` und wird über
+            `--whatsapp-lift` am <main> gelöst (siehe Kommentar unten), nicht über eine
+            96 px breite Spalte durch die ganze Seite. */}
         {/* pb: der dunkle ScheduleBottomCta stand vorher direkt auf dem schwarzen Footer —
             zwei grosse Dunkelflaechen ohne Fuge (Kritik-Runde 10.08.2026). Papier-Luft dazwischen. */}
         <section id="kursplan-list" className="scroll-mt-24 bg-[var(--color-bg-soft)] pb-14 pt-2 sm:pb-16 sm:pt-10 lg:pt-5">
-          <div className="mx-auto max-w-[1080px] pl-5 pr-24 sm:pl-8 sm:pr-[5.5rem]">
-            <CourseEngine onTotal={setTotal} />
-          </div>
+          <Shell>
+            <div className="max-w-[1080px]">
+              <CourseEngine onTotal={setTotal} />
+            </div>
+          </Shell>
         </section>
       </main>
       {/* Kein Float-Overlap: auf 1440 laege die gruene Pille auf der Samstag-Karte

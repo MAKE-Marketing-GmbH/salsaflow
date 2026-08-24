@@ -35,7 +35,7 @@ export type Promotion =
   | { kind: 'existing'; rung: Rung } //       normaler Schritt auf eine vorhandene Rung
   | { kind: 'new'; def: NewRungDef }; //      Advanced nach oben offen -> neue Stufe anlegen
 
-function advancedLabels(stufe: number): { labelDe: string; labelEn: string } {
+function advancedLabels(stufe: number) {
   return { labelDe: `Advanced Stufe ${stufe}`, labelEn: `Advanced Level ${stufe}` };
 }
 

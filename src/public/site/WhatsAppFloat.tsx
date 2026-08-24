@@ -19,6 +19,7 @@ const WHATSAPP_URL = 'https://wa.me/41764788411';
 
 type WhatsAppFloatStyle = CSSProperties & {
   '--whatsapp-collision-lift': string;
+  '--whatsapp-collision-slide': string;
 };
 
 /* Breite, die das Label "WhatsApp" plus Innenabstand der Pille belegt. Gemessen auf
@@ -35,6 +36,7 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
   const [headerDocked, setHeaderDocked] = useState(false);
   const floatRef = useRef<HTMLAnchorElement>(null);
   const collisionLiftRef = useRef(0);
+  const collisionSlideRef = useRef(0);
   const headerDockedRef = useRef(false);
   // `compactRef` ist die Form, die gerade gezeichnet wird. Zwei unabhaengige Gruende
   // koennen sie verlangen: Scrollen (weniger Flaeche ueber dem Inhalt) und der Solver
@@ -44,6 +46,7 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
   const scrollCompactRef = useRef(false);
   const [compact, setCompact] = useState(false);
   const [collisionLift, setCollisionLift] = useState(0);
+  const [collisionSlide, setCollisionSlide] = useState(0);
   const [placed, setPlaced] = useState(false);
   const placedRef = useRef(false);
   /* R134/10, geschaerft R153 und erneut aufgemacht in dieser Runde (Kundenkritik 21.08.:
@@ -231,8 +234,14 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
       });
     };
 
+    /* Ab lg, nicht ab sm. Zwischen 640 und 1023 px weicht das Kursraster dem Knopf NICHT
+       aus: `ScheduleTeaser.tsx` traegt sein `pr-36` erst ab `lg`, der Knopf belegt seine
+       ~80px-Zone (`--wa-corner`) aber schon ab `sm`. In dieser Luecke sass die Pille auf
+       der Sa-Kachel (Grok-Look R190 Runde 8, Raphaels Punkt 2). Der Kreis ist 66px
+       schmaler und laesst das Raster unveraendert — Entscheidung Raphael 22.08.2026,
+       Weg 2 gegen "Raster schmaler machen". */
     const labelAllowed = () =>
-      window.innerWidth >= 640 &&
+      window.innerWidth >= 1024 &&
       !document.querySelector(
         '[data-split-hero-page], [data-events-page], [data-team-page], [data-faq-page], [data-kursaufbau-page], [data-privat-page], [data-collabs-page], [data-tanzschuhe-page], [data-partys-page], [data-heels-style-page]',
       );
@@ -397,7 +406,13 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
          ist nicht mehr der Knopf unten rechts aus wiki/absprachen.md:21 — er ist ein zweites,
          zufaellig platziertes Element. Zwei Knopfhoehen sind die Grenze, ab der man das
          Ausweichen noch als Ausweichen liest. */
-      const candidates = [0, 56, 112];
+      /* R206: Drei Stufen waren zu grob. Gemessen auf /buchung 390px stand der Knopf bei
+         y=776..824 auf zwei Kurskacheln (20..370 breit, 697..785 und 793..881) — kein
+         Kandidat aus [0, 56, 112] traf die 8px-Luecke zwischen den Kacheln, also fiel der
+         Solver auf den Grundplatz zurueck und blieb auf dem Inhalt sitzen. Die feinere
+         Leiter deckt denselben Korridor (zwei Knopfhoehen, Kommentar oben) mit halben
+         Schritten ab und findet solche Luecken. */
+      const candidates = [0, 28, 56, 84, 112];
       const viewportH = window.innerHeight;
       const scrollTop = window.scrollY;
       const liveBlockers = dynamicRects();
@@ -467,9 +482,51 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
          `visibility: hidden` und dazwischen sichtbar. Der Knopf flackerte und fehlte auf dem
          ersten Fold ganz. Ein Messenger-Knopf, den es manchmal nicht gibt, ist schlechter als
          einer, der am aeussersten Rand ueber einer Textzeile steht. */
+      /* R206: Findet der Korridor nichts, sass der Knopf bisher stumpf auf dem Inhalt —
+         gemessen /buchung m390 auf zwei Kurskacheln, / m390 auf der Bewertungszeile
+         "4,9 · 104 Bewertungen", /fotos d1440 auf den Filter-Chips. Statt eines weiteren
+         Route-Sonderfalls in index.css weicht der Knopf jetzt zur Seite: er schiebt sich
+         so weit nach rechts aus dem Fenster, dass nur noch das Icon am Rand steht
+         (`--whatsapp-collision-slide`). Das Ziel bleibt tippbar, deckt aber keinen Text
+         mehr ab. Sobald der Korridor wieder einen freien Slot hat, faehrt er zurueck. */
+      let slide = 0;
       if (next === null) {
         next = 0;
         needsCompact = compactShift > 0;
+        const parkWidth = needsCompact ? current.height : pillWidth;
+        const maxSlide = Math.max(0, Math.round(parkWidth * 0.42));
+        for (const test of [maxSlide, Math.round(maxSlide / 2)]) {
+          const left = current.right - parkWidth + test - 6;
+          const right = current.right + test + 6;
+          const documentTop = baseTop - 6 + scrollTop;
+          const documentBottom = baseBottom + 6 + scrollTop;
+          const stillBlocked =
+            staticBlockers.some(
+              (rect) =>
+                rect.right > left &&
+                rect.left < right &&
+                rect.bottom > documentTop &&
+                rect.top < documentBottom &&
+                !isBackgroundNow(rect),
+            ) ||
+            liveBlockers.some(
+              (rect) =>
+                rect.right > left &&
+                rect.left < right &&
+                rect.bottom > baseTop - 6 &&
+                rect.top < baseBottom + 6,
+            );
+          if (!stillBlocked) {
+            slide = test;
+            break;
+          }
+        }
+        if (!slide) slide = maxSlide;
+      }
+      if (collisionSlideRef.current !== slide) {
+        collisionSlideRef.current = slide;
+        float.style.setProperty('--whatsapp-collision-slide', `${slide}px`);
+        setCollisionSlide(slide);
       }
       if (collisionCompactRef.current !== needsCompact) {
         collisionCompactRef.current = needsCompact;
@@ -557,6 +614,11 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
 
   const floatStyle: WhatsAppFloatStyle = {
     '--whatsapp-collision-lift': `${collisionLift}px`,
+    '--whatsapp-collision-slide': `${collisionSlide}px`,
+    // Seitliches Parken laeuft ueber `right`, nicht ueber `transform`: der Hover-Hub
+    // (`hover:-translate-y-0.5`) und das Press-Feedback von framer-motion sitzen bereits
+    // auf `transform`. Ein zweiter Schreiber dort haette beide ueberschrieben.
+    right: collisionSlide > 0 ? `calc(var(--whatsapp-base-right, 0.25rem) - ${collisionSlide}px)` : undefined,
     bottom: raised
       ? 'calc(1.25rem + var(--sticky-cta-height, 0px) + var(--cookie-float-lift, 0px) + var(--whatsapp-lift, 0px) + var(--whatsapp-collision-lift))'
       : 'calc(1.25rem + var(--sticky-cta-height, 0px) + var(--whatsapp-lift, 0px) + var(--whatsapp-collision-lift))',
@@ -592,7 +654,11 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
            Pillenform mit Label) — Desktop war nie der Befund. */
         'whatsapp-float group/wa fixed right-1 z-40 inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full px-0 sm:right-6 sm:h-14',
         // Kompakt heisst: Kreis statt Pille, weil sonst kein Platz bleibt (siehe Solver).
-        compact ? 'sm:w-14 sm:px-0' : 'sm:w-auto sm:px-4',
+        // Die Pille beginnt bei `lg`, nicht bei `sm`: zwischen 640 und 1023 px laege sie
+        // auf der Sa-Kachel des Kursrasters (siehe `labelAllowed`). Unter lg bleibt der
+        // Kreis aus der Basiszeile (h-12/sm:h-14, w-12) stehen.
+        'sm:w-14 sm:px-0',
+        compact ? 'lg:w-14 lg:px-0' : 'lg:w-auto lg:px-4',
         // Vor der ersten Messung steht der Knopf noch auf dem Grundplatz, ohne zu wissen, was
         // dort liegt. Er bleibt bis dahin unsichtbar; danach zuendet der Eintritt.
         hydrated && !placed && 'invisible pointer-events-none opacity-0',
@@ -618,8 +684,8 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
            und liegt der Knopf auf seinem Ausgangsplatz, gibt es nichts zu kreuzen; dann
            bleibt die ruhige Token-Dauer. */
         collisionLift === 0 && headerDocked
-          ? 'transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom] duration-[var(--dur-slow)] ease-[var(--ease-sf)]'
-          : 'transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom] duration-0 ease-[var(--ease-sf)]',
+          ? 'transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom,right] duration-[var(--dur-slow)] ease-[var(--ease-sf)]'
+          : 'transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom,right] duration-0 ease-[var(--ease-sf)]',
         // R101: Seiten-Anker (z.B. /kursplan) setzt --whatsapp-lift per Media-Query auf :root.
         className,
       )}
@@ -659,7 +725,7 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
             animate={{ opacity: 1, width: 'auto' }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, width: 0 }}
             transition={{ type: 'spring', bounce: 0, duration: reduced ? 0.15 : 0.4 }}
-            className="hidden overflow-hidden text-sm font-semibold whitespace-nowrap sm:inline-block"
+            className="hidden overflow-hidden text-sm font-semibold whitespace-nowrap lg:inline-block"
           >
             WhatsApp
           </motion.span>

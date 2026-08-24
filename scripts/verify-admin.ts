@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { eq, inArray, notInArray } from 'drizzle-orm';
 import { openDb } from '../db/client.js';
-import { adminProfiles, coursePrices, courses, levelRungs, terms } from '../db/schema.js';
+import { adminProfiles, coursePrices, courses, events, levelRungs, terms } from '../db/schema.js';
 import { createApp } from '../server/app.js';
 import { hashPassword } from '../server/auth.js';
 
@@ -73,6 +73,8 @@ async function main() {
 
   /* 2) Staffeln listen ---------------------------------------------------- */
   const termsRes = await app.request('/api/admin/terms', { headers: { cookie } });
+  // SAFETY: Der vorige Check belegt, dass das Cookie eine gueltige Session ist; die
+  // Route antwortet damit mit ihrem Erfolgs-Body aus server/admin-routes.ts (terms[]).
   const termsBody = (await termsRes.json()) as { terms: { id: string; name: string; courseCount: number }[] };
   const januar = termsBody.terms.find((t) => t.name === 'Staffel Januar 2026');
   check('Staffel Januar 2026 wird gelistet', !!januar, januar ? `${januar.courseCount} Kurse` : 'fehlt');
@@ -84,11 +86,15 @@ async function main() {
     headers: auth,
     body: JSON.stringify({ name: 'TEST Neue Staffel', startDate: '2026-09-01', endDate: '2026-10-26', weekCount: 8 }),
   });
+  // SAFETY: id ist optional deklariert. Die Assertion behauptet damit nur, dass der Body
+  // ein Objekt ist; der Check darunter prueft die id-Existenz selbst und schlaegt sonst fehl.
   const newTermBody = (await newTermRes.json()) as { id?: string };
   check('Neue Staffel anlegen -> 201 + id', newTermRes.status === 201 && !!newTermBody.id, `status ${newTermRes.status}`);
   if (newTermBody.id) createdTermIds.push(newTermBody.id);
 
   const newTermDetail = await app.request(`/api/admin/terms/${newTermBody.id}`, { headers: { cookie } });
+  // SAFETY: term und courses sind optional deklariert, der Check darunter liest beide mit
+  // ?. und Default. Fehlen sie (etwa bei einem Fehler-Body), wird der Check FAIL statt Crash.
   const newTermDetailBody = (await newTermDetail.json()) as { term?: { status: string }; courses?: unknown[] };
   check(
     'Neue Staffel ist leer + draft',
@@ -103,6 +109,9 @@ async function main() {
 
   /* 4) Duplizieren-Vorschau: Auto-Aufstieg pro Kurs gegen Referenz --------- */
   const prevRes = await app.request(`/api/admin/terms/${januar.id}/duplicate-preview`, { headers: { cookie } });
+  // SAFETY: januar ist an dieser Stelle geprueft (early return oben, wenn es fehlt), das
+  // Cookie ist gueltig. Die Route liefert damit ihren Vorschau-Erfolgs-Body; die Checks
+  // darunter vergleichen jedes gelesene Feld einzeln gegen die Referenz-Implementierung.
   const prev = (await prevRes.json()) as {
     suggested: { name: string; startDate: string; endDate: string };
     courses: {
@@ -150,6 +159,8 @@ async function main() {
       endDate: prev.suggested.endDate,
     }),
   });
+  // SAFETY: Alle drei Felder sind optional deklariert; die Checks darunter pruefen jedes
+  // einzeln (!!id, courses ===, promoted ?? 0). Ein Fehler-Body faellt als FAIL auf.
   const dupBody = (await dupRes.json()) as { id?: string; courses?: number; promoted?: number };
   check('Duplizieren -> 201', dupRes.status === 201 && !!dupBody.id, `status ${dupRes.status}`);
   if (dupBody.id) createdTermIds.push(dupBody.id);
@@ -158,6 +169,9 @@ async function main() {
 
   // Duplikat-Detail laden: Levels muessen den Vorschau-Werten entsprechen.
   const dupDetailRes = await app.request(`/api/admin/terms/${dupBody.id}`, { headers: { cookie } });
+  // SAFETY: Der Check direkt darueber belegt dupRes.status === 201 und eine vorhandene
+  // dupBody.id. Die Detail-Route liefert fuer eine existierende Staffel-ID mit gueltigem
+  // Cookie ihren Erfolgs-Body aus server/admin-routes.ts (term + courses[]).
   const dupDetail = (await dupDetailRes.json()) as {
     term: { duplicatedFrom: string | null; status: string };
     courses: { levelDe: string | null; status: string; styleDe: string }[];
@@ -167,8 +181,8 @@ async function main() {
   check('Duplikat: alle Kurse draft', allDraft, allDraft ? 'ok' : 'nicht alle draft');
 
   // Die Menge der neuen Level-Labels muss der Menge der Vorschau-newLevelDe entsprechen.
-  const expectedLevels = [...prev.courses.map((p) => p.newLevelDe)].sort();
-  const actualLevels = [...dupDetail.courses.map((c) => c.levelDe)].sort();
+  const expectedLevels = prev.courses.map((p) => p.newLevelDe).sort();
+  const actualLevels = dupDetail.courses.map((c) => c.levelDe).sort();
   const levelsMatch = JSON.stringify(expectedLevels) === JSON.stringify(actualLevels);
   check('Duplikat: Levels = Vorschau-Auto-Aufstieg', levelsMatch, levelsMatch ? `${actualLevels.length} Levels` : 'Abweichung Vorschau/Commit');
 
@@ -184,6 +198,9 @@ async function main() {
   if (sample) {
     // override -> current rung beibehalten: dazu brauchen wir die rungId. Aus /meta holen.
     const metaRes = await app.request('/api/admin/meta', { headers: { cookie } });
+    // SAFETY: /api/admin/meta ist eine Lese-Route; das oben geprueft gueltige Cookie passiert
+    // das Auth-Gate. Sie liefert damit ihren Erfolgs-Body mit levelRungs[]. Das find()
+    // darunter behandelt eine leere Liste selbst (else-Zweig setzt den Check auf FAIL).
     const meta = (await metaRes.json()) as { levelRungs: { id: string; labelDe: string; ladderKey: string }[] };
     const keepRung = meta.levelRungs.find((r) => r.ladderKey === 'salsa_bachata' && r.labelDe === sample.currentLevelDe);
     if (keepRung) {
@@ -197,9 +214,12 @@ async function main() {
           overrides: { [sample.courseId]: keepRung.id },
         }),
       });
+      // SAFETY: id ist optional deklariert; die Zeile darunter prueft sie vor dem Gebrauch.
       const ovBody = (await ovRes.json()) as { id?: string };
       if (ovBody.id) createdTermIds.push(ovBody.id);
       const ovDetailRes = await app.request(`/api/admin/terms/${ovBody.id}`, { headers: { cookie } });
+      // SAFETY: Die Detail-Route liefert mit gueltigem Cookie ihren Erfolgs-Body inklusive
+      // courses[]. levelDe ist als nullable deklariert, wie die Spalte in db/schema.ts.
       const ovDetail = (await ovDetailRes.json()) as { courses: { levelDe: string | null }[] };
       const keptCount = ovDetail.courses.filter((c) => c.levelDe === sample.currentLevelDe).length;
       const wouldBePromotedCount = prev.courses.filter((p) => p.newLevelDe === sample.currentLevelDe).length;
@@ -211,7 +231,56 @@ async function main() {
     check('Override: gewaehltes Level wird respektiert', false, 'kein Sample-Kurs gefunden');
   }
 
-  /* 7) Schreib-Gate: teacher_readonly darf nicht schreiben ---------------- */
+  /* 7) Event-CMS: Entwurf -> veröffentlichen -> öffentlich -> löschen ------ */
+  const eventCreate = await app.request('/api/admin/events', {
+    method: 'POST',
+    headers: auth,
+    body: JSON.stringify({
+      slug: 'test-cms-workshop',
+      format: 'workshop',
+      titleDe: 'TEST CMS Workshop',
+      titleEn: 'TEST CMS workshop',
+      summaryDe: 'Ein verifizierbarer Testtermin für den neuen öffentlichen Eventkalender.',
+      summaryEn: 'A verifiable test date for the new public event calendar.',
+      startDate: '2027-01-20',
+      endDate: null,
+      startTime: '19:30',
+      endTime: '21:00',
+      location: 'Salsaflow Basel',
+      ticketUrl: 'https://example.com/tickets',
+      detailUrl: '/events-workshops/eventkalender',
+      imageUrl: null,
+      imageAltDe: null,
+      imageAltEn: null,
+      featured: true,
+      status: 'draft',
+      sort: 10,
+    }),
+  });
+  // SAFETY: Die Route liefert bei Erfolg `{ id }`; bei einem Fehler bleibt `id` optional
+  // und der unmittelbar folgende Check fällt kontrolliert auf FAIL statt zu dereferenzieren.
+  const eventCreateBody = (await eventCreate.json()) as { id?: string };
+  check('Event-CMS: Entwurf anlegen -> 201', eventCreate.status === 201 && !!eventCreateBody.id, `status ${eventCreate.status}`);
+  const eventId = eventCreateBody.id;
+  if (eventId) {
+    const eventPublish = await app.request(`/api/admin/events/${eventId}`, {
+      method: 'PATCH',
+      headers: auth,
+      body: JSON.stringify({ status: 'published' }),
+    });
+    check('Event-CMS: veröffentlichen -> 200', eventPublish.status === 200, `status ${eventPublish.status}`);
+    const publicEvents = await app.request('/api/public/events');
+    // SAFETY: Der öffentliche Endpunkt besitzt genau den `{ events: [...] }`-Vertrag;
+    // die optionale Deklaration hält auch einen unerwarteten Fehler-Body crashfrei.
+    const publicBody = (await publicEvents.json()) as { events?: { id: string; titleDe: string }[] };
+    const visible = publicBody.events?.find((event) => event.id === eventId);
+    check('Event-CMS: veröffentlichtes Event erscheint öffentlich', !!visible, visible?.titleDe ?? 'fehlt');
+    const eventDelete = await app.request(`/api/admin/events/${eventId}`, { method: 'DELETE', headers: { cookie } });
+    check('Event-CMS: Event löschen -> 200', eventDelete.status === 200, `status ${eventDelete.status}`);
+    await db.delete(events).where(eq(events.id, eventId));
+  }
+
+  /* 8) Schreib-Gate: teacher_readonly darf nicht schreiben ---------------- */
   readonlyAdminId = (
     await db
       .insert(adminProfiles)

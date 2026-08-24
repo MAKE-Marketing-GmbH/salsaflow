@@ -132,7 +132,7 @@ export const HOME_V3 = {
       // forbidden-check.py: «Menschen, die nicht nur unterrichten, sondern mit dir tanzen.»
       // -> FEHLER Z1 [A2]. Ersetzt durch eine Sachaussage darueber, was das Team konkret
       // tut. Derselbe Check auf der neuen Zeile: 0 harte Verstoesse.
-      title: 'Unsere Lehrpersonen tanzen die Abende mit.',
+      title: 'Unser Team über Salsaflow',
       // Kritiker-Verdict r14, Punkt 4 ("redundante Textblöcke, die mobile Viewports dicht
       // machen"). Gemessen mit `node scripts/aaa-r14-typo.cjs 390`: dieser Absatz war mit 357
       // Zeichen / 182px der laengste SICHTBARE Fliesstext der ganzen Startseite (die noch
@@ -281,7 +281,7 @@ export const HOME_V3 = {
     },
     team: {
       eyebrow: '',
-      title: 'Our teachers dance the evenings with you.',
+      title: 'Our team at Salsaflow',
       // Gleiche Kuerzung wie DE (siehe Kommentar dort): die beiden Schluss-Saetze wiederholten
       // die H2 derselben Sektion.
       story: 'Salsaflow was founded by Fabio, Claudia, Vanessa and Sebastian. Today a large team of teachers, area leads and up-and-coming talents carries the community.',

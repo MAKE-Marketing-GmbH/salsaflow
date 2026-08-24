@@ -146,7 +146,7 @@ export const EVENTS = {
     },
     workshops: {
       eyebrow: 'Workshops',
-      title: 'Ein Workshop gibt einem Thema einen ganzen Abend.',
+      title: 'Unsere Workshops',
       body: 'Du konzentrierst dich auf Technik, Figuren, Musikalität oder Styling und kannst das Gelernte danach direkt auf Events anwenden.',
       // R155: vorher vier kleine Punkte (Video 05:40, "Mini-Sachen lost"). Jetzt zwei
       // Bloecke, je ein Gedanke pro Satz: Punkt 1 traegt Technik, Styling und
@@ -158,14 +158,14 @@ export const EVENTS = {
     },
     anniversary: {
       eyebrow: 'Anniversary Weekend',
-      title: 'Das grosse Community-Wochenende rund um Salsaflow.',
+      title: 'Das Salsaflow-Anniversary-Weekend',
       body: 'Mehr Programm, mehr Menschen, mehr Feiermoment.',
     },
     floweekend: {
       eyebrow: 'Floweekend',
       badge: 'Highlight',
-      title: 'Ein Wochenende zum Eintauchen.',
-      body: 'Wochenendformat für intensiveres Lernen, Tanzen und Community-Gefühl.',
+      title: 'Flow Weekend',
+      body: 'Zwei Tage intensiv trainieren: Workshops mit Gastlehrer:innen aus Europa, Technik-Blöcke am Vormittag, Social Dancing am Abend. Du lernst konzentriert, tanzt viel und wächst in einem Wochenende spürbar weiter.',
       ctaTickets: 'Floweekend ansehen',
     },
     tickets: {
@@ -267,7 +267,7 @@ export const EVENTS = {
     },
     workshops: {
       eyebrow: 'Workshops',
-      title: 'A workshop gives one topic a full evening.',
+      title: 'Our workshops',
       body: 'You focus on technique, figures, musicality or styling and can apply what you learned directly at the next event.',
       // R155: same two-block grouping as DE, one thought per sentence.
       points: [
@@ -277,14 +277,14 @@ export const EVENTS = {
     },
     anniversary: {
       eyebrow: 'Anniversary Weekend',
-      title: 'The big community weekend around Salsaflow.',
+      title: 'The Salsaflow Anniversary Weekend',
       body: 'More programme, more people, more moments to celebrate.',
     },
     floweekend: {
       eyebrow: 'Floweekend',
       badge: 'Highlight',
-      title: 'A weekend to dive in.',
-      body: 'A weekend format with more time for workshops, dancing and the Salsaflow community.',
+      title: 'Flow Weekend',
+      body: 'Two days of focused training: workshops with guest teachers from across Europe, technique blocks in the morning, social dancing in the evening. You learn intensively, dance a lot and grow noticeably in one weekend.',
       ctaTickets: 'See Floweekend',
     },
     tickets: {

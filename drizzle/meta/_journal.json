@@ -15,6 +15,13 @@
       "when": 1786130411528,
       "tag": "0001_white_thunderbird",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787560582626,
+      "tag": "0002_redundant_princess_powerful",
+      "breakpoints": true
     }
   ]
 }

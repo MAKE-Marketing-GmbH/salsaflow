@@ -1,0 +1,18 @@
+LOOK only. Write EXACTLY /root/clients/salsaflow-w1/worklog/s7-kimi-r130.md
+
+Read these PNGs yourself (pixels, not filenames):
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux130/tanzkurse-mobil-390.png
+- /root/clients/salsaflow-w1/worklog/shots/S7-ux130/tanzkurse-desktop-1440.png
+
+Route /tanzkurse. First fold only.
+
+File ONLY:
+LOOK
+pass: true|false
+BELEG: one sentence
+biggest_gap: one sentence
+
+pass true only if a visitor sees a real class photo with whole faces plus H1 plus a clear CTA in the 390 fold, and desktop still shows photo + H1 + both CTAs.
+
+WhatsApp circle bottom-right is a lock, not FAIL.
+No code. No Ja/Nein list. No legal.

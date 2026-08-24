@@ -19,7 +19,7 @@ import { INFO_EMAIL, sendMail } from './mail.js';
 import { clientKey, rateLimit } from './rate-limit.js';
 
 type SeedTeacher = { displayName: string };
-type SeedCourse = {
+export type SeedCourse = {
   id: string;
   styleDe: string;
   styleEn: string;
@@ -32,9 +32,9 @@ type SeedCourse = {
   status: string;
   teachers?: SeedTeacher[];
 };
-type SeedSchedule = { courses: SeedCourse[] };
+export type SeedSchedule = { courses: SeedCourse[] };
 
-const WEEKDAY_DE: Record<string, string> = {
+const WEEKDAY_DE = {
   mon: 'Montag',
   tue: 'Dienstag',
   wed: 'Mittwoch',
@@ -42,7 +42,13 @@ const WEEKDAY_DE: Record<string, string> = {
   fri: 'Freitag',
   sat: 'Samstag',
   sun: 'Sonntag',
-};
+} satisfies Record<string, string>;
+
+// SAFETY: `key in WEEKDAY_DE` prueft die Mitgliedschaft zur Laufzeit; nur dann wird der
+// String als Schluessel gelesen. Unbekannte Werte liefern null, der Aufrufer zeigt dann
+// den Rohwert (`?? course.weekday`).
+const weekdayDe = (key: string): string | null =>
+  key in WEEKDAY_DE ? WEEKDAY_DE[key as keyof typeof WEEKDAY_DE] : null;
 
 // Namen und Telefonnummern landen in der Betreffzeile der Mail. Ein Zeilenumbruch darin
 // wuerde dort eine neue Kopfzeile oeffnen (siehe headerSafe in server/mail.ts). Zwei Ebenen:
@@ -147,7 +153,7 @@ export function createReservationRoutes(loadSchedule: () => Promise<SeedSchedule
     const replyEmail = d.participant.email?.trim() || null;
     const courseLine =
       `${course.styleDe} · ${course.levelDe}\n` +
-      `  ${WEEKDAY_DE[course.weekday] ?? course.weekday} ${course.startTime}–${course.endTime}\n` +
+      `  ${weekdayDe(course.weekday) ?? course.weekday} ${course.startTime}–${course.endTime}\n` +
       `  ${course.locationName}\n` +
       (course.teachers?.length ? `  Leitung: ${course.teachers.map((t) => t.displayName).join(', ')}\n` : '');
 

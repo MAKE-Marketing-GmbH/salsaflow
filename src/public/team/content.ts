@@ -186,7 +186,11 @@ export const TEAM = {
       titleA: 'Tanz lernt man',
       titleAccent: 'leichter',
       titleB: 'wenn man sich willkommen fühlt.',
-      lead: 'Unser Team unterrichtet, organisiert, tanzt und sorgt dafür, dass du dich in der Community nicht wie ein Gast, sondern wie ein Teil davon fühlst.',
+      // R208: Der Satz lief ueber eine Verneinung ("nicht wie ein Gast, sondern wie ein
+      // Teil davon") — harter Treffer A2 in forbidden.md und einer der deutlichsten
+      // KI-Tells ueberhaupt. Er steht im Hero, also an der sichtbarsten Stelle der Seite.
+      // Die Zusage steht jetzt direkt da, ohne den Umweg ueber das Gegenteil.
+      lead: 'Unser Team unterrichtet, organisiert und tanzt selbst mit. Nach ein paar Abenden kennst du Gesichter und Namen und gehörst dazu.',
       stats: [
         { v: '~40', l: 'Kurse pro Woche' },
         { v: '4', l: 'Freunde am Anfang' },
@@ -270,7 +274,8 @@ export const TEAM = {
       titleA: 'Dancing feels',
       titleAccent: 'easier',
       titleB: 'when you feel welcome.',
-      lead: 'Our team teaches, organises, dances and makes sure you feel like part of the community, not like a guest.',
+      // R208: gleiche Korrektur wie DE, siehe Begruendung dort.
+      lead: 'Our team teaches, organises and dances along. After a few evenings you know faces and names, and you belong.',
       stats: [
         { v: '~40', l: 'classes a week' },
         { v: '4', l: 'friends at the start' },

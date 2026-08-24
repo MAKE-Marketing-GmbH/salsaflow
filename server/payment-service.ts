@@ -7,7 +7,7 @@
 // Idempotenz: Jedes Webhook-Event wird ueber `payment_events.provider_event_id` (UNIQUE) genau
 // einmal verarbeitet. Ein doppelt zugestelltes Event ist ein No-Op.
 
-import { eq } from 'drizzle-orm';
+import { and, eq, notInArray } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { Db } from '../db/client.js';
 import { bookings, notifications, payments, paymentEvents } from '../db/schema.js';
@@ -22,6 +22,7 @@ import {
 } from './booking.js';
 import {
   buildEvent,
+  chfToMinor,
   createCheckoutSession,
   paymentMode,
   publicBaseUrl,
@@ -30,6 +31,8 @@ import {
   verifyWebhookSignature,
   webhookSecret,
   type StripeEvent,
+  type StripeFieldValue,
+  type StripeObject,
 } from './payments.js';
 import { INFO_EMAIL, sendMail } from './mail.js';
 
@@ -163,46 +166,110 @@ export async function processSignedWebhook(
   const v = verifyWebhookSignature(rawBody, signatureHeader, webhookSecret());
   if (!v.ok) return { httpStatus: 400, status: 'invalid_signature', reason: v.reason };
 
-  let event: StripeEvent;
-  try {
-    event = JSON.parse(rawBody) as StripeEvent;
-  } catch {
-    return { httpStatus: 400, status: 'invalid_payload' };
-  }
-  if (!event || typeof event.id !== 'string' || typeof event.type !== 'string') {
-    return { httpStatus: 400, status: 'invalid_payload' };
-  }
+  const event = parseStripeEvent(rawBody);
+  if (!event) return { httpStatus: 400, status: 'invalid_payload' };
 
   // Idempotenz: Event genau einmal verarbeiten (UNIQUE provider_event_id).
   const inserted = await db
     .insert(paymentEvents)
-    .values({ id: randomUUID(), providerEventId: event.id, type: event.type, payload: event as unknown as object })
+    .values({ id: randomUUID(), providerEventId: event.id, type: event.type, payload: event })
     .onConflictDoNothing({ target: paymentEvents.providerEventId })
     .returning({ id: paymentEvents.id });
-  if (inserted.length === 0) return { httpStatus: 200, status: 'duplicate' };
+  if (inserted.length === 0) {
+    // Retry eines Events, dessen Verarbeitung nach dem Insert abgebrochen ist (der
+    // Insert committet VOR handleEvent): eine Zeile ohne processedAt wird nachgeholt,
+    // sonst waere das Event dauerhaft als "duplicate" verloren.
+    const existing = (
+      await db.select().from(paymentEvents).where(eq(paymentEvents.providerEventId, event.id)).limit(1)
+    )[0];
+    if (!existing || existing.processedAt) return { httpStatus: 200, status: 'duplicate' };
+    await handleEvent(db, event, existing.id);
+    return { httpStatus: 200, status: 'processed' };
+  }
 
   await handleEvent(db, event, inserted[0].id);
   return { httpStatus: 200, status: 'processed' };
 }
 
-function normalizeMethod(obj: Record<string, unknown>): 'twint' | 'card' | 'apple_pay' | 'google_pay' | 'other' {
+/* ----------------------------------------------------------------------------
+ * I/O-Boundary: rohes Webhook-JSON -> StripeEvent. Ab hier arbeitet der Rest der
+ * Datei nur noch auf dem geparsten Domaenen-Wert, nie auf `unknown`.
+ * -------------------------------------------------------------------------- */
+// JSON.parse liefert genau diese sechs Formen. `StripeFieldValue` ist die
+// Domaenen-Darstellung davon, deshalb ist der Rueckgabetyp exakt und nicht `unknown`.
+function decodeJson(rawBody: string): StripeFieldValue | undefined {
+  try {
+    // SAFETY: JSON.parse erzeugt ausschliesslich null, Boolean, Number, String, Array
+    // oder ein Plain-Object aus ebendiesen - das ist genau die Definition von
+    // StripeFieldValue (server/payments.ts). Werfende Eingaben faengt der catch-Zweig.
+    return JSON.parse(rawBody) as StripeFieldValue;
+  } catch {
+    return undefined;
+  }
+}
+
+// Ein Plain-Object aussortieren. `instanceof Object` ist bei JSON-Werten wahr fuer
+// Objekte und Arrays; Arrays fallen ueber Array.isArray raus, null ist kein Object.
+function asObject(value: StripeFieldValue | undefined): StripeObject | null {
+  if (value === null || value === undefined) return null;
+  if (Array.isArray(value)) return null;
+  return value instanceof Object ? value : null;
+}
+
+// Ein String-Feld lesen. Alles andere (Zahl, Flag, Objekt, Liste, fehlend) gilt als
+// "nicht gesetzt" - dasselbe Ergebnis wie vorher die typeof-Zweige.
+function isString(value: StripeFieldValue | undefined): value is string {
+  return typeof value === 'string';
+}
+
+function isNumber(value: StripeFieldValue | undefined): value is number {
+  return typeof value === 'number';
+}
+
+function asString(value: StripeFieldValue | undefined): string | null {
+  return isString(value) ? value : null;
+}
+
+export function parseStripeEvent(rawBody: string): StripeEvent | null {
+  const root = asObject(decodeJson(rawBody));
+  if (!root) return null;
+  const id = asString(root['id']);
+  const type = asString(root['type']);
+  if (id === null || type === null) return null;
+  const data = asObject(root['data']);
+  const object = data ? asObject(data['object']) : null;
+  return { id, type, data: { object: object ?? {} } };
+}
+
+function stringField(obj: StripeObject, key: string): string | null {
+  return asString(obj[key]);
+}
+
+function nestedObject(obj: StripeObject, key: string): StripeObject | null {
+  return asObject(obj[key]);
+}
+
+function normalizeMethod(obj: StripeObject): 'twint' | 'card' | 'apple_pay' | 'google_pay' | 'other' {
   const types = obj['payment_method_types'];
-  const raw =
-    (Array.isArray(types) ? (types[0] as string) : undefined) ??
-    (obj['payment_method_type'] as string | undefined) ??
-    (obj['method'] as string | undefined);
+  const firstType = Array.isArray(types) ? asString(types[0]) : null;
+  const raw = firstType ?? stringField(obj, 'payment_method_type') ?? stringField(obj, 'method');
   if (raw === 'twint' || raw === 'card' || raw === 'apple_pay' || raw === 'google_pay') return raw;
   return 'other';
 }
 
 async function handleEvent(db: Db, event: StripeEvent, eventRowId: string): Promise<void> {
-  const obj = event.data?.object ?? {};
-  const sessionId = typeof obj['id'] === 'string' ? (obj['id'] as string) : null;
-  const intentId = typeof obj['payment_intent'] === 'string' ? (obj['payment_intent'] as string) : null;
-  const metaBookingId =
-    typeof (obj['metadata'] as Record<string, unknown> | undefined)?.['booking_id'] === 'string'
-      ? ((obj['metadata'] as Record<string, string>)['booking_id'])
-      : null;
+  const obj = event.data.object;
+  const sessionId = stringField(obj, 'id');
+  // Stripe liefert payment_intent je nach Endpoint-Konfiguration als String ODER als
+  // expandiertes Objekt; bei payment_intent.*-Events IST data.object der Intent selbst
+  // (seine ID steht dann in obj.id, ein payment_intent-Feld existiert nicht).
+  const intentFromObject = nestedObject(obj, 'payment_intent');
+  const intentId =
+    stringField(obj, 'payment_intent')
+    ?? (intentFromObject ? stringField(intentFromObject, 'id') : null)
+    ?? (event.type.startsWith('payment_intent.') ? sessionId : null);
+  const metadata = nestedObject(obj, 'metadata');
+  const metaBookingId = metadata ? stringField(metadata, 'booking_id') : null;
 
   // Zugehoerige Zahlung finden (je nach Event ueber Session-ID oder Intent-ID).
   let payment: PaymentRow | null = null;
@@ -217,6 +284,16 @@ async function handleEvent(db: Db, event: StripeEvent, eventRowId: string): Prom
     case 'checkout.session.completed':
     case 'checkout.session.async_payment_succeeded': {
       if (payment) {
+        // Betragsabgleich: ein Event ueber einen anderen Betrag als den Buchungs-Snapshot
+        // bestaetigt NICHT. Zahlung bleibt pending, info@ prueft manuell.
+        const amountTotal = obj['amount_total'];
+        if (isNumber(amountTotal) && amountTotal !== chfToMinor(payment.amountChf)) {
+          console.warn('[payment] Betrags-Mismatch im Webhook:', amountTotal, 'erwartet', chfToMinor(payment.amountChf));
+          await notifyConfirmFailed(db, payment.bookingId, payment.amountChf).catch((mailErr) => {
+            console.error('[payment] Alarm-Mail fehlgeschlagen:', mailErr);
+          });
+          break;
+        }
         const method = normalizeMethod(obj);
         await db
           .update(payments)
@@ -232,30 +309,44 @@ async function handleEvent(db: Db, event: StripeEvent, eventRowId: string): Prom
           try {
             await confirmBooking(db, bookingId, 'booking_confirmation', { amountChf: payment.amountChf, method });
           } catch (e) {
-            // Seltener Wettlauf (z.B. Buchung bereits abgelaufen): Geld ist da + verbucht,
-            // Buchung ist nicht mehr bestaetigbar. Loggen, nicht crashen (Webhook bleibt 200),
-            // UND info@ alarmieren, damit der Fall (bezahlt ohne Bestaetigung) manuell geklaert wird.
-            console.warn('[payment] confirm nach Zahlung fehlgeschlagen:', e instanceof Error ? e.message : e);
-            await notifyConfirmFailed(db, bookingId, payment.amountChf).catch(() => {});
+            // Nur der erwartbare Wettlauf (Buchung inzwischen abgelaufen o. ae. = BookingError)
+            // wird geschluckt: Geld ist da + verbucht, info@ klaert manuell. Alles andere
+            // (z. B. DB-Ausfall) wirft weiter -> 500 -> Stripe retried, und der
+            // Reprocessing-Pfad in processSignedWebhook holt die Verarbeitung nach.
+            if (!(e instanceof BookingError)) throw e;
+            console.warn('[payment] confirm nach Zahlung fehlgeschlagen:', e.message);
+            await notifyConfirmFailed(db, bookingId, payment.amountChf).catch((mailErr) => {
+              console.error('[payment] Alarm-Mail fehlgeschlagen:', mailErr);
+            });
           }
         }
       }
       break;
     }
     case 'checkout.session.expired': {
+      // Status-Guard: ein spaetes expired-Event darf eine bereits erfolgreiche oder
+      // erstattete Zahlung nicht ueberschreiben (sonst blockiert refundBooking).
+      // Buchungs-Aktionen nur mit gefundener Zahlung — metadata.booking_id allein
+      // ist kein autorisierter Schluessel auf fremde Buchungen.
       if (payment) {
-        await db.update(payments).set({ status: 'expired' }).where(eq(payments.id, payment.id));
+        await db
+          .update(payments)
+          .set({ status: 'expired' })
+          .where(and(eq(payments.id, payment.id), notInArray(payments.status, ['succeeded', 'refunded'])));
+        if (bookingId) await expireBooking(db, bookingId);
       }
-      if (bookingId) await expireBooking(db, bookingId);
       break;
     }
     case 'checkout.session.async_payment_failed':
     case 'payment_intent.payment_failed': {
       if (payment) {
-        await db.update(payments).set({ status: 'failed' }).where(eq(payments.id, payment.id));
+        await db
+          .update(payments)
+          .set({ status: 'failed' })
+          .where(and(eq(payments.id, payment.id), notInArray(payments.status, ['succeeded', 'refunded'])));
+        // Buchung bleibt pending_payment (Kunde kann erneut zahlen). Hinweis-Mail an den Kunden.
+        if (bookingId) await notifyPaymentFailed(db, bookingId);
       }
-      // Buchung bleibt pending_payment (Kunde kann erneut zahlen). Hinweis-Mail an den Kunden.
-      if (bookingId) await notifyPaymentFailed(db, bookingId);
       break;
     }
     case 'charge.refunded':

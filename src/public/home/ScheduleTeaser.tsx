@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import {
-  buildScheduleDays,
+  buildScheduleDaysForTerms,
   buildScheduleSlots,
   fetchSchedule,
   weekdayKeyForISO,
@@ -65,7 +65,8 @@ function formatShortDate(iso: string, lang: 'de' | 'en'): string {
  *  Mo/Di/Mi — der Samstagskurs (SFIT, 11:00, existiert real) konnte per Konstruktion nie
  *  erscheinen, und ein Datum stand nirgends. Gemessen: alle drei Zeilen 18:30.
  *  -> Jetzt eine Wochen-Schiene Mo bis Sa mit echtem Kalenderdatum aus
- *     `buildScheduleDays(today)` (UTC-basiert, dieselbe Funktion wie /kursplan). Samstag ist
+ *     `buildScheduleDaysForTerms(today, terms)` (UTC-basiert, dieselbe Quelle wie /kursplan
+ *     und /buchung: naechstes Vorkommen je Wochentag innerhalb der Staffeln). Samstag ist
  *     eine feste Spalte und traegt sein Datum wie jeder andere Tag.
  *
  *  `withCoursePath` haengt die Level-Treppe (CoursePath) an denselben Kurs-Block an, statt sie
@@ -97,8 +98,12 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
   );
   // Mo bis Sa. Sonntag faellt raus, weil die Schule sonntags nicht unterrichtet (API: null
   // Kurse) — eine leere siebte Spalte waere eine Luege ueber das Angebot, kein Kalender.
+  // Wochen-Fix 23.08.2026: buildScheduleDays(today) zeigte die Kalenderwoche von HEUTE —
+  // an einem Sonntag also fast nur vergangene Tage, waehrend /kursplan und /buchung schon
+  // die naechste Woche mit echten Terminen fuehren. buildScheduleDaysForTerms liefert pro
+  // Wochentag das NAECHSTE Vorkommen innerhalb der Staffeln — dieselbe Quelle wie dort.
   const days = useMemo(
-    () => (data ? buildScheduleDays(data.today).filter((d) => d.key !== 'sun') : []),
+    () => (data ? buildScheduleDaysForTerms(data.today, data.terms).filter((d) => d.key !== 'sun') : []),
     [data],
   );
   const byDay = useMemo(() => {
@@ -144,7 +149,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
   const loadingLabel = de ? 'Kurse werden geladen ...' : 'Loading courses ...';
 
   return (
-    <section id="kurse" className={cn('scroll-mt-24 bg-[var(--color-paper-warm)]', SECTION_Y_HOME)}>
+    <section id="kurse" className={cn('scroll-mt-24 bg-[var(--color-bg-soft)]', SECTION_Y_HOME)}>
       <Shell>
         {/* lg:pr-36: der Knopf "Zum ganzen Kursplan" (x=1206-1388) lag in der Zone des
             fixen WhatsApp-FAB (ab x=1294) — wie das Tages-Grid darunter
@@ -159,7 +164,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
               vollen Satzes fuer Screenreader. */}
           <motion.div variants={item} className="max-w-2xl">
             <RevealWords as="h2" text={s.title} className={cn(sectionTitle, MEASURE_L)} />
-            <p className={`mt-3 ${sectionLead}`}>{s.lead}</p>
+            <p className={sectionLead}>{s.lead}</p>
           </motion.div>
           <motion.a
             variants={item}
@@ -232,8 +237,8 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
             <ClipReveal>
               {/* Die Wochen-Schiene. Sechs Spalten fester Breite ab sm (Mo bis Sa), damit die
                   Auswahl beim Tageswechsel nicht springt; darunter waagrecht scrollbar.
-                  Datum kommt aus buildScheduleDays(today), also aus dem echten Kalender —
-                  nicht aus einem festen Text. */}
+                  Datum kommt aus buildScheduleDaysForTerms(today, terms), also aus dem echten
+                  Staffel-Kalender — nicht aus einem festen Text. */}
               {/* Sechs feste Spalten AUF JEDER BREITE, nicht erst ab sm.
                   Erster Versuch war eine waagrecht scrollbare Leiste mit min-w-[4.5rem].
                   Am 390px-Screenshot nachgemessen (/tmp/sf-home/final/mob-03-y2532.png):
@@ -253,7 +258,10 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
         // auf Touch nicht.
         // lg:pr-36: der fixe WhatsApp-FAB lag beim Scrollen auf der Sa-Kachel
         // ("1 Kurs" verdeckt, Critic Runde 9, Item 2).
-        className="grid grid-cols-6 py-3 sm:gap-1.5 lg:pr-36"
+        // R207: gemeinsame Grundlinie am Container (wie CourseEngine.tsx:837). Die aktiven
+        // Reiter setzen ihre 2px-Linie darauf; ohne die Container-Linie haengt der aktive
+        // Tag als einzelner Strich in der Luft.
+        className="grid grid-cols-6 border-b border-[var(--color-line)] pt-3 sm:gap-1.5 lg:pr-36"
               >
                 {days.map((d) => {
                   const count = byDay.get(d.key)?.length ?? 0;
@@ -269,33 +277,34 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                       disabled={count === 0}
                       onClick={() => setDay(d.key)}
                       className={cn(
-                        // Inhalt zentriert wie in den /kursplan-Tag-Tabs: linksbuendige Labels
-                        // liessen in den breiten Desktop-Spalten ein Loch zwischen dem "Mi"-Text
-                        // und der vollbreiten aktiven Kachel (Critic 13.08.2026).
-                        'group flex min-w-0 flex-col items-center gap-1 rounded-[var(--radius-chip)] px-1.5 py-2.5 text-center transition-colors sm:px-3',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-paper-warm)]',
+                        // R207 (Raphael 23.08. 17:10): "Datumsauswahl wie im Kursplan (die
+                        // zweite Variante)." Die zweite Variante ist die Reiterleiste aus
+                        // CourseEngine/DayBar (CourseEngine.tsx:861): KEINE ausgefuellten
+                        // Kacheln mehr, sondern flache Reiter auf einer gemeinsamen
+                        // Grundlinie, der aktive Tag mit 2px-Unterstrich und voller
+                        // Tintenfarbe. Damit tragen Startseite und /kursplan dieselbe
+                        // Formsprache — das war der Befund.
+                        'group flex min-w-0 flex-col items-center justify-center border-b-2 px-1 py-2 transition-colors sm:px-2',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-soft)]',
                         count === 0
-                          ? 'cursor-default text-[var(--color-line)]'
+                          ? 'cursor-default border-transparent text-[var(--color-ink-muted)] opacity-50'
                           : active
-                            ? 'bg-[var(--color-ink)] text-white'
-                            : 'text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]',
+                            ? 'border-[var(--color-ink)] text-[var(--color-ink)]'
+                            : 'border-transparent text-[var(--color-ink-muted)] hover:border-[var(--color-line)] hover:text-[var(--color-ink)]',
                       )}
                     >
-                      <span className="text-xs font-semibold uppercase tracking-[0.16em]">
-                        {de ? d.shortDe : d.shortEn}
-                      </span>
-                      <span
-                        className={cn(
-                          'font-display text-xl font-extrabold leading-none tabular-nums',
-                          count === 0 ? '' : active ? 'text-white' : 'text-[var(--color-ink)]',
-                        )}
-                      >
-                        {Number(dayNum)}
+                      {/* Wie im Kursplan: mobil die Abkuerzung, ab lg der ausgeschriebene Tag
+                          mit Datum. Die Zeile darunter traegt die Kurszahl. */}
+                      <span className={cn('font-display text-base leading-none tracking-tight sm:text-lg', active ? 'font-extrabold' : 'font-bold')}>
+                        <span className="lg:hidden">{de ? d.shortDe : d.shortEn}</span>
+                        <span className="hidden lg:inline">{de ? d.shortDe : d.shortEn} {Number(dayNum)}.</span>
                       </span>
                       {/* Singular/Plural echt behandeln: der Samstag hat genau EINEN Kurs
                           (SFIT 11:00), und "1 Kurse" auf der Startseite einer Schule ist
-                          ein sichtbarer Schludrigkeits-Marker. */}
-                      <span className={cn('text-[0.6875rem] leading-tight', active ? 'text-white/70' : '')}>
+                          ein sichtbarer Schludrigkeits-Marker.
+                          R207: einheitliche Muted-Farbe wie im Kursplan — der aktive Tag ist
+                          keine dunkle Flaeche mehr, weisse Schrift waere hier unlesbar. */}
+                      <span className="mt-1.5 text-[11px] font-semibold tabular-nums text-[var(--color-ink-muted)]">
                         {count === 0
                           ? de ? 'frei' : 'off'
                           : count === 1
@@ -311,7 +320,10 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                   gilt hier fuer JEDEN Tag, nicht nur den Samstag. */}
               <p
                 id="kurse-tagesliste-label"
-                className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-[var(--color-line)] pt-4 text-sm"
+                /* R207: KEIN border-t mehr. Die Reiterleiste darueber traegt jetzt selbst
+                   eine Grundlinie (border-b am Container) — zwei Haarlinien mit 0px Abstand
+                   dazwischen lesen sich als Doppelstrich. */
+                className="flex flex-wrap items-baseline gap-x-3 gap-y-1 pt-4 text-sm"
               >
                 <span className="type-h3 text-[var(--color-ink)]">
                   {activeLabel ? (de ? activeLabel.labelDe : activeLabel.labelEn) : ''}
