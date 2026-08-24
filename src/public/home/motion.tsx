@@ -19,8 +19,8 @@ import {
 } from 'react';
 
 /** Einheitlicher Basistakt: sichtbar von unten einblenden, ohne Feder oder Seitenbewegung. */
-export const EASE_OUT = [0.22, 1, 0.36, 1] as const;
-export const VIEWPORT = { once: true, margin: '0px 0px -8% 0px' } as const;
+export const EASE_OUT = [0.22, 0.65, 0.3, 1] as const;
+export const VIEWPORT = { once: true, margin: '0px 0px -4% 0px' } as const;
 
 const emptySubscribe = () => () => {};
 
@@ -34,13 +34,13 @@ export function useHydrated() {
 
 export function useReveal(opts?: { stagger?: number; distance?: number; duration?: number }) {
   const reduced = useReducedMotion() === true;
-  const stagger = opts?.stagger ?? 0.055;
-  const distance = Math.min(opts?.distance ?? 18, 24);
-  const duration = opts?.duration ?? 0.55;
+  const stagger = opts?.stagger ?? 0.05;
+  const distance = Math.min(opts?.distance ?? 16, 22);
+  const duration = opts?.duration ?? 0.7;
 
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.03 } },
   };
   const item: Variants = {
     hidden: reduced ? { opacity: 1 } : { opacity: 0, y: distance },
@@ -104,13 +104,13 @@ export function useRevealVariant(
   opts?: { stagger?: number; distance?: number; duration?: number; delay?: number },
 ) {
   const reduced = useReducedMotion() === true;
-  const stagger = opts?.stagger ?? 0.055;
-  const distance = Math.min(opts?.distance ?? 18, 24);
-  const duration = opts?.duration ?? 0.55;
+  const stagger = opts?.stagger ?? 0.05;
+  const distance = Math.min(opts?.distance ?? 16, 22);
+  const duration = opts?.duration ?? 0.7;
   const delay = opts?.delay ?? 0;
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.03 } },
   };
   const item = revealVariantItem(variant, { reduced, distance, duration, delay });
   return { container, item, reduced };
@@ -213,9 +213,9 @@ export function RevealWords({
   text,
   className,
   as: Tag = 'h2',
-  stagger = 0.03,
-  distance = 14,
-  duration = 0.5,
+  stagger = 0.028,
+  distance = 12,
+  duration = 0.62,
   instant = false,
 }: RevealWordsProps) {
   const reduced = useReducedMotion() === true;
@@ -223,7 +223,7 @@ export function RevealWords({
   const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.02 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
   };
   const word: Variants = animated
     ? {

@@ -164,10 +164,10 @@ export function Rise({
     <M
       data-reveal
       className={className}
-      initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 18 }}
+      initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '0px 0px -8% 0px' }}
-      transition={{ duration: reduced ? 0 : 0.55, delay: reduced ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, margin: '0px 0px -4% 0px' }}
+      transition={{ duration: reduced ? 0 : 0.7, delay: reduced ? 0 : delay, ease: [0.22, 0.65, 0.3, 1] }}
     >
       {children}
     </M>

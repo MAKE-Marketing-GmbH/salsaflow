@@ -101,7 +101,7 @@ export function SchedulePage() {
               pb-2 auf pb-8/pb-10 — vorher trug das Band den Abstand zum Kalender, jetzt
               muss ihn der Textblock selbst tragen, sonst klebt die Tages-Steuerung direkt
               unter dem Intro-Satz. */}
-          <Shell className="pb-8 pt-2 sm:pb-10 lg:pb-10 lg:pt-3">
+          <Shell className="pb-8 pt-2 sm:pb-10 lg:!px-8 lg:pb-10 lg:pt-3">
             <div className="grid gap-2 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16">
               <h1 className={`type-h1 text-[var(--color-ink)] ${MEASURE_XL}`}>
                 {de ? (
@@ -191,32 +191,15 @@ export function SchedulePage() {
               geloescht statt konserviert. Die Historie steht im Git-Log. */}
         </section>
 
-        {/* Der Kalender. Die Zeilen bleiben auf 1080px begrenzt: eine Kurszeile ist
-            Zeit + Kurs + CTA und braucht keine 1400px — bei voller Breite stand ein 700px
-            breites Nichts zwischen Kursname und Button (Beleg:
-            /tmp/kursplan-cal-shots3/kursplan-desktop-01-y700.png).
-
-            R190 (Raphael 22.08.: "die Breite der Seite ist übelst kaputt nach dem Hero"):
-            Die Begrenzung war vorher ein EIGENER zentrierter Container (`mx-auto` +
-            `pl-5 pr-24`). Damit stand die H1 der Seite auf 52 px und alles darunter —
-            Wochenzeile, Stil-Chips, Kurskarten — auf 213 px. Ein Sprung von 161 px direkt
-            unter dem Hero, an der auffälligsten Stelle der Seite. Rechts lief es
-            auseinander: die Kurskarte endete bei 1143, der Fließtext oben bei 1387.
-
-            Jetzt trägt die Sektion dieselbe `Shell` wie jede andere — gleiche linke Kante,
-            gleicher Rahmen. Die 1080px wirken als `max-w` INNERHALB der Shell und ohne
-            `mx-auto`: die Zeilen bleiben kurz, beginnen aber auf der Seitenkante statt
-            in der Mitte. Das alte `pr-24` fällt mit, aus demselben Grund wie in
-            primitives.tsx — der WhatsApp-Knopf ist `fixed` und wird über
-            `--whatsapp-lift` am <main> gelöst (siehe Kommentar unten), nicht über eine
-            96 px breite Spalte durch die ganze Seite. */}
+        {/* Der Kalender nutzt die komplette Shell. Die frühere 1080px-Grenze endete auf
+            großen Displays deutlich vor der rechten Seitenkante und erzeugte den im
+            Kunden-Screenshot sichtbaren leeren Korridor. Zeitspalte, Karten und Filter
+            folgen jetzt demselben breiten Raster wie Hero und Navigation. */}
         {/* pb: der dunkle ScheduleBottomCta stand vorher direkt auf dem schwarzen Footer —
             zwei grosse Dunkelflaechen ohne Fuge (Kritik-Runde 10.08.2026). Papier-Luft dazwischen. */}
         <section id="kursplan-list" className="scroll-mt-24 bg-[var(--color-bg-soft)] pb-14 pt-2 sm:pb-16 sm:pt-10 lg:pt-5">
-          <Shell>
-            <div className="max-w-[1080px]">
-              <CourseEngine onTotal={setTotal} />
-            </div>
+          <Shell className="lg:!px-8">
+            <CourseEngine onTotal={setTotal} />
           </Shell>
         </section>
       </main>
@@ -226,7 +209,7 @@ export function SchedulePage() {
           data-kursplan am <main> (oben) + --whatsapp-lift in index.css, NICHT ueber eine
           Klasse — der Float-bottom ist inline und wuerde eine Klasse schlagen. Copy/Raster
           bleiben. */}
-      <SiteFooter entryCta={false} />
+      <SiteFooter entryCta={false} float={false} />
     </>
   );
 }
