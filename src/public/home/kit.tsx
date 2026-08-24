@@ -24,7 +24,6 @@ import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Shell } from '@/public/site/primitives';
-import { useHydrated } from '@/public/home/motion';
 
 /** Flaechen der Home = dieselben wie auf allen Unterseiten. */
 export const PAPER = 'bg-[var(--color-paper-warm)]';
@@ -160,15 +159,12 @@ export function Rise({
   as?: 'div' | 'li' | 'section';
 }) {
   const reduced = useReducedMotion();
-  const hydrated = useHydrated();
   const M = as === 'li' ? motion.li : as === 'section' ? motion.section : motion.div;
   return (
     <M
       data-reveal
       className={className}
-      // Vor der Hydration sichtbar starten: sonst schreibt der Prerender opacity:0 ins HTML
-      // und der Inhalt bleibt weg, solange das Bundle nicht laeuft.
-      initial={hydrated ? { opacity: reduced ? 1 : 0, y: reduced ? 0 : 18 } : false}
+      initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 18 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '0px 0px -8% 0px' }}
       transition={{ duration: reduced ? 0 : 0.55, delay: reduced ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}

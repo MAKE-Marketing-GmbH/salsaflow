@@ -826,6 +826,21 @@ body:has([data-partys-page]) section.relative.isolate.overflow-hidden > div.poin
   }
 }
 
+/* Der Prerender liefert Reveal-Elemente im Startzustand aus, damit die Animation auch
+   nach Hydration tatsächlich läuft. Nutzer mit reduzierter Bewegung sehen unabhängig
+   vom JavaScript-Zeitpunkt sofort den stabilen Endzustand. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-reveal] * {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+  }
+}
+
 /* ================================================================= WHATSAPP-RESERVE (R190)
  *
  * Raphael 22.08.: "die Breite der Seite ist übelst kaputt nach dem Hero."

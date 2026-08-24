@@ -26,7 +26,6 @@
 
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import { useHydrated } from '@/public/home/motion';
 
 /** Der EINE Easing-Wert der Site (ease-out, kein Bounce — Bounce ist ein AI-Slop-Tell). */
 export const REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
@@ -56,7 +55,6 @@ export function useRevealMotion(opts?: {
   from?: RevealFrom;
 }) {
   const reduced = useReducedMotion();
-  const hydrated = useHydrated();
   const stagger = opts?.stagger ?? 0.055;
   const distance = opts?.distance ?? 18;
   const duration = opts?.duration ?? 0.55;
@@ -67,9 +65,7 @@ export function useRevealMotion(opts?: {
     show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
   };
   const item: Variants = {
-    hidden: hydrated
-      ? { opacity: reduced ? 1 : 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y }
-      : { opacity: 1, x: 0, y: 0 },
+    hidden: { opacity: reduced ? 1 : 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y },
     show: {
       opacity: 1,
       x: 0,
@@ -77,7 +73,7 @@ export function useRevealMotion(opts?: {
       transition: { duration: reduced ? 0 : duration, ease: REVEAL_EASE },
     },
   };
-  return { container, item, reduced, hydrated };
+  return { container, item, reduced };
 }
 
 /** Welches Element die Gruppe rendert.
@@ -155,12 +151,11 @@ export function RevealItem({
   from?: RevealFrom;
 } & Omit<ComponentPropsWithoutRef<typeof motion.div>, 'initial' | 'whileInView' | 'viewport' | 'transition'>) {
   const reduced = useReducedMotion();
-  const hydrated = useHydrated();
   const shift = offset(from ?? 'up', distance ?? 18);
   return (
     <motion.div
       data-reveal
-      initial={hydrated ? { opacity: reduced ? 1 : 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y } : false}
+      initial={{ opacity: reduced ? 1 : 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={REVEAL_VIEWPORT}
       transition={{

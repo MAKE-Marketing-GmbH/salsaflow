@@ -32,18 +32,8 @@ export function useHydrated() {
   );
 }
 
-function endState() {
-  return {
-    opacity: 1,
-    transform: 'none',
-    filter: 'blur(0px)',
-    clipPath: 'inset(0% 0% 0% 0%)',
-  };
-}
-
 export function useReveal(opts?: { stagger?: number; distance?: number; duration?: number }) {
   const reduced = useReducedMotion() === true;
-  const hydrated = useHydrated();
   const stagger = opts?.stagger ?? 0.055;
   const distance = Math.min(opts?.distance ?? 18, 24);
   const duration = opts?.duration ?? 0.55;
@@ -52,18 +42,16 @@ export function useReveal(opts?: { stagger?: number; distance?: number; duration
     hidden: {},
     show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
   };
-  const item: Variants = hydrated
-    ? {
-        hidden: reduced ? { opacity: 1 } : { opacity: 0, y: distance },
-        show: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: reduced ? 0 : duration, ease: EASE_OUT },
-        },
-      }
-    : { hidden: endState(), show: endState() };
+  const item: Variants = {
+    hidden: reduced ? { opacity: 1 } : { opacity: 0, y: distance },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: reduced ? 0 : duration, ease: EASE_OUT },
+    },
+  };
 
-  return { container, item, reduced, hydrated };
+  return { container, item, reduced };
 }
 
 const SECTION_OFFSET: ['start end', 'end start'] = ['start end', 'end start'];
@@ -95,10 +83,9 @@ export type RevealVariant = 'rise' | 'clip' | 'blur';
 
 function revealVariantItem(
   variant: RevealVariant,
-  opts: { reduced: boolean; hydrated: boolean; distance: number; duration: number; delay: number },
+  opts: { reduced: boolean; distance: number; duration: number; delay: number },
 ): Variants {
-  const { reduced, hydrated, distance, duration, delay } = opts;
-  if (!hydrated) return { hidden: endState(), show: endState() };
+  const { reduced, distance, duration, delay } = opts;
   if (reduced) return { hidden: { opacity: 1 }, show: { opacity: 1 } };
 
   const transition = { duration, delay, ease: EASE_OUT };
@@ -117,7 +104,6 @@ export function useRevealVariant(
   opts?: { stagger?: number; distance?: number; duration?: number; delay?: number },
 ) {
   const reduced = useReducedMotion() === true;
-  const hydrated = useHydrated();
   const stagger = opts?.stagger ?? 0.055;
   const distance = Math.min(opts?.distance ?? 18, 24);
   const duration = opts?.duration ?? 0.55;
@@ -126,8 +112,8 @@ export function useRevealVariant(
     hidden: {},
     show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
   };
-  const item = revealVariantItem(variant, { reduced, hydrated, distance, duration, delay });
-  return { container, item, reduced, hydrated };
+  const item = revealVariantItem(variant, { reduced, distance, duration, delay });
+  return { container, item, reduced };
 }
 
 export function Reveal({
@@ -233,13 +219,13 @@ export function RevealWords({
   instant = false,
 }: RevealWordsProps) {
   const reduced = useReducedMotion() === true;
-  const hydrated = useHydrated() && !instant;
+  const animated = !instant;
   const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
   const container: Variants = {
     hidden: {},
     show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.02 } },
   };
-  const word: Variants = hydrated
+  const word: Variants = animated
     ? {
         hidden: reduced ? { opacity: 1 } : { opacity: 0, y: Math.min(distance, 20) },
         show: {
@@ -248,7 +234,7 @@ export function RevealWords({
           transition: { duration: reduced ? 0 : duration, ease: EASE_OUT },
         },
       }
-    : { hidden: endState(), show: endState() };
+    : { hidden: { opacity: 1, y: 0 }, show: { opacity: 1, y: 0 } };
 
   return (
     <Tag className={className} data-reveal data-reveal-variant="letters">
