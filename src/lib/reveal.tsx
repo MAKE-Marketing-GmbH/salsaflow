@@ -33,7 +33,7 @@ export const REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
 
 /** Der EINE Viewport-Trigger. -8% laesst den Reveal zuenden, bevor das Element mittig steht;
  *  bei 0% "schwimmt" er sichtbar nach. */
-export const REVEAL_VIEWPORT = { once: true, margin: '-8% 0px' } as const;
+export const REVEAL_VIEWPORT = { once: true, margin: '0px 0px -8% 0px' } as const;
 
 /** Aus welcher Richtung fliegt das Element ein.
  *  'up' ist der Default und der Normalfall — die anderen drei nur, wenn die Richtung etwas
@@ -57,24 +57,24 @@ export function useRevealMotion(opts?: {
 }) {
   const reduced = useReducedMotion();
   const hydrated = useHydrated();
-  const stagger = opts?.stagger ?? 0.07;
-  const distance = opts?.distance ?? 14;
-  const duration = opts?.duration ?? 0.45;
+  const stagger = opts?.stagger ?? 0.055;
+  const distance = opts?.distance ?? 18;
+  const duration = opts?.duration ?? 0.55;
   const shift = offset(opts?.from ?? 'up', distance);
 
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.03 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
   };
   const item: Variants = {
     hidden: hydrated
-      ? { opacity: 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y }
+      ? { opacity: reduced ? 1 : 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y }
       : { opacity: 1, x: 0, y: 0 },
     show: {
       opacity: 1,
       x: 0,
       y: 0,
-      transition: { duration: reduced ? 0.3 : duration, ease: REVEAL_EASE },
+      transition: { duration: reduced ? 0 : duration, ease: REVEAL_EASE },
     },
   };
   return { container, item, reduced, hydrated };
@@ -156,15 +156,15 @@ export function RevealItem({
 } & Omit<ComponentPropsWithoutRef<typeof motion.div>, 'initial' | 'whileInView' | 'viewport' | 'transition'>) {
   const reduced = useReducedMotion();
   const hydrated = useHydrated();
-  const shift = offset(from ?? 'up', distance ?? 14);
+  const shift = offset(from ?? 'up', distance ?? 18);
   return (
     <motion.div
       data-reveal
-      initial={hydrated ? { opacity: 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y } : false}
+      initial={hydrated ? { opacity: reduced ? 1 : 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y } : false}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={REVEAL_VIEWPORT}
       transition={{
-        duration: reduced ? 0.3 : duration ?? 0.45,
+        duration: reduced ? 0 : duration ?? 0.55,
         delay: reduced ? 0 : delay,
         ease: REVEAL_EASE,
       }}

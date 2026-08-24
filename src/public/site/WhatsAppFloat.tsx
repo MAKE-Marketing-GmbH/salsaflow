@@ -638,26 +638,10 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
       whileHover="hover"
       whileTap={reduced ? undefined : { scale: 0.94 }}
       className={cn(
-        // Rechts unten, weiss auf gruen und auf dem Handy sichtbar (Absprachen.md:21).
-        /* R188 / AAA (Video-Runde 21.08.): mobil deckte die Blase Fliesstext ab — gemessen
-           auf der Startseite 390px an 14 von 35 Scrollpositionen, 17 ueberdeckte Textzeilen
-           (worklog/.r188f6-wa.mjs), auf /preise sogar einen Preis in der Zeile "Schueler
-           und Studenten" (worklog/shots/R188/after-final5-preise/preise/m-02.png).
-           Ursache ist Geometrie, kein Einzelfall: die Blase mass 56px breit an x=314..370,
-           die Inhaltsspalte laeuft bei 390px Viewport bis x=370 (Shell-Padding 20px). Der
-           Knopf stand also vollstaendig IN der Textspalte. Ein vertikaler Lift verschiebt
-           das Problem nur — genau daran haengen bereits sieben Route-Sonderregeln in
-           index.css (R101, R138, R139 ...), jede fuer eine einzelne Stelle.
-           Mobil ist die Blase deshalb ein kompakter 48px-Kreis am rechten Rand (right-3).
-           Sie belegt jetzt x=338..386 und damit im Wesentlichen den Aussenrand rechts der
-           Textkante statt die Spalte selbst. Ab sm bleibt alles unveraendert (h-14, right-6,
-           Pillenform mit Label) — Desktop war nie der Befund. */
-        'whatsapp-float group/wa fixed right-1 z-40 inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full px-0 sm:right-6 sm:h-14',
+        // Mobile bleibt frei von permanenten Floating-Actions. WhatsApp ist dort weiter
+        // in Standort, Footer und Kontakt erreichbar; der fixe Knopf beginnt erst ab lg.
+        'whatsapp-float group/wa fixed right-6 z-40 hidden h-14 w-14 items-center justify-center gap-2 rounded-full px-0 lg:inline-flex',
         // Kompakt heisst: Kreis statt Pille, weil sonst kein Platz bleibt (siehe Solver).
-        // Die Pille beginnt bei `lg`, nicht bei `sm`: zwischen 640 und 1023 px laege sie
-        // auf der Sa-Kachel des Kursrasters (siehe `labelAllowed`). Unter lg bleibt der
-        // Kreis aus der Basiszeile (h-12/sm:h-14, w-12) stehen.
-        'sm:w-14 sm:px-0',
         compact ? 'lg:w-14 lg:px-0' : 'lg:w-auto lg:px-4',
         // Vor der ersten Messung steht der Knopf noch auf dem Grundplatz, ohne zu wissen, was
         // dort liegt. Er bleibt bis dahin unsichtbar; danach zuendet der Eintritt.
@@ -674,10 +658,6 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
         // (`.whatsapp-float` in index.css), nicht ueber diese Transition.
         // Dauer und Kurve kommen aus den Motion-Token statt aus einer eigenen 520ms-Zahl —
         // dieselbe Stufe wie der Auftritt in `.whatsapp-float`.
-        /* Mobil springt `bottom` ohne Zwischenweg in den freien Kollisions-Slot. Eine
-           420ms-Fahrt von Slot A nach B kreuzte unterwegs genau den Text, den der Solver
-           freigibt (Verifier mass trotz korrektem Ziel weiter Treffer). Ab sm gibt es
-           keine Kollisions-Slots; dort bleibt die ruhige Token-Dauer unveraendert. */
         /* Springt der Knopf in einen anderen Slot, faehrt er ohne Zwischenweg. Eine
            420ms-Fahrt von Slot A nach B kreuzte unterwegs genau den Inhalt, den der Solver
            freigibt (Verifier mass trotz korrektem Ziel weiter Treffer). Steht die Kopfzeile

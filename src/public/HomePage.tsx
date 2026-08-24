@@ -21,7 +21,6 @@ import { EventsTeaser } from '@/public/home/EventsTeaser';
 import { Faq } from '@/public/home/Faq';
 import { LocationBand } from '@/public/home/LocationBand';
 import { InstagramShowcase } from '@/public/social/InstagramShowcase';
-import { StickyCta } from '@/public/home/StickyCta';
 import { CoursePath } from '@/public/home/CoursePath';
 
 export function HomePage() {
@@ -90,10 +89,7 @@ export function HomePage() {
           Beibehalten aus Kritiker final-2, Issue 2: ScheduleTeaser + CoursePath bleiben EIN
           Kapitel mit einer H2 (withCoursePath), und InstagramShowcase bleibt ganz unten als
           Ausblick statt als Station im Scroll. */}
-      {/* paddingBottom via --sticky-cta-height statt statischem pb-20: der Sticky-Balken
-          (77px, mobil ab 480px Scroll) deckte sonst am Seitenende den letzten Inhalt
-          (Critic Runde 15, Item 2). Die Variable ist 0px, sobald der Balken weg ist. */}
-      <main id="main" tabIndex={-1} style={{ paddingBottom: 'var(--sticky-cta-height, 0px)' }}>
+      <main id="main" tabIndex={-1}>
         {/* R186 (Dom, 20.08.): WhyGrid ist raus aus der sichtbaren Reihenfolge. Der Kunde
             hat die Sektion "Du brauchst keinen perfekten Moment. Nur den ersten Schritt."
             im Screenshot abgelehnt. Sie beantwortete vier Einsteiger-Einwaende, die die
@@ -119,7 +115,6 @@ export function HomePage() {
         <InstagramShowcase compact data-design-unit="home.instagram-showcase" />
       </main>
       <SiteFooter entryCta={false} float />  {/* S17 Footer (dunkel, WhatsApp-Float bleibt auf Home sichtbar) */}
-      <StickyCta />
     </div>
   );
 }

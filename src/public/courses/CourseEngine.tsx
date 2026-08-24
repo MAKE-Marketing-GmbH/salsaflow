@@ -834,7 +834,7 @@ function DayBar({
            endet. Ohne das sass der Kreis auf "Sa 22.08. · 1"
            (kursplan-mobil-settled.png, Grok Runde 4 und 5). Ab lg steht der
            Knopf im 88-px-Shellrand und braucht das nicht. */
-        className="grid grid-cols-3 gap-x-2 gap-y-3 border-b border-[var(--color-line)] pb-1 max-sm:pr-14 lg:flex lg:gap-6 lg:pb-0"
+        className="grid grid-cols-3 gap-x-2 gap-y-3 border-b border-[var(--color-line)] pb-1 lg:flex lg:gap-6 lg:pb-0"
       >
         {days.map((d) => {
           const on = d.key === active;

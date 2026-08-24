@@ -29,7 +29,7 @@ import { useLang } from '@/lib/i18n';
 import { HOME_V3 } from '@/public/home/content-v3';
 import { FounderCards } from '@/public/team/FounderRow';
 import { Eyebrow, Shell, BeatMark, CtaArrow, sectionLead } from '@/public/site/primitives';
-import { ClipReveal, Reveal, RevealWords, useReveal, useParallaxStyle } from '@/public/home/motion';
+import { ClipReveal, Reveal, RevealWords, RiseReveal, useReveal, useParallaxStyle } from '@/public/home/motion';
 import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
@@ -285,12 +285,9 @@ export function TeamBlock() {
       </Shell>
 
       <Shell>
-        {/* 4) Die vier Gruender als eigene klare Reihe unter dem Band (FounderCards,
-            /team-konsistent). Kein Reveal/whileInView hier (Watchdog-Fix 2026-07-08):
-            Gruender-Fotos + Namen hingen im mobilen Scrollshot in der opacity-0-Zwischenphase
-            fest (halbtransparent, grau, wirkte unfertig). Echte Personenfotos muessen sofort
-            satt sichtbar sein. */}
-        <div className="mt-12 lg:mt-16">
+        {/* 4) Die vier Gründer als eigene klare Reihe unter dem Band. Der gemeinsame
+            Fade-up hält Fotos, Namen und Link als einen stabilen Themenblock zusammen. */}
+        <RiseReveal className="mt-12 lg:mt-16">
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-ink-muted)]">
             <BeatMark />
             {lang === 'de' ? 'Die Gründer' : 'The founders'}
@@ -303,7 +300,7 @@ export function TeamBlock() {
             {t.teamLink}
             <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
           </a>
-        </div>
+        </RiseReveal>
       </Shell>
     </section>
   );

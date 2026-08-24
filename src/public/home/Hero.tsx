@@ -448,42 +448,11 @@ export function Hero() {
               <CtaPill href="/kursplan" className="max-sm:w-full">
                 {cta.plan}
               </CtaPill>
-              {/* R191, `max-sm:pr-[var(--wa-corner)]`: der Link ist unter sm vollbreit
-                  (`items-stretch` am Container). Seine Klickflaeche lief damit bis x=370,
-                  waehrend sein Text schon bei x=287 endet — 83 px unsichtbare Polsterung
-                  unter dem WhatsApp-Kreis (x338..386). Gemessen per `elementFromPoint`
-                  ueber die Schnittflaeche: 5 von 10 Punkten der untersten Linkzeile
-                  gehoerten dem Knopf, dort war der CTA nicht bedienbar.
-                  Der Knopf ist der falsche Hebel dafuer — er steht mit 20 px schon am
-                  unteren Anschlag, jeder negative Lift faellt an der Solver-Schranke
-                  (`bottom > viewportH - 12`, nachgerechnet fuer -4 bis -20).
-                  Also endet die Klickflaeche jetzt dort, wo der Knopf beginnt: dieselbe
-                  Zahl, die auch die Shell verbraucht (`--wa-corner`).
-                  `w-[calc(100%-var(--wa-corner))]` statt `pr-`: der Link ist `inline-flex`
-                  in einem `items-stretch`-Container, ein Innenabstand liesse die Box also
-                  gleich breit und schoebe nur den Text. Die Breite muss selbst kuerzer
-                  werden.
-
-                  R192, `max-sm:pl-[var(--wa-corner)]`: die schmalere Box allein reicht
-                  nicht. Hier stand vorher, der Text bleibe zentriert und bewege sich
-                  nicht — das war falsch, gemessen wandert er auf jeder Breite von 320
-                  bis 639 px um 29..31 px nach links (die halbe `--wa-corner`). Folge:
-                  die beiden gestapelten CTAs standen auf zwei verschiedenen
-                  Mittelachsen, auf 360 px sind 29 px rund 8 Prozent der Bildbreite.
-                  `CtaPill` darueber bleibt `w-full`, weil sie den Knopf nicht beruehrt.
-                  Der Ausgleich laeuft ueber INNENabstand links, nicht ueber
-                  `translate-x`: ein Transform verschiebt die Trefferflaeche mit und
-                  schob den Link damit wieder unter den Knopf (gemessen 34 von 88
-                  Rasterpunkten zurueck gestohlen). Padding bewegt nur den Inhalt. Die
-                  Box endet weiterhin bei `100% - var(--wa-corner)`, der Text steht
-                  wieder mittig auf der Pill-Achse.
-                  Erst ab 340 px (`min-[340px]:`): darunter kostet der Innenabstand
-                  60 px Textbreite und der Titel bricht von drei auf vier Zeilen
-                  (gemessen auf 320 px). Auf der engsten Breite wiegt eine vierte Zeile
-                  schwerer als 30 px Achsversatz, ueberall sonst ist es umgekehrt. */}
+              {/* Beide mobilen Hero-Aktionen teilen jetzt dieselbe volle Breite und
+                  Mittelachse. Der WhatsApp-Float darf das Seitenraster nicht verziehen. */}
               <CtaText
                 href="/schnupperstunde"
-                className="min-h-11 max-sm:w-[calc(100%-var(--wa-corner))] max-sm:justify-center min-[340px]:max-sm:pl-[var(--wa-corner)]"
+                className="min-h-11 max-sm:w-full max-sm:justify-center"
               >
                 {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
               </CtaText>
@@ -499,7 +468,7 @@ export function Hero() {
                 INVARIANTS/HOME_V3 team.stats. */}
             <motion.dl
               variants={item}
-              className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--color-line)] pt-5 text-[0.9375rem] max-[370px]:hidden max-sm:mt-6 max-sm:pr-16 max-sm:pt-4 sm:mt-10"
+              className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--color-line)] pt-5 text-[0.9375rem] max-[370px]:hidden max-sm:mt-6 max-sm:pt-4 sm:mt-10"
             >
               <div className="flex items-center gap-2">
                 {/* Quelle vor dem Urteil: das G sagt WOHER die Zahl kommt, die Sterne sagen WIE

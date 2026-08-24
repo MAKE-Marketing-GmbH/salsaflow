@@ -21,85 +21,12 @@ export function Shell({
   className?: string;
   as?: ElementType;
 }) {
-  /* SEITENRAHMEN (R190, Raphael 22.08.: "die Breite der Seite ist übelst kaputt
-     nach dem Hero").
-
-     Vorher stand hier `pl-5 pr-24 sm:pl-8 sm:pr-[5.5rem]` — links 20 px gegen rechts
-     96 px. Der Grund war der fixe WhatsApp-Knopf: eine Kursplan-Zeile las sich auf
-     390 px, als läge sie auf dem Kreis.
-
-     Gemessen auf der Startseite vor dem Fix (scripts/r190-layout-audit.cjs):
-     die rechte Textkante lag bei 692, 712, 712, 787, 660 und 537 px — also
-     sechs verschiedene Kanten auf einer Seite. Links sprang sie zwischen 46
-     und 52 px. Genau das sieht Raphael.
-
-     WAS SICH WIRKLICH GEAENDERT HAT — und was nicht.
-     Der Fussabdruck des Knopfes steht jetzt als EINE Zahl in index.css
-     (`--wa-corner`) statt als geschaetzter Wert an jeder Stelle:
-       Mobil    right-1 ( 4 px) + 48 px Kreis = 52 px  ->  --wa-corner 3.75rem
-       Desktop  right-6 (24 px) + 56 px Kreis = 80 px  ->  --wa-corner 5.5rem
-     Beide mit 8 px Luft.
-     MOBIL bringt das echte 36 px: 96 -> 60 px rechtes Padding.
-     AB sm AENDERT SICH NICHTS: 5.5rem sind 88 px, exakt der Wert des alten
-     `sm:pr-[5.5rem]`. Die erste Fassung dieses Kommentars behauptete hier
-     "denselben SICHTBAREN Wert links und rechts" und "gut ein Drittel der alten
-     96 px" — beides falsch, von einem Kritiker am Code nachgerechnet und im
-     Browser bestaetigt: Desktop 32 px links gegen 88 px rechts.
-     Das Layout-Gate sah es nie, weil es nur die LINKE Textkante prueft.
-     Echte Anteile, falls jemand nachrechnet: mobil 60/96 = 62 %, Desktop
-     88/88 = 100 %. Hier stand vorher "92 % Desktop"; das war 88 geteilt durch
-     den MOBILEN Altwert 96 und widersprach dem "AB sm AENDERT SICH NICHTS"
-     drei Zeilen darueber. Der alte Desktop-Wert war `sm:pr-[5.5rem]` = 88 px.
-     Befund von sol-critic, an `git show HEAD:` nachgeprueft.
-
-     WARUM DIE ASYMMETRIE TROTZDEM BLEIBT — dreimal gemessen, nicht vermutet.
-     Der Knopf ist `fixed` und belegt eine ECKE (auf 1440x900 die untersten 76 px).
-     Ein `padding-right` ueber die ganze Seitenhoehe ist dafuer viel Reserve.
-     Das ist der staerkste Einwand, und er wurde zweimal ausgebaut (Weg 1 und 2
-     unten). Beide Male blieb messbar mehr verdeckter Inhalt uebrig als jetzt.
-
-     Der Grund steht in `WhatsAppFloat.tsx:400`: der Kollisionsloeser hebt den
-     Knopf nur VERTIKAL (Kandidaten 0/56/112 px) und faellt, wenn keine Hoehe
-     frei ist, bewusst auf Lift 0 zurueck — er legt sich dann ueber den Inhalt,
-     statt zu flackern oder ins obere Drittel zu wandern. Auf dichten Seiten wie
-     /faq oder einer Kursliste gibt es diese freie Hoehe nicht. Ohne horizontales
-     Ausweichen ist die Reserve in der Shell das einzige, was die rechte Spalte
-     schuetzt.
-
-     ZWEI WEGE ZUR SYMMETRIE WURDEN GEBAUT UND GEMESSEN. Beide sind schlechter.
-
-     Weg 1, seitliches Ausweichen im Loeser. Widerlegt in
-     `scripts/r190-probe-seitlich.cjs` (acht Kernrouten, beide Viewports): der Knopf
-     ist breiter als der Rand, den eine symmetrische Shell freigaebe —
-     Desktop fehlen 28..94 px, mobil 32 px. Eine dritte Achse haette keinen freien
-     Zielort; sie waere Code, der immer denselben Wert zurueckgibt.
-
-     ACHTUNG, GRENZE DIESER MESSUNG: sie fragt, ob der Knopf in den DOKUMENTRAND
-     passt. Der Knopf ist aber `fixed` (WhatsAppFloat.tsx) und steht im Viewport.
-     opus-critic hat das in Runde 4 zu Recht angegriffen. Die Zahl oben entscheidet
-     also nur ueber Weg 1, nicht ueber die Frage der Symmetrie.
-
-     Weg 2, deshalb nachgebaut: "Padding nur wo der Knopf ist" — symmetrische Shell
-     plus Reserve im unteren Band, statt 88 px ueber die ganze Seitenhoehe
-     (`scripts/r190-probe-wa-symmetrie2.cjs`, drei Zustaende, acht Routen, beide
-     Viewports, alle Scrollpositionen). Gemessene Kollisionen mit Text und
-     Bedienelementen:
-       A  jetzt, asymmetrisch                 0
-       B  symmetrisch, ohne Ersatz           34
-       C  symmetrisch + Bandreserve           7
-     C ist deutlich besser als B und trotzdem schlechter als A. Die verbleibenden
-     sieben liegen auf `/`, `/tanzkurse` und mobil — Stellen, an denen der Inhalt
-     bis an die Kante laeuft und der Loeser keine freie Hoehe findet.
-
-     EHRLICH BLEIBT DAMIT: die Seite ist rechts breiter gepolstert als links
-     (Desktop 32 gegen 88 px). Das ist eine Entscheidung gegen verdeckten Inhalt,
-     keine Symmetrie. Der Preis ist sichtbar, und Raphael hat ihn benannt.
-     Wer ihn nicht zahlen will, hat genau eine Stellschraube: den KNOPF aendern,
-     nicht die Shell und nicht den Loeser. Ein 40-px-Kreis oder ein Knopf, der
-     beim Scrollen ganz verschwindet, macht Weg 2 tragfaehig. Das ist eine
-     Design-Entscheidung und gehoert Raphael, nicht diesem Kommentar. */
+  /* Mobil und Tablet brauchen einen sichtbar symmetrischen Seitenrahmen. Der fixe
+     WhatsApp-Knopf belegt nur eine Ecke und darf deshalb nicht mehr auf jeder Zeile
+     einen breiteren rechten Rand erzwingen. Ab lg bleibt die bestehende Reserve fuer
+     dichte Desktop-Layouts erhalten. */
   return (
-    <Tag className={cn('mx-auto w-full max-w-[1400px] pl-5 pr-[var(--wa-corner)] sm:pl-8', className)}>
+    <Tag className={cn('mx-auto w-full max-w-[1400px] px-5 sm:px-8 lg:pl-8 lg:pr-[var(--wa-corner)]', className)}>
       {children}
     </Tag>
   );

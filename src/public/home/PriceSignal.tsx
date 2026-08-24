@@ -7,15 +7,12 @@ import { Check, Gift } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3 } from '@/public/home/content-v3';
 import { sectionTitle, sectionLead, CtaArrow, Shell } from '@/public/site/primitives';
-import { BlurReveal } from '@/public/home/motion';
+import { RiseReveal } from '@/public/home/motion';
 import { MEASURE_L } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
-// Kein Reveal auf Preis-Buehne und CTAs (Watchdog-Fix 2026-07-08): die Zahl und die
-// Kaufwege muessen SOFORT lesbar sein, kein opacity-0-Startzustand. Die EINE erlaubte
-// Geste dieser Sektion sitzt deshalb auf der Headline: BlurReveal (scharfstellen statt
-// einschieben), reduced-motion nur Fade. Die Preiszahl bleibt unbewegt; CountStat gibt
-// es hier nicht.
+// Das komplette Preis-Panel folgt demselben Fade-up wie die anderen Themenblöcke.
+// Es bewegt nur opacity + transform; Reduced Motion rendert sofort den Endzustand.
 //
 // -------------------------------------------------- Kritiker-FAIL d-03/d-09, Runde 2026-08-09
 // Befund "totes Weissraum-Band". Gemessen mit scripts/aaa-measure.cjs (Abstand von der
@@ -67,15 +64,11 @@ export function PriceSignal() {
         {/* R207 (Raphael 23.08. 17:10): "Preisblock: Hintergrund NICHT creme, einfach
             weiss." Sektion UND Panel laufen jetzt auf Weiss. Die gift-Pille traegt darum
             wieder bg-soft, damit sie sich vom weissen Panel abhebt (siehe Kommentar unten). */}
-        <div className="overflow-hidden rounded-[1.5rem] border border-[var(--color-line)] bg-white">
+        <RiseReveal className="overflow-hidden rounded-[1.5rem] border border-[var(--color-line)] bg-white">
           <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
             {/* Links: Erklaerung + Wege. */}
             <div className="p-7 sm:p-10 lg:p-12">
-              {/* BlurReveal rendert ein motion.div-Wrapper um die H2. Der Wrapper traegt
-                  keine eigene Flaeche; die Typo-Stufe bleibt am Heading. */}
-              <BlurReveal>
-                <h2 className={cn(sectionTitle, MEASURE_L)}>{p.title}</h2>
-              </BlurReveal>
+              <h2 className={cn(sectionTitle, MEASURE_L)}>{p.title}</h2>
               {/* R190: war eine wortgleiche Kopie von `sectionLead` mit eigenem `mt-5`
                   und mass 20 px gegen 16 px im Rest der Seite. Jetzt die Rolle. */}
               <p className={cn(sectionLead, 'max-w-md')}>
@@ -131,7 +124,7 @@ export function PriceSignal() {
               </div>
             </div>
           </div>
-        </div>
+        </RiseReveal>
       </Shell>
     </section>
   );

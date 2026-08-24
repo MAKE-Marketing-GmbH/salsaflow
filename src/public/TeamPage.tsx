@@ -515,7 +515,7 @@ function FounderSection() {
                         bei x=370 — 56px Ueberschneidung. Genau diese 56px stehen hier, und
                         nur an der einen Zeile, die lang genug ist, um sie zu erreichen.
                         Der restliche Kartentext behaelt die vollen 167px. */}
-                    <div className={cn('mt-3 border-t border-[var(--color-line)] pt-3', index % 2 === 1 && 'max-sm:pr-14')}>
+                    <div className="mt-3 border-t border-[var(--color-line)] pt-3">
                       <TeachingLine teaching={teaches} lang={lang} />
                     </div>
                   </figcaption>

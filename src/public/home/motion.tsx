@@ -18,9 +18,9 @@ import {
   type RefObject,
 } from 'react';
 
-/** Ruhiger Basistakt: kurze Wege, hohe Startdeckkraft, kein sichtbares „Ploppen“. */
+/** Einheitlicher Basistakt: sichtbar von unten einblenden, ohne Feder oder Seitenbewegung. */
 export const EASE_OUT = [0.22, 1, 0.36, 1] as const;
-export const VIEWPORT = { once: true, margin: '0px 0px -5% 0px' } as const;
+export const VIEWPORT = { once: true, margin: '0px 0px -8% 0px' } as const;
 
 const emptySubscribe = () => () => {};
 
@@ -44,17 +44,17 @@ function endState() {
 export function useReveal(opts?: { stagger?: number; distance?: number; duration?: number }) {
   const reduced = useReducedMotion() === true;
   const hydrated = useHydrated();
-  const stagger = opts?.stagger ?? 0.045;
-  const distance = Math.min(opts?.distance ?? 10, 14);
-  const duration = opts?.duration ?? 0.42;
+  const stagger = opts?.stagger ?? 0.055;
+  const distance = Math.min(opts?.distance ?? 18, 24);
+  const duration = opts?.duration ?? 0.55;
 
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.015 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
   };
   const item: Variants = hydrated
     ? {
-        hidden: reduced ? { opacity: 1 } : { opacity: 0.88, y: distance },
+        hidden: reduced ? { opacity: 1 } : { opacity: 0, y: distance },
         show: {
           opacity: 1,
           y: 0,
@@ -102,20 +102,12 @@ function revealVariantItem(
   if (reduced) return { hidden: { opacity: 1 }, show: { opacity: 1 } };
 
   const transition = { duration, delay, ease: EASE_OUT };
-  if (variant === 'clip') {
-    return {
-      hidden: { opacity: 0.92, clipPath: 'inset(0% 0% 10% 0%)' },
-      show: { opacity: 1, clipPath: 'inset(0% 0% 0% 0%)', transition },
-    };
-  }
-  if (variant === 'blur') {
-    return {
-      hidden: { opacity: 0.9, filter: 'blur(0.8px)', transform: 'translate3d(0, 4px, 0)' },
-      show: { opacity: 1, filter: 'blur(0px)', transform: 'translate3d(0, 0, 0)', transition },
-    };
-  }
+  // Die bisherigen Clip- und Blur-Varianten erzeugten auf kleinen Geräten zusätzliche
+  // Compositing-Arbeit und einen uneinheitlichen Takt. Die API-Namen bleiben kompatibel,
+  // visuell laufen aber alle Inhalte als derselbe Fade-up aus opacity + transform.
+  void variant;
   return {
-    hidden: { opacity: 0.88, transform: `translate3d(0, ${distance}px, 0)` },
+    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0)` },
     show: { opacity: 1, transform: 'translate3d(0, 0, 0)', transition },
   };
 }
@@ -126,13 +118,13 @@ export function useRevealVariant(
 ) {
   const reduced = useReducedMotion() === true;
   const hydrated = useHydrated();
-  const stagger = opts?.stagger ?? 0.045;
-  const distance = Math.min(opts?.distance ?? 10, 14);
-  const duration = opts?.duration ?? (variant === 'clip' ? 0.5 : 0.42);
+  const stagger = opts?.stagger ?? 0.055;
+  const distance = Math.min(opts?.distance ?? 18, 24);
+  const duration = opts?.duration ?? 0.55;
   const delay = opts?.delay ?? 0;
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.015 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
   };
   const item = revealVariantItem(variant, { reduced, hydrated, distance, duration, delay });
   return { container, item, reduced, hydrated };
@@ -235,9 +227,9 @@ export function RevealWords({
   text,
   className,
   as: Tag = 'h2',
-  stagger = 0.022,
-  distance = 8,
-  duration = 0.4,
+  stagger = 0.03,
+  distance = 14,
+  duration = 0.5,
   instant = false,
 }: RevealWordsProps) {
   const reduced = useReducedMotion() === true;
@@ -245,11 +237,11 @@ export function RevealWords({
   const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: 0.01 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.02 } },
   };
   const word: Variants = hydrated
     ? {
-        hidden: reduced ? { opacity: 1 } : { opacity: 0.9, y: Math.min(distance, 10) },
+        hidden: reduced ? { opacity: 1 } : { opacity: 0, y: Math.min(distance, 20) },
         show: {
           opacity: 1,
           y: 0,

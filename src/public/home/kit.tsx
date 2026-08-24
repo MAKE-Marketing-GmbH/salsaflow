@@ -147,7 +147,7 @@ export const SECTION_Y_HOME = 'py-16 lg:py-16';
 /** Alt-Name, zeigt auf die Standardstufe (die "Lead"-Sektion war nie der Hoehepunkt). */
 export const SECTION_Y_LEAD = SECTION_Y;
 
-/** Die EINE Motion der Seite: opacity + 16px, 600ms, einmal. */
+/** Die EINE Motion der Seite: Fade-in von unten, nur opacity + transform, einmal. */
 export function Rise({
   children,
   className,
@@ -168,10 +168,10 @@ export function Rise({
       className={className}
       // Vor der Hydration sichtbar starten: sonst schreibt der Prerender opacity:0 ins HTML
       // und der Inhalt bleibt weg, solange das Bundle nicht laeuft.
-      initial={hydrated ? { opacity: 0, y: reduced ? 0 : 16 } : false}
+      initial={hydrated ? { opacity: reduced ? 1 : 0, y: reduced ? 0 : 18 } : false}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-8% 0px' }}
-      transition={{ duration: reduced ? 0.3 : 0.6, delay: reduced ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, margin: '0px 0px -8% 0px' }}
+      transition={{ duration: reduced ? 0 : 0.55, delay: reduced ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </M>

@@ -161,14 +161,9 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
       // eine schwebende Karte: eingerueckt, gerundet wie jede andere Flaeche auf der
       // Seite, mit weichem Schatten statt Trennlinie. Der Text darf umbrechen
       // (kein whitespace-nowrap mehr), damit auf 390px nichts abgeschnitten wird.
-      // R153: Der WhatsApp-Float steht fix unten rechts. Vorher lief die Karte bis an den
-      // rechten Fensterrand und der Knopf lag in derselben Zeile darauf. Der Hebel sitzt am
-      // Banner-Wrapper, nicht am Float: rechts bleibt eine freie Spalte fuer den Knopf, also
-      // liegen Karte und Knopf nebeneinander statt uebereinander. Mobil ist der Float ein
-      // Kreis (3.5rem) bei right-5 (1.25rem) plus 0.75rem Luft = 5.5rem. Ab sm ist er eine
-      // Pille mit Label «WhatsApp» bei right-6 und braucht mehr: 10.5rem.
-      // Kein `left` am Float — der Knopf bleibt sitewide rechts unten im Gutter.
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pr-[5.5rem] sm:px-5 sm:pb-5 sm:pr-[10.5rem]"
+      // Mobile und Tablet bleiben symmetrisch. Erst ab lg, wenn der WhatsApp-Float
+      // tatsächlich sichtbar ist, reserviert der Banner rechts dessen Platz.
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-3 sm:px-5 sm:pb-5 lg:pr-[10.5rem]"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
     >
       <div className="pointer-events-auto mx-auto flex w-full max-w-[640px] items-center gap-3 rounded-[var(--radius-card)] border border-[var(--color-line)] bg-[var(--color-paper-warm)]/95 px-4 py-2.5 shadow-[0_10px_30px_rgba(17,17,17,0.14)] backdrop-blur-sm sm:px-5">

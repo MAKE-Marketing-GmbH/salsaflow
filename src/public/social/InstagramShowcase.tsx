@@ -286,9 +286,8 @@ export function InstagramShowcase({ compact = false, 'data-design-unit': designU
             variants={item}
             className={cn(
               'flex min-w-0 snap-x snap-mandatory gap-3 overflow-x-auto pb-2',
-              // Bis sm aus der Shell ausbrechen. Die Shell gibt links pl-5 und rechts
-              // pr-[var(--wa-corner)] (Platz fuer den WhatsApp-Float); beides wird hier
-              // per negativem Rand aufgehoben, damit die volle Viewportbreite zum
+              // Bis sm aus der Shell ausbrechen. Die Shell gibt symmetrisch 20px frei;
+              // der negative Rand hebt rechts genau diesen Einzug wieder auf, damit die volle Viewportbreite zum
               // Scrollen zur Verfuegung steht. pl-5 setzt den Einlaufrand danach wieder
               // — der Slider soll unter dem Text beginnen, nicht an der Glaskante.
               // KEIN w-screen dazu: zusammen mit -mx ergab das eine um 20px nach links
@@ -305,8 +304,7 @@ export function InstagramShowcase({ compact = false, 'data-design-unit': designU
               /* R221: Der Slider laeuft jetzt bis 1149px durch, nicht mehr nur bis sm.
                  Grund ist eine Rechnung, keine Vorliebe: drei Karten brauchen
                  3x362 + 2x16 = 1118px. Die Shell gibt innen `min(vw,1400) - 32`
-                 (pl-8 links; den rechten `pr-[var(--wa-corner)]` holt das Raster
-                 unten zurueck). Das erreicht 1118px erst ab 1150px Viewport —
+                 (32px pro Seite). Das erreicht 1118px erst ab 1150px Viewport —
                  bei 1024 stuenden selbst ohne jeden Rand nur 992px zur Verfuegung.
 
                  Darunter ein Raster zu erzwingen hiesse: entweder die 360px-Schwelle
@@ -314,7 +312,7 @@ export function InstagramShowcase({ compact = false, 'data-design-unit': designU
                  oder den 2+1-Bruch mit 460px toter Spur behalten (der Befund, der
                  R221 ausgeloest hat). Der Slider ist die dritte Antwort: alle drei
                  Karten in voller Breite, ohne Waise und ohne Einspalten-Kolonne. */
-              'max-[1149px]:-mr-[var(--wa-corner)]',
+              'max-[1149px]:-mr-5 sm:max-[1149px]:-mr-8 lg:max-[1149px]:-mr-[var(--wa-corner)]',
               'min-[1150px]:grid min-[1150px]:snap-none min-[1150px]:grid-cols-[repeat(auto-fit,minmax(var(--ig-min),1fr))] min-[1150px]:gap-4 min-[1150px]:overflow-visible min-[1150px]:pb-0 min-[1150px]:pl-0 min-[1150px]:pr-0',
               /* Die 88px, die die Shell rechts fuer den WhatsApp-Float freihaelt, sind
                  unter dem Raster ungenutzt: der Float ist `fixed` und sitzt unten
