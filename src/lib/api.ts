@@ -15,7 +15,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     credentials: 'include',
     ...init,
-    headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
+    headers: { 'content-type': 'application/json', ...init?.headers },
   });
   if (!res.ok) {
     // SAFETY: Alle Fehlerantworten dieser API liefern `{ error: string }` (siehe

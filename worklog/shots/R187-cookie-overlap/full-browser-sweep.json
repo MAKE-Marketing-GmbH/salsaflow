@@ -1,0 +1,766 @@
+{
+  "complete": true,
+  "routeCount": 27,
+  "viewportCount": 2,
+  "caseCount": 54,
+  "failureCount": 0,
+  "failures": [],
+  "results": [
+    {
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 23,
+      "brokenImages": []
+    },
+    {
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 23,
+      "brokenImages": []
+    },
+    {
+      "route": "/tanzkurse",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/tanzkurse",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 15,
+      "brokenImages": []
+    },
+    {
+      "route": "/tanzkurse",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/tanzkurse",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 15,
+      "brokenImages": []
+    },
+    {
+      "route": "/tanzkurse/salsa",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/tanzkurse/salsa",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 6,
+      "brokenImages": []
+    },
+    {
+      "route": "/tanzkurse/salsa",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/tanzkurse/salsa",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 6,
+      "brokenImages": []
+    },
+    {
+      "route": "/tanzkurse/bachata",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/tanzkurse/bachata",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 6,
+      "brokenImages": []
+    },
+    {
+      "route": "/tanzkurse/bachata",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/tanzkurse/bachata",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 6,
+      "brokenImages": []
+    },
+    {
+      "route": "/tanzkurse/heels",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/tanzkurse/heels",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 6,
+      "brokenImages": []
+    },
+    {
+      "route": "/tanzkurse/heels",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/tanzkurse/heels",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 6,
+      "brokenImages": []
+    },
+    {
+      "route": "/privatstunden",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/privatstunden",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 4,
+      "brokenImages": []
+    },
+    {
+      "route": "/privatstunden",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/privatstunden",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 4,
+      "brokenImages": []
+    },
+    {
+      "route": "/kursaufbau",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/kursaufbau",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 5,
+      "brokenImages": []
+    },
+    {
+      "route": "/kursaufbau",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/kursaufbau",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 5,
+      "brokenImages": []
+    },
+    {
+      "route": "/preise",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/preise",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 8,
+      "brokenImages": []
+    },
+    {
+      "route": "/preise",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/preise",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 8,
+      "brokenImages": []
+    },
+    {
+      "route": "/shows-animationen",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/shows-animationen",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 10,
+      "brokenImages": []
+    },
+    {
+      "route": "/shows-animationen",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/shows-animationen",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 10,
+      "brokenImages": []
+    },
+    {
+      "route": "/events",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/events",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 14,
+      "brokenImages": []
+    },
+    {
+      "route": "/events",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/events",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 14,
+      "brokenImages": []
+    },
+    {
+      "route": "/events-workshops/danceflow-night",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/events-workshops/danceflow-night",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 7,
+      "brokenImages": []
+    },
+    {
+      "route": "/events-workshops/danceflow-night",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/events-workshops/danceflow-night",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 7,
+      "brokenImages": []
+    },
+    {
+      "route": "/events-workshops/anniversary-weekend",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/events-workshops/anniversary-weekend",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 9,
+      "brokenImages": []
+    },
+    {
+      "route": "/events-workshops/anniversary-weekend",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/events-workshops/anniversary-weekend",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 9,
+      "brokenImages": []
+    },
+    {
+      "route": "/events-workshops/floweekend",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/events-workshops/floweekend",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 5,
+      "brokenImages": []
+    },
+    {
+      "route": "/events-workshops/floweekend",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/events-workshops/floweekend",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 5,
+      "brokenImages": []
+    },
+    {
+      "route": "/events-workshops/eventkalender",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/events-workshops/eventkalender",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 5,
+      "brokenImages": []
+    },
+    {
+      "route": "/events-workshops/eventkalender",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/events-workshops/eventkalender",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 5,
+      "brokenImages": []
+    },
+    {
+      "route": "/team",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/team",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 22,
+      "brokenImages": []
+    },
+    {
+      "route": "/team",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/team",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 22,
+      "brokenImages": []
+    },
+    {
+      "route": "/fotos",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/fotos",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 114,
+      "brokenImages": []
+    },
+    {
+      "route": "/fotos",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/fotos",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 131,
+      "brokenImages": []
+    },
+    {
+      "route": "/kontakt",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/kontakt",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 8,
+      "brokenImages": []
+    },
+    {
+      "route": "/kontakt",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/kontakt",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 8,
+      "brokenImages": []
+    },
+    {
+      "route": "/schnupperstunde",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/schnupperstunde",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 3,
+      "brokenImages": []
+    },
+    {
+      "route": "/schnupperstunde",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/schnupperstunde",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 3,
+      "brokenImages": []
+    },
+    {
+      "route": "/kontakt/standort-raumvermietung",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/kontakt/standort-raumvermietung",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 7,
+      "brokenImages": []
+    },
+    {
+      "route": "/kontakt/standort-raumvermietung",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/kontakt/standort-raumvermietung",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 7,
+      "brokenImages": []
+    },
+    {
+      "route": "/mehr/collabs",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/mehr/collabs",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 4,
+      "brokenImages": []
+    },
+    {
+      "route": "/mehr/collabs",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/mehr/collabs",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 4,
+      "brokenImages": []
+    },
+    {
+      "route": "/mehr/tanzschuhe",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/mehr/tanzschuhe",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 4,
+      "brokenImages": []
+    },
+    {
+      "route": "/mehr/tanzschuhe",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/mehr/tanzschuhe",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 4,
+      "brokenImages": []
+    },
+    {
+      "route": "/mehr/partys",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/mehr/partys",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 5,
+      "brokenImages": []
+    },
+    {
+      "route": "/mehr/partys",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/mehr/partys",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 5,
+      "brokenImages": []
+    },
+    {
+      "route": "/faq",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/faq",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 2,
+      "brokenImages": []
+    },
+    {
+      "route": "/faq",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/faq",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 2,
+      "brokenImages": []
+    },
+    {
+      "route": "/impressum",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/impressum",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 3,
+      "brokenImages": []
+    },
+    {
+      "route": "/impressum",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/impressum",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 3,
+      "brokenImages": []
+    },
+    {
+      "route": "/datenschutz",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/datenschutz",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 3,
+      "brokenImages": []
+    },
+    {
+      "route": "/datenschutz",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/datenschutz",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 3,
+      "brokenImages": []
+    },
+    {
+      "route": "/kursplan",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/kursplan?tag=fri&staffel=a30b7045-510d-4995-b6a7-0fb1c914480d",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 9,
+      "brokenImages": []
+    },
+    {
+      "route": "/kursplan",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/kursplan?tag=fri&staffel=a30b7045-510d-4995-b6a7-0fb1c914480d",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 7,
+      "brokenImages": []
+    },
+    {
+      "route": "/buchung",
+      "viewport": {
+        "width": 1440,
+        "height": 730,
+        "label": "desktop"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/buchung",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 4,
+      "brokenImages": []
+    },
+    {
+      "route": "/buchung",
+      "viewport": {
+        "width": 390,
+        "height": 844,
+        "label": "mobile"
+      },
+      "status": 200,
+      "finalUrl": "http://127.0.0.1:4174/buchung",
+      "navigationError": null,
+      "runtimeErrors": [],
+      "imageCount": 4,
+      "brokenImages": []
+    }
+  ]
+}
