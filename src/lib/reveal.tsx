@@ -9,15 +9,14 @@
 // Animationen, Reinflieg, sexy, nicht kompliziert") ist ein SITEWIDE-Wunsch — also gehoert
 // das Muster nach `src/lib`, wo jede Seite es ohne Umweg zieht.
 //
-// Bewusst KEIN Neubau der Motion-Physik: Dauer, Distanz und Easing sind exakt die Werte,
-// die `home/motion.tsx` seit dem Geil-Pass faehrt (14px, 0.45s, ease-out [0.22,1,0.36,1]).
-// Zwei verschiedene Takte auf derselben Seite waeren schlechter als gar keine Animation.
+// Die Motion-Physik folgt exakt `home/motion.tsx`: 16px Weg, 0.7s und eine weiche
+// weiche Ease-Out-Kurve. Zwei verschiedene Takte auf derselben Seite waeren schlechter als gar
+// keine Animation.
 //
 // Drei harte Regeln, die hier eingebaut sind statt an jeder Aufrufstelle wiederholt:
-//   1. `prefers-reduced-motion` -> nur Fade, kein Versatz. Nie ganz abschalten (der Inhalt
-//      wuerde sonst je nach Systemeinstellung anders erscheinen), aber nie bewegen.
-//   2. Vor der Hydration ist der Endzustand der Startzustand. Sonst schreibt der Prerender
-//      `opacity: 0` ins ausgelieferte HTML und die Seite ist ohne JavaScript leer.
+//   1. `prefers-reduced-motion` -> sofortiger Endzustand, keine Bewegung.
+//   2. Der Prerender schreibt den Startzustand; `noscript` und die Reduced-Motion-Regel
+//      stellen den Inhalt ohne Animation sofort sichtbar.
 //   3. `once: true`. Ein Element, das bei jedem Vorbeiscrollen erneut einfliegt, ist der
 //      Unterschied zwischen "sexy" und "kompliziert".
 //
@@ -28,11 +27,10 @@ import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import { type ComponentPropsWithoutRef, type ReactNode } from 'react';
 
 /** Der EINE Easing-Wert der Site (ease-out, kein Bounce — Bounce ist ein AI-Slop-Tell). */
-export const REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
+export const REVEAL_EASE = [0.22, 0.65, 0.3, 1] as const;
 
-/** Der EINE Viewport-Trigger. -8% laesst den Reveal zuenden, bevor das Element mittig steht;
- *  bei 0% "schwimmt" er sichtbar nach. */
-export const REVEAL_VIEWPORT = { once: true, margin: '0px 0px -8% 0px' } as const;
+/** Der EINE Viewport-Trigger. -4% startet den Reveal weich am unteren Bildrand. */
+export const REVEAL_VIEWPORT = { once: true, margin: '0px 0px -4% 0px' } as const;
 
 /** Aus welcher Richtung fliegt das Element ein.
  *  'up' ist der Default und der Normalfall — die anderen drei nur, wenn die Richtung etwas
@@ -55,14 +53,14 @@ export function useRevealMotion(opts?: {
   from?: RevealFrom;
 }) {
   const reduced = useReducedMotion();
-  const stagger = opts?.stagger ?? 0.055;
-  const distance = opts?.distance ?? 18;
-  const duration = opts?.duration ?? 0.55;
+  const stagger = opts?.stagger ?? 0.05;
+  const distance = opts?.distance ?? 16;
+  const duration = opts?.duration ?? 0.7;
   const shift = offset(opts?.from ?? 'up', distance);
 
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.03 } },
   };
   const item: Variants = {
     hidden: { opacity: reduced ? 1 : 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y },
@@ -151,7 +149,7 @@ export function RevealItem({
   from?: RevealFrom;
 } & Omit<ComponentPropsWithoutRef<typeof motion.div>, 'initial' | 'whileInView' | 'viewport' | 'transition'>) {
   const reduced = useReducedMotion();
-  const shift = offset(from ?? 'up', distance ?? 18);
+  const shift = offset(from ?? 'up', distance ?? 16);
   return (
     <motion.div
       data-reveal
@@ -159,7 +157,7 @@ export function RevealItem({
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={REVEAL_VIEWPORT}
       transition={{
-        duration: reduced ? 0 : duration ?? 0.55,
+        duration: reduced ? 0 : duration ?? 0.7,
         delay: reduced ? 0 : delay,
         ease: REVEAL_EASE,
       }}

@@ -190,7 +190,7 @@ export const HOME = defineHomeContent({
       title: 'Salsa, Bachata, Heels.',
       // R207 (Raphael 23.08. 17:10): unter die H2 gehoert eine kurze Beschreibung —
       // der Lead war leer, die vier Karten standen ohne Fuehrung direkt unter dem Titel.
-      lead: 'Drei Tanzstile und Privatstunden. Wähle, was dich anspricht — Kurse und Termine stehen auf jeder Seite.',
+      lead: 'Drei Tanzstile und Privatstunden. Wähle, was dich anspricht. Kurse und Termine stehen auf jeder Seite.',
       cards: [
         { key: 'salsa', title: 'Salsa', hint: 'Beginner bis Advanced', text: 'Für alle, die Rhythmus, Technik und Social Dancing verbinden wollen. Von den ersten Basics bis zu fliessenden Kombinationen.', photo: offerPhotos.salsa, alt: 'Tanzpaar dreht sich beim Salsa im Salsaflow Studio', href: '/tanzkurse/salsa' },
         { key: 'bachata', title: 'Bachata', hint: 'Bachata Sensual', text: 'Für weiche Bewegungen und Paartanz mit Gefühl. Ideal, wenn du an Technik und Connection arbeiten willst.', photo: offerPhotos.bachata, alt: 'Bachata-Paar beim Üben', href: '/tanzkurse/bachata' },
@@ -232,7 +232,7 @@ export const HOME = defineHomeContent({
       //    und stand zweimal auf demselben Bildschirm (Fliesstext und Faktenzeile).
       // 3. Die englische Fassung sagte im zweiten Satz "at any level", die deutsche etwas
       //    anderes. Jetzt tragen beide Sprachen denselben Inhalt in derselben Reihenfolge.
-      body: 'Am 1., 3. und 5. Freitag läuft die Danceflow Night: unsere eigenen DJs legen Salsa und Bachata auf, und du tanzt auf jedem Level mit. Vor ausgewählten Abenden findet ein Workshop statt. Dazu kommen die grossen Weekends — das Anniversary Weekend und das Floweekend mit Gastlehrer:innen aus ganz Europa.',
+      body: 'Am 1., 3. und 5. Freitag läuft die Danceflow Night: unsere eigenen DJs legen Salsa und Bachata auf, und du tanzt auf jedem Level mit. Vor ausgewählten Abenden findet ein Workshop statt. Dazu kommen die grossen Weekends: das Anniversary Weekend und das Floweekend mit Gastlehrer:innen aus ganz Europa.',
       cta: 'Alle Events ansehen',
       price: 'Salsaflow-Schüler zahlen 5 CHF, Gäste 10 CHF.',
       facts: [
@@ -326,7 +326,7 @@ export const HOME = defineHomeContent({
       // R186: sinngleich kurz zur deutschen Fassung. Kein Eyebrow, kein Lead.
       eyebrow: '',
       title: 'Salsa, Bachata, Heels.',
-      lead: 'Three dance styles and private lessons. Pick what appeals to you — courses and dates are on each page.',
+      lead: 'Three dance styles and private lessons. Pick what appeals to you. Courses and dates are on each page.',
       cards: [
         { key: 'salsa', title: 'Salsa', hint: 'Beginner to advanced', text: 'For everyone who wants to connect rhythm, technique and social dancing. From the first basics to flowing combinations.', photo: offerPhotos.salsa, alt: 'Dance couple turning while dancing salsa at the Salsaflow studio', href: '/tanzkurse/salsa' },
         { key: 'bachata', title: 'Bachata', hint: 'Bachata Sensual', text: 'For soft movement and partner dancing with feeling. Ideal if you want to work on technique and connection.', photo: offerPhotos.bachata, alt: 'Bachata couple practising', href: '/tanzkurse/bachata' },
@@ -350,7 +350,7 @@ export const HOME = defineHomeContent({
     events: {
       eyebrow: 'Events & workshops',
       title: 'There is more dancing after class.',
-      body: 'On the 1st, 3rd and 5th Friday the Danceflow Night takes place: our own DJs play Salsa and Bachata, and you dance at any level. Selected evenings start with a workshop. On top come the big weekends — the Anniversary Weekend and the Floweekend with guest teachers from across Europe.',
+      body: 'On the 1st, 3rd and 5th Friday the Danceflow Night takes place: our own DJs play Salsa and Bachata, and you dance at any level. Selected evenings start with a workshop. On top come the big weekends: the Anniversary Weekend and the Floweekend with guest teachers from across Europe.',
       cta: 'See all events',
       price: 'Salsaflow students pay CHF 5; guests pay CHF 10.',
       facts: [

@@ -183,10 +183,6 @@ export function Hero() {
     show: { opacity: 1 },
   };
 
-  const alt = de
-    ? 'Tanzpaar in der Drehung im Salsaflow-Studio Basel, beide lachen'
-    : 'A couple mid-turn at the Salsaflow studio in Basel, both laughing';
-
   // --hero-photo-h: EINE Zahl fuer die mobile Fotohoehe UND den Textversatz darunter
   // (Rechenweg im Kommentar am Grid). Steht als Arbitrary Property auf der Section, weil
   // Foto und Textblock sie beide als calc()-Basis lesen — laufen die zwei Werte
@@ -578,46 +574,32 @@ export function Hero() {
               style={parallax}
               className="absolute inset-x-0 -top-8 h-[calc(100%+4rem)] will-change-transform"
             >
-              <picture>
-                {/* < 640px: 4:5-Zuschnitt, formatgleich zur Box — object-cover schneidet nichts weg. */}
+              {/* R224 (Raphael 24.08.): Das Startseiten-Hero zeigt jetzt ein lokal
+                  ausgeliefertes Salsaflow-Reel statt eines statischen Fotos. Die Datei ist
+                  ein 12-Sekunden-Ausschnitt aus dem Instagram-Lady-Style-Reel, H.264 und
+                  physisch OHNE Audiospur. autoplay + muted + playsInline verhindert Player-
+                  Chrome und iOS-Vollbild; loop macht daraus eine ruhige Hero-Bewegung.
+
+                  Reduced Motion laedt keine Videoquelle: Das media-Attribut am <source>
+                  passt dann nicht, und das Poster bleibt als stilles Endbild stehen. So wird
+                  Bewegung nicht erst nach einem sichtbaren Frame per JavaScript gestoppt. */}
+              <video
+                aria-hidden="true"
+                autoPlay
+                muted
+                loop
+                playsInline
+                disablePictureInPicture
+                preload="metadata"
+                poster="/photos/instagram/lady-style-v2.webp"
+                className="h-full w-full object-cover object-center"
+              >
                 <source
-                  media="(max-width: 639px)"
-                  srcSet="/photos/2026/hero-paar-dreh-01-portrait.webp"
-                  width={1080}
-                  height={1350}
+                  src="/videos/home-hero-instagram-muted.mp4"
+                  type="video/mp4"
+                  media="(prefers-reduced-motion: no-preference)"
                 />
-                {/* >= 1024px: dasselbe Portraet wie mobil, NICHT das Querformat.
-                    Gemessener Grund (R190): die Desktop-Box ist 628x691, also hochkant.
-                    Das Querformat 1600x1066 hat darin overflowY = 0 — object-cover
-                    skaliert es exakt auf die Boxhoehe und zeigt es vollstaendig. Damit
-                    war `lg:object-top` wirkungslos: es gibt keinen Weg zu verschieben,
-                    und der Anschnitt der erhobenen Arme steckt bereits in der Quelldatei.
-                    Das Portraet 1080x1350 fuellt dieselbe Box mit 785px Hoehe, also 94px
-                    Spielraum — erst dadurch greift object-position ueberhaupt. */}
-                <source
-                  media="(min-width: 1024px)"
-                  srcSet="/photos/2026/hero-paar-dreh-01-portrait.webp"
-                  width={1080}
-                  height={1350}
-                />
-                <img
-                  src="/photos/2026/hero-paar-dreh-01.webp"
-                  alt={alt}
-                  // R126: mobil 38% schnitt Mund/Kinn der Frau. 26% dreht den Crop nach oben
-                  // (Koepfe bei y 12..50 %, weniger Hals). sm+ unveraendert.
-                  // lg: 8%. Die 94px Spielraum des Portraets werden hier verteilt, und der
-                  // knappe Punkt ist NICHT der Scheitel, sondern die erhobene rechte Hand des
-                  // Mannes — sie liegt oberhalb beider Koepfe. Screenshots bei 22% und 14%
-                  // (/tmp/fixB/after/hero-pos-22.png, hero-pos-14.png) schneiden ihr die
-                  // Fingerkuppen ab; bei 8% (hero-pos-8.png) stehen beide Haende, beide Arme
-                  // und beide Koepfe frei im Bild.
-                  className="h-full w-full object-cover object-[50%_26%] sm:object-[50%_32%] lg:object-[50%_8%]"
-                  width={1600}
-                  height={1066}
-                  loading="eager"
-                  fetchPriority="high"
-                />
-              </picture>
+              </video>
             </motion.div>
           </motion.div>
         </div>

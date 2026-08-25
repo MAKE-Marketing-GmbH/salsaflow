@@ -2,7 +2,7 @@
 // Shortcode mehr. Wer den Feed wechselt (Behold, Graph API) oder aktualisiert
 // (scripts/refresh-instagram-feed.mjs), fasst nur die Datendatei an, nicht dieses Layout.
 
-import { type CSSProperties } from 'react';
+import { useEffect, type CSSProperties } from 'react';
 import { ExternalLink, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLang } from '@/lib/i18n';
@@ -29,6 +29,44 @@ const IG_EMBED_MIN = 360;
 const IG_CARD_BORDER = 2;
 const IG_CARD_MIN = IG_EMBED_MIN + IG_CARD_BORDER;
 
+const INSTAGRAM_EMBED_SCRIPT_ID = 'instagram-embed-script';
+
+type InstagramEmbedWindow = Window & {
+  instgrm?: {
+    Embeds?: {
+      process: () => void;
+    };
+  };
+};
+
+/** Instagrams offizielles Embed-Skript vermisst jeden Beitrag nach dem Laden selbst und
+ * setzt die Iframe-Hoehe passend zum Original. Das ist der entscheidende Unterschied zum
+ * frueheren direkten /embed/captioned/-Iframe in einem festen Aspect-Ratio-Rahmen. */
+function useInstagramEmbeds() {
+  useEffect(() => {
+    const instagramWindow: InstagramEmbedWindow = window;
+    const process = () => instagramWindow.instgrm?.Embeds?.process();
+    const existing = document.getElementById(INSTAGRAM_EMBED_SCRIPT_ID);
+
+    if (existing instanceof HTMLScriptElement) {
+      process();
+      existing.addEventListener('load', process, { once: true });
+      return () => existing.removeEventListener('load', process);
+    }
+
+    const script = document.createElement('script');
+    script.id = INSTAGRAM_EMBED_SCRIPT_ID;
+    script.src = 'https://www.instagram.com/embed.js';
+    script.async = true;
+    script.onload = process;
+    document.body.appendChild(script);
+
+    return () => {
+      script.onload = null;
+    };
+  }, []);
+}
+
 function InstagramVideoCard({ post, compact = false }: { post: FeedPost; compact?: boolean }) {
   const { lang } = useLang();
   const title = lang === 'de' ? post.titel : post.titelEn;
@@ -37,21 +75,33 @@ function InstagramVideoCard({ post, compact = false }: { post: FeedPost; compact
   const directLabel = lang === 'de' ? `${title} direkt auf Instagram öffnen` : `Open ${title} directly on Instagram`;
 
   return (
-    <article data-component-unit="component.instagram-video-card" className="group relative isolate flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-white/15 bg-[var(--color-ink)] shadow-[0_24px_70px_-30px_rgba(0,0,0,0.7)]">
-      {/* R207 (Raphael 23.08. 17:10): "Instagram: echtes Instagram-Embed, nicht nur Bilder
-          die so tun als waeren sie Instagram." Das iframe laed jetzt SOFORT (loading=lazy),
-          ohne Klick-Facade. Die Karte zeigt das echte Instagram-UI — Header mit Avatar,
-          Play-Button und Caption sind im Embed sichtbar. */}
-      <div className={cn('relative w-full overflow-hidden bg-[var(--color-ink)]', compact ? 'aspect-[5/4]' : 'aspect-[9/16]')}>
-        <iframe
-          src={`${postUrl}embed/captioned/`}
+    <article data-component-unit="component.instagram-video-card" className="group relative isolate flex flex-col overflow-hidden rounded-[1.5rem] border border-white/15 bg-white shadow-[0_24px_70px_-30px_rgba(0,0,0,0.7)]">
+      {/* R222 (Raphael 24.08.): Die Posts duerfen nicht in eine einheitliche Kartenhoehe
+          gezwungen werden. Der fruehere 5:4-Rahmen auf Home schnitt Reels ab und erzeugte
+          pro Karte einen eigenen Scrollbalken. Das offizielle Blockquote-Embed wird von
+          embed.js pro Beitrag vermessen; Medium, Header und Caption behalten dadurch die
+          von Instagram gelieferte Originalhoehe. */}
+      <div className="w-full overflow-hidden bg-white [&_.instagram-media]:!m-0 [&_.instagram-media]:!max-w-none [&_.instagram-media]:!min-w-0 [&_.instagram-media]:!w-full [&>iframe]:!m-0 [&>iframe]:!max-w-none [&>iframe]:!w-full">
+        <blockquote
+          className="instagram-media"
+          data-instgrm-captioned
+          data-instgrm-permalink={`${postUrl}?utm_source=ig_embed&utm_campaign=loading`}
+          data-instgrm-version="14"
           title={iframeTitle}
-          className="absolute inset-0 h-full w-full border-0 bg-[var(--color-ink)]"
-          loading="lazy"
-          allow="encrypted-media; picture-in-picture"
-          allowFullScreen
-          referrerPolicy="strict-origin-when-cross-origin"
-        />
+          style={{
+            background: '#fff',
+            border: 0,
+            margin: 0,
+            maxWidth: 'none',
+            minWidth: 0,
+            padding: 0,
+            width: '100%',
+          }}
+        >
+          <a href={postUrl} target="_blank" rel="noopener noreferrer" aria-label={directLabel}>
+            {title}
+          </a>
+        </blockquote>
       </div>
       {/* Der Titel steht UNTER der Buehne. Zwei Gruende:
           1. SEO: er bleibt im HTML lesbar, auch wenn das Embed geladen ist.
@@ -98,6 +148,7 @@ export function InstagramShowcase({ compact = false, 'data-design-unit': designU
   const { item } = useReveal({ stagger: 0.08 });
   const onHome = designUnitId === 'home.instagram-showcase';
   const posts = getInstagramFeed();
+  useInstagramEmbeds();
 
   return (
     <section

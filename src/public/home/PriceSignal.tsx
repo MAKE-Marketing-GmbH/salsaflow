@@ -33,10 +33,13 @@ import { cn } from '@/lib/utils';
 // (home/kit.tsx SECTION_Y_HOME). Damit war diese Sektion mit ihren 96px wieder der Ausreisser —
 // `node scripts/aaa-measure.cjs` mass DEADGAP=193px an ihren Kanten gegen 128px ueberall
 // sonst. Die Rechnung bleibt dieselbe, nur gegen den neuen Zielwert 64px:
-//   mobil   py-9  (36px) + p-7  (28px) = 64px
-//   Desktop py-4  (16px) + p-12 (48px) = 64px
-// Der kleine py-4-Wert sieht im Code fremd aus, ist aber genau der Punkt: sichtbar zaehlt die
-// SUMME aus Sektionsrand und Panel-Rand, und die trifft jetzt exakt den Rhythmus der Nachbarn.
+//   mobil   pt-9  (36px) + p-7  (28px) = 64px am Einstieg
+//   Desktop pt-4  (16px) + p-12 (48px) = 64px am Einstieg
+// Der kleine pt-4-Wert sieht im Code fremd aus, ist aber genau der Punkt: sichtbar zaehlt die
+// SUMME aus Sektionsrand und Panel-Rand, und die trifft am Einstieg den Rhythmus der Nachbarn.
+// Zum folgenden FAQ-Kapitel ist der Abstand bewusst groesser (pb-16/lg:pb-20): Dort beginnt
+// ein neuer Gedanke direkt mit einer grossen H2 und einer langen Akkordeon-Liste. Die zusaetzliche
+// Weissflaeche trennt beide Kapitel klar, ohne das Preis-Panel innen kuenstlich aufzublasen.
 // -------------------------------------------------- Kritiker-Verdict "Template-Monotonie", r14
 // Befund war "6+ Sektionen im selben Karten-Muster". Nachgemessen (`node scripts/aaa-r14-pattern.cjs
 // 1440`) stimmt das Karten-Argument nicht: gleich breite Kachelreihen gibt es auf der ganzen Seite
@@ -59,7 +62,7 @@ export function PriceSignal() {
   const p = HOME_V3[lang].price;
 
   return (
-    <section className={cn('scroll-mt-24 bg-white', 'py-9 lg:py-4')}>
+    <section className={cn('scroll-mt-24 bg-white', 'pt-9 pb-16 lg:pt-4 lg:pb-20')}>
       <Shell>
         {/* R207 (Raphael 23.08. 17:10): "Preisblock: Hintergrund NICHT creme, einfach
             weiss." Sektion UND Panel laufen jetzt auf Weiss. Die gift-Pille traegt darum

@@ -423,18 +423,18 @@ function CoursesHero() {
                 ) : null}
               </div>
 
-              {/* Das neue Motiv: hero-paar-dreh-01-portrait.webp — ein Paar bei einer Drehung,
-                  BEIDE Gesichter frei und zugewandt. Das alte Bandmotiv zeigte eine Gruppe
-                  ueberwiegend von hinten. Hochformat, passt ohne Crop in die Hero-Spalte;
-                  vor dem Einbau per Read angesehen. */}
+              {/* R223 (Raphael 24.08.): Hero-Bild erneut gewechselt. Statt des warmen
+                  Party-/Drehmotivs steht hier jetzt eine echte Unterrichtssituation:
+                  ein Paar uebt die Drehung, weitere Kursteilnehmende tanzen dahinter.
+                  Der mittige Crop haelt Blick, Arme und Bewegung auf Mobil wie Desktop. */}
               <motion.div variants={item} className="pt-8">
                 <div className="overflow-hidden rounded-[var(--radius-media)]">
                   <img
-                    src="/photos/2026/hero-paar-dreh-01-portrait.webp"
-                    alt={de ? 'Tanzendes Paar bei einer Drehung im Salsaflow-Studio' : 'A couple mid-turn in the Salsaflow studio'}
-                    className="aspect-[4/5] w-full object-cover object-[center_28%] lg:aspect-[4/4.4]"
-                    width={1080}
-                    height={1350}
+                    src="/photos/gallery/kurse/01.jpg"
+                    alt={de ? 'Tanzpaar beim Üben einer Drehung im Salsaflow-Kurs' : 'A dance couple practising a turn in a Salsaflow class'}
+                    className="aspect-[4/5] w-full object-cover object-center lg:aspect-[4/4.4]"
+                    width={1600}
+                    height={1066}
                     loading="eager"
                     fetchPriority="high"
                   />
