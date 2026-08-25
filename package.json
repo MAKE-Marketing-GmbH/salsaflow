@@ -12,6 +12,7 @@
     "sync:redirects": "node scripts/vercel-redirects.mjs --write",
     "verify:redirects": "node scripts/vercel-redirects.mjs",
     "test:a11y-headings": "node scripts/a11y-heading-order.test.mjs",
+    "test:api-cold-start": "tsx scripts/api-cold-start.test.ts",
     "test:booking-dialog-focus": "node scripts/booking-dialog-focus.test.mjs",
     "test:auth-security": "tsx scripts/auth-security.test.ts",
     "test:build-caps": "node scripts/build-thread-caps.test.mjs",

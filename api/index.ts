@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { Hono, type Context } from 'hono';
+import { z } from 'zod';
 import { createContactRoutes } from '../server/contact-routes.js';
 import { createReservationRoutes, type SeedSchedule } from '../server/reservation-routes.js';
 import { openDb } from '../db/client.js';
@@ -89,15 +90,70 @@ staticApp.all('/api/*', (c) =>
   ),
 );
 
-async function runtimeApp() {
-  if (!process.env.DATABASE_URL?.trim()) return staticApp;
+async function databaseApp() {
   const handle = await openDb();
-  await handle.migrate();
+  try {
+    await handle.migrate();
+  } catch (error) {
+    try {
+      await handle.close();
+    } catch (closeError) {
+      console.error('Failed to close database handle after initialization error.', closeError);
+    }
+    throw error;
+  }
   const app = new Hono();
   // Reihenfolge ist der Vertrag: Public zuerst, DB nur als Fall-through fuer Admin.
   app.route('/', publicContractApp);
   app.route('/', createApp(handle.db));
   return app;
+}
+
+type RuntimeOptions = {
+  databaseUrl?: string;
+  loadDatabaseApp?: () => Promise<Hono>;
+  wait?: (milliseconds: number) => Promise<void>;
+  report?: (error: Error) => void;
+};
+
+const transientDatabaseErrorSchema = z.object({
+  code: z.enum(['ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'EAI_AGAIN', 'ENETUNREACH', 'EHOSTUNREACH']),
+});
+
+function isTransientDatabaseError(error: Error) {
+  let current: Error | undefined = error;
+  while (current) {
+    if (transientDatabaseErrorSchema.safeParse(current).success) return true;
+    current = current.cause instanceof Error ? current.cause : undefined;
+  }
+  return false;
+}
+
+const waitForRetry = (milliseconds: number) =>
+  new Promise<void>((resolveRetry) => setTimeout(resolveRetry, milliseconds));
+
+export async function runtimeApp({
+  databaseUrl = process.env.DATABASE_URL,
+  loadDatabaseApp = databaseApp,
+  wait = waitForRetry,
+  report = (error) => console.error('Database initialization failed; serving the public API only.', error),
+}: RuntimeOptions = {}) {
+  if (!databaseUrl?.trim()) return staticApp;
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await loadDatabaseApp();
+    } catch (caughtError) {
+      const error = caughtError instanceof Error ? caughtError : new Error('Database initialization failed.');
+      lastError = error;
+      if (!isTransientDatabaseError(error) || attempt === 1) break;
+      await wait(150);
+    }
+  }
+
+  report(lastError ?? new Error('Database initialization failed.'));
+  return staticApp;
 }
 
 const appPromise = runtimeApp();
