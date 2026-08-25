@@ -21,7 +21,7 @@
 // verbliebenen dunklen Stellen laufen auf --color-surface-dark bzw. weiss.
 
 import type { ReactNode } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Shell } from '@/public/site/primitives';
 
@@ -146,7 +146,7 @@ export const SECTION_Y_HOME = 'py-16 lg:py-16';
 /** Alt-Name, zeigt auf die Standardstufe (die "Lead"-Sektion war nie der Hoehepunkt). */
 export const SECTION_Y_LEAD = SECTION_Y;
 
-/** Die EINE Motion der Seite: Fade-in von unten, nur opacity + transform, einmal. */
+/** Die EINE Motion der Seite: klarer Fade-in von unten, nur opacity + transform, einmal. */
 export function Rise({
   children,
   className,
@@ -158,16 +158,18 @@ export function Rise({
   delay?: number;
   as?: 'div' | 'li' | 'section';
 }) {
-  const reduced = useReducedMotion();
   const M = as === 'li' ? motion.li : as === 'section' ? motion.section : motion.div;
   return (
     <M
       data-reveal
       className={className}
-      initial={{ opacity: reduced ? 1 : 0, y: reduced ? 0 : 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{
+        opacity: 0,
+        transform: 'translate3d(0, 44px, 0) scale(0.97)',
+      }}
+      whileInView={{ opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' }}
       viewport={{ once: true, margin: '0px 0px -4% 0px' }}
-      transition={{ duration: reduced ? 0 : 0.7, delay: reduced ? 0 : delay, ease: [0.22, 0.65, 0.3, 1] }}
+      transition={{ duration: 0.78, delay, ease: [0.23, 1, 0.32, 1] }}
     >
       {children}
     </M>

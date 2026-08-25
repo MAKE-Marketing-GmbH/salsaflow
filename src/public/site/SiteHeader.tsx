@@ -168,7 +168,10 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
           sein (Container im Container), und Hero-CTAs/WhatsApp duerfen nicht darunter
           bzw. darueber liegen. Offen wird die Leiste darum full-bleed: kein Aussen-
           Padding, keine Rundung, und das Panel fuellt den ganzen Viewport (unten). */}
-      <div className={cn('mx-auto max-w-[1400px]', open ? 'px-0 py-0' : 'px-[5px] py-[9px] sm:px-[15px] sm:py-[10px]')}>
+      <div
+        data-page-header
+        className={cn('mx-auto max-w-[1400px]', open ? 'px-0 py-0' : 'px-[5px] py-[9px] sm:px-[15px] sm:py-[10px]')}
+      >
         {/* ROOT-CAUSE des bekannten Dropdown-Bugs, gemessen mit scripts/nav-probe.cjs:
             Das Desktop-Submenu ging immer auf (`opacity: 1`, `visibility: visible`), wurde
             aber von GENAU dieser Pille abgeschnitten. Sie traegt `overflow-hidden` (noetig

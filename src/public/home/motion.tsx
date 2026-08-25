@@ -18,8 +18,8 @@ import {
   type RefObject,
 } from 'react';
 
-/** Einheitlicher Basistakt: sichtbar von unten einblenden, ohne Feder oder Seitenbewegung. */
-export const EASE_OUT = [0.22, 0.65, 0.3, 1] as const;
+/** Einheitlicher Basistakt: mit klarer Tiefe von unten einblenden, ohne Feder. */
+export const EASE_OUT = [0.23, 1, 0.32, 1] as const;
 export const VIEWPORT = { once: true, margin: '0px 0px -4% 0px' } as const;
 
 const emptySubscribe = () => () => {};
@@ -33,25 +33,24 @@ export function useHydrated() {
 }
 
 export function useReveal(opts?: { stagger?: number; distance?: number; duration?: number }) {
-  const reduced = useReducedMotion() === true;
-  const stagger = opts?.stagger ?? 0.05;
-  const distance = Math.min(opts?.distance ?? 16, 22);
-  const duration = opts?.duration ?? 0.7;
+  const stagger = opts?.stagger ?? 0.06;
+  const distance = Math.min(opts?.distance ?? 44, 56);
+  const duration = opts?.duration ?? 0.78;
 
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.03 } },
+    show: { transition: { staggerChildren: stagger, delayChildren: 0.08 } },
   };
   const item: Variants = {
-    hidden: reduced ? { opacity: 1 } : { opacity: 0, y: distance },
+    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0) scale(0.97)` },
     show: {
       opacity: 1,
-      y: 0,
-      transition: { duration: reduced ? 0 : duration, ease: EASE_OUT },
+      transform: 'translate3d(0, 0, 0) scale(1)',
+      transition: { duration, ease: EASE_OUT },
     },
   };
 
-  return { container, item, reduced };
+  return { container, item };
 }
 
 const SECTION_OFFSET: ['start end', 'end start'] = ['start end', 'end start'];
@@ -83,19 +82,46 @@ export type RevealVariant = 'rise' | 'clip' | 'blur';
 
 function revealVariantItem(
   variant: RevealVariant,
-  opts: { reduced: boolean; distance: number; duration: number; delay: number },
+  opts: { distance: number; duration: number; delay: number },
 ): Variants {
-  const { reduced, distance, duration, delay } = opts;
-  if (reduced) return { hidden: { opacity: 1 }, show: { opacity: 1 } };
-
+  const { distance, duration, delay } = opts;
   const transition = { duration, delay, ease: EASE_OUT };
-  // Die bisherigen Clip- und Blur-Varianten erzeugten auf kleinen Geräten zusätzliche
-  // Compositing-Arbeit und einen uneinheitlichen Takt. Die API-Namen bleiben kompatibel,
-  // visuell laufen aber alle Inhalte als derselbe Fade-up aus opacity + transform.
-  void variant;
+
+  if (variant === 'clip') {
+    return {
+      hidden: {
+        opacity: 0,
+        clipPath: 'inset(0 0 14% 0)',
+        transform: `translate3d(0, ${Math.min(distance, 32)}px, 0) scale(0.97)`,
+      },
+      show: {
+        opacity: 1,
+        clipPath: 'inset(0 0 0 0)',
+        transform: 'translate3d(0, 0, 0) scale(1)',
+        transition,
+      },
+    };
+  }
+
+  if (variant === 'blur') {
+    return {
+      hidden: {
+        opacity: 0,
+        filter: 'blur(4px)',
+        transform: `translate3d(0, ${Math.min(distance, 32)}px, 0) scale(0.97)`,
+      },
+      show: {
+        opacity: 1,
+        filter: 'blur(0)',
+        transform: 'translate3d(0, 0, 0) scale(1)',
+        transition,
+      },
+    };
+  }
+
   return {
-    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0)` },
-    show: { opacity: 1, transform: 'translate3d(0, 0, 0)', transition },
+    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0) scale(0.97)` },
+    show: { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)', transition },
   };
 }
 
@@ -103,17 +129,16 @@ export function useRevealVariant(
   variant: RevealVariant = 'rise',
   opts?: { stagger?: number; distance?: number; duration?: number; delay?: number },
 ) {
-  const reduced = useReducedMotion() === true;
-  const stagger = opts?.stagger ?? 0.05;
-  const distance = Math.min(opts?.distance ?? 16, 22);
-  const duration = opts?.duration ?? 0.7;
+  const stagger = opts?.stagger ?? 0.06;
+  const distance = Math.min(opts?.distance ?? 44, 56);
+  const duration = opts?.duration ?? 0.78;
   const delay = opts?.delay ?? 0;
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.03 } },
+    show: { transition: { staggerChildren: stagger, delayChildren: 0.08 } },
   };
-  const item = revealVariantItem(variant, { reduced, distance, duration, delay });
-  return { container, item, reduced };
+  const item = revealVariantItem(variant, { distance, duration, delay });
+  return { container, item };
 }
 
 export function Reveal({
@@ -213,28 +238,33 @@ export function RevealWords({
   text,
   className,
   as: Tag = 'h2',
-  stagger = 0.028,
-  distance = 12,
-  duration = 0.62,
+  stagger = 0.04,
+  distance = 24,
+  duration = 0.68,
   instant = false,
 }: RevealWordsProps) {
-  const reduced = useReducedMotion() === true;
   const animated = !instant;
   const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.025 } },
+    show: { transition: { staggerChildren: stagger, delayChildren: 0.08 } },
   };
   const word: Variants = animated
     ? {
-        hidden: reduced ? { opacity: 1 } : { opacity: 0, y: Math.min(distance, 20) },
+        hidden: {
+          opacity: 0,
+          transform: `translate3d(0, ${Math.min(distance, 28)}px, 0) scale(0.97)`,
+        },
         show: {
           opacity: 1,
-          y: 0,
-          transition: { duration: reduced ? 0 : duration, ease: EASE_OUT },
+          transform: 'translate3d(0, 0, 0) scale(1)',
+          transition: { duration, ease: EASE_OUT },
         },
       }
-    : { hidden: { opacity: 1, y: 0 }, show: { opacity: 1, y: 0 } };
+    : {
+        hidden: { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' },
+        show: { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' },
+      };
 
   return (
     <Tag className={className} data-reveal data-reveal-variant="letters">

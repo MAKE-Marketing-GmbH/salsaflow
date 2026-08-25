@@ -87,6 +87,13 @@
   --dur-slow: 420ms;
   --ease-sf: cubic-bezier(0.22, 1, 0.36, 1);
 
+  /* Seitenwechsel sind Marketing-Choreografie, keine Mikro-Interaktion. Sie bekommen
+     deshalb einen eigenen Takt, bleiben aber auf derselben starken Ease-Out-Familie. */
+  --dur-page-enter: 780ms;
+  --dur-header-enter: 680ms;
+  --delay-header-enter: 80ms;
+  --ease-enter: cubic-bezier(0.23, 1, 0.32, 1);
+
   /* R153: Wie stark der Cookie-Hinweis den WhatsApp-Float anhebt.
    * Unter sm ist der Wert 0px — dort loest der rechte Gutter am Banner-Wrapper den
    * Konflikt bereits waagerecht, und ein Vertikal-Lift wuerde den Kreis genau auf den
@@ -118,61 +125,94 @@ html {
    niemand mehr. Eine Regel fuer einen Zustand, den es nicht gibt, liest sich wie
    eine getroffene Entscheidung und ist keine — entfernt. */
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* Ruhige dokumentübergreifende Seitenwechsel. Moderne Browser blenden die alte Seite
-   kurz aus und lassen die neue mit minimalem Vertikalweg erscheinen; ältere Browser
-   navigieren ohne Zusatzlogik normal weiter. Die Navigation selbst wird nie verzögert. */
+/* Dokumentuebergreifende Seitenwechsel. Der Inhalt kommt als zusammenhaengende Flaeche
+   mit Weg, Tiefe und Fokus von unten; die Header-Leiste folgt versetzt von oben. Die
+   Navigation selbst wird nie verzoegert. Die Site-Motion laeuft auf ausdruecklichen
+   Produktwunsch auch dann, wenn das Betriebssystem Reduced Motion meldet. */
 @view-transition {
   navigation: auto;
+}
+
+[data-page-header] {
+  view-transition-name: sf-site-header;
+}
+
+@keyframes sf-page-in {
+  from {
+    opacity: 0.18;
+    filter: blur(4px);
+    transform: translate3d(0, 56px, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
 }
 
 @keyframes sf-page-out {
   to {
     opacity: 0;
-    transform: translate3d(0, -3px, 0);
+    filter: blur(4px);
+    transform: translate3d(0, -24px, 0);
   }
 }
 
-@keyframes sf-page-in {
+@keyframes sf-header-in {
   from {
     opacity: 0;
-    transform: translate3d(0, 7px, 0);
+    filter: blur(4px);
+    transform: translate3d(0, -125%, 0) scale(0.97);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  ::view-transition-old(root) {
-    animation: 180ms cubic-bezier(0.4, 0, 1, 1) both sf-page-out;
-  }
-
-  ::view-transition-new(root) {
-    animation: 560ms cubic-bezier(0.22, 0.65, 0.3, 1) both sf-page-in;
+@keyframes sf-header-out {
+  to {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translate3d(0, -100%, 0) scale(0.97);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none;
-  }
+/* Vite liefert im Dev-Modus nur ein leeres #root; dort uebernehmen zwei CSS-Mount-
+   Animationen dieselbe Choreografie. Production nutzt ausschliesslich die benannten
+   dokumentuebergreifenden Snapshots darunter. */
+#root:not([data-prerendered='true']) main#main {
+  transform-origin: 50% 0;
+  animation: sf-page-in var(--dur-page-enter) var(--ease-enter) both;
+}
+
+#root:not([data-prerendered='true']) [data-page-header] {
+  transform-origin: 50% 0;
+  animation: sf-header-in var(--dur-header-enter) var(--ease-enter) var(--delay-header-enter) both;
+}
+
+::view-transition-old(root) {
+  animation: sf-page-out var(--dur-base) var(--ease-enter) both;
+}
+
+::view-transition-old(sf-site-header) {
+  transform-origin: 50% 0;
+  animation: sf-header-out var(--dur-fast) var(--ease-enter) both;
+}
+
+::view-transition-new(root) {
+  transform-origin: 50% 0;
+  animation: sf-page-in var(--dur-page-enter) var(--ease-enter) both;
+}
+
+::view-transition-group(sf-site-header) {
+  z-index: 50;
+}
+
+::view-transition-new(sf-site-header) {
+  transform-origin: 50% 0;
+  animation: sf-header-in var(--dur-header-enter) var(--ease-enter) var(--delay-header-enter) both;
 }
 
 body {
@@ -868,21 +908,6 @@ body:has([data-partys-page]) section.relative.isolate.overflow-hidden > div.poin
   }
 }
 
-/* Der Prerender liefert Reveal-Elemente im Startzustand aus, damit die Animation auch
-   nach Hydration tatsächlich läuft. Nutzer mit reduzierter Bewegung sehen unabhängig
-   vom JavaScript-Zeitpunkt sofort den stabilen Endzustand. */
-@media (prefers-reduced-motion: reduce) {
-  [data-reveal],
-  [data-reveal] * {
-    opacity: 1 !important;
-    transform: none !important;
-    filter: none !important;
-    clip-path: none !important;
-    transition-duration: 0s !important;
-    animation-duration: 0s !important;
-  }
-}
-
 /* ================================================================= WHATSAPP-RESERVE (R190)
  *
  * Raphael 22.08.: "die Breite der Seite ist übelst kaputt nach dem Hero."
@@ -1282,7 +1307,7 @@ html:has(.faq-page) {
 
   body:has([data-testid='cookie-accept']) main[data-kursplan] {
     padding-top: calc(var(--cookie-banner-height) + 0.5rem);
-    transition: padding-top 180ms ease;
+    transition: padding-top 180ms ease; /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
   }
 
   /* /events R189: Die feste Karte lag auf den drei Fakten direkt unter dem Hero.
@@ -1296,7 +1321,7 @@ html:has(.faq-page) {
 
   body:has([data-events-page]):has([data-testid='cookie-accept']) main {
     padding-top: calc(var(--cookie-banner-height) + 0.5rem);
-    transition: padding-top 180ms ease;
+    transition: padding-top 180ms ease; /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
   }
 
   /* /kursplan: die Wochen-Pfeile sitzen im ersten Fold, nicht am Dokumentende.
@@ -1341,7 +1366,7 @@ html:has(.faq-page) {
 
   body:has([data-testid='cookie-accept']) main[data-kursplan] {
     padding-top: calc(var(--cookie-banner-height) + 0.75rem);
-    transition: padding-top 180ms ease;
+    transition: padding-top 180ms ease; /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
   }
 
   /* /events R189: Auch auf Desktop darf die Cookie-Karte nicht über der Faktenleiste liegen. */
@@ -1353,7 +1378,7 @@ html:has(.faq-page) {
 
   body:has([data-events-page]):has([data-testid='cookie-accept']) main {
     padding-top: calc(var(--cookie-banner-height) + 0.75rem);
-    transition: padding-top 180ms ease;
+    transition: padding-top 180ms ease; /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
   }
 
   /* R179: 10rem = 160px schnitt Köpfe auf 1440 mit sichtbarer Leiste.

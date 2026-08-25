@@ -10,6 +10,17 @@ import type { ScheduleResponse } from '@/lib/schedule';
 // globale, BEVOR irgendeine Komponente rendert — embeddedSchedule() findet ihn dann.
 import { embeddedScheduleData } from '@/generated/schedule-embedded';
 
+// Vites Dev-HTML enthaelt nur ein leeres #root. Damit fehlt beim dokumentuebergreifenden
+// Capture der neue Header noch, waehrend der prerendered Production-Build ihn bereits
+// ausliefert. Im Dev uebernimmt deshalb der live CSS-Mount-Fallback aus index.css, und der
+// Browser startet gar nicht erst einen Cross-Document-Uebergang ohne neuen Snapshot.
+if (import.meta.env.DEV && !document.querySelector('#sf-dev-view-transition')) {
+  const style = document.createElement('style');
+  style.id = 'sf-dev-view-transition';
+  style.textContent = '@view-transition { navigation: none; }';
+  document.head.append(style);
+}
+
 // SAFETY: Erweitert globalThis nur um das eine optionale Feld, das embeddedSchedule()
 // in src/lib/schedule.ts unter genau diesem Namen wieder liest — dieselbe Struktur
 // wie dort in ScheduleScope dokumentiert.

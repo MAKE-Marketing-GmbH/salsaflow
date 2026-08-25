@@ -9,25 +9,24 @@
 // Animationen, Reinflieg, sexy, nicht kompliziert") ist ein SITEWIDE-Wunsch — also gehoert
 // das Muster nach `src/lib`, wo jede Seite es ohne Umweg zieht.
 //
-// Die Motion-Physik folgt exakt `home/motion.tsx`: 16px Weg, 0.7s und eine weiche
-// weiche Ease-Out-Kurve. Zwei verschiedene Takte auf derselben Seite waeren schlechter als gar
+// Die Motion-Physik folgt exakt `home/motion.tsx`: 44px Weg, 0.78s und eine klare
+// Ease-Out-Kurve. Zwei verschiedene Takte auf derselben Seite waeren schlechter als gar
 // keine Animation.
 //
-// Drei harte Regeln, die hier eingebaut sind statt an jeder Aufrufstelle wiederholt:
-//   1. `prefers-reduced-motion` -> sofortiger Endzustand, keine Bewegung.
-//   2. Der Prerender schreibt den Startzustand; `noscript` und die Reduced-Motion-Regel
-//      stellen den Inhalt ohne Animation sofort sichtbar.
-//   3. `once: true`. Ein Element, das bei jedem Vorbeiscrollen erneut einfliegt, ist der
+// Zwei harte Regeln, die hier eingebaut sind statt an jeder Aufrufstelle wiederholt:
+//   1. Der Prerender schreibt den Startzustand; `noscript` stellt den Inhalt ohne
+//      JavaScript sofort sichtbar.
+//   2. `once: true`. Ein Element, das bei jedem Vorbeiscrollen erneut einfliegt, ist der
 //      Unterschied zwischen "sexy" und "kompliziert".
 //
 // `data-reveal` bleibt auf jedem Container: die Screenshot-Werkzeuge des Repos erzwingen
 // darueber die Sichtbarkeit, sonst waeren Scroll-Reveal-Shots leer.
 
-import { motion, useReducedMotion, type Variants } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { type ComponentPropsWithoutRef, type ReactNode } from 'react';
 
 /** Der EINE Easing-Wert der Site (ease-out, kein Bounce — Bounce ist ein AI-Slop-Tell). */
-export const REVEAL_EASE = [0.22, 0.65, 0.3, 1] as const;
+export const REVEAL_EASE = [0.23, 1, 0.32, 1] as const;
 
 /** Der EINE Viewport-Trigger. -4% startet den Reveal weich am unteren Bildrand. */
 export const REVEAL_VIEWPORT = { once: true, margin: '0px 0px -4% 0px' } as const;
@@ -37,11 +36,11 @@ export const REVEAL_VIEWPORT = { once: true, margin: '0px 0px -4% 0px' } as cons
  *  bedeutet (z. B. eine Bildspalte, die von ihrer Seite hereinkommt). */
 export type RevealFrom = 'up' | 'down' | 'left' | 'right';
 
-function offset(from: RevealFrom, distance: number) {
-  if (from === 'down') return { y: -distance, x: 0 };
-  if (from === 'left') return { x: -distance, y: 0 };
-  if (from === 'right') return { x: distance, y: 0 };
-  return { y: distance, x: 0 };
+function revealTransform(from: RevealFrom, distance: number) {
+  if (from === 'down') return `translate3d(0, ${-distance}px, 0) scale(0.97)`;
+  if (from === 'left') return `translate3d(${-distance}px, 0, 0) scale(0.97)`;
+  if (from === 'right') return `translate3d(${distance}px, 0, 0) scale(0.97)`;
+  return `translate3d(0, ${distance}px, 0) scale(0.97)`;
 }
 
 /** Varianten fuer Gruppe + Kind. Aufrufer, die eigene `motion`-Elemente rendern, ziehen
@@ -52,26 +51,27 @@ export function useRevealMotion(opts?: {
   duration?: number;
   from?: RevealFrom;
 }) {
-  const reduced = useReducedMotion();
-  const stagger = opts?.stagger ?? 0.05;
-  const distance = opts?.distance ?? 16;
-  const duration = opts?.duration ?? 0.7;
-  const shift = offset(opts?.from ?? 'up', distance);
+  const stagger = opts?.stagger ?? 0.06;
+  const distance = Math.min(opts?.distance ?? 44, 56);
+  const duration = opts?.duration ?? 0.78;
+  const startTransform = revealTransform(opts?.from ?? 'up', distance);
 
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.03 } },
+    show: { transition: { staggerChildren: stagger, delayChildren: 0.08 } },
   };
   const item: Variants = {
-    hidden: { opacity: reduced ? 1 : 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y },
+    hidden: {
+      opacity: 0,
+      transform: startTransform,
+    },
     show: {
       opacity: 1,
-      x: 0,
-      y: 0,
-      transition: { duration: reduced ? 0 : duration, ease: REVEAL_EASE },
+      transform: 'translate3d(0, 0, 0) scale(1)',
+      transition: { duration, ease: REVEAL_EASE },
     },
   };
-  return { container, item, reduced };
+  return { container, item };
 }
 
 /** Welches Element die Gruppe rendert.
@@ -148,17 +148,19 @@ export function RevealItem({
   duration?: number;
   from?: RevealFrom;
 } & Omit<ComponentPropsWithoutRef<typeof motion.div>, 'initial' | 'whileInView' | 'viewport' | 'transition'>) {
-  const reduced = useReducedMotion();
-  const shift = offset(from ?? 'up', distance ?? 16);
+  const startTransform = revealTransform(from ?? 'up', Math.min(distance ?? 44, 56));
   return (
     <motion.div
       data-reveal
-      initial={{ opacity: reduced ? 1 : 0, x: reduced ? 0 : shift.x, y: reduced ? 0 : shift.y }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      initial={{
+        opacity: 0,
+        transform: startTransform,
+      }}
+      whileInView={{ opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' }}
       viewport={REVEAL_VIEWPORT}
       transition={{
-        duration: reduced ? 0 : duration ?? 0.7,
-        delay: reduced ? 0 : delay,
+        duration: duration ?? 0.78,
+        delay,
         ease: REVEAL_EASE,
       }}
       {...rest}
