@@ -16,11 +16,11 @@
   "status": "dead_plateau",
   "last_gap": "KEINE — Plateau (Pass 08:48 FOLGUNS/raster/IG halten)",
   "spend_stop": "Plateau",
-  "updated": "2026-08-25T07:17:32+0200",
-  "note": "tick 07:15 CEST 25.08 still dead_plateau KEINE Urteil mtime 09:03:33 CEST 24.08 builder/critic DEAD no spawn",
+  "updated": "2026-08-25T07:34:57+0200",
+  "note": "tick 07:31 CEST 25.08 still dead_plateau KEINE Urteil mtime 09:03:33 CEST 24.08 builder/critic DEAD no spawn",
   "dead_waiting_A7": "5227c5b4-d507-4e05-9da0-046015d827e0",
   "tui_dead_since_touch": "2026-08-24T14:17:10Z",
-  "last_tick": "07:15 CEST 25.08.2026",
-  "tick_notes": "tick 03:32 CEST 25.08 still dead_plateau KEINE Urteil mtime 09:03:33 CEST 24.08 builder/critic DEAD no spawn | 04:01 CEST 25.08 still dead_plateau KEINE no spawn | 04:17 CEST 25.08 still dead_plateau KEINE no spawn | 04:33 CEST 25.08 still dead_plateau KEINE no spawn | 04:47 CEST 25.08 still dead_plateau KEINE no spawn | 05:02 CEST 25.08 still dead_plateau KEINE no spawn | 05:15 CEST 25.08 still dead_plateau KEINE no spawn | 05:31 CEST 25.08 still dead_plateau KEINE no spawn | 05:48 CEST 25.08 still dead_plateau KEINE no spawn | 06:01 CEST 25.08 still dead_plateau KEINE no spawn | 06:15 CEST 25.08 still dead_plateau KEINE no spawn | 06:34 CEST 25.08 still dead_plateau KEINE no spawn | 06:50 CEST 25.08 still dead_plateau KEINE no spawn | 07:04 CEST 25.08 still dead_plateau KEINE no spawn | 07:15 CEST 25.08 still dead_plateau KEINE no spawn",
-  "last_note": "tick 07:15 CEST 25.08 still dead_plateau KEINE Urteil mtime 09:03:33 CEST 24.08 builder/critic DEAD no spawn"
+  "last_tick": "07:31 CEST 25.08.2026",
+  "tick_notes": "tick 03:32 CEST 25.08 still dead_plateau KEINE Urteil mtime 09:03:33 CEST 24.08 builder/critic DEAD no spawn | 04:01 CEST 25.08 still dead_plateau KEINE no spawn | 04:17 CEST 25.08 still dead_plateau KEINE no spawn | 04:33 CEST 25.08 still dead_plateau KEINE no spawn | 04:47 CEST 25.08 still dead_plateau KEINE no spawn | 05:02 CEST 25.08 still dead_plateau KEINE no spawn | 05:15 CEST 25.08 still dead_plateau KEINE no spawn | 05:31 CEST 25.08 still dead_plateau KEINE no spawn | 05:48 CEST 25.08 still dead_plateau KEINE no spawn | 06:01 CEST 25.08 still dead_plateau KEINE no spawn | 06:15 CEST 25.08 still dead_plateau KEINE no spawn | 06:34 CEST 25.08 still dead_plateau KEINE no spawn | 06:50 CEST 25.08 still dead_plateau KEINE no spawn | 07:04 CEST 25.08 still dead_plateau KEINE no spawn | 07:15 CEST 25.08 still dead_plateau KEINE no spawn | 07:31 CEST 25.08 still dead_plateau KEINE no spawn",
+  "last_note": "tick 07:31 CEST 25.08 still dead_plateau KEINE Urteil mtime 09:03:33 CEST 24.08 builder/critic DEAD no spawn"
 }
