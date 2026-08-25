@@ -9,9 +9,9 @@
 // Animationen, Reinflieg, sexy, nicht kompliziert") ist ein SITEWIDE-Wunsch — also gehoert
 // das Muster nach `src/lib`, wo jede Seite es ohne Umweg zieht.
 //
-// Die Motion-Physik folgt exakt `home/motion.tsx`: 44px Weg, 0.78s und eine klare
+// Die Motion-Physik folgt exakt `home/motion.tsx`: 24px Weg, 0.48s und eine klare
 // Ease-Out-Kurve. Zwei verschiedene Takte auf derselben Seite waeren schlechter als gar
-// keine Animation.
+// keine Animation. Reduced Motion behaelt nur einen 0.2s-Opacity-Wechsel.
 //
 // Zwei harte Regeln, die hier eingebaut sind statt an jeder Aufrufstelle wiederholt:
 //   1. Der Prerender schreibt den Startzustand; `noscript` stellt den Inhalt ohne
@@ -22,10 +22,10 @@
 // `data-reveal` bleibt auf jedem Container: die Screenshot-Werkzeuge des Repos erzwingen
 // darueber die Sichtbarkeit, sonst waeren Scroll-Reveal-Shots leer.
 
-import { motion, type Variants } from 'framer-motion';
+import { motion, useReducedMotion, type Variants } from 'motion/react';
 import { type ComponentPropsWithoutRef, type ReactNode } from 'react';
 
-/** Der EINE Easing-Wert der Site (ease-out, kein Bounce — Bounce ist ein AI-Slop-Tell). */
+/** Der EINE Easing-Wert der Site (ease-[var(--motion-out)], kein Bounce — Bounce ist ein AI-Slop-Tell). */
 export const REVEAL_EASE = [0.23, 1, 0.32, 1] as const;
 
 /** Der EINE Viewport-Trigger. -4% startet den Reveal weich am unteren Bildrand. */
@@ -37,10 +37,10 @@ export const REVEAL_VIEWPORT = { once: true, margin: '0px 0px -4% 0px' } as cons
 export type RevealFrom = 'up' | 'down' | 'left' | 'right';
 
 function revealTransform(from: RevealFrom, distance: number) {
-  if (from === 'down') return `translate3d(0, ${-distance}px, 0) scale(0.97)`;
-  if (from === 'left') return `translate3d(${-distance}px, 0, 0) scale(0.97)`;
-  if (from === 'right') return `translate3d(${distance}px, 0, 0) scale(0.97)`;
-  return `translate3d(0, ${distance}px, 0) scale(0.97)`;
+  if (from === 'down') return `translate3d(0, ${-distance}px, 0)`;
+  if (from === 'left') return `translate3d(${-distance}px, 0, 0)`;
+  if (from === 'right') return `translate3d(${distance}px, 0, 0)`;
+  return `translate3d(0, ${distance}px, 0)`;
 }
 
 /** Varianten fuer Gruppe + Kind. Aufrufer, die eigene `motion`-Elemente rendern, ziehen
@@ -51,14 +51,15 @@ export function useRevealMotion(opts?: {
   duration?: number;
   from?: RevealFrom;
 }) {
-  const stagger = opts?.stagger ?? 0.06;
-  const distance = Math.min(opts?.distance ?? 44, 56);
-  const duration = opts?.duration ?? 0.78;
+  const reduced = useReducedMotion() === true;
+  const stagger = reduced ? 0 : (opts?.stagger ?? 0.05);
+  const distance = reduced ? 0 : Math.min(opts?.distance ?? 24, 32);
+  const duration = reduced ? 0.2 : (opts?.duration ?? 0.48);
   const startTransform = revealTransform(opts?.from ?? 'up', distance);
 
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: stagger, delayChildren: 0.08 } },
+    show: { transition: { staggerChildren: stagger, delayChildren: reduced ? 0 : 0.02 } },
   };
   const item: Variants = {
     hidden: {
@@ -67,7 +68,7 @@ export function useRevealMotion(opts?: {
     },
     show: {
       opacity: 1,
-      transform: 'translate3d(0, 0, 0) scale(1)',
+      transform: 'translate3d(0, 0, 0)',
       transition: { duration, ease: REVEAL_EASE },
     },
   };
@@ -148,7 +149,8 @@ export function RevealItem({
   duration?: number;
   from?: RevealFrom;
 } & Omit<ComponentPropsWithoutRef<typeof motion.div>, 'initial' | 'whileInView' | 'viewport' | 'transition'>) {
-  const startTransform = revealTransform(from ?? 'up', Math.min(distance ?? 44, 56));
+  const reduced = useReducedMotion() === true;
+  const startTransform = revealTransform(from ?? 'up', reduced ? 0 : Math.min(distance ?? 24, 32));
   return (
     <motion.div
       data-reveal
@@ -156,10 +158,10 @@ export function RevealItem({
         opacity: 0,
         transform: startTransform,
       }}
-      whileInView={{ opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' }}
+      whileInView={{ opacity: 1, transform: 'translate3d(0, 0, 0)' }}
       viewport={REVEAL_VIEWPORT}
       transition={{
-        duration: duration ?? 0.78,
+        duration: reduced ? 0.2 : (duration ?? 0.48),
         delay,
         ease: REVEAL_EASE,
       }}

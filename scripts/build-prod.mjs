@@ -36,5 +36,6 @@ function run(cmd, args) {
 
 run(bin('tsc'), ['-p', 'tsconfig.json', '--noEmit']);
 run(bin('tsc'), ['-p', 'tsconfig.node.json', '--noEmit']);
+run(process.execPath, [path.join(root, 'scripts', 'vercel-redirects.mjs')]);
 run(bin('vite'), ['build']);
 run(process.execPath, [path.join(root, 'scripts', 'prerender.mjs')]);

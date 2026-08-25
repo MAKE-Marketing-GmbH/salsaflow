@@ -6,7 +6,7 @@
 // R188 E8: die Sektion "Was ist ein Floweekend" (Foto plus Dreiklang Workshops/Socials/
 // Community) ist raus. Was das Format ist, beantworten jetzt die vier Programmbloecke.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { Check, PartyPopper, Users, Target, Music2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
@@ -78,7 +78,8 @@ export function FloweekendPage() {
 const PROGRAM_ICONS: LucideIcon[] = [Target, Music2, Users, PartyPopper];
 
 function ProgramSection({ c }: { c: FloweekendContent }) {
-  const { item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const p = c.program;
   return (
     <section className="bg-[var(--color-paper-warm)] py-16 lg:py-24">
@@ -192,7 +193,7 @@ function FitSection({ c }: { c: FloweekendContent }) {
             >
               {f.cta.label}
               {/* Pfeil-Dauer aus dem Motion-Token, sonst faellt Tailwind auf 150ms zurueck. */}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>

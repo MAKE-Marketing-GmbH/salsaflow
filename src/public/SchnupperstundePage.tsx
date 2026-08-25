@@ -3,7 +3,7 @@
 // Kontakt bleibt fuer allgemeine Anfragen. Das Formular hier ist fest auf
 // Schnupperstunde gesperrt.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { useLang } from '@/lib/i18n';
 import { CONTACT } from '@/public/site/SiteFooter';
 import {
@@ -90,7 +90,8 @@ export function SchnupperstundePage() {
 }
 
 function FactsSection({ de }: { de: boolean }) {
-  const { item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const facts = FACTS[de ? 'de' : 'en'];
   return (
     <section className="bg-[var(--color-bg-soft)] pt-4 pb-2 lg:pt-4 lg:pb-2">
@@ -131,7 +132,7 @@ function FactsSection({ de }: { de: boolean }) {
             className="group inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--color-salsa)]"
           >
             {de ? 'Studio am Bahnhof Basel SBB' : 'Studio at Basel SBB station'}
-            <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+            <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
           </a>
         </Reveal>
       </Shell>

@@ -6,12 +6,13 @@
 // schwebender Zwei-Foto-Komposition). 1400px-Shell. Calm Motion: ruhiger Reveal-Fade-up-Takt,
 // reduced-motion nur Fade. Adress-Platzhalter bleibt elegante Copy, kein roher [PLATZHALTER].
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { MapPin, Phone } from 'lucide-react';
 import { useRef } from 'react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3, TRIAL_HREF } from '@/public/home/content-v3';
 import { CONTACT } from '@/public/site/SiteFooter';
+import { GoogleMapEmbed } from '@/public/site/GoogleMapEmbed';
 import { Eyebrow, Shell, CtaPill, CtaText, WhatsAppGlyph, sectionLead } from '@/public/site/primitives';
 import { HOME } from '@/public/home/content';
 import { ClipReveal, RiseReveal, useParallaxStyle } from '@/public/home/motion';
@@ -22,8 +23,9 @@ export function LocationBand() {
   const { lang } = useLang();
   const de = lang === 'de';
   const c = HOME_V3[lang].closer;
+  const reducedMotion = useReducedMotion() === true;
   const sectionRef = useRef<HTMLElement>(null);
-  const photoParallax = useParallaxStyle(sectionRef, 40);
+  const photoParallax = useParallaxStyle(sectionRef, reducedMotion ? 0 : 40);
 
   return (
     <section
@@ -136,12 +138,10 @@ export function LocationBand() {
                     Maps-Ansicht direkt in der Sektion statt nur der Adresszeile.
                     loading=lazy, die Karte blockiert keinen Render. */}
                 <div className="mt-4 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)]">
-                  <iframe
+                  <GoogleMapEmbed
                     title={de ? 'Karte: Salsaflow, Elisabethenanlage 7, Basel' : 'Map: Salsaflow, Elisabethenanlage 7, Basel'}
                     src="https://www.google.com/maps?q=Elisabethenanlage%207%2C%204051%20Basel&output=embed"
-                    className="aspect-[4/3] w-full border-0"
-                    loading="lazy"
-                    referrerPolicy="strict-origin-when-cross-origin"
+                    className="relative aspect-[4/3] w-full border-0"
                   />
                 </div>
               </div>

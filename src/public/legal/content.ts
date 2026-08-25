@@ -1,14 +1,12 @@
 // Rechtstexte (Etappe 15): Impressum + Datenschutzerklaerung, zweisprachig DE/EN.
 // Copy-Regeln 003/069/085: simpel, du-Form, echte Umlaute (ä/ö/ü, kein ae/oe/ue), CH-ss (kein
 // Eszett, Schweiz), keine Em-Dashes. Die Datenschutzerklaerung beschreibt die TATSAECHLICHEN
-// Datenfluesse der Seite (Quellen: ARCHITEKTUR.md, DECISIONS Etappe 8/9/14): Kontaktformular ->
-// Mail an info@, Reservierung -> ebenfalls Mail (KEINE Datenbank, KEINE Zahlung), Mailversand ->
-// Resend, Hosting -> Vercel, localStorage -> Sprache und Cookie-Hinweis (kein Analytics).
-//
-// Korrektur 13.08.2026: Der Text nannte Stripe als Zahlungsabwickler und eine Supabase-Datenbank
-// mit Serverstandort Frankfurt. Beides laeuft auf dieser Website nicht (Beschluss "Reservierung
-// statt Kauf", siehe DECISIONS.md). Eine konkrete Zusage, die nicht zutrifft, ist schlimmer als
-// gar keine. Wer Zahlung oder Datenbank spaeter scharf schaltet, traegt sie hier wieder ein.
+// Datenfluesse der Seite: Kontaktformular und Reservierung gehen per Resend als Mail an das
+// Studio; der oeffentliche Funnel speichert sie nicht in der Redaktionsdatenbank und nimmt
+// keine Online-Zahlung an. Das geschuetzte Redaktionssystem darf Kurs- und Event-Stammdaten
+// in einer Datenbank halten. Hosting -> Vercel, localStorage -> Sprache und Cookie-Hinweis
+// (kein Analytics). Konkrete Anbieter- oder Standortzusagen werden nur genannt, wenn der
+// ausgelieferte Runtime-Vertrag sie belegt.
 //
 // Rechtsname, Adresse, Vertretung und UID stammen aus CONTENT-SPEC und Business-Reality.
 // Ein MWST-Status wird nicht behauptet, weil dafuer kein Beleg vorliegt.
@@ -27,7 +25,7 @@ export const IMPRESSUM = {
   de: {
     pageTitle: 'Impressum',
     intro: 'Angaben zur Betreiberin dieser Website.',
-    lastUpdated: 'Stand: Juli 2026',
+    lastUpdated: 'Stand: August 2026',
     sections: [
       {
         title: 'Betreiberin',
@@ -142,14 +140,14 @@ export const DATENSCHUTZ = {
         title: 'Kontaktformular',
         body: [
           'Wenn du ein Kontaktformular nutzt, verarbeiten wir deinen Namen, deine Nachricht, dein Anliegen sowie je nach Formular deine E-Mail-Adresse oder Telefonnummer.',
-          'Wir nutzen diese Daten nur, um deine Anfrage zu beantworten. Die Nachricht wird als E-Mail an info@salsaflow-dc.com gesendet. Wir speichern dazu keine Daten in einer öffentlichen Datenbank.',
+          'Wir nutzen diese Daten nur, um deine Anfrage zu beantworten. Die Nachricht wird über Resend als E-Mail an info@salsaflow-dc.com gesendet und nicht in der Redaktionsdatenbank gespeichert.',
         ],
       },
       {
         title: 'Kursreservierung',
         body: [
           'Wenn du einen Kursplatz reservierst, verarbeiten wir Vor- und Nachname, E-Mail, Telefonnummer, deine Rollenwahl (Leader/Follower) und bei einer Anmeldung zu zweit die Daten deiner Tanzpartnerin oder deines Tanzpartners.',
-          'Deine Reservierung erreicht uns als E-Mail. Wir brauchen die Daten, um den Platz zu prüfen, dich zu erreichen und die Reservierung zu bestätigen. Rechtsgrundlage ist unser berechtigtes Interesse, deine Anfrage zu beantworten.',
+          'Deine Reservierung wird über Resend als E-Mail an das Studio gesendet und nicht in der Redaktionsdatenbank gespeichert. Wir brauchen die Daten, um den Platz zu prüfen, dich zu erreichen und die Reservierung zu bestätigen. Rechtsgrundlage ist unser berechtigtes Interesse, deine Anfrage zu beantworten.',
         ],
       },
       {
@@ -162,14 +160,14 @@ export const DATENSCHUTZ = {
       {
         title: 'Bestätigungs-E-Mails',
         body: [
-          'Für Buchungs- und Zahlungsbestätigungen sowie für Kontakt-Anfragen versenden wir E-Mails über den Dienstleister Resend. Dabei werden deine angegebenen Kontaktdaten und der Inhalt der jeweiligen Nachricht verarbeitet.',
+          'Für Reservierungsbestätigungen und Kontakt-Anfragen versenden wir E-Mails über den Dienstleister Resend. Dabei werden deine angegebenen Kontaktdaten und der Inhalt der jeweiligen Nachricht verarbeitet.',
         ],
       },
       {
         title: 'Hosting und Datenbank',
         body: [
           'Diese Website wird bei Vercel gehostet. Beim Aufruf entstehen technische Server-Protokolle (zum Beispiel IP-Adresse, Datum, aufgerufene Seite), die dem Betrieb und der Sicherheit dienen.',
-          'Diese Website betreibt keine eigene Datenbank. Deine Reservierungen und Anfragen erreichen uns als E-Mail und liegen danach in unserem Postfach.',
+          'Das geschützte Redaktionssystem kann eine Datenbank für Kurs-, Event- und Administrationsdaten verwenden. Inhalte aus Kontaktformularen und Reservierungen werden dort nicht gespeichert; sie erreichen uns als E-Mail und liegen danach in unserem Postfach.',
         ],
       },
       {
@@ -183,7 +181,7 @@ export const DATENSCHUTZ = {
         title: 'Externe Links und Dienste',
         body: [
           'Für den Ticketverkauf zu Events verlinken wir auf Eventfrog. Ausserdem verlinken wir auf Instagram, WhatsApp und Google. Wenn du diese Links öffnest, gelten die Datenschutzbestimmungen des jeweiligen Anbieters.',
-          'Instagram-Videos laden erst, wenn du das jeweilige Video aktiv anklickst. Dann wird eine Verbindung zu Instagram beziehungsweise Meta aufgebaut. Dabei können technische Daten wie deine IP-Adresse übertragen und Cookies oder ähnliche Technologien eingesetzt werden.',
+          'Das Hero-Video wird direkt von unserer Website ausgeliefert und baut keine Verbindung zu Instagram oder Meta auf. Eingebettete Instagram-Videos laden erst, wenn du das jeweilige Video aktiv anklickst. Dann können technische Daten wie deine IP-Adresse übertragen und Cookies oder ähnliche Technologien eingesetzt werden.',
         ],
       },
       {
@@ -211,7 +209,7 @@ export const DATENSCHUTZ = {
     pageTitle: 'Privacy policy',
     intro:
       'We take the protection of your data seriously. Here we explain in plain words which data we collect, what we use it for and which rights you have. The Swiss Data Protection Act (revDSG) applies; for visitors from the EU the GDPR applies as well.',
-    lastUpdated: 'Last updated: July 2026',
+    lastUpdated: 'Last updated: August 2026',
     sections: [
       {
         title: 'Controller',
@@ -224,14 +222,14 @@ export const DATENSCHUTZ = {
         title: 'Contact form',
         body: [
           'When you use a contact form, we process your name, message, topic and, depending on the form, your email address or phone number.',
-          'We use this data only to answer your request. The message is sent as an email to info@salsaflow-dc.com. We do not store this data in any public database.',
+          'We use this data only to answer your request. The message is sent through Resend to info@salsaflow-dc.com and is not stored in the editorial database.',
         ],
       },
       {
         title: 'Course reservation',
         body: [
           'When you reserve a spot, we process your first and last name, email, phone number, your role (leader/follower) and, if you sign up as a pair, the details of your dance partner.',
-          'Your reservation reaches us as an email. We need the data to check the spot, get in touch and confirm the reservation. The legal basis is our legitimate interest in answering your request.',
+          'Your reservation is sent through Resend to the studio and is not stored in the editorial database. We need the data to check the spot, get in touch and confirm the reservation. The legal basis is our legitimate interest in answering your request.',
         ],
       },
       {
@@ -244,14 +242,14 @@ export const DATENSCHUTZ = {
       {
         title: 'Confirmation emails',
         body: [
-          'For booking and payment confirmations and for contact requests, we send emails through the provider Resend. This processes the contact details you provide and the content of the respective message.',
+          'For reservation confirmations and contact requests, we send emails through the provider Resend. This processes the contact details you provide and the content of the respective message.',
         ],
       },
       {
         title: 'Hosting and database',
         body: [
           'This website is hosted by Vercel. When you access the site, technical server logs are created (for example IP address, date, page requested) that serve operation and security.',
-          'This website runs no database of its own. Your reservations and requests reach us as email and then sit in our mailbox.',
+          'The protected editorial system may use a database for course, event and administration data. Contact-form and reservation content is not stored there; it reaches us by email and then remains in our mailbox.',
         ],
       },
       {
@@ -265,7 +263,7 @@ export const DATENSCHUTZ = {
         title: 'External links and services',
         body: [
           'For event ticket sales we link to Eventfrog. We also link to Instagram, WhatsApp and Google. When you open these links, the privacy terms of the respective provider apply.',
-          'Instagram videos load only after you actively click the respective video. This establishes a connection to Instagram or Meta. Technical data such as your IP address may be transferred, and cookies or similar technologies may be used.',
+          'The hero video is delivered directly by our website and does not connect to Instagram or Meta. Embedded Instagram videos load only after you actively click them. Technical data such as your IP address may then be transferred, and cookies or similar technologies may be used.',
         ],
       },
       {

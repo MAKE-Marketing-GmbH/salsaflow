@@ -3,7 +3,7 @@
 // Design-System strikt (hell im Wechsel paper-warm/bg-soft, Rot sparsam, Reveal-Takt, Kit-Bausteine).
 // Copy kommt 1:1 aus HEELS (heels-content.ts), hier nur Rendering.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { Check } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
@@ -114,7 +114,8 @@ type C = HeelsContent;
 const HEELS_HERO_IMG_CLASS = 'aspect-[21/9] w-full object-cover lg:aspect-[4/3]';
 
 function HeelsHero({ c }: { c: C }) {
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const h = c.hero;
   /* Der LIVE-Content steuert den Crop. Mobil entspricht die Datei bereits 21:9.
      Auf Desktop hält `30% center` den rechten Quellrand ausserhalb des 4:3-Rahmens. */
@@ -263,7 +264,7 @@ function MythSection({ c }: { c: C }) {
               className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {m.cta.label}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -354,7 +355,7 @@ function ShoesSection({ c }: { c: C }) {
                 className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {s.cta.label}
-                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
               </a>
             </motion.div>
           </Reveal>

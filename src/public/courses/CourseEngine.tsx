@@ -1113,7 +1113,7 @@ function ScheduleBottomCta({ nextStart }: { nextStart: string | null }) {
             className="btn-base btn-primary group px-6 py-2.5 text-sm"
           >
             {lang === 'de' ? 'Platz sichern' : 'Book your spot'}
-            <ArrowRight size={16} strokeWidth={2} aria-hidden className="ml-1.5 transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+            <ArrowRight size={16} strokeWidth={2} aria-hidden className="ml-1.5 transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
           </a>
           <a
             href="/schnupperstunde"

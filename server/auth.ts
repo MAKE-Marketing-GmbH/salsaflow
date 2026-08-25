@@ -4,9 +4,18 @@ import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypt
 // lokal verifizierbar. Passwort-Hash via Node-scrypt (keine native Build-Abhaengigkeit),
 // Session als signiertes, statusloses Token (HMAC-SHA256) -> keine zusaetzliche Sessions-Tabelle.
 
-const SECRET = process.env.AUTH_SECRET || 'dev-insecure-secret-bitte-aendern';
+const DEVELOPMENT_SECRET = 'dev-insecure-secret-bitte-aendern';
 const SCRYPT_KEYLEN = 64;
 export const SESSION_COOKIE = 'sf_session';
+
+function signingSecret(): string {
+  const configured = process.env.AUTH_SECRET?.trim();
+  if (configured) return configured;
+  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    throw new Error('AUTH_SECRET fehlt: Admin-Sessions sind in Produktion ohne eigenes Secret gesperrt.');
+  }
+  return DEVELOPMENT_SECRET;
+}
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(16);
@@ -27,7 +36,7 @@ export function verifyPassword(password: string, stored: string): boolean {
 export function issueSession(userId: string, ttlSeconds = 60 * 60 * 8): string {
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
   const payload = Buffer.from(JSON.stringify({ sub: userId, exp })).toString('base64url');
-  const sig = createHmac('sha256', SECRET).update(payload).digest('base64url');
+  const sig = createHmac('sha256', signingSecret()).update(payload).digest('base64url');
   return `${payload}.${sig}`;
 }
 
@@ -49,7 +58,7 @@ export function verifySession(token: string | undefined | null): { sub: string }
   if (dot < 0) return null;
   const payload = token.slice(0, dot);
   const sig = token.slice(dot + 1);
-  const expected = createHmac('sha256', SECRET).update(payload).digest('base64url');
+  const expected = createHmac('sha256', signingSecret()).update(payload).digest('base64url');
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;

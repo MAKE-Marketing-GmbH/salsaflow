@@ -9,7 +9,7 @@
 // Befund kursplan d-mid, Runde 10) — gleiche Footer-Beobachtung wie CookieBanner.tsx.
 
 import { type CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { WhatsAppIcon } from '@/public/site/BrandIcons';
 import { useHydrated } from '@/public/home/motion';
 import { cn } from '@/lib/utils';
@@ -54,12 +54,12 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
      VERBOTEN bleibt, was ohne Anlass endlos laeuft — Dauer-Puls, Ping-Ring, Bounce,
      Wackeln, alles nach Gratis-Widget. ERLAUBT ist Bewegung MIT Anlass, die auf den
      Nutzer reagiert statt auf eine Schleife:
-       1. Eintritt: weicher Spring nach oben (framer-motion, bounce 0.18), einmalig.
+       1. Eintritt: weicher Spring nach oben (motion/react, bounce 0.18), einmalig.
        2. Hover: Icon dreht ein paar Grad und zoomt leicht — EINE Geste, nicht zwei.
        3. Scroll/Platz-Mangel: Pille <-> Kreis als Layout-Transition mit Spring.
        4. Press: kurzes Rein- und Zurueckfedern (0.94), taktiles Feedback.
        5. Ausweichen (collisionLift): gleitet, statt zu springen.
-     Alles laeuft ueber framer-motion und nur auf transform/opacity. SSR: der Server
+     Alles laeuft ueber motion/react und nur auf transform/opacity. SSR: der Server
      rendert ohne JS den sichtbaren Endzustand (useHydrated-Pattern aus motion.tsx);
      die Animation zuendet erst nach der Hydration, und `useReducedMotion` begrenzt
      alles auf einen einfachen Fade. */
@@ -616,7 +616,7 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
     '--whatsapp-collision-lift': `${collisionLift}px`,
     '--whatsapp-collision-slide': `${collisionSlide}px`,
     // Seitliches Parken laeuft ueber `right`, nicht ueber `transform`: der Hover-Hub
-    // (`hover:-translate-y-0.5`) und das Press-Feedback von framer-motion sitzen bereits
+    // (`hover:-translate-y-0.5`) und das Press-Feedback von motion/react sitzen bereits
     // auf `transform`. Ein zweiter Schreiber dort haette beide ueberschrieben.
     right: collisionSlide > 0 ? `calc(var(--whatsapp-base-right, 0.25rem) - ${collisionSlide}px)` : undefined,
     bottom: raised
@@ -664,8 +664,8 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
            und liegt der Knopf auf seinem Ausgangsplatz, gibt es nichts zu kreuzen; dann
            bleibt die ruhige Token-Dauer. */
         collisionLift === 0 && headerDocked
-          ? 'transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom,right] duration-[var(--dur-slow)] ease-[var(--ease-sf)]'
-          : 'transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom,right] duration-0 ease-[var(--ease-sf)]',
+          ? 'transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom,right] duration-[var(--dur-slow)] ease-[var(--motion-out)]'
+          : 'transition-[color,background-color,border-color,transform,opacity,box-shadow,bottom,right] duration-0 ease-[var(--motion-out)]',
         // R101: Seiten-Anker (z.B. /kursplan) setzt --whatsapp-lift per Media-Query auf :root.
         className,
       )}

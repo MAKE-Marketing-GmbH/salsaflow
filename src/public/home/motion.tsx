@@ -7,7 +7,7 @@ import {
   useTransform,
   type MotionValue,
   type Variants,
-} from 'framer-motion';
+} from 'motion/react';
 import {
   useEffect,
   useMemo,
@@ -33,19 +33,20 @@ export function useHydrated() {
 }
 
 export function useReveal(opts?: { stagger?: number; distance?: number; duration?: number }) {
-  const stagger = opts?.stagger ?? 0.06;
-  const distance = Math.min(opts?.distance ?? 44, 56);
-  const duration = opts?.duration ?? 0.78;
+  const reduced = useReducedMotion() === true;
+  const stagger = reduced ? 0 : (opts?.stagger ?? 0.05);
+  const distance = reduced ? 0 : Math.min(opts?.distance ?? 24, 32);
+  const duration = reduced ? 0.2 : (opts?.duration ?? 0.48);
 
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: stagger, delayChildren: 0.08 } },
+    show: { transition: { staggerChildren: stagger, delayChildren: reduced ? 0 : 0.02 } },
   };
   const item: Variants = {
-    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0) scale(0.97)` },
+    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0)` },
     show: {
       opacity: 1,
-      transform: 'translate3d(0, 0, 0) scale(1)',
+      transform: 'translate3d(0, 0, 0)',
       transition: { duration, ease: EASE_OUT },
     },
   };
@@ -82,9 +83,9 @@ export type RevealVariant = 'rise' | 'clip' | 'blur';
 
 function revealVariantItem(
   variant: RevealVariant,
-  opts: { distance: number; duration: number; delay: number },
+  opts: { distance: number; duration: number; delay: number; reduced: boolean },
 ): Variants {
-  const { distance, duration, delay } = opts;
+  const { distance, duration, delay, reduced } = opts;
   const transition = { duration, delay, ease: EASE_OUT };
 
   if (variant === 'clip') {
@@ -92,12 +93,12 @@ function revealVariantItem(
       hidden: {
         opacity: 0,
         clipPath: 'inset(0 0 14% 0)',
-        transform: `translate3d(0, ${Math.min(distance, 32)}px, 0) scale(0.97)`,
+        transform: `translate3d(0, ${Math.min(distance, 24)}px, 0)`,
       },
       show: {
         opacity: 1,
         clipPath: 'inset(0 0 0 0)',
-        transform: 'translate3d(0, 0, 0) scale(1)',
+        transform: 'translate3d(0, 0, 0)',
         transition,
       },
     };
@@ -107,21 +108,21 @@ function revealVariantItem(
     return {
       hidden: {
         opacity: 0,
-        filter: 'blur(4px)',
-        transform: `translate3d(0, ${Math.min(distance, 32)}px, 0) scale(0.97)`,
+        filter: reduced ? 'blur(0)' : 'blur(4px)',
+        transform: `translate3d(0, ${Math.min(distance, 24)}px, 0)`,
       },
       show: {
         opacity: 1,
         filter: 'blur(0)',
-        transform: 'translate3d(0, 0, 0) scale(1)',
+        transform: 'translate3d(0, 0, 0)',
         transition,
       },
     };
   }
 
   return {
-    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0) scale(0.97)` },
-    show: { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)', transition },
+    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0)` },
+    show: { opacity: 1, transform: 'translate3d(0, 0, 0)', transition },
   };
 }
 
@@ -129,15 +130,16 @@ export function useRevealVariant(
   variant: RevealVariant = 'rise',
   opts?: { stagger?: number; distance?: number; duration?: number; delay?: number },
 ) {
-  const stagger = opts?.stagger ?? 0.06;
-  const distance = Math.min(opts?.distance ?? 44, 56);
-  const duration = opts?.duration ?? 0.78;
+  const reduced = useReducedMotion() === true;
+  const stagger = reduced ? 0 : (opts?.stagger ?? 0.05);
+  const distance = reduced ? 0 : Math.min(opts?.distance ?? 24, 32);
+  const duration = reduced ? 0.2 : (opts?.duration ?? 0.48);
   const delay = opts?.delay ?? 0;
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: stagger, delayChildren: 0.08 } },
+    show: { transition: { staggerChildren: stagger, delayChildren: reduced ? 0 : 0.02 } },
   };
-  const item = revealVariantItem(variant, { distance, duration, delay });
+  const item = revealVariantItem(variant, { distance, duration, delay, reduced });
   return { container, item };
 }
 
@@ -238,32 +240,33 @@ export function RevealWords({
   text,
   className,
   as: Tag = 'h2',
-  stagger = 0.04,
-  distance = 24,
-  duration = 0.68,
+  stagger = 0.035,
+  distance = 18,
+  duration = 0.42,
   instant = false,
 }: RevealWordsProps) {
+  const reduced = useReducedMotion() === true;
   const animated = !instant;
   const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: stagger, delayChildren: 0.08 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.02 } },
   };
   const word: Variants = animated
     ? {
         hidden: {
           opacity: 0,
-          transform: `translate3d(0, ${Math.min(distance, 28)}px, 0) scale(0.97)`,
+          transform: `translate3d(0, ${reduced ? 0 : Math.min(distance, 24)}px, 0)`,
         },
         show: {
           opacity: 1,
-          transform: 'translate3d(0, 0, 0) scale(1)',
-          transition: { duration, ease: EASE_OUT },
+          transform: 'translate3d(0, 0, 0)',
+          transition: { duration: reduced ? 0.2 : duration, ease: EASE_OUT },
         },
       }
     : {
-        hidden: { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' },
-        show: { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' },
+        hidden: { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+        show: { opacity: 1, transform: 'translate3d(0, 0, 0)' },
       };
 
   return (
@@ -280,7 +283,7 @@ export function RevealWords({
           <motion.span
             key={`${wordText}-${index}`}
             variants={word}
-            className="inline-block whitespace-pre"
+            className="inline-block min-w-0 whitespace-normal"
           >
             {wordText}
             {index < words.length - 1 ? ' ' : ''}

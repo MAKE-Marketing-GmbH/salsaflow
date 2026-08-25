@@ -35,6 +35,7 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
   const c = COPY[lang];
   // acknowledged startet true bis Mount-Check (kein Flackern fuer Wiederkehrer).
   const [acknowledged, setAcknowledged] = useState(true);
+  const [storageChecked, setStorageChecked] = useState(false);
   const [clearedByScroll, setClearedByScroll] = useState(false);
   const [blockedByDialog, setBlockedByDialog] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -48,6 +49,9 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
       // localStorage kann blockiert sein - dann zeigen wir den Hinweis.
     }
     setAcknowledged(ok);
+    setStorageChecked(true);
+    if (ok) delete document.documentElement.dataset.cookieNotice;
+    else document.documentElement.dataset.cookieNotice = 'needed';
     // Reload/Navigation mitten auf der Seite: Freiraum behalten.
     if (!ok && window.scrollY > 0) setClearedByScroll(true);
   }, []);
@@ -113,12 +117,16 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
 
   // Sichtbarkeit nach oben melden (WhatsApp-Float weicht aus).
   useEffect(() => {
+    if (!storageChecked) return;
+    if (visible) document.documentElement.dataset.cookieNotice = 'needed';
+    else delete document.documentElement.dataset.cookieNotice;
     onVisibleChange?.(visible);
     window.dispatchEvent(new CustomEvent('salsaflow-cookie-visibility', { detail: visible }));
-  }, [visible, onVisibleChange]);
+  }, [onVisibleChange, storageChecked, visible]);
 
   // Hoehe messen -> Body-Polster + Bottom-CTAs. Bei unsichtbar IMMER 0.
   useEffect(() => {
+    if (!storageChecked) return;
     const root = document.documentElement;
     const banner = bannerRef.current;
     if (!visible || !banner) {
@@ -137,7 +145,7 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
       observer?.disconnect();
       root.style.setProperty('--cookie-banner-height', '0px');
     };
-  }, [visible]);
+  }, [storageChecked, visible]);
 
   const accept = () => {
     try {
@@ -145,6 +153,7 @@ export function CookieBanner({ onVisibleChange }: { onVisibleChange?: (visible: 
     } catch {
       // Wahl liess sich nicht merken - Banner trotzdem schliessen.
     }
+    delete document.documentElement.dataset.cookieNotice;
     setAcknowledged(true);
   };
 

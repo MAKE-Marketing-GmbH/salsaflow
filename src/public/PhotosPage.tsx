@@ -13,7 +13,7 @@
 // doppelte die Filter-Chips). Das Album steht im Filter und in der Album-Zeile darueber.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
@@ -22,7 +22,7 @@ import { SiteHeader } from '@/public/site/SiteHeader';
 import { SiteFooter } from '@/public/site/SiteFooter';
 import { Shell, Eyebrow, TitleAccent, CtaPill, GoogleRating } from '@/public/site/primitives';
 import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
-import { useReducedMotion, type Variants } from 'framer-motion';
+import { useReducedMotion, type Variants } from 'motion/react';
 import { GALLERY, ALBUM_ORDER, GALLERY_PHOTOS, type AlbumId } from '@/public/gallery/content';
 import { InstagramShowcase } from '@/public/social/InstagramShowcase';
 
@@ -101,7 +101,7 @@ function packColumns(items: Packed[], n: number): Packed[][] {
  * sichtbar wird, also genau beim Scrollen und ueber die ganze Seitenlaenge.
  *
  * Die Werte kommen aus dem bestehenden Motion-Vertrag des Repos (home/motion.tsx):
- * nur transform + opacity, EASE_OUT [0.22,1,0.36,1], `once: true`, Distanz <= 24px.
+ * nur transform + opacity, EASE_OUT [0.23,1,0.32,1], `once: true`, Distanz <= 24px.
  * Der Versatz ist 18px plus ein leichtes scale 0.985 — dieselbe Sprache wie die
  * Bild-Reveals auf /team, kein neuer Effekt.
  *
@@ -115,13 +115,12 @@ function useTileReveal(): Variants {
   const hydrated = useHydrated();
   return {
     hidden: hydrated
-      ? { opacity: 0, y: reduced ? 0 : 18, scale: reduced ? 1 : 0.985 }
-      : { opacity: 1, y: 0, scale: 1 },
+      ? { opacity: 0, transform: reduced ? 'translate3d(0, 0, 0)' : 'translate3d(0, 18px, 0) scale(0.985)' }
+      : { opacity: 1, transform: 'translate3d(0, 0, 0)' },
     show: {
       opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { duration: reduced ? 0.3 : 0.55, ease: EASE_OUT },
+      transform: 'translate3d(0, 0, 0)',
+      transition: { duration: reduced ? 0.2 : 0.48, ease: EASE_OUT },
     },
   };
 }
@@ -269,7 +268,7 @@ export function PhotosPage() {
                               <img
                                 src={p.src}
                                 alt={p.alt}
-                                className="block h-auto w-full transition-transform duration-[var(--dur-slow)] ease-out group-hover:scale-[1.04]"
+                                className="block h-auto w-full transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] group-hover:scale-[1.04]"
                                 width={p.width ?? 1080}
                                 height={p.height ?? 1350}
                                 /* R190: die ersten ~12 Kacheln liegen bei jedem Viewport
@@ -279,7 +278,7 @@ export function PhotosPage() {
                                    hundert Fotos. `i` ist der Index in der ungepackten
                                    Liste, nicht die Spaltenposition, also trifft die
                                    Grenze die tatsaechlich ersten Fotos. */
-                                loading={i < 12 ? 'eager' : 'lazy'}
+                                loading={i < 4 ? 'eager' : 'lazy'}
                               />
                               <span
                                 aria-hidden
@@ -287,7 +286,7 @@ export function PhotosPage() {
                               />
                               <span
                                 aria-hidden
-                                className="pointer-events-none absolute bottom-2.5 right-2.5 flex h-8 w-8 translate-y-1 items-center justify-center rounded-full bg-white/90 text-[var(--color-ink)] opacity-0 shadow-sm backdrop-blur-sm transition-[transform,opacity] duration-[var(--dur-base)] ease-out group-hover:translate-y-0 group-hover:opacity-100"
+                                className="pointer-events-none absolute bottom-2.5 right-2.5 flex h-8 w-8 translate-y-1 items-center justify-center rounded-full bg-white/90 text-[var(--color-ink)] opacity-0 shadow-sm backdrop-blur-sm transition-[transform,opacity] duration-[var(--dur-base)] ease-[var(--motion-out)] group-hover:translate-y-0 group-hover:opacity-100"
                               >
                                 <Maximize2 size={15} strokeWidth={2} />
                               </span>

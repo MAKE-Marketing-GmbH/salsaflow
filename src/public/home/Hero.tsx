@@ -75,7 +75,7 @@
 // ist (Raphael Punkt 5). Darum `max-[370px]:hidden`. Ab 390 px bleibt `4,9 · 104`
 // im Fold (2 px Reserve). Die langen Facts nur ab sm.
 
-import { motion, type Variants } from 'framer-motion';
+import { motion, useReducedMotion, type Variants } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
@@ -90,18 +90,19 @@ import { MEASURE_XL } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
 /* R189 — Parallax-Distanz des Hero-Fotos, nach Breite gestaffelt.
-   Desktop 44px, Mobil 24px. Der Unterschied ist keine Geschmacksfrage: `useParallaxStyle`
+   Desktop 44px, Mobil 0px. Der Unterschied ist keine Geschmacksfrage: `useParallaxStyle`
    verteilt die Strecke symmetrisch (+d/2 beim Eintritt, -d/2 beim Austritt), also wandert
    das Bild auf Desktop 22px nach unten und 22px nach oben. Auf Mobil klebt das Foto
-   full-bleed an der Fensterkante und traegt die H1 — dort sind 12px in jede Richtung das
-   Maximum, bevor der Versatz die Schrift gegen das Motiv verschiebt.
+   full-bleed an der Fensterkante und traegt die H1. Auf Coarse-Pointer-/Mobilprofilen war
+   der Effekt kaum sichtbar, kostete aber einen zusaetzlichen scroll-gebundenen Wert; dort
+   bleibt das Motiv deshalb stabil.
 
    MEDIA-QUERY STATT CONDITIONAL HOOK: der Haken laeuft IMMER und IMMER genau einmal, nur
    sein Argument aendert sich. Ein `if (mobile) useParallaxStyle(...)` waere ein Verstoss
    gegen die Hook-Regeln und wuerde beim ersten Breitenwechsel die Hook-Reihenfolge
    zerreissen. Darum liest ein eigener State die Media-Query und speist nur die ZAHL ein. */
 const PARALLAX_DESKTOP = 44;
-const PARALLAX_MOBILE = 24;
+const PARALLAX_MOBILE = 0;
 const DESKTOP_QUERY = '(min-width: 640px)';
 
 /** Liefert die Parallax-Distanz fuer die aktuelle Breite. Serverseitig und vor der ersten
@@ -124,11 +125,10 @@ function useParallaxDistance(): number {
 
 export function Hero() {
   const { lang } = useLang();
-  /* R209: `useReducedMotion` ist hier raus. Es steuerte ausschliesslich Stagger-Abstaende
-     und Fade-Dauern des Folds — beides gibt es nicht mehr. Der Bewegungsschutz geht dabei
-     NICHT verloren: die einzige verbliebene Bewegung im Hero ist der Foto-Parallax, und der
-     nullt seine Distanz selbst (`useParallax` in motion.tsx: `const half = reduced ? 0 :
-     distance / 2`). Ein zweiter Haken hier haette denselben Wert nur noch einmal gelesen. */
+  /* Der Fold selbst bleibt ab Frame 1 statisch. Reduced Motion steuert hier nur die
+     verbliebene Tiefenbewegung des Fotos explizit auf Distanz 0; der Helper sichert
+     denselben Fall zusätzlich an seiner eigenen Bibliotheksgrenze ab. */
+  const reducedMotion = useReducedMotion() === true;
   const h = HOME[lang].hero;
   const cta = HOME[lang].cta;
   const de = lang === 'de';
@@ -138,7 +138,8 @@ export function Hero() {
      Rahmen, liefe der Effekt ueber eine Strecke, auf der das Foto laengst aus dem Bild
      gescrollt ist, und die sichtbare Bewegung waere fast null. */
   const photoRef = useRef<HTMLDivElement>(null);
-  const parallax = useParallaxStyle(photoRef, useParallaxDistance());
+  const parallaxDistance = useParallaxDistance();
+  const parallax = useParallaxStyle(photoRef, reducedMotion ? 0 : parallaxDistance);
 
   /* R209 (Raphael 23.08. 20:20): "Home-Erstbild (und Mobil-Erstbild) ist immer noch ein
      Fade-Wrack. Hero-Erstframe ohne Opacity-Fade — Foto+Rot sofort."
@@ -396,7 +397,7 @@ export function Hero() {
                  unter der Kante, sie beruehrte sie also.
                  WOHER DIE ALTEN 7 px KAMEN, WEISS ICH NICHT. Ein erster Erklaerversuch
                  stand hier und war falsch — er schob sie auf eine Messung gegen das
-                 <img> statt gegen die Box. Das kann nicht stimmen: der Ueberstand des
+                 Bildelement statt gegen die Box. Das kann nicht stimmen: der Ueberstand des
                  Parallax-Traegers reicht nur nach UNTEN, eine Messung dagegen ergaebe
                  ein negatives Vorzeichen, nicht +7. Die Zahl bleibt unerklaert; sie
                  stammt aus einer Runde, deren Messweg nicht dokumentiert ist.
@@ -471,9 +472,11 @@ export function Hero() {
                     gut sie ist. Vierfarbiges Original-G auf hellem Grund — Repo-Regel in
                     primitives.tsx:59-62 (einfarbig nur im dunklen Footer). alt="" + sr-only
                     <dt> darunter liest "Google-Bewertung" schon vor. */}
-                <img src="/logo/google-g.svg" alt="" width={16} height={16} className="h-4 w-4 shrink-0" />
-                <StarRating size={14} />
-                <dt className="sr-only">{de ? 'Google-Bewertung' : 'Google rating'}</dt>
+                <dt className="flex items-center gap-2">
+                  <img src="/logo/google-g.svg" alt="" width={16} height={16} className="h-4 w-4 shrink-0" />
+                  <StarRating size={14} />
+                  <span className="sr-only">{de ? 'Google-Bewertung' : 'Google rating'}</span>
+                </dt>
                 <dd className="font-semibold text-[var(--color-ink)]">
                   {de ? '4,9' : '4.9'}
                   {/* R190: die lange Zeile lief unter den WhatsApp-Knopf
@@ -492,15 +495,19 @@ export function Hero() {
                 </dd>
               </div>
               <div className="hidden items-center gap-1.5 sm:flex">
-                <span aria-hidden className="h-1 w-1 rounded-full bg-[var(--color-salsa)]" />
-                <dt className="sr-only">{de ? 'Gegründet' : 'Founded'}</dt>
+                <dt className="flex items-center">
+                  <span aria-hidden className="h-1 w-1 rounded-full bg-[var(--color-salsa)]" />
+                  <span className="sr-only">{de ? 'Gegründet' : 'Founded'}</span>
+                </dt>
                 <dd className="text-[var(--color-ink-muted)]">
                   {de ? 'seit 2018 in Basel' : 'in Basel since 2018'}
                 </dd>
               </div>
               <div className="hidden items-center gap-1.5 sm:flex">
-                <span aria-hidden className="h-1 w-1 rounded-full bg-[var(--color-salsa)]" />
-                <dt className="sr-only">{de ? 'Kurse' : 'Classes'}</dt>
+                <dt className="flex items-center">
+                  <span aria-hidden className="h-1 w-1 rounded-full bg-[var(--color-salsa)]" />
+                  <span className="sr-only">{de ? 'Kurse' : 'Classes'}</span>
+                </dt>
                 <dd className="text-[var(--color-ink-muted)]">
                   {de ? 'rund 40 Kurse pro Woche' : 'around 40 classes a week'}
                 </dd>
@@ -532,16 +539,16 @@ export function Hero() {
               ab — dieselbe Rundung wie die Karten darunter. Es bleibt full-bleed und traegt
               weiter die H1; nur die zwei sichtbaren Ecken folgen jetzt der Linie. */}
           {/* R189 — echter scroll-gebundener Parallax auf GENAU diesem Foto.
-              Der Effekt sitzt am <img>, nicht an dieser Box: die Box definiert den
+              Der Effekt sitzt am Bildelement, nicht an dieser Box: die Box definiert den
               Ausschnitt (`overflow-hidden` plus Radius), das Bild wandert darin. Wanderte
               die Box selbst, wuerde sie ihren eigenen Radius und ihre Kante mitnehmen.
 
               DER 14px-STREIFEN AUS DEM KOMMENTAR OBEN (Zeile 105-110) IST HIER DER
               ENTSCHEIDENDE PUNKT. Dort ist gemessen belegt, dass jeder Versatz nach unten
               auf Mobil einen leeren Papierstreifen an der Oberkante freilegt, weil das Foto
-              full-bleed an der Fensterkante klebt. Parallax verschiebt symmetrisch, also
-              +22px nach unten auf Desktop und +12px auf Mobil — ohne Gegenmassnahme waere
-              der alte Fehler zurueck, nur groesser.
+              full-bleed an der Fensterkante klebt. Parallax verschiebt auf Desktop
+              symmetrisch um bis zu 22px; auf Mobil bleibt er jetzt bei 0px. Ohne
+              Gegenmassnahme waere der alte Fehler auf breiten Viewports trotzdem zurueck.
               Gegenmassnahme: das Bild bekommt UEBERSTAND statt Passgenauigkeit. Es ist
               `calc(100% + 64px)` hoch und sitzt `-32px` ueber der Boxoberkante. 32px sind
               mehr als die groesste halbe Strecke (44/2 = 22), also bleibt an beiden Kanten
@@ -574,11 +581,13 @@ export function Hero() {
               style={parallax}
               className="absolute inset-x-0 -top-8 h-[calc(100%+4rem)] will-change-transform"
             >
-              {/* R224 (Raphael 24.08.): Das Startseiten-Hero zeigt jetzt ein lokal
-                  ausgeliefertes Salsaflow-Reel statt eines statischen Fotos. Die Datei ist
-                  ein 12-Sekunden-Ausschnitt aus dem Instagram-Lady-Style-Reel, H.264 und
-                  physisch OHNE Audiospur. autoplay + muted + playsInline verhindert Player-
-                  Chrome und iOS-Vollbild; loop macht daraus eine ruhige Hero-Bewegung.
+              {/* R224/R225: Das Startseiten-Hero zeigt einen lokal ausgelieferten Cut aus
+                  drei Reels des offiziellen Salsaflow-Accounts: DYhKD7ONhfK (Lady Style),
+                  DahpxEVtWvm (Choreografie) und DX-Cz9MNkG_ (Anniversary-Buehne). Jeder
+                  Ausschnitt steht drei Sekunden; zwei 250-ms-Crossfades verbinden die
+                  Szenen. Desktop und Mobil sind H.264 und physisch OHNE Audiospur.
+                  autoplay + muted + playsInline verhindert Player-Chrome und iOS-Vollbild;
+                  loop macht daraus eine kompakte Hero-Bewegung ohne JavaScript-Timer.
 
                   Reduced Motion laedt keine Videoquelle: Das media-Attribut am <source>
                   passt dann nicht, und das Poster bleibt als stilles Endbild stehen. So wird
@@ -595,9 +604,14 @@ export function Hero() {
                 className="h-full w-full object-cover object-center"
               >
                 <source
+                  src="/videos/home-hero-instagram-muted-mobile.mp4"
+                  type="video/mp4"
+                  media="(max-width: 639px) and (prefers-reduced-motion: no-preference)"
+                />
+                <source
                   src="/videos/home-hero-instagram-muted.mp4"
                   type="video/mp4"
-                  media="(prefers-reduced-motion: no-preference)"
+                  media="(min-width: 640px) and (prefers-reduced-motion: no-preference)"
                 />
               </video>
             </motion.div>

@@ -15,6 +15,32 @@ eine bewusste Entscheidung. Stillschweigend überschreibe ich nichts.
 
 ---
 
+## Werkzeugtabelle — aktiver Production-Stack
+
+Diese Tabelle ist das Pflichtartefakt aus dem Tool-Use-Case-Router. Sie steht bewusst
+vor allen beschreibenden Tabellen dieses Dokuments, damit das deterministische
+`werkzeug-gate.mjs` genau diesen zusammenhängenden Block als Werkzeugtabelle liest.
+
+| Bedarf | Werkzeug | Befehl | Gate | Router-Anker | geprüft-am |
+|---|---|---|---|---|---|
+| React-UI und Klassenauflösung | `react`, `react-dom`, `clsx`, `tailwind-merge` | `npm i react react-dom clsx tailwind-merge` | Typecheck; genau ein Primitive-/Token-System | `#stack-primitives` | 2026-08-25 |
+| Vite-/Tailwind-Build und lokale Tasks | `vite`, `@vitejs/plugin-react`, `@tailwindcss/vite`, `tailwindcss`, `typescript`, `tsx`, `concurrently`, `@types/node`, `@types/react`, `@types/react-dom` | `npm i -D vite @vitejs/plugin-react @tailwindcss/vite tailwindcss typescript tsx concurrently @types/node @types/react @types/react-dom` | `npm run typecheck`; `npm run build` | `#sections` | 2026-08-25 |
+| Markenschrift, lokal und ohne Drittrequest | `@fontsource/afacad` plus vorhandene lokale Cal-Sans-/Alex-Brush-Dateien | `npm i @fontsource/afacad` | keine Font-CDN-Requests; deutscher Zeichensatz; visuelle Typo-Abnahme | `#fonts` | 2026-08-25 |
+| Seitenwechsel, Scroll-Reveals und Smooth-Scroll | `motion` über `motion/react`, `lenis` | `npm i motion lenis` | `useReducedMotion()`/CSS-Fallback; nur Transform/Opacity; Motion- und Mobile-Smoke | `#motion` | 2026-08-25 |
+| UI-Icons | `lucide-react` | `npm i lucide-react` | genau ein Icon-System; dekorative Icons `aria-hidden` | `#icons` | 2026-08-25 |
+| API, Validierung und Laufzeitkonfiguration | `hono`, `@hono/node-server`, `zod`, `dotenv` | `npm i hono @hono/node-server zod dotenv` | API-Health; Validierungs-/Kontakt-Smokes; keine Secrets im Client | `#formular` | 2026-08-25 |
+| Lokale und produktive Datenbankadapter | `drizzle-orm`, `@electric-sql/pglite`, `pg`, `drizzle-kit`, `@types/pg` | `npm i drizzle-orm @electric-sql/pglite pg && npm i -D drizzle-kit @types/pg` | Migration-/Public-/Booking-Verifikation; kein destruktiver Prod-Reset | `#formular` | 2026-08-25 |
+| Code-, Browser- und Screenshot-QA | `oxlint`, `@oxlint/plugins`, `playwright-core` | `npm i -D oxlint @oxlint/plugins playwright-core` | `npx oxlint`; kanonischer Shot-Sweep mit `--base` | `#sections` | 2026-08-25 |
+| Lokale Bildverarbeitung im Build/QA | `sharp` | `npm i -D sharp` | Build; Bilddimensionen/Dateien vorhanden; keine Runtime-CDN-Abhängigkeit | `#bilder` | 2026-08-25 |
+
+Motion-Nachweis vom 25.08.2026: Der Katalogeintrag `Motion Primitives` wurde über
+`resource-access.mjs show` auf `#motion` geroutet. Dessen offizielle Site lieferte beim
+Pflicht-`open`, im echten Chrome und über den Reader nur den Vercel-Security-Checkpoint;
+für das tatsächlich verwendete Paket wurden deshalb die offizielle Installationsseite
+`motion.dev/docs/react` (`npm install motion`, Import `motion/react`) und die npm-Metadaten
+gelesen. Geprüfter Stand: `motion` 13.1.1, MIT, Repository
+`motiondivision/motion`. Es wird keine Motion-Primitives-Komponente übernommen.
+
 ## 0. Kernaussage in fünf Zeilen
 
 - Design A ist **kein Neubau**. Der Bleed-Hero mit rotem Kant-Marker, Cal Sans, Afacad und `#ad1827` sind bereits gebaut.
@@ -374,54 +400,63 @@ Suchergebnis-Anzeige steht.
 
 ## 6. Motion
 
-### 6.1 Die eine Signatur
+### 6.1 Seitenwechsel als Signatur
 
-Beleg: [`src/public/home/motion.tsx`](/root/clients/salsaflow-dc/src/public/home/motion.tsx)
+Ein Seitenaufruf ist selten genug für erklärende Marketing-Motion. Der Zweck ist
+**Preventing Jarring Change**: der neue Seitenstamm kommt sichtbar von unten, während
+der neue Header räumlich passend von oben eintritt. Die kanonischen Tokens stehen in
+`src/index.css`:
 
-Ein Takt für die ganze Seite (`motion.tsx:25-39`):
+| Parameter | Seitenstamm | Header |
+|---|---|---|
+| Distanz | `24px` mobil, `32px` ab 64rem | `-24px` |
+| Dauer | `520ms` | `280ms` |
+| Easing | `cubic-bezier(0.23, 1, 0.32, 1)` | dieselbe Kurve |
+| Technik | CSS View Transitions plus Dev-Mount-Fallback | benannter Header-Snapshot |
 
-| Parameter | Wert |
-|---|---|
-| Distanz | `14px` y-Versatz |
-| Dauer | `0.45s` (reduced: `0.3s`, nur Fade) |
-| Stagger | `0.07s`, `delayChildren: 0.03` |
-| Easing | `EASE_OUT = [0.22, 1, 0.36, 1]` |
-| Viewport | `once: true`, `margin: '-8% 0px'` |
+Above-the-fold-Heroes bleiben statisch. So konkurriert der Seitenwechsel nicht mit
+einem zweiten Hero-Entrance; die staffelnden Content-Reveals beginnen erst darunter.
 
-Das `-8%` statt `-12%` ist gemessen (`motion.tsx:18-19`): Reveals zünden früher und
-„schwimmen“ nicht im Scroll-Glide nach.
+### 6.2 Ein Takt für Content-Reveals
 
-Dasselbe Easing `cubic-bezier(0.22,1,0.36,1)` liegt als `--acc-ease` im CSS
-(`index.css:78`). Eine Kurve, zwei Systeme — richtig.
+`src/lib/reveal.tsx` und `src/public/home/motion.tsx` teilen dieselbe Motion-Sprache:
 
-### 6.2 Weitere erlaubte Bewegungen
+- `24px` Standardweg, hart auf maximal `32px` begrenzt;
+- `0.48s` Dauer, `0.05s` Stagger und `0.02s` Gruppen-Vorlauf;
+- Ease-out `[0.23, 1, 0.32, 1]`;
+- `once: true`, Viewport-Margin `0px 0px -4% 0px`;
+- Transform-Strings (`translate3d`) plus Opacity statt `y`-/`scale`-Shorthands.
 
-- **Count-up** (`useCountUp`, `motion.tsx:72-96`): 1,1s, Ease-out-Cubic, einmalig ab Sichtbarkeit.
-- **Marquee** (`motion.tsx:118-147`): die **einzige** erlaubte Dauerschleife, 42s linear, `aria-hidden`, zwei identische Spuren.
-- **Booking-Dialog** (`index.css:238-256`): Backdrop-Fade + Panel `translateY(8px) scale(0.98)` → neutral, 150-200ms.
-- **Header-Hide/Show**: `transition-transform duration-300`.
+Der Stagger gilt für sinnvolle Gruppen, nicht für jedes dekorative Kleinteil. Damit
+kommen Abschnitte Element für Element, ohne die Interaktion zu blockieren.
 
-### 6.3 Reduced-Motion — doppelt abgesichert
+### 6.3 Weitere erlaubte Bewegungen
 
-Global (`index.css:98-111`): alle Animationen und Transitions auf `0.01ms`,
-`scroll-behavior: auto`. Zusätzlich prüft jede JS-Komponente `useReducedMotion()`
-und liefert den Endzustand direkt: kein Versatz, kein Loop, kein Count-up
-(`motion.tsx:4`). Der Marquee wird zum seitlich scrollbaren Band (`:128-134`).
+- **Count-up:** standardmäßig `0.9s`, Ease-out-Cubic, einmalig ab Sichtbarkeit.
+- **Marquee:** die einzige Dauerschleife, standardmäßig `48s` linear, `aria-hidden`,
+  zwei identische Spuren.
+- **Leichte Tiefenstaffelung:** maximal `14px` Gesamtweg und nur mit vollem
+  Transform-String; kein großflächiger Hintergrund-Parallax.
+- **Booking-/Menü-Zustände:** unter 300ms, interruptible, nur Transform/Opacity.
 
-**Nicht entfernen:** jeder Reveal-Container trägt `data-reveal` (`motion.tsx:59`).
-Das Screenshot-Tool erzwingt darüber Sichtbarkeit — sonst wären alle
-Reveal-on-Scroll-Shots leer. Ein „aufgeräumtes“ `data-reveal` bricht die Verify-Schleife.
+### 6.4 Reduced Motion — sanft statt abgeschaltet
 
-```
-$ grep -rln "data-reveal" src/ | wc -l
-14
-```
+CSS-Seitenwechsel verlieren unter `prefers-reduced-motion: reduce` sämtliche
+Positionsänderung und bleiben als kurzer Opacity-Wechsel erhalten. Jede JS-Motion-Datei
+ruft `useReducedMotion()` auf: Reveals werden zu einem `0.2s` Fade, Parallax wird
+eingefroren, Count-up springt auf den Endwert und der Marquee wird zu einem horizontal
+scrollbaren Band.
 
-### 6.4 Verboten
+**Nicht entfernen:** jeder Reveal-Container trägt `data-reveal`. Der kanonische
+Screenshot-Sweep erzwingt darüber im statischen Modus sichtbare Endzustände; ohne das
+Attribut wären Scroll-Reveal-Shots leer.
 
-Bounce, Overshoot, parallaxe Hintergründe, Scroll-Hijacking, Auto-Karussells mit
-Inhalt (der `aria-hidden`-Marquee ist die Ausnahme), Animation auf `width`/`height`/
-`top`/`left`. Nur `transform` und `opacity`.
+### 6.5 Verboten
+
+Bounce und Overshoot ohne expliziten Delight-Zweck, Scroll-Hijacking, inhaltliche
+Auto-Karussells, `transition: all`, Animation auf `width`/`height`/`top`/`left`,
+Motion-Shorthands unter Last sowie ungegatete Touch-Hover. Bewegung bleibt auf
+Transform/Opacity; Reduced Motion ist in CSS und JS Pflicht.
 
 ---
 

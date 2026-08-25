@@ -31,6 +31,27 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const mobileGroupRefs = useRef(new Map<string, HTMLButtonElement>());
+  const subnavBackRef = useRef<HTMLButtonElement>(null);
+
+  const closeMenu = useCallback(() => {
+    setOpen(false);
+    setOpenGroup(null);
+    menuButtonRef.current?.focus();
+  }, []);
+
+  const openMobileGroup = (label: string) => {
+    setOpenGroup(label);
+    window.requestAnimationFrame(() => subnavBackRef.current?.focus());
+  };
+
+  const closeMobileGroup = () => {
+    const label = openGroup;
+    setOpenGroup(null);
+    window.requestAnimationFrame(() => {
+      if (label) mobileGroupRefs.current.get(label)?.focus();
+    });
+  };
 
   useEffect(() => {
     setPathname(window.location.pathname);
@@ -38,17 +59,77 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
 
   useEffect(() => {
     if (!open) return;
+
+    const scrollY = window.scrollY;
+    const root = document.documentElement;
+    const previousRootOverflow = root.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    const isolationTargets = [
+      ...document.querySelectorAll<HTMLElement>(
+        'main, footer, [data-cookie-banner], [data-sticky-cta], a.whatsapp-float',
+      ),
+    ].filter((element) => !headerRef.current?.contains(element));
+    const previousInert = isolationTargets.map((element) => element.inert);
+
+    root.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    isolationTargets.forEach((element) => {
+      element.inert = true;
+    });
+
+    const focusables = () =>
+      [...(menuRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ) ?? [])].filter(
+        (element) =>
+          element.getClientRects().length > 0 &&
+          !element.closest('[inert]') &&
+          element.getAttribute('aria-hidden') !== 'true',
+      );
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
         closeMenu();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const items = focusables();
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('keydown', onKey);
+      root.style.overflow = previousRootOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      isolationTargets.forEach((element, index) => {
+        element.inert = previousInert[index] ?? false;
+      });
+      window.scrollTo(0, scrollY);
     };
-  }, [open]);
+  }, [closeMenu, open]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 64rem)');
+    const closeAtDesktop = () => {
+      if (!desktop.matches) return;
+      setOpen(false);
+      setOpenGroup(null);
+    };
+    closeAtDesktop();
+    desktop.addEventListener('change', closeAtDesktop);
+    return () => desktop.removeEventListener('change', closeAtDesktop);
+  }, []);
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -56,7 +137,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
 
     const update = () => {
       const y = window.scrollY;
-      if (y < 24 || open) {
+      if (y < 24 || open || headerRef.current?.contains(document.activeElement)) {
         setHidden(false);
       } else if (y > lastY + 8) {
         setHidden(true);
@@ -85,12 +166,6 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
     header.addEventListener('focusin', showOnFocus);
     return () => header.removeEventListener('focusin', showOnFocus);
   }, []);
-
-  const closeMenu = () => {
-    setOpen(false);
-    setOpenGroup(null);
-    menuButtonRef.current?.focus();
-  };
 
   // Volle Navigation (V3-Copyplan): drei Dropdown-Gruppen + Leaf-Links.
   const nav: NavItem[] = [
@@ -150,7 +225,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
     <header
       ref={headerRef}
       className={cn(
-        'fixed inset-x-0 top-0 z-50 will-change-transform transition-transform duration-[var(--dur-base)] ease-out motion-reduce:transition-none',
+        'fixed inset-x-0 top-0 z-50 will-change-transform transition-transform duration-[var(--dur-base)] ease-[var(--motion-out)] motion-reduce:transition-none',
         solidBackdrop && 'bg-[var(--color-paper-warm)]',
       )}
       style={{
@@ -190,10 +265,10 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
              546px hoch (gemessen) — dann las man den Seitentext als Schleier quer durch die
              Navigation. Offen darum deckend und ohne Blur. Betrifft nur Mobil: `open` steuert
              ausschliesslich das Burger-Menu, der Burger ist `lg:hidden`. */
-          className="t-acc w-full overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-[var(--color-paper-warm)]/95 text-[var(--color-ink)] shadow-[0_8px_28px_rgba(17,17,17,0.1)] backdrop-blur data-[open=true]:rounded-none data-[open=true]:border-transparent data-[open=true]:bg-[var(--color-paper-warm)] data-[open=true]:shadow-none data-[open=true]:backdrop-blur-none lg:overflow-visible lg:rounded-full"
+          className="t-acc w-full overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] text-[var(--color-ink)] shadow-[0_8px_28px_rgba(17,17,17,0.1)] data-[open=true]:overflow-visible data-[open=true]:rounded-none data-[open=true]:border-transparent data-[open=true]:shadow-none lg:overflow-visible lg:rounded-full"
         >
           <div className="t-acc-head h-12 gap-3 pl-3.5 pr-1.5 sm:h-14 sm:gap-4 sm:pl-4 sm:pr-3">
-          <a href="/" className="flex shrink-0 items-center" aria-label={de ? 'Salsaflow Dance Company - Startseite' : 'Salsaflow Dance Company - Home'}>
+          <a href="/" className="flex min-h-11 shrink-0 items-center" aria-label={de ? 'Salsaflow Dance Company - Startseite' : 'Salsaflow Dance Company - Home'}>
             {/* Immer die dunkle Wortmarke: die Leiste sitzt sitewide auf Cream (die weisse
                 Variante gehoerte zum entfallenen Glas-Zustand auf dem dunklen Hero-Foto). */}
             <img
@@ -273,6 +348,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
               ohne Einrueckung und ohne Border-Schiene (Punkt 2). */}
           <div
           id="mobile-navigation"
+          data-mobile-menu-panel
           aria-hidden={!open}
           inert={!open}
           aria-label={de ? 'Mobile Navigation' : 'Mobile navigation'}
@@ -282,11 +358,12 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
           <div className="relative h-[calc(100dvh-3rem)] overflow-hidden border-t border-[var(--color-line)] sm:h-[calc(100dvh-3.5rem)]">
             {/* Ebene 1: Hauptpunkte. Bei offener Gruppe schiebt sie nach links raus. */}
             <nav
+              data-mobile-menu-primary
               aria-label={de ? 'Mobile Navigation' : 'Mobile navigation'}
               aria-hidden={openGroup !== null}
               inert={openGroup !== null}
               className={cn(
-                'flex h-full flex-col gap-1 overflow-y-auto px-4 pb-6 pt-3 transition-transform duration-[var(--dur-base)] ease-out motion-reduce:transition-none sm:px-6',
+                'flex h-full flex-col gap-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-3 transition-transform duration-[var(--dur-base)] ease-[var(--motion-out)] motion-reduce:transition-none sm:px-6',
                 openGroup !== null ? '-translate-x-full' : 'translate-x-0',
               )}
             >
@@ -295,7 +372,11 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
                   <button
                     key={item.label}
                     type="button"
-                    onClick={() => setOpenGroup(item.label)}
+                    ref={(node) => {
+                      if (node) mobileGroupRefs.current.set(item.label, node);
+                      else mobileGroupRefs.current.delete(item.label);
+                    }}
+                    onClick={() => openMobileGroup(item.label)}
                     aria-expanded={openGroup === item.label}
                     className={cn(
                       't-hover flex min-h-11 items-center justify-between rounded-[var(--radius-chip)] px-2 py-2.5 text-base font-medium hover:bg-[var(--color-bg-soft)]',
@@ -340,16 +421,18 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
             {/* Ebene 2: Unterpunkte der offenen Gruppe, kommt von rechts herein. */}
             <div
               data-mobile-subnav
+              data-active={openGroup !== null}
               aria-hidden={openGroup === null}
               inert={openGroup === null}
               className={cn(
-                'absolute inset-0 flex flex-col gap-1 overflow-y-auto bg-[var(--color-paper-warm)] px-4 pb-6 pt-3 transition-transform duration-[var(--dur-base)] ease-out motion-reduce:transition-none sm:px-6',
+                'absolute inset-0 flex flex-col gap-1 overflow-y-auto overscroll-contain bg-[var(--color-paper-warm)] px-4 pb-6 pt-3 transition-transform duration-[var(--dur-base)] ease-[var(--motion-out)] motion-reduce:transition-none sm:px-6',
                 openGroup !== null ? 'translate-x-0' : 'translate-x-full',
               )}
             >
               <button
+                ref={subnavBackRef}
                 type="button"
-                onClick={() => setOpenGroup(null)}
+                onClick={closeMobileGroup}
                 className="t-hover mb-1 flex min-h-11 items-center gap-1.5 rounded-[var(--radius-chip)] px-2 py-2.5 text-base font-semibold text-[var(--color-ink)] hover:bg-[var(--color-bg-soft)]"
               >
                 <ChevronLeft size={18} strokeWidth={2} aria-hidden />
@@ -402,7 +485,7 @@ function DesktopLink({ item, active }: { item: Leaf; active: boolean }) {
     <a
       href={item.href}
       aria-current={active ? 'page' : undefined}
-      className="t-hover relative py-1 text-sm font-medium text-[var(--color-ink)] hover:text-[var(--color-salsa)]"
+      className="t-hover relative inline-flex min-h-11 items-center text-sm font-medium text-[var(--color-ink)] hover:text-[var(--color-salsa)]"
     >
       {item.label}
       {active && (
@@ -426,7 +509,7 @@ function DesktopLink({ item, active }: { item: Leaf; active: boolean }) {
  * den Diagonal-Move ueber die Nachbar-Spalte hinweg.
  */
 const OPEN_DELAY = 90; // kurz genug um sich sofort anzufuehlen, lang genug gegen Durchwisch-Blitzer
-const CLOSE_DELAY = 220; // Zeit fuer den diagonalen Weg zum untersten Kindlink
+const CLOSE_DELAY = 140; // genug fuer den diagonalen Weg, ohne das Schliessen traege wirken zu lassen
 
 function DesktopDropdown({
   item,
@@ -438,6 +521,7 @@ function DesktopDropdown({
   pathname: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLAnchorElement>(null);
   const timer = useRef<number | undefined>(undefined);
@@ -447,6 +531,7 @@ function DesktopDropdown({
   // die Bewegung interruptible — zurueck auf den Trigger cancelt das Schliessen.
   const schedule = useCallback((next: boolean, delay: number) => {
     window.clearTimeout(timer.current);
+    if (next) setKeyboardOpen(false);
     timer.current = window.setTimeout(() => setOpen(next), delay);
   }, []);
   const cancel = useCallback(() => window.clearTimeout(timer.current), []);
@@ -460,6 +545,7 @@ function DesktopDropdown({
   };
   const openAndFocus = (i: number) => {
     cancel();
+    setKeyboardOpen(true);
     setOpen(true);
     // Erst nach dem Paint fokussieren: vorher ist das Panel `inert` und nimmt keinen Fokus.
     window.requestAnimationFrame(() => focusItem(i));
@@ -504,7 +590,9 @@ function DesktopDropdown({
     >
       <a
         ref={triggerRef}
-        href={item.href ?? item.children?.[0]?.href ?? '#'}
+        href={item.href}
+        role={item.href ? undefined : 'button'}
+        tabIndex={item.href ? undefined : 0}
         aria-haspopup="true"
         aria-expanded={open}
         aria-controls={menuId}
@@ -517,14 +605,20 @@ function DesktopDropdown({
           if (!item.href) {
             e.preventDefault();
             cancel();
+            setKeyboardOpen(false);
             setOpen((wasOpen) => !wasOpen);
             return;
           }
           const coarse = window.matchMedia('(pointer: coarse)').matches;
-          if (coarse && !open) { e.preventDefault(); cancel(); setOpen(true); }
+          if (coarse && !open) {
+            e.preventDefault();
+            cancel();
+            setKeyboardOpen(false);
+            setOpen(true);
+          }
         }}
         className={cn(
-          'relative inline-flex items-center gap-1 py-1 text-sm font-medium transition-colors',
+          'relative inline-flex min-h-11 items-center gap-1 text-sm font-medium transition-colors',
           't-hover',
           active || open ? 'text-[var(--color-salsa)]' : 'text-[var(--color-ink)] hover:text-[var(--color-salsa)]',
         )}
@@ -534,7 +628,7 @@ function DesktopDropdown({
           size={14}
           strokeWidth={2}
           aria-hidden
-          className={cn('transition-transform duration-[var(--dur-fast)] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', open && '-scale-y-100')}
+          className={cn('transition-transform duration-[var(--dur-fast)] ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none', open && '-scale-y-100')}
         />
         {active && (
           <span className="absolute -bottom-0.5 left-0 right-6 h-0.5 rounded-full bg-[var(--color-salsa)]" />
@@ -553,7 +647,11 @@ function DesktopDropdown({
            Motion: Ursprung links oben, Eintritt darum aus der Richtung, in die das
            Panel wächst (x statt y), Dauer `--dur-fast`, Kurve `cubic-bezier(0.23,1,0.32,1)`
            = der starke Ease-Out der Motion-Doktrin. `scale(0.98)` statt `scale(0)`. */
-        style={{ top: 'calc(100% - 2px)', transformOrigin: 'top left' }}
+        style={{
+          top: 'calc(100% - 2px)',
+          transformOrigin: 'top left',
+          transitionDuration: keyboardOpen ? '0ms' : undefined,
+        }}
         className={cn(
           'absolute left-0 z-50 w-60 pt-3 transition-[opacity,transform] duration-[var(--dur-fast)] ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none',
           open ? 'visible translate-x-0 scale-100 opacity-100' : 'invisible -translate-x-1 scale-[0.98] opacity-0',
@@ -570,7 +668,7 @@ function DesktopDropdown({
                 aria-current={chActive ? 'page' : undefined}
                 onKeyDown={(e) => onItemKeyDown(e, i)}
                 className={cn(
-                  'block rounded-[var(--radius-chip)] px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-salsa)]',
+                  'flex min-h-11 items-center rounded-[var(--radius-chip)] px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-salsa)]',
                   chActive ? 'bg-[var(--color-bg-soft)] text-[var(--color-salsa)]' : 'text-[var(--color-ink)]',
                 )}
               >

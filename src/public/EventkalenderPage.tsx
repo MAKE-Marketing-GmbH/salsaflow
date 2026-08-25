@@ -8,7 +8,7 @@
 // erfindet keine Datumsangaben. Einzige Zeitangabe ist der gesicherte Danceflow-Rhythmus.
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { CalendarDays, Sparkles, Star } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import type { PublicEvent } from '@/lib/api';
@@ -87,7 +87,8 @@ export function EventkalenderPage() {
 
 /* --------------------------------------------------- Filter & Kategorien */
 function FilterSection({ c }: { c: EventkalenderContent }) {
-  const { item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const f = c.filter;
   return (
     <section id="filter" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-16 lg:py-24">
@@ -126,7 +127,7 @@ function FilterSection({ c }: { c: EventkalenderContent }) {
               </ul>
               <span className="mt-auto inline-flex min-h-11 items-center gap-1.5 pt-3 text-sm font-bold text-[var(--color-salsa)] transition-colors group-hover:text-[var(--color-ink)]">
                 {f.groupCta}
-                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
               </span>
             </motion.a>
           ))}
@@ -176,7 +177,7 @@ function CardsSection({ c }: { c: EventkalenderContent }) {
                 className="group mt-4 inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {ev.cta.label}
-                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
               </a>
             </motion.article>
           ))}
@@ -226,7 +227,7 @@ function FeaturedSection({ c }: { c: EventkalenderContent }) {
                     className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-ink)] transition-colors hover:text-[var(--color-salsa)]"
                   >
                     {l.label}
-                    <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                    <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
                   </a>
                 ))}
               </div>

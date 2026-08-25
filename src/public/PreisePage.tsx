@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { useLang } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import {
@@ -193,22 +193,20 @@ function GroupedPrices({
           rund 500px von ihrem eigenen Positionsnamen entfernt (gemessen im ersten
           Durchgang, d-02.png) und die beiden lasen sich nicht mehr als ein Paar.
           Die 52px-Zahl ist ohnehin der Blickfang, sie braucht die rechte Kante nicht. */}
-      <dl className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <dd className="shrink-0 font-display text-[2.75rem] font-extrabold leading-none tracking-[-0.03em] text-[var(--color-salsa)] sm:text-[3.25rem]">
-          {anchorRow.value ?? onRequest}
-        </dd>
-        <div className="min-w-0">
-          <dt className="text-[0.95rem] font-semibold leading-snug text-[var(--color-ink)]">
-            {anchorRow.label}
-          </dt>
+      <dl>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <dt className="order-2 min-w-0 text-[0.95rem] font-semibold leading-snug text-[var(--color-ink)]">
+            <span className="block">{anchorRow.label}</span>
           {/* Die Empfehlungs-Pille steht UNTER dem Positionsnamen. Marken-Rot auf
               10 Prozent Flaeche, kein Pastellton — die Schrift traegt volles
               #AD1827 (var(--color-salsa)). */}
-          <dd className="mt-1.5">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--color-salsa)]/10 px-3 py-1 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[var(--color-salsa)]">
+            <span className="mt-1.5 inline-flex items-center gap-2 rounded-full bg-[var(--color-salsa)]/10 px-3 py-1 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[var(--color-salsa)]">
               <BeatMark />
               {anchorNote}
             </span>
+          </dt>
+          <dd className="order-1 shrink-0 font-display text-[2.75rem] font-extrabold leading-none tracking-[-0.03em] text-[var(--color-salsa)] sm:text-[3.25rem]">
+            {anchorRow.value ?? onRequest}
           </dd>
         </div>
       </dl>
@@ -247,7 +245,8 @@ function GroupedPrices({
 
 /* ----------------------------------------------------------------- Reguläre Kurse */
 function RegularSection({ c }: { c: PreiseContent }) {
-  const { item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const r = c.regular;
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
@@ -619,7 +618,7 @@ function FitSection({ c }: { c: PreiseContent }) {
                   <span className="mt-1 block text-[0.95rem] leading-snug text-[var(--color-ink-muted)]">{o.pick}</span>
                 </span>
                 <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-line)] text-[var(--color-salsa)] transition-colors duration-[var(--dur-fast)] group-hover:border-[var(--color-salsa)] group-hover:bg-[var(--color-salsa)] group-hover:text-white">
-                  <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                  <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
                 </span>
               </motion.a>
             ))}

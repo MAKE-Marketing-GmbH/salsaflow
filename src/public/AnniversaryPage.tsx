@@ -7,7 +7,7 @@
 // Template ohne erfundene Termine (Plan: echte Daten leben im Eventkalender). Copy 1:1 aus
 // anniversary-content.ts.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 // R188 E5: `Check` lief nur in der entfernten AudienceSection.
 import { GraduationCap, Sparkles, Users, type LucideIcon } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
@@ -58,7 +58,8 @@ export function AnniversaryPage() {
 
 /* -------------------------------------------------------------------- Hero (hell) */
 function AnniversaryHero({ c }: { c: AnniversaryContent }) {
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const h = c.hero;
   return (
     <section
@@ -300,7 +301,7 @@ function ProgrammSection({ c }: { c: AnniversaryContent }) {
               className="group mt-auto inline-flex min-h-12 items-center gap-1.5 pt-7 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {p.cta.label}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -364,7 +365,7 @@ function ProofSection({ c }: { c: AnniversaryContent }) {
               className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {link.label}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </motion.a>
           ))}
         </Reveal>

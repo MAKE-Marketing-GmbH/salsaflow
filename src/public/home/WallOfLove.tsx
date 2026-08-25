@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { useLang } from '@/lib/i18n';
 import { GOOGLE_REVIEWS, WALL_REVIEWS, localizeReview } from '@/public/site/reviews';
 import { CtaArrow, GoogleRating, Shell, StarRating, sectionLead } from '@/public/site/primitives';
@@ -26,7 +26,11 @@ const COPY = {
 export function WallOfLove() {
   const { lang } = useLang();
   // Item-Varianten nur noch fuer die Zitat-Gruppe (Stagger ueber drei Karten).
-  const { item: itemVariants } = useReveal({ stagger: 0.1 });
+  const reducedMotion = useReducedMotion() === true;
+  const { item: itemVariants } = useReveal({
+    stagger: 0.1,
+    distance: reducedMotion ? 0 : 24,
+  });
   const c = COPY[lang];
 
   return (
@@ -95,7 +99,7 @@ export function WallOfLove() {
                 className="t-hover group inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[var(--color-ink)] hover:text-[var(--color-salsa)]"
               >
                 {c.all}
-                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" />
               </a>
             </div>
           </motion.div>

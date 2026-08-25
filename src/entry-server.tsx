@@ -1,9 +1,34 @@
-import { StrictMode, Suspense } from 'react';
+import { StrictMode, Suspense, type ComponentType } from 'react';
 import { renderToString } from 'react-dom/server';
 import { LangProvider } from '@/lib/i18n';
 import { SmoothScroll } from '@/public/site/SmoothScroll';
 import { PRERENDER_ROUTES, resolveRoute } from '@/routes';
 import { SEO_META, type SeoKey } from '@/lib/seo';
+import { HomePage } from '@/public/HomePage';
+import { CoursesPage } from '@/public/CoursesPage';
+import { EventsPage } from '@/public/EventsPage';
+import { TeamPage } from '@/public/TeamPage';
+import { PhotosPage } from '@/public/PhotosPage';
+import { ContactPage } from '@/public/ContactPage';
+import { ImpressumPage } from '@/public/ImpressumPage';
+import { DatenschutzPage } from '@/public/DatenschutzPage';
+import { SchedulePage } from '@/public/SchedulePage';
+import { SalsaPage, BachataPage, HeelsPage } from '@/public/courses/styles/pages';
+import { PrivatstundenPage } from '@/public/PrivatstundenPage';
+import { KursaufbauPage } from '@/public/KursaufbauPage';
+import { PreisePage } from '@/public/PreisePage';
+import { ShowsAnimationenPage } from '@/public/ShowsAnimationenPage';
+import { DanceflowNightPage } from '@/public/DanceflowNightPage';
+import { AnniversaryPage } from '@/public/AnniversaryPage';
+import { FloweekendPage } from '@/public/FloweekendPage';
+import { EventkalenderPage } from '@/public/EventkalenderPage';
+import { CollabsPage } from '@/public/CollabsPage';
+import { TanzschuhePage } from '@/public/TanzschuhePage';
+import { PartysPage } from '@/public/PartysPage';
+import { FaqPage } from '@/public/FaqPage';
+import { SchnupperstundePage } from '@/public/SchnupperstundePage';
+import { StandortPage } from '@/public/StandortPage';
+import { NotFoundPage } from '@/public/NotFoundPage';
 
 export type PrerenderResult = {
   html: string;
@@ -28,9 +53,47 @@ export function getRouteMeta(pathname: string) {
   return { title: meta.title, description: meta.description };
 }
 
+/**
+ * Der Browser-Router nutzt React.lazy. Beim Build muss renderToString dagegen bereits
+ * aufgeloeste Komponenten sehen, sonst wuerde jede SEO-Route am Suspense-Fallback enden.
+ * Diese server-only Zuordnung wird nie Teil des Client-Bundles.
+ */
+function prerenderComponentFor(seoKey: SeoKey): ComponentType {
+  switch (seoKey) {
+    case 'home': return HomePage;
+    case 'courses': return CoursesPage;
+    case 'salsa': return SalsaPage;
+    case 'bachata': return BachataPage;
+    case 'heels': return HeelsPage;
+    case 'privatstunden': return PrivatstundenPage;
+    case 'kursaufbau': return KursaufbauPage;
+    case 'preise': return PreisePage;
+    case 'shows': return ShowsAnimationenPage;
+    case 'events': return EventsPage;
+    case 'danceflow': return DanceflowNightPage;
+    case 'anniversary': return AnniversaryPage;
+    case 'floweekend': return FloweekendPage;
+    case 'eventkalender': return EventkalenderPage;
+    case 'team': return TeamPage;
+    case 'photos': return PhotosPage;
+    case 'contact': return ContactPage;
+    case 'schnupper': return SchnupperstundePage;
+    case 'standort': return StandortPage;
+    case 'collabs': return CollabsPage;
+    case 'tanzschuhe': return TanzschuhePage;
+    case 'partys': return PartysPage;
+    case 'faq': return FaqPage;
+    case 'impressum': return ImpressumPage;
+    case 'datenschutz': return DatenschutzPage;
+    case 'schedule': return SchedulePage;
+    case 'notFound': return NotFoundPage;
+    default: throw new Error(`Route ${seoKey} ist nicht fuer Prerender freigegeben.`);
+  }
+}
+
 export function renderRoute(pathname: string): PrerenderResult {
   const route = resolveRoute(pathname);
-  const Matched = route.component;
+  const Matched = prerenderComponentFor(route.seoKey);
   const meta = SEO_META[route.seoKey].de;
   // Der Baum muss ZEICHEN FUER ZEICHEN dem aus main.tsx entsprechen, inklusive <Suspense>.
   // Ohne das Suspense hier sah React beim Hydrieren an derselben Stelle einmal <Suspense>

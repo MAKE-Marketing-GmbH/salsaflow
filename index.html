@@ -3,6 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Der Cookie-Status steht vor dem ersten Paint fest. Sonst erscheint der Hinweis
+         erst nach der Hydration und die route-spezifischen Freiraumregeln verschieben
+         den Hero nachträglich. Die Abfrage liest nur den eigenen Local-Storage-Schlüssel. -->
+    <script>
+      try {
+        if (localStorage.getItem('salsaflow-cookie-ok') !== '1') {
+          document.documentElement.dataset.cookieNotice = 'needed';
+        }
+      } catch {
+        document.documentElement.dataset.cookieNotice = 'needed';
+      }
+    </script>
     <title>Tanzschule Basel: Salsa, Bachata &amp; Heels | Salsaflow</title>
     <meta
       name="description"

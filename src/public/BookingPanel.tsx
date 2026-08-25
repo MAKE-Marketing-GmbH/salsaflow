@@ -8,8 +8,8 @@
 // Motion: EINE Signatur — getakteter Fade-up (Feder-Kurve) auf Liste und Panel-Wechsel,
 // alles motion-safe, also respektiert prefers-reduced-motion automatisch.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { EASE_OUT, useHydrated } from '@/public/home/motion';
 import { WhatsAppIcon } from '@/public/site/BrandIcons';
@@ -165,16 +165,20 @@ function Funnel() {
   // R54: fertiger Buchungs-Stand liegt in BookingForm (Dialog). Der Funnel braucht ihn fuer
   // Schritt 3 der Fortschritts-Leiste — BookingForm meldet ihn ueber onDone hoch.
   const [done, setDone] = useState(false);
+  const reserveButtonRef = useRef<HTMLButtonElement>(null);
 
   // Der Dialog haengt seinen Scroll-Lock- und Erst-Fokus-Effekt an diese Funktion.
   // Als Inline-Pfeilfunktion entstand sie bei JEDEM Render von Funnel neu, der Effekt
   // lief erneut, der Body wurde ent- und neu gesperrt und der Fokus sprang zurueck auf
   // den Schliessen-Knopf. `onDone()` loeste so einen Render garantiert aus und stahl
   // dem Nutzer mitten im Formular den Fokus. Die beiden Setter sind von React stabil,
-  // die Funktion ist damit fuer die Lebensdauer des Dialogs dieselbe.
+  // die Funktion ist damit fuer die Lebensdauer des Dialogs dieselbe. Der Ausloeser
+  // unmountet waehrend des Dialogs; sein stabiler React-Ref zeigt nach dem Schliessen
+  // auf den neu gerenderten Knopf und stellt den Fokus im naechsten Frame wieder her.
   const closeReservation = useCallback(() => {
     setReserveOpen(false);
     setDone(false);
+    window.requestAnimationFrame(() => reserveButtonRef.current?.focus());
   }, []);
 
   const loadPlan = () => {
@@ -650,10 +654,10 @@ full
                 return (
                   <li
                     key={s.key}
-                    // ease-out statt der frueheren Federkurve: die schoss ueber den Zielwert
+                    // ease-[var(--motion-out)] statt der frueheren Federkurve: die schoss ueber den Zielwert
                     // hinaus und wippte zurueck. Bei bis zu neun Karten wippt dann alles
                     // nacheinander. Dieselbe Animation lief an drei anderen Stellen im selben
-                    // Panel schon mit ease-out.
+                    // Panel schon mit ease-[var(--motion-out)].
                     className="motion-safe:animate-[booking-panel-in_280ms_ease-out_both]"
                     style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
                   >
@@ -729,6 +733,7 @@ full
             <CourseDetail
               course={course}
               term={termOf(course)}
+              reserveButtonRef={reserveButtonRef}
               onReserve={() => setReserveOpen(true)}
               onChange={() => {
                 setCourse(null);
@@ -803,11 +808,13 @@ function courseBlurb(course: ScheduleCourse, lang: 'de' | 'en'): string {
 function CourseDetail({
   course,
   term,
+  reserveButtonRef,
   onReserve,
   onChange,
 }: {
   course: ScheduleCourse;
   term?: ScheduleTerm;
+  reserveButtonRef: RefObject<HTMLButtonElement | null>;
   onReserve: () => void;
   onChange: () => void;
 }) {
@@ -1005,7 +1012,7 @@ function CourseDetail({
       {/* Der Maps-Link stand hier. Er ist in die linke Info-Spalte gewandert
           (Begruendung dort), damit unter dem Raster kein Rest mehr haengt. */}
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <button type="button" onClick={onReserve} data-testid="reserve-spot" className="btn-base btn-primary px-6 py-2.5 text-sm">
+        <button ref={reserveButtonRef} type="button" onClick={onReserve} data-testid="reserve-spot" className="btn-base btn-primary px-6 py-2.5 text-sm">
           {full
             ? de
               ? 'Auf Warteliste setzen'
@@ -1094,10 +1101,9 @@ function BookingForm({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(loadAvail, [course.id]);
 
-  // Dialog-Isolation: Body-Scroll sperren, Escape schliessen, Fokus-Trap, Fokus zurueckgeben.
+  // Dialog-Isolation: Body-Scroll sperren, Escape schliessen und Fokus im Dialog halten.
+  // Die Rueckgabe an den neu gerenderten Ausloeser gehoert dem Eltern-Funnel.
   useEffect(() => {
-    // SAFETY: activeElement ist Element | null. Wir brauchen nur .focus() beim Schliessen.
-    const previouslyFocused = document.activeElement as HTMLElement | null;
     const frame = window.requestAnimationFrame(() => closeRef.current?.focus());
 
     const focusables = () =>
@@ -1127,31 +1133,29 @@ function BookingForm({
 
     window.addEventListener('keydown', onKey);
 
-    // Body-Scroll sperren. `overflow: hidden` allein reicht auf iOS Safari nicht — dort
-    // scrollt der Hintergrund weiter und nimmt die Geste mit, sodass der Dialog selbst
-    // stehen bleibt. Der Body wird darum zusaetzlich auf `position: fixed` gelegt und die
-    // Scrollposition festgehalten, damit die Seite beim Schliessen nicht nach oben springt.
+    // Dokument-Scroll sperren, ohne den Body mit negativem `top` zu verschieben. Der alte
+    // Fixed-Body-Trick zog den ebenfalls fixierten Dialog nach einem Seitenscroll oberhalb
+    // des Viewports; der fokussierte Schliessen-Knopf war dann unsichtbar. Root + Body
+    // overflow und das overscroll-contain des Backdrops isolieren denselben Hintergrund,
+    // waehrend der Dialog in echten Viewport-Koordinaten bleibt.
     const scrollY = window.scrollY;
+    const root = document.documentElement;
     const prev = {
+      rootOverflow: root.style.overflow,
       overflow: document.body.style.overflow,
-      position: document.body.style.position,
-      top: document.body.style.top,
-      width: document.body.style.width,
+      overscrollBehavior: document.body.style.overscrollBehavior,
     };
+    root.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
+    document.body.style.overscrollBehavior = 'none';
 
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener('keydown', onKey);
+      root.style.overflow = prev.rootOverflow;
       document.body.style.overflow = prev.overflow;
-      document.body.style.position = prev.position;
-      document.body.style.top = prev.top;
-      document.body.style.width = prev.width;
+      document.body.style.overscrollBehavior = prev.overscrollBehavior;
       window.scrollTo(0, scrollY);
-      previouslyFocused?.focus?.();
     };
   }, [onBack]);
 
@@ -1350,9 +1354,9 @@ function BookingForm({
               {/* Kein `id` mehr: der Dialog benennt sich ueber `aria-label`, das
                   fruehere `aria-labelledby` zeigte als einziges hierher. Eine id ohne
                   Referenz ist toter Markup. */}
-              <h3 className="font-display text-lg font-extrabold leading-tight tracking-tight text-white sm:text-xl">
+              <h2 className="font-display text-lg font-extrabold leading-tight tracking-tight text-white sm:text-xl">
                 {courseLabel}
-              </h3>
+              </h2>
               {/* R188 KP5 — DAS DATUM KOMMT ZURUECK, und zwar begruendet gegen R183.
                   R183 hatte Wochentag/Uhrzeit hier geloescht mit dem Argument: "stand in
                   der Kursliste schon, der Nutzer hat darauf geklickt". Raphael widerspricht

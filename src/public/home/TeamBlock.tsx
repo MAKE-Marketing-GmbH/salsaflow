@@ -23,7 +23,7 @@
 // Reduced-motion: nur Fade, kein Versatz, kein Scale. Die Abfrage liegt jetzt komplett in
 // useReveal/ClipReveal; die Komponente selbst liest die Praeferenz nicht mehr selbst aus.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { useRef } from 'react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3 } from '@/public/home/content-v3';
@@ -46,7 +46,8 @@ export function TeamBlock() {
   const { lang } = useLang();
   const de = lang === 'de';
   const t = HOME_V3[lang].team;
-  const { item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ distance: reducedMotion ? 0 : 24 });
 
   // Hauptgesten der Sektion (max. zwei, Auftrag 21.08.):
   //   1) Headline als RevealWords (Wort-Stagger statt Standard-rise).
@@ -298,7 +299,7 @@ export function TeamBlock() {
             className="group mt-8 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--color-ink)] underline decoration-[var(--color-salsa)] decoration-2 underline-offset-4 transition-colors hover:text-[var(--color-salsa)]"
           >
             {t.teamLink}
-            <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
+            <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" />
           </a>
         </RiseReveal>
       </Shell>

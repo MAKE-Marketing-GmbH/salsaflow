@@ -16,7 +16,7 @@
 // Zweisprachig DE/EN.
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { levelLabelI18n, useLang, weekdayLabel } from '@/lib/i18n';
 import { Seo } from '@/lib/seo';
 import { SiteHeader } from '@/public/site/SiteHeader';
@@ -158,7 +158,7 @@ function CourseStartCard({ course, data, index, altThumb = false }: { course: Sc
           width={800}
           height={500}
           loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.04]"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-safe:group-hover:scale-[1.04]"
           style={{ objectPosition: focus }}
         />
         <span
@@ -250,7 +250,7 @@ function CourseStartCard({ course, data, index, altThumb = false }: { course: Sc
       </span>
       <span className="mt-auto flex items-center justify-between gap-3 pt-2 text-sm font-semibold text-[var(--color-salsa)]">
         <span>{course.status === 'full' ? t.fullyBooked : lang === 'de' ? 'Kurs ansehen' : 'View class'}</span>
-        <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-1" strokeWidth={2.25} />
+        <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-1" strokeWidth={2.25} />
       </span>
     </a>
   );
@@ -308,7 +308,8 @@ export function CoursesPage() {
    behalten HeroFrame und ihre Achse unveraendert. */
 function CoursesHero() {
   const { lang } = useLang();
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const h = COURSES_OVERVIEW[lang].hero;
   const de = lang === 'de';
   /* Facts (~290px unter den CTAs) schieben das Foto auf 390 aus dem Fold.
@@ -594,7 +595,7 @@ function StylesSection() {
                       src={photo}
                       alt={override?.alt ?? card.alt ?? card.title}
                       className={cn(
-                        'absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-base)] ease-out motion-safe:group-hover:scale-[1.04]',
+                        'absolute inset-0 h-full w-full object-cover transition-transform duration-[var(--dur-base)] ease-[var(--motion-out)] motion-safe:group-hover:scale-[1.04]',
                         // Das Bachata-Motiv ist hochkant. In der Querformat-Karte (7/5) schneidet
                         // ein mittiger Ausschnitt beiden Tanzenden den Oberkopf ab.
                         // 12% statt 25%: der Maennerkopf war oben angeschnitten

@@ -1,6 +1,6 @@
 
 import { type ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   Check,
   Heart,
@@ -71,7 +71,8 @@ function Accented({ text, accent, dark = false }: { text: string; accent?: strin
 
 /* ------------------------------------------------------------------------ Hero */
 function PrivatHero({ c }: { c: PrivatContent }) {
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const h = c.hero;
   return (
     <section
@@ -399,7 +400,7 @@ function PricesSection({ c }: { c: PrivatContent }) {
                 className="group inline-flex min-h-12 items-center gap-1.5 px-2 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {p.altCta.label}
-                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
               </a>
             </motion.div>
           </Reveal>

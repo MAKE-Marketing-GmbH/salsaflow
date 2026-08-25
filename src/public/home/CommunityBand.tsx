@@ -16,7 +16,7 @@
 // Bilder: echte Community-Fotos, alle 3:2 und sitewide noch ungenutzt (geprueft gegen
 // grep ueber src/). Keine Datei doppelt.
 
-import { useReducedMotion } from 'framer-motion';
+import { useReducedMotion } from 'motion/react';
 import { useLang } from '@/lib/i18n';
 import { Marquee, useHydrated } from '@/public/home/motion';
 import { LABEL, TEXT_LOW, PAPER, SECTION_Y_PEAK, Rise, Wrap } from '@/public/home/kit';

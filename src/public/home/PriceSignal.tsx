@@ -85,7 +85,7 @@ export function PriceSignal() {
                   className="btn-base btn-outline group px-6 py-3 text-base"
                 >
                   {p.plan}
-                  <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
+                  <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" />
                 </a>
                 {/* min-h-12: der Textlink mass 106x20 — zu klein als Tap-Ziel
                     (Critic Runde 13, Item 3). */}

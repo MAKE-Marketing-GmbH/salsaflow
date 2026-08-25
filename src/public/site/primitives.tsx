@@ -153,7 +153,7 @@ export function CtaPill({
         'group inline-flex min-h-12 items-center justify-center gap-1.5 rounded-full',
         'border border-[var(--color-salsa)] bg-[var(--color-salsa)] px-7 py-3.5',
         'text-base font-semibold text-white',
-        'transition-colors duration-[var(--dur-fast)] ease-out hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)]',
+        'transition-colors duration-[var(--dur-fast)] ease-[var(--motion-out)] hover:border-[var(--color-salsa-700)] hover:bg-[var(--color-salsa-700)]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
         onNight
           ? 'focus-visible:ring-white focus-visible:ring-offset-[var(--color-surface-dark)]'
@@ -168,7 +168,7 @@ export function CtaPill({
         strokeWidth={2.25}
         aria-hidden
         className={cn(
-          'transition-transform duration-[var(--dur-fast)] ease-out',
+          'transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)]',
           down ? 'motion-safe:group-hover:translate-y-0.5' : 'motion-safe:group-hover:translate-x-0.5',
         )}
       />
@@ -222,7 +222,7 @@ export function CtaText({
         strokeWidth={2.25}
         aria-hidden
         className={cn(
-          'shrink-0 transition-transform duration-[var(--dur-fast)] ease-out',
+          'shrink-0 transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)]',
           down ? 'motion-safe:group-hover:translate-y-0.5' : 'motion-safe:group-hover:translate-x-0.5',
         )}
       />

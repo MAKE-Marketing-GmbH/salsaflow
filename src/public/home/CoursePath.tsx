@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, CalendarDays } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { Shell, sectionLead } from '@/public/site/primitives';
@@ -41,6 +41,7 @@ const COPY = {
 export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
   const { lang } = useLang();
   const c = COPY[lang];
+  const reducedMotion = useReducedMotion() === true;
 
   const Heading = embedded ? 'h3' : 'h2';
   /* R188 / SW1 (Video 21.08.: "ueberall Animationen, Reinflieg beim Scrollen, sexy, nicht
@@ -50,9 +51,12 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
      hart, waehrend alles darueber und darunter einstieg.
      Genutzt wird das neue sitewide Muster aus `src/lib/reveal.tsx` — nicht der Home-lokale
      Reveal, damit dieselbe Sektion auf /kursaufbau (nicht embedded) denselben Takt bekaeme.
-     Der Takt ist derselbe wie sitewide (14px, 0.45s, ease-out), nur der Stagger ist mit
+     Der Takt ist derselbe wie sitewide (14px, 0.45s, ease-[var(--motion-out)]), nur der Stagger ist mit
      0.06 leicht dichter: fuenf Stufen nacheinander bei 0.07 lesen sich als Warteschlange. */
-  const { item } = useRevealMotion({ stagger: 0.06 });
+  const { item } = useRevealMotion({
+    stagger: 0.06,
+    distance: reducedMotion ? 0 : 24,
+  });
 
   const body = (
     <>
@@ -123,7 +127,7 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
             className="group inline-flex min-h-11 w-fit items-center gap-2 text-base font-semibold text-[var(--color-salsa)]"
           >
             {c.cta}
-            <ArrowRight size={17} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" aria-hidden />
+            <ArrowRight size={17} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" aria-hidden />
           </motion.a>
         </RevealGroup>
 
@@ -144,7 +148,7 @@ export function CoursePath({ embedded = false }: { embedded?: boolean } = {}) {
                     className={cn(
                       'absolute left-0 top-2 h-[9px] w-[9px] rounded-full bg-[var(--color-salsa)] ring-4',
                       embedded ? 'ring-[var(--color-paper-warm)]' : 'ring-[var(--color-paper)]',
-                      'transition-transform duration-[var(--dur-base)] ease-out motion-safe:group-hover:scale-150',
+                      'transition-transform duration-[var(--dur-base)] ease-[var(--motion-out)] motion-safe:group-hover:scale-150',
                     )}
                   />
                   {/* R188 / H4: eingebettet ist diese Zeile ein <h4> UNTER der H3

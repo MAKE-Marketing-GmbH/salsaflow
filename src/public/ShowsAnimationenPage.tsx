@@ -8,7 +8,7 @@
 // Rhythmus: Hero -> Anlaesse -> Formate (Show/Animation/Workshop + Kombination) -> Ablauf der
 // Anfrage -> Beweis-Galerie -> Final CTA -> FAQ. Primaerer CTA dieser Seite -> /kontakt#animationen.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   Check,
   Building2,
@@ -67,7 +67,8 @@ export function ShowsAnimationenPage() {
    die Show-Energie sofort beweist und keine Composition braucht. Split wie StyleHero: links
    Breadcrumb + Eyebrow + H1 + Lead + Proof-Chips + CTA-Paar, rechts das Foto mit Glas-Karte. */
 function AnimHero({ c }: { c: ShowsAnimContent }) {
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const h = c.hero;
   return (
     <section
@@ -271,7 +272,7 @@ function FormatsSection({ c }: { c: ShowsAnimContent }) {
                     className="group mt-auto inline-flex min-h-12 items-center gap-1.5 self-start pt-5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
                   >
                     {fmt.cta.label}
-                    <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                    <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
                   </a>
                 </motion.div>
               );
@@ -305,7 +306,7 @@ function FormatsSection({ c }: { c: ShowsAnimContent }) {
                 className="group mt-3 inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {f.combo.cta.label}
-                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
               </a>
             </motion.div>
           </Reveal>
@@ -422,7 +423,7 @@ function GallerySection({ c }: { c: ShowsAnimContent }) {
               className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {g.link.label}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>

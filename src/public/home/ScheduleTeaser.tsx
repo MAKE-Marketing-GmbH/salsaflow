@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import {
@@ -145,7 +145,8 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
     return blocks;
   }, [activeSlots]);
   const hasData = state === 'ready' && slots.length > 0 && days.length > 0;
-  const { item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const loadingLabel = de ? 'Kurse werden geladen ...' : 'Loading courses ...';
 
   return (
@@ -172,7 +173,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
             className="btn-base btn-primary group w-fit gap-2 px-5 py-3 text-sm"
           >
             {s.all}
-            <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2.25} />
+            <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" strokeWidth={2.25} />
           </motion.a>
         </Reveal>
 
@@ -205,7 +206,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                       </span>
                       <span className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-salsa)]">
                         {de ? 'Termine ansehen' : 'View dates'}
-                        <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2.25} />
+                        <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" strokeWidth={2.25} />
                       </span>
                     </a>
                   </li>
@@ -386,7 +387,7 @@ export function ScheduleTeaser({ withCoursePath = false }: { withCoursePath?: bo
                   {de
                     ? `Alle ${activeSlots.length} Kurse an diesem Tag`
                     : `All ${activeSlots.length} classes on this day`}
-                  <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" strokeWidth={2} />
+                  <ArrowRight aria-hidden className="h-4 w-4 transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" strokeWidth={2} />
                 </a>
               )}
             </ClipReveal>

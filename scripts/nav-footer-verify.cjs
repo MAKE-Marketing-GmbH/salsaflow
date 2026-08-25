@@ -71,7 +71,7 @@ const childHit = (p, label) =>
   await p.waitForTimeout(300);
   await p.locator('header nav a[data-nav-child]').filter({ hasText: /^Bachata$/ }).first().click();
   await p.waitForTimeout(900);
-  ok('click: Kindlink navigiert', p.url().endsWith('/tanzkurse/bachata'), p.url());
+  ok('click: Kindlink navigiert', new URL(p.url()).pathname === '/tanzkurse/bachata', p.url());
 
   // ---------- 3. AKTIV-ZUSTAND ----------
   await p.waitForSelector('header nav[aria-label="Hauptnavigation"]');
@@ -101,8 +101,8 @@ const childHit = (p, label) =>
   ok('kbd: ArrowUp -> zurueck auf Übersicht',
     (await p.evaluate(() => document.activeElement?.textContent?.trim())) === 'Übersicht');
   await p.keyboard.press('End');
-  ok('kbd: End -> letzter Eintrag (Preise)',
-    (await p.evaluate(() => document.activeElement?.textContent?.trim())) === 'Preise');
+  ok('kbd: End -> letzter Eintrag (Kursaufbau)',
+    (await p.evaluate(() => document.activeElement?.textContent?.trim())) === 'Kursaufbau');
   // Fokus-Ring muss sichtbar sein (a11y, index.css :focus-visible)
   ok('kbd: Fokus-Ring sichtbar (outline gesetzt)',
     await p.evaluate(() => {

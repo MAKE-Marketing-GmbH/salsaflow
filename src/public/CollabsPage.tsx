@@ -3,7 +3,7 @@
 // FAQ -> Schluss-CTA. Ruhige Variante des Design-Systems (hell im Wechsel paper-warm/bg-soft,
 // Rot sparsam, Reveal-Takt wie Startseite). Copy 1:1 aus COLLABS (echte Umlaute, CH-ss).
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { Check } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import {
@@ -67,7 +67,8 @@ export function CollabsPage() {
 
 /* ------------------------------------------------------------------ So empfehlen wir */
 function HowSection({ c }: { c: (typeof COLLABS)['de'] }) {
-  const { item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const h = c.how;
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">

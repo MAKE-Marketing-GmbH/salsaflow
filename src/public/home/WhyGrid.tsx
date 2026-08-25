@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3, TRIAL_HREF } from '@/public/home/content-v3';
@@ -35,7 +35,8 @@ import { cn } from '@/lib/utils';
 export function WhyGrid() {
   const { lang } = useLang();
   const w = HOME_V3[lang].why;
-  const { item } = useReveal({ stagger: 0.07 });
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ stagger: 0.07, distance: reducedMotion ? 0 : 24 });
   const de = lang === 'de';
 
   return (
@@ -80,7 +81,7 @@ export function WhyGrid() {
             className="group mt-7 inline-flex min-h-12 items-center gap-2 font-semibold text-[var(--color-ink)] transition-colors hover:text-[var(--color-salsa)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-4"
           >
             {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
-            <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
+            <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" />
           </motion.a>
 
           {/* Fuellt die gemessene Leerzone unter dem CTA (Kopfkommentar Eingriff 1).

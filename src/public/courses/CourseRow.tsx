@@ -350,7 +350,7 @@ export function CourseRow({
         )}
       >
         {label}
-        <ArrowRight size={16} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+        <ArrowRight size={16} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
       </span>
     </a>
   );

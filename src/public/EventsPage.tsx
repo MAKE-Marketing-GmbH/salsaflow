@@ -12,7 +12,7 @@
 // Fakten leben unveraendert auf /events-workshops/danceflow-night.
 
 import { useEffect, useState, type ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, CalendarDays, PartyPopper, Users, type LucideIcon } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import type { PublicEvent } from '@/lib/api';
@@ -123,7 +123,7 @@ function EventfrogCta({
         size={18}
         strokeWidth={2.25}
         aria-hidden
-        className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5"
+        className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5"
       />
     </a>
   );
@@ -296,7 +296,11 @@ function EventsHero() {
    Das Bild hat feste `aspect-[4/3]`, also startet auch der Text ueberall auf gleicher Hoehe. */
 function EventsPreviewSection() {
   const { lang } = useLang();
-  const { item } = useReveal({ stagger: 0.1, distance: 22 });
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({
+    stagger: 0.1,
+    distance: reducedMotion ? 0 : 22,
+  });
   const p = EVENTS[lang].preview;
   return (
     <section id="danceflow" className="scroll-mt-24 bg-white py-16 lg:py-[6.25rem]">
@@ -344,7 +348,7 @@ function EventsPreviewSection() {
                     size={16}
                     strokeWidth={2.25}
                     aria-hidden
-                    className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5"
+                    className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5"
                   />
                 </span>
               </div>

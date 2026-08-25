@@ -6,7 +6,7 @@
 // Flaechen (Hero, Ablauf, Closer) im Wechsel mit den hellen paper-warm/bg-soft-Sektionen. Rot
 // #AD1827 bleibt sparsam (CTA, Marker, ein Script-Akzentwort). Copy 1:1 aus danceflow-content.ts.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { Check, ArrowRight } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { DANCEFLOW, type DanceflowContent } from '@/public/events/danceflow-content';
@@ -48,7 +48,8 @@ export function DanceflowNightPage() {
 
 /* -------------------------------------------------------------------- Hero (dunkel, full-bleed) */
 function DanceflowHero({ c }: { c: DanceflowContent }) {
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const h = c.hero;
   return (
     <section
@@ -182,7 +183,7 @@ function WhySection({ c }: { c: DanceflowContent }) {
               className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {w.cta.label}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -225,7 +226,7 @@ function FlowSection({ c }: { c: DanceflowContent }) {
               className="btn-base btn-primary group mt-8 px-6 py-3 text-sm"
             >
               {f.cta.label}
-              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
           {/* lg:mr-36: der fixe WhatsApp-FAB lag auf dem rechten unteren Bildrand
@@ -325,7 +326,7 @@ function PriceSection({ c }: { c: DanceflowContent }) {
               className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {p.cta.label}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>

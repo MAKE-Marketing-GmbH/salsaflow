@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { motion, useReducedMotion, type Variants } from 'framer-motion';
+import { motion, useReducedMotion, type Variants } from 'motion/react';
 import {
   api,
   formatDate,
@@ -78,11 +78,21 @@ export function TermEditor({
   const reveal = {
     container: {
       hidden: {},
-      show: { transition: { staggerChildren: reducedMotion ? 0 : 0.07, delayChildren: 0.03 } },
+      show: { transition: { staggerChildren: reducedMotion ? 0 : 0.05, delayChildren: 0.02 } },
     },
     item: {
-      hidden: { opacity: 0, y: reducedMotion ? 0 : 14 },
-      show: { opacity: 1, y: 0, transition: { duration: reducedMotion ? 0.01 : 0.45, ease: [0.22, 1, 0.36, 1] } },
+      hidden: {
+        opacity: 0,
+        transform: `translate3d(0, ${reducedMotion ? 0 : 14}px, 0)`,
+      },
+      show: {
+        opacity: 1,
+        transform: 'translate3d(0, 0, 0)',
+        transition: {
+          duration: reducedMotion ? 0.2 : 0.24,
+          ease: [0.23, 1, 0.32, 1],
+        },
+      },
     },
   } satisfies { container: Variants; item: Variants };
 

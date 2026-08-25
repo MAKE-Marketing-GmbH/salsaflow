@@ -3,7 +3,7 @@
 const { chromium } = require('playwright-core');
 const fs = require('fs');
 
-const BASE = 'http://127.0.0.1:5175';
+const BASE = process.env.SALSAFLOW_BASE_URL || 'http://127.0.0.1:5175';
 const OUT = process.argv[2] || 'worklog/shots/R188/after-final/states';
 
 function check(condition, message) {

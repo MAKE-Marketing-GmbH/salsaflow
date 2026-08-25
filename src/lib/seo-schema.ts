@@ -1,7 +1,6 @@
 import scheduleRaw from '../../db/seed/public-schedule.json?raw';
 import { z } from 'zod';
 import type { Lang } from '@/lib/i18n';
-import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 import {
   BUSINESS_ID,
   DEFAULT_SOCIAL_IMAGE,
@@ -155,16 +154,6 @@ function localBusinessNode() {
       addressCountry: 'CH',
     },
     sameAs: ['https://www.instagram.com/salsaflowdc'],
-    /* Gleiche belegte Quelle wie in lib/schema.ts: src/public/site/reviews.ts.
-       Der Knoten macht die Bewertung maschinenlesbar. Er verspricht keine Review-Sterne,
-       weil Google sie bei selbst veröffentlichten LocalBusiness-Bewertungen meist ausblendet. */
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: GOOGLE_REVIEWS.rating,
-      reviewCount: GOOGLE_REVIEWS.count,
-      bestRating: 5,
-      worstRating: 1,
-    },
   } satisfies JsonLdNode;
 }
 

@@ -28,7 +28,7 @@
 // headerSafe und die Umbruch-Abweisung im Namen ebenfalls.
 
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -251,6 +251,7 @@ export function InquiryWizard({
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState('');
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const topicHeadingRef = useRef<HTMLLegendElement>(null);
   const lastTopic = useRef<TopicKey | null>(initialTopic);
   const prevStep = useRef(step);
   const reduced = useReducedMotion();
@@ -279,8 +280,14 @@ export function InquiryWizard({
     const was = prevStep.current;
     prevStep.current = step;
     if (was === step) return;
-    if (step > 0) headingRef.current?.focus();
-  }, [step]);
+    // AnimatePresence wartet erst auf den Exit des alten Schritts. Ein sofortiger Fokus
+    // trifft deshalb noch keinen neuen Knoten und faellt auf <body>. Nach dem kurzen
+    // Uebergang steht das neue Fokusziel sicher im DOM, auch beim Zurueckweg zu Schritt 0.
+    const timer = window.setTimeout(() => {
+      (step === 0 ? topicHeadingRef.current : headingRef.current)?.focus();
+    }, reduced ? 0 : 240);
+    return () => window.clearTimeout(timer);
+  }, [reduced, step]);
 
   /* Ohne Wahl traegt der Wizard die Texte des haeufigsten Anliegens als Geruest. Sichtbar
      wird davon nichts: Schritt 2 und 3 sind erst nach einer Wahl erreichbar (canAdvance),
@@ -304,6 +311,8 @@ export function InquiryWizard({
      hier der Ausloeser: jede Eingabe loescht ihn bereits, damit verschwindet der
      rote Rahmen im selben Moment wie die Meldung. */
   const showGap = Boolean(error) && contactGap !== null;
+  const topicInvalid = Boolean(error) && topic === null;
+  const privacyInvalid = Boolean(error) && contactGap === null && !privacy;
   /* R188 K1: ohne Anliegen geht es nicht weiter. Die Wahl ist damit eine echte Frage,
      kein stillschweigend gesetzter Default. */
   const canAdvance = step > 0 || Boolean(topic);
@@ -410,9 +419,9 @@ export function InquiryWizard({
         <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-salsa)] text-white">
           <Check aria-hidden className="h-6 w-6" strokeWidth={2.4} />
         </span>
-        <h3 className="type-h3 mt-5 text-[var(--color-ink)]">{copy.successTitle}</h3>
+        <h2 className="type-h3 mt-5 text-[var(--color-ink)]">{copy.successTitle}</h2>
         <p className="mt-3 max-w-lg text-base leading-relaxed text-[var(--color-ink-muted)]">{copy.successBody}</p>
-        <h4 className="type-h4 mt-7 text-[var(--color-salsa)]">{copy.successNext}</h4>
+        <h3 className="type-h4 mt-7 text-[var(--color-salsa)]">{copy.successNext}</h3>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <a
             href={stylePath}
@@ -420,7 +429,7 @@ export function InquiryWizard({
             className="btn-base btn-primary group gap-2 px-5 text-sm"
           >
             {copy.successCta}
-            <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+            <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
           </a>
           <a
             href={CONTACT.whatsapp}
@@ -440,7 +449,7 @@ export function InquiryWizard({
   if (compact) {
     return (
       <form onSubmit={submit} onKeyDown={blockEnterSubmit} noValidate className="p-5 sm:p-6">
-        <fieldset>
+        <fieldset aria-invalid={topicInvalid || undefined} aria-describedby={topicInvalid ? ERROR_ID : undefined}>
           <legend className="type-h3 text-[var(--color-ink)]">{copy.topicTitle}</legend>
           <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.topicLead}</p>
           <TopicGrid topics={orderedTopics} topic={topic} onSelect={selectTopic} />
@@ -451,7 +460,7 @@ export function InquiryWizard({
           <Input label={copy.phone} value={phone} onChange={(value) => { setPhone(value); setError(''); }} type="tel" autoComplete="tel" invalid={showGap && contactGap === 'reach'} />
           <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" invalid={showGap && (contactGap === 'email' || contactGap === 'reach')} className="sm:col-span-2" />
         </div>
-        <PrivacyCheck checked={privacy} onChange={(next) => { setPrivacy(next); setError(''); }} label={copy.privacyLabel} />
+        <PrivacyCheck checked={privacy} onChange={(next) => { setPrivacy(next); setError(''); }} label={copy.privacyLabel} invalid={privacyInvalid} />
         <Honeypot value={website} onChange={setWebsite} />
 
         {(error || status === 'error') && (
@@ -470,7 +479,7 @@ export function InquiryWizard({
     );
   }
 
-  // Schritt-Uebergang: 200ms Fade plus 12px Versatz, ease-out. Vor der Hydration und bei
+  // Schritt-Uebergang: 200ms Fade plus 12px Versatz, ease-[var(--motion-out)]. Vor der Hydration und bei
   // prefers-reduced-motion steht der Inhalt sofort da (kein opacity:0 im Prerender-HTML).
   const stepMotion =
     reduced || !hydrated
@@ -520,7 +529,7 @@ export function InquiryWizard({
                 ersten beiden Karten stehen mobil ueber dem Fold. Die Zeile bleibt in
                 der Kurzform auf der Startseite: dort fehlt die Fortschrittsleiste. */}
             {step === 0 && (
-              <fieldset>
+              <fieldset aria-invalid={topicInvalid || undefined} aria-describedby={topicInvalid ? ERROR_ID : undefined}>
                 {/* type-h3 BLEIBT stehen: die Klasse traegt in index.css eine eigene
                     Wortabstand-Regel fuer `form legend.type-h3` (dort word-spacing
                     0.1em, sonst kleben die Woerter). Darum wird die Klasse nicht
@@ -528,14 +537,14 @@ export function InquiryWizard({
                     max-sm:text-[17px] statt der clamp-Groesse 20px. Das spart die
                     letzten Pixel, die der ersten Kartenreihe ueber dem Fold fehlten.
                     Ab sm greift wieder die clamp-Groesse aus type-h3. */}
-                <legend className="type-h3 text-[var(--color-ink)] max-sm:text-[17px] max-sm:leading-tight">{copy.topicTitle}</legend>
+                <legend ref={topicHeadingRef} tabIndex={-1} className="type-h3 text-[var(--color-ink)] outline-none max-sm:text-[17px] max-sm:leading-tight">{copy.topicTitle}</legend>
                 <TopicGrid topics={orderedTopics} topic={topic} onSelect={selectTopic} />
               </fieldset>
             )}
 
             {step === 1 && (
               <div>
-                <h3 ref={headingRef} tabIndex={-1} className="type-h3 text-[var(--color-ink)] outline-none">{copy.detailTitle}</h3>
+                <h2 ref={headingRef} tabIndex={-1} className="type-h3 text-[var(--color-ink)] outline-none">{copy.detailTitle}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.detailLead}</p>
                 <div className="mt-6 space-y-6">
                   {fields.map((field) =>
@@ -590,7 +599,7 @@ export function InquiryWizard({
 
             {step === 2 && (
               <div>
-                <h3 ref={headingRef} tabIndex={-1} className="type-h3 text-[var(--color-ink)] outline-none">{copy.contactTitle}</h3>
+                <h2 ref={headingRef} tabIndex={-1} className="type-h3 text-[var(--color-ink)] outline-none">{copy.contactTitle}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.contactLead}</p>
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
                   {/* Beim Fall `reach` fehlt genau einer von zwei Wegen. Beide zu markieren
@@ -618,7 +627,7 @@ export function InquiryWizard({
                   </div>
                 </fieldset>
 
-                <PrivacyCheck checked={privacy} onChange={(next) => { setPrivacy(next); setError(''); }} label={copy.privacyLabel} />
+                <PrivacyCheck checked={privacy} onChange={(next) => { setPrivacy(next); setError(''); }} label={copy.privacyLabel} invalid={privacyInvalid} />
                 <Honeypot value={website} onChange={setWebsite} />
               </div>
             )}
@@ -754,7 +763,7 @@ function ChoiceCard({
     <label
       className={cn(
         'flex h-full cursor-pointer items-center rounded-[var(--radius-card)] border text-left font-semibold',
-        'transition-[background-color,border-color,color] duration-[var(--dur-fast)] ease-out',
+        'transition-[background-color,border-color,color] duration-[var(--dur-fast)] ease-[var(--motion-out)]',
         // R188 K2: `has-[:focus-visible]` statt `focus-within`. Der Unterschied entscheidet
         // ueber genau den Ring, den das Video ruegt: ein MAUSKLICK auf das Label fokussiert
         // das sr-only-Radio, `focus-within` haette danach dauerhaft einen roten Ring um die
@@ -852,7 +861,7 @@ function WizardProgress({ step, labels }: { step: number; labels: readonly strin
 }
 
 /** Datenschutz-Haekchen. Pflicht vor dem Absenden. */
-function PrivacyCheck({ checked, onChange, label }: { checked: boolean; onChange: (next: boolean) => void; label: ReactNode }) {
+function PrivacyCheck({ checked, onChange, label, invalid = false }: { checked: boolean; onChange: (next: boolean) => void; label: ReactNode; invalid?: boolean }) {
   return (
     <label className="mt-6 flex min-h-11 cursor-pointer items-start gap-3 text-sm leading-relaxed text-[var(--color-ink-muted)]">
       <input
@@ -860,6 +869,8 @@ function PrivacyCheck({ checked, onChange, label }: { checked: boolean; onChange
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
         data-testid="contact-privacy"
+        aria-invalid={invalid || undefined}
+        aria-describedby={invalid ? ERROR_ID : undefined}
         className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-salsa)]"
       />
       <span className="min-w-0 hyphens-none text-pretty">{label}</span>

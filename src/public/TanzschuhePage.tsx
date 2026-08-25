@@ -3,7 +3,7 @@
 // Schluss-CTA. Ruhige Beratungsseite (hell im Wechsel paper-warm/bg-soft, Rot sparsam). Copy 1:1
 // aus TANZSCHUHE (echte Umlaute, CH-ss). Interne Links auf echte Kurs-/Kursplan-Routen.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, Check } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import {
@@ -76,7 +76,8 @@ export function TanzschuhePage() {
 /* ------------------------------------------------------------------ Nach Tanzstil */
 function ByStyleSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
   const { lang } = useLang();
-  const { item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const s = c.byStyle;
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">
@@ -101,7 +102,7 @@ function ByStyleSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
                   Karte stand "Salsa" zweimal untereinander. Jetzt sagt er, wohin er fuehrt. */}
               <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)]">
                 {lang === 'de' ? `${card.name}-Kurse ansehen` : `See ${card.name} classes`}
-                <ArrowRight size={15} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                <ArrowRight size={15} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
               </span>
             </motion.a>
           ))}
@@ -113,7 +114,7 @@ function ByStyleSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
               className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {s.cta.label}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -133,7 +134,7 @@ function PracticalSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
         <Reveal className="grid gap-5 lg:grid-cols-2 lg:gap-6" stagger={0.08}>
           <motion.div
             variants={item}
-            className="rounded-[var(--radius-media)] border border-[var(--color-salsa)]/25 bg-white p-7 shadow-[0_18px_50px_rgba(17,17,17,0.05)] sm:p-8"
+            className="min-w-0 rounded-[var(--radius-media)] border border-[var(--color-salsa)]/25 bg-white p-7 shadow-[0_18px_50px_rgba(17,17,17,0.05)] sm:p-8"
           >
             <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
               <BeatMark />
@@ -146,7 +147,7 @@ function PracticalSection({ c }: { c: (typeof TANZSCHUHE)['de'] }) {
           </motion.div>
           <motion.div
             variants={item}
-            className="rounded-[var(--radius-media)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] p-7 shadow-[0_14px_35px_rgba(17,17,17,0.04)] sm:p-8"
+            className="min-w-0 rounded-[var(--radius-media)] border border-[var(--color-line)] bg-[var(--color-bg-soft)] p-7 shadow-[0_14px_35px_rgba(17,17,17,0.04)] sm:p-8"
           >
             <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">
               <BeatMark />

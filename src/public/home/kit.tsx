@@ -21,7 +21,7 @@
 // verbliebenen dunklen Stellen laufen auf --color-surface-dark bzw. weiss.
 
 import type { ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { Shell } from '@/public/site/primitives';
 
@@ -232,7 +232,7 @@ export function BtnPrimary({
         'inline-flex h-[52px] items-center justify-center rounded-full bg-[var(--color-salsa)] px-8 text-base font-semibold text-white',
         // salsa-700 statt salsa-500: Der zweite Primaerknopf (CtaPill in site/primitives.tsx)
         // dunkelt beim Hover. Dieser hellte auf. Zwei Richtungen fuer dieselbe Geste.
-        'transition-colors duration-[var(--dur-fast)] ease-out hover:bg-[var(--color-salsa-700)]',
+        'transition-colors duration-[var(--dur-fast)] ease-[var(--motion-out)] hover:bg-[var(--color-salsa-700)]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
         onNight
           ? 'focus-visible:ring-white focus-visible:ring-offset-[var(--color-surface-dark)]'

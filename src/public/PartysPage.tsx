@@ -3,7 +3,7 @@
 // aber warm und lebendig (Plan: hell, echte Menschen, nie dunkler Club). Copy 1:1 aus PARTYS
 // (echte Umlaute, CH-ss). Danceflow + Kalender verlinken auf echte Event-Routen.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { Check } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import {
@@ -94,7 +94,12 @@ function DanceflowSection({ c }: { c: (typeof PARTYS)['de'] }) {
      EINEN Takt und ist raus. R190 nimmt auch die 14px raus: der Token steht auf 20
      (home/motion.tsx), und jede eigene Zahl hier ist wieder eine stille Abweichung.
      Die Dauer bleibt bewusst gesetzt, sie ist der Charakter dieser Seite. */
-  const { container, item } = useReveal({ duration: 0.7, stagger: 0.1 });
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({
+    duration: 0.7,
+    stagger: 0.1,
+    distance: reducedMotion ? 0 : 24,
+  });
   const d = c.danceflow;
   /* R163: Dieser Block beginnt bei y=825, der Fold endet bei 900. Mit dem Default-
      Viewport (-8%) zuendete er sofort beim Laden: gemessen lief die Opazitaet ohne
@@ -177,7 +182,7 @@ function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
                 className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {m.cta.label}
-                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
               </a>
             </motion.div>
           </Reveal>

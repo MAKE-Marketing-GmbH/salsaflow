@@ -7,7 +7,7 @@
 // (paper-warm <-> bg-soft), Rot #AD1827 sparsam (CTA, Marker, aktive Stufe, ein
 // Script-Akzentwort pro Headline). Echte Bilder, echte Umlaute, CH-ss, keine Em-Dashes.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { Check, CalendarDays, Clock, DoorOpen, Ticket, Quote, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
@@ -58,7 +58,8 @@ export function KursaufbauPage() {
 
 /* -------------------------------------------------------------------- Hero */
 function KursaufbauHero({ c }: { c: KursaufbauContent }) {
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const h = c.hero;
   return (
     <section
@@ -179,7 +180,7 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
                       className="btn-base btn-outline group px-4 py-2 text-sm"
                     >
                       {s.label}
-                      <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                      <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
                     </a>
                   ))}
                 </div>
@@ -281,7 +282,7 @@ function LevelsLadder({ c }: { c: KursaufbauContent }) {
                                 size={14}
                                 strokeWidth={2.5}
                                 aria-hidden
-                                className="transition-transform duration-[var(--dur-fast)] ease-out group-open/rung:rotate-180"
+                                className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-open/rung:rotate-180"
                               />
                             </summary>
                             <dl className="mt-3 grid gap-2.5">
@@ -352,7 +353,7 @@ function DoubtSection({ c }: { c: KursaufbauContent }) {
               className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {d.cta.label}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>

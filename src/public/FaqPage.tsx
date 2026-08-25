@@ -5,7 +5,7 @@
 // JSON-LD bleibt EIN Block (id ld-faq) und sammelt beide Spalten.
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
@@ -136,7 +136,8 @@ function allFaqItems(c: FaqPageContent) {
  */
 function FaqHero({ c }: { c: FaqPageContent }) {
   const { lang } = useLang();
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const h = c.hero;
   return (
     <section
@@ -262,7 +263,7 @@ function FaqSection({ c }: { c: FaqPageContent }) {
               className="group mt-2 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
             >
               {lang === 'de' ? 'Frag uns direkt' : 'Ask us directly'}
-              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
+              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>

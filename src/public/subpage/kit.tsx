@@ -9,7 +9,7 @@
 // JSON-LD (BreadcrumbList / FAQPage) steht direkt im HTML und ist damit auch ohne JavaScript lesbar.
 
 import type { ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { ChevronDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
@@ -31,7 +31,6 @@ import {
   Reveal,
   useReveal,
   useRevealVariant,
-  ClipReveal,
   RevealWords,
 } from '@/public/home/motion';
 import { SECTION_Y } from '@/public/home/kit';
@@ -359,16 +358,10 @@ export function HeroFrame({
   /** Zusatzinhalt unter dem CTA-Block (z. B. Chip-Reihe auf den Stilseiten). */
   children?: ReactNode;
 }) {
-  const { container, item } = useReveal();
-  /* R189 Motion-Rollen: die H1 bekommt den blur-Eingang statt desselben rise wie jede
-     Zeile darunter. Sie scharft sich ein (blur 8->0, scale 1.02->1), waehrend Lead, CTA
-     und Zahlen ruhig steigen — damit hat der Hero einen Fokuspunkt statt eines
-     gleichfoermigen Stapels. Bewusst NICHT RevealWords: `title` ist hier ein ReactNode
-     (die Seiten reichen `<>{titleA} {titleAccent}</>` herein) plus optional TitleAccent
-     daneben; RevealWords kann nur einen String in Woerter schneiden, ohne Markup zu
-     zerlegen. Die Klassenliste der H1 bleibt Byte fuer Byte unveraendert — das hier ist
-     ein Variantentausch, keine Layout-Aenderung. */
-  const { item: headingItem } = useRevealVariant('blur');
+  /* Der Above-the-fold-Hero bleibt statisch. Der Seitenstamm besitzt bereits die eine
+     dokumentuebergreifende Eintrittschoreografie; ein zweiter H1-/CTA-/Bild-Reveal wuerde
+     denselben Inhalt doppelt bewegen und die Seite fast eine Sekunde lang unfertig halten.
+     Below-the-fold-SectionHeads und Karten behalten ihre eigenen gestaffelten Reveals. */
   const center = axis === 'center';
   const wide = axis === 'wide';
   const split = axis === 'split';
@@ -403,9 +396,7 @@ export function HeroFrame({
         : 'calc(var(--nav-h) + 1.5rem)';
 
   const heading = (
-    <motion.h1
-      variants={headingItem}
-      data-reveal-variant="blur"
+    <h1
       className={cn(
         // .type-h1 = die EINE H1-Groesse (src/index.css). `wide` behaelt seine groessere
         // Stufe: dort traegt die H1 die volle Shell allein, das ist Seiten-Charakter,
@@ -421,7 +412,7 @@ export function HeroFrame({
       )}
     >
       {title} {titleAccent ? <TitleAccent>{titleAccent}</TitleAccent> : null}
-    </motion.h1>
+    </h1>
   );
 
   /* `mt-0` hebt das `mt-4` aus `sectionLead` gezielt auf.
@@ -437,21 +428,19 @@ export function HeroFrame({
    * `sectionLead` bleibt trotzdem die Quelle fuer Schriftgroesse, Zeilenhoehe und
    * Farbe — nur der Abstand kommt hier aus dem Layout statt aus der Rolle. */
   const leadEl = lead ? (
-    <motion.p
-      variants={item}
+    <p
       className={cn('text-pretty', sectionLead, 'mt-0', center ? 'mx-auto max-w-2xl' : 'max-w-xl')}
       // R73-Nachzieh: auf salsa (lift) die Lead-Zeilenhoehe dichter, damit das Band
       // hoeher sitzt und die Koepfe Luft unter dem Kinn bekommen. Nur Anzeige-Straffung.
       style={lift ? { lineHeight: 1.32 } : undefined}
     >
       {lead}
-    </motion.p>
+    </p>
   ) : null;
 
   const ctas =
     primary || secondary ? (
-      <motion.div
-        variants={item}
+      <div
         className={cn('flex flex-col gap-3 sm:flex-row sm:items-center', center && 'sm:justify-center')}
       >
         {primary ? <PrimaryCta href={primary.href}>{primary.label}</PrimaryCta> : null}
@@ -460,26 +449,24 @@ export function HeroFrame({
             {secondary.label}
           </GhostCta>
         ) : null}
-      </motion.div>
+      </div>
     ) : null;
 
   const micro = microcopy ? (
-    <motion.p
-      variants={item}
+    <p
       className={cn('text-sm leading-relaxed text-[var(--color-ink-muted)]', center && 'mx-auto max-w-xl')}
       // R73-Nachzieh: Microcopy-Abstand zum CTA-Block auf salsa (lift) leicht kuerzen.
       style={lift ? { marginTop: '-0.25rem' } : undefined}
     >
       {microcopy}
-    </motion.p>
+    </p>
   ) : null;
 
   /* Die Zahlen-Leiste. Sie war im alten Hero dreimal dieselbe rote 3er-Reihe; jetzt haengt
      ihre Form an der Achse (Schiene rechts / Zeile unter der Haarlinie / zentriert). */
   const factList =
     facts && facts.length ? (
-      <motion.dl
-        variants={item}
+      <dl
         className={cn(
           // R52: unter md eine Spalte (Preise auf 390 quetschten in einer Zeile: Zahl eng an
           // Zahl, Label klein). Ab md bleibt es drei Spalten — Desktop unveraendert.
@@ -499,7 +486,7 @@ export function HeroFrame({
             </dd>
           </div>
         ))}
-      </motion.dl>
+      </dl>
     ) : null;
 
   return (
@@ -540,20 +527,17 @@ export function HeroFrame({
               : 'pb-10 sm:pb-12')
           : (tightBottom ? 'pb-6 lg:pb-8' : 'pb-14 sm:pb-16 lg:pb-20'),
       )}>
-        <motion.div
-          data-reveal
-          variants={container}
-          initial="hidden"
-          animate="show"
+        <div
+          data-hero-static
           className={center ? 'text-center' : undefined}
         >
           {crumbs ? (
-            <motion.div variants={item} className={cn(dense ? (tight || tightBottom ? 'mb-1' : 'mb-3') : 'mb-6', center && 'flex justify-center')}>
+            <div className={cn(dense ? (tight || tightBottom ? 'mb-1' : 'mb-3') : 'mb-6', center && 'flex justify-center')}>
               {/* R84: tightBottom (nur /schnupperstunde) schaltet die Crumb auf compact
                   (Tap-Hoehe 44->20px), damit #anfrage mit erster Zeile in den 730er-Fold
                   rueckt. Reiner Abstand-Hebel, Default false = andere Seiten unveraendert. */}
               <Breadcrumb trail={crumbs} compact={tight || tightBottom} />
-            </motion.div>
+            </div>
           ) : null}
           {/* Kein Hero-Eyebrow mehr (Meta-Kritik 2026-08-07). Er stand hier auf JEDER Unterseite
               und erzeugte denselben Einstieg: roter Takt-Marker, versale gesperrte Kleinzeile,
@@ -601,7 +585,7 @@ export function HeroFrame({
               im 730-Fold die grauen Unterzeilen der Preis-Leiste ab. Nur /preise nutzt
               dense+facts, alle anderen Achsen unveraendert. */}
           {factList ? <div className={dense ? 'mt-6' : 'mt-10'}>{factList}</div> : null}
-        </motion.div>
+        </div>
       </Shell>
 
       {media ? (
@@ -611,16 +595,9 @@ export function HeroFrame({
            heightClass: Seiten mit Cookie-Ueberdeckung (z. B. /tanzkurse) koennen das Band
            hoeher ziehen, damit unter den Stats mehr als ein Kopfstreifen bleibt.
 
-           R189 Motion-Rollen: das Band faehrt jetzt als Vorhang auf (ClipReveal) statt
-           mit dem Rest der Seite zu steigen. Der Grund steht in motion.tsx: ein y-Versatz
-           verschiebt das MOTIV, und bei einem full-bleed Band, dessen Crop auf Kinnlinien
-           kalibriert ist (R71/R174/R181), ist genau das schaedlich. clip laesst das Bild
-           an seinem Platz stehen und vergroessert nur die sichtbare Flaeche — der Crop
-           bleibt exakt, wo er gemessen wurde.
-
-           Der Wrapper traegt weiter `relative w-full overflow-hidden`; ClipReveal rendert
-           ein motion.div darum, das keine eigene Geometrie mitbringt. */
-        <ClipReveal className="relative w-full overflow-hidden">
+           Das Bild bleibt im Above-the-fold statisch. Der Wrapper bewahrt die kalibrierte
+           Crop-Geometrie; die gemeinsame Seitenchoreografie bewegt bereits den ganzen Stamm. */
+        <div className="relative w-full overflow-hidden">
           <img
             src={media.src}
             alt={media.alt}
@@ -635,7 +612,7 @@ export function HeroFrame({
             loading="eager"
             fetchPriority="high"
           />
-        </ClipReveal>
+        </div>
       ) : null}
     </section>
   );
@@ -665,7 +642,10 @@ export function SectionHead({
 }) {
   /* Nur fuer den Akzent-Fall (siehe Kommentar am Heading unten). Der Haken laeuft
      bedingungslos, weil React-Hooks nicht hinter einem `if` stehen duerfen. */
-  const { item: headBlur } = useRevealVariant('blur');
+  const reducedMotion = useReducedMotion() === true;
+  const { item: headBlur } = useRevealVariant('blur', {
+    distance: reducedMotion ? 0 : 24,
+  });
   return (
     <div className={cn(center ? 'mx-auto max-w-2xl text-center' : 'max-w-2xl', className)}>
       {eyebrow ? (

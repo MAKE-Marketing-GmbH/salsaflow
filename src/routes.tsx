@@ -1,37 +1,41 @@
 import { lazy, type ComponentType } from 'react';
 import type { SeoKey } from '@/lib/seo';
-// Admin lazy: die komplette Verwaltung (App) lag im einen oeffentlichen Bundle — jeder
-// Besucher der Startseite hat sie mitgeladen. /admin wird nie prerendert (leere Huelle),
-// darum trifft renderToString diese lazy-Komponente nie.
+
+// Jede Route ist ein eigener Browser-Einstieg. Der Prerender nutzt in entry-server.tsx
+// bewusst eine getrennte eager Aufloesung, damit alle SEO-Routen weiter vollstaendiges
+// HTML erhalten. So bleibt der Client klein, ohne den Crawl- und Hydration-Vertrag zu
+// verwischen.
 const App = lazy(() => import('@/App').then((m) => ({ default: m.App })));
-import { HomePage } from '@/public/HomePage';
-import { CoursesPage } from '@/public/CoursesPage';
-import { EventsPage } from '@/public/EventsPage';
-import { TeamPage } from '@/public/TeamPage';
-import { PhotosPage } from '@/public/PhotosPage';
-import { ContactPage } from '@/public/ContactPage';
-import { MehrPage } from '@/public/MehrPage';
-import { ImpressumPage } from '@/public/ImpressumPage';
-import { DatenschutzPage } from '@/public/DatenschutzPage';
-import { SchedulePage } from '@/public/SchedulePage';
-import { BookingReturn } from '@/public/BookingReturn';
-import { BookingPage } from '@/public/BookingPanel';
-import { SalsaPage, BachataPage, HeelsPage } from '@/public/courses/styles/pages';
-import { PrivatstundenPage } from '@/public/PrivatstundenPage';
-import { KursaufbauPage } from '@/public/KursaufbauPage';
-import { PreisePage } from '@/public/PreisePage';
-import { ShowsAnimationenPage } from '@/public/ShowsAnimationenPage';
-import { DanceflowNightPage } from '@/public/DanceflowNightPage';
-import { AnniversaryPage } from '@/public/AnniversaryPage';
-import { FloweekendPage } from '@/public/FloweekendPage';
-import { EventkalenderPage } from '@/public/EventkalenderPage';
-import { CollabsPage } from '@/public/CollabsPage';
-import { TanzschuhePage } from '@/public/TanzschuhePage';
-import { PartysPage } from '@/public/PartysPage';
-import { FaqPage } from '@/public/FaqPage';
-import { SchnupperstundePage } from '@/public/SchnupperstundePage';
-import { StandortPage } from '@/public/StandortPage';
-import { NotFoundPage } from '@/public/NotFoundPage';
+const HomePage = lazy(() => import('@/public/HomePage').then((m) => ({ default: m.HomePage })));
+const CoursesPage = lazy(() => import('@/public/CoursesPage').then((m) => ({ default: m.CoursesPage })));
+const EventsPage = lazy(() => import('@/public/EventsPage').then((m) => ({ default: m.EventsPage })));
+const TeamPage = lazy(() => import('@/public/TeamPage').then((m) => ({ default: m.TeamPage })));
+const PhotosPage = lazy(() => import('@/public/PhotosPage').then((m) => ({ default: m.PhotosPage })));
+const ContactPage = lazy(() => import('@/public/ContactPage').then((m) => ({ default: m.ContactPage })));
+const MehrPage = lazy(() => import('@/public/MehrPage').then((m) => ({ default: m.MehrPage })));
+const ImpressumPage = lazy(() => import('@/public/ImpressumPage').then((m) => ({ default: m.ImpressumPage })));
+const DatenschutzPage = lazy(() => import('@/public/DatenschutzPage').then((m) => ({ default: m.DatenschutzPage })));
+const SchedulePage = lazy(() => import('@/public/SchedulePage').then((m) => ({ default: m.SchedulePage })));
+const BookingReturn = lazy(() => import('@/public/BookingReturn').then((m) => ({ default: m.BookingReturn })));
+const BookingPage = lazy(() => import('@/public/BookingPanel').then((m) => ({ default: m.BookingPage })));
+const SalsaPage = lazy(() => import('@/public/courses/styles/pages').then((m) => ({ default: m.SalsaPage })));
+const BachataPage = lazy(() => import('@/public/courses/styles/pages').then((m) => ({ default: m.BachataPage })));
+const HeelsPage = lazy(() => import('@/public/courses/styles/pages').then((m) => ({ default: m.HeelsPage })));
+const PrivatstundenPage = lazy(() => import('@/public/PrivatstundenPage').then((m) => ({ default: m.PrivatstundenPage })));
+const KursaufbauPage = lazy(() => import('@/public/KursaufbauPage').then((m) => ({ default: m.KursaufbauPage })));
+const PreisePage = lazy(() => import('@/public/PreisePage').then((m) => ({ default: m.PreisePage })));
+const ShowsAnimationenPage = lazy(() => import('@/public/ShowsAnimationenPage').then((m) => ({ default: m.ShowsAnimationenPage })));
+const DanceflowNightPage = lazy(() => import('@/public/DanceflowNightPage').then((m) => ({ default: m.DanceflowNightPage })));
+const AnniversaryPage = lazy(() => import('@/public/AnniversaryPage').then((m) => ({ default: m.AnniversaryPage })));
+const FloweekendPage = lazy(() => import('@/public/FloweekendPage').then((m) => ({ default: m.FloweekendPage })));
+const EventkalenderPage = lazy(() => import('@/public/EventkalenderPage').then((m) => ({ default: m.EventkalenderPage })));
+const CollabsPage = lazy(() => import('@/public/CollabsPage').then((m) => ({ default: m.CollabsPage })));
+const TanzschuhePage = lazy(() => import('@/public/TanzschuhePage').then((m) => ({ default: m.TanzschuhePage })));
+const PartysPage = lazy(() => import('@/public/PartysPage').then((m) => ({ default: m.PartysPage })));
+const FaqPage = lazy(() => import('@/public/FaqPage').then((m) => ({ default: m.FaqPage })));
+const SchnupperstundePage = lazy(() => import('@/public/SchnupperstundePage').then((m) => ({ default: m.SchnupperstundePage })));
+const StandortPage = lazy(() => import('@/public/StandortPage').then((m) => ({ default: m.StandortPage })));
+const NotFoundPage = lazy(() => import('@/public/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
 export type RouteClass = 'seo-public' | 'app-public' | 'app-private';
 
@@ -238,6 +242,23 @@ export const ROUTE_DEFINITIONS: RouteDefinition[] = [
   { path: '/press', component: PhotosPage, routeClass: 'seo-public', seoKey: 'photos', redirectTo: '/fotos' },
   { path: '/medien', component: PhotosPage, routeClass: 'seo-public', seoKey: 'photos', redirectTo: '/fotos' },
   { path: '/media', component: PhotosPage, routeClass: 'seo-public', seoKey: 'photos', redirectTo: '/fotos' },
+  // Echte Jimdo-Altpfade aus dem technischen SEO-Audit. Nur eindeutige Ziele sind hier
+  // gespiegelt; /angebot/sommerkurse und /infos/agb bleiben bewusst offen, solange keine
+  // fachlich passende Zielseite existiert.
+  { path: '/angebot', component: CoursesPage, routeClass: 'seo-public', seoKey: 'courses', redirectTo: '/tanzkurse' },
+  { path: '/kurse/workshops', component: EventsPage, routeClass: 'seo-public', seoKey: 'events', redirectTo: '/events' },
+  { path: '/kurse/privatstunden', component: PrivatstundenPage, routeClass: 'seo-public', seoKey: 'privatstunden', redirectTo: '/privatstunden' },
+  { path: '/kurse/shows-animationen', component: ShowsAnimationenPage, routeClass: 'seo-public', seoKey: 'shows', redirectTo: '/shows-animationen' },
+  { path: '/kurse/preise', component: PreisePage, routeClass: 'seo-public', seoKey: 'preise', redirectTo: '/preise' },
+  { path: '/floweekend-2026', component: FloweekendPage, routeClass: 'seo-public', seoKey: 'floweekend', redirectTo: '/events-workshops/floweekend' },
+  { path: '/sfdc-anniverysaryweekend2026', component: AnniversaryPage, routeClass: 'seo-public', seoKey: 'anniversary', redirectTo: '/events-workshops/anniversary-weekend' },
+  { path: '/über-uns', component: TeamPage, routeClass: 'seo-public', seoKey: 'team', redirectTo: '/team' },
+  { path: '/über-uns/team', component: TeamPage, routeClass: 'seo-public', seoKey: 'team', redirectTo: '/team' },
+  { path: '/über-uns/philisophie', component: TeamPage, routeClass: 'seo-public', seoKey: 'team', redirectTo: '/team' },
+  { path: '/kontakt/tanzstudio', component: StandortPage, routeClass: 'seo-public', seoKey: 'standort', redirectTo: '/kontakt/standort-raumvermietung' },
+  { path: '/events/salsa-partys-in-basel', component: PartysPage, routeClass: 'seo-public', seoKey: 'partys', redirectTo: '/mehr/partys' },
+  { path: '/kontakt/kontakt', component: ContactPage, routeClass: 'seo-public', seoKey: 'contact', redirectTo: '/kontakt' },
+  { path: '/infos/faq', component: FaqPage, routeClass: 'seo-public', seoKey: 'faq', redirectTo: '/faq' },
 ];
 
 export const PRERENDER_ROUTES = ROUTE_DEFINITIONS.filter((route) => route.prerender);
@@ -258,16 +279,23 @@ const withTrailingSlashRedirect = (route: RouteDefinition, canonicalPath: string
 });
 
 export function resolveRoute(pathname: string): RouteDefinition {
-  const exact = ROUTE_DEFINITIONS.find((route) => route.match !== 'prefix' && route.path === pathname);
+  let normalizedPathname = pathname;
+  try {
+    normalizedPathname = decodeURI(pathname);
+  } catch {
+    // Ein kaputter Prozent-Escape bleibt ein ehrlicher 404 statt den Router selbst zu werfen.
+  }
+
+  const exact = ROUTE_DEFINITIONS.find((route) => route.match !== 'prefix' && route.path === normalizedPathname);
   if (exact) return exact;
 
   const prefix = ROUTE_DEFINITIONS.find(
-    (route) => route.match === 'prefix' && (pathname === route.path || pathname.startsWith(`${route.path}/`)),
+    (route) => route.match === 'prefix' && (normalizedPathname === route.path || normalizedPathname.startsWith(`${route.path}/`)),
   );
   if (prefix) return prefix;
 
-  if (pathname.length > 1 && pathname.endsWith('/')) {
-    const trimmed = pathname.slice(0, -1);
+  if (normalizedPathname.length > 1 && normalizedPathname.endsWith('/')) {
+    const trimmed = normalizedPathname.slice(0, -1);
     const trimmedMatch = ROUTE_DEFINITIONS.find(
       (route) =>
         (route.match !== 'prefix' && route.path === trimmed) ||

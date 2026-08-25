@@ -7,7 +7,7 @@
 // Em-Dashes).
 
 import { useEffect, useState, type CSSProperties } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 import { Seo } from '@/lib/seo';
@@ -175,7 +175,8 @@ function ContactHero() {
   const { lang } = useLang();
   const h = CONTACT_PAGE[lang].hero;
   const direct = CONTACT_PAGE[lang].direct;
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   return (
     <section className="relative isolate overflow-hidden bg-[var(--color-paper-warm)]" style={{ paddingTop: 'calc(var(--nav-h) + 0.75rem)' }}>
       {/* Kunden-Feedback 2026-08-07: "Die Hintergrund-Illustrationen sehen uebelst komisch aus."
@@ -230,7 +231,7 @@ function ContactHero() {
               className="btn-base btn-primary group gap-2 px-5 text-sm"
             >
               {h.primaryCta}
-              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
             <a
               href={CONTACT.whatsapp}
@@ -382,7 +383,7 @@ function LocationSection() {
               className="btn-base btn-outline group mt-6 gap-2 px-6 py-3 text-base"
             >
               {l.mapsCta}
-              <ArrowRight size={18} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <ArrowRight size={18} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -470,7 +471,7 @@ function RentalSection({ onRequestRoom }: { onRequestRoom: () => void }) {
                   className="btn-base btn-primary group mt-8 w-fit gap-2 px-6 py-3 text-base"
                 >
                   {r.cta}
-                  <ArrowRight size={18} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                  <ArrowRight size={18} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
                 </a>
               </div>
 

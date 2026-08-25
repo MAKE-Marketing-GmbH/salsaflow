@@ -13,7 +13,7 @@
 // bevor Sticky-CTA und WhatsApp die kleineren Bilder verdecken koennen.
 // id="events" bleibt (Anker der alten EventsDark-Sektion).
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
@@ -150,7 +150,7 @@ export function EventsTeaser() {
                     size={18}
                     strokeWidth={2.25}
                     aria-hidden
-                    className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5"
+                    className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5"
                   />
                 </a>
                 <span className="text-sm font-semibold text-white/75">{e.price}</span>
@@ -187,10 +187,10 @@ export function EventsTeaser() {
             // R207: h-full + zwei gleiche Zeilen (1fr), damit der Streifen die volle
             // Zeilenhoehe traegt und unten keine schwarze Restflaeche bleibt.
             className="hidden h-full gap-4 lg:grid lg:grid-cols-1 lg:grid-rows-[1fr_1fr] lg:gap-5"
-            initial={hydrated ? { opacity: 0, y: reduced ? 0 : 20 } : false}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={hydrated ? { opacity: 0, transform: reduced ? 'translate3d(0, 0, 0)' : 'translate3d(0, 20px, 0)' } : false}
+            whileInView={{ opacity: 1, transform: 'translate3d(0, 0, 0)' }}
             viewport={VIEWPORT}
-            transition={{ duration: reduced ? 0.32 : 0.6, ease: EASE_OUT, delay: reduced ? 0 : 0.1 }}
+            transition={{ duration: reduced ? 0.2 : 0.48, ease: EASE_OUT, delay: reduced ? 0 : 0.08 }}
           >
             <figure className="min-h-0 overflow-hidden rounded-[var(--radius-media)]">
               <img

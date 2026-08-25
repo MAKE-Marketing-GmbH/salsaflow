@@ -6,7 +6,7 @@
 // Lucide-Icons, ruhige Reveal-Motion, ein Script-Akzentwort in der H1.
 // Copy nach Regel 003/069/085 (simpel, du-Form, echte Umlaute, CH-ss, keine Em-Dashes).
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { Seo } from '@/lib/seo';
 import { useLang } from '@/lib/i18n';
 import { SiteHeader } from '@/public/site/SiteHeader';
@@ -41,7 +41,8 @@ const MORE_HERO_IMAGE = '/photos/gallery/danceflow/03.jpg';
 function MoreHero() {
   const { lang } = useLang();
   const h = MORE_PAGE[lang].hero;
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   return (
     <section className="relative overflow-hidden bg-[var(--color-paper-warm)]" style={{ paddingTop: 'calc(var(--nav-h) + 1.5rem)' }}>
       <Shell className="grid items-center gap-10 pb-14 pt-6 sm:pb-16 lg:grid-cols-[1.02fr_0.98fr] lg:pt-10">
@@ -128,7 +129,7 @@ function HubCards() {
                 </p>
                 <span className="mt-6 inline-flex items-center gap-1.5 text-base font-semibold text-[var(--color-salsa)]">
                   {card.cta}
-                  <ArrowRight size={17} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                  <ArrowRight size={17} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
                 </span>
               </motion.a>
             );

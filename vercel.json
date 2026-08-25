@@ -10,8 +10,188 @@
   },
   "redirects": [
     {
+      "source": "/mehr",
+      "destination": "/faq",
+      "permanent": true
+    },
+    {
       "source": "/shows",
       "destination": "/shows-animationen",
+      "permanent": true
+    },
+    {
+      "source": "/animationen",
+      "destination": "/shows-animationen",
+      "permanent": true
+    },
+    {
+      "source": "/kurse",
+      "destination": "/tanzkurse",
+      "permanent": true
+    },
+    {
+      "source": "/privat",
+      "destination": "/privatstunden",
+      "permanent": true
+    },
+    {
+      "source": "/private-lessons",
+      "destination": "/privatstunden",
+      "permanent": true
+    },
+    {
+      "source": "/gutscheine",
+      "destination": "/kontakt#geschenkgutschein",
+      "permanent": true
+    },
+    {
+      "source": "/events-workshops/shows",
+      "destination": "/shows-animationen",
+      "permanent": true
+    },
+    {
+      "source": "/schedule",
+      "destination": "/kursplan",
+      "permanent": true
+    },
+    {
+      "source": "/fotos-1",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/salsa",
+      "destination": "/tanzkurse/salsa",
+      "permanent": true
+    },
+    {
+      "source": "/heels",
+      "destination": "/tanzkurse/heels",
+      "permanent": true
+    },
+    {
+      "source": "/bachata",
+      "destination": "/tanzkurse/bachata",
+      "permanent": true
+    },
+    {
+      "source": "/tanzschuhe",
+      "destination": "/mehr/tanzschuhe",
+      "permanent": true
+    },
+    {
+      "source": "/danceflow",
+      "destination": "/events-workshops/danceflow-night",
+      "permanent": true
+    },
+    {
+      "source": "/party",
+      "destination": "/mehr/partys",
+      "permanent": true
+    },
+    {
+      "source": "/partys",
+      "destination": "/mehr/partys",
+      "permanent": true
+    },
+    {
+      "source": "/show",
+      "destination": "/shows-animationen",
+      "permanent": true
+    },
+    {
+      "source": "/workshop",
+      "destination": "/events",
+      "permanent": true
+    },
+    {
+      "source": "/erste-stunde",
+      "destination": "/schnupperstunde",
+      "permanent": true
+    },
+    {
+      "source": "/probestunde",
+      "destination": "/schnupperstunde",
+      "permanent": true
+    },
+    {
+      "source": "/kontakt/schnupper",
+      "destination": "/schnupperstunde",
+      "permanent": true
+    },
+    {
+      "source": "/floweekend",
+      "destination": "/events-workshops/floweekend",
+      "permanent": true
+    },
+    {
+      "source": "/jahrestag",
+      "destination": "/events-workshops/anniversary-weekend",
+      "permanent": true
+    },
+    {
+      "source": "/danceflow-night",
+      "destination": "/events-workshops/danceflow-night",
+      "permanent": true
+    },
+    {
+      "source": "/events-workshops/anniversary",
+      "destination": "/events-workshops/anniversary-weekend",
+      "permanent": true
+    },
+    {
+      "source": "/workshops",
+      "destination": "/events",
+      "permanent": true
+    },
+    {
+      "source": "/collabs",
+      "destination": "/mehr/collabs",
+      "permanent": true
+    },
+    {
+      "source": "/ueber-uns",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/about",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/galerie",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/gallery",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/studio",
+      "destination": "/kontakt/standort-raumvermietung",
+      "permanent": true
+    },
+    {
+      "source": "/studios",
+      "destination": "/kontakt/standort-raumvermietung",
+      "permanent": true
+    },
+    {
+      "source": "/location",
+      "destination": "/kontakt/standort-raumvermietung",
+      "permanent": true
+    },
+    {
+      "source": "/anfahrt",
+      "destination": "/kontakt/standort-raumvermietung",
+      "permanent": true
+    },
+    {
+      "source": "/trial",
+      "destination": "/schnupperstunde",
       "permanent": true
     },
     {
@@ -23,16 +203,458 @@
       "source": "/kursplan-buchung",
       "destination": "/kursplan",
       "permanent": true
+    },
+    {
+      "source": "/standort",
+      "destination": "/kontakt/standort-raumvermietung",
+      "permanent": true
+    },
+    {
+      "source": "/raumvermietung",
+      "destination": "/kontakt/standort-raumvermietung",
+      "permanent": true
+    },
+    {
+      "source": "/geschenkgutschein",
+      "destination": "/kontakt#geschenkgutschein",
+      "permanent": true
+    },
+    {
+      "source": "/gutschein",
+      "destination": "/kontakt#geschenkgutschein",
+      "permanent": true
+    },
+    {
+      "source": "/schnupper",
+      "destination": "/schnupperstunde",
+      "permanent": true
+    },
+    {
+      "source": "/kontakt/schnupperstunde",
+      "destination": "/schnupperstunde",
+      "permanent": true
+    },
+    {
+      "source": "/kurse/salsa",
+      "destination": "/tanzkurse/salsa",
+      "permanent": true
+    },
+    {
+      "source": "/kurse/heels",
+      "destination": "/tanzkurse/heels",
+      "permanent": true
+    },
+    {
+      "source": "/kurse/bachata",
+      "destination": "/tanzkurse/bachata",
+      "permanent": true
+    },
+    {
+      "source": "/teachers",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/lehrer",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/private",
+      "destination": "/privatstunden",
+      "permanent": true
+    },
+    {
+      "source": "/lessons",
+      "destination": "/privatstunden",
+      "permanent": true
+    },
+    {
+      "source": "/about-us",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/aboutus",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/classes",
+      "destination": "/tanzkurse",
+      "permanent": true
+    },
+    {
+      "source": "/timetable",
+      "destination": "/kursplan",
+      "permanent": true
+    },
+    {
+      "source": "/calendar",
+      "destination": "/events-workshops/eventkalender",
+      "permanent": true
+    },
+    {
+      "source": "/nights",
+      "destination": "/mehr/partys",
+      "permanent": true
+    },
+    {
+      "source": "/danceflow-nights",
+      "destination": "/events-workshops/danceflow-night",
+      "permanent": true
+    },
+    {
+      "source": "/ersteStunde",
+      "destination": "/schnupperstunde",
+      "permanent": true
+    },
+    {
+      "source": "/ich-tanze",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/ichtanze",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/worumgeht",
+      "destination": "/faq",
+      "permanent": true
+    },
+    {
+      "source": "/worum-gehts",
+      "destination": "/faq",
+      "permanent": true
+    },
+    {
+      "source": "/blog",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/pricing",
+      "destination": "/preise",
+      "permanent": true
+    },
+    {
+      "source": "/prices",
+      "destination": "/preise",
+      "permanent": true
+    },
+    {
+      "source": "/contact",
+      "destination": "/kontakt",
+      "permanent": true
+    },
+    {
+      "source": "/contacts",
+      "destination": "/kontakt",
+      "permanent": true
+    },
+    {
+      "source": "/photos",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/photo",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/class",
+      "destination": "/tanzkurse",
+      "permanent": true
+    },
+    {
+      "source": "/trial-lesson",
+      "destination": "/schnupperstunde",
+      "permanent": true
+    },
+    {
+      "source": "/instructors",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/buchen",
+      "destination": "/buchung",
+      "permanent": true
+    },
+    {
+      "source": "/booking",
+      "destination": "/buchung",
+      "permanent": true
+    },
+    {
+      "source": "/anmelden",
+      "destination": "/buchung",
+      "permanent": true
+    },
+    {
+      "source": "/anmeldung",
+      "destination": "/buchung",
+      "permanent": true
+    },
+    {
+      "source": "/privatstunde",
+      "destination": "/privatstunden",
+      "permanent": true
+    },
+    {
+      "source": "/einzelstunde",
+      "destination": "/privatstunden",
+      "permanent": true
+    },
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/fragen",
+      "destination": "/faq",
+      "permanent": true
+    },
+    {
+      "source": "/termine",
+      "destination": "/kursplan",
+      "permanent": true
+    },
+    {
+      "source": "/book",
+      "destination": "/buchung",
+      "permanent": true
+    },
+    {
+      "source": "/reservieren",
+      "destination": "/buchung",
+      "permanent": true
+    },
+    {
+      "source": "/reservation",
+      "destination": "/buchung",
+      "permanent": true
+    },
+    {
+      "source": "/private-lesson",
+      "destination": "/privatstunden",
+      "permanent": true
+    },
+    {
+      "source": "/privates",
+      "destination": "/privatstunden",
+      "permanent": true
+    },
+    {
+      "source": "/start",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/startseite",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/lehrerinnen",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/dozenten",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/news",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/journal",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/stories",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/kurse-buchen",
+      "destination": "/buchung",
+      "permanent": true
+    },
+    {
+      "source": "/presse",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/press",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/medien",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/media",
+      "destination": "/fotos",
+      "permanent": true
+    },
+    {
+      "source": "/angebot",
+      "destination": "/tanzkurse",
+      "permanent": true
+    },
+    {
+      "source": "/kurse/workshops",
+      "destination": "/events",
+      "permanent": true
+    },
+    {
+      "source": "/kurse/privatstunden",
+      "destination": "/privatstunden",
+      "permanent": true
+    },
+    {
+      "source": "/kurse/shows-animationen",
+      "destination": "/shows-animationen",
+      "permanent": true
+    },
+    {
+      "source": "/kurse/preise",
+      "destination": "/preise",
+      "permanent": true
+    },
+    {
+      "source": "/floweekend-2026",
+      "destination": "/events-workshops/floweekend",
+      "permanent": true
+    },
+    {
+      "source": "/sfdc-anniverysaryweekend2026",
+      "destination": "/events-workshops/anniversary-weekend",
+      "permanent": true
+    },
+    {
+      "source": "/über-uns",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/über-uns/team",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/über-uns/philisophie",
+      "destination": "/team",
+      "permanent": true
+    },
+    {
+      "source": "/kontakt/tanzstudio",
+      "destination": "/kontakt/standort-raumvermietung",
+      "permanent": true
+    },
+    {
+      "source": "/events/salsa-partys-in-basel",
+      "destination": "/mehr/partys",
+      "permanent": true
+    },
+    {
+      "source": "/kontakt/kontakt",
+      "destination": "/kontakt",
+      "permanent": true
+    },
+    {
+      "source": "/infos/faq",
+      "destination": "/faq",
+      "permanent": true
     }
   ],
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/fonts/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/photos/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/videos/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
       "source": "/admin",
-      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
     },
     {
       "source": "/buchung/(.*)",
-      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
     }
   ],
   "rewrites": [

@@ -3,7 +3,7 @@
 // Motion liefert nur die Feder-Hoehe beim Oeffnen/Schliessen. Die EINE Motion-Signatur
 // des Repos (EASE_OUT, 14px-Versatz, Reveal-Stagger) gilt auch hier — kein GSAP, kein
 // Bounce. prefers-reduced-motion: Oeffnen/Schliessen sofort, ohne Hoehen-Animation
-// (useReducedMotion aus framer-motion, kein MatchMedia-Selbstbau).
+// (useReducedMotion aus motion/react, kein MatchMedia-Selbstbau).
 //
 // Warum ein eigener Component statt des geteilten FaqBlock aus subpage/kit.tsx:
 // kit.tsx gehoert dem Seiten-Builder-Owner (nicht uns). Der FaqBlock oeffnet nativ
@@ -12,7 +12,7 @@
 // sanfte Hoehen-Feder. FAQPage-JSON-LD setzt weiterhin FaqPage.tsx selbst (ld-faq).
 
 import { useState, type MouseEvent, type ReactNode } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { EASE_OUT } from '@/public/home/motion';
 import type { Faq } from '@/public/subpage/kit';
@@ -52,7 +52,7 @@ export function FaqItem({
           // motion-safe: statt einer `reduced`-Klasse — die Klasse haengt sonst am
           // JS-Wert von useReducedMotion, den der Server nicht kennt (Hydration-Mismatch).
           // Die CSS-Variante gilt schon im ersten Frame und braucht kein JavaScript.
-          className="shrink-0 text-[var(--color-salsa)] motion-safe:transition-transform motion-safe:duration-[var(--acc-chevron)] motion-safe:ease-[var(--acc-ease)] group-open:rotate-180"
+          className="shrink-0 text-[var(--color-salsa)] motion-safe:transition-transform motion-safe:duration-[var(--acc-chevron)] motion-safe:ease-[var(--acc-timing)] group-open:rotate-180"
         />
       </summary>
       {/* Bei reduced-motion: Panel sofort da, kein Hoehen-Tween, kein Fade.
@@ -87,7 +87,7 @@ export function FaqItem({
                     className="group inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--color-salsa)] underline decoration-1 underline-offset-4 transition-colors hover:text-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
                   >
                     {entry.label}
-                    <ArrowRight size={15} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
+                    <ArrowRight size={15} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" />
                   </a>
                 ))}
               </div>

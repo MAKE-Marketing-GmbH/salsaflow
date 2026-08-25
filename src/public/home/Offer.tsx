@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
 import { useLang } from '@/lib/i18n';
@@ -70,7 +70,7 @@ function StyleCard({ card, parallax }: { card: OfferCard; parallax: ParallaxStyl
              Bildersatz, dieselbe Entscheidung wie bei photo-grade-private auf /privatstunden
              (privat/content.ts:181). */
           className={cn(
-            'h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.025]',
+            'h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-safe:group-hover:scale-[1.025]',
             card.key === 'privat' ? 'photo-grade-private' : undefined,
             cardCrop(card.key),
           )}
@@ -95,7 +95,7 @@ function StyleCard({ card, parallax }: { card: OfferCard; parallax: ParallaxStyl
           {card.key === 'privat'
             ? (lang === 'de' ? 'Privatstunde anfragen' : 'Request a private lesson')
             : (lang === 'de' ? 'Kurse und Termine' : 'Courses and dates')}
-          <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
+          <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" />
         </span>
       </div>
     </a>
@@ -105,7 +105,8 @@ function StyleCard({ card, parallax }: { card: OfferCard; parallax: ParallaxStyl
 export function Offer() {
   const { lang } = useLang();
   const o = HOME[lang].offer;
-  const { item } = useReveal({ stagger: 0.07 });
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ stagger: 0.07, distance: reducedMotion ? 0 : 24 });
   const sectionRef = useRef<HTMLElement>(null);
   const cardParallax = useParallaxStyle(sectionRef, 32);
   // R186 (Dom, 20.08.): Der Filter `card.key !== 'privat'` aus R134/9 ist raus. Dom will
@@ -180,7 +181,7 @@ export function Offer() {
             {lang === 'de'
               ? 'Alle Tanzkurse im Überblick'
               : 'See all dance classes'}
-            <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
+            <ArrowRight aria-hidden size={18} strokeWidth={2.25} className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" />
           </motion.a>
         </Reveal>
       </Shell>

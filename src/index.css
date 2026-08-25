@@ -43,8 +43,8 @@
   --color-team-warm-2: #ece1d1;   /* Team-Freisteller-Panel, unten */
   --color-photo-warm: #f0b35a;    /* warmer Foto-Overlay, siehe DESIGN.md Imagery */
   --color-flow-green: #4d7c5a;    /* ruhiger Live-Punkt fuer freie Plaetze */
-  --color-whatsapp: #25d366;
-  --color-whatsapp-hover: #1ebe5b;
+  --color-whatsapp: #075e54;
+  --color-whatsapp-hover: #064c45;
 
 
   --color-salsa: #ad1827;
@@ -74,7 +74,7 @@
   --acc-expand: 250ms;
   --acc-collapse: 250ms;
   --acc-chevron: 250ms;
-  --acc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --acc-timing: cubic-bezier(0.23, 1, 0.32, 1);
 
   /* Motion-Ordnung (13.08.2026). Vorher liefen fuenf Dauern durcheinander: 150, 200, 300,
      500 und 700ms fuer dieselbe Art Interaktion. Ab jetzt gibt es drei Stufen:
@@ -85,14 +85,15 @@
   --dur-fast: 160ms;
   --dur-base: 240ms;
   --dur-slow: 420ms;
-  --ease-sf: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-out: cubic-bezier(0.23, 1, 0.32, 1);
 
   /* Seitenwechsel sind Marketing-Choreografie, keine Mikro-Interaktion. Sie bekommen
      deshalb einen eigenen Takt, bleiben aber auf derselben starken Ease-Out-Familie. */
-  --dur-page-enter: 780ms;
-  --dur-header-enter: 680ms;
-  --delay-header-enter: 80ms;
-  --ease-enter: cubic-bezier(0.23, 1, 0.32, 1);
+  --dur-page-enter: 520ms;
+  --dur-header-enter: 280ms;
+  --delay-header-enter: 0ms;
+  --page-enter-y: 24px;
+  --motion-enter: cubic-bezier(0.23, 1, 0.32, 1);
 
   /* R153: Wie stark der Cookie-Hinweis den WhatsApp-Float anhebt.
    * Unter sm ist der Wert 0px — dort loest der rechte Gutter am Banner-Wrapper den
@@ -109,10 +110,23 @@
   }
 }
 
+@media (min-width: 64rem) {
+  :root {
+    --page-enter-y: 32px;
+  }
+}
+
 @media (max-width: 639px) {
   :root {
     --nav-h: 66px;
   }
+}
+
+/* Der Inline-Preflight in index.html setzt dieses Attribut vor dem ersten Paint.
+   76px entsprechen 64px Kartenhöhe plus 12px Außenabstand des Cookie-Hinweises;
+   ResizeObserver ersetzt den Wert nach Mount durch die exakte Höhe. */
+html[data-cookie-notice='needed'] {
+  --cookie-banner-height: 76px;
 }
 
 html {
@@ -125,10 +139,9 @@ html {
    niemand mehr. Eine Regel fuer einen Zustand, den es nicht gibt, liest sich wie
    eine getroffene Entscheidung und ist keine — entfernt. */
 
-/* Dokumentuebergreifende Seitenwechsel. Der Inhalt kommt als zusammenhaengende Flaeche
-   mit Weg, Tiefe und Fokus von unten; die Header-Leiste folgt versetzt von oben. Die
-   Navigation selbst wird nie verzoegert. Die Site-Motion laeuft auf ausdruecklichen
-   Produktwunsch auch dann, wenn das Betriebssystem Reduced Motion meldet. */
+/* Dokumentuebergreifende Seitenwechsel. Genau EINE Choreografie bewegt den sichtbaren
+   Seitenstamm von unten und den Header kurz von oben. Above-the-fold-Heroes bleiben dabei
+   statisch; erst Inhalte unterhalb des Folds staffeln ihre eigenen Elemente. */
 @view-transition {
   navigation: auto;
 }
@@ -139,44 +152,47 @@ html {
 
 @keyframes sf-page-in {
   from {
-    opacity: 0.18;
-    filter: blur(4px);
-    transform: translate3d(0, 56px, 0) scale(0.97);
+    opacity: 0.42;
+    transform: translate3d(0, var(--page-enter-y), 0);
   }
   to {
     opacity: 1;
-    filter: blur(0);
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes sf-page-out {
   to {
     opacity: 0;
-    filter: blur(4px);
-    transform: translate3d(0, -24px, 0);
+    transform: translate3d(0, -12px, 0);
   }
 }
 
 @keyframes sf-header-in {
   from {
     opacity: 0;
-    filter: blur(4px);
-    transform: translate3d(0, -125%, 0) scale(0.97);
+    transform: translate3d(0, -24px, 0);
   }
   to {
     opacity: 1;
-    filter: blur(0);
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes sf-header-out {
   to {
     opacity: 0;
-    filter: blur(4px);
-    transform: translate3d(0, -100%, 0) scale(0.97);
+    transform: translate3d(0, -16px, 0);
   }
+}
+
+@keyframes sf-reduced-in {
+  from { opacity: 0.68; }
+  to { opacity: 1; }
+}
+
+@keyframes sf-reduced-out {
+  to { opacity: 0; }
 }
 
 /* Vite liefert im Dev-Modus nur ein leeres #root; dort uebernehmen zwei CSS-Mount-
@@ -184,26 +200,26 @@ html {
    dokumentuebergreifenden Snapshots darunter. */
 #root:not([data-prerendered='true']) main#main {
   transform-origin: 50% 0;
-  animation: sf-page-in var(--dur-page-enter) var(--ease-enter) both;
+  animation: sf-page-in var(--dur-page-enter) var(--motion-enter) both;
 }
 
 #root:not([data-prerendered='true']) [data-page-header] {
   transform-origin: 50% 0;
-  animation: sf-header-in var(--dur-header-enter) var(--ease-enter) var(--delay-header-enter) both;
+  animation: sf-header-in var(--dur-header-enter) var(--motion-enter) var(--delay-header-enter) both;
 }
 
 ::view-transition-old(root) {
-  animation: sf-page-out var(--dur-base) var(--ease-enter) both;
+  animation: sf-page-out var(--dur-fast) var(--motion-enter) both;
 }
 
 ::view-transition-old(sf-site-header) {
   transform-origin: 50% 0;
-  animation: sf-header-out var(--dur-fast) var(--ease-enter) both;
+  animation: sf-header-out var(--dur-fast) var(--motion-enter) both;
 }
 
 ::view-transition-new(root) {
   transform-origin: 50% 0;
-  animation: sf-page-in var(--dur-page-enter) var(--ease-enter) both;
+  animation: sf-page-in var(--dur-page-enter) var(--motion-enter) both;
 }
 
 ::view-transition-group(sf-site-header) {
@@ -212,7 +228,23 @@ html {
 
 ::view-transition-new(sf-site-header) {
   transform-origin: 50% 0;
-  animation: sf-header-in var(--dur-header-enter) var(--ease-enter) var(--delay-header-enter) both;
+  animation: sf-header-in var(--dur-header-enter) var(--motion-enter) var(--delay-header-enter) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root:not([data-prerendered='true']) main#main,
+  #root:not([data-prerendered='true']) [data-page-header],
+  ::view-transition-new(root),
+  ::view-transition-new(sf-site-header) {
+    animation: sf-reduced-in var(--dur-fast) var(--motion-enter) both !important;
+    transform: none !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-old(sf-site-header) {
+    animation: sf-reduced-out 120ms var(--motion-enter) both !important;
+    transform: none !important;
+  }
 }
 
 body {
@@ -231,7 +263,7 @@ body {
 .t-hover {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
   transition-duration: var(--dur-fast);
-  transition-timing-function: var(--ease-sf);
+  transition-timing-function: var(--motion-out);
 }
 
 /* Unterstrich, der beim Hover von links einfaehrt. Asymmetrisch: der Eintritt ist schnell
@@ -240,7 +272,7 @@ body {
 .t-underline {
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform var(--dur-base) var(--ease-sf);
+  transition: transform var(--dur-base) var(--motion-out);
 }
 
 .group:hover .t-underline {
@@ -266,7 +298,7 @@ body {
 .t-hover-move {
   transition-property: color, background-color, border-color, transform, opacity, box-shadow;
   transition-duration: var(--dur-base);
-  transition-timing-function: var(--ease-sf);
+  transition-timing-function: var(--motion-out);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -288,7 +320,7 @@ body {
 .t-acc-panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows var(--acc-collapse) var(--acc-ease);
+  transition: grid-template-rows var(--acc-collapse) var(--acc-timing);
 }
 
 /* Kein Weichzeichner mehr (13.08.2026): 4px Blur lag auf Fliesstext, den man in dem Moment
@@ -297,7 +329,7 @@ body {
   min-height: 0;
   overflow: hidden;
   opacity: 0;
-  transition: opacity var(--acc-collapse) var(--acc-ease);
+  transition: opacity var(--acc-collapse) var(--acc-timing);
 }
 
 .t-acc[data-open='true'] > .t-acc-panel {
@@ -310,8 +342,103 @@ body {
   transition-duration: var(--acc-expand);
 }
 
+/* Das Header-Menü ist ein Vollbild-Layer und braucht keine layoutgebundene
+   Grid-Zeilen-Animation. Transform + Opacity bleiben auf dem Compositor; die
+   generische Accordion-Regel darüber gilt weiter für alle übrigen Akkordeons. */
+[data-mobile-menu-panel] {
+  position: fixed;
+  inset: 3rem 0 auto;
+  height: calc(100dvh - 3rem);
+  min-height: 0;
+  display: block;
+  overflow: hidden;
+  background: var(--color-paper-warm);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transform: translate3d(0, 1.5rem, 0);
+  transition:
+    opacity var(--dur-base) var(--motion-out),
+    transform var(--dur-base) var(--motion-out),
+    visibility 0s linear var(--dur-base);
+}
+
+[data-mobile-menu-panel] > .t-acc-panel-inner {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  opacity: 1;
+  transition: none;
+}
+
+.t-acc[data-open='true'] > [data-mobile-menu-panel] {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity var(--dur-base) var(--motion-out),
+    transform var(--dur-base) var(--motion-out),
+    visibility 0s;
+}
+
+@media (min-width: 40rem) and (max-width: 63.999rem) {
+  [data-mobile-menu-panel] {
+    inset-block-start: 3.5rem;
+    height: calc(100dvh - 3.5rem);
+  }
+}
+
+@media (min-width: 64rem) {
+  [data-mobile-menu-panel] {
+    display: none !important;
+  }
+}
+
+@keyframes sf-menu-item-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > * {
+    animation: sf-menu-item-in 300ms var(--motion-out) both;
+  }
+
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(1) { animation-delay: 30ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(2) { animation-delay: 60ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(3) { animation-delay: 90ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(4) { animation-delay: 120ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(5) { animation-delay: 150ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(6) { animation-delay: 180ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(7) { animation-delay: 210ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(8) { animation-delay: 240ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(9) { animation-delay: 270ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(10) { animation-delay: 300ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(11) { animation-delay: 330ms; }
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > :nth-child(12) { animation-delay: 360ms; }
+
+  [data-mobile-subnav][data-active='true'] > * {
+    animation: sf-menu-item-in 280ms var(--motion-out) both;
+  }
+
+  [data-mobile-subnav][data-active='true'] > :nth-child(1) { animation-delay: 30ms; }
+  [data-mobile-subnav][data-active='true'] > :nth-child(2) { animation-delay: 60ms; }
+  [data-mobile-subnav][data-active='true'] > :nth-child(3) { animation-delay: 90ms; }
+  [data-mobile-subnav][data-active='true'] > :nth-child(4) { animation-delay: 120ms; }
+  [data-mobile-subnav][data-active='true'] > :nth-child(5) { animation-delay: 150ms; }
+  [data-mobile-subnav][data-active='true'] > :nth-child(6) { animation-delay: 180ms; }
+  [data-mobile-subnav][data-active='true'] > :nth-child(7) { animation-delay: 210ms; }
+}
+
 .t-acc-chevron {
-  transition: transform var(--acc-chevron) var(--acc-ease);
+  transition: transform var(--acc-chevron) var(--acc-timing);
 }
 
 .t-acc[data-open='true'] > .t-acc-head .t-acc-chevron {
@@ -327,6 +454,24 @@ body {
 
   .t-acc-panel-inner {
     filter: none;
+  }
+
+  [data-mobile-menu-panel] {
+    transform: none;
+    transition:
+      opacity var(--dur-fast) var(--motion-out),
+      visibility 0s linear var(--dur-fast);
+  }
+
+  .t-acc[data-open='true'] > [data-mobile-menu-panel] {
+    transition:
+      opacity var(--dur-fast) var(--motion-out),
+      visibility 0s;
+  }
+
+  .t-acc[data-open='true'] [data-mobile-menu-primary] > *,
+  [data-mobile-subnav][data-active='true'] > * {
+    animation: none !important;
   }
 }
 
@@ -549,7 +694,7 @@ form h3.type-h3,
     font-weight: 600;
     transition-property: color, background-color, border-color;
     transition-duration: var(--dur-fast);
-    transition-timing-function: ease-out;
+    transition-timing-function: var(--motion-out);
   }
 
   .btn-primary {
@@ -677,11 +822,11 @@ main img.photo-grade-bachata-why {
     }
   }
 
-  /* Dauer und Kurve aus den Motion-Token (--dur-slow / --ease-sf) statt eigener 520ms-Zahl:
+  /* Dauer und Kurve aus den Motion-Token (--dur-slow / --motion-out) statt eigener 520ms-Zahl:
    * eine Stufe fuer grosse Flaechen, eine Kurve fuer alles. `both` haelt den Startzustand
    * waehrend der Verzoegerung, sonst blitzt der Knopf vor dem Auftritt kurz auf. */
   .whatsapp-float {
-    animation: whatsapp-float-in var(--dur-slow) var(--ease-sf) 90ms both;
+    animation: whatsapp-float-in var(--dur-slow) var(--motion-out) 90ms both;
   }
 }
 
@@ -1205,7 +1350,7 @@ html:has(.faq-page) {
    Unter lg ist der Hero einspaltig, es gibt keine freie Spalte, also greift die Regel
    erst ab lg. */
 @media (width >= 64rem) {
-  body:has([data-hero-fold]):has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true']))
+  html[data-cookie-notice='needed'] body:has([data-hero-fold]):not(:has([data-cookie-clear='true']))
     [data-cookie-banner] > * {
     margin-right: 0;
     margin-left: auto;
@@ -1252,13 +1397,13 @@ html:has(.faq-page) {
    Querformat mit dieser Fensterhoehe ist die Navigation zusammengeklappt und das Band frei.
    Der Seitenstamm reserviert die gemessene Hoehe, damit die Karte nichts ueberdeckt. */
 @media (width >= 40rem) and (height <= 32rem) {
-  body:has([data-hero-fold]):has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true']))
+  html[data-cookie-notice='needed'] body:has([data-hero-fold]):not(:has([data-cookie-clear='true']))
     [data-cookie-banner] {
     top: var(--nav-h);
     bottom: auto;
   }
 
-  body:has([data-hero-fold]):has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true']))
+  html[data-cookie-notice='needed'] body:has([data-hero-fold]):not(:has([data-cookie-clear='true']))
     main {
     padding-top: calc(var(--cookie-banner-height) + 0.5rem);
   }
@@ -1281,7 +1426,7 @@ html:has(.faq-page) {
    traegt `[--hero-photo-h:68svh]` direkt an der section). Eine Regel auf `body` waere von
    dort ueberschrieben worden und haette nichts getan. */
 @media (width < 40rem) {
-  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true']))
+  html[data-cookie-notice='needed'] body:not(:has([data-cookie-clear='true']))
     section:has([data-hero-fold]) {
     --hero-photo-h: calc(68svh - 7.5rem);
   }
@@ -1290,7 +1435,7 @@ html:has(.faq-page) {
 @media (width < 40rem) {
   /* R210: Das Bodenpolster bleibt. Es traegt weiterhin den Abstand zur naechsten Sektion,
      wenn der Hinweis oben sitzt — nur die Ueberdeckung im Fold loest es nicht. */
-  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-hero-fold] {
+  html[data-cookie-notice='needed'] body:not(:has([data-cookie-clear='true'])) [data-hero-fold] {
     padding-bottom: var(--cookie-banner-height);
   }
 
@@ -1299,29 +1444,29 @@ html:has(.faq-page) {
      unter der festen Navigation. Der Seitenstamm reserviert ihre gemessene Höhe.
      Beim ersten Scroll verschwindet die Karte wie bisher. Das Polster fährt in 180 ms heraus.
      data-kursplan markiert die Route eindeutig. */
-  body:has(main[data-kursplan]):has([data-testid='cookie-accept']) [data-cookie-banner] {
+  html[data-cookie-notice='needed'] body:has(main[data-kursplan]) [data-cookie-banner] {
     top: var(--nav-h);
     bottom: auto;
     padding: 0.5rem 0.75rem 0 !important;
   }
 
-  body:has([data-testid='cookie-accept']) main[data-kursplan] {
+  html[data-cookie-notice='needed'] body main[data-kursplan] {
     padding-top: calc(var(--cookie-banner-height) + 0.5rem);
-    transition: padding-top 180ms ease; /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
+    transition: padding-top 180ms var(--motion-out); /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
   }
 
   /* /events R189: Die feste Karte lag auf den drei Fakten direkt unter dem Hero.
      Sie sitzt jetzt wie auf /kursplan unter der Navigation. Der Seitenstamm reserviert
      ihre echte Höhe, damit weder Text noch Link unter der Karte liegen. */
-  body:has([data-events-page]):has([data-testid='cookie-accept']) [data-cookie-banner] {
+  html[data-cookie-notice='needed'] body:has([data-events-page]) [data-cookie-banner] {
     top: var(--nav-h);
     bottom: auto;
     padding: 0.5rem 0.75rem 0 !important;
   }
 
-  body:has([data-events-page]):has([data-testid='cookie-accept']) main {
+  html[data-cookie-notice='needed'] body:has([data-events-page]) main {
     padding-top: calc(var(--cookie-banner-height) + 0.5rem);
-    transition: padding-top 180ms ease; /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
+    transition: padding-top 180ms var(--motion-out); /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
   }
 
   /* /kursplan: die Wochen-Pfeile sitzen im ersten Fold, nicht am Dokumentende.
@@ -1329,21 +1474,21 @@ html:has(.faq-page) {
      den Kalender-Kopf so weit stauchen, dass die Pfeile über der Leiste bleiben. */
   /* R179: 8.25rem schnitt die Köpfe (Sol). 11rem bleibt unter dem 14rem-Band
      nach Accept, Gesichter bleiben. CookieBanner unangetastet. */
-  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
+  html[data-cookie-notice='needed'] body:not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
     height: 11rem;
   }
 
-  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero] > .mx-auto {
+  html[data-cookie-notice='needed'] body:not(:has([data-cookie-clear='true'])) [data-schedule-hero] > .mx-auto {
     padding-bottom: 1.25rem;
   }
 
-  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) #kursplan-list {
+  html[data-cookie-notice='needed'] body:not(:has([data-cookie-clear='true'])) #kursplan-list {
     padding-top: 1.25rem;
   }
 
   /* /buchung: Cookie schnitt die letzte Fold-Kurszeile. Foto stauchen.
      Leiste selbst nicht mehr fixed — sie sitzt im Footer-Fluss (Akzeptieren bleibt). */
-  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-buchung-photo] img {
+  html[data-cookie-notice='needed'] body:not(:has([data-cookie-clear='true'])) [data-buchung-photo] img {
     height: 5.25rem;
   }
 
@@ -1358,40 +1503,40 @@ html:has(.faq-page) {
 @media (width >= 40rem) {
   /* /kursplan R189: Auch auf Desktop sitzt die Karte unter der Navigation. Der Seitenstamm
      reserviert ihre gemessene Höhe, damit sie weder Hero noch Filter verdeckt. */
-  body:has(main[data-kursplan]):has([data-testid='cookie-accept']) [data-cookie-banner] {
+  html[data-cookie-notice='needed'] body:has(main[data-kursplan]) [data-cookie-banner] {
     top: var(--nav-h);
     bottom: auto;
     padding: 0.75rem 1.25rem 0 !important;
   }
 
-  body:has([data-testid='cookie-accept']) main[data-kursplan] {
+  html[data-cookie-notice='needed'] body main[data-kursplan] {
     padding-top: calc(var(--cookie-banner-height) + 0.75rem);
-    transition: padding-top 180ms ease; /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
+    transition: padding-top 180ms var(--motion-out); /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
   }
 
   /* /events R189: Auch auf Desktop darf die Cookie-Karte nicht über der Faktenleiste liegen. */
-  body:has([data-events-page]):has([data-testid='cookie-accept']) [data-cookie-banner] {
+  html[data-cookie-notice='needed'] body:has([data-events-page]) [data-cookie-banner] {
     top: var(--nav-h);
     bottom: auto;
     padding: 0.75rem 1.25rem 0 !important;
   }
 
-  body:has([data-events-page]):has([data-testid='cookie-accept']) main {
+  html[data-cookie-notice='needed'] body:has([data-events-page]) main {
     padding-top: calc(var(--cookie-banner-height) + 0.75rem);
-    transition: padding-top 180ms ease; /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
+    transition: padding-top 180ms var(--motion-out); /* impeccable-disable-line layout-transition -- Cookie-Freiraum muss den Dokumentfluss einmalig verlassen. */
   }
 
   /* R179: 10rem = 160px schnitt Köpfe auf 1440 mit sichtbarer Leiste.
      14rem bleibt unter 18rem nach Accept. CookieBanner unangetastet. */
-  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
+  html[data-cookie-notice='needed'] body:not(:has([data-cookie-clear='true'])) [data-schedule-hero-photo] img {
     height: 14rem;
   }
 
-  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) [data-schedule-hero] > .mx-auto {
+  html[data-cookie-notice='needed'] body:not(:has([data-cookie-clear='true'])) [data-schedule-hero] > .mx-auto {
     padding-bottom: 1.75rem;
   }
 
-  body:has([data-testid='cookie-accept']):not(:has([data-cookie-clear='true'])) #kursplan-list {
+  html[data-cookie-notice='needed'] body:not(:has([data-cookie-clear='true'])) #kursplan-list {
     padding-top: 1.5rem;
   }
 }

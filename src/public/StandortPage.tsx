@@ -10,10 +10,11 @@
 //
 // Rhythmus: Hero -> Anfahrt -> Studios -> Raumvermietung (Checkliste) -> Schluss-CTA -> FAQ.
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { Check, ArrowRight } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { CONTACT } from '@/public/site/SiteFooter';
+import { GoogleMapEmbed } from '@/public/site/GoogleMapEmbed';
 import {
   ClosingInvite,
   SubPageShell,
@@ -70,7 +71,8 @@ export function StandortPage() {
 
 /* -------------------------------------------------------------------- Anfahrt (#anfahrt) */
 function AnfahrtSection({ c }: { c: StandortContent }) {
-  const { item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   const a = c.anfahrt;
   return (
     <section id="anfahrt" className="scroll-mt-24 bg-[var(--color-bg-soft)] py-16 lg:py-24">
@@ -94,7 +96,7 @@ function AnfahrtSection({ c }: { c: StandortContent }) {
               className="btn-base btn-outline group mt-7 gap-2 px-6 py-3 text-base"
             >
               {a.mapsCta}
-              <ArrowRight size={18} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <ArrowRight size={18} strokeWidth={2} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </motion.a>
           </Reveal>
           <Reveal className="grid gap-4 sm:grid-cols-2" stagger={0.07}>
@@ -132,12 +134,10 @@ function AnfahrtSection({ c }: { c: StandortContent }) {
           </Reveal>
           <Reveal className="lg:col-span-2">
             <div className="relative mx-auto h-72 max-w-3xl overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white">
-              <iframe
+              <GoogleMapEmbed
                 title={a.mapsCta}
                 src={CONTACT.mapsEmbed}
                 className="absolute inset-0 h-full w-full border-0"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
           </Reveal>

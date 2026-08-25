@@ -1,6 +1,6 @@
 
 import { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { Check, ArrowRight } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
@@ -260,7 +260,8 @@ const BACHATA_HERO_PHOTO: SplitHeroPhoto = {
 
 function SplitHero({ c, photo }: { c: StyleContent; photo: SplitHeroPhoto }) {
   const { lang } = useLang();
-  const { container, item } = useReveal();
+  const reducedMotion = useReducedMotion() === true;
+  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
   /* R189 Motion-Rollen: die H1 scharft sich ein statt mit Lead, CTA und Chips im
      selben rise zu steigen. Gleiche Geste wie die HeroFrame-H1 in subpage/kit.tsx,
      damit Salsa/Bachata (eigene Bauform) und die HeroFrame-Seiten denselben Eingang
@@ -554,7 +555,7 @@ function WhySectionImageRight({ c }: { c: StyleContent }) {
      dafuer. Der kommt hier NICHT aus einer groesseren Bildhoehe (das wuerde den
      ausgemessenen 5/6-Rahmen brechen), sondern daraus, dass der Rahmen selbst wandert
      und das Bild darin voll bleibt. Deshalb sitzt der transform auf dem Wrapper, nicht
-     auf dem <img>.
+     auf dem Bild-Element.
 
      useParallaxStyle statt useParallax: der volle translate3d-String geht auf den
      Compositor. Die Kurzform-Props (x/y) laufen im Haupt-Thread und verlieren Frames,
@@ -653,7 +654,7 @@ function FitSection({ c }: { c: StyleContent }) {
               className="group mt-auto inline-flex w-fit items-center gap-1.5 pt-6 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
             >
               {f.cta.label}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>
@@ -814,7 +815,7 @@ function LevelsSection({ c }: { c: StyleContent }) {
                 className="group inline-flex min-h-12 items-center gap-1.5 text-sm font-bold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {l.cta.label}
-                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+                <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
               </a>
             </div>
           </motion.div>
@@ -938,7 +939,7 @@ function SocialSection({ c }: { c: StyleContent }) {
               className="btn-base btn-primary group mt-8 px-6 py-3 text-sm"
             >
               {s.cta.label}
-              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-out group-hover:translate-x-0.5" />
+              <ArrowRight size={16} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] group-hover:translate-x-0.5" />
             </a>
           </motion.div>
         </Reveal>

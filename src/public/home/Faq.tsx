@@ -7,7 +7,7 @@
 // Aufklappen instant. A11y: aria-expanded/-controls/-labelledby, role=region.
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'motion/react';
 import { ChevronDown } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { HOME_V3 } from '@/public/home/content-v3';
@@ -20,11 +20,12 @@ export function Faq() {
   const { lang } = useLang();
   const f = HOME_V3[lang].faq;
   const a = HOME_V3[lang].answer;
+  const reducedMotion = useReducedMotion() === true;
   /* R190: `distance: 12` raus. Der Token steht auf 20 (motion.tsx), und 12 war
      genau der Wert, bei dem die Geste vorbei ist, bevor das Auge sie liest —
      Raphaels "das ploppt einfach ein" auf dieser Seite. Der Stagger bleibt eng,
      weil die FAQ-Liste viele kurze Zeilen hat. */
-  const { item } = useReveal({ stagger: 0.06 });
+  const { item } = useReveal({ stagger: 0.06, distance: reducedMotion ? 0 : 24 });
   const [open, setOpen] = useState<number | null>(null);
 
   // Geretteter AnswerBox-Kern (Frage + SEO-Antwort) als erste Frage, danach die bestehende FAQ.
@@ -67,7 +68,7 @@ export function Faq() {
               className="group mt-7 inline-flex min-h-12 items-center gap-1.5 text-base font-semibold text-[var(--color-salsa)] transition-colors hover:text-[var(--color-salsa-700)]"
             >
               {f.more}
-              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-out motion-safe:group-hover:translate-x-0.5" />
+              <CtaArrow className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" />
             </motion.a>
           </Reveal>
 
@@ -148,7 +149,7 @@ export function Faq() {
                     role="region"
                     aria-labelledby={`faq-q-${i}`}
                     hidden={!isOpen}
-                    className="grid transition-[grid-template-rows] duration-[var(--dur-base)] ease-out motion-reduce:transition-none"
+                    className="grid transition-[grid-template-rows] duration-[var(--dur-base)] ease-[var(--motion-out)] motion-reduce:transition-none"
                     style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
                   >
                     <div className="overflow-hidden">

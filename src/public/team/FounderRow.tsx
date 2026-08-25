@@ -22,7 +22,7 @@
 // Warum `bust` und nicht object-position: object-position verschiebt nur, es skaliert nicht.
 // Die vier Figuren stehen aber unterschiedlich GROSS in ihren Dateien (Schulterlinie streute
 // ueber 5.5 Prozentpunkte), es braucht also pro Person einen eigenen Zoom. Das leistet ein
-// absolut positioniertes <img> mit eigener Breite/Position im Panel.
+// absolut positioniertes Bild-Element mit eigener Breite/Position im Panel.
 
 import { useLang } from '@/lib/i18n';
 import { FOUNDERS, founderRole } from '@/public/team/content';
@@ -71,7 +71,7 @@ export function FounderCards({ className = '' }: { className?: string }) {
                 <img
                   src={founder.photo}
                   alt={`${founder.name} ${founder.last}, ${role} ${lang === 'de' ? 'von' : 'at'} Salsaflow`}
-                  className="absolute max-w-none transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.02]"
+                  className="absolute max-w-none transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-safe:group-hover:scale-[1.02]"
                   style={{ width: founder.bust.w, left: founder.bust.l, top: founder.bust.t }}
                   loading="lazy"
                   width={1000}

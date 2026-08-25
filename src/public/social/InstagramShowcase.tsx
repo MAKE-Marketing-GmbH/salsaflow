@@ -2,9 +2,9 @@
 // Shortcode mehr. Wer den Feed wechselt (Behold, Graph API) oder aktualisiert
 // (scripts/refresh-instagram-feed.mjs), fasst nur die Datendatei an, nicht dieses Layout.
 
-import { useEffect, type CSSProperties } from 'react';
-import { ExternalLink, ShieldCheck } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { ExternalLink, LoaderCircle, Play, ShieldCheck } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useLang } from '@/lib/i18n';
 import { CONTACT } from '@/public/site/SiteFooter';
 import { InstagramIcon } from '@/public/site/BrandIcons';
@@ -42,16 +42,35 @@ type InstagramEmbedWindow = Window & {
 /** Instagrams offizielles Embed-Skript vermisst jeden Beitrag nach dem Laden selbst und
  * setzt die Iframe-Hoehe passend zum Original. Das ist der entscheidende Unterschied zum
  * frueheren direkten /embed/captioned/-Iframe in einem festen Aspect-Ratio-Rahmen. */
-function useInstagramEmbeds() {
+function useInstagramEmbeds(loadedCount: number) {
   useEffect(() => {
+    if (loadedCount === 0) return;
+
     const instagramWindow: InstagramEmbedWindow = window;
-    const process = () => instagramWindow.instgrm?.Embeds?.process();
+    const labelIframes = () => {
+      document
+        .querySelectorAll<HTMLIFrameElement>('article[data-component-unit="component.instagram-video-card"] iframe')
+        .forEach((iframe) => {
+          if (iframe.title.trim()) return;
+          const title = iframe.closest('article')?.querySelector('h3')?.textContent?.trim();
+          iframe.title = title ? `${title} auf Instagram` : 'Instagram-Beitrag';
+        });
+    };
+    const process = () => {
+      instagramWindow.instgrm?.Embeds?.process();
+      window.requestAnimationFrame(labelIframes);
+    };
     const existing = document.getElementById(INSTAGRAM_EMBED_SCRIPT_ID);
+    const observer = new MutationObserver(labelIframes);
+    observer.observe(document.body, { childList: true, subtree: true });
 
     if (existing instanceof HTMLScriptElement) {
       process();
       existing.addEventListener('load', process, { once: true });
-      return () => existing.removeEventListener('load', process);
+      return () => {
+        observer.disconnect();
+        existing.removeEventListener('load', process);
+      };
     }
 
     const script = document.createElement('script');
@@ -62,17 +81,71 @@ function useInstagramEmbeds() {
     document.body.appendChild(script);
 
     return () => {
+      observer.disconnect();
       script.onload = null;
     };
-  }, []);
+  }, [loadedCount]);
 }
 
-function InstagramVideoCard({ post, compact = false }: { post: FeedPost; compact?: boolean }) {
+function InstagramVideoCard({
+  post,
+  compact = false,
+  loaded,
+  onLoad,
+}: {
+  post: FeedPost;
+  compact?: boolean;
+  loaded: boolean;
+  onLoad: () => void;
+}) {
   const { lang } = useLang();
   const title = lang === 'de' ? post.titel : post.titelEn;
   const postUrl = post.url;
   const iframeTitle = lang === 'de' ? `${title} auf Instagram` : `${title} on Instagram`;
   const directLabel = lang === 'de' ? `${title} direkt auf Instagram öffnen` : `Open ${title} directly on Instagram`;
+  const embedRootRef = useRef<HTMLDivElement>(null);
+  const [embedReady, setEmbedReady] = useState(false);
+
+  useEffect(() => {
+    if (!loaded) return;
+
+    const root = embedRootRef.current;
+    if (!root) return;
+
+    let currentIframe: HTMLIFrameElement | null = null;
+    let iframeResizeObserver: ResizeObserver | null = null;
+
+    const markReadyWhenMeasured = () => {
+      if (!currentIframe || currentIframe.getBoundingClientRect().height < 200) return;
+      setEmbedReady(true);
+    };
+
+    const observeIframe = () => {
+      const nextIframe = root.querySelector<HTMLIFrameElement>('iframe');
+      if (!nextIframe) return;
+
+      if (nextIframe !== currentIframe) {
+        currentIframe?.removeEventListener('load', markReadyWhenMeasured);
+        iframeResizeObserver?.disconnect();
+        currentIframe = nextIframe;
+        currentIframe.addEventListener('load', markReadyWhenMeasured);
+        iframeResizeObserver = new ResizeObserver(markReadyWhenMeasured);
+        iframeResizeObserver.observe(currentIframe);
+      }
+
+      markReadyWhenMeasured();
+    };
+
+    const mutationObserver = new MutationObserver(observeIframe);
+    mutationObserver.observe(root, { childList: true, subtree: true });
+    observeIframe();
+
+    return () => {
+      mutationObserver.disconnect();
+      iframeResizeObserver?.disconnect();
+      currentIframe?.removeEventListener('load', markReadyWhenMeasured);
+    };
+  }, [loaded]);
 
   return (
     <article data-component-unit="component.instagram-video-card" className="group relative isolate flex flex-col overflow-hidden rounded-[1.5rem] border border-white/15 bg-white shadow-[0_24px_70px_-30px_rgba(0,0,0,0.7)]">
@@ -81,27 +154,99 @@ function InstagramVideoCard({ post, compact = false }: { post: FeedPost; compact
           pro Karte einen eigenen Scrollbalken. Das offizielle Blockquote-Embed wird von
           embed.js pro Beitrag vermessen; Medium, Header und Caption behalten dadurch die
           von Instagram gelieferte Originalhoehe. */}
-      <div className="w-full overflow-hidden bg-white [&_.instagram-media]:!m-0 [&_.instagram-media]:!max-w-none [&_.instagram-media]:!min-w-0 [&_.instagram-media]:!w-full [&>iframe]:!m-0 [&>iframe]:!max-w-none [&>iframe]:!w-full">
-        <blockquote
-          className="instagram-media"
-          data-instgrm-captioned
-          data-instgrm-permalink={`${postUrl}?utm_source=ig_embed&utm_campaign=loading`}
-          data-instgrm-version="14"
-          title={iframeTitle}
-          style={{
-            background: '#fff',
-            border: 0,
-            margin: 0,
-            maxWidth: 'none',
-            minWidth: 0,
-            padding: 0,
-            width: '100%',
-          }}
-        >
-          <a href={postUrl} target="_blank" rel="noopener noreferrer" aria-label={directLabel}>
-            {title}
-          </a>
-        </blockquote>
+      <div
+        ref={embedRootRef}
+        className={cn(
+          'relative w-full overflow-hidden bg-white [&_.instagram-media]:!m-0 [&_.instagram-media]:!max-w-none [&_.instagram-media]:!min-w-0 [&_.instagram-media]:!w-full [&>iframe]:!m-0 [&>iframe]:!max-w-none [&>iframe]:!w-full',
+          loaded && !embedReady && 'aspect-[9/16]',
+        )}
+      >
+        {loaded ? (
+          <blockquote
+            className="instagram-media"
+            data-instgrm-captioned
+            data-instgrm-permalink={`${postUrl}?utm_source=ig_embed&utm_campaign=loading`}
+            data-instgrm-version="14"
+            title={iframeTitle}
+            style={{
+              background: '#fff',
+              border: 0,
+              margin: 0,
+              maxWidth: 'none',
+              minWidth: 0,
+              padding: 0,
+              width: '100%',
+            }}
+          >
+            <a href={postUrl} target="_blank" rel="noopener noreferrer" aria-label={directLabel}>
+              {title}
+            </a>
+          </blockquote>
+        ) : (
+          <button
+            type="button"
+            onClick={onLoad}
+            aria-label={lang === 'de' ? `${title} von Instagram laden` : `Load ${title} from Instagram`}
+            className="group/embed relative block aspect-[9/16] w-full overflow-hidden bg-[var(--color-ink)] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-salsa)]"
+          >
+            {post.poster ? (
+              <img
+                src={post.poster}
+                alt=""
+                aria-hidden
+                width={post.posterWidth ?? 1080}
+                height={post.posterHeight ?? 1920}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] group-hover/embed:scale-[1.025]"
+              />
+            ) : null}
+            <span aria-hidden className="absolute inset-0 bg-[linear-gradient(to_top,rgba(10,10,10,0.84)_0%,rgba(10,10,10,0.08)_58%,rgba(10,10,10,0.28)_100%)]" />
+            <span className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4 text-left">
+              <span>
+                <span className="block text-lg font-bold leading-tight">{title}</span>
+                <span className="mt-1.5 block text-xs font-semibold text-white/75">
+                  {lang === 'de' ? 'Instagram erst nach Klick laden' : 'Load Instagram after click'}
+                </span>
+              </span>
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-[var(--color-ink)] shadow-lg transition-transform duration-[var(--dur-base)] ease-[var(--motion-out)] group-hover/embed:scale-105">
+                <Play aria-hidden className="ml-0.5 h-5 w-5 fill-current" />
+              </span>
+            </span>
+          </button>
+        )}
+        {loaded ? (
+          <div
+            data-instagram-loading={embedReady ? undefined : ''}
+            role={embedReady ? undefined : 'status'}
+            aria-hidden={embedReady || undefined}
+            className={cn(
+              'absolute inset-0 z-10 flex items-center justify-center overflow-hidden bg-[var(--color-ink)] p-5 text-center text-white motion-safe:transition-opacity motion-safe:duration-[var(--dur-fast)]',
+              embedReady ? 'pointer-events-none opacity-0' : 'opacity-100',
+            )}
+          >
+            {post.poster ? (
+              <img
+                src={post.poster}
+                alt=""
+                aria-hidden
+                width={post.posterWidth ?? 1080}
+                height={post.posterHeight ?? 1920}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : null}
+            <span aria-hidden className="absolute inset-0 bg-black/65" />
+            <span className="relative">
+              <LoaderCircle
+                aria-hidden
+                className="mx-auto h-7 w-7 animate-spin text-white motion-reduce:animate-none"
+                strokeWidth={1.75}
+              />
+              <span className="mt-3 block text-sm font-semibold">
+                {lang === 'de' ? 'Instagram wird geladen …' : 'Instagram is loading …'}
+              </span>
+            </span>
+          </div>
+        ) : null}
       </div>
       {/* Der Titel steht UNTER der Buehne. Zwei Gruende:
           1. SEO: er bleibt im HTML lesbar, auch wenn das Embed geladen ist.
@@ -145,10 +290,12 @@ type InstagramShowcaseProps = {
 
 export function InstagramShowcase({ compact = false, 'data-design-unit': designUnitId }: InstagramShowcaseProps) {
   const { lang } = useLang();
-  const { item } = useReveal({ stagger: 0.08 });
+  const reducedMotion = useReducedMotion() === true;
+  const { item } = useReveal({ stagger: 0.08, distance: reducedMotion ? 0 : 24 });
   const onHome = designUnitId === 'home.instagram-showcase';
   const posts = getInstagramFeed();
-  useInstagramEmbeds();
+  const [loadedPosts, setLoadedPosts] = useState<Set<string>>(() => new Set());
+  useInstagramEmbeds(loadedPosts.size);
 
   return (
     <section
@@ -404,7 +551,18 @@ export function InstagramShowcase({ compact = false, 'data-design-unit': designU
                   'min-[1150px]:last:mr-0',
                 )}
               >
-                <InstagramVideoCard post={post} compact={onHome} />
+                <InstagramVideoCard
+                  post={post}
+                  compact={onHome}
+                  loaded={loadedPosts.has(post.shortcode)}
+                  onLoad={() => {
+                    setLoadedPosts((current) => {
+                      const next = new Set(current);
+                      next.add(post.shortcode);
+                      return next;
+                    });
+                  }}
+                />
               </div>
             ))}
           </motion.div>

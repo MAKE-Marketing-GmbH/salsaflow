@@ -30,6 +30,10 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+export function sessionCookieIsSecure(): boolean {
+  return Boolean(process.env.VERCEL) || process.env.NODE_ENV === 'production';
+}
+
 function publicUser(a: typeof adminProfiles.$inferSelect) {
   return { id: a.id, email: a.email, displayName: a.displayName, role: a.role };
 }
@@ -100,6 +104,7 @@ export function createApp(db: Db) {
     setCookie(c, SESSION_COOKIE, token, {
       httpOnly: true,
       sameSite: 'Lax',
+      secure: sessionCookieIsSecure(),
       path: '/',
       maxAge: 60 * 60 * 8,
     });
@@ -120,7 +125,11 @@ export function createApp(db: Db) {
   });
 
   app.post('/api/auth/logout', (c) => {
-    deleteCookie(c, SESSION_COOKIE, { path: '/' });
+    deleteCookie(c, SESSION_COOKIE, {
+      path: '/',
+      sameSite: 'Lax',
+      secure: sessionCookieIsSecure(),
+    });
     return c.json({ ok: true });
   });
 

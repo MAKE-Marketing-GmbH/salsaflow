@@ -14,7 +14,7 @@
 // kein abgeschnittener Kopf. Weisse Info-Chips auf den Fotos (wie im Hero), keine dunklen Overlays.
 
 import { useEffect, useMemo, useState } from 'react';
-import { motion, useReducedMotion, type Variants } from 'framer-motion';
+import { motion, useReducedMotion, type Variants } from 'motion/react';
 import { useLang, WEEKDAY_LABEL } from '@/lib/i18n';
 import { Seo } from '@/lib/seo';
 import { SiteHeader } from '@/public/site/SiteHeader';
@@ -193,7 +193,7 @@ function TeachingLine({ teaching, lang }: { teaching: Teaching | undefined; lang
   return (
     <p className="mt-2 block text-pretty text-[0.9rem] leading-snug text-[var(--color-ink-muted)]">
       {styles}
-      {days ? <span className="text-[var(--color-ink-muted)]/75">{` ·${NB}${days}`}</span> : null}
+      {days ? <span className="text-[var(--color-ink-muted)]">{` ·${NB}${days}`}</span> : null}
     </p>
   );
 }
@@ -464,7 +464,7 @@ function FounderSection() {
                     <img
                       src={founder.photo}
                       alt={`${founder.name} ${founder.last}, ${role} ${lang === 'de' ? 'von' : 'at'} Salsaflow`}
-                      className="absolute max-w-none transition-transform duration-[var(--dur-slow)] ease-out motion-safe:group-hover:scale-[1.02]"
+                      className="absolute max-w-none transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-safe:group-hover:scale-[1.02]"
                       style={{ width: founder.bust.w, left: founder.bust.l, top: founder.bust.t }}
                       loading="lazy"
                       width={1414}
@@ -607,8 +607,14 @@ function TeamPhotoSection() {
 
   const hydrated = useHydrated();
   const imgReveal: Variants = {
-    hidden: hydrated ? { opacity: 0, y: reduced ? 0 : 20, scale: reduced ? 1 : 0.99 } : { opacity: 1, y: 0, scale: 1 },
-    show: { opacity: 1, y: 0, scale: 1, transition: { duration: reduced ? 0.3 : 0.7, ease: EASE_OUT } },
+    hidden: hydrated
+      ? { opacity: 0, transform: reduced ? 'translate3d(0, 0, 0)' : 'translate3d(0, 20px, 0) scale(0.99)' }
+      : { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+    show: {
+      opacity: 1,
+      transform: 'translate3d(0, 0, 0)',
+      transition: { duration: reduced ? 0.2 : 0.48, ease: EASE_OUT },
+    },
   };
 
   return (
@@ -695,7 +701,7 @@ function TeamPhotoSection() {
                   <dt className="font-display text-2xl font-extrabold leading-none text-[var(--color-salsa)] sm:text-3xl">
                     {stat.v}
                   </dt>
-                  <dd className="mt-2 text-xs leading-snug text-balance text-[var(--color-ink-muted)] [overflow-wrap:normal] [word-break:keep-all]">
+                  <dd className="mt-2 text-xs leading-snug text-balance text-[var(--color-ink)] [overflow-wrap:normal] [word-break:keep-all]">
                     {stat.l}
                   </dd>
                 </div>

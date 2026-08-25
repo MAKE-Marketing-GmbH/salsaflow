@@ -28,6 +28,7 @@ export function SmoothScroll() {
   useEffect(() => {
     const root = document.documentElement;
     const reducedMotion = window.matchMedia(REDUCED_MOTION_QUERY);
+    const coarsePointer = window.matchMedia('(pointer: coarse)');
     let lenis: Lenis | null = null;
 
     const stop = () => {
@@ -39,7 +40,9 @@ export function SmoothScroll() {
 
     const start = () => {
       stop();
-      if (reducedMotion.matches) return;
+      // Touch bleibt ohnehin nativ. Auf echten Coarse-Pointer-Geräten Lenis gar nicht
+      // erst starten, damit kein leerer 60-Hz-RAF-Loop im Hintergrund weiterläuft.
+      if (reducedMotion.matches || coarsePointer.matches) return;
 
       lenis = new Lenis({
         autoRaf: true,
@@ -63,9 +66,11 @@ export function SmoothScroll() {
 
     start();
     reducedMotion.addEventListener('change', start);
+    coarsePointer.addEventListener('change', start);
 
     return () => {
       reducedMotion.removeEventListener('change', start);
+      coarsePointer.removeEventListener('change', start);
       stop();
     };
   }, []);

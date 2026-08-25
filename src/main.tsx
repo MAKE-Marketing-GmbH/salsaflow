@@ -37,8 +37,9 @@ if (route.redirectTo) {
     <StrictMode>
       <LangProvider>
         <SmoothScroll />
-        {/* Suspense nur fuer die lazy Admin-Route (routes.tsx); erzeugt kein DOM und
-            stoert die Hydration der prerenderten Seiten nicht. */}
+        {/* Alle Browser-Routen sind lazy. Prerendered HTML bleibt waehrend der selektiven
+            Hydration sichtbar; im Dev-Modus ist der leere Fallback nur fuer die kurze
+            Chunk-Ladezeit aktiv. */}
         <Suspense fallback={null}>
           <Matched />
         </Suspense>

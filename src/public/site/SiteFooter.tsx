@@ -6,6 +6,7 @@
 // Runde 1: volle NAP-Adresse jetzt bewusst IM Footer — Begruendung an der Kontakt-Spalte.
 
 import { useState } from 'react';
+import { Mail, MapPin, Phone } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import { WhatsAppFloat } from '@/public/site/WhatsAppFloat';
@@ -210,7 +211,7 @@ export function SiteFooter({
             <FooterHeading>{c.contactTitle}</FooterHeading>
             <address className="not-italic">
               <p className="flex items-start gap-2.5 py-1.5 text-sm leading-relaxed text-white/85">
-                <PinIcon />
+                <MapPin aria-hidden className="mt-0.5 size-4 shrink-0" strokeWidth={1.8} />
                 <span>
                   Elisabethenanlage 7<br />
                   4051 Basel
@@ -220,10 +221,10 @@ export function SiteFooter({
               {/* Mail und Telefon gehoeren mit in das <address>-Element: es umschliesst die
                   Kontaktdaten der Seite, nicht nur die Postanschrift. */}
               <a href={`mailto:${CONTACT.email}`} className="t-hover flex min-h-11 items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white">
-                <MailIcon /> {CONTACT.email}
+                <Mail aria-hidden className="size-4 shrink-0" strokeWidth={1.8} /> {CONTACT.email}
               </a>
               <a href={CONTACT.phoneHref} className="t-hover flex min-h-11 items-center gap-2.5 py-1.5 text-sm text-white/85 hover:text-white">
-                <PhoneIcon /> {CONTACT.phoneDisplay}
+                <Phone aria-hidden className="size-4 shrink-0" strokeWidth={1.8} /> {CONTACT.phoneDisplay}
               </a>
             </address>
           </div>
@@ -288,7 +289,11 @@ export function SiteFooter({
 
     {/* Sitewide-Floats: liegen position:fixed ueber dem Layout, darum als Geschwister neben dem
         Footer (nicht im Footer-Fluss). Erscheinen damit auf jeder Seite (sitewide.md §7/§8). */}
-    {float && <WhatsAppFloat raised={cookieVisible} className={floatClass} />}
+    {float && (
+      <aside aria-label={lang === 'de' ? 'WhatsApp-Kontakt' : 'WhatsApp contact'}>
+        <WhatsAppFloat raised={cookieVisible} className={floatClass} />
+      </aside>
+    )}
     <CookieBanner onVisibleChange={setCookieVisible} />
     </>
   );
@@ -311,32 +316,10 @@ function FooterHeading({ children }: { children: React.ReactNode }) {
      Labels (Soll: Fuge ~2-3x Buchstabenabstand, nicht ~3x so breit). 0.2em = 2.4px extra,
      gesamt ~4.3px gegen 1.9px Buchstabenabstand: Fuge klar sichtbar, Kopf bleibt EIN Label. */
   return (
-    <h3 className="type-h4 text-white/85 [word-spacing:0.2em]">{children}</h3>
+    <h2 className="type-h4 text-white/85 [word-spacing:0.2em]">{children}</h2>
   );
 }
 
-/* Individuelle, schlichte Line-Icons (keine Icon-Library-Dependency). */
-function MailIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" />
-    </svg>
-  );
-}
-function PhoneIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L20 13l-1 4-3 1A14 14 0 0 1 4 8z" />
-    </svg>
-  );
-}
-function PinIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0" aria-hidden>
-      <path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" />
-    </svg>
-  );
-}
 /* Marken-Glyphen (Instagram, WhatsApp, Google) stehen jetzt in site/BrandIcons.tsx.
    `InstagramIcon` wird hier weiter-exportiert: InstagramShowcase importiert es sitewide
    von hier, und der Pfad soll durch den Icon-Tausch nicht brechen. */
