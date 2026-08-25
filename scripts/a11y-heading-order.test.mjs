@@ -20,6 +20,13 @@ await context.addInitScript(() => {
 const page = await context.newPage();
 const failures = [];
 
+async function waitForReact(selector) {
+  await page.waitForFunction((target) => {
+    const element = document.querySelector(target);
+    return Boolean(element && Object.keys(element).some((key) => key.startsWith('__reactProps$')));
+  }, selector);
+}
+
 async function checkHeadingOrder(state) {
   const headings = await page.locator('h1,h2,h3,h4,h5,h6').evaluateAll((nodes) =>
     nodes
@@ -49,6 +56,7 @@ try {
 
   await page.goto(`${baseUrl}/kontakt`, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('[data-testid="inquiry-next"]');
+  await waitForReact('input[name="topic"]');
   await page.locator('input[name="topic"]').first().check({ force: true });
   await page.locator('[data-testid="inquiry-next"]').click();
   await page.waitForTimeout(260);

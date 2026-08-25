@@ -19,9 +19,17 @@ await context.addInitScript(() => {
 
 const page = await context.newPage();
 
+async function waitForReact(selector) {
+  await page.waitForFunction((target) => {
+    const element = document.querySelector(target);
+    return Boolean(element && Object.keys(element).some((key) => key.startsWith('__reactProps$')));
+  }, selector);
+}
+
 try {
   await page.goto(`${baseUrl}/buchung`, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('[data-testid^="pick-course-"]', { timeout: 15_000 });
+  await waitForReact('[data-testid^="pick-course-"]');
   await page.locator('[data-testid^="pick-course-"]').first().click();
 
   const reserve = page.locator('[data-testid="reserve-spot"]');
