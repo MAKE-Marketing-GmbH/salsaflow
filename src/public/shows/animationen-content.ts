@@ -104,7 +104,7 @@ export const SHOWS_ANIM = {
         alt: 'Salsaflow-Tanzcrew tanzt gemeinsam auf einer hellen Eventbühne',
       },
       cardLabel: 'Für dein Event',
-      cardText: 'Show, Animation und Workshop aus einer Hand.',
+      cardText: 'Show, Animation und Workshop — vom selben Team geplant und getanzt.',
     },
     occasions: {
       eyebrow: 'Für welche Anlässe',

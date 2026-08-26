@@ -347,7 +347,9 @@ function CalendarSection({ c, events }: { c: EventkalenderContent; events: Publi
                         {EVENT_FORMAT_LABEL[lang][event.format]}
                       </span>
                       {event.featured && (
-                        <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
+                        // Token statt Fremdfarbe: amber lag ausserhalb der DESIGN.md-Palette
+                        // (Slop-Scan Regel 03). Ink-Flaeche traegt denselben Status-Kontrast.
+                        <span className="rounded-full bg-[var(--color-ink)] px-3 py-1 text-xs font-semibold text-white">
                           {lang === 'de' ? 'Highlight' : 'Featured'}
                         </span>
                       )}

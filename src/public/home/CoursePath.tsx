@@ -25,7 +25,7 @@ const COPY = {
   },
   en: {
     title: 'From your first steps to dancing with confidence.',
-    lead: 'Our classes follow a clear path. You learn step by step and grow into your next level.',
+    lead: 'Our classes follow a clear path. You learn step by step, from beginner stage 1 to open level.',
     levels: [
       ['Beginner stages 1 to 6', 'Rhythm, basic steps, turns and the most important partner-dance signals.'],
       ['Beginner Flow', 'Connect the beginner material, strengthen your timing and dance more freely.'],

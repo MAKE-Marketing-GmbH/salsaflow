@@ -279,7 +279,7 @@ const en: PrivatContent = {
     eyebrow: 'Private lessons in Basel',
     title: 'Coaching for exactly your goal.',
     titleAccent: 'your goal',
-    lead: 'Technique, a wedding dance or the step up to the next level. You tell us what to work on.',
+    lead: 'Technique, a wedding dance or the jump from beginner to intermediate. You tell us what to work on.',
     bullets: [
       'personal correction instead of course logic',
       'Salsa, Bachata, wedding dance, technique',
@@ -304,7 +304,7 @@ const en: PrivatContent = {
     cards: [
       { title: 'Wedding dance', text: 'An occasion is coming up and you want to feel confident.' },
       { title: 'Technique', text: 'You keep getting stuck on the same movement.' },
-      { title: 'Level change', text: 'You want to know if you are ready for the next level.' },
+      { title: 'Level change', text: 'You want to know if you are ready for the intermediate class.' },
     ],
     moreLabel: 'Other reasons',
     more: ['Coming back after a break', 'Practising together as a couple', 'Styling and musicality'],

@@ -405,6 +405,9 @@ export function HeroFrame({
      ist — RevealWords schneidet an Leerzeichen, und der Accent haengt am gemeinsamen
      Zeilenumbruch (Begruendung wie in SectionHead). `immediate` startet die Welle beim
      Mount statt auf den Viewport-Trigger: die H1 ist above the fold. */
+  // `title` ist als ReactNode deklariert; nur ein reiner String laesst sich an
+  // Leerzeichen in Wort-Spans zerlegen — der typeof-Check IST hier die Boundary.
+  // oxlint-disable-next-line anti-slop/no-runtime-typeof
   const wave = typeof title === 'string' && !titleAccent;
   const headingClass = cn(
     // .type-h1 = die EINE H1-Groesse (src/index.css). `wide` behaelt seine groessere
@@ -422,6 +425,7 @@ export function HeroFrame({
   const heading = wave ? (
     <RevealWords
       as="h1"
+      // SAFETY: `wave` garantiert `typeof title === 'string'` (Zeile darueber).
       text={title as string}
       className={headingClass}
       stagger={0.03}
