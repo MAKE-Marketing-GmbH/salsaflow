@@ -31,6 +31,31 @@ function upsertCanonical(html, canonical) {
   return pattern.test(html) ? html.replace(pattern, tag) : html.replace('</head>', `    ${tag}\n  </head>`);
 }
 
+/** React 19 emits resource hints next to the component that requested them. In our static
+ *  render that means the links initially sit at the start of #root, after CSS and modules
+ *  were already discovered. Promote only explicitly high-priority LCP hints into the head;
+ *  discard React's opportunistic image preloads so footer and below-fold art do not compete
+ *  with the hero on a constrained mobile connection. The actual img elements still load
+ *  normally when the parser reaches them. */
+function hoistPreloadLinks(html) {
+  const pattern = /<link\s+[^>]*rel=["']preload["'][^>]*\/?\s*>/gi;
+  const links = html.match(pattern);
+  if (!links?.length) return html;
+
+  const withoutInlineLinks = html.replace(pattern, '');
+  const highPriorityLinks = [...new Set(links.filter((link) => /fetchpriority=["']high["']/i.test(link)))];
+  if (highPriorityLinks.length === 0) return withoutInlineLinks;
+  const preloadMarkup = highPriorityLinks.join('\n    ');
+  const viewportMeta = /(<meta\s+[^>]*name=["']viewport["'][^>]*>)/i;
+  if (viewportMeta.test(withoutInlineLinks)) {
+    /* Media Queries in a preload placed before the viewport meta are evaluated against
+     * mobile Chrome's temporary 980px layout viewport. That makes a `(min-width: 640px)`
+     * desktop hint fire on a 390px device before the real viewport becomes known. */
+    return withoutInlineLinks.replace(viewportMeta, `$1\n    ${preloadMarkup}`);
+  }
+  return withoutInlineLinks.replace('<head>', `<head>\n    ${preloadMarkup}`);
+}
+
 function buildDocument(template, { route, title, description, body, noindex = false, canonical = true, prerendered = true }) {
   const canonicalUrl = `${siteOrigin}${route === '/' ? '/' : route}`;
   let html = template
@@ -55,7 +80,7 @@ function buildDocument(template, { route, title, description, body, noindex = fa
   html = upsertMeta(html, 'name', 'twitter:description', description);
   html = upsertMeta(html, 'name', 'twitter:image', socialImage);
   html = upsertCanonical(html, canonical ? canonicalUrl : null);
-  return html;
+  return hoistPreloadLinks(html);
 }
 
 async function writeRoute(route, html) {

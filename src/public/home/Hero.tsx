@@ -77,6 +77,7 @@
 
 import { motion, useReducedMotion, type Variants } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
+import { preload } from 'react-dom';
 import { useLang } from '@/lib/i18n';
 import { HOME } from '@/public/home/content';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
@@ -104,6 +105,8 @@ import { cn } from '@/lib/utils';
 const PARALLAX_DESKTOP = 44;
 const PARALLAX_MOBILE = 0;
 const DESKTOP_QUERY = '(min-width: 640px)';
+const HERO_POSTER_DESKTOP = '/photos/instagram/lady-style-v2.webp';
+const HERO_POSTER_MOBILE = '/photos/instagram/lady-style-hero-mobile.webp';
 
 /** Liefert die Parallax-Distanz fuer die aktuelle Breite. Serverseitig und vor der ersten
  *  Messung gilt der Mobil-Wert — der kleinere von beiden, also der, der im Zweifel weniger
@@ -124,11 +127,24 @@ function useParallaxDistance(): number {
 }
 
 export function Hero() {
+  preload(HERO_POSTER_MOBILE, {
+    as: 'image',
+    fetchPriority: 'high',
+    media: '(max-width: 639px)',
+  });
+  preload(HERO_POSTER_DESKTOP, {
+    as: 'image',
+    fetchPriority: 'high',
+    media: '(min-width: 640px)',
+  });
   const { lang } = useLang();
   /* Der Fold selbst bleibt ab Frame 1 statisch. Reduced Motion steuert hier nur die
      verbliebene Tiefenbewegung des Fotos explizit auf Distanz 0; der Helper sichert
      denselben Fall zusätzlich an seiner eigenen Bibliotheksgrenze ab. */
   const reducedMotion = useReducedMotion() === true;
+  const [loadHeroVideo, setLoadHeroVideo] = useState(false);
+  const [heroVideoVisible, setHeroVideoVisible] = useState(false);
+  const [heroPosterReady, setHeroPosterReady] = useState(false);
   const h = HOME[lang].hero;
   const cta = HOME[lang].cta;
   const de = lang === 'de';
@@ -138,6 +154,40 @@ export function Hero() {
      Rahmen, liefe der Effekt ueber eine Strecke, auf der das Foto laengst aus dem Bild
      gescrollt ist, und die sichtbare Bewegung waere fast null. */
   const photoRef = useRef<HTMLDivElement>(null);
+  const heroPosterRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (heroPosterRef.current?.complete) setHeroPosterReady(true);
+  }, []);
+
+  /* Poster-first statt Video-first: Das statische Hero-Bild steht schon im prerendered HTML
+     und wird als LCP mit hoher Prioritaet geladen. Der 1.3-MB-/2.7-MB-Cut startet erst im
+     ersten Idle-Fenster (spaetestens nach 1.4 s), damit er CSS, Fonts und H1 nicht um
+     Bandbreite oder Main-Thread-Zeit verdraengt. Safari faellt auf einen kurzen Timer zurueck.
+     Reduced Motion mountet das Video gar nicht; dadurch bleibt dieselbe ruhige Poster-Variante
+     wie bisher, ohne nachtraegliches Stoppen eines bereits sichtbaren Frames. */
+  useEffect(() => {
+    if (reducedMotion || !heroPosterReady) {
+      setLoadHeroVideo(false);
+      setHeroVideoVisible(false);
+      return;
+    }
+
+    const load = () => setLoadHeroVideo(true);
+    const idleApi: {
+      requestIdleCallback?: Window['requestIdleCallback'];
+      cancelIdleCallback?: Window['cancelIdleCallback'];
+    } = window;
+    const requestIdle = idleApi.requestIdleCallback?.bind(window);
+    const cancelIdle = idleApi.cancelIdleCallback?.bind(window);
+    if (requestIdle && cancelIdle) {
+      const idleId = requestIdle(load, { timeout: 1400 });
+      return () => cancelIdle(idleId);
+    }
+
+    const timeoutId = window.setTimeout(load, 900);
+    return () => window.clearTimeout(timeoutId);
+  }, [heroPosterReady, reducedMotion]);
   const parallaxDistance = useParallaxDistance();
   const parallax = useParallaxStyle(photoRef, reducedMotion ? 0 : parallaxDistance);
 
@@ -587,33 +637,54 @@ export function Hero() {
                   Ausschnitt steht drei Sekunden; zwei 250-ms-Crossfades verbinden die
                   Szenen. Desktop und Mobil sind H.264 und physisch OHNE Audiospur.
                   autoplay + muted + playsInline verhindert Player-Chrome und iOS-Vollbild;
-                  loop macht daraus eine kompakte Hero-Bewegung ohne JavaScript-Timer.
+                  loop macht daraus eine kompakte Hero-Bewegung ohne JavaScript-Timer. Das
+                  hoch priorisierte Bild darunter ist der erste Paint; onCanPlay blendet den
+                  nach Idle gemounteten Film compositor-only darueber.
 
-                  Reduced Motion laedt keine Videoquelle: Das media-Attribut am <source>
-                  passt dann nicht, und das Poster bleibt als stilles Endbild stehen. So wird
-                  Bewegung nicht erst nach einem sichtbaren Frame per JavaScript gestoppt. */}
-              <video
-                aria-hidden="true"
-                autoPlay
-                muted
-                loop
-                playsInline
-                disablePictureInPicture
-                preload="metadata"
-                poster="/photos/instagram/lady-style-v2.webp"
-                className="h-full w-full object-cover object-center"
-              >
-                <source
-                  src="/videos/home-hero-instagram-muted-mobile.mp4"
-                  type="video/mp4"
-                  media="(max-width: 639px) and (prefers-reduced-motion: no-preference)"
+                  Reduced Motion mountet das Video gar nicht; die Media-Attribute der Quellen
+                  bleiben die zweite Breiten-/Praeferenzwache. Das Poster steht dann statisch,
+                  ohne einen bereits sichtbaren Film nachtraeglich stoppen zu muessen. */}
+              <picture>
+                <source media="(min-width: 640px)" srcSet={HERO_POSTER_DESKTOP} />
+                <img
+                  ref={heroPosterRef}
+                  src={HERO_POSTER_MOBILE}
+                  alt=""
+                  width={480}
+                  height={852}
+                  fetchPriority="high"
+                  onLoad={() => setHeroPosterReady(true)}
+                  className="absolute inset-0 h-full w-full object-cover object-center"
                 />
-                <source
-                  src="/videos/home-hero-instagram-muted.mp4"
-                  type="video/mp4"
-                  media="(min-width: 640px) and (prefers-reduced-motion: no-preference)"
-                />
-              </video>
+              </picture>
+              {loadHeroVideo ? (
+                <video
+                  aria-hidden="true"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  disablePictureInPicture
+                  preload="none"
+                  onCanPlay={() => setHeroVideoVisible(true)}
+                  onError={() => setHeroVideoVisible(false)}
+                  className={cn(
+                    'absolute inset-0 h-full w-full object-cover object-center opacity-0 transition-opacity duration-[var(--dur-base)] [transition-timing-function:var(--motion-out)]',
+                    heroVideoVisible && 'opacity-100',
+                  )}
+                >
+                  <source
+                    src="/videos/home-hero-instagram-muted-mobile.mp4"
+                    type="video/mp4"
+                    media="(max-width: 639px) and (prefers-reduced-motion: no-preference)"
+                  />
+                  <source
+                    src="/videos/home-hero-instagram-muted.mp4"
+                    type="video/mp4"
+                    media="(min-width: 640px) and (prefers-reduced-motion: no-preference)"
+                  />
+                </video>
+              ) : null}
             </motion.div>
           </motion.div>
         </div>
