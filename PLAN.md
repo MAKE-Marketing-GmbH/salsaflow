@@ -1,9 +1,12 @@
-# PLAN R189 Rest
+# PLAN R189 Rest — ERLEDIGT (26.08.2026)
 
-Contract: WhatsApp darf sichtbare Founder-Kacheln nicht überdecken. FAQ hat keine tote Fläche unter dem Sticky-Foto. Gates, Shots, dreifache Kritik, Commit ohne Push.
+Contract erfuellt:
 
-Items teilen keine Schreibpfade.
+1. wa-founder-clip — DONE. Kollisionssolver in `src/public/site/WhatsAppFloat.tsx`
+   (overflowClipBox, Founder-Kachel-Blocker, `--whatsapp-collision-lift/-slide`).
+2. faq-dead-space — DONE. Sweep 26.08 (Desktop 1440×900 + Scrollstufen) zeigt
+   keine tote Flaeche unter dem Sticky-Foto auf /faq.
+3. Synthese — DONE im Gauntlet-Lauf 26.08: Gates (detect Exit 0, Oxlint Exit 0,
+   scan-ai-slop Rescan), Shots angesehen, Deploy `67069f3` live verifiziert.
 
-1. wa-founder-clip — grok-worker — WhatsAppFloat + Kollisions-Skript
-2. faq-dead-space — opus-builder — FaqPage / subpage kit
-3. Synthese im Ultracode-Lauf — Gates-Datei, Shots, restliche Skripte, Kritik
+Offene Punkte nur noch fuer Dom-Klaerung + DNS-Cutover: siehe PROGRESS.md.

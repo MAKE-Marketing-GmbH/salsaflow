@@ -1,6 +1,22 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-26 22:20 UTC — R-Scroll-Runde deployed (Commit `e96cb18`, main → Vercel). 5 Scroll-Signature-Momente live, Sol/Grok/Kimi-Review-Funde gefixt.
+**Stand:** 2026-08-26 23:20 UTC — Gauntlet-Abschlussrunde deployed (Commit `67069f3`, main → Vercel). Anti-Slop-Gates gruen, Slop-Copy-Funde gefixt.
+**Vorher:** R-Scroll-Runde deployed (Commit `e96cb18`). 5 Scroll-Signature-Momente live, Sol/Grok/Kimi-Review-Funde gefixt.
+
+## Gauntlet-Abschluss 26.08 (main, deployed `67069f3`)
+
+- Anti-Slop-Gates: `detect.mjs` Exit 0 · Oxlint Exit 0 (2 begruendete Ausnahmen
+  in kit.tsx: no-runtime-typeof + SAFETY-Kommentar) · `scan-ai-slop.mjs` Rescan.
+- Copy-Fixes: Eventkalender-Badge amber-100 → Ink-Token · Shows „aus einer Hand"
+  → „vom selben Team geplant und getanzt" · EN „next level" aus CoursePath +
+  Privat-Content entfernt.
+- Sweeps angesehen: /, /events-workshops/eventkalender, /shows-animationen,
+  /privatstunden, /faq (Desktop 1440×900 + Mobile 390×844, static). FAQ-Spalte
+  ohne tote Flaeche, Badge korrekt, keine Regressionen.
+- Live verifiziert nach Deploy: amber 0 Treffer, neue Shows-Copy 1 Treffer,
+  X-Robots-Tag noindex steht, HTTP 200.
+- PLAN.md-Reste geprueft: wa-founder-clip (Kollisionslogik in WhatsAppFloat.tsx
+  vorhanden) und faq-dead-space (Sweep zeigt keine tote Flaeche) sind erledigt.
 **Handoff:** [HANDOFF-2026-08-14.md](/root/clients/salsaflow/worklog/watchdog/HANDOFF-2026-08-14.md)
 **Handoff-ready:** ja
 
