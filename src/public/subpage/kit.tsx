@@ -358,10 +358,16 @@ export function HeroFrame({
   /** Zusatzinhalt unter dem CTA-Block (z. B. Chip-Reihe auf den Stilseiten). */
   children?: ReactNode;
 }) {
-  /* Der Above-the-fold-Hero bleibt statisch. Der Seitenstamm besitzt bereits die eine
-     dokumentuebergreifende Eintrittschoreografie; ein zweiter H1-/CTA-/Bild-Reveal wuerde
-     denselben Inhalt doppelt bewegen und die Seite fast eine Sekunde lang unfertig halten.
-     Below-the-fold-SectionHeads und Karten behalten ihre eigenen gestaffelten Reveals. */
+  /* Der Above-the-fold-Hero bleibt weitgehend statisch. Der Seitenstamm besitzt bereits
+     die eine dokumentuebergreifende Eintrittschoreografie; ein zweiter H1-/CTA-/Bild-Reveal
+     wuerde denselben Inhalt doppelt bewegen und die Seite fast eine Sekunde lang unfertig
+     halten. Below-the-fold-SectionHeads und Karten behalten ihre gestaffelten Reveals.
+     R-Scroll, EINE Ausnahme: die H1-Woerter laufen als sehr schnelle Welle (stagger 0.03,
+     distance 14, sofortiger Start ueber initial/animate statt whileInView — die H1 ist
+     above the fold und darf nicht auf einen Viewport-Trigger warten). Nur wenn `title`
+     ein reiner String OHNE titleAccent ist: RevealWords braucht einen String zum
+     Schneiden, und TitleAccent haengt am gemeinsamen Zeilenumbruch (siehe SectionHead).
+     Reduced Motion handled RevealWords selbst (distance 0, stagger 0). */
   const center = axis === 'center';
   const wide = axis === 'wide';
   const split = axis === 'split';
@@ -395,22 +401,36 @@ export function HeroFrame({
         ? 'calc(var(--nav-h) + 0.5rem)'
         : 'calc(var(--nav-h) + 1.5rem)';
 
-  const heading = (
-    <h1
-      className={cn(
-        // .type-h1 = die EINE H1-Groesse (src/index.css). `wide` behaelt seine groessere
-        // Stufe: dort traegt die H1 die volle Shell allein, das ist Seiten-Charakter,
-        // keine Abweichung von der Ebene.
-        'type-h1 text-[var(--color-ink)]',
-        wide
-          ? 'text-[2.7rem] leading-[0.98] sm:text-[4rem] lg:text-[5rem] max-w-[16em]'
-          /* R205 Runde 2 (Grok, /preise m390): bei 41.6px blieb die Script-Accent-Zeile
-             «Privatstunden.» allein als letzte Zeile stehen — sie war breiter als jede
-             mögliche Mitzeile. Eine Stufe kleiner auf Mobil laesst «und» davor passen. */
-          : cn(MEASURE_XL, 'max-sm:text-[2.25rem] max-sm:leading-[1.06]'),
-        center && 'mx-auto',
-      )}
-    >
+  /* R-Scroll: Die H1-Welle laeuft nur, wenn `title` ein reiner String ohne titleAccent
+     ist — RevealWords schneidet an Leerzeichen, und der Accent haengt am gemeinsamen
+     Zeilenumbruch (Begruendung wie in SectionHead). `immediate` startet die Welle beim
+     Mount statt auf den Viewport-Trigger: die H1 ist above the fold. */
+  const wave = typeof title === 'string' && !titleAccent;
+  const headingClass = cn(
+    // .type-h1 = die EINE H1-Groesse (src/index.css). `wide` behaelt seine groessere
+    // Stufe: dort traegt die H1 die volle Shell allein, das ist Seiten-Charakter,
+    // keine Abweichung von der Ebene.
+    'type-h1 text-[var(--color-ink)]',
+    wide
+      ? 'text-[2.7rem] leading-[0.98] sm:text-[4rem] lg:text-[5rem] max-w-[16em]'
+      /* R205 Runde 2 (Grok, /preise m390): bei 41.6px blieb die Script-Accent-Zeile
+         «Privatstunden.» allein als letzte Zeile stehen — sie war breiter als jede
+         mögliche Mitzeile. Eine Stufe kleiner auf Mobil laesst «und» davor passen. */
+      : cn(MEASURE_XL, 'max-sm:text-[2.25rem] max-sm:leading-[1.06]'),
+    center && 'mx-auto',
+  );
+  const heading = wave ? (
+    <RevealWords
+      as="h1"
+      text={title as string}
+      className={headingClass}
+      stagger={0.03}
+      distance={14}
+      duration={0.38}
+      immediate
+    />
+  ) : (
+    <h1 className={headingClass}>
       {title} {titleAccent ? <TitleAccent>{titleAccent}</TitleAccent> : null}
     </h1>
   );

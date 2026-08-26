@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'motion/react';
+import { motion, useMotionTemplate, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
 import { useLang } from '@/lib/i18n';
@@ -8,7 +8,7 @@ import {
   Reveal,
   RiseReveal,
   type ParallaxStyle,
-  useParallaxStyle,
+  useParallax,
   useReveal,
 } from '@/public/home/motion';
 import { MEASURE_L, MEASURE_M, SECTION_Y_HOME } from '@/public/home/kit';
@@ -55,6 +55,10 @@ function StyleCard({ card, parallax }: { card: OfferCard; parallax: ParallaxStyl
       aria-label={`${card.title}: ${card.hint}`}
       className="group relative isolate flex min-h-[22rem] overflow-hidden rounded-[1.5rem] bg-[var(--color-ink)] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:rounded-[2rem] lg:min-h-[26rem]"
     >
+      {/* R-Scroll: der Scroll-Scale (1.06 -> 1.0) laeuft im selben transform wie der
+          Karten-Parallax (EIN Template in Offer, siehe unten), der Hover-Scale (1.025)
+          bleibt am img — zwei Elemente, keine konkurrierenden transforms auf demselben
+          Knoten. Der Ueberstand (-top-5/+2.5rem) faengt den Scale-Rand mit ab. */}
       <motion.div
         data-scroll-motion={`offer-${card.key}`}
         style={parallax}
@@ -108,7 +112,21 @@ export function Offer() {
   const reducedMotion = useReducedMotion() === true;
   const { item } = useReveal({ stagger: 0.07, distance: reducedMotion ? 0 : 24 });
   const sectionRef = useRef<HTMLElement>(null);
-  const cardParallax = useParallaxStyle(sectionRef, 32);
+  /* R-Scroll: Parallax-y und Scroll-Scale (1.06 -> 1.0 waehrend die Sektion durch den
+     Viewport laeuft) leben in EINEM transform-Template statt als getrennte
+     style-Properties — `scale` neben einem fertigen `transform`-String wuerde in
+     motion/react kollidieren. EIN gemeinsamer MotionValue fuer alle vier Karten
+     (die Sektion ist der Messrahmen, nicht die Einzelkarte).
+     Reduced Motion: useParallax liefert dann konstant 0, der Scale steht auf 1. */
+  const cardY = useParallax(sectionRef, 32);
+  const { scrollYProgress: offerProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+  const cardScale = useTransform(offerProgress, [0, 1], reducedMotion ? [1, 1] : [1.06, 1]);
+  const cardParallax: ParallaxStyle = {
+    transform: useMotionTemplate`translate3d(0, ${cardY}px, 0) scale(${cardScale})`,
+  };
   // R186 (Dom, 20.08.): Der Filter `card.key !== 'privat'` aus R134/9 ist raus. Dom will
   // die Privatstunden auf der Startseite sehen, Desktop als vierte Karte ganz rechts.
   // Die Reihenfolge steht in content.ts: Salsa, Bachata, Heels, Privatstunden.

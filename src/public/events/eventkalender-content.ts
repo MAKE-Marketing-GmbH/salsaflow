@@ -126,7 +126,8 @@ export const EVENTKALENDER = {
         { label: 'Danceflow Night', options: ['1., 3. & 5. Freitag', 'Salsa & Bachata', 'alle Levels'], href: R.danceflow },
         { label: 'Workshops', options: ['wechselnde Themen', 'Level je Ankündigung', 'Termine folgen'], href: R.kontakt },
         { label: 'Anniversary Weekend', options: ['Workshops', 'Shows', 'Socials'], href: R.anniversary },
-        { label: 'Floweekend', options: ['Workshops', 'Social Dancing', 'Community'], href: R.floweekend },
+        // Sol-Review: Termin belegt (Dossier P11), darum hier als Option sichtbar.
+        { label: 'Floweekend', options: ['9.–10. Oktober 2026', 'Workshops', 'Social Dancing'], href: R.floweekend },
       ],
       groupCta: 'Mehr erfahren',
     },
@@ -237,7 +238,7 @@ export const EVENTKALENDER = {
         { label: 'Danceflow Night', options: ['1st, 3rd & 5th Friday', 'Salsa & Bachata', 'all levels'], href: R.danceflow },
         { label: 'Workshops', options: ['changing topics', 'level in each announcement', 'dates to come'], href: R.kontakt },
         { label: 'Anniversary Weekend', options: ['workshops', 'shows', 'socials'], href: R.anniversary },
-        { label: 'Floweekend', options: ['workshops', 'social dancing', 'community'], href: R.floweekend },
+        { label: 'Floweekend', options: ['9–10 October 2026', 'workshops', 'social dancing'], href: R.floweekend },
       ],
       groupCta: 'Learn more',
     },

@@ -29,7 +29,7 @@ import { useLang } from '@/lib/i18n';
 import { HOME_V3 } from '@/public/home/content-v3';
 import { FounderCards } from '@/public/team/FounderRow';
 import { Eyebrow, Shell, BeatMark, CtaArrow, sectionLead } from '@/public/site/primitives';
-import { ClipReveal, Reveal, RevealWords, RiseReveal, useReveal, useParallaxStyle } from '@/public/home/motion';
+import { ClipReveal, CountStat, EASE_OUT, Reveal, RevealWords, RiseReveal, useReveal, useParallaxStyle, VIEWPORT } from '@/public/home/motion';
 import { MEASURE_L, SECTION_Y_HOME } from '@/public/home/kit';
 import { cn } from '@/lib/utils';
 
@@ -145,14 +145,29 @@ export function TeamBlock() {
               Kein `flex-wrap`: das ergab auf 390px ein 2+1-Raster mit verwaister dritter Zeile.
               Mobil daher drei volle Zeilen (Zahlenspalte fix breit, damit die Labels auf einer
               Kante stehen), ab md drei gleich breite Spalten. */}
+          {/* R-Scroll: die Haarlinie liegt nicht mehr als border-t am dl, sondern als
+              eigenes 1px-Element, das sich beim Sichtbarwerden von scaleX 0 -> 1 aufzieht
+              (origin-left, compositor-only). Ein border kann nicht transformieren, darum
+              der Wechsel; Position und Farbe sind identisch (--color-line, Oberkante dl).
+              Reduced Motion: initial schon scaleX 1, die Linie steht sofort voll da.
+              Die drei Zahlen laufen ueber CountStat (CountUp am Sichtbarwerden) — die
+              Regex ^(\D*)(\d+)(\D*)$ traegt '2018', '3' und '~400' (Praefix '~'). */}
           <motion.dl
             variants={item}
-            className="mt-8 grid grid-cols-1 gap-y-3 border-t border-[var(--color-line)] pt-5 md:grid-cols-3 md:gap-x-8 md:gap-y-0"
+            className="relative mt-8 grid grid-cols-1 gap-y-3 pt-5 md:grid-cols-3 md:gap-x-8 md:gap-y-0"
           >
+            <motion.span
+              aria-hidden
+              className="absolute inset-x-0 top-0 h-px origin-left bg-[var(--color-line)]"
+              initial={{ scaleX: reducedMotion ? 1 : 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={VIEWPORT}
+              transition={{ duration: reducedMotion ? 0 : 0.9, ease: EASE_OUT }}
+            />
             {t.stats.map((s) => (
               <div key={s.l} className="flex items-baseline gap-2.5">
                 <dt className="w-16 shrink-0 font-display text-2xl font-extrabold leading-none tracking-[-0.02em] text-[var(--color-ink)] tabular-nums sm:w-auto sm:text-[1.75rem]">
-                  {s.v}
+                  <CountStat value={s.v} />
                 </dt>
                 <dd className="text-sm leading-snug text-[var(--color-ink-muted)]">{s.l}</dd>
               </div>

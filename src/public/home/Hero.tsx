@@ -75,7 +75,7 @@
 // ist (Raphael Punkt 5). Darum `max-[370px]:hidden`. Ab 390 px bleibt `4,9 · 104`
 // im Fold (2 px Reserve). Die langen Facts nur ab sm.
 
-import { motion, useReducedMotion, type Variants } from 'motion/react';
+import { motion, useReducedMotion, useScroll, useTransform, type Variants } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { preload } from 'react-dom';
 import { useLang } from '@/lib/i18n';
@@ -191,6 +191,24 @@ export function Hero() {
   const parallaxDistance = useParallaxDistance();
   const parallax = useParallaxStyle(photoRef, reducedMotion ? 0 : parallaxDistance);
 
+  /* R-Scroll: Exit-Geste beim Wegscrollen — die Fotobox skaliert subtil auf 0.96 und
+     dunkelt auf 0.72 ab, scroll-linked ueber die eigene Austrittsstrecke
+     (offset ['start start','end start']: Fortschritt 0 solange die Boxoberkante im
+     Viewport haengt, 1 wenn die Unterkante oben raus ist).
+     Der Effekt liegt auf der AEUSSEREN Box (photoRef), NICHT auf dem Parallax-Traeger
+     darin: der lebt vom -top-8/+4rem-Ueberstand, ein Scale dort wuerde die Ueberstand-
+     Rechnung (32px > 22px halbe Strecke) verzerren und Kanten freilegen.
+     Gate wie beim Parallax: `parallaxDistance === 0` heisst Mobil (< sm) — dort klebt
+     das Foto full-bleed an der Fensterkante und traegt die H1, ein Scale wuerde beim
+     Scrollen Papierstreifen an den Kanten freilegen. Reduced Motion ebenso aus. */
+  const { scrollYProgress: photoExit } = useScroll({
+    target: photoRef,
+    offset: ['start start', 'end start'],
+  });
+  const exitActive = !reducedMotion && parallaxDistance > 0;
+  const photoExitScale = useTransform(photoExit, [0, 1], exitActive ? [1, 0.96] : [1, 1]);
+  const photoExitOpacity = useTransform(photoExit, [0, 1], exitActive ? [1, 0.72] : [1, 1]);
+
   /* R209 (Raphael 23.08. 20:20): "Home-Erstbild (und Mobil-Erstbild) ist immer noch ein
      Fade-Wrack. Hero-Erstframe ohne Opacity-Fade — Foto+Rot sofort."
      Beleg worklog/shots/CRITIC-0823-2010/home-1440-fold0.png gegen home-1440-top.png.
@@ -226,13 +244,12 @@ export function Hero() {
     hidden: { opacity: 1, y: 0 },
     show: { opacity: 1, y: 0 },
   };
-  // Das Foto trug bisher denselben Fade, nur ohne y-Versatz (der alte Grund: auf Mobil klebt
-  // es full-bleed an der Fensterkante, ein 14px-Versatz legte dort oben Papier frei). Der
-  // Versatz bleibt auch jetzt tabu — das Foto steht schlicht sofort.
-  const photoItem: Variants = {
-    hidden: { opacity: 1 },
-    show: { opacity: 1 },
-  };
+  // Review (Grok F4): `variants` an der Fotobox gestrichen — sie war nur ein No-Op
+  // (opacity 1 -> 1), und eine Opacity-Variant wuerde den scroll-linked Wert von
+  // `style={{ opacity: photoExitOpacity }}` beim Variant-Commit ueberschreiben. Die Box
+  // gehoert damit nicht mehr zur Eintrittschoreografie: das Foto steht sofort und
+  // allein, der y-Versatz bleibt wie immer tabu (Mobil klebt es full-bleed an der
+  // Fensterkante, 14px legten dort oben Papier frei).
 
   // --hero-photo-h: EINE Zahl fuer die mobile Fotohoehe UND den Textversatz darunter
   // (Rechenweg im Kommentar am Grid). Steht als Arbitrary Property auf der Section, weil
@@ -605,11 +622,14 @@ export function Hero() {
               Material stehen, egal wohin der Scroll das Bild schiebt. Genau das meint der
               Hinweis "das Element braucht Ueberstand" in useParallax (motion.tsx:156-159).
 
-              Die Deckkraft-Signatur bleibt: `photoItem` faehrt weiter rein ueber opacity,
-              ohne y — die Begruendung dafuer steht unveraendert bei `photoItem`. */}
+              Keine Eintritts-Variante mehr an dieser Box (Kommentar dort): sie steht
+              sofort, allein der Exit uebernimmt die Bewegung. */}
           <motion.div
             ref={photoRef}
-            variants={photoItem}
+            /* R-Scroll: scale + opacity direkt auf dieser Box (compositor-only). Der
+               Ueberstand-Traeger darin bleibt unberuehrt, sein Koordinatensystem
+               skaliert als Ganzes mit — keine Kante wird frei. */
+            style={{ scale: photoExitScale, opacity: photoExitOpacity }}
             className="absolute inset-x-0 top-0 z-0 h-[var(--hero-photo-h)] overflow-hidden rounded-b-[var(--radius-media)] sm:relative sm:mx-8 sm:h-auto sm:aspect-[16/9] sm:rounded-[var(--radius-media)] lg:mr-8 lg:aspect-auto lg:h-full lg:min-h-[32rem] lg:rounded-[var(--radius-media)]"
           >
             {/* Lesbarkeits-Verlauf, NUR unter sm (ab sm liegt kein Text auf dem Foto und ein

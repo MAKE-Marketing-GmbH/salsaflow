@@ -135,7 +135,7 @@ export function SiteFooter({
             </p>
             <p className="mt-1.5 text-sm leading-relaxed text-[var(--color-ink-muted)]">
               {lang === 'de'
-                ? 'Komm zur gratis Schnupperstunde oder schreib uns kurz.'
+                ? 'Komm zur Gratis Schnupperstunde oder schreib uns kurz.'
                 : 'Join a free trial class or send us a quick message.'}
             </p>
           </div>

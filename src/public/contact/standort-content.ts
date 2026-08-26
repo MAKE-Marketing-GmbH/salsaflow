@@ -113,6 +113,9 @@ export const STANDORT = {
       body: 'Die Nähe zum Bahnhof ist nicht nur ein Detail. Sie ist der Grund, warum Menschen nach Arbeit, Schule oder Uni leichter regelmässig kommen.',
       infos: [
         { label: 'Adresse', value: 'Salsaflow Dance Company GmbH, Elisabethenanlage 7, 4051 Basel' },
+        // Sol-Review: Öffnungszeiten fehlten sitewide; Quelle Onboarding `oeffnungszeiten`
+        // (Mo–Sa 08–18, So geschlossen). Das sind Erreichbarkeitszeiten, Kurse laufen abends.
+        { label: 'Erreichbarkeit', value: 'Montag bis Samstag, 08:00–18:00 Uhr. Sonntag geschlossen. Kurse finden auch abends statt — siehe Kursplan.' },
         { label: 'Orientierung', value: 'Direkt am Bahnhof Basel SBB, nur wenige Gehminuten entfernt.' },
         { label: 'Mit dem ÖV', value: 'Zug, Tram und Bus halten am Bahnhof SBB. Von dort bist du in wenigen Minuten bei uns.' },
         { label: 'Parken', value: 'Parkplätze am Bahnhof sind begrenzt. Am entspanntesten kommst du mit dem ÖV.' },
@@ -223,6 +226,7 @@ export const STANDORT = {
       body: 'The closeness to the station is not just a detail. It is the reason people come more easily and regularly after work, school or uni.',
       infos: [
         { label: 'Address', value: 'Salsaflow Dance Company GmbH, Elisabethenanlage 7, 4051 Basel' },
+        { label: 'Availability', value: 'Monday to Saturday, 08:00–18:00. Closed on Sunday. Classes also run in the evening — see the schedule.' },
         { label: 'Orientation', value: 'Right by Basel SBB station, only a few minutes on foot.' },
         { label: 'By public transport', value: 'Trains, trams and buses stop at Basel SBB. From there you reach us in a few minutes.' },
         { label: 'Parking', value: 'Parking near the station is limited. The easiest way is by public transport.' },

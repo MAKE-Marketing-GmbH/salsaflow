@@ -551,7 +551,7 @@ const bachata = {
     },
     closing: {
       title: 'Probiere Bachata in einer',
-      titleAccent: 'Gratis-Schnupperstunde',
+      titleAccent: 'Gratis Schnupperstunde',
       body: 'Starte mit einer Schnupperstunde oder öffne direkt den Kursplan. Wenn du unsicher bist, welcher Kurs passt, frag uns kurz. Lieber richtig starten als lange überlegen.',
       primary: { label: 'Bachata Kursplan ansehen', href: R.bachataPlan },
       secondary: { label: 'Bachata Schnupperstunde buchen', href: R.schnupper },

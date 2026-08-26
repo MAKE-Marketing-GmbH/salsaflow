@@ -177,7 +177,7 @@ export const HOME = defineHomeContent({
     about: {
       eyebrow: 'Wer wir sind',
       title: 'Vier Freunde, eine Tanzfläche.',
-      body: 'Wir sind vier Tänzerinnen und Tänzer aus Basel. 2018 haben wir Salsaflow gegründet, weil uns die steifen Tanzschulen fehlten. Heute sind wir drei Studios am Bahnhof Basel SBB mit rund 40 Kursen pro Woche. Bei uns lernst du tanzen und findest gleichzeitig neue Leute.',
+      body: 'Wir sind vier Tänzerinnen und Tänzer aus Basel. 2018 haben wir Salsaflow gegründet, weil die steifen Tanzschulen nichts für uns waren. Heute sind wir drei Studios am Bahnhof Basel SBB mit rund 40 Kursen pro Woche. Bei uns lernst du tanzen und findest gleichzeitig neue Leute.',
       link: 'Lern uns kennen',
     },
     offer: {

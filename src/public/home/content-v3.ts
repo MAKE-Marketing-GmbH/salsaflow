@@ -215,7 +215,7 @@ export const HOME_V3 = {
       title: 'Fragen vor deiner ersten Stunde.',
       items: [
         { q: 'Was ist der Unterschied zwischen Salsa, Bachata und Heels?', a: 'Salsa ist ein schneller, fröhlicher Paartanz mit vielen Drehungen, gesellig und voller Energie. Bachata ist langsamer und weicher, kommt aus der Dominikanischen Republik und ist leicht zu lernen. Heels tanzt du auf Absätzen, meist allein, und übst Haltung und Ausdruck. Weisst du nicht, was passt, probier in der Gratis-Stunde einfach eins aus.' },
-        { q: 'Kann ich ohne Partner kommen?', a: 'Ja, komm einfach allein zu uns. Im Kurs wechseln wir die Partner regelmässig durch, so tanzt du mit allen und lernst schneller. Die allermeisten kommen sowieso ohne festen Partner zu uns.' },
+        { q: 'Kann ich ohne Partner kommen?', a: 'Ja, komm einfach allein zu uns. Im Kurs wechseln wir die Partner regelmässig durch, so tanzt du im Lauf eines Abends mit vielen verschiedenen Menschen. Viele melden sich ohne festen Partner an.' },
         { q: 'Ich habe noch nie getanzt. Geht das?', a: 'Ja. Unsere Beginner-Kurse starten ohne Vorkenntnisse. Wir zeigen dir alles ruhig Schritt für Schritt, in deinem eigenen Tempo.' },
         { q: 'Ist die Schnupperstunde wirklich gratis?', a: 'Ja, die erste Stunde ist komplett kostenlos und unverbindlich. Du schaust in Ruhe rein, tanzt mit und entscheidest erst danach, ob du einen Kurs buchst. Kein Abo, keine versteckten Kosten.' },
         { q: 'Was soll ich anziehen?', a: 'Zieh bequeme Kleidung an, in der du dich gut bewegen kannst. Saubere Schuhe mit glatter Sohle reichen für den Anfang. Tanzschuhe brauchst du erst viel später, wenn überhaupt.' },
@@ -352,7 +352,7 @@ export const HOME_V3 = {
       title: 'Questions before your first class.',
       items: [
         { q: 'What is the difference between Salsa, Bachata and Heels?', a: 'Salsa is a fast, joyful partner dance with lots of turns, social and full of energy. Bachata is slower and softer, comes from the Dominican Republic and is easy to learn. Heels is danced on heels, mostly solo, and trains posture and expression. Not sure what fits? Just try one in the free class.' },
-        { q: 'Can I come without a partner?', a: 'Yes, just come alone. In class we rotate partners regularly, so you dance with everyone and learn faster. Most people come without a fixed partner anyway.' },
+        { q: 'Can I come without a partner?', a: 'Yes, just come alone. In class we rotate partners regularly, so you dance with many different people over the evening. Many sign up without a fixed partner.' },
         { q: 'I have never danced. Is that ok?', a: 'Yes. Our beginner classes start with no prior experience. We show you everything calmly, step by step and at your own pace.' },
         { q: 'Is the trial class really free?', a: 'Yes. The first class is free and without obligation. Join the class, see how it feels and decide afterwards whether you want to enrol.' },
         { q: 'What should I wear?', a: 'Wear comfy clothes you can move in well. Clean shoes with a smooth sole are enough at the start. You only need dance shoes much later, if at all.' },

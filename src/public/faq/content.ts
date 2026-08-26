@@ -150,11 +150,11 @@ export const FAQ_CONTENT = {
             },
             {
               q: 'Kann ich ohne Tanzpartner kommen?',
-              a: 'Ja, und die allermeisten kommen ohne. Du meldest dich allein an, im Kurs wird auf eine gute Balance zwischen Leadern und Followern geachtet und die Partner wechseln regelmässig durch. So tanzt du mit allen und lernst schneller, als wenn du immer mit derselben Person übst.',
+              a: 'Ja, viele kommen ohne. Du meldest dich allein an, im Kurs wird auf eine gute Balance zwischen Leadern und Followern geachtet und die Partner wechseln regelmässig durch. So tanzt du im Lauf eines Abends mit vielen verschiedenen Menschen.',
             },
             {
               q: 'Passe ich da rein, auch von meinem Alter her?',
-              a: 'Ja. Bei uns tanzen Menschen aller Altersgruppen nebeneinander im selben Kurs, von Studierenden bis weit darüber hinaus. Beim Partnerwechsel tanzt du im Lauf eines Abends ohnehin mit fast allen. Du wirst vom ersten Abend an herzlich aufgenommen.',
+              a: 'Ja. Bei uns tanzen Erwachsene jeden Alters nebeneinander im selben Kurs, von Studierenden bis weit darüber hinaus (Einstieg ab etwa 12 Jahren). Beim Partnerwechsel tanzt du im Lauf eines Abends ohnehin mit fast allen. Du wirst vom ersten Abend an herzlich aufgenommen.',
             },
             {
               q: 'Wo buche ich den Heels-Kurs?',
@@ -348,7 +348,7 @@ export const FAQ_CONTENT = {
             },
             {
               q: 'Do I fit in, also in terms of my age?',
-              a: 'Yes. People of all ages dance with us. You are welcomed warmly from the very first evening.',
+              a: 'Yes. Adults of all ages dance with us, from students to well beyond (starting from around age 12). You are welcomed warmly from the very first evening.',
             },
             {
               q: 'Where do I book the Heels course?',
@@ -414,11 +414,11 @@ export const FAQ_CONTENT = {
           items: [
             {
               q: 'What does a course cost?',
-              a: 'You find all current prices on the prices page.',
+              a: 'The price covers the whole course cycle, meaning 8 lessons of 60 minutes each, not per evening. There are also workshops, passes and private lessons with their own prices. All current amounts are on the prices page.',
             },
             {
               q: 'Are there student prices?',
-              a: 'Yes. Pupils and students get reduced prices. The details are on the prices page.',
+              a: 'Yes. For pupils and students a course cycle costs CHF 160 instead of 190, for couples CHF 270 instead of 320. The other offers have their own reduced rates, all listed on the prices page.',
             },
             {
               q: 'What does the Danceflow Night cost?',

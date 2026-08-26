@@ -101,7 +101,9 @@ export const FLOWEEKEND = defineFloweekendContent({
       lead: 'Mehr Zeit, mehr Themen, mehr Menschen: Das Floweekend ist für alle, die tiefer in Salsa, Bachata und Community eintauchen wollen.',
       primary: { label: 'Floweekend anfragen', href: R.kontakt },
       secondary: { label: 'Frage zum Level stellen', href: R.kontakt },
-      microcopy: 'Programm, Level und Preise folgen mit dem nächsten bestätigten Termin.',
+      // Sol-Review: der Termin ist belegt (Firmen-Dossier P11: FLOWeekend 9.–10.10.2026,
+      // Onboarding: "FLOWEEKEND kommt im Oktober") — nur Programm/Preise sind noch offen.
+      microcopy: 'Nächster Termin: 9.–10. Oktober 2026. Programm, Level und Preise folgen.',
       // Runde 3, Issue 3: events-hero-1400 lag gleichzeitig auf /events/anniversary,
       // /events/eventkalender und hier — drei Event-Unterseiten mit demselben Aufmacher.
       // Floweekend bekommt einen eigenen Social-Moment aus der Party-Strecke.
@@ -217,7 +219,7 @@ export const FLOWEEKEND = defineFloweekendContent({
       lead: 'More time, more topics, more people: the Floweekend is for everyone who wants to dive deeper into Salsa, Bachata and community.',
       primary: { label: 'Ask about Floweekend', href: R.kontakt },
       secondary: { label: 'Ask about your level', href: R.kontakt },
-      microcopy: 'The programme, levels and prices will be published with the next confirmed date.',
+      microcopy: 'Next date: 9–10 October 2026. Programme, levels and prices will follow.',
       // R188 E7: siehe Kommentar in der deutschen Fassung — party-52 statt party-29,
       // weil nur dort alle Koepfe in den schmalen Band-Ausschnitt passen.
       image: {

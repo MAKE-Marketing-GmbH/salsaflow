@@ -1,10 +1,14 @@
 import {
   motion,
+  useAnimationFrame,
   useInView,
   useMotionTemplate,
+  useMotionValue,
   useReducedMotion,
   useScroll,
+  useSpring,
   useTransform,
+  useVelocity,
   type MotionValue,
   type Variants,
 } from 'motion/react';
@@ -234,6 +238,10 @@ export type RevealWordsProps = {
   distance?: number;
   duration?: number;
   instant?: boolean;
+  /** R-Scroll: startet die Welle sofort beim Mount (initial/animate) statt auf den
+   *  Viewport-Trigger zu warten. Fuer Above-the-fold-H1s der Unterseiten-Heroes:
+   *  `instant` waere gar keine Animation, `whileInView` ein spaeter Start. */
+  immediate?: boolean;
 };
 
 export function RevealWords({
@@ -244,9 +252,16 @@ export function RevealWords({
   distance = 18,
   duration = 0.42,
   instant = false,
+  immediate = false,
 }: RevealWordsProps) {
   const reduced = useReducedMotion() === true;
-  const animated = !instant;
+  /* R-Scroll-Review (Grok F1/F5): `immediate` bei Reduced Motion == `instant` — gar keine
+     Animation. Und im `immediate`-Zweig bleibt die Opacity KONSTANT 1: der hidden-Zustand
+     steht im prerenderten HTML (SSR schreibt `initial`), eine ATF-H1 mit opacity:0 wäre
+     ohne JS unsichtbar (der R209-Fall). Nur der y-Versatz animiert — der ist ohne JS
+     harmlos (Text steht dann 14px tiefer, aber sichtbar). */
+  const still = instant || (immediate && reduced);
+  const animated = !still;
   const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
   const container: Variants = {
     hidden: {},
@@ -255,7 +270,7 @@ export function RevealWords({
   const word: Variants = animated
     ? {
         hidden: {
-          opacity: 0,
+          opacity: immediate ? 1 : 0,
           transform: `translate3d(0, ${reduced ? 0 : Math.min(distance, 24)}px, 0)`,
         },
         show: {
@@ -276,8 +291,12 @@ export function RevealWords({
         aria-hidden
         className="inline-flex flex-wrap gap-x-[0.16em]"
         variants={container}
-        initial={instant ? 'show' : 'hidden'}
-        {...(instant ? { animate: 'show' } : { whileInView: 'show', viewport: VIEWPORT })}
+        initial={still ? 'show' : 'hidden'}
+        {...(still
+          ? { animate: 'show' }
+          : immediate
+            ? { animate: 'show' }
+            : { whileInView: 'show', viewport: VIEWPORT })}
       >
         {words.map((wordText, index) => (
           <motion.span
@@ -326,10 +345,14 @@ export function useCountUp(target: number, duration = 0.9) {
 }
 
 export function CountStat({ value, className }: { value: string; className?: string }) {
+  /* R-Scroll: Rules-of-Hooks-Fix. Vorher stand `if (!match) return ...` VOR useCountUp —
+     ein Hook nach einem early return. Solange `value` stabil ist, fiel das nie auf, aber
+     ein Wechsel von "2018" auf z.B. "Basel" haette die Hook-Reihenfolge zerrissen.
+     Der Hook laeuft jetzt IMMER (Fallback-Target 0), der Fallback rendert danach. */
   const match = value.match(/^(\D*)(\d+)(\D*)$/);
+  const { ref, val } = useCountUp(match ? Number.parseInt(match[2], 10) : 0);
   if (!match) return <span className={className}>{value}</span>;
-  const [, prefix, digits, suffix] = match;
-  const { ref, val } = useCountUp(Number.parseInt(digits, 10));
+  const [, prefix, , suffix] = match;
   return (
     <span ref={ref} className={className}>
       {prefix}
@@ -339,6 +362,14 @@ export function CountStat({ value, className }: { value: string; className?: str
   );
 }
 
+/* R-Scroll: das Band laeuft nicht mehr als fixe Keyframe-Animation, sondern per
+   useAnimationFrame und koppelt sich leicht an die Scrollgeschwindigkeit: Grundtempo ist
+   unveraendert 50% pro `duration` Sekunden, bei schnellem Scrollen steigt der Faktor
+   gleitend bis 2.5x (Spring glaettet die rohe px/s-Velocity, sonst zuckt das Band bei
+   jedem Lenis-Impuls). 3000 px/s als Normierung: das ist ein zuegiger Flick auf Desktop —
+   normales Lesescrollen (~600 px/s) hebt den Faktor nur um ~0.3, bleibt also subtil.
+   API (children, className, duration) und der Reduced-Motion-Zweig (statisches,
+   seitlich scrollbares Band, kein rAF) sind unveraendert. */
 export function Marquee({
   children,
   className,
@@ -349,13 +380,35 @@ export function Marquee({
   duration?: number;
 }) {
   const reduced = useReducedMotion() === true;
+  const rootRef = useRef<HTMLDivElement>(null);
+  /* Review (Grok F2): rAF nur, solange das Band im Viewport steht — offscreen weiterlaufen
+     kostet Frames ohne sichtbaren Effekt. margin haelt das Band schon kurz vor Eintritt
+     aktiv, damit es nie stehend in den Viewport rutscht. */
+  const inView = useInView(rootRef, { margin: '200px 0px' });
+  const x = useMotionValue(0);
+  const { scrollY } = useScroll();
+  const velocity = useVelocity(scrollY);
+  const smoothVelocity = useSpring(velocity, { damping: 40, stiffness: 200 });
+  const transform = useMotionTemplate`translate3d(${x}%, 0, 0)`;
+
+  useAnimationFrame((_, delta) => {
+    if (reduced || !inView) return;
+    // Review (Grok F3): delta klemmen — nach Tab-Rueckkehr liefert rAF ein Riesen-Delta,
+    // das Band wuerde springen. 48ms = max. ~3 Frames Nachholung, danach normal weiter.
+    const dt = Math.min(delta, 48) / 1000;
+    // Faktor 1..2.5, richtungsunabhaengig — das Band laeuft immer vorwaerts, nur schneller.
+    const factor = 1 + Math.min(Math.abs(smoothVelocity.get()) / 3000, 1) * 1.5;
+    const base = 50 / duration; // Prozent pro Sekunde bei Faktor 1
+    let next = x.get() - base * factor * dt;
+    // Wrap bei -50%: die zweite Kind-Kopie steht dann exakt dort, wo die erste begann.
+    // Mit geklemmtem dt ist ein einzelnes += 50 immer ausreichend (Schritt << 50).
+    if (next <= -50) next += 50;
+    x.set(next);
+  });
+
   return (
-    <div aria-hidden className={`${reduced ? 'overflow-x-auto' : 'overflow-hidden'} ${className ?? ''}`}>
-      <motion.div
-        className="flex w-max"
-        animate={reduced ? undefined : { x: ['0%', '-50%'] }}
-        transition={reduced ? undefined : { duration, ease: 'linear', repeat: Infinity }}
-      >
+    <div ref={rootRef} aria-hidden className={`${reduced ? 'overflow-x-auto' : 'overflow-hidden'} ${className ?? ''}`}>
+      <motion.div className="flex w-max" style={reduced ? undefined : { transform }}>
         {children}
         {children}
       </motion.div>

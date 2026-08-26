@@ -153,6 +153,17 @@ function localBusinessNode() {
       addressLocality: 'Basel',
       addressCountry: 'CH',
     },
+    // Kunden-Onboarding (make-onboarding-2026-08-07.json, `oeffnungszeiten`):
+    // Mo–Sa 08:00–18:00, Sonntag geschlossen. Erreichbarkeits-/Bürozeiten — die
+    // Kurszeiten selbst stehen im Kursplan (Schedule-Schema weiter unten).
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        opens: '08:00',
+        closes: '18:00',
+      },
+    ],
     sameAs: ['https://www.instagram.com/salsaflowdc'],
   } satisfies JsonLdNode;
 }
