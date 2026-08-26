@@ -152,7 +152,7 @@ html {
 
 @keyframes sf-page-in {
   from {
-    opacity: 0.42;
+    opacity: 1;
     transform: translate3d(0, var(--page-enter-y), 0);
   }
   to {
@@ -170,7 +170,7 @@ html {
 
 @keyframes sf-header-in {
   from {
-    opacity: 0;
+    opacity: 1;
     transform: translate3d(0, -24px, 0);
   }
   to {
@@ -228,7 +228,7 @@ html {
 
 ::view-transition-new(sf-site-header) {
   transform-origin: 50% 0;
-  animation: sf-header-in var(--dur-header-enter) var(--motion-enter) var(--delay-header-enter) both;
+  animation: sf-header-in var(--dur-header-enter) var(--motion-enter) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -353,12 +353,11 @@ body {
   display: block;
   overflow: hidden;
   background: var(--color-paper-warm);
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
   visibility: hidden;
   transform: translate3d(0, 1.5rem, 0);
   transition:
-    opacity var(--dur-base) var(--motion-out),
     transform var(--dur-base) var(--motion-out),
     visibility 0s linear var(--dur-base);
 }
@@ -377,7 +376,6 @@ body {
   visibility: visible;
   transform: translate3d(0, 0, 0);
   transition:
-    opacity var(--dur-base) var(--motion-out),
     transform var(--dur-base) var(--motion-out),
     visibility 0s;
 }
@@ -458,15 +456,11 @@ body {
 
   [data-mobile-menu-panel] {
     transform: none;
-    transition:
-      opacity var(--dur-fast) var(--motion-out),
-      visibility 0s linear var(--dur-fast);
+    transition: visibility 0s linear var(--dur-fast);
   }
 
   .t-acc[data-open='true'] > [data-mobile-menu-panel] {
-    transition:
-      opacity var(--dur-fast) var(--motion-out),
-      visibility 0s;
+    transition: visibility 0s;
   }
 
   .t-acc[data-open='true'] [data-mobile-menu-primary] > *,

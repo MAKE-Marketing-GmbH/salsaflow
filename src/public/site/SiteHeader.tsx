@@ -13,6 +13,10 @@ import { HOME } from '@/public/home/content';
 type Leaf = { label: string; href: string };
 type NavItem = { label: string; href?: string; children?: Leaf[] };
 
+// Das Vollbild-Menü blendet in 240 ms aus. Der kleine Puffer stellt sicher, dass der
+// Browser erst danach den dokumentübergreifenden View-Transition-Snapshot aufnimmt.
+const MOBILE_MENU_EXIT_MS = 260;
+
 export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean } = {}) {
   const { lang, setLang } = useLang();
   const c = HOME[lang];
@@ -31,6 +35,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navigationTimerRef = useRef<number | undefined>(undefined);
   const mobileGroupRefs = useRef(new Map<string, HTMLButtonElement>());
   const subnavBackRef = useRef<HTMLButtonElement>(null);
 
@@ -39,6 +44,40 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
     setOpenGroup(null);
     menuButtonRef.current?.focus();
   }, []);
+
+  const navigateAfterMobileMenu = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!open || event.defaultPrevented) return;
+
+      const opensElsewhere =
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        event.currentTarget.target === '_blank' ||
+        event.currentTarget.hasAttribute('download');
+
+      if (opensElsewhere) {
+        closeMenu();
+        return;
+      }
+
+      event.preventDefault();
+      const href = event.currentTarget.href;
+      setOpen(false);
+      setOpenGroup(null);
+      window.clearTimeout(navigationTimerRef.current);
+
+      const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 0
+        : MOBILE_MENU_EXIT_MS;
+      navigationTimerRef.current = window.setTimeout(() => window.location.assign(href), delay);
+    },
+    [closeMenu, open],
+  );
+
+  useEffect(() => () => window.clearTimeout(navigationTimerRef.current), []);
 
   const openMobileGroup = (label: string) => {
     setOpenGroup(label);
@@ -268,7 +307,12 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
           className="t-acc w-full overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-[var(--color-paper-warm)] text-[var(--color-ink)] shadow-[0_8px_28px_rgba(17,17,17,0.1)] data-[open=true]:overflow-visible data-[open=true]:rounded-none data-[open=true]:border-transparent data-[open=true]:shadow-none lg:overflow-visible lg:rounded-full"
         >
           <div className="t-acc-head h-12 gap-3 pl-3.5 pr-1.5 sm:h-14 sm:gap-4 sm:pl-4 sm:pr-3">
-          <a href="/" className="flex min-h-11 shrink-0 items-center" aria-label={de ? 'Salsaflow Dance Company - Startseite' : 'Salsaflow Dance Company - Home'}>
+          <a
+            href="/"
+            onClick={navigateAfterMobileMenu}
+            className="flex min-h-11 shrink-0 items-center"
+            aria-label={de ? 'Salsaflow Dance Company - Startseite' : 'Salsaflow Dance Company - Home'}
+          >
             {/* Immer die dunkle Wortmarke: die Leiste sitzt sitewide auf Cream (die weisse
                 Variante gehoerte zum entfallenen Glas-Zustand auf dem dunklen Hero-Foto). */}
             <img
@@ -387,7 +431,12 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
                     <ChevronRight size={16} strokeWidth={2} aria-hidden />
                   </button>
                 ) : item.href ? (
-                  <MobileLink key={item.href} item={{ label: item.label, href: item.href }} active={leafActive(item.href)} onClick={closeMenu} />
+                  <MobileLink
+                    key={item.href}
+                    item={{ label: item.label, href: item.href }}
+                    active={leafActive(item.href)}
+                    onClick={navigateAfterMobileMenu}
+                  />
                 ) : null,
               )}
 
@@ -403,7 +452,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
                   genau EIN Kursplan/Schnupper-Paar im Bild. */}
               <a
                 href="/kursplan"
-                onClick={closeMenu}
+                onClick={navigateAfterMobileMenu}
                 className="btn-base btn-primary mt-2 px-4 py-3 text-base"
               >
                 {c.cta.plan}
@@ -411,7 +460,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
               </a>
               <a
                 href="/schnupperstunde"
-                onClick={closeMenu}
+                onClick={navigateAfterMobileMenu}
                 className="mt-1 inline-flex items-center justify-center px-4 py-3 text-base font-semibold text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-ink)]"
               >
                 {c.cta.trial}
@@ -446,7 +495,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
                   <a
                     key={ch.href}
                     href={ch.href}
-                    onClick={closeMenu}
+                    onClick={navigateAfterMobileMenu}
                     aria-current={leafActive(ch.href) ? 'page' : undefined}
                     className={cn(
                       't-hover flex min-h-11 items-center rounded-[var(--radius-chip)] px-2 py-2 text-base font-medium hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)]',
@@ -682,7 +731,15 @@ function DesktopDropdown({
   );
 }
 
-function MobileLink({ item, active, onClick }: { item: Leaf; active: boolean; onClick: () => void }) {
+function MobileLink({
+  item,
+  active,
+  onClick,
+}: {
+  item: Leaf;
+  active: boolean;
+  onClick: React.MouseEventHandler<HTMLAnchorElement>;
+}) {
   return (
     <a
       href={item.href}

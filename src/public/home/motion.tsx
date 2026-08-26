@@ -274,7 +274,7 @@ export function RevealWords({
       <span className="sr-only">{text}</span>
       <motion.span
         aria-hidden
-        className="inline-flex flex-wrap"
+        className="inline-flex flex-wrap gap-x-[0.16em]"
         variants={container}
         initial={instant ? 'show' : 'hidden'}
         {...(instant ? { animate: 'show' } : { whileInView: 'show', viewport: VIEWPORT })}
@@ -286,7 +286,6 @@ export function RevealWords({
             className="inline-block min-w-0 whitespace-normal"
           >
             {wordText}
-            {index < words.length - 1 ? ' ' : ''}
           </motion.span>
         ))}
       </motion.span>
