@@ -1,9 +1,29 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-17 05:22 UTC — Geil-Welle Zwischenstand. S0–S7 plus Runden bis R77 genommen. R78 Buchung-Karte offen. Preview-Push auf Branch `geil-welle`. Nicht Production.
-**Session:** Watchdog Grok + Worker Kimi in `29e7fd18`
+**Stand:** 2026-08-26 22:20 UTC — R-Scroll-Runde deployed (Commit `e96cb18`, main → Vercel). 5 Scroll-Signature-Momente live, Sol/Grok/Kimi-Review-Funde gefixt.
 **Handoff:** [HANDOFF-2026-08-14.md](/root/clients/salsaflow/worklog/watchdog/HANDOFF-2026-08-14.md)
 **Handoff-ready:** ja
+
+## R-Scroll-Runde 26.08 (main, deployed `e96cb18`)
+
+- 5 Scroll-Momente (motion/react, reduced-motion-gated, compositor-only):
+  Hero-Exit (Scale 0.96 + Dim, nur Desktop) · Stil-Karten-Zoom 1.06→1.0 ·
+  Stats-Linie + CountUp (TeamBlock) · Velocity-Marquee (Code drin, CommunityBand
+  weiter ungenutzt) · H1-Wort-Welle auf Unterseiten-Heroes (nur reine String-Titel).
+- Grok-Review-Fixes: H1 steht im Prerender mit opacity:1 (kein R209-Rückfall),
+  Marquee-rAF nur in-view + Delta 48ms geklemmt, photoItem-No-Op-Variant weg
+  (keine doppelte opacity-Bindung am Hero-Foto).
+- Sol-Content-Fixes: FLOWeekend 9.–10.10.2026 sitewide · Erreichbarkeit Mo–Sa 08–18
+  auf /standort (DE+EN) · Alter „ab ~12" in FAQ · Absolutclaims entschärft ·
+  EN-FAQ-Preise auf DE-Niveau · „Gratis Schnupperstunde" vereinheitlicht.
+- SEO: X-Robots-Tag noindex host-basiert auf salsaflow-dc.vercel.app (live verifiziert),
+  openingHoursSpecification im LocalBusiness-Schema.
+- Verifiziert: Typecheck, Build, Desktop+Mobile-Sweeps (worklog/shots/RSCROLL-CHECK,
+  RSCROLL-MOBILE), Live-Smoke nach Deploy (200, Header, H1 sichtbar).
+- OFFEN für Dom-Klärung (nicht raten): Studiozahl 3 (Onboarding-Wort) vs. 2
+  (Dossier-Beleg) · Mietpreise CHF 50/60 übernehmen? · Teamzahlen 37 additiv vs. 25.
+- WICHTIG nach DNS-Cutover: `ASSET_ORIGIN` (seo-config.ts) und `socialImage`
+  (prerender.mjs) von vercel.app auf www.salsaflow-dc.com umstellen.
 
 ## Geil-Welle 14.08 (Worktree `/root/clients/salsaflow-w1`, Branch `geil-welle`)
 
