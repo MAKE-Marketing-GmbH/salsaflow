@@ -1,6 +1,6 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-27 13:10 UTC — Weltklasse-Kritik-Runde (4 Kritiker, 1200+ Shots), Fixes gebaut, Gates gruen, Deploy folgt in diesem Commit.
+**Stand:** 2026-08-27 13:30 UTC — Weltklasse-Runde vollstaendig deployed: Hauptwelle `a606b39` + UX-Nachzuegler `48e9c4e` (DayBar mobil sticky, Eventkalender-Endzeile, Maps-Radius), live verifiziert.
 **Vorher:** Gauntlet-Abschlussrunde deployed (Commit `67069f3`, main → Vercel).
 
 ## Weltklasse-Runde 27.08 (Review → Fixliste → Bauwellen)
