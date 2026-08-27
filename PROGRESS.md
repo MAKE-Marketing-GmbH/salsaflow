@@ -1,6 +1,6 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-27 17:00 UTC — Redaktionsschicht bereit zum Deploy. Live-Admin-Passwort auf den Seed-Default zurueckgesetzt (`admin@salsaflow-dc.com` / `salsaflow-admin-2026`); oeffentliche Events-API liefert vor dem Deploy noch 0, weil die DB-Verdrahtung noch nicht live ist.
+**Stand:** 2026-08-27 17:05 UTC — Redaktionsschicht live (`1ee1bbf`). Admin-Login `admin@salsaflow-dc.com` / `salsaflow-admin-2026`. Oeffentliche APIs lesen die DB (`Cache-Control: no-store`); Event anlegen erscheint sofort, Kaufweg bleibt 410.
 **Vorher:** Weltklasse-Runde deployed (`a606b39` + `48e9c4e`).
 
 ## Redaktion 27.08 (Backend fuer den Tanzschul-Betrieb)
