@@ -133,7 +133,11 @@ function AnfahrtSection({ c }: { c: StandortContent }) {
             ))}
           </Reveal>
           <Reveal className="lg:col-span-2">
-            <div className="relative mx-auto h-72 max-w-3xl overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white">
+            {/* --radius-media statt --radius-card: der Embed traegt ein absolut positioniertes
+                iframe mit overflow-hidden, das die 12px-Rundung des Karten-Tokens optisch
+                auffrisst — nach dem Consent-Klick stand die Karte hart-eckig da
+                (visueller Review 27.08., kontakt__standort-…-00-Google_Maps_laden.png). */}
+            <div className="relative mx-auto h-72 max-w-3xl overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white">
               <GoogleMapEmbed
                 title={a.mapsCta}
                 src={CONTACT.mapsEmbed}

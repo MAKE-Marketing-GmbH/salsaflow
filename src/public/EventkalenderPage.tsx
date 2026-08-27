@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { CalendarDays, Sparkles, Star } from 'lucide-react';
 import { useLang } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 import type { PublicEvent } from '@/lib/api';
 import { EVENTKALENDER, type EventkalenderContent } from '@/public/events/eventkalender-content';
 import {
@@ -152,7 +153,13 @@ function CardsSection({ c }: { c: EventkalenderContent }) {
             <motion.article
               key={ev.name}
               variants={item}
-              className="flex h-full flex-col rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-7 shadow-[0_18px_50px_rgba(17,17,17,0.05)] sm:p-8"
+              /* Bei einer ungeraden Kartenanzahl blieb die letzte Zeile zur Haelfte leer;
+                 die letzte Karte traegt dann die volle Rasterbreite (visueller Review
+                 27.08., eventkalender-desktop-05-y3000.png). */
+              className={cn(
+                'flex h-full flex-col rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white p-7 shadow-[0_18px_50px_rgba(17,17,17,0.05)] sm:p-8',
+                'odd:last:lg:col-span-2',
+              )}
             >
               <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
                 <CalendarDays size={14} strokeWidth={2.25} aria-hidden />
@@ -329,7 +336,9 @@ function CalendarSection({ c, events }: { c: EventkalenderContent; events: Publi
                 <motion.article
                   key={event.id}
                   variants={item}
-                  className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)]"
+                  // Dasselbe wie oben: letzte Karte einer ungeraden Anzahl ueber die volle
+                  // Rasterbreite, statt eine halbleere Endzeile zu hinterlassen.
+                  className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_18px_50px_rgba(17,17,17,0.06)] odd:last:lg:col-span-2"
                 >
                   {event.imageUrl && (
                     <img

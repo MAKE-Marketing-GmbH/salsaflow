@@ -808,11 +808,25 @@ function DayBar({
   const c = CAL[lang];
 
   return (
-    // Bewusst NICHT sticky. Ein Tag hat hoechstens 9 Kurse (rund eine Bildschirmhoehe), die
-    // Leiste braucht also nicht mitzureisen — sie kostete 150px Dauer-Hoehe und lief beim
-    // Scrollen sichtbar ueber die erste Uhrzeit (Beleg: /tmp/kursplan-cal-shots2/kursplan-desktop-01-y700.png,
-    // "18:30" halb hinter der Leiste).
-    <div>
+    // Auf Desktop bewusst NICHT sticky (lg:static): die Leiste kostete dort 150px
+    // Dauer-Hoehe und lief beim Scrollen sichtbar ueber die erste Uhrzeit (Beleg:
+    // /tmp/kursplan-cal-shots2/kursplan-desktop-01-y700.png, "18:30" halb hinter der
+    // Leiste).
+    //
+    // Mobil (unter lg) IST sie jetzt sticky — die sticky-Stufe kam spaeter dazu
+    // (visueller Review 27.08., kursplan-mobile-11-y3844.png): mobil zeigt die Seite
+    // pro Tag mehrere Karten untereinander, und die Karten muessen die Hoehe der
+    // Zeitspalte mit ausfuellen. Ab etwa 3800px Scrolltiefe war nirgends mehr
+    // erkennbar, welcher Wochentag gerade laeuft — die Wochen-Pfeile stehen oben,
+    // die Tages-Ueberschrift scrollt mit weg. Die Leiste traegt den Tag.
+    //
+    // Haarlinie unten: die gemeinsame Grundlinie der Reiter (border-b am Raster
+    // darunter) bleibt sichtbar, waehrend Karten hinter die Leiste scrollen.
+    // Hintergrund = bg-soft, die Flaeche der Kalender-Sektion.
+    // -mx-5/px-5 hebt den 20px-Shellrand auf, damit die Flaeche bis an die
+    // Viewport-Kanten reicht (sticky-Elemente innerhalb der Shell kleben sonst
+    // optisch am Shellrand).
+    <div className="sticky top-[var(--nav-h)] z-20 -mx-5 bg-[var(--color-bg-soft)] px-5 pb-2 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-0">
       {/* Tage. Bis Tabletbreite ein 3x2-Raster statt einer horizontal scrollenden Reihe: bei
           schmalen Viewports passen die ausgeschriebenen Daten nicht kollisionsfrei nebeneinander.
           Erst ab lg stehen alle sechs Tage in einer Reihe. */}
