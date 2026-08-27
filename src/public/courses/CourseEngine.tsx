@@ -823,10 +823,9 @@ function DayBar({
     // Haarlinie unten: die gemeinsame Grundlinie der Reiter (border-b am Raster
     // darunter) bleibt sichtbar, waehrend Karten hinter die Leiste scrollen.
     // Hintergrund = bg-soft, die Flaeche der Kalender-Sektion.
-    // -mx-5/px-5 hebt den 20px-Shellrand auf, damit die Flaeche bis an die
-    // Viewport-Kanten reicht (sticky-Elemente innerhalb der Shell kleben sonst
-    // optisch am Shellrand).
-    <div className="sticky top-[var(--nav-h)] z-20 -mx-5 bg-[var(--color-bg-soft)] px-5 pb-2 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-0">
+    // -mx-5/px-5 (ab sm: -mx-8/px-8) hebt den Shellrand auf, damit die Flaeche bis
+    // an die Viewport-Kanten reicht — sonst klebt die Leiste optisch am Shellrand.
+    <div className="sticky top-[var(--nav-h)] z-20 -mx-5 bg-[var(--color-bg-soft)] px-5 pb-2 sm:-mx-8 sm:px-8 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-0">
       {/* Tage. Bis Tabletbreite ein 3x2-Raster statt einer horizontal scrollenden Reihe: bei
           schmalen Viewports passen die ausgeschriebenen Daten nicht kollisionsfrei nebeneinander.
           Erst ab lg stehen alle sechs Tage in einer Reihe. */}
