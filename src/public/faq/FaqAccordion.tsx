@@ -28,17 +28,29 @@ export function FaqItem({
 }: Faq & { defaultOpen?: boolean; link?: FaqLink; link2?: FaqLink }) {
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(defaultOpen);
+  // Die Schliess-Animation lief ins Leere: setOpen(false) nahm `open` am <details> im
+  // selben Commit weg, in dem AnimatePresence den Exit startete — ein geschlossenes
+  // details blendet seine Kinder nativ SOFORT aus, der Hoehen-Tween war unsichtbar.
+  // Darum entkoppelt: `open` steuert das Panel (AnimatePresence), `detailsOpen` haelt
+  // das details-Attribut, bis onExitComplete feuert. Beim Oeffnen laufen beide sofort.
+  // SSR: beide starten auf defaultOpen, der Initial-Render bleibt identisch. Bei
+  // reduced-motion dauert der Exit 0s, onExitComplete feuert im naechsten Frame —
+  // gleiche Struktur in beiden Zweigen (Hydration-Kommentar unten gilt weiter).
+  const [detailsOpen, setDetailsOpen] = useState(defaultOpen);
 
   // R163/R166: React darf details nicht unkontrolliert zuruecksetzen.
   // Native summary toggled und React rendert ohne open — die Antwort klappt zu.
-  // Darum: open={open} und preventDefault auf dem Summary-Klick.
+  // Darum: open={...} und preventDefault auf dem Summary-Klick.
   function onSummaryClick(event: MouseEvent<HTMLElement>) {
     event.preventDefault();
-    setOpen((was) => !was);
+    setOpen((was) => {
+      if (!was) setDetailsOpen(true);
+      return !was;
+    });
   }
 
   return (
-    <details open={open} className="group py-3">
+    <details open={detailsOpen} className="group py-3">
       <summary
         onClick={onSummaryClick}
         className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-6 rounded-[var(--radius-chip)] py-6 text-left font-display text-lg font-bold leading-snug text-[var(--color-ink)] marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-4 sm:text-xl [&::-webkit-details-marker]:hidden"
@@ -61,7 +73,7 @@ export function FaqItem({
           rendert immer die Animations-Variante — bei prefers-reduced-motion sah React
           im Browser dann eine andere Struktur, verwarf den ganzen Seitenbaum und rendert
           neu (Fehler 418). Nur die Werte haengen jetzt an `reduced`, nicht die Struktur. */}
-      <AnimatePresence initial={false}>
+      <AnimatePresence initial={false} onExitComplete={() => setDetailsOpen(false)}>
         {open ? (
           <motion.div
             key="panel"
@@ -81,13 +93,16 @@ export function FaqItem({
             {link || link2 ? (
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pb-6">
                 {[link, link2].filter((entry): entry is FaqLink => Boolean(entry)).map((entry) => (
+                  /* group/link statt group: das aeussere <details> ist selbst `group` —
+                     ein nacktes group-hover am Pfeil feuerte beim Hover IRGENDWO im
+                     offenen details, nicht nur am Link. Benannte Gruppe scoped das. */
                   <a
                     key={entry.href}
                     href={entry.href}
-                    className="group inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--color-salsa)] underline decoration-1 underline-offset-4 transition-colors hover:text-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
+                    className="group/link inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-[var(--color-salsa)] underline decoration-1 underline-offset-4 transition-colors hover:text-[var(--color-salsa-700)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2"
                   >
                     {entry.label}
-                    <ArrowRight size={15} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover:translate-x-0.5" />
+                    <ArrowRight size={15} strokeWidth={2.25} aria-hidden className="transition-transform duration-[var(--dur-fast)] ease-[var(--motion-out)] motion-safe:group-hover/link:translate-x-0.5" />
                   </a>
                 ))}
               </div>

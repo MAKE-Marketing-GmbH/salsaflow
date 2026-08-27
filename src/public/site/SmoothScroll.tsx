@@ -12,10 +12,24 @@ const NESTED_SCROLL_SELECTOR = [
   '[contenteditable="true"]',
 ].join(',');
 
+/* getComputedStyle ist zu teuer fuer den Wheel-Pfad (Lenis fragt `prevent` pro
+   Wheel-Event fuer jeden Knoten der Event-Kette). Der overflow-y-Wert eines Knotens
+   haengt an Klassen/Styles, nicht am Scrollzustand — er aendert sich in dieser Codebase
+   nie zur Laufzeit. Ein veralteter Cache-Eintrag waere zudem harmlos: schlimmstenfalls
+   greift Lenis auf einem frisch scrollbar gewordenen Container einmal zu frueh/spaet,
+   und die WeakMap raeumt entfernte Knoten selbst ab. Darum keine Invalidierung. */
+const overflowScrollableCache = new WeakMap<HTMLElement, boolean>();
+
 function hasNativeVerticalScroll(node: HTMLElement) {
+  // scrollHeight/clientHeight zuerst: billig, aendert sich mit dem Inhalt — nicht cachen.
   if (node.scrollHeight <= node.clientHeight + 1) return false;
-  const overflowY = window.getComputedStyle(node).overflowY;
-  return overflowY === 'auto' || overflowY === 'scroll';
+  let scrollable = overflowScrollableCache.get(node);
+  if (scrollable === undefined) {
+    const overflowY = window.getComputedStyle(node).overflowY;
+    scrollable = overflowY === 'auto' || overflowY === 'scroll';
+    overflowScrollableCache.set(node, scrollable);
+  }
+  return scrollable;
 }
 
 /**
@@ -72,6 +86,10 @@ export function SmoothScroll() {
       reducedMotion.removeEventListener('change', start);
       coarsePointer.removeEventListener('change', start);
       stop();
+      // Waehrend einer Reduced-Phase setzt stop() bewusst `scrollBehavior: 'auto'`
+      // (harte Anker-Spruenge statt smooth). Beim Unmount darf dieser Inline-Style
+      // nicht auf <html> haengen bleiben — zurueck auf den Stylesheet-Default.
+      root.style.scrollBehavior = '';
     };
   }, []);
 

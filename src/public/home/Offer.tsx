@@ -49,10 +49,12 @@ function StyleCard({ card, parallax }: { card: OfferCard; parallax: ParallaxStyl
   const { lang } = useLang();
   const size = cardSize(card.key);
 
+  // Kein aria-label auf dem <a>: es ueberschrieb den ganzen Karteninhalt fuer
+  // Screenreader und verletzte WCAG Label-in-Name. H3, Text und Linktext tragen
+  // den zugaenglichen Namen selbst.
   return (
     <a
       href={card.href}
-      aria-label={`${card.title}: ${card.hint}`}
       className="group relative isolate flex min-h-[22rem] overflow-hidden rounded-[1.5rem] bg-[var(--color-ink)] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2 sm:rounded-[2rem] lg:min-h-[26rem]"
     >
       {/* R-Scroll: der Scroll-Scale (1.06 -> 1.0) laeuft im selben transform wie der

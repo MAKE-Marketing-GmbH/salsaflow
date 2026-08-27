@@ -26,6 +26,7 @@ import { TEAM, FACES, FOUNDERS, founderRole } from '@/public/team/content';
 import { WALL_REVIEWS, localizeReview } from '@/public/site/reviews';
 import { fetchSchedule, WEEKDAY_ORDER, type ScheduleCourse, type WeekdayKey } from '@/lib/schedule';
 import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
+import { founderBustTop } from '@/public/team/FounderRow';
 
 /** Der Cookie-Hinweis ist `position: fixed` und nimmt keinen Platz im Dokument ein — die
  *  untersten ~58px der Seite waren dadurch an keiner Scrollposition frei (Kritiker-Runde 3:
@@ -465,7 +466,9 @@ function FounderSection() {
                       src={founder.photo}
                       alt={`${founder.name} ${founder.last}, ${role} ${lang === 'de' ? 'von' : 'at'} Salsaflow`}
                       className="absolute max-w-none transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-safe:group-hover:scale-[1.02]"
-                      style={{ width: founder.bust.w, left: founder.bust.l, top: founder.bust.t }}
+                      /* founderBustTop: Sebastians bust.t-Korrektur (Kritiker-Beleg
+                         team-desktop-04-y2250.png, Messung + Begruendung in FounderRow.tsx). */
+                      style={{ width: founder.bust.w, left: founder.bust.l, top: founderBustTop(founder.key, founder.bust.t) }}
                       loading="lazy"
                       width={1414}
                       height={2000}

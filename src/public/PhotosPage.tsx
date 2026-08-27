@@ -264,7 +264,10 @@ export function PhotosPage() {
                                   nichts ab. Angeschnittene Koepfe am Rand stecken schon im Original
                                   (geprueft an gallery/danceflow/01-v3.webp, 2048x1360: der Partner
                                   ist in der Quelle angeschnitten). object-position waere hier ohne
-                                  Wirkung — der Fix muesste das Foto selbst ersetzen. */}
+                                  Wirkung — der Fix muesste das Foto selbst ersetzen.
+                                  Gilt auch fuer den Beleg fotos-desktop-04-y2250.png (Person am
+                                  rechten Rand halbiert): nachgeprueft, das Raster cropt nicht,
+                                  der Anschnitt steckt im Original — darum hier KEIN Umbau. */}
                               <img
                                 src={p.src}
                                 alt={p.alt}

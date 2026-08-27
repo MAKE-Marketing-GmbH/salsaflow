@@ -1,7 +1,46 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-26 23:20 UTC — Gauntlet-Abschlussrunde deployed (Commit `67069f3`, main → Vercel). Anti-Slop-Gates gruen, Slop-Copy-Funde gefixt.
-**Vorher:** R-Scroll-Runde deployed (Commit `e96cb18`). 5 Scroll-Signature-Momente live, Sol/Grok/Kimi-Review-Funde gefixt.
+**Stand:** 2026-08-27 13:10 UTC — Weltklasse-Kritik-Runde (4 Kritiker, 1200+ Shots), Fixes gebaut, Gates gruen, Deploy folgt in diesem Commit.
+**Vorher:** Gauntlet-Abschlussrunde deployed (Commit `67069f3`, main → Vercel).
+
+## Weltklasse-Runde 27.08 (Review → Fixliste → Bauwellen)
+
+Review-Setup: voller Sweep (1232 Shots, 24 Routen, Desktop+Mobil), 3 visuelle
+Kritiker (composer-2.5-fast) + 1 Code-Reviewer auf Motion-System. Delegator-Routen
+Sol/Grok timeouteten 2x — Code-Review ueber lokalen Task-Agenten gelaufen.
+
+Verifizierte + gefixte Befunde:
+- HIGH useCountUp: Prerender schrieb 0 statt Zielwert (SSR/ohne JS/Crawler).
+  Fix: SSR traegt Zielwert, Reset+Zaehlen nur im Effekt; textContent statt
+  setState pro Frame (motion.tsx).
+- MED clip-Variante war nicht reduced-gated → jetzt gated (motion.tsx).
+- MED FAQ-Schliess-Animation lief ins Leere (open-Attribut kollabierte Panel
+  nativ) → detailsOpen-Entkopplung via onExitComplete (FaqAccordion.tsx).
+- MED WhatsAppFloat Scroll-Hot-Path: labelAllowed/Header/Clip-Ahnen jetzt
+  gecacht (WeakMap, Rebuild-Invalidierung), nur noch Rects im Frame.
+- MED Team-Portraits: Sebastians bust.t nachgemessen und auf Augenlinien-Norm
+  korrigiert (founderBustTop, FounderRow.tsx + TeamPage.tsx).
+- LOW group/link im FAQ-Accordion, aria-label-Ueberschreibung in Offer.tsx weg
+  (WCAG Label-in-Name), WhatsAppFloat toter initial-Fade entfernt (CSS-Flip ist
+  Realitaet), SmoothScroll scrollBehavior-Cleanup + WeakMap-Cache im
+  Wheel-Prevent-Pfad.
+
+Gegengeprueft und als falsch positiv verworfen:
+- Kursplan-Chip-Fade: Chips umbrechen bewusst (dok. Entscheidung, kein Scroll).
+- Kursplan Sticky-Tagesanker: explizit abgelehnte Entscheidung mit Beleg, nicht
+  angefasst. Team-Grid zeigt EINEN Tag (max 9 Kurse ~1 Bildschirmhoehe).
+- Maps-Eckig-Look: Embed ist rund gerahmt, Grauton ist Google Maps selbst.
+- Kontakt-Leerraum: Maps-Platzhalter + Oeffnungszeiten fuellen die Spalte.
+- Tanzkurse-Scrim: reicht bis ~2/3 Bildhoehe, lesbar (Re-Sweep belegt).
+- Fotos-Masonry-Halbierung: Anschnitt steckt im Original, Raster cropt nicht.
+- Danceflow-Night-Subtitle: Scrim an der Kritiker-Stelle ausreichend.
+- Collabs/Tanzschuhe-Bildsprache: Herstellerlogos/-produktfotos, kein
+  Studio-Ersatz vorhanden — geparkt bis Kundenmaterial da ist.
+- Eventkalender verwaiste Karte: datengetrieben, normaler Grid-Rest.
+
+Gates: Build OK, oxlint Exit 0, detect.mjs Exit 0. Re-Sweep (5 Routen):
+Team-Portrait-Fix sichtbar korrekt, FAQ-Clicks sauber, Prerender zeigt
+Zielwerte (2018/3/~400 statt 0).
 
 ## Gauntlet-Abschluss 26.08 (main, deployed `67069f3`)
 

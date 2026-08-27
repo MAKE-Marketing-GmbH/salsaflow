@@ -54,7 +54,12 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
      VERBOTEN bleibt, was ohne Anlass endlos laeuft — Dauer-Puls, Ping-Ring, Bounce,
      Wackeln, alles nach Gratis-Widget. ERLAUBT ist Bewegung MIT Anlass, die auf den
      Nutzer reagiert statt auf eine Schleife:
-       1. Eintritt: weicher Spring nach oben (motion/react, bounce 0.18), einmalig.
+       1. Eintritt: einmaliger Fade. Laeuft als CSS-Animation (`.whatsapp-float` /
+          `whatsapp-float-in` in index.css) plus Sichtbarkeits-Flip nach der ersten
+          Messung (`placed`), NICHT ueber motion/react: die CSS-Animation haelt mit
+          `fill: both` dauerhaft die Hand auf `opacity`, ein motion-initial/animate-Paar
+          auf dem Anker waere davon ueberschrieben (und zuendete auf prerenderten Seiten
+          ohnehin nie, weil `hydrated` beim Mount noch false ist — Perf-Review).
        2. Hover: Icon dreht ein paar Grad und zoomt leicht — EINE Geste, nicht zwei.
        3. Scroll/Platz-Mangel: Pille <-> Kreis als Layout-Transition mit Spring.
        4. Press: kurzes Rein- und Zurueckfedern (0.94), taktiles Feedback.
@@ -153,6 +158,13 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
     let staticBlockers: StaticBlocker[] = [];
     let dynamicBlockers: DynamicBlocker[] = [];
     let viewportAnchoredCache = new WeakMap<HTMLElement, boolean>();
+    /* Frame-Budget (Perf-Review): `measure` laeuft per rAF bei jedem Scroll-Event. Alles,
+       was dort Styles liest (getComputedStyle, querySelector ueber den Baum), fliegt raus
+       und wird beim Rebuild vorberechnet. Der MutationObserver unten stoesst den Rebuild
+       bei jeder DOM-Aenderung an, damit bleiben die Caches aktuell. */
+    let clipAncestorCache = new WeakMap<HTMLElement, HTMLElement[]>();
+    let labelAllowedNow = false;
+    let headerElement: HTMLElement | null = null;
 
     const elementIsVisible = (element: HTMLElement, allowMotionOpacity: boolean) => {
       if (element.closest('[hidden], [aria-hidden="true"], [inert]')) return false;
@@ -189,11 +201,26 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
        Der naechste Clip ist oft die Karte selbst (Instagram-Peek, Founder-Kachel).
        Die Karte ragt geometrisch unter den Knopf, der Slider schneidet sie aber ab.
        Nur der sichtbare Rest darf blocken. */
-    const overflowClipBox = (element: HTMLElement): CollisionRect | null => {
-      let clipped: CollisionRect | null = null;
+    /* Zweigeteilt (Perf-Review): Die Ahnenkette mit Clip-Overflow haengt nur an den
+       Styles und aendert sich zwischen Rebuilds nicht — sie wird pro Element einmal
+       ermittelt (getComputedStyle) und in der WeakMap gehalten. Im Frame bleibt nur
+       noch getBoundingClientRect auf den gecachten Ahnen. */
+    const overflowClipAncestors = (element: HTMLElement): HTMLElement[] => {
+      const cached = clipAncestorCache.get(element);
+      if (cached) return cached;
+      const ancestors: HTMLElement[] = [];
       for (let ancestor = element.parentElement; ancestor && ancestor !== document.body; ancestor = ancestor.parentElement) {
         const style = window.getComputedStyle(ancestor);
         if (!CLIP_OVERFLOW.includes(style.overflowX) && !CLIP_OVERFLOW.includes(style.overflowY)) continue;
+        ancestors.push(ancestor);
+      }
+      clipAncestorCache.set(element, ancestors);
+      return ancestors;
+    };
+
+    const overflowClipBox = (element: HTMLElement): CollisionRect | null => {
+      let clipped: CollisionRect | null = null;
+      for (const ancestor of overflowClipAncestors(element)) {
         const box = ancestor.getBoundingClientRect();
         clipped = clipped
           ? {
@@ -240,6 +267,10 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
        der Sa-Kachel (Grok-Look R190 Runde 8, Raphaels Punkt 2). Der Kreis ist 66px
        schmaler und laesst das Raster unveraendert — Entscheidung Raphael 22.08.2026,
        Weg 2 gegen "Raster schmaler machen". */
+    /* Nicht pro Frame: der 10-Selektor-querySelector haengt nur an Route-Markern und der
+       Fensterbreite. Beides aendert sich nie mitten im Scroll-Frame — Marker kommen per
+       DOM-Mutation (MutationObserver -> Rebuild), Breite per Resize (onResize -> Rebuild).
+       Der Rebuild schreibt das Ergebnis in `labelAllowedNow`; `measure` liest nur noch. */
     const labelAllowed = () =>
       window.innerWidth >= 1024 &&
       !document.querySelector(
@@ -250,11 +281,16 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
       const float = floatRef.current;
       if (!float) return;
       const current = float.getBoundingClientRect();
+      /* Frame-Caches invalidieren: Rebuild ist die einzige Stelle, an der sich Route-Marker,
+         Header-Element und Clip-Ketten geaendert haben koennen (siehe labelAllowed oben). */
+      labelAllowedNow = labelAllowed();
+      headerElement = document.querySelector('header');
+      clipAncestorCache = new WeakMap<HTMLElement, HTMLElement[]>();
       /* Mobil hat kein Label (`hidden sm:inline-block`). Mehrere Desktop-Routen zwingen
          den Kreis per CSS (split-hero, events, team, faq, kursaufbau, privat, collabs,
          tanzschuhe, partys, heels). LABEL_WIDTH dort draufzurechnen vermisst eine
          Phantom-Pille. */
-      const pillWidth = labelAllowed() && compactRef.current ? current.width + LABEL_WIDTH : current.width;
+      const pillWidth = labelAllowedNow && compactRef.current ? current.width + LABEL_WIDTH : current.width;
       const stripLeft = current.right - pillWidth - 8;
       const stripRight = current.right + 8;
       const scrollTop = window.scrollY;
@@ -416,11 +452,12 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
       const viewportH = window.innerHeight;
       const scrollTop = window.scrollY;
       const liveBlockers = dynamicRects();
-      const header = document.querySelector('header');
-      const headerRect = header?.getBoundingClientRect();
+      /* Element aus dem Rebuild-Cache; das Rect ist billig und bleibt pro Frame frisch
+         (der Header faehrt beim Scrollen per translateY aus dem Bild). */
+      const headerRect = headerElement?.isConnected ? headerElement.getBoundingClientRect() : undefined;
       const headerVisible = Boolean(headerRect && headerRect.bottom > 0 && headerRect.height > 0);
       const ceiling = headerVisible && headerRect ? headerRect.bottom + 12 : 12;
-      const pillWidth = labelAllowed() && compactRef.current ? current.width + LABEL_WIDTH : current.width;
+      const pillWidth = labelAllowedNow && compactRef.current ? current.width + LABEL_WIDTH : current.width;
       const compactShift = Math.max(0, pillWidth - current.height);
       const searchLeft = current.right - pillWidth;
       let next: number | null = null;
@@ -632,8 +669,12 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
       rel="noreferrer"
       aria-label={label}
       title={label}
-      initial={hydrated ? { opacity: 0 } : false}
-      animate={{ opacity: 1 }}
+      /* Kein initial/animate-Opacity-Paar mehr: `hydrated` ist beim Hydration-Mount noch
+         false, motion liest `initial` nur beim Mount — der Wert haette also auf
+         prerenderten Seiten nie gezuendet. Der Eintritts-Fade laeuft komplett ueber die
+         CSS-Animation `.whatsapp-float` (index.css) plus den `placed`-Klassen-Flip unten;
+         motion behaelt hier nur Hover/Press. */
+      initial={false}
       transition={{ type: 'spring', bounce: 0.18, duration: reduced ? 0.2 : 0.55 }}
       whileHover="hover"
       whileTap={reduced ? undefined : { scale: 0.94 }}

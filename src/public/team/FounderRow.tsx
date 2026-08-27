@@ -27,6 +27,20 @@
 import { useLang } from '@/lib/i18n';
 import { FOUNDERS, founderRole } from '@/public/team/content';
 
+/* Kritiker-Beleg team-desktop-04-y2250.png: Sebastians Kopf klebt am oberen Kartenrand,
+ * die Nachbarkarten haben viel Luft. Nachgemessen (Alpha-Scan der Quelldateien + bust-
+ * Geometrie im 4:5-Panel): Scheitel Fabio/Claudia/Vanessa ~15.1-15.2% Panelhoehe,
+ * Sebastian 7.6%; Augenlinie der drei ~38.0% (der dokumentierte Zielwert aus
+ * team/content.ts), Sebastian 25.9%. Ursache: sein `bust.t: '1%'` stammt noch aus der
+ * 152.2%-Zoom-Rechnung, die R159 auf 122% zurueckgenommen hat — t wurde nie nachgezogen.
+ * Korrektur auf die Augenlinien-Normierung: t = 38% - 18.03% x 1.3805 = 13.1%
+ * (18.03% Augenlinie in der Datei, 1.3805 = Bildhoehe/Panelhoehe bei w=122%).
+ * Der Override steht hier statt in team/content.ts, weil content.ts einem anderen
+ * Paket gehoert; Zoom und left bleiben unveraendert. */
+export function founderBustTop(key: string, t: string): string {
+  return key === 'sebastian' ? '13.1%' : t;
+}
+
 /* ------------------------------------------------------- Kritiker-Befund 2026-08-09, Portraits
  * "Portraits wild ungleich gross (Fabio riesig, Sebastian briefmarkengross) — wirkt wie kaputtes
  * Layout. Auf 1-2 kontrollierte Groessen angleichen, gleicher Crop/Baseline, klarer Rhythmus."
@@ -72,7 +86,7 @@ export function FounderCards({ className = '' }: { className?: string }) {
                   src={founder.photo}
                   alt={`${founder.name} ${founder.last}, ${role} ${lang === 'de' ? 'von' : 'at'} Salsaflow`}
                   className="absolute max-w-none transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-safe:group-hover:scale-[1.02]"
-                  style={{ width: founder.bust.w, left: founder.bust.l, top: founder.bust.t }}
+                  style={{ width: founder.bust.w, left: founder.bust.l, top: founderBustTop(founder.key, founder.bust.t) }}
                   loading="lazy"
                   width={1000}
                   height={1414}

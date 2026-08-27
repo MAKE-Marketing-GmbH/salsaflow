@@ -16,7 +16,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
   useSyncExternalStore,
   type ReactNode,
   type RefObject,
@@ -96,7 +95,9 @@ function revealVariantItem(
     return {
       hidden: {
         opacity: 0,
-        clipPath: 'inset(0 0 14% 0)',
+        /* clipPath war der letzte ungated Wert (blur unten hat die Gabel schon):
+           bei Reduced Motion zeigt der hidden-Frame sonst einen beschnittenen Streifen. */
+        clipPath: reduced ? 'inset(0 0 0 0)' : 'inset(0 0 14% 0)',
         transform: `translate3d(0, ${Math.min(distance, 24)}px, 0)`,
       },
       show: {
@@ -320,28 +321,32 @@ export function useCountUp(target: number, duration = 0.9) {
   const reduced = useReducedMotion() === true;
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: '0px' });
-  const [val, setVal] = useState(reduced ? target : 0);
 
+  /* SSR/Prerender: der Span traegt serverseitig IMMER den Zielwert als Kind (siehe
+     CountStat unten) — ohne JS und fuer Crawler steht die richtige Zahl. Der Reset auf 0
+     passiert ausschliesslich hier im Effekt (nach der Hydration, nie im Render).
+     Wert laeuft per textContent direkt ins DOM statt ueber React-State: setState pro
+     rAF-Frame waren ~54 Re-Renders pro Zaehlvorgang. React weiss vom laufenden Wert
+     nichts, die Komponente rendert dafuer nie neu. */
   useEffect(() => {
-    if (!inView) return;
-    if (reduced) {
-      setVal(target);
-      return;
-    }
+    if (!inView || reduced) return;
+    const el = ref.current;
+    if (!el) return;
+    el.textContent = '0';
     let frame = 0;
     const start = performance.now();
     const milliseconds = duration * 1000;
     const tick = (now: number) => {
       const progress = Math.min(1, (now - start) / milliseconds);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setVal(Math.round(eased * target));
+      el.textContent = String(Math.round(eased * target));
       if (progress < 1) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
   }, [duration, inView, reduced, target]);
 
-  return { ref, val };
+  return { ref };
 }
 
 export function CountStat({ value, className }: { value: string; className?: string }) {
@@ -350,13 +355,16 @@ export function CountStat({ value, className }: { value: string; className?: str
      ein Wechsel von "2018" auf z.B. "Basel" haette die Hook-Reihenfolge zerrissen.
      Der Hook laeuft jetzt IMMER (Fallback-Target 0), der Fallback rendert danach. */
   const match = value.match(/^(\D*)(\d+)(\D*)$/);
-  const { ref, val } = useCountUp(match ? Number.parseInt(match[2], 10) : 0);
+  const { ref } = useCountUp(match ? Number.parseInt(match[2], 10) : 0);
   if (!match) return <span className={className}>{value}</span>;
-  const [, prefix, , suffix] = match;
+  const [, prefix, num, suffix] = match;
+  /* Der Zahl-Span traegt den Zielwert als Kind (SSR-sichtbar); der Effekt aus useCountUp
+     ueberschreibt den textContent beim Hochzaehlen. Prefix/Suffix bleiben eigene Text-
+     knoten — textContent nur auf dem Zahl-Span, sonst frisst das Schreiben die Raender. */
   return (
-    <span ref={ref} className={className}>
+    <span className={className}>
       {prefix}
-      {val}
+      <span ref={ref}>{num}</span>
       {suffix}
     </span>
   );
@@ -368,8 +376,8 @@ export function CountStat({ value, className }: { value: string; className?: str
    gleitend bis 2.5x (Spring glaettet die rohe px/s-Velocity, sonst zuckt das Band bei
    jedem Lenis-Impuls). 3000 px/s als Normierung: das ist ein zuegiger Flick auf Desktop —
    normales Lesescrollen (~600 px/s) hebt den Faktor nur um ~0.3, bleibt also subtil.
-   API (children, className, duration) und der Reduced-Motion-Zweig (statisches,
-   seitlich scrollbares Band, kein rAF) sind unveraendert. */
+   API (children, className, duration) und der Reduced-Motion-Zweig (statisches
+   geclipptes Band, kein rAF) sind unveraendert. */
 export function Marquee({
   children,
   className,
@@ -386,6 +394,11 @@ export function Marquee({
      aktiv, damit es nie stehend in den Viewport rutscht. */
   const inView = useInView(rootRef, { margin: '200px 0px' });
   const x = useMotionValue(0);
+  /* Perf-Review: Die Kette laeuft auch bei reduced/offscreen weiter — Hooks duerfen nicht
+     konditional sein. Das ist bewusst akzeptiert: useVelocity/useSpring rechnen nur,
+     solange sich scrollY tatsaechlich aendert (Subscription auf den MotionValue, kein
+     eigener rAF-Dauerloop), und im Ruhezustand faellt die Feder auf 0 und schlaeft.
+     Ein paar Zahlen-Updates pro Scroll-Frame sind billiger als jede Umbau-Alternative. */
   const { scrollY } = useScroll();
   const velocity = useVelocity(scrollY);
   const smoothVelocity = useSpring(velocity, { damping: 40, stiffness: 200 });
@@ -406,8 +419,13 @@ export function Marquee({
     x.set(next);
   });
 
+  /* Reduced: statisches, geclipptes Band statt `overflow-x-auto`. Die Children sind rein
+     dekorativ (einziger Nutzer: CommunityBand.tsx, das bei reduced ohnehin auf sein
+     3er-Grid wechselt und das Marquee nur im ersten Hydration-Frame zeigt) — ein
+     scrollbarer Container unter aria-hidden waere fuer Tastatur fokussierbar, fuer
+     Screenreader aber unsichtbar. */
   return (
-    <div ref={rootRef} aria-hidden className={`${reduced ? 'overflow-x-auto' : 'overflow-hidden'} ${className ?? ''}`}>
+    <div ref={rootRef} aria-hidden className={`overflow-hidden ${className ?? ''}`}>
       <motion.div className="flex w-max" style={reduced ? undefined : { transform }}>
         {children}
         {children}
