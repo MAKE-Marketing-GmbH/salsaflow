@@ -94,10 +94,12 @@
      (sonst Blaetze das Papier durch). */
   --dur-page-enter: 720ms;
   --dur-page-out: 280ms;
-  --dur-header-enter: 360ms;
+  --dur-header-enter: 640ms;
   --delay-header-enter: 0ms;
   --page-enter-y: 20px;
   --page-enter-blur: 8px;
+  --page-header-blur: 0px;
+  --page-header-y: 0px;
   --motion-enter: cubic-bezier(0.23, 1, 0.32, 1);
 
   /* R153: Wie stark der Cookie-Hinweis den WhatsApp-Float anhebt.
@@ -179,8 +181,8 @@ html {
 @keyframes sf-header-in {
   from {
     opacity: 1;
-    filter: blur(4px);
-    transform: translate3d(0, -16px, 0);
+    filter: blur(var(--page-header-blur));
+    transform: translate3d(0, var(--page-header-y), 0);
   }
   to {
     opacity: 1;
@@ -191,9 +193,9 @@ html {
 
 @keyframes sf-header-out {
   to {
-    opacity: 0;
-    filter: blur(4px);
-    transform: translate3d(0, -12px, 0);
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, calc(var(--page-header-y) * 0.7), 0);
   }
 }
 
@@ -268,6 +270,12 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+html[data-dialog-lock],
+html[data-dialog-lock] body {
+  overflow: hidden !important;
+  overscroll-behavior: none;
 }
 
 /* Zeigerkontakt-Uebergang (13.08.2026). Vorher sprangen Navigations- und Fusszeilen-Links
@@ -804,6 +812,17 @@ main img.photo-grade-bachata-why {
   }
 }
 
+@keyframes booking-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateX(2.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* WhatsApp-Float: EIN Auftritt, danach Ruhe (R134/10).
  * Kein Puls, kein Ping-Ring, kein Wackeln — der Knopf steigt einmal aus der unteren
  * Kante auf und richtet sich dabei auf.
@@ -833,6 +852,7 @@ main img.photo-grade-bachata-why {
    * eine Stufe fuer grosse Flaechen, eine Kurve fuer alles. `both` haelt den Startzustand
    * waehrend der Verzoegerung, sonst blitzt der Knopf vor dem Auftritt kurz auf. */
   .whatsapp-float {
+    font-family: var(--font-sans);
     animation: whatsapp-float-in var(--dur-slow) var(--motion-out) 90ms both;
   }
 }

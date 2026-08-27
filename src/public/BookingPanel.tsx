@@ -9,6 +9,7 @@
 // alles motion-safe, also respektiert prefers-reduced-motion automatisch.
 
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { EASE_OUT, useHydrated } from '@/public/home/motion';
@@ -1148,6 +1149,7 @@ function BookingForm({
     root.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
     document.body.style.overscrollBehavior = 'none';
+    root.dataset.dialogLock = '';
 
     return () => {
       window.cancelAnimationFrame(frame);
@@ -1155,6 +1157,7 @@ function BookingForm({
       root.style.overflow = prev.rootOverflow;
       document.body.style.overflow = prev.overflow;
       document.body.style.overscrollBehavior = prev.overscrollBehavior;
+      delete root.dataset.dialogLock;
       window.scrollTo(0, scrollY);
     };
   }, [onBack]);
@@ -1277,6 +1280,10 @@ function BookingForm({
         notes: notes.trim() || undefined,
         language: lang,
       });
+      if (r.status !== 'waitlisted') {
+        window.location.assign('/vorbereiten');
+        return;
+      }
       setResult(r);
       onDone?.();
     } catch (e) {
@@ -1286,10 +1293,13 @@ function BookingForm({
     }
   }
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto overscroll-contain bg-black/50 p-3 backdrop-blur-[2px] sm:p-5 motion-safe:animate-[booking-backdrop-in_180ms_ease-out]"
+      className="fixed inset-0 z-[70] flex items-start justify-center overflow-hidden overscroll-none bg-black/50 p-3 backdrop-blur-[2px] sm:p-5 motion-safe:animate-[booking-backdrop-in_180ms_ease-out]"
       data-testid="booking-backdrop"
+      data-lenis-prevent
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onBack();
       }}
@@ -1318,7 +1328,7 @@ function BookingForm({
            JETZT traegt der Rahmen oben --color-ink (dieselbe Tinte wie die Kopfzeile),
            die drei anderen Kanten bleiben hell auf dem Papierkoerper. Der Kopf ist
            damit oben sauber abgeschlossen. */
-        className="my-auto flex max-h-[min(92vh,900px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] border-t-[3px] border-t-[var(--color-ink)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-panel-in_180ms_ease-out]"
+        className="my-auto flex max-h-[min(92vh,900px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] border-t-[3px] border-t-[var(--color-ink)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-dialog-in_280ms_var(--motion-out)]"
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* R134/1: Der 4px-Salsa-Strich ueber der schwarzen Kopfzeile ist WEG (Raphael:
@@ -1744,7 +1754,8 @@ function BookingForm({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

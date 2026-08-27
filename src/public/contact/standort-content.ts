@@ -110,7 +110,7 @@ export const STANDORT = {
       eyebrow: 'Anfahrt',
       title: 'So kommst du',
       titleAccent: 'hin',
-      body: 'Die Nähe zum Bahnhof ist nicht nur ein Detail. Sie ist der Grund, warum Menschen nach Arbeit, Schule oder Uni leichter regelmässig kommen.',
+      body: 'Die Nähe zum Bahnhof ist nicht nur ein Detail. Sie ist der Grund, warum Menschen nach Arbeit, Schule oder Uni leichter regelmässig kommen. Die Karte darunter zeigt den Eingang an der Elisabethenanlage.',
       infos: [
         { label: 'Adresse', value: 'Salsaflow Dance Company GmbH, Elisabethenanlage 7, 4051 Basel' },
         // Sol-Review: Öffnungszeiten fehlten sitewide; Quelle Onboarding `oeffnungszeiten`
@@ -223,7 +223,7 @@ export const STANDORT = {
       eyebrow: 'Directions',
       title: 'This is how you get',
       titleAccent: 'here',
-      body: 'The closeness to the station is not just a detail. It is the reason people come more easily and regularly after work, school or uni.',
+      body: 'The closeness to the station is not just a detail. It is the reason people come more easily and regularly after work, school or uni. The map below shows the entrance on Elisabethenanlage.',
       infos: [
         { label: 'Address', value: 'Salsaflow Dance Company GmbH, Elisabethenanlage 7, 4051 Basel' },
         { label: 'Availability', value: 'Monday to Saturday, 08:00–18:00. Closed on Sunday. Classes also run in the evening — see the schedule.' },

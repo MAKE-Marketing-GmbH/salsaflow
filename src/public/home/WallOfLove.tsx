@@ -160,12 +160,12 @@ export function WallOfLove() {
                   // Karten in einem 3x2-Raster: Spalte 1 jeder Zeile linksbuendig, Spalten 2
                   // und 3 mit linker Haarlinie; die zweite Zeile haengt an einer oberen Linie.
                   // `relative` traegt das absolut gesetzte Anfuehrungszeichen der Leitstimme.
-                  'relative flex flex-col py-7 last:pb-0 sm:pb-0 sm:pt-8',
+                  'relative flex flex-col py-7 last:pb-0 sm:pt-8',
                   index > 0 && 'border-t border-[var(--color-line)]',
                   index % 3 > 0 && 'sm:border-l sm:pl-7 lg:pl-10',
                   index % 3 < 2 && 'sm:pr-7 lg:pr-10',
-                  index >= 3 && 'sm:border-t sm:pt-8',
-                  index < 3 && 'sm:border-t-0',
+                  index >= 3 && 'sm:border-t sm:pt-8 sm:pb-0',
+                  index < 3 && 'sm:border-t-0 sm:pb-10',
                 )}
               >
                 {/* Die Sterne bleiben auf ALLEN drei Karten. Sie sind der Beleg der einzelnen
@@ -206,7 +206,7 @@ export function WallOfLove() {
                 <figcaption className="mt-auto flex items-end justify-between gap-3 pt-6">
                   <div className="min-w-0">
                     <div className="truncate type-h3 text-[var(--color-ink)]">{review.name}</div>
-                    <div className="text-xs text-[var(--color-ink-muted)]">{localized.when}</div>
+                    <div className="mt-2 pb-2 text-xs leading-relaxed text-[var(--color-ink-muted)]">{localized.when}</div>
                   </div>
                   <span className="shrink-0 text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-salsa)]">
                     {localized.aspect}

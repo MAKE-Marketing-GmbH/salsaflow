@@ -41,6 +41,7 @@ export type SeoKey =
   | 'partys'
   | 'faq'
   | 'schnupper'
+  | 'prepare'
   | 'admin'
   | 'booking'
   | 'bookingStatus'
@@ -81,6 +82,7 @@ export const SEO_ROUTE_CONFIG = {
   partys: { canonicalPath: '/mehr/partys', indexable: true },
   faq: { canonicalPath: '/faq', indexable: true },
   schnupper: { canonicalPath: '/schnupperstunde', indexable: true },
+  prepare: { canonicalPath: '/vorbereiten', indexable: true },
   impressum: { canonicalPath: '/impressum', indexable: true },
   datenschutz: { canonicalPath: '/datenschutz', indexable: true },
   schedule: { canonicalPath: '/kursplan', indexable: true },
@@ -424,6 +426,18 @@ export const SEO_META = {
       title: 'Free Trial Class in Basel | Salsaflow',
       description:
         'Try Salsa, Bachata or Heels for free at Salsaflow in Basel. One class, no commitment, right by Basel SBB.',
+    },
+  },
+  prepare: {
+    de: {
+      title: 'So bereitest du dich auf deine Tanzstunde vor | Salsaflow',
+      description:
+        'Dein Platz ist reserviert. Folge Salsaflow auf Instagram, schreib bei Fragen auf WhatsApp und komm in bequemer Kleidung vorbei.',
+    },
+    en: {
+      title: 'How to prepare for your dance class | Salsaflow',
+      description:
+        'Your spot is booked. Follow Salsaflow on Instagram, message us on WhatsApp with questions, and come in comfortable clothes.',
     },
   },
   admin: {

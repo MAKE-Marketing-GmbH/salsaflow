@@ -27,6 +27,7 @@ import { TanzschuhePage } from '@/public/TanzschuhePage';
 import { PartysPage } from '@/public/PartysPage';
 import { FaqPage } from '@/public/FaqPage';
 import { SchnupperstundePage } from '@/public/SchnupperstundePage';
+import { PreparePage } from '@/public/PreparePage';
 import { StandortPage } from '@/public/StandortPage';
 import { NotFoundPage } from '@/public/NotFoundPage';
 
@@ -78,6 +79,7 @@ function prerenderComponentFor(seoKey: SeoKey): ComponentType {
     case 'photos': return PhotosPage;
     case 'contact': return ContactPage;
     case 'schnupper': return SchnupperstundePage;
+    case 'prepare': return PreparePage;
     case 'standort': return StandortPage;
     case 'collabs': return CollabsPage;
     case 'tanzschuhe': return TanzschuhePage;

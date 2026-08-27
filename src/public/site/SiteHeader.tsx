@@ -178,9 +178,9 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
       const y = window.scrollY;
       if (y < 24 || open || headerRef.current?.contains(document.activeElement)) {
         setHidden(false);
-      } else if (y > lastY + 8) {
+      } else if (y > lastY + 24) {
         setHidden(true);
-      } else if (y < lastY - 8) {
+      } else if (y < lastY - 24) {
         setHidden(false);
       }
       lastY = y;
@@ -263,8 +263,9 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
   return (
     <header
       ref={headerRef}
+      data-page-header
       className={cn(
-        'fixed inset-x-0 top-0 z-50 will-change-transform transition-transform duration-[var(--dur-base)] ease-[var(--motion-out)] motion-reduce:transition-none',
+        'fixed inset-x-0 top-0 z-50 isolate bg-[var(--color-paper-warm)] will-change-transform transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-reduce:transition-none',
         solidBackdrop && 'bg-[var(--color-paper-warm)]',
       )}
       style={{
@@ -283,7 +284,6 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
           bzw. darueber liegen. Offen wird die Leiste darum full-bleed: kein Aussen-
           Padding, keine Rundung, und das Panel fuellt den ganzen Viewport (unten). */}
       <div
-        data-page-header
         className={cn('mx-auto max-w-[1400px]', open ? 'px-0 py-0' : 'px-[5px] py-[9px] sm:px-[15px] sm:py-[10px]')}
       >
         {/* ROOT-CAUSE des bekannten Dropdown-Bugs, gemessen mit scripts/nav-probe.cjs:

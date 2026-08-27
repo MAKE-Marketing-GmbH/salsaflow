@@ -140,7 +140,7 @@ export function LocationBand() {
                 <div className="mt-4 overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)]">
                   <GoogleMapEmbed
                     title={de ? 'Karte: Salsaflow, Elisabethenanlage 7, Basel' : 'Map: Salsaflow, Elisabethenanlage 7, Basel'}
-                    src="https://www.google.com/maps?q=Elisabethenanlage%207%2C%204051%20Basel&output=embed"
+                    src={CONTACT.mapsEmbed}
                     className="relative aspect-[4/3] w-full border-0"
                   />
                 </div>

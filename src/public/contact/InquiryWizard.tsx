@@ -218,6 +218,7 @@ export function InquiryWizard({
   onTopicChange,
   compact = false,
   lockTopic = false,
+  onSuccessHref,
 }: {
   /** null = keine Vorauswahl beim Laden (R188 K1). Die Schnupper-Seite und die
    *  Hash-Links auf /kontakt setzen weiter einen echten Wert. */
@@ -226,6 +227,8 @@ export function InquiryWizard({
   compact?: boolean;
   /** true: Anliegen steht fest (eigene Schnupper-Seite). Kein 8er-Raster. */
   lockTopic?: boolean;
+  /** Nach erfolgreichem Absenden dorthin weiterleiten statt den In-Place-Erfolg zu zeigen. */
+  onSuccessHref?: string;
 }) {
   const { lang } = useLang();
   const de = lang === 'de';
@@ -403,6 +406,10 @@ export function InquiryWizard({
         }),
       });
       if (!response.ok) throw new Error('request failed');
+      if (onSuccessHref) {
+        window.location.assign(onSuccessHref);
+        return;
+      }
       setStatus('success');
     } catch {
       setStatus('error');
@@ -445,20 +452,27 @@ export function InquiryWizard({
     );
   }
 
-  // Kurzform auf der Startseite: Anliegen-Raster plus die drei Kontaktfelder, ein Schritt.
+  // Kurzform: auf der Startseite mit Anliegen-Raster, auf der Schnupper-Seite
+  // (lockTopic) nur Name, Erreichbarkeit und Senden.
   if (compact) {
     return (
       <form onSubmit={submit} onKeyDown={blockEnterSubmit} noValidate className="p-5 sm:p-6">
-        <fieldset aria-invalid={topicInvalid || undefined} aria-describedby={topicInvalid ? ERROR_ID : undefined}>
-          <legend className="type-h3 text-[var(--color-ink)]">{copy.topicTitle}</legend>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.topicLead}</p>
-          <TopicGrid topics={orderedTopics} topic={topic} onSelect={selectTopic} />
-        </fieldset>
+        {lockTopic ? (
+          <p className="type-h3 text-[var(--color-ink)]">{de ? 'Platz sichern' : 'Reserve a spot'}</p>
+        ) : (
+          <fieldset aria-invalid={topicInvalid || undefined} aria-describedby={topicInvalid ? ERROR_ID : undefined}>
+            <legend className="type-h3 text-[var(--color-ink)]">{copy.topicTitle}</legend>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.topicLead}</p>
+            <TopicGrid topics={orderedTopics} topic={topic} onSelect={selectTopic} />
+          </fieldset>
+        )}
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className={cn('grid gap-4 sm:grid-cols-2', lockTopic ? 'mt-4' : 'mt-6')}>
           <Input testId="contact-name" label={copy.name} value={name} onChange={(value) => { setName(value); setError(''); }} autoComplete="given-name" invalid={showGap && contactGap === 'name'} />
           <Input label={copy.phone} value={phone} onChange={(value) => { setPhone(value); setError(''); }} type="tel" autoComplete="tel" invalid={showGap && contactGap === 'reach'} />
-          <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" invalid={showGap && (contactGap === 'email' || contactGap === 'reach')} className="sm:col-span-2" />
+          {lockTopic ? null : (
+            <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" invalid={showGap && (contactGap === 'email' || contactGap === 'reach')} className="sm:col-span-2" />
+          )}
         </div>
         <PrivacyCheck checked={privacy} onChange={(next) => { setPrivacy(next); setError(''); }} label={copy.privacyLabel} invalid={privacyInvalid} />
         <Honeypot value={website} onChange={setWebsite} />
@@ -471,7 +485,7 @@ export function InquiryWizard({
 
         <div className="mt-6">
           <button type="submit" data-testid="contact-submit" disabled={status === 'submitting'} className="btn-base btn-primary min-h-12 w-full gap-2 px-7 text-base disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto">
-            {status === 'submitting' ? copy.sending : copy.submit}
+            {status === 'submitting' ? copy.sending : (lockTopic ? (de ? 'Platz reservieren' : 'Reserve a spot') : copy.submit)}
             {status === 'submitting' ? <Spinner /> : <ArrowRight aria-hidden className="h-4 w-4" />}
           </button>
         </div>
