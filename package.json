@@ -27,6 +27,7 @@
     "verify": "tsx scripts/verify.ts",
     "verify:admin": "tsx scripts/verify-admin.ts",
     "verify:public": "tsx scripts/verify-public.ts",
+    "verify:editorial": "tsx scripts/verify-editorial.ts",
     "verify:booking": "tsx scripts/verify-booking.ts",
     "verify:payment": "tsx scripts/verify-payment.ts",
     "verify:contact": "tsx scripts/verify-contact.ts",

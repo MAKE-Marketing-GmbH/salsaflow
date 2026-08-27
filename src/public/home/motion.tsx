@@ -20,10 +20,25 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
+import {
+  EASE_OUT,
+  REVEAL_BLUR,
+  REVEAL_DISTANCE,
+  REVEAL_DURATION,
+  REVEAL_STAGGER,
+  REVEAL_VIEWPORT,
+} from '@/lib/motion-tokens';
+
+export {
+  EASE_OUT,
+  REVEAL_BLUR,
+  REVEAL_DISTANCE,
+  REVEAL_DURATION,
+  REVEAL_STAGGER,
+} from '@/lib/motion-tokens';
 
 /** Einheitlicher Basistakt: mit klarer Tiefe von unten einblenden, ohne Feder. */
-export const EASE_OUT = [0.23, 1, 0.32, 1] as const;
-export const VIEWPORT = { once: true, margin: '0px 0px -4% 0px' } as const;
+export const VIEWPORT = REVEAL_VIEWPORT;
 
 const emptySubscribe = () => () => {};
 
@@ -37,18 +52,24 @@ export function useHydrated() {
 
 export function useReveal(opts?: { stagger?: number; distance?: number; duration?: number }) {
   const reduced = useReducedMotion() === true;
-  const stagger = reduced ? 0 : (opts?.stagger ?? 0.05);
-  const distance = reduced ? 0 : Math.min(opts?.distance ?? 24, 32);
-  const duration = reduced ? 0.2 : (opts?.duration ?? 0.48);
+  const stagger = reduced ? 0 : (opts?.stagger ?? REVEAL_STAGGER);
+  const distance = reduced ? 0 : Math.min(opts?.distance ?? REVEAL_DISTANCE, 32);
+  const duration = reduced ? 0.2 : (opts?.duration ?? REVEAL_DURATION);
+  const blur = reduced ? 0 : REVEAL_BLUR;
 
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: stagger, delayChildren: reduced ? 0 : 0.02 } },
+    show: { transition: { staggerChildren: stagger, delayChildren: reduced ? 0 : 0.04 } },
   };
   const item: Variants = {
-    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0)` },
+    hidden: {
+      opacity: 0,
+      filter: `blur(${blur}px)`,
+      transform: `translate3d(0, ${distance}px, 0)`,
+    },
     show: {
       opacity: 1,
+      filter: 'blur(0px)',
       transform: 'translate3d(0, 0, 0)',
       transition: { duration, ease: EASE_OUT },
     },
@@ -90,6 +111,7 @@ function revealVariantItem(
 ): Variants {
   const { distance, duration, delay, reduced } = opts;
   const transition = { duration, delay, ease: EASE_OUT };
+  const blur = reduced ? 0 : REVEAL_BLUR;
 
   if (variant === 'clip') {
     return {
@@ -98,11 +120,13 @@ function revealVariantItem(
         /* clipPath war der letzte ungated Wert (blur unten hat die Gabel schon):
            bei Reduced Motion zeigt der hidden-Frame sonst einen beschnittenen Streifen. */
         clipPath: reduced ? 'inset(0 0 0 0)' : 'inset(0 0 14% 0)',
+        filter: `blur(${blur}px)`,
         transform: `translate3d(0, ${Math.min(distance, 24)}px, 0)`,
       },
       show: {
         opacity: 1,
         clipPath: 'inset(0 0 0 0)',
+        filter: 'blur(0px)',
         transform: 'translate3d(0, 0, 0)',
         transition,
       },
@@ -113,12 +137,12 @@ function revealVariantItem(
     return {
       hidden: {
         opacity: 0,
-        filter: reduced ? 'blur(0)' : 'blur(4px)',
+        filter: `blur(${blur}px)`,
         transform: `translate3d(0, ${Math.min(distance, 24)}px, 0)`,
       },
       show: {
         opacity: 1,
-        filter: 'blur(0)',
+        filter: 'blur(0px)',
         transform: 'translate3d(0, 0, 0)',
         transition,
       },
@@ -126,8 +150,17 @@ function revealVariantItem(
   }
 
   return {
-    hidden: { opacity: 0, transform: `translate3d(0, ${distance}px, 0)` },
-    show: { opacity: 1, transform: 'translate3d(0, 0, 0)', transition },
+    hidden: {
+      opacity: 0,
+      filter: `blur(${blur}px)`,
+      transform: `translate3d(0, ${distance}px, 0)`,
+    },
+    show: {
+      opacity: 1,
+      filter: 'blur(0px)',
+      transform: 'translate3d(0, 0, 0)',
+      transition,
+    },
   };
 }
 
@@ -136,13 +169,13 @@ export function useRevealVariant(
   opts?: { stagger?: number; distance?: number; duration?: number; delay?: number },
 ) {
   const reduced = useReducedMotion() === true;
-  const stagger = reduced ? 0 : (opts?.stagger ?? 0.05);
-  const distance = reduced ? 0 : Math.min(opts?.distance ?? 24, 32);
-  const duration = reduced ? 0.2 : (opts?.duration ?? 0.48);
+  const stagger = reduced ? 0 : (opts?.stagger ?? REVEAL_STAGGER);
+  const distance = reduced ? 0 : Math.min(opts?.distance ?? REVEAL_DISTANCE, 32);
+  const duration = reduced ? 0.2 : (opts?.duration ?? REVEAL_DURATION);
   const delay = opts?.delay ?? 0;
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: stagger, delayChildren: reduced ? 0 : 0.02 } },
+    show: { transition: { staggerChildren: stagger, delayChildren: reduced ? 0 : 0.04 } },
   };
   const item = revealVariantItem(variant, { distance, duration, delay, reduced });
   return { container, item };
@@ -249,9 +282,9 @@ export function RevealWords({
   text,
   className,
   as: Tag = 'h2',
-  stagger = 0.035,
+  stagger = 0.045,
   distance = 18,
-  duration = 0.42,
+  duration = 0.62,
   instant = false,
   immediate = false,
 }: RevealWordsProps) {
@@ -260,29 +293,33 @@ export function RevealWords({
      Animation. Und im `immediate`-Zweig bleibt die Opacity KONSTANT 1: der hidden-Zustand
      steht im prerenderten HTML (SSR schreibt `initial`), eine ATF-H1 mit opacity:0 wäre
      ohne JS unsichtbar (der R209-Fall). Nur der y-Versatz animiert — der ist ohne JS
-     harmlos (Text steht dann 14px tiefer, aber sichtbar). */
+     harmlos (Text steht dann 14px tiefer, aber sichtbar). Kein Blur on ATF: ein
+     unscharfer Erstframe ist derselbe R209-Fehler, nur weicher. */
   const still = instant || (immediate && reduced);
   const animated = !still;
   const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
+  const wordBlur = reduced || immediate ? 0 : 4;
   const container: Variants = {
     hidden: {},
-    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.02 } },
+    show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: reduced ? 0 : 0.04 } },
   };
   const word: Variants = animated
     ? {
         hidden: {
           opacity: immediate ? 1 : 0,
+          filter: `blur(${wordBlur}px)`,
           transform: `translate3d(0, ${reduced ? 0 : Math.min(distance, 24)}px, 0)`,
         },
         show: {
           opacity: 1,
+          filter: 'blur(0px)',
           transform: 'translate3d(0, 0, 0)',
           transition: { duration: reduced ? 0.2 : duration, ease: EASE_OUT },
         },
       }
     : {
-        hidden: { opacity: 1, transform: 'translate3d(0, 0, 0)' },
-        show: { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+        hidden: { opacity: 1, filter: 'blur(0px)', transform: 'translate3d(0, 0, 0)' },
+        show: { opacity: 1, filter: 'blur(0px)', transform: 'translate3d(0, 0, 0)' },
       };
 
   return (

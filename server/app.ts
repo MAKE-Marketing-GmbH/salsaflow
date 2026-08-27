@@ -11,6 +11,7 @@ import {
   locations,
   styles,
   teachers,
+  terms,
 } from '../db/schema.js';
 import { SESSION_COOKIE, issueSession, verifyPassword, verifySession } from './auth.js';
 import { createAdminRoutes } from './admin.js';
@@ -39,19 +40,24 @@ function publicUser(a: typeof adminProfiles.$inferSelect) {
 }
 
 // Kurse aus der lokalen DB in der Form, die reservation-routes.ts erwartet (SeedCourse).
-async function loadDbCoursesForReservation(db: Db) {
-  const [styleRows, rungRows, locRows, courseRows, ctRows, teacherRows] = await Promise.all([
+export async function loadDbCoursesForReservation(db: Db) {
+  const [styleRows, rungRows, locRows, courseRows, ctRows, teacherRows, termRows] = await Promise.all([
     db.select().from(styles),
     db.select().from(levelRungs),
     db.select().from(locations),
     db.select().from(courses),
     db.select().from(courseTeachers),
     db.select().from(teachers),
+    db.select().from(terms),
   ]);
   const styleById = new Map(styleRows.map((s) => [s.id, s]));
   const rungById = new Map(rungRows.map((r) => [r.id, r]));
   const locById = new Map(locRows.map((l) => [l.id, l]));
   const teacherById = new Map(teacherRows.map((t) => [t.id, t]));
+  const today = new Date().toISOString().slice(0, 10);
+  const visibleTermIds = new Set(
+    termRows.filter((term) => term.status === 'published' && term.endDate >= today).map((term) => term.id),
+  );
   const teachersByCourse = new Map<string, { displayName: string }[]>();
   for (const ct of ctRows) {
     const t = teacherById.get(ct.teacherId);
@@ -60,19 +66,21 @@ async function loadDbCoursesForReservation(db: Db) {
     list.push({ displayName: t.displayName });
     teachersByCourse.set(ct.courseId, list);
   }
-  return courseRows.map((co) => ({
-    id: co.id,
-    styleDe: styleById.get(co.styleId)?.nameDe ?? '',
-    styleEn: styleById.get(co.styleId)?.nameEn ?? '',
-    levelDe: (co.levelRungId ? rungById.get(co.levelRungId)?.labelDe : '') ?? '',
-    levelEn: (co.levelRungId ? rungById.get(co.levelRungId)?.labelEn : '') ?? '',
-    weekday: co.weekday,
-    startTime: co.startTime.slice(0, 5),
-    endTime: co.endTime.slice(0, 5),
-    locationName: locById.get(co.locationId)?.name ?? '',
-    status: co.status,
-    teachers: teachersByCourse.get(co.id) ?? [],
-  }));
+  return courseRows
+    .filter((co) => visibleTermIds.has(co.termId) && (co.status === 'open' || co.status === 'full'))
+    .map((co) => ({
+      id: co.id,
+      styleDe: styleById.get(co.styleId)?.nameDe ?? '',
+      styleEn: styleById.get(co.styleId)?.nameEn ?? '',
+      levelDe: (co.levelRungId ? rungById.get(co.levelRungId)?.labelDe : '') ?? '',
+      levelEn: (co.levelRungId ? rungById.get(co.levelRungId)?.labelEn : '') ?? '',
+      weekday: co.weekday,
+      startTime: co.startTime.slice(0, 5),
+      endTime: co.endTime.slice(0, 5),
+      locationName: locById.get(co.locationId)?.name ?? '',
+      status: co.status,
+      teachers: teachersByCourse.get(co.id) ?? [],
+    }));
 }
 
 // Hono-App als Factory, damit sie mit derselben DB-Instanz sowohl vom Server (server/index.ts)

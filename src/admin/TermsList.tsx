@@ -50,7 +50,8 @@ export function TermsList({
           <h1 className="text-2xl font-bold tracking-tight">Kursplan verwalten</h1>
           <p className="max-w-xl text-sm text-neutral-600">
             Hier legst du die Kurs-Staffeln an. Am einfachsten erstellst du eine neue Staffel, indem du
-            die letzte <strong>duplizierst</strong> - die Level steigen dann automatisch eine Stufe.
+            die letzte <strong>duplizierst</strong> — die Level steigen dann automatisch eine Stufe. Nur
+            veröffentlichte Staffeln erscheinen im öffentlichen Kursplan.
           </p>
         </div>
         {!readonly && (

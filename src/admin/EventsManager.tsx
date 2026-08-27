@@ -288,17 +288,17 @@ function EventForm({
   const [error, setError] = useState<string | null>(null);
   const dateError = value.endDate && value.endDate < value.startDate ? 'Das Enddatum liegt vor dem Startdatum.' : null;
   const timeError = value.startTime && value.endTime && value.endTime <= value.startTime ? 'Die Endzeit muss nach der Startzeit liegen.' : null;
-  const canSave = value.titleDe.trim().length >= 2 && value.titleEn.trim().length >= 2
-    && value.summaryDe.trim().length >= 10 && value.summaryEn.trim().length >= 10
+  const canSave = value.titleDe.trim().length >= 2
+    && value.summaryDe.trim().length >= 10
     && value.slug.length >= 2 && !dateError && !timeError;
 
   const payload = useMemo<JsonValue>(() => ({
     slug: value.slug.trim(),
     format: value.format,
     titleDe: value.titleDe.trim(),
-    titleEn: value.titleEn.trim(),
+    titleEn: value.titleEn.trim() || value.titleDe.trim(),
     summaryDe: value.summaryDe.trim(),
-    summaryEn: value.summaryEn.trim(),
+    summaryEn: value.summaryEn.trim() || value.summaryDe.trim(),
     startDate: value.startDate,
     location: value.location.trim(),
     endDate: value.endDate || null,
@@ -373,7 +373,7 @@ function EventForm({
               }}
             />
           </Field>
-          <Field label="Titel Englisch" required>
+          <Field label="Titel Englisch" hint="Optional — leer übernimmt den deutschen Titel.">
             <TextInput value={value.titleEn} onChange={(event) => setValue((v) => ({ ...v, titleEn: event.target.value }))} />
           </Field>
         </div>
@@ -397,7 +397,7 @@ function EventForm({
               className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus:border-[var(--color-salsa)] focus:outline-none"
             />
           </Field>
-          <Field label="Kurzbeschreibung Englisch" required>
+          <Field label="Kurzbeschreibung Englisch" hint="Optional — leer übernimmt den deutschen Text.">
             <textarea
               value={value.summaryEn}
               onChange={(event) => setValue((v) => ({ ...v, summaryEn: event.target.value }))}
@@ -464,7 +464,7 @@ function EventForm({
           />
           <span>
             <span className="block text-sm font-semibold">Als Highlight markieren</span>
-            <span className="block text-xs text-neutral-500">Für besonders wichtige Workshops oder Wochenenden.</span>
+            <span className="block text-xs text-neutral-500">Setzt das Highlight-Label auf der Eventkarte im Kalender. Die festen Format-Seiten (Danceflow, Floweekend, Anniversary) bleiben eigene Seiten.</span>
           </span>
         </label>
         {error && <ErrorNote>{error}</ErrorNote>}

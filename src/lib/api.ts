@@ -59,8 +59,8 @@ export type Meta = {
     labelDe: string;
     labelEn: string;
   }[];
-  teachers: { id: string; displayName: string }[];
-  locations: { id: string; name: string }[];
+  teachers: { id: string; displayName: string; photoUrl: string | null }[];
+  locations: { id: string; name: string; address: string }[];
   tariffs: { id: string; key: string; nameDe: string; seats: number; sort: number }[];
   weekdays: { key: string; de: string }[];
 };
@@ -97,6 +97,7 @@ export type AdminCourse = {
   locationName: string;
   bookingType: 'leader_follower' | 'open';
   capacityTotal: number;
+  allowsLateEntry: boolean;
   status: 'draft' | 'open' | 'full' | 'cancelled' | 'finished';
   teachers: { id: string; displayName: string }[];
   prices: { tariffId: string; tariffKey: string; tariffDe: string; amountChf: string }[];
@@ -136,6 +137,24 @@ export type AdminEvent = PublicEvent & {
   sort: number;
   createdAt: string;
   updatedAt: string;
+};
+
+export type AdminTeacher = {
+  id: string;
+  displayName: string;
+  role: string | null;
+  photoUrl: string | null;
+  isActive: boolean;
+  sort: number;
+  courseCount: number;
+};
+
+export type AdminLocation = {
+  id: string;
+  name: string;
+  address: string;
+  sort: number;
+  courseCount: number;
 };
 
 export type DuplicatePreview = {

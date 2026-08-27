@@ -1,7 +1,21 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-27 13:30 UTC — Weltklasse-Runde vollstaendig deployed: Hauptwelle `a606b39` + UX-Nachzuegler `48e9c4e` (DayBar mobil sticky, Eventkalender-Endzeile, Maps-Radius), live verifiziert.
-**Vorher:** Gauntlet-Abschlussrunde deployed (Commit `67069f3`, main → Vercel).
+**Stand:** 2026-08-27 17:00 UTC — Redaktionsschicht bereit zum Deploy. Live-Admin-Passwort auf den Seed-Default zurueckgesetzt (`admin@salsaflow-dc.com` / `salsaflow-admin-2026`); oeffentliche Events-API liefert vor dem Deploy noch 0, weil die DB-Verdrahtung noch nicht live ist.
+**Vorher:** Weltklasse-Runde deployed (`a606b39` + `48e9c4e`).
+
+## Redaktion 27.08 (Backend fuer den Tanzschul-Betrieb)
+
+Was sie selbst anpassen:
+- Staffeln anlegen/duplizieren/veroeffentlichen; Kurse darin inkl. Quereinstieg.
+- Events als Entwurf oder veroeffentlicht; Englisch optional (faellt auf DE zurueck).
+- Lehrer und Studios unter `/admin` (Lehrer auch direkt im Kursformular).
+- Veroeffentlichte, zukuenftige Daten erscheinen sofort im Kursplan und Eventkalender (`Cache-Control: no-store`).
+
+Was bewusst nicht ins Admin gehoert:
+- Teamseite/Gruenderportraits, Format-Seiten (Danceflow/Floweekend/Anniversary), Preise auf der Website.
+- Bild-Upload (Pfad/URL), Stile/Level-Leitern, Online-Kauf.
+
+Gates: `verify:editorial` 20/20, `verify:admin` 26/26, `verify:public` 20/20, `verify:booking` 39/39, Typecheck, Cold-Start.
 
 ## Weltklasse-Runde 27.08 (Review → Fixliste → Bauwellen)
 

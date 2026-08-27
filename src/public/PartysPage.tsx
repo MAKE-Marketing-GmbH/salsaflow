@@ -89,14 +89,14 @@ export function PartysPage() {
 
 /* ------------------------------------------------------------------ Danceflow Night als Start */
 function DanceflowSection({ c }: { c: (typeof PARTYS)['de'] }) {
-  /* Takt dieser Seite: 0.7s, Stagger 0.1 — ruhiger als die Startseite.
+  /* Takt dieser Seite: etwas langsamer als der Site-Default, Stagger 0.1.
      R151 hatte den Versatz hier auf 8px gezogen; das war eine stille Abweichung vom
-     EINEN Takt und ist raus. R190 nimmt auch die 14px raus: der Token steht auf 20
+     EINEN Takt und ist raus. R190 nimmt auch die 14px raus: der Token steht auf 24
      (home/motion.tsx), und jede eigene Zahl hier ist wieder eine stille Abweichung.
      Die Dauer bleibt bewusst gesetzt, sie ist der Charakter dieser Seite. */
   const reducedMotion = useReducedMotion() === true;
   const { container, item } = useReveal({
-    duration: 0.7,
+    duration: 0.84,
     stagger: 0.1,
     distance: reducedMotion ? 0 : 24,
   });
@@ -161,7 +161,7 @@ function DanceflowSection({ c }: { c: (typeof PARTYS)['de'] }) {
 /* ------------------------------------------------------------------ Weitere Orte (kuratiert) */
 function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
   // Gleicher Takt wie im Danceflow-Block: 0.7s, Stagger 0.1, Versatz 14px (Repo-Signatur).
-  const { item } = useReveal({ duration: 0.7, stagger: 0.1 });
+  const { item } = useReveal({ duration: 0.84, stagger: 0.1 });
   const m = c.more;
   return (
     <section className="bg-[var(--color-paper-warm)] py-16 lg:py-24">
@@ -209,7 +209,7 @@ function MoreSection({ c }: { c: (typeof PARTYS)['de'] }) {
 /* ------------------------------------------------------------------ Zum ersten Mal (Tipps) */
 function FirstTimeSection({ c }: { c: (typeof PARTYS)['de'] }) {
   // Gleicher Takt wie im Danceflow-Block: 0.7s, Stagger 0.1, Versatz 14px (Repo-Signatur).
-  const { item } = useReveal({ duration: 0.7, stagger: 0.1 });
+  const { item } = useReveal({ duration: 0.84, stagger: 0.1 });
   const f = c.firstTime;
   return (
     <section className="bg-[var(--color-bg-soft)] py-16 lg:py-24">

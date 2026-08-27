@@ -21,9 +21,15 @@
 // verbliebenen dunklen Stellen laufen auf --color-surface-dark bzw. weiss.
 
 import type { ReactNode } from 'react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { Shell } from '@/public/site/primitives';
+import {
+  EASE_OUT,
+  REVEAL_BLUR,
+  REVEAL_DURATION,
+  VIEWPORT,
+} from '@/public/home/motion';
 
 /** Flaechen der Home = dieselben wie auf allen Unterseiten. */
 export const PAPER = 'bg-[var(--color-paper-warm)]';
@@ -146,7 +152,7 @@ export const SECTION_Y_HOME = 'py-16 lg:py-16';
 /** Alt-Name, zeigt auf die Standardstufe (die "Lead"-Sektion war nie der Hoehepunkt). */
 export const SECTION_Y_LEAD = SECTION_Y;
 
-/** Die EINE Motion der Seite: klarer Fade-in von unten, nur opacity + transform, einmal. */
+/** Die EINE Motion der Seite: klarer Fade-in von unten, opacity + transform + leichter Blur. */
 export function Rise({
   children,
   className,
@@ -158,18 +164,21 @@ export function Rise({
   delay?: number;
   as?: 'div' | 'li' | 'section';
 }) {
+  const reduced = useReducedMotion() === true;
   const M = as === 'li' ? motion.li : as === 'section' ? motion.section : motion.div;
+  const blur = reduced ? 0 : REVEAL_BLUR;
   return (
     <M
       data-reveal
       className={className}
       initial={{
         opacity: 0,
-        transform: 'translate3d(0, 44px, 0) scale(0.97)',
+        filter: `blur(${blur}px)`,
+        transform: `translate3d(0, ${reduced ? 0 : 24}px, 0)`,
       }}
-      whileInView={{ opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' }}
-      viewport={{ once: true, margin: '0px 0px -4% 0px' }}
-      transition={{ duration: 0.78, delay, ease: [0.23, 1, 0.32, 1] }}
+      whileInView={{ opacity: 1, filter: 'blur(0px)', transform: 'translate3d(0, 0, 0)' }}
+      viewport={VIEWPORT}
+      transition={{ duration: reduced ? 0.2 : REVEAL_DURATION, delay, ease: EASE_OUT }}
     >
       {children}
     </M>

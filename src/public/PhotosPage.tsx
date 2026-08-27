@@ -21,7 +21,7 @@ import { Seo } from '@/lib/seo';
 import { SiteHeader } from '@/public/site/SiteHeader';
 import { SiteFooter } from '@/public/site/SiteFooter';
 import { Shell, Eyebrow, TitleAccent, CtaPill, GoogleRating } from '@/public/site/primitives';
-import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
+import { Reveal, useReveal, EASE_OUT, REVEAL_BLUR, REVEAL_DURATION, VIEWPORT, useHydrated } from '@/public/home/motion';
 import { useReducedMotion, type Variants } from 'motion/react';
 import { GALLERY, ALBUM_ORDER, GALLERY_PHOTOS, type AlbumId } from '@/public/gallery/content';
 import { InstagramShowcase } from '@/public/social/InstagramShowcase';
@@ -115,12 +115,17 @@ function useTileReveal(): Variants {
   const hydrated = useHydrated();
   return {
     hidden: hydrated
-      ? { opacity: 0, transform: reduced ? 'translate3d(0, 0, 0)' : 'translate3d(0, 18px, 0) scale(0.985)' }
-      : { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+      ? {
+          opacity: 0,
+          filter: reduced ? 'blur(0px)' : `blur(${REVEAL_BLUR}px)`,
+          transform: reduced ? 'translate3d(0, 0, 0)' : 'translate3d(0, 18px, 0) scale(0.985)',
+        }
+      : { opacity: 1, filter: 'blur(0px)', transform: 'translate3d(0, 0, 0)' },
     show: {
       opacity: 1,
+      filter: 'blur(0px)',
       transform: 'translate3d(0, 0, 0)',
-      transition: { duration: reduced ? 0.2 : 0.48, ease: EASE_OUT },
+      transition: { duration: reduced ? 0.2 : REVEAL_DURATION, ease: EASE_OUT },
     },
   };
 }

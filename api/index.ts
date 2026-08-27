@@ -6,7 +6,8 @@ import { z } from 'zod';
 import { createContactRoutes } from '../server/contact-routes.js';
 import { createReservationRoutes, type SeedSchedule } from '../server/reservation-routes.js';
 import { openDb } from '../db/client.js';
-import { createApp } from '../server/app.js';
+import { createApp, loadDbCoursesForReservation } from '../server/app.js';
+import { createPublicRoutes } from '../server/public.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const schedulePath = resolve(here, '../db/seed/public-schedule.json');
@@ -90,6 +91,52 @@ staticApp.all('/api/*', (c) =>
   ),
 );
 
+type EditorialSchedule = { terms?: unknown[] };
+
+export function createDatabaseRuntime(db: Parameters<typeof createApp>[0]) {
+  const app = new Hono();
+  const editorial = createPublicRoutes(db);
+  const reservationHealth = {
+    ok: true,
+    service: 'salsaflow-dc-api',
+    mode: 'vercel-reservation',
+    bookingEnabled: false,
+    reservationEnabled: true,
+    contactConfigured: Boolean(process.env.RESEND_API_KEY?.trim()),
+  } as const;
+
+  app.get('/api/health', (c) => c.json(reservationHealth));
+
+  // Redaktion vor createApp: sonst wuerde der alte Kauf-Funnel aus server/app.ts
+  // die Reservierung und den Eventkalender wieder ueberschreiben.
+  app.get('/api/public/schedule', async (c) => {
+    c.header('Cache-Control', 'no-store');
+    const response = await editorial.request('/api/public/schedule');
+    const body = (await response.json()) as EditorialSchedule;
+    if (Array.isArray(body.terms) && body.terms.length > 0) return c.json(body);
+    return c.json(await currentSchedule());
+  });
+  app.get('/api/public/events', async (c) => {
+    c.header('Cache-Control', 'no-store');
+    return editorial.request('/api/public/events');
+  });
+  app.post('/api/public/bookings', retiredBooking);
+  app.all('/api/public/bookings/*', retiredBooking);
+  app.route(
+    '/',
+    createReservationRoutes(async () => {
+      const response = await editorial.request('/api/public/schedule');
+      const body = (await response.json()) as EditorialSchedule;
+      if (Array.isArray(body.terms) && body.terms.length > 0) {
+        return { courses: await loadDbCoursesForReservation(db) };
+      }
+      return (await schedulePromise) as SeedSchedule;
+    }),
+  );
+  app.route('/', createApp(db));
+  return app;
+}
+
 async function databaseApp() {
   const handle = await openDb();
   try {
@@ -102,11 +149,7 @@ async function databaseApp() {
     }
     throw error;
   }
-  const app = new Hono();
-  // Reihenfolge ist der Vertrag: Public zuerst, DB nur als Fall-through fuer Admin.
-  app.route('/', publicContractApp);
-  app.route('/', createApp(handle.db));
-  return app;
+  return createDatabaseRuntime(handle.db);
 }
 
 type RuntimeOptions = {

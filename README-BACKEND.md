@@ -37,7 +37,7 @@ npm run dev                   # Frontend (5173) + API (8787) parallel
 | `npm run verify` | Fertig-Kriterium maschinell pruefen |
 | `npm run build` | **Gate**: Typecheck + Build |
 | `npm run dev` / `npm run start` | App lokal starten |
-| `npm run verify:admin` / `:public` / `:booking` | Gates Etappe 6 / 7 / 8 |
+| `npm run verify:admin` / `:public` / `:editorial` / `:booking` | Gates Etappe 6 / 7 / Redaktion / 8 |
 | `npm run verify:payment` | **Gate Etappe 9**: Online-Zahlung (Sandbox, PAYMENT_ENABLED=1) |
 | `npm run dev:pay` | App lokal MIT scharfer Zahlung (PAYMENT_ENABLED=1) |
 

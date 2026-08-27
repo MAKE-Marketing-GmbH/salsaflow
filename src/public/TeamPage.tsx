@@ -25,7 +25,7 @@ import { ClosingInvite, MEASURE_L, HeroFrame, GhostCta, PrimaryCta, SCHNUPPER_HR
 import { TEAM, FACES, FOUNDERS, founderRole } from '@/public/team/content';
 import { WALL_REVIEWS, localizeReview } from '@/public/site/reviews';
 import { fetchSchedule, WEEKDAY_ORDER, type ScheduleCourse, type WeekdayKey } from '@/lib/schedule';
-import { Reveal, useReveal, EASE_OUT, VIEWPORT, useHydrated } from '@/public/home/motion';
+import { Reveal, useReveal, EASE_OUT, REVEAL_BLUR, REVEAL_DURATION, VIEWPORT, useHydrated } from '@/public/home/motion';
 import { founderBustTop } from '@/public/team/FounderRow';
 
 /** Der Cookie-Hinweis ist `position: fixed` und nimmt keinen Platz im Dokument ein — die
@@ -611,12 +611,17 @@ function TeamPhotoSection() {
   const hydrated = useHydrated();
   const imgReveal: Variants = {
     hidden: hydrated
-      ? { opacity: 0, transform: reduced ? 'translate3d(0, 0, 0)' : 'translate3d(0, 20px, 0) scale(0.99)' }
-      : { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+      ? {
+          opacity: 0,
+          filter: reduced ? 'blur(0px)' : `blur(${REVEAL_BLUR}px)`,
+          transform: reduced ? 'translate3d(0, 0, 0)' : 'translate3d(0, 20px, 0) scale(0.99)',
+        }
+      : { opacity: 1, filter: 'blur(0px)', transform: 'translate3d(0, 0, 0)' },
     show: {
       opacity: 1,
+      filter: 'blur(0px)',
       transform: 'translate3d(0, 0, 0)',
-      transition: { duration: reduced ? 0.2 : 0.48, ease: EASE_OUT },
+      transition: { duration: reduced ? 0.2 : REVEAL_DURATION, ease: EASE_OUT },
     },
   };
 

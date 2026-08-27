@@ -428,9 +428,9 @@ export function HeroFrame({
       // SAFETY: `wave` garantiert `typeof title === 'string'` (Zeile darueber).
       text={title as string}
       className={headingClass}
-      stagger={0.03}
+      stagger={0.04}
       distance={14}
-      duration={0.38}
+      duration={0.52}
       immediate
     />
   ) : (

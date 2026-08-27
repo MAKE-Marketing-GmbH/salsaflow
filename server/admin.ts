@@ -33,6 +33,8 @@ type AuditMeta = typeof auditLog.$inferInsert['meta'];
 type TermPatch = Partial<typeof terms.$inferInsert>;
 type CoursePatch = Partial<typeof courses.$inferInsert>;
 type EventPatch = Partial<typeof events.$inferInsert>;
+type TeacherPatch = Partial<typeof teachers.$inferInsert>;
+type LocationPatch = Partial<typeof locations.$inferInsert>;
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 const WEEKDAY_DE = {
@@ -107,6 +109,7 @@ const courseBodySchema = z.object({
   locationId: z.string().uuid(),
   bookingType: z.enum(BOOKING_TYPE).optional(),
   capacityTotal: z.number().int().min(1).max(500).optional(),
+  allowsLateEntry: z.boolean().optional(),
   status: z.enum(COURSE_STATUS).optional(),
   teacherIds: z.array(z.string().uuid()).optional(),
   prices: z.array(priceSchema).optional(),
@@ -142,6 +145,24 @@ const eventDatesOrdered = (d: { startDate?: string; endDate?: string | null }) =
 const eventCreateSchema = z.object(eventFields).refine(eventDatesOrdered, dateOrderMsg);
 const eventPatchSchema = z.object(eventFields).partial().refine(eventDatesOrdered, dateOrderMsg);
 
+const teacherFields = {
+  displayName: z.string().min(2).max(120),
+  role: z.string().max(120).nullable().optional(),
+  photoUrl: nullableText(1000).optional(),
+  isActive: z.boolean().optional(),
+  sort: z.number().int().min(-9999).max(9999).optional(),
+};
+const teacherCreateSchema = z.object(teacherFields);
+const teacherPatchSchema = z.object(teacherFields).partial();
+
+const locationFields = {
+  name: z.string().min(2).max(120),
+  address: z.string().min(2).max(240).optional(),
+  sort: z.number().int().min(-9999).max(9999).optional(),
+};
+const locationCreateSchema = z.object(locationFields);
+const locationPatchSchema = z.object(locationFields).partial();
+
 /* ----------------------------------------------------------------------------
  * Hilfsfunktionen
  * -------------------------------------------------------------------------- */
@@ -154,6 +175,28 @@ function eventJson(event: typeof events.$inferSelect) {
     ...event,
     startTime: event.startTime?.slice(0, 5) ?? null,
     endTime: event.endTime?.slice(0, 5) ?? null,
+  };
+}
+
+function teacherJson(teacher: typeof teachers.$inferSelect, courseCount = 0) {
+  return {
+    id: teacher.id,
+    displayName: teacher.displayName,
+    role: teacher.role,
+    photoUrl: teacher.photoUrl,
+    isActive: teacher.isActive,
+    sort: teacher.sort,
+    courseCount,
+  };
+}
+
+function locationJson(location: typeof locations.$inferSelect, courseCount = 0) {
+  return {
+    id: location.id,
+    name: location.name,
+    address: location.address,
+    sort: location.sort,
+    courseCount,
   };
 }
 
@@ -270,6 +313,7 @@ async function loadCoursesForTerm(db: Db, termId: string) {
         locationName: loc?.name ?? '',
         bookingType: c.bookingType,
         capacityTotal: c.capacityTotal,
+        allowsLateEntry: c.allowsLateEntry,
         status: c.status,
         teachers: teachersByCourse.get(c.id) ?? [],
         prices: pricesByCourse.get(c.id) ?? [],
@@ -368,10 +412,10 @@ export function createAdminRoutes(db: Db) {
         .sort((a, b) => a.ladderKey.localeCompare(b.ladderKey) || a.ordinal - b.ordinal),
       teachers: teacherRows
         .filter((t) => t.isActive)
-        .map((t) => ({ id: t.id, displayName: t.displayName }))
+        .map((t) => ({ id: t.id, displayName: t.displayName, photoUrl: t.photoUrl }))
         .sort((a, b) => a.displayName.localeCompare(b.displayName)),
       locations: locRows
-        .map((l) => ({ id: l.id, name: l.name }))
+        .map((l) => ({ id: l.id, name: l.name, address: l.address }))
         .sort((a, b) => a.name.localeCompare(b.name)),
       tariffs: tariffRows
         .map((t) => ({ id: t.id, key: t.key, nameDe: t.nameDe, seats: t.seats, sort: t.sort }))
@@ -797,6 +841,135 @@ export function createAdminRoutes(db: Db) {
     return c.json({ ok: true });
   });
 
+  /* --- Lehrer / Studios -------------------------------------------------- */
+  admin.get('/api/admin/teachers', async (c) => {
+    const [teacherRows, linkRows] = await Promise.all([
+      db.select().from(teachers),
+      db.select().from(courseTeachers),
+    ]);
+    const countByTeacher = new Map<string, number>();
+    for (const link of linkRows) {
+      countByTeacher.set(link.teacherId, (countByTeacher.get(link.teacherId) ?? 0) + 1);
+    }
+    return c.json({
+      teachers: teacherRows
+        .map((teacher) => teacherJson(teacher, countByTeacher.get(teacher.id) ?? 0))
+        .sort((a, b) => Number(b.isActive) - Number(a.isActive) || a.sort - b.sort || a.displayName.localeCompare(b.displayName)),
+    });
+  });
+
+  admin.post('/api/admin/teachers', async (c) => {
+    const parsed = teacherCreateSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
+    const d = parsed.data;
+    const id = randomUUID();
+    const existing = await db.select({ sort: teachers.sort }).from(teachers);
+    const nextSort = d.sort ?? (existing.reduce((max, row) => Math.max(max, row.sort), -1) + 1);
+    await db.insert(teachers).values({
+      id,
+      displayName: d.displayName.trim(),
+      role: d.role?.trim() || null,
+      photoUrl: d.photoUrl?.trim() || null,
+      isActive: d.isActive ?? true,
+      sort: nextSort,
+    });
+    await audit(db, c.get('admin').id, 'create', 'teacher', id, { displayName: d.displayName });
+    return c.json({ id }, 201);
+  });
+
+  admin.patch('/api/admin/teachers/:id', async (c) => {
+    const id = c.req.param('id');
+    const parsed = teacherPatchSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
+    const existing = await db.select().from(teachers).where(eq(teachers.id, id)).limit(1);
+    if (!existing[0]) return c.json({ error: 'Lehrer nicht gefunden' }, 404);
+    const d = parsed.data;
+    const patch: TeacherPatch = {};
+    if (d.displayName !== undefined) patch.displayName = d.displayName.trim();
+    if (d.role !== undefined) patch.role = d.role?.trim() || null;
+    if (d.photoUrl !== undefined) patch.photoUrl = d.photoUrl?.trim() || null;
+    if (d.isActive !== undefined) patch.isActive = d.isActive;
+    if (d.sort !== undefined) patch.sort = d.sort;
+    await db.update(teachers).set(patch).where(eq(teachers.id, id));
+    await audit(db, c.get('admin').id, 'update', 'teacher', id);
+    return c.json({ ok: true });
+  });
+
+  admin.delete('/api/admin/teachers/:id', async (c) => {
+    const id = c.req.param('id');
+    const existing = await db.select().from(teachers).where(eq(teachers.id, id)).limit(1);
+    if (!existing[0]) return c.json({ error: 'Lehrer nicht gefunden' }, 404);
+    const linked = await db.select({ courseId: courseTeachers.courseId }).from(courseTeachers).where(eq(courseTeachers.teacherId, id)).limit(1);
+    if (linked[0]) {
+      return c.json({ error: 'Lehrer ist noch Kursen zugeordnet. Erst deaktivieren oder von den Kursen lösen.' }, 409);
+    }
+    await db.delete(teachers).where(eq(teachers.id, id));
+    await audit(db, c.get('admin').id, 'delete', 'teacher', id);
+    return c.json({ ok: true });
+  });
+
+  admin.get('/api/admin/locations', async (c) => {
+    const [locRows, courseRows] = await Promise.all([
+      db.select().from(locations),
+      db.select({ locationId: courses.locationId }).from(courses),
+    ]);
+    const countByLocation = new Map<string, number>();
+    for (const course of courseRows) {
+      countByLocation.set(course.locationId, (countByLocation.get(course.locationId) ?? 0) + 1);
+    }
+    return c.json({
+      locations: locRows
+        .map((location) => locationJson(location, countByLocation.get(location.id) ?? 0))
+        .sort((a, b) => a.sort - b.sort || a.name.localeCompare(b.name)),
+    });
+  });
+
+  admin.post('/api/admin/locations', async (c) => {
+    const parsed = locationCreateSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
+    const d = parsed.data;
+    const id = randomUUID();
+    const existing = await db.select({ sort: locations.sort }).from(locations);
+    const nextSort = d.sort ?? (existing.reduce((max, row) => Math.max(max, row.sort), -1) + 1);
+    await db.insert(locations).values({
+      id,
+      name: d.name.trim(),
+      address: d.address?.trim() || 'Elisabethenanlage 7, 4051 Basel',
+      sort: nextSort,
+    });
+    await audit(db, c.get('admin').id, 'create', 'location', id, { name: d.name });
+    return c.json({ id }, 201);
+  });
+
+  admin.patch('/api/admin/locations/:id', async (c) => {
+    const id = c.req.param('id');
+    const parsed = locationPatchSchema.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
+    const existing = await db.select().from(locations).where(eq(locations.id, id)).limit(1);
+    if (!existing[0]) return c.json({ error: 'Studio nicht gefunden' }, 404);
+    const d = parsed.data;
+    const patch: LocationPatch = {};
+    if (d.name !== undefined) patch.name = d.name.trim();
+    if (d.address !== undefined) patch.address = d.address.trim();
+    if (d.sort !== undefined) patch.sort = d.sort;
+    await db.update(locations).set(patch).where(eq(locations.id, id));
+    await audit(db, c.get('admin').id, 'update', 'location', id);
+    return c.json({ ok: true });
+  });
+
+  admin.delete('/api/admin/locations/:id', async (c) => {
+    const id = c.req.param('id');
+    const existing = await db.select().from(locations).where(eq(locations.id, id)).limit(1);
+    if (!existing[0]) return c.json({ error: 'Studio nicht gefunden' }, 404);
+    const used = await db.select({ id: courses.id }).from(courses).where(eq(courses.locationId, id)).limit(1);
+    if (used[0]) {
+      return c.json({ error: 'Studio ist noch Kursen zugeordnet. Erst die Kurse umhängen.' }, 409);
+    }
+    await db.delete(locations).where(eq(locations.id, id));
+    await audit(db, c.get('admin').id, 'delete', 'location', id);
+    return c.json({ ok: true });
+  });
+
   /* --- Kurse -------------------------------------------------------------- */
   admin.post('/api/admin/courses', async (c) => {
     const parsed = courseBodySchema.safeParse(await c.req.json().catch(() => null));
@@ -818,6 +991,7 @@ export function createAdminRoutes(db: Db) {
       locationId: d.locationId,
       bookingType: d.bookingType ?? 'leader_follower',
       capacityTotal: d.capacityTotal ?? 24,
+      allowsLateEntry: d.allowsLateEntry ?? true,
       status: d.status ?? 'draft',
     });
     await setCourseRelations(db, id, d.teacherIds, d.prices);
@@ -843,6 +1017,7 @@ export function createAdminRoutes(db: Db) {
     if (d.locationId !== undefined) coursePatch.locationId = d.locationId;
     if (d.bookingType !== undefined) coursePatch.bookingType = d.bookingType;
     if (d.capacityTotal !== undefined) coursePatch.capacityTotal = d.capacityTotal;
+    if (d.allowsLateEntry !== undefined) coursePatch.allowsLateEntry = d.allowsLateEntry;
     if (d.status !== undefined) coursePatch.status = d.status;
     await db.update(courses).set(coursePatch).where(eq(courses.id, id));
     await setCourseRelations(db, id, d.teacherIds, d.prices);

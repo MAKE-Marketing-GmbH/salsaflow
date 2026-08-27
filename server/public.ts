@@ -53,6 +53,7 @@ export function createPublicRoutes(db: Db) {
   const pub = new Hono();
 
   pub.get('/api/public/events', async (c) => {
+    c.header('Cache-Control', 'no-store');
     const today = todayISO();
     const rows = await db.select().from(events);
     const visible = rows
@@ -82,6 +83,7 @@ export function createPublicRoutes(db: Db) {
   });
 
   pub.get('/api/public/schedule', async (c) => {
+    c.header('Cache-Control', 'no-store');
     const today = todayISO();
 
     // 1) Sichtbare Staffeln: veroeffentlicht + nicht vorbei. Phase relativ zu heute.
@@ -102,7 +104,8 @@ export function createPublicRoutes(db: Db) {
     if (termIds.length === 0) {
       return c.json({
         today,
-        bookingEnabled: true,
+        bookingEnabled: false,
+        reservationEnabled: true,
         terms: [],
         courses: [],
         filters: { weekdays: [], styles: [], levels: [] },
@@ -200,7 +203,8 @@ export function createPublicRoutes(db: Db) {
 
     return c.json({
       today,
-      bookingEnabled: true,
+      bookingEnabled: false,
+      reservationEnabled: true,
       terms: visibleTerms.sort((a, b) => a.startDate.localeCompare(b.startDate)),
       courses: visibleCourses,
       filters: { weekdays: presentWeekdays, styles: presentStyles, levelCategories: presentCategories },

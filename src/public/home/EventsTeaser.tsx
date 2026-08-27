@@ -21,6 +21,8 @@ import { HOME } from '@/public/home/content';
 import { Eyebrow, Shell, sectionLead } from '@/public/site/primitives';
 import {
   EASE_OUT,
+  REVEAL_BLUR,
+  REVEAL_DURATION,
   Reveal,
   RevealOne,
   VIEWPORT,
@@ -187,10 +189,10 @@ export function EventsTeaser() {
             // R207: h-full + zwei gleiche Zeilen (1fr), damit der Streifen die volle
             // Zeilenhoehe traegt und unten keine schwarze Restflaeche bleibt.
             className="hidden h-full gap-4 lg:grid lg:grid-cols-1 lg:grid-rows-[1fr_1fr] lg:gap-5"
-            initial={hydrated ? { opacity: 0, transform: reduced ? 'translate3d(0, 0, 0)' : 'translate3d(0, 20px, 0)' } : false}
-            whileInView={{ opacity: 1, transform: 'translate3d(0, 0, 0)' }}
+            initial={hydrated ? { opacity: 0, filter: reduced ? 'blur(0px)' : `blur(${REVEAL_BLUR}px)`, transform: reduced ? 'translate3d(0, 0, 0)' : 'translate3d(0, 20px, 0)' } : false}
+            whileInView={{ opacity: 1, filter: 'blur(0px)', transform: 'translate3d(0, 0, 0)' }}
             viewport={VIEWPORT}
-            transition={{ duration: reduced ? 0.2 : 0.48, ease: EASE_OUT, delay: reduced ? 0 : 0.08 }}
+            transition={{ duration: reduced ? 0.2 : REVEAL_DURATION, ease: EASE_OUT, delay: reduced ? 0 : 0.08 }}
           >
             <figure className="min-h-0 overflow-hidden rounded-[var(--radius-media)]">
               <img

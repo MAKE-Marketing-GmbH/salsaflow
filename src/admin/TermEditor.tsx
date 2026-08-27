@@ -58,16 +58,16 @@ export function TermEditor({
   meta,
   readonly,
   onBack,
-  onShowBalance,
   reloadTerms,
+  reloadMeta,
   showToast,
 }: {
   termId: string;
   meta: Meta;
   readonly: boolean;
   onBack: () => void;
-  onShowBalance: () => void;
   reloadTerms: () => Promise<TermListItem[]>;
+  reloadMeta?: () => Promise<void>;
   showToast: (msg: string) => void;
 }) {
   const [detail, setDetail] = useState<TermDetail | null>(null);
@@ -147,11 +147,6 @@ export function TermEditor({
               {formatDate(term.startDate)} bis {formatDate(term.endDate)} &middot; {term.weekCount} Wochen
               &middot; {detail.courses.length} {detail.courses.length === 1 ? 'Kurs' : 'Kurse'}
             </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" onClick={onShowBalance} data-testid="open-balance">
-              Buchungen &amp; Balance
-            </Button>
           </div>
           {!readonly && (
             <div className="flex flex-wrap items-center gap-2">
@@ -238,6 +233,7 @@ export function TermEditor({
           meta={meta}
           existing={form.mode === 'edit' ? form.course : null}
           onClose={() => setForm(null)}
+          onTeacherCreated={reloadMeta}
           onSaved={async (msg) => {
             setForm(null);
             await reload();
@@ -478,12 +474,14 @@ function CourseForm({
   existing,
   onClose,
   onSaved,
+  onTeacherCreated,
 }: {
   termId: string;
   meta: Meta;
   existing: AdminCourse | null;
   onClose: () => void;
   onSaved: (msg: string) => Promise<void>;
+  onTeacherCreated?: () => Promise<void>;
 }) {
   const normalTariff = meta.tariffs.find((t) => t.key === 'normal');
   const studentTariff = meta.tariffs.find((t) => t.key === 'student');
@@ -496,7 +494,16 @@ function CourseForm({
   const [endTime, setEndTime] = useState(existing?.endTime ?? '19:30');
   const [locationId, setLocationId] = useState(existing?.locationId ?? meta.locations[0]?.id ?? '');
   const [teacherIds, setTeacherIds] = useState<string[]>(existing?.teachers.map((t) => t.id) ?? []);
+  const [teacherList, setTeacherList] = useState(() => {
+    const byId = new Map(meta.teachers.map((teacher) => [teacher.id, teacher]));
+    for (const teacher of existing?.teachers ?? []) {
+      if (!byId.has(teacher.id)) byId.set(teacher.id, { id: teacher.id, displayName: teacher.displayName, photoUrl: null });
+    }
+    return [...byId.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
+  });
+  const [newTeacherName, setNewTeacherName] = useState('');
   const [capacity, setCapacity] = useState(existing?.capacityTotal ?? 24);
+  const [allowsLateEntry, setAllowsLateEntry] = useState(existing?.allowsLateEntry ?? true);
   const [status, setStatus] = useState<AdminCourse['status']>(existing?.status ?? 'open');
   const [priceNormal, setPriceNormal] = useState<string>(
     existing?.prices.find((p) => p.tariffKey === 'normal')?.amountChf ?? '190',
@@ -525,6 +532,21 @@ function CourseForm({
     setTeacherIds((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
   }
 
+  async function addTeacherQuick() {
+    const displayName = newTeacherName.trim();
+    if (displayName.length < 2) return;
+    setError(null);
+    try {
+      const created = await api.post<{ id: string }>('/api/admin/teachers', { displayName });
+      setTeacherList((cur) => [...cur, { id: created.id, displayName, photoUrl: null }].sort((a, b) => a.displayName.localeCompare(b.displayName)));
+      setTeacherIds((cur) => [...cur, created.id]);
+      setNewTeacherName('');
+      await onTeacherCreated?.();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Lehrperson konnte nicht angelegt werden.');
+    }
+  }
+
   async function submit() {
     setError(null);
     if (!styleId) return setError('Bitte einen Stil wählen.');
@@ -546,6 +568,7 @@ function CourseForm({
       locationId,
       bookingType,
       capacityTotal: capacity,
+      allowsLateEntry,
       status,
       teacherIds,
       prices,
@@ -640,8 +663,9 @@ function CourseForm({
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Ort" required>
+          <Field label="Ort" required hint={meta.locations.length === 0 ? 'Lege zuerst ein Studio unter „Lehrer & Studios“ an.' : undefined}>
             <Select value={locationId} onChange={(e) => setLocationId(e.target.value)}>
+              {meta.locations.length === 0 && <option value="">Kein Studio vorhanden</option>}
               {meta.locations.map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.name}
@@ -666,9 +690,24 @@ function CourseForm({
           </Field>
         </div>
 
-        <Field label="Lehrer" hint="Mehrfachauswahl möglich.">
+        <label className="flex items-start gap-3 rounded-lg border border-neutral-200 p-4">
+          <input
+            type="checkbox"
+            checked={allowsLateEntry}
+            onChange={(event) => setAllowsLateEntry(event.target.checked)}
+            className="mt-1 h-4 w-4 accent-[var(--color-salsa)]"
+          />
+          <span>
+            <span className="block text-sm font-semibold">Quereinstieg während der laufenden Staffel möglich</span>
+            <span className="block text-xs text-neutral-500">
+              Aktiviert den Quereinstieg-Hinweis im Kursplan. Für fortgeschrittene Kurse ohne späten Einstieg ausschalten.
+            </span>
+          </span>
+        </label>
+
+        <Field label="Lehrer" hint="Mehrfachauswahl möglich. Neue Namen kannst du direkt hier anlegen.">
           <div className="flex flex-wrap gap-2">
-            {meta.teachers.map((t) => {
+            {teacherList.map((t) => {
               const on = teacherIds.includes(t.id);
               return (
                 <button
@@ -685,6 +724,22 @@ function CourseForm({
                 </button>
               );
             })}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <TextInput
+              value={newTeacherName}
+              placeholder="Name, z. B. Guest Teacher"
+              onChange={(event) => setNewTeacherName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  void addTeacherQuick();
+                }
+              }}
+            />
+            <Button type="button" onClick={() => void addTeacherQuick()} disabled={newTeacherName.trim().length < 2}>
+              Hinzufügen
+            </Button>
           </div>
         </Field>
 

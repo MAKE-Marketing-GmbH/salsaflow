@@ -1,20 +1,20 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { api, type Meta, type TermListItem } from '@/lib/api';
 import { Loading } from '@/admin/ui';
 import { TermsList } from '@/admin/TermsList';
 import { TermEditor } from '@/admin/TermEditor';
 import { DuplicateView } from '@/admin/DuplicateView';
-import { BalanceView } from '@/admin/BalanceView';
 import { EventsManager } from '@/admin/EventsManager';
+import { DirectoryManager } from '@/admin/DirectoryManager';
 
 type AdminUser = { id: string; email: string; displayName: string; role: string };
 
 type View =
   | { name: 'list' }
   | { name: 'events' }
+  | { name: 'directory' }
   | { name: 'editor'; termId: string }
-  | { name: 'duplicate'; termId: string }
-  | { name: 'balance'; termId: string };
+  | { name: 'duplicate'; termId: string };
 
 export function AdminApp({ user, onLogout }: { user: AdminUser; onLogout: () => void }) {
   const [meta, setMeta] = useState<Meta | null>(null);
@@ -28,10 +28,15 @@ export function AdminApp({ user, onLogout }: { user: AdminUser; onLogout: () => 
     return data.terms;
   }, []);
 
+  const reloadMeta = useCallback(async () => {
+    const data = await api.get<Meta>('/api/admin/meta');
+    setMeta(data);
+  }, []);
+
   useEffect(() => {
-    api.get<Meta>('/api/admin/meta').then(setMeta).catch(() => setMeta(null));
+    reloadMeta().catch(() => setMeta(null));
     reloadTerms().catch(() => setTerms([]));
-  }, [reloadTerms]);
+  }, [reloadMeta, reloadTerms]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -58,28 +63,18 @@ export function AdminApp({ user, onLogout }: { user: AdminUser; onLogout: () => 
           </div>
         </div>
         <nav aria-label="Redaktionsbereiche" className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-5">
-          <button
+          <NavTab
+            current={view.name === 'list' || view.name === 'editor' || view.name === 'duplicate'}
             onClick={() => setView({ name: 'list' })}
-            aria-current={view.name !== 'events' ? 'page' : undefined}
-            className={`min-h-11 whitespace-nowrap border-b-2 px-3 text-sm font-semibold ${
-              view.name !== 'events'
-                ? 'border-[var(--color-salsa)] text-[var(--color-salsa)]'
-                : 'border-transparent text-neutral-600 hover:text-black'
-            }`}
           >
             Kurse &amp; Staffeln
-          </button>
-          <button
-            onClick={() => setView({ name: 'events' })}
-            aria-current={view.name === 'events' ? 'page' : undefined}
-            className={`min-h-11 whitespace-nowrap border-b-2 px-3 text-sm font-semibold ${
-              view.name === 'events'
-                ? 'border-[var(--color-salsa)] text-[var(--color-salsa)]'
-                : 'border-transparent text-neutral-600 hover:text-black'
-            }`}
-          >
+          </NavTab>
+          <NavTab current={view.name === 'events'} onClick={() => setView({ name: 'events' })}>
             Events &amp; Workshops
-          </button>
+          </NavTab>
+          <NavTab current={view.name === 'directory'} onClick={() => setView({ name: 'directory' })}>
+            Lehrer &amp; Studios
+          </NavTab>
         </nav>
       </header>
 
@@ -96,6 +91,8 @@ export function AdminApp({ user, onLogout }: { user: AdminUser; onLogout: () => 
           <Loading label="Kursplan wird geladen..." />
         ) : view.name === 'events' ? (
           <EventsManager readonly={readonly} showToast={showToast} />
+        ) : view.name === 'directory' ? (
+          <DirectoryManager readonly={readonly} showToast={showToast} onChanged={reloadMeta} />
         ) : view.name === 'list' ? (
           <TermsList
             terms={terms}
@@ -111,15 +108,8 @@ export function AdminApp({ user, onLogout }: { user: AdminUser; onLogout: () => 
             meta={meta}
             readonly={readonly}
             onBack={() => setView({ name: 'list' })}
-            onShowBalance={() => setView({ name: 'balance', termId: view.termId })}
             reloadTerms={reloadTerms}
-            showToast={showToast}
-          />
-        ) : view.name === 'balance' ? (
-          <BalanceView
-            termId={view.termId}
-            readonly={readonly}
-            onBack={() => setView({ name: 'editor', termId: view.termId })}
+            reloadMeta={reloadMeta}
             showToast={showToast}
           />
         ) : (
@@ -137,5 +127,29 @@ export function AdminApp({ user, onLogout }: { user: AdminUser; onLogout: () => 
         )}
       </main>
     </div>
+  );
+}
+
+function NavTab({
+  current,
+  onClick,
+  children,
+}: {
+  current: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-current={current ? 'page' : undefined}
+      className={`min-h-11 whitespace-nowrap border-b-2 px-3 text-sm font-semibold ${
+        current
+          ? 'border-[var(--color-salsa)] text-[var(--color-salsa)]'
+          : 'border-transparent text-neutral-600 hover:text-black'
+      }`}
+    >
+      {children}
+    </button>
   );
 }
