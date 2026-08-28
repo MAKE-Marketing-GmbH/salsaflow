@@ -32,6 +32,21 @@ const VIEWPORTS = [
   { name: 'mobile', width: 390, height: 844, mobile: true },
 ];
 
+/* Kurse mit Rollenwahl starten auf Schritt 1: dort steht nur `booking-next`,
+   `booking-submit` existiert erst auf Schritt 2. Offene Klassen (styleKey 'heels')
+   ueberspringen Schritt 1 und zeigen den Absende-Knopf sofort. */
+async function schrittEinsDurchlaufen(page) {
+  const weiter = page.locator('[data-testid="booking-next"]');
+  if (!(await weiter.count())) {
+    await page.waitForSelector('[data-testid="booking-submit"]', { timeout: 15000 });
+    return;
+  }
+  const rolle = page.locator('[data-testid="role-follower"]');
+  if (await rolle.count()) await rolle.click();
+  await weiter.click();
+  await page.waitForSelector('[data-testid="booking-submit"]', { timeout: 15000 });
+}
+
 const browser = await chromium.launch();
 const shots = [];
 
@@ -60,10 +75,9 @@ for (const vp of VIEWPORTS) {
     await page.goto(`${BASE}/buchung`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-testid^="pick-course-"]', { timeout: 15000 });
     await page.locator('[data-testid^="pick-course-"]').first().click();
-    await page.waitForSelector('[data-testid="booking-submit"]', { timeout: 15000 });
+    await page.waitForSelector('[data-testid="booking-dialog"]', { timeout: 15000 });
+    await schrittEinsDurchlaufen(page);
 
-    const role = page.locator('[data-testid="role-follower"]');
-    if (await role.count()) await role.click();
     await page.locator('input[name="bk-firstName"]').fill('Shot');
     await page.locator('input[name="bk-lastName"]').fill('Test');
     await page.locator('input[name="bk-email"]').fill(`shot.${STAMP}.${mode}.${vp.name}@uishot.local`);

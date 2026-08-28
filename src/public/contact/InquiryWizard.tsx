@@ -355,7 +355,9 @@ export function InquiryWizard({
       })
       .filter((line): line is string => Boolean(line));
     if (notes.trim()) lines.push(`${copy.noteLabel}: ${notes.trim()}`);
-    lines.push(`${copy.reachLabel}: ${copy.reachOptions.find((option) => option.key === reach)?.label ?? reach}`);
+    if (!compact) {
+      lines.push(`${copy.reachLabel}: ${copy.reachOptions.find((option) => option.key === reach)?.label ?? reach}`);
+    }
     return lines;
   }
 

@@ -23,7 +23,6 @@ export function GoogleMapEmbed({
         onLoad={() => setMapReady(true)}
         className={`absolute inset-0 h-full w-full border-0 motion-safe:transition-opacity motion-safe:duration-300 ${mapReady ? 'opacity-100' : 'opacity-0'}`}
         referrerPolicy="strict-origin-when-cross-origin"
-        loading="lazy"
         allowFullScreen
       />
       {!mapReady ? (
