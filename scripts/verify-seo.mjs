@@ -17,17 +17,20 @@ function read(file) {
 // Die Sollzahl stand hier einmal fest im Skript und brach bei jeder Routenaenderung.
 // Die Routen-Wahrheit kommt aus demselben Manifest, aus dem scripts/prerender.mjs
 // Sitemap und noindex-Flag erzeugt (`entry.getPrerenderManifest()`, dort als
-// node_modules/.cache/salsaflow abgelegt). Frueher stand hier eine Regex ueber
+// .build/prerender-manifest.json abgelegt). Frueher stand hier eine Regex ueber
 // src/routes.tsx und src/lib/seo-config.ts: die haette bei mehrzeiliger Formatierung
 // oder einem berechneten `indexable` stillschweigend andere Zahlen geliefert, ohne dass
 // sich die Bedeutung aendert.
-const manifestPfad = path.resolve('node_modules/.cache/salsaflow/prerender-manifest.json');
+const manifestPfad = path.resolve('.build/prerender-manifest.json');
 check(
   fs.existsSync(manifestPfad),
   `Prerender-Manifest fehlt: ${manifestPfad} — zuerst \`npm run build\` laufen lassen.`,
 );
-const manifest = fs.existsSync(manifestPfad) ? JSON.parse(read(manifestPfad)) : [];
+const artefakt = fs.existsSync(manifestPfad) ? JSON.parse(read(manifestPfad)) : { routes: [], noindexShells: [] };
+const manifest = artefakt.routes ?? [];
+const noindexShells = artefakt.noindexShells ?? [];
 check(manifest.length > 0, 'Prerender-Manifest ist leer.');
+check(noindexShells.length > 0, 'Prerender-Manifest nennt keine noindex-Huellen.');
 const soll = manifest.filter((route) => route.indexable !== false).length;
 check(soll > 0, 'Keine indexierbare Route im Prerender-Manifest.');
 
@@ -58,7 +61,7 @@ for (const rawUrl of urls) {
   check(/<meta name="twitter:title" content="[^"]+"/i.test(html), `Twitter-Titel fehlt: ${route}`);
 }
 
-for (const file of ['admin.html', 'buchung.html', '404.html']) {
+for (const file of noindexShells) {
   const html = read(path.join(dist, file));
   check(/<meta name="robots" content="noindex, nofollow"/i.test(html), `${file} ist nicht noindex.`);
 }

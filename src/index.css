@@ -751,7 +751,10 @@ main img.photo-grade-bachata-why {
   filter: saturate(0.98) contrast(1.04) brightness(1.06) !important;
 }
 
-/* Buchungs-Dialog: sanfte Ein-Animation (Backdrop + Panel, 150-200ms).
+/* Buchungs-Dialog: Der Dialog selbst faehrt ueber booking-dialog-in/-out von rechts ein
+ * und wieder hinaus (280ms rein, 240ms raus), der Backdrop blendet dazu.
+ * `booking-panel-in` ist davon getrennt: es laesst die Formularbloecke INNERHALB des
+ * Dialogs auftreten, nicht den Dialog selbst.
  * motion-safe ist im Tailwind-Arbitrary-Value gesetzt, reduced-motion bleibt ruhig. */
 @keyframes booking-backdrop-in {
   from {

@@ -4,7 +4,7 @@ import { createServer } from 'vite';
 
 const root = process.cwd();
 const dist = path.join(root, 'dist');
-const manifestDir = path.join(root, 'node_modules', '.cache', 'salsaflow');
+const manifestDir = path.join(root, '.build');
 const manifestPath = path.join(manifestDir, 'prerender-manifest.json');
 const templatePath = path.join(dist, 'index.html');
 const siteOrigin = 'https://www.salsaflow-dc.com';
@@ -12,6 +12,14 @@ const siteOrigin = 'https://www.salsaflow-dc.com';
 // DNS-Cutover noch die alte Website — og:image dort ist 404, geteilte Links kaemen ohne
 // Vorschaubild an. Beim Cutover zuruestellen auf www.salsaflow-dc.com.
 const socialImage = 'https://salsaflow-dc.vercel.app/photos/showcase/hp-05.webp';
+
+/* Routen ohne Vorrendering: leere Huellen mit noindex. Einzige Quelle fuer den Build UND
+ * fuer scripts/verify-seo.mjs — die Liste stand dort frueher ein zweites Mal von Hand und
+ * waere bei einer vierten Huelle stillschweigend unvollstaendig geblieben. */
+const SHELL_ROUTES = [
+  ['/admin', 'admin.html'],
+  ['/buchung', 'buchung.html'],
+];
 
 const escapeHtml = (value) =>
   value
@@ -172,9 +180,9 @@ try {
   });
   await fs.writeFile(path.join(dist, '404.html'), notFoundHtml);
 
-  // Leere Huellen fuer die zwei Routen, die im Browser aufbauen. Titel und Beschreibung kommen
+  // Leere Huellen fuer die Routen, die im Browser aufbauen. Titel und Beschreibung kommen
   // aus SEO_META, damit sie nicht neben der echten Konfiguration veralten.
-  for (const [route, file] of [['/admin', 'admin.html'], ['/buchung', 'buchung.html']]) {
+  for (const [route, file] of SHELL_ROUTES) {
     const meta = entry.getRouteMeta(route);
     const html = buildDocument(template, {
       route,
@@ -202,7 +210,10 @@ try {
   await fs.writeFile(
     manifestPath,
     JSON.stringify(
-      manifest.map(({ path: route, seoKey, indexable }) => ({ path: route, seoKey, indexable })),
+      {
+        routes: manifest.map(({ path: route, seoKey, indexable }) => ({ path: route, seoKey, indexable })),
+        noindexShells: [...SHELL_ROUTES.map(([, file]) => file), '404.html'],
+      },
       null,
       2,
     ),
