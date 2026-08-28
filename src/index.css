@@ -43,8 +43,16 @@
   --color-team-warm-2: #ece1d1;   /* Team-Freisteller-Panel, unten */
   --color-photo-warm: #f0b35a;    /* warmer Foto-Overlay, siehe DESIGN.md Imagery */
   --color-flow-green: #4d7c5a;    /* ruhiger Live-Punkt fuer freie Plaetze */
-  --color-whatsapp: #075e54;
-  --color-whatsapp-hover: #064c45;
+  /* WhatsApp-Gruen, offizielle Markenfarbe (Raphael 28.08.: «nicht dunkelgruen,
+     sondern das WhatsApp-Gruen»). Vorher stand hier #075e54 — das ist der dunkle
+     Ton aus dem alten WhatsApp-Logo, nicht die aktuelle Markenfarbe, und er wirkte
+     auf dem warmen Papier wie ein Fremdkoerper.
+     Ausnahme zum Token-Law in DESIGN.md («eine Akzentfarbe»): eine Markenfarbe
+     gehoert der Marke, nicht dem Designsystem — ein WhatsApp-Knopf in Salsa-Rot
+     wird als Kanal nicht wiedererkannt. Die Ausnahme gilt ausschliesslich fuer
+     WhatsApp-Flaechen, nirgends sonst. */
+  --color-whatsapp: #25d366;
+  --color-whatsapp-hover: #1ebe5b;
 
 
   --color-salsa: #ad1827;
@@ -1582,8 +1590,21 @@ html:has(.faq-page) {
   }
 }
 
+/* Der Hinweis raeumt nach dem ersten Scroll die Inhaltsflaeche frei. Die Routen setzen
+   dafuer `data-cookie-clear` (z. B. HomePage.tsx), diese Regel fuehrt es aus.
+
+   R208 — `:not(:has([data-cookie-open]))`: Solange das Einstellungs-Panel OFFEN ist,
+   bleibt die Karte stehen. Ohne diesen Ausschluss verschwand sie mitten in der Auswahl:
+   das Panel ist auf 390px rund 445px hoch, man muss also fast zwangslaeufig scrollen, um
+   die zweite Kategorie und die Knoepfe zu lesen — und genau dieses Scrollen loeschte die
+   Karte weg (gemessen: opacity 0, visibility hidden, translateY(445px), Kategorie nicht
+   mehr klickbar). Wer das Panel bewusst geoeffnet hat, will es bedienen, nicht loswerden.
+   Beim Zuklappen greift die Regel sofort wieder, das alte Verhalten bleibt also erhalten.
+
+   Der Marker `data-cookie-open` sitzt auf demselben Element (CookieBanner.tsx) und wird
+   nur gesetzt, wenn das Panel offen ist. */
 body:has([data-cookie-clear='true'])
-  :is([role='region'], [role='dialog']):has([data-testid='cookie-accept']) {
+  :is([role='region'], [role='dialog']):has([data-testid='cookie-accept']):not([data-cookie-open]) {
   pointer-events: none;
   visibility: hidden;
   opacity: 0;

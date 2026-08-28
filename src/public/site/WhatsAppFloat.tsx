@@ -3,19 +3,27 @@
 // Sobald der Footer in den Viewport kommt, blendet der Knopf aus: Der Footer
 // traegt im Entry-CTA-Band einen eigenen WhatsApp-Button.
 //
-// Bauform (2026-08-28, .claude/product-design.md): Kreis, Salsa-Rot, weisser Glyph.
+// Bauform (2026-08-28, .claude/product-design.md): Kreis, WhatsApp-Gruen, weisser Glyph.
 //
-// Vorher war der Knopf eine dunkelgruene Pille mit dem Wort «WhatsApp» daneben, die
-// beim Scrollen ihre Breite animierte. Zwei Dinge stimmten daran nicht:
+// Vorher war der Knopf eine PILLE mit dem Wort «WhatsApp» daneben, die beim Scrollen
+// ihre Breite animierte, in dunklem #075e54. Drei Korrekturen, in dieser Reihenfolge:
 //
-//   1. Gruen (#075e54) war die einzige Farbe der Seite ausserhalb der Palette.
-//      DESIGN.md haelt EINE Akzentfarbe fest; der Float war die Ausnahme, und im
-//      Screenshot war er genau deshalb das Erste, was ins Auge sprang — nicht der
-//      CTA, sondern die Ecke. Die Wiedererkennung traegt der Glyph, nicht der Grund.
-//   2. Das Label wurde auf sieben Routen per CSS wieder ausgeblendet
+//   1. FORM. Das Label wurde auf sieben Routen per CSS wieder ausgeblendet
 //      (privatstunden, kursaufbau, events, team, faq, collabs, tanzschuhe+partys).
 //      Sieben Ausnahmen gegen eine Regel heissen, dass die Regel falsch war. Der
 //      Kreis ist jetzt der Normalfall; die Sonderregeln sind aus index.css entfernt.
+//      Das Label lebt als Hover-Tooltip weiter.
+//   2. FARBE, erster Anlauf: Salsa-Rot, weil #075e54 die einzige Farbe ausserhalb
+//      der Palette war und die Ecke staerker zog als der CTA.
+//   3. FARBE, korrigiert (Raphael 28.08., «nicht dunkelgruen, sondern das
+//      WhatsApp-Gruen»): #25d366, die offizielle Markenfarbe. Der Einwand gegen
+//      Rot ist berechtigt — ein WhatsApp-Knopf in der Hausfarbe wird als Kanal nicht
+//      mehr erkannt, und die Wiedererkennung ist hier wichtiger als die Palette-
+//      Reinheit. Das Problem am alten Zustand war nie «gruen», sondern «dunkelgruen»:
+//      #075e54 stammt aus dem alten Logo und wirkt auf warmem Papier wie ein Loch.
+//      #25d366 ist hell, sitzt im selben Helligkeitsband wie das Papier und liest
+//      sich als Marke statt als Fremdkoerper. Die Farbe liegt im Token
+//      --color-whatsapp (index.css), nicht als Literal hier.
 //
 // Damit faellt auch der Scroll-Listener weg, der nur die Pillenbreite steuerte:
 // ein Kreis hat keinen kompakten und keinen offenen Zustand. Das Label lebt als
@@ -77,8 +85,12 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
       transition={{ type: 'spring', bounce: 0.18, duration: reduced ? 0.2 : 0.5 }}
       className={cn(
         'whatsapp-float group/wa font-sans fixed right-6 z-40 hidden h-14 w-14 items-center justify-center rounded-full lg:inline-flex',
-        'bg-[var(--color-salsa)] text-white shadow-[0_12px_32px_rgba(173,24,39,0.28)] ring-1 ring-black/5',
-        'hover:bg-[var(--color-salsa-700)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2',
+        /* Der Schatten traegt den Gruenton statt eines neutralen Grau: ein farbiger
+           Schatten unter einem farbigen Knopf liest sich als Licht, ein grauer als
+           Schmutz. Der Ring ist eine haarfeine dunkle Kante, damit der Kreis auf dem
+           warmen Papier eine Kontur behaelt — kein Rahmen, nur ein Abschluss. */
+        'bg-[var(--color-whatsapp)] text-white shadow-[0_12px_32px_rgba(37,211,102,0.35)] ring-1 ring-black/10',
+        'hover:bg-[var(--color-whatsapp-hover)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-whatsapp)] focus-visible:ring-offset-2',
         'transition-[background-color,box-shadow] duration-[var(--dur-base)] ease-[var(--motion-out)]',
         className,
       )}
