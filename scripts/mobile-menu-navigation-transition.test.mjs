@@ -76,20 +76,23 @@ try {
        Versatz sind raus, damit nichts durchschimmert. Statt einer Animation pruefen
        wir darum den beobachtbaren Zustand — der Header steht waehrend der Navigation
        deckend und unverschoben, und keine laufende Animation macht ihn transparent. */
-    const headerSnapshotStaysOpaque = animations
-      .filter((candidate) => String(candidate.effect?.pseudoElement ?? '').includes('sf-site-header'))
-      .every((candidate) => {
-        if (!(candidate.effect instanceof KeyframeEffect)) return true;
-        return candidate.effect
-          .getKeyframes()
-          .every((frame) => frame.opacity === undefined || Number(frame.opacity) === 1);
-      });
+    const headerSnapshots = animations.filter((candidate) =>
+      String(candidate.effect?.pseudoElement ?? '').includes('sf-site-header'),
+    );
+    const headerSnapshotCount = headerSnapshots.length;
+    const headerSnapshotsAllOpaque = headerSnapshots.every((candidate) => {
+      if (!(candidate.effect instanceof KeyframeEffect)) return false;
+      return candidate.effect
+        .getKeyframes()
+        .every((frame) => frame.opacity === undefined || Number(frame.opacity) === 1);
+    });
     const header = document.querySelector('[data-page-header]');
     const headerStyle = header ? getComputedStyle(header) : null;
     return {
       oldRoot: details('::view-transition-old(root)'),
       newRoot: details('::view-transition-new(root)'),
-      headerSnapshotStaysOpaque,
+      headerSnapshotCount,
+      headerSnapshotsAllOpaque,
       headerOpacity: headerStyle ? Number.parseFloat(headerStyle.opacity) : null,
       headerNamed: headerStyle ? headerStyle.viewTransitionName : null,
     };
@@ -128,7 +131,7 @@ try {
     sequencing.headerNamed === 'sf-site-header' &&
     sequencing.headerOpacity !== null &&
     sequencing.headerOpacity > 0.99 &&
-    sequencing.headerSnapshotStaysOpaque;
+    (sequencing.headerSnapshotCount === 0 || sequencing.headerSnapshotsAllOpaque);
 
   if (
     !menuClosesOpaque ||

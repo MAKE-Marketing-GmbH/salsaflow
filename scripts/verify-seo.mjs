@@ -17,11 +17,11 @@ function read(file) {
 // Die Sollzahl stand hier einmal fest im Skript und brach bei jeder Routenaenderung.
 // Die Routen-Wahrheit kommt aus demselben Manifest, aus dem scripts/prerender.mjs
 // Sitemap und noindex-Flag erzeugt (`entry.getPrerenderManifest()`, dort als
-// .data/prerender-manifest.json abgelegt). Frueher stand hier eine Regex ueber
+// dist/prerender-manifest.json abgelegt). Frueher stand hier eine Regex ueber
 // src/routes.tsx und src/lib/seo-config.ts: die haette bei mehrzeiliger Formatierung
 // oder einem berechneten `indexable` stillschweigend andere Zahlen geliefert, ohne dass
 // sich die Bedeutung aendert.
-const manifestPfad = path.resolve('.data/prerender-manifest.json');
+const manifestPfad = path.join(dist, 'prerender-manifest.json');
 check(
   fs.existsSync(manifestPfad),
   `Prerender-Manifest fehlt: ${manifestPfad} — zuerst \`npm run build\` laufen lassen.`,

@@ -4,8 +4,7 @@ import { createServer } from 'vite';
 
 const root = process.cwd();
 const dist = path.join(root, 'dist');
-const manifestDir = path.join(root, '.data');
-const manifestPath = path.join(manifestDir, 'prerender-manifest.json');
+const manifestPath = path.join(dist, 'prerender-manifest.json');
 const templatePath = path.join(dist, 'index.html');
 const siteOrigin = 'https://www.salsaflow-dc.com';
 // Bild-Host = ASSET_ORIGIN (src/lib/seo-config.ts): die Ziel-Domain traegt bis zum
@@ -193,10 +192,9 @@ try {
   );
 
   // Dasselbe Manifest, aus dem gerade Sitemap und noindex-Flag entstanden sind, als
-  // Artefakt fuer den Pruefer. `.data` liegt ausserhalb von `dist` und wird nicht
-  // ausgeliefert. Ohne das muesste verify-seo die Routen-Wahrheit aus TypeScript-
-  // Quelltext greppen und haenge damit an der Schreibweise statt an der Bedeutung.
-  await fs.mkdir(manifestDir, { recursive: true });
+  // Build-Artefakt neben dem uebrigen generierten Output. Ohne das muesste verify-seo
+  // die Routen-Wahrheit aus TypeScript-Quelltext greppen und haenge damit an der
+  // Schreibweise statt an der Bedeutung.
   await fs.writeFile(
     manifestPath,
     JSON.stringify(

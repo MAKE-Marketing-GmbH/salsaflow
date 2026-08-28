@@ -1093,6 +1093,7 @@ function BookingForm({
   // Schliessen-Knopf (Dialog-Konvention), nicht der Ueberschrift.
   const stepChanged = useRef(false);
   const closeTimer = useRef<number | null>(null);
+  const redirecting = useRef(false);
 
   const requestClose = useCallback(() => {
     if (closeTimer.current !== null) return;
@@ -1316,6 +1317,7 @@ function BookingForm({
           wo: course.locationName,
           zahlung: bt.successPayShort,
         });
+        redirecting.current = true;
         window.location.assign('/vorbereiten');
         return;
       }
@@ -1328,7 +1330,7 @@ function BookingForm({
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : bt.errorGeneric);
     } finally {
-      setSubmitting(false);
+      if (!redirecting.current) setSubmitting(false);
     }
   }
 
@@ -1377,6 +1379,7 @@ function BookingForm({
             ? 'motion-safe:animate-[booking-dialog-out_240ms_var(--motion-out)_forwards]'
             : 'motion-safe:animate-[booking-dialog-in_280ms_var(--motion-out)]'
         }`}
+        inert={closing}
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* R134/1: Der 4px-Salsa-Strich ueber der schwarzen Kopfzeile ist WEG (Raphael:
