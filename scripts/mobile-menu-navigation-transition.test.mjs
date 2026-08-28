@@ -88,11 +88,22 @@ try {
     });
     const header = document.querySelector('[data-page-header]');
     const headerStyle = header ? getComputedStyle(header) : null;
+    /* Eine wiedereingefuehrte Durchschimmer-Animation muss nicht als benanntes
+       Pseudo-Element auftauchen — `sf-header-in` lief direkt auf [data-page-header].
+       Darum zusaetzlich jede Animation pruefen, deren Ziel der Header selbst ist. */
+    const headerElementAnimations = header ? header.getAnimations({ subtree: false }) : [];
+    const headerElementAnimationsAllOpaque = headerElementAnimations.every((candidate) => {
+      if (!(candidate.effect instanceof KeyframeEffect)) return false;
+      return candidate.effect
+        .getKeyframes()
+        .every((frame) => frame.opacity === undefined || Number(frame.opacity) === 1);
+    });
     return {
       oldRoot: details('::view-transition-old(root)'),
       newRoot: details('::view-transition-new(root)'),
       headerSnapshotCount,
       headerSnapshotsAllOpaque,
+      headerElementAnimationsAllOpaque,
       headerOpacity: headerStyle ? Number.parseFloat(headerStyle.opacity) : null,
       headerNamed: headerStyle ? headerStyle.viewTransitionName : null,
     };
@@ -131,6 +142,7 @@ try {
     sequencing.headerNamed === 'sf-site-header' &&
     sequencing.headerOpacity !== null &&
     sequencing.headerOpacity > 0.99 &&
+    sequencing.headerElementAnimationsAllOpaque &&
     (sequencing.headerSnapshotCount === 0 || sequencing.headerSnapshotsAllOpaque);
 
   if (

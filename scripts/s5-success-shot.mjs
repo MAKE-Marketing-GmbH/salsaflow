@@ -34,8 +34,11 @@ const VIEWPORTS = [
 
 /* Kurse mit Rollenwahl starten auf Schritt 1: dort steht nur `booking-next`,
    `booking-submit` existiert erst auf Schritt 2. Offene Klassen (styleKey 'heels')
-   ueberspringen Schritt 1 und zeigen den Absende-Knopf sofort. */
+   ueberspringen Schritt 1 und zeigen den Absende-Knopf sofort. Beide Knoepfe stehen
+   hinter dem Verfuegbarkeits-Ladezustand des Dialogs, deshalb erst darauf warten:
+   im Ladezustand ist keiner im DOM und die Zaehlung saehe faelschlich eine offene Klasse. */
 async function schrittEinsDurchlaufen(page) {
+  await page.locator('[data-testid="booking-next"], [data-testid="booking-submit"]').first().waitFor({ timeout: 15000 });
   const weiter = page.locator('[data-testid="booking-next"]');
   if (!(await weiter.count())) {
     await page.waitForSelector('[data-testid="booking-submit"]', { timeout: 15000 });

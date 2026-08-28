@@ -38,8 +38,16 @@ async function firstOutcome(page, timeoutMs = 15000) {
    verschiedenen Schritten, ebenso der Marker `lane-full-note`: er steht auf Schritt 1 und
    auf Schritt 2 nur bei offenen Klassen. Die Auslastung muss deshalb gelesen werden,
    solange Schritt 1 sichtbar ist — danach ist sie aus dem DOM verschwunden und jede
-   Ableitung faende faelschlich «nicht voll». */
+   Ableitung faende faelschlich «nicht voll». Der Dialog startet ausserdem im
+   Ladezustand (`loading` = true), und die Fusszeile mit beiden Knoepfen haengt hinter
+   diesem Gate: vor dem Ende des Verfuegbarkeits-Abrufs ist keiner der beiden im DOM.
+   Erst danach unterscheidet die Zaehlung Schritt 1 von einer offenen Klasse. */
+async function auslastungBereit(page, timeout = 15000) {
+  await page.locator('[data-testid="booking-next"], [data-testid="booking-submit"]').first().waitFor({ timeout });
+}
+
 async function schrittEinsDurchlaufen(page, { rolle, paar = false }) {
+  await auslastungBereit(page);
   const weiter = page.locator('[data-testid="booking-next"]');
   const aufSchrittEins = (await weiter.count()) > 0;
   if (!aufSchrittEins) {
