@@ -375,7 +375,15 @@ export function InquiryWizard({
       return;
     }
     if (contactGap) {
-      setError(contactGap === 'name' ? copy.nameError : contactGap === 'email' ? copy.emailError : copy.reachError);
+      setError(
+        contactGap === 'name'
+          ? copy.nameError
+          : contactGap === 'email'
+            ? copy.emailError
+            : lockTopic
+              ? copy.phoneOnlyError
+              : copy.reachError,
+      );
       return;
     }
     if (!privacy) {
@@ -1014,6 +1022,7 @@ function wizardCopy(de: boolean, topic: TopicKey) {
        ueber E-Mail und Handynummer und suchte im falschen Feld. */
     nameError: de ? 'Bitte gib deinen Vornamen an.' : 'Please add your first name.',
     reachError: de ? 'Bitte gib eine E-Mail oder eine Handynummer an, damit wir antworten können.' : 'Please add an email or mobile number so we can reply.',
+    phoneOnlyError: de ? 'Bitte gib deine Handynummer an, damit wir antworten können.' : 'Please add your mobile number so we can reply.',
     emailError: de ? 'Diese E-Mail-Adresse sieht nicht vollständig aus. Bitte prüfe sie kurz.' : 'This email address looks incomplete. Please check it.',
     privacyError: de ? 'Bitte setze das Häkchen beim Datenschutz.' : 'Please tick the privacy box.',
     back: de ? 'Zurück' : 'Back',

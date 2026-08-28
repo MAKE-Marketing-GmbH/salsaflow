@@ -22,6 +22,7 @@ import {
   type CourseAvailability,
   type CreateBookingResult,
 } from '@/lib/booking';
+import { storeReservation } from '@/lib/reservation-handoff';
 import {
   fetchSchedule,
   embeddedSchedule,
@@ -1284,13 +1285,13 @@ function BookingForm({
         const when = course.nextDates?.[0]
           ? `${formatDateI18n(course.nextDates[0], lang)} · ${course.startTime}-${course.endTime}`
           : `${dayLabel} · ${course.startTime}-${course.endTime}`;
-        const params = new URLSearchParams({
+        storeReservation({
           kurs: courseLabel,
           wann: when,
           wo: course.locationName,
           zahlung: bt.successPayShort,
         });
-        window.location.assign(`/vorbereiten?${params.toString()}`);
+        window.location.assign('/vorbereiten');
         return;
       }
       setResult(r);
@@ -1441,7 +1442,6 @@ function BookingForm({
             </div>
           ) : result ? (
             <SuccessPanel
-              result={result}
               onBack={onBack}
               courseLabel={courseLabel}
               dayLabel={dayLabel}
@@ -1768,23 +1768,20 @@ function BookingForm({
   );
 }
 
-/* Schritt 3: Bestaetigung (frei) oder Warteliste (voll).
+/* Schritt 3: Warteliste (Kurs voll).
+ *
+ * Eine erfolgreiche Reservierung bleibt nicht im Dialog: sie leitet auf /vorbereiten
+ * weiter und traegt Kurs, Termin, Studio und Zahlung dorthin mit. Hier landet nur noch
+ * der Warteliste-Fall.
  *
  * Der Bildschirm beantwortet zuerst die Frage, die der Besucher gerade hat: WAS habe ich
  * gebucht? Darum steht der Kursname gross oben, darunter drei Fakten-Zeilen (Wann, Wo,
- * Bezahlen). Erst danach kommt der Text. Vorher stand hier eine Ueberschrift, ein
- * Fliesstext-Block und eine nummerierte Liste — keine einzige Zeile nannte den Kurs.
+ * Bezahlen). Erst danach kommt der Text.
  *
- * Ehrlichkeit: es geht KEINE automatische Bestaetigungs-Mail raus. Die Reservierung
- * landet als Mail beim Studio, ein Mensch bestaetigt (Absprache 13.08.2026). Der Text
- * sagt genau das und verspricht keinen Automatismus.
- *
- * Warteliste: kein bg-amber-100 mehr (Fremdfarbe ausserhalb der Token-Liste, DESIGN.md
- * "keine neue Farbe in der Komponente"). Neutrale bg-soft-Flaeche, Salsa-Rot als Akzent,
- * gleiche Klarheit wie der Erfolgs-Fall.
+ * Kein bg-amber-100 (Fremdfarbe ausserhalb der Token-Liste, DESIGN.md "keine neue Farbe
+ * in der Komponente"). Neutrale bg-soft-Flaeche, Salsa-Rot als Akzent.
  */
 function SuccessPanel({
-  result,
   onBack,
   courseLabel,
   dayLabel,
@@ -1792,7 +1789,6 @@ function SuccessPanel({
   endTime,
   locationName,
 }: {
-  result: CreateBookingResult;
   onBack: () => void;
   courseLabel: string;
   dayLabel: string;
@@ -1802,11 +1798,10 @@ function SuccessPanel({
 }) {
   const { lang } = useLang();
   const bt = BOOKING_UI[lang];
-  const waitlisted = result.status === 'waitlisted';
   const reduced = useReducedMotion();
   const hydrated = useHydrated();
 
-  // EIN authored Moment: die Karte steigt mit Feder-Kurve ein, der Haken zeichnet sich
+  // EIN authored Moment: die Karte steigt mit Feder-Kurve ein, die Uhr zeichnet sich
   // in derselben Bewegung. 380ms, danach ist Ruhe. Kein Bounce, kein zweiter Effekt.
   // Vor der Hydration und bei prefers-reduced-motion ist der Endzustand der Startzustand:
   // kein opacity:0 im ausgelieferten HTML, kein Versatz fuer Leute, die keine Bewegung wollen.
@@ -1817,35 +1812,23 @@ function SuccessPanel({
     <motion.div
       className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white shadow-sm"
       data-testid="booking-success"
-      data-status={waitlisted ? 'waitlisted' : 'confirmed'}
+      data-status="waitlisted"
       role="status"
       aria-live="polite"
       initial={cardInitial}
       animate={{ opacity: 1, transform: 'translateY(0px)' }}
       transition={still ? { duration: 0 } : { type: 'spring', duration: 0.42, bounce: 0.12 }}
     >
-      {/* Kopf: Haken + Kursname + Fakten. Der Erfolgs-Fall traegt Salsa-Rot als Flaeche,
-          die Warteliste dieselbe Struktur auf neutraler bg-soft-Flaeche mit rotem Akzent. */}
-      <div
-        className={cn(
-          'px-5 py-6 text-center sm:px-6 sm:py-7',
-          waitlisted
-            ? 'border-b border-[var(--color-line)] bg-[var(--color-bg-soft)]'
-            : 'bg-[var(--color-salsa)] text-white',
-        )}
-      >
+      {/* Kopf: Uhr-Symbol + Kursname + Fakten auf neutraler bg-soft-Flaeche mit rotem Akzent. */}
+      <div className="border-b border-[var(--color-line)] bg-[var(--color-bg-soft)] px-5 py-6 text-center sm:px-6 sm:py-7">
         <div
-          className={cn(
-            'mx-auto flex h-14 w-14 items-center justify-center rounded-full',
-            waitlisted ? 'bg-white text-[var(--color-salsa)] ring-1 ring-[var(--color-line)]' : 'bg-white/15 text-white',
-          )}
+          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white text-[var(--color-salsa)] ring-1 ring-[var(--color-line)]"
           aria-hidden
         >
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            {/* Der Haken (bzw. die Uhr) zeichnet sich einmal. pathLength normiert die Laenge
-                auf 1, damit dieselbe Dauer fuer beide Formen gilt. */}
+            {/* Die Uhr zeichnet sich einmal. pathLength normiert die Laenge auf 1. */}
             <motion.path
-              d={waitlisted ? 'M12 7v5l3 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z' : 'M20 6 9 17l-5-5'}
+              d="M12 7v5l3 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z"
               pathLength={1}
               initial={still ? { strokeDasharray: 1, strokeDashoffset: 0 } : { strokeDasharray: 1, strokeDashoffset: 1 }}
               animate={{ strokeDashoffset: 0 }}
@@ -1854,47 +1837,40 @@ function SuccessPanel({
           </svg>
         </div>
 
-        <p className={cn('mt-4 text-xs font-bold uppercase tracking-[0.16em]', waitlisted ? 'text-[var(--color-salsa)]' : 'text-white/70')}>
-          {waitlisted ? bt.successWaitlistFor : bt.successConfirmedTitle}
+        <p className="mt-4 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
+          {bt.successWaitlistFor}
         </p>
-        <h3 className={cn('type-h2 mt-1 text-balance', waitlisted ? 'text-[var(--color-ink)]' : 'text-white')} data-testid="booking-success-course">
+        <h3 className="type-h2 mt-1 text-balance text-[var(--color-ink)]" data-testid="booking-success-course">
           {courseLabel}
         </h3>
 
         {/* Drei Fakten, die vorher nirgends standen. Kein Fliesstext. */}
-        <dl className={cn('mx-auto mt-5 grid max-w-md gap-3 text-left sm:grid-cols-3', waitlisted ? 'text-[var(--color-ink)]' : 'text-white')}>
-          <Fact label={bt.successFactWhen} tone={waitlisted ? 'light' : 'dark'}>
+        <dl className="mx-auto mt-5 grid max-w-md gap-3 text-left text-[var(--color-ink)] sm:grid-cols-3">
+          <Fact label={bt.successFactWhen} tone="light">
             {dayLabel} {startTime}-{endTime}
           </Fact>
-          <Fact label={bt.successFactWhere} tone={waitlisted ? 'light' : 'dark'}>
+          <Fact label={bt.successFactWhere} tone="light">
             {locationName}
           </Fact>
-          <Fact label={bt.successFactPay} tone={waitlisted ? 'light' : 'dark'}>
+          <Fact label={bt.successFactPay} tone="light">
             {bt.successPayShort}
           </Fact>
         </dl>
       </div>
 
       <div className="px-5 py-5 sm:px-6 sm:py-6">
-        {waitlisted && (
-          <h4 className="type-h3 text-[var(--color-ink)]">{bt.successWaitlistTitle}</h4>
-        )}
-        <p className={cn('max-w-prose text-sm leading-relaxed text-[var(--color-ink-muted)]', waitlisted && 'mt-2')}>
-          {waitlisted ? waitlistBody(lang) : bt.successConfirmedBody}
+        <h4 className="type-h3 text-[var(--color-ink)]">{bt.successWaitlistTitle}</h4>
+        <p className="mt-2 max-w-prose text-sm leading-relaxed text-[var(--color-ink-muted)]">
+          {waitlistBody(lang)}
         </p>
 
         {/* Naechste Schritte: konkret, kein Marketing. Ohne die Mail-Zeile — sie stand
             wortgleich schon im Text darueber. */}
         <ul className="mt-4 space-y-2.5">
-          {(waitlisted
-            ? [bt.waitlistBodyExtra]
-            : [bt.successNextLocation, bt.successNextBring]
-          ).map((text) => (
-            <li key={text} className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--color-ink)]">
-              <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-salsa)]" />
-              <span className="text-pretty">{text}</span>
-            </li>
-          ))}
+          <li className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--color-ink)]">
+            <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-salsa)]" />
+            <span className="text-pretty">{bt.waitlistBodyExtra}</span>
+          </li>
         </ul>
 
         {/* EINE starke Aktion: WhatsApp. Kursplan bleibt Text-Link, damit kein Button-Zoo

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLang } from '@/lib/i18n';
+import { takeReservation, type ReservationFacts } from '@/lib/reservation-handoff';
 import { CONTACT } from '@/public/site/SiteFooter';
 import { InstagramIcon, WhatsAppIcon } from '@/public/site/BrandIcons';
 import { SubHero, SubPageShell, Shell, Reveal } from '@/public/subpage/kit';
@@ -9,8 +10,9 @@ const COPY = {
   de: {
     crumb: 'Vorbereiten',
     title: 'So bereitest du dich vor.',
-    lead: 'Dein Platz ist da. Drei Dinge, dann tanzt du locker mit.',
-    bookingTitle: 'Dein Platz',
+    lead: 'Deine Anmeldung ist da. Das Studio bestätigt dir den Platz, meist am selben Tag. Bis dahin: drei Dinge.',
+    bookingTitle: 'Deine Anmeldung',
+    bookingNote: 'Das Studio schaut sie an und bestätigt dir den Platz, meist am selben Tag.',
     factWhen: 'Wann',
     factWhere: 'Wo',
     factPay: 'Bezahlung',
@@ -33,7 +35,7 @@ const COPY = {
       },
       {
         title: 'Was du mitbringst',
-        body: 'Bequeme Kleidung. Hallenschuhe oder barfuss. Den Rest zeigen wir dir vor Ort.',
+        body: 'Bequeme Kleidung, saubere Schuhe mit flacher Sohle oder barfuss. Studio Elisabethenanlage 7, 4051 Basel — 5 Minuten vom Bahnhof SBB.',
         href: '/kursplan',
         label: 'Kursplan ansehen',
         external: false,
@@ -44,8 +46,9 @@ const COPY = {
   en: {
     crumb: 'Prepare',
     title: 'How to get ready.',
-    lead: 'Your spot is booked. Three things, then you just dance.',
-    bookingTitle: 'Your spot',
+    lead: 'We have your sign-up. The studio confirms your spot, usually the same day. Until then: three things.',
+    bookingTitle: 'Your sign-up',
+    bookingNote: 'The studio looks at it and confirms your spot, usually the same day.',
     factWhen: 'When',
     factWhere: 'Where',
     factPay: 'Payment',
@@ -68,7 +71,7 @@ const COPY = {
       },
       {
         title: 'What to bring',
-        body: 'Comfortable clothes. Indoor shoes or barefoot. We show you the rest on site.',
+        body: 'Comfortable clothes, clean flat-soled shoes or barefoot. Studio Elisabethenanlage 7, 4051 Basel — 5 minutes from Basel SBB.',
         href: '/kursplan',
         label: 'See the schedule',
         external: false,
@@ -78,30 +81,15 @@ const COPY = {
   },
 } as const;
 
-/* Die Buchung liegt nicht im Client-State: der Erfolgspfad verlaesst das Modal per
-   window.location.assign. Kurs, Termin, Studio und Zahlung kommen deshalb als Query
-   an — sonst stuende die Bestaetigung ohne die drei Fakten da, die vorher im Modal
-   sichtbar waren. Ohne Query rendert der Block gar nicht (Direktaufruf der Seite). */
-type Booking = { kurs: string; wann: string; wo: string; zahlung: string };
-
-function readBooking(): Booking | null {
-  if (typeof window === 'undefined') return null;
-  const q = new URLSearchParams(window.location.search);
-  const kurs = q.get('kurs')?.trim();
-  const wann = q.get('wann')?.trim();
-  const wo = q.get('wo')?.trim();
-  const zahlung = q.get('zahlung')?.trim();
-  if (!kurs || !wann || !wo || !zahlung) return null;
-  return { kurs, wann, wo, zahlung };
-}
-
 export function PreparePage() {
   const { lang } = useLang();
   const c = COPY[lang];
-  // Erst nach der Hydration lesen: der Server kennt die Query des Browsers nicht, ein
-  // direktes Lesen im Render wuerde Server- und Client-Markup auseinanderlaufen lassen.
-  const [booking, setBooking] = useState<Booking | null>(null);
-  useEffect(() => setBooking(readBooking()), []);
+  /* Erst nach der Hydration lesen: der Server kennt den sessionStorage des Browsers
+     nicht, ein direktes Lesen im Render wuerde Server- und Client-Markup auseinander-
+     laufen lassen. Ohne Reservierung rendert der Block gar nicht — die Seite ist auch
+     ueber das Schnupper-Formular und per Direktaufruf erreichbar. */
+  const [booking, setBooking] = useState<ReservationFacts | null>(null);
+  useEffect(() => setBooking(takeReservation()), []);
   return (
     <SubPageShell seo="prepare">
       <SubHero
@@ -123,6 +111,9 @@ export function PreparePage() {
                 {c.bookingTitle}
               </p>
               <h2 className="type-h3 mt-1 text-[var(--color-ink)]">{booking.kurs}</h2>
+              <p className="mt-2 max-w-prose text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                {c.bookingNote}
+              </p>
               <dl className="mt-4 grid gap-3 sm:grid-cols-3">
                 {(
                   [
