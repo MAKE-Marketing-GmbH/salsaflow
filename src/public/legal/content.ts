@@ -127,7 +127,7 @@ export const DATENSCHUTZ = {
     pageTitle: 'Datenschutzerklärung',
     intro:
       'Wir nehmen den Schutz deiner Daten ernst. Hier erklären wir einfach, welche Daten wir erheben, wofür wir sie nutzen und welche Rechte du hast. Es gilt das Schweizer Datenschutzgesetz (revDSG); für Besucher aus der EU zusätzlich die DSGVO.',
-    lastUpdated: 'Stand: Juli 2026',
+    lastUpdated: 'Stand: August 2026',
     sections: [
       {
         title: 'Verantwortliche Stelle',
@@ -174,7 +174,8 @@ export const DATENSCHUTZ = {
         title: 'Cookies und Tracking',
         body: [
           'Wir setzen keine Tracking-Cookies und kein Webanalyse-Werkzeug wie Google Analytics ein.',
-          'Wir speichern zwei technische Einstellungen in deinem Browser (localStorage): deine gewählte Sprache und ob du den Cookie-Hinweis bestätigt hast. Diese Einstellungen verlassen deinen Browser nicht.',
+          'Wir speichern technische Einstellungen in deinem Browser (localStorage und sessionStorage) — und zwar erst, wenn du etwas tust, nicht schon beim Aufrufen der Seite: deine Auswahl im Cookie-Hinweis (also auch, ob du Google Maps erlaubt hast), deine gewählte Sprache, sobald du sie umstellst, und während einer Buchung deine bereits ausgefüllten Angaben bis zum nächsten Schritt. Diese Einstellungen verlassen deinen Browser nicht.',
+          'Im Cookie-Hinweis kannst du über «Einstellungen» einzeln festlegen, was du erlaubst. Notwendige Einstellungen lassen sich nicht abwählen, weil die Seite ohne sie nicht funktioniert. Deine Wahl kannst du jederzeit ändern, indem du die Website-Daten in deinem Browser löschst.',
         ],
       },
       {
@@ -182,7 +183,7 @@ export const DATENSCHUTZ = {
         body: [
           'Für den Ticketverkauf zu Events verlinken wir auf Eventfrog. Ausserdem verlinken wir auf Instagram, WhatsApp und Google. Wenn du diese Links öffnest, gelten die Datenschutzbestimmungen des jeweiligen Anbieters.',
           'Das Hero-Video wird direkt von unserer Website ausgeliefert und baut keine Verbindung zu Instagram oder Meta auf. Eingebettete Instagram-Videos laden erst, wenn du das jeweilige Video aktiv anklickst. Dann können technische Daten wie deine IP-Adresse übertragen und Cookies oder ähnliche Technologien eingesetzt werden.',
-          'Auf Seiten mit unserer Karte (Startseite und Standort) laden wir eine Google-Maps-Karte automatisch, also ohne dass du sie anklicken musst. Dabei baut dein Browser beim Seitenaufruf eine Verbindung zu Google auf: technische Daten wie deine IP-Adresse werden an Google übertragen, und Google kann Cookies oder ähnliche Technologien einsetzen. Es gelten die Datenschutzbestimmungen von Google.',
+          'Auf Seiten mit unserer Karte (Startseite und Standort) laden wir die Google-Maps-Karte erst, wenn du zugestimmt hast. Ohne deine Zustimmung wird die Karte nicht eingebettet und dein Browser baut keine Verbindung zu Google auf; an ihrer Stelle siehst du einen Hinweis mit der Schaltfläche «Karte laden». Sobald du zustimmst — im Cookie-Hinweis unter «Einstellungen» oder direkt an der Karte — werden technische Daten wie deine IP-Adresse an Google übertragen, und Google kann Cookies oder ähnliche Technologien einsetzen. Es gelten die Datenschutzbestimmungen von Google. Ohne Einbettung kannst du die Anfahrt auch über einen normalen Link bei Google öffnen.',
         ],
       },
       {
@@ -257,7 +258,8 @@ export const DATENSCHUTZ = {
         title: 'Cookies and tracking',
         body: [
           'We do not use any tracking cookies and no web analytics tool such as Google Analytics.',
-          'We store two technical settings in your browser (localStorage): your chosen language and whether you acknowledged the cookie notice. These settings do not leave your browser.',
+          'We store technical settings in your browser (localStorage and sessionStorage) — and only once you do something, not merely by opening the page: your choice in the cookie notice (including whether you allowed Google Maps), your chosen language as soon as you switch it, and during a booking the details you already entered until the next step. These settings do not leave your browser.',
+          'In the cookie notice you can use «Settings» to decide individually what you allow. Necessary settings cannot be switched off because the site does not work without them. You can change your choice at any time by clearing this site\'s data in your browser.',
         ],
       },
       {
@@ -265,7 +267,7 @@ export const DATENSCHUTZ = {
         body: [
           'For event ticket sales we link to Eventfrog. We also link to Instagram, WhatsApp and Google. When you open these links, the privacy terms of the respective provider apply.',
           'The hero video is delivered directly by our website and does not connect to Instagram or Meta. Embedded Instagram videos load only after you actively click them. Technical data such as your IP address may then be transferred, and cookies or similar technologies may be used.',
-          'On pages that show our map (home page and location page) a Google Maps map loads automatically, without you having to click it. Your browser therefore connects to Google as soon as the page loads: technical data such as your IP address is transferred to Google, and Google may use cookies or similar technologies. Google\'s privacy terms apply.',
+          'On pages that show our map (home page and location page) the Google Maps map only loads once you have agreed. Without your consent the map is not embedded and your browser does not connect to Google; instead you see a notice with a «Load map» button. As soon as you agree — in the cookie notice under «Settings» or directly at the map — technical data such as your IP address is transferred to Google, and Google may use cookies or similar technologies. Google\'s privacy terms apply. Without the embed you can also open the directions through a normal link at Google.',
         ],
       },
       {
