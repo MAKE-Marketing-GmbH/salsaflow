@@ -36,9 +36,22 @@ const VIEWPORTS = [
    `booking-submit` existiert erst auf Schritt 2. Offene Klassen (styleKey 'heels')
    ueberspringen Schritt 1 und zeigen den Absende-Knopf sofort. Beide Knoepfe stehen
    hinter dem Verfuegbarkeits-Ladezustand des Dialogs, deshalb erst darauf warten:
-   im Ladezustand ist keiner im DOM und die Zaehlung saehe faelschlich eine offene Klasse. */
+   im Ladezustand ist keiner im DOM und die Zaehlung saehe faelschlich eine offene Klasse.
+   Der Ladezustand kann auch im Abruf-Fehler oder in «nicht buchbar» enden — beide
+   zeigen nie einen der Knoepfe und wuerden sonst als blosser Timeout erscheinen. */
 async function schrittEinsDurchlaufen(page) {
-  await page.locator('[data-testid="booking-next"], [data-testid="booking-submit"]').first().waitFor({ timeout: 15000 });
+  await page
+    .locator(
+      '[data-testid="booking-next"], [data-testid="booking-submit"], [data-testid="avail-retry"], [data-testid="avail-not-bookable"]',
+    )
+    .first()
+    .waitFor({ timeout: 15000 });
+  if (await page.locator('[data-testid="avail-retry"]').count()) {
+    throw new Error('Verfuegbarkeits-Abruf fehlgeschlagen: der Dialog zeigt den Fehlerzustand mit Erneut-Knopf');
+  }
+  if (await page.locator('[data-testid="avail-not-bookable"]').count()) {
+    throw new Error('Kurs ist laut Verfuegbarkeit nicht buchbar: der Dialog zeigt den Nicht-buchbar-Hinweis');
+  }
   const weiter = page.locator('[data-testid="booking-next"]');
   if (!(await weiter.count())) {
     await page.waitForSelector('[data-testid="booking-submit"]', { timeout: 15000 });

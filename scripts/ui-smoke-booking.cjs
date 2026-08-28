@@ -41,13 +41,32 @@ async function firstOutcome(page, timeoutMs = 15000) {
    Ableitung faende faelschlich «nicht voll». Der Dialog startet ausserdem im
    Ladezustand (`loading` = true), und die Fusszeile mit beiden Knoepfen haengt hinter
    diesem Gate: vor dem Ende des Verfuegbarkeits-Abrufs ist keiner der beiden im DOM.
-   Erst danach unterscheidet die Zaehlung Schritt 1 von einer offenen Klasse. */
+   Erst danach unterscheidet die Zaehlung Schritt 1 von einer offenen Klasse.
+   Der Ladezustand endet in vier moeglichen Zweigen: Schritt 1, Schritt 2, Abruf-Fehler
+   oder «nicht buchbar». Nur auf die beiden Knoepfe zu warten hiesse, die letzten zwei
+   Zweige als Locator-Timeout zu melden statt als benannten Grund. */
 async function auslastungBereit(page, timeout = 15000) {
-  await page.locator('[data-testid="booking-next"], [data-testid="booking-submit"]').first().waitFor({ timeout });
+  await page
+    .locator(
+      '[data-testid="booking-next"], [data-testid="booking-submit"], [data-testid="avail-retry"], [data-testid="avail-not-bookable"]',
+    )
+    .first()
+    .waitFor({ timeout });
+  if (await page.locator('[data-testid="avail-retry"]').count()) {
+    throw new Error('Verfuegbarkeits-Abruf fehlgeschlagen: der Dialog zeigt den Fehlerzustand mit Erneut-Knopf');
+  }
+  if (await page.locator('[data-testid="avail-not-bookable"]').count()) {
+    throw new Error('Kurs ist laut Verfuegbarkeit nicht buchbar: der Dialog zeigt den Nicht-buchbar-Hinweis');
+  }
 }
 
 async function schrittEinsDurchlaufen(page, { rolle, paar = false }) {
-  await auslastungBereit(page);
+  try {
+    await auslastungBereit(page);
+  } catch (e) {
+    ok('Verfuegbarkeit im Buchungsdialog geladen', false, e.message);
+    throw e;
+  }
   const weiter = page.locator('[data-testid="booking-next"]');
   const aufSchrittEins = (await weiter.count()) > 0;
   if (!aufSchrittEins) {

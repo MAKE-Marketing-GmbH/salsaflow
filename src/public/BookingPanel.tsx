@@ -1488,7 +1488,7 @@ function BookingForm({
               </button>
             </div>
           ) : !avail.bookable ? (
-            <div className="py-6 text-center text-sm text-[var(--color-ink-muted)]">
+            <div data-testid="avail-not-bookable" className="py-6 text-center text-sm text-[var(--color-ink-muted)]">
               <p>{bt.notBookable}</p>
               <a href="/kontakt#kontaktformular" className="mt-3 inline-flex font-semibold text-[var(--color-salsa)] underline underline-offset-4">
                 {lang === 'de' ? 'Anderen Einstieg finden' : 'Find another way to start'}
