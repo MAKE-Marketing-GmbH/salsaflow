@@ -14,41 +14,27 @@ function read(file) {
   return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
 }
 
-// Die Sollzahl stand hier fest auf 27, waehrend `routes.tsx` seit mehreren Commits
-// 26 Routen mit `prerender: true` fuehrt. Der Pruefer meldete darum FAIL, obwohl
-// keine Seite fehlte. Eine feste Zahl bricht bei jeder Routenaenderung erneut.
-// Jetzt zaehlen die Quellen selbst: `prerender: true` in `src/routes.tsx`, abzueglich der
-// Routen, die `src/lib/seo-config.ts` auf `indexable: false` setzt: die stehen in keiner
-// Sitemap und tragen noindex, werden aber weiterhin vorgerendert.
-const routesQuelle = read(path.resolve('src/routes.tsx'));
-const seoQuelle = read(path.resolve('src/lib/seo-config.ts'));
-const nichtIndexierbar = new Set(
-  [...seoQuelle.matchAll(/(\w+):\s*\{[^{}]*indexable:\s*false[^{}]*\}/g)].map((match) => match[1]),
+// Die Sollzahl stand hier einmal fest im Skript und brach bei jeder Routenaenderung.
+// Die Routen-Wahrheit kommt aus demselben Manifest, aus dem scripts/prerender.mjs
+// Sitemap und noindex-Flag erzeugt (`entry.getPrerenderManifest()`, dort als
+// .data/prerender-manifest.json abgelegt). Frueher stand hier eine Regex ueber
+// src/routes.tsx und src/lib/seo-config.ts: die haette bei mehrzeiliger Formatierung
+// oder einem berechneten `indexable` stillschweigend andere Zahlen geliefert, ohne dass
+// sich die Bedeutung aendert.
+const manifestPfad = path.resolve('.data/prerender-manifest.json');
+check(
+  fs.existsSync(manifestPfad),
+  `Prerender-Manifest fehlt: ${manifestPfad} — zuerst \`npm run build\` laufen lassen.`,
 );
-const prerenderKeys = [...routesQuelle.matchAll(/seoKey:\s*'([^']+)'[^}]*prerender:\s*true/g)].map(
-  (match) => match[1],
-);
-check(prerenderKeys.length > 0, 'Keine Route mit `prerender: true` in src/routes.tsx gefunden.');
-const indexierbareKeys = prerenderKeys.filter((key) => !nichtIndexierbar.has(key));
-const soll = indexierbareKeys.length;
-check(soll > 0, 'Keine indexierbare Route mit `prerender: true` gefunden.');
+const manifest = fs.existsSync(manifestPfad) ? JSON.parse(read(manifestPfad)) : [];
+check(manifest.length > 0, 'Prerender-Manifest ist leer.');
+const soll = manifest.filter((route) => route.indexable !== false).length;
+check(soll > 0, 'Keine indexierbare Route im Prerender-Manifest.');
 
 // Vorgerendert, aber bewusst nicht indexierbar: die Datei existiert, steht in keiner
 // Sitemap und muss noindex tragen. Ohne diesen Check deckt sich die Regel selbst zu,
 // weil Sitemap-Laenge und Soll aus derselben Quelle stammen.
-const noindexPfade = [...nichtIndexierbar]
-  .filter((key) => prerenderKeys.includes(key))
-  .map((key) => {
-    const treffer = seoQuelle.match(
-      new RegExp(`${key}:\\s*\\{[^{}]*canonicalPath:\\s*'([^']+)'[^{}]*\\}`),
-    );
-    return treffer ? treffer[1] : null;
-  })
-  .filter(Boolean);
-check(
-  noindexPfade.length === prerenderKeys.filter((key) => nichtIndexierbar.has(key)).length,
-  'Zu einer nicht indexierbaren Prerender-Route fehlt der canonicalPath in seo-config.ts.',
-);
+const noindexPfade = manifest.filter((route) => route.indexable === false).map((route) => route.path);
 
 const sitemap = read(path.join(dist, 'sitemap.xml'));
 const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);

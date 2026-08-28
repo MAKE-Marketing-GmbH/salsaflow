@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLang } from '@/lib/i18n';
 import { takeReservation, type ReservationHandoff } from '@/lib/reservation-handoff';
 import { CONTACT } from '@/public/site/SiteFooter';
@@ -91,7 +91,17 @@ export function PreparePage() {
      laufen lassen. Ohne Reservierung rendert der Block gar nicht — die Seite ist auch
      ueber das Schnupper-Formular und per Direktaufruf erreichbar. */
   const [handoff, setHandoff] = useState<ReservationHandoff | null>(null);
-  useEffect(() => setHandoff(takeReservation()), []);
+  /* takeReservation() raeumt den Eintrag beim Lesen — ein zweiter Lauf faende nichts
+     mehr und wuerde die schon gelesene Anmeldung mit null ueberschreiben. Genau das
+     macht der StrictMode-Remount im Dev-Build (Effekt, Cleanup, Effekt). Der Waechter
+     laesst den Konsum einmal pro Mount zu; echte Reloads bekommen einen neuen Mount
+     mit leerem Ref und sehen den Eintrag zu Recht nicht mehr. */
+  const consumed = useRef(false);
+  useEffect(() => {
+    if (consumed.current) return;
+    consumed.current = true;
+    setHandoff(takeReservation());
+  }, []);
   const booking = handoff?.kind === 'course' ? handoff : null;
   /* Der behauptende Lead haengt an jeder bekannten Anmeldung, auch der ohne Termin:
      die Route ist per Direktaufruf und geteiltem Link erreichbar, und takeReservation()

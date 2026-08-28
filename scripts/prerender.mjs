@@ -4,6 +4,8 @@ import { createServer } from 'vite';
 
 const root = process.cwd();
 const dist = path.join(root, 'dist');
+const manifestDir = path.join(root, '.data');
+const manifestPath = path.join(manifestDir, 'prerender-manifest.json');
 const templatePath = path.join(dist, 'index.html');
 const siteOrigin = 'https://www.salsaflow-dc.com';
 // Bild-Host = ASSET_ORIGIN (src/lib/seo-config.ts): die Ziel-Domain traegt bis zum
@@ -188,6 +190,20 @@ try {
   await fs.writeFile(
     path.join(dist, 'sitemap.xml'),
     sitemapXml(manifest.filter((route) => route.indexable !== false).map((route) => route.path)),
+  );
+
+  // Dasselbe Manifest, aus dem gerade Sitemap und noindex-Flag entstanden sind, als
+  // Artefakt fuer den Pruefer. `.data` liegt ausserhalb von `dist` und wird nicht
+  // ausgeliefert. Ohne das muesste verify-seo die Routen-Wahrheit aus TypeScript-
+  // Quelltext greppen und haenge damit an der Schreibweise statt an der Bedeutung.
+  await fs.mkdir(manifestDir, { recursive: true });
+  await fs.writeFile(
+    manifestPath,
+    JSON.stringify(
+      manifest.map(({ path: route, seoKey, indexable }) => ({ path: route, seoKey, indexable })),
+      null,
+      2,
+    ),
   );
 
   process.stdout.write(`Prerender: ${manifest.length} Routen + 404 + Admin + Buchung\n`);
