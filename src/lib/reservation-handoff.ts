@@ -104,3 +104,15 @@ export function takeReservation(): ReservationHandoff | null {
     return null;
   }
 }
+
+/* Beide Erfolgspfade verlassen die Seite per window.location.assign. Bleibt die
+ * Navigation aus — blockierender Extension-Handler, abgebrochener Wechsel, Rueckkehr
+ * aus dem Back-Forward-Cache auf dieselbe Seite — waere das Formular ohne diesen
+ * Wecker dauerhaft im Sende-Zustand eingefroren, obwohl die Anmeldung laengst steht.
+ * Der Timer feuert nur in diesem Fall: bei echter Navigation ist das Dokument fort. */
+const REDIRECT_FALLBACK_MS = 2500;
+
+export function redirectAfterSubmit(href: string, onStalled: () => void): void {
+  window.location.assign(href);
+  window.setTimeout(onStalled, REDIRECT_FALLBACK_MS);
+}

@@ -166,6 +166,8 @@ export type BookingDict = {
   fieldRequired: string;
   emailInvalid: string;
   errorGeneric: string;
+  redirectStalled: string;
+  redirectStalledLink: string;
   successWaitlistTitle: string;
   loading: string;
   redirecting: string;
@@ -229,6 +231,8 @@ export const BOOKING_UI = {
     fieldRequired: 'Dieses Feld ist Pflicht.',
     emailInvalid: 'Diese E-Mail-Adresse stimmt nicht.',
     errorGeneric: 'Buchung fehlgeschlagen. Bitte versuche es erneut.',
+    redirectStalled: 'Dein Platz ist reserviert, die Weiterleitung hat aber nicht geklappt.',
+    redirectStalledLink: 'Weiter zur Vorbereitung',
     successWaitlistTitle: 'Du stehst auf der Warteliste',
     loading: 'Verfügbarkeit wird geprüft...',
     redirecting: 'Weiter zur sicheren Bezahlung...',
@@ -292,6 +296,8 @@ export const BOOKING_UI = {
     fieldRequired: 'This field is required.',
     emailInvalid: 'This email address is not valid.',
     errorGeneric: 'Booking failed. Please try again.',
+    redirectStalled: 'Your spot is reserved, but the redirect did not go through.',
+    redirectStalledLink: 'Continue to your preparation',
     successWaitlistTitle: 'You are on the waiting list',
     loading: 'Checking availability...',
     redirecting: 'Continuing to secure payment...',

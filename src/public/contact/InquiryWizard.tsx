@@ -47,7 +47,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
-import { storeInquiry } from '@/lib/reservation-handoff';
+import { redirectAfterSubmit, storeInquiry } from '@/lib/reservation-handoff';
 import { CONTACT_PAGE, type TopicKey } from '@/public/contact/content';
 import { CONTACT } from '@/public/site/SiteFooter';
 import { WhatsAppIcon } from '@/public/site/BrandIcons';
@@ -250,6 +250,7 @@ export function InquiryWizard({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [reach, setReach] = useState<Reach>('whatsapp');
+  const [stalledHref, setStalledHref] = useState<string | null>(null);
   const [privacy, setPrivacy] = useState(false);
   const [website, setWebsite] = useState('');
   const [status, setStatus] = useState<Status>('idle');
@@ -355,7 +356,10 @@ export function InquiryWizard({
       })
       .filter((line): line is string => Boolean(line));
     if (notes.trim()) lines.push(`${copy.noteLabel}: ${notes.trim()}`);
-    if (!compact) {
+    // Nur der Schnupper-Hero (lockTopic) blendet die Erreichbarkeits-Wahl aus. Jede
+    // andere Form — auch die kompakte Startseite — erhebt sie sichtbar, also muss der
+    // gewaehlte Wert auch in der Studio-Mail stehen.
+    if (!lockTopic) {
       lines.push(`${copy.reachLabel}: ${copy.reachOptions.find((option) => option.key === reach)?.label ?? reach}`);
     }
     return lines;
@@ -419,7 +423,13 @@ export function InquiryWizard({
       if (!response.ok) throw new Error('request failed');
       if (onSuccessHref) {
         storeInquiry();
-        window.location.assign(onSuccessHref);
+        // Der Sende-Zustand haelt den Knopf gesperrt, damit die Anmeldung nicht doppelt
+        // rausgeht. Bleibt die Navigation aus, gibt der Wecker das Formular frei und
+        // nennt den Weg, statt den Knopf dauerhaft im Sende-Zustand stehen zu lassen.
+        redirectAfterSubmit(onSuccessHref, () => {
+          setStatus('idle');
+          setStalledHref(onSuccessHref);
+        });
         return;
       }
       setStatus('success');
@@ -492,6 +502,14 @@ export function InquiryWizard({
         {(error || status === 'error') && (
           <p role="alert" id={ERROR_ID} className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">
             {error || copy.sendError}
+          </p>
+        )}
+        {stalledHref && (
+          <p role="alert" data-testid="contact-redirect-stalled" className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">
+            {copy.redirectStalled}{' '}
+            <a href={stalledHref} className="underline underline-offset-2">
+              {copy.redirectStalledLink}
+            </a>
           </p>
         )}
 
@@ -665,6 +683,15 @@ export function InquiryWizard({
       {(error || status === 'error') && (
         <p role="alert" id={ERROR_ID} className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">
           {error || copy.sendError}
+        </p>
+      )}
+
+      {stalledHref && (
+        <p role="alert" data-testid="contact-redirect-stalled" className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">
+          {copy.redirectStalled}{' '}
+          <a href={stalledHref} className="underline underline-offset-2">
+            {copy.redirectStalledLink}
+          </a>
         </p>
       )}
 
@@ -1034,6 +1061,10 @@ function wizardCopy(de: boolean, topic: TopicKey) {
     submit: de ? 'Anfrage senden' : 'Send request',
     sending: de ? 'Wird gesendet ...' : 'Sending ...',
     sendError: de ? 'Das hat nicht geklappt. Bitte versuche es noch einmal.' : 'That did not work. Please try again.',
+    redirectStalled: de
+      ? 'Deine Anmeldung ist da, die Weiterleitung hat aber nicht geklappt.'
+      : 'We have your request, but the redirect did not go through.',
+    redirectStalledLink: de ? 'Weiter zur Vorbereitung' : 'Continue to your preparation',
     successTitle: de ? 'Danke, wir melden uns.' : 'Thanks, we will be in touch.',
     successBody: de ? 'Deine Anfrage ist angekommen. Eine Person aus dem Team antwortet dir mit dem passenden nächsten Schritt.' : 'Your request has arrived. Someone from the team will reply with the right next step.',
     successNext: de ? 'So geht es weiter' : 'What happens next',

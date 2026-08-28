@@ -22,7 +22,7 @@ import {
   type CourseAvailability,
   type CreateBookingResult,
 } from '@/lib/booking';
-import { storeReservation } from '@/lib/reservation-handoff';
+import { redirectAfterSubmit, storeReservation } from '@/lib/reservation-handoff';
 import {
   fetchSchedule,
   embeddedSchedule,
@@ -1072,6 +1072,7 @@ function BookingForm({
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [redirectStalled, setRedirectStalled] = useState(false);
   const [result, setResult] = useState<CreateBookingResult | null>(null);
   const [showErrors, setShowErrors] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -1180,27 +1181,17 @@ function BookingForm({
 
     // Dokument-Scroll sperren, ohne den Body mit negativem `top` zu verschieben. Der alte
     // Fixed-Body-Trick zog den ebenfalls fixierten Dialog nach einem Seitenscroll oberhalb
-    // des Viewports; der fokussierte Schliessen-Knopf war dann unsichtbar. Root + Body
-    // overflow und das overscroll-contain des Backdrops isolieren denselben Hintergrund,
-    // waehrend der Dialog in echten Viewport-Koordinaten bleibt.
+    // des Viewports; der fokussierte Schliessen-Knopf war dann unsichtbar. Das Flag allein
+    // schaltet die Regel `html[data-dialog-lock]` in index.css, die Root und Body sperrt;
+    // der Dialog bleibt dabei in echten Viewport-Koordinaten. Kein zweiter Inline-Pfad:
+    // die `!important`-Regel schluege ihn ohnehin, sein Save/Restore waere nur Ballast.
     const scrollY = window.scrollY;
     const root = document.documentElement;
-    const prev = {
-      rootOverflow: root.style.overflow,
-      overflow: document.body.style.overflow,
-      overscrollBehavior: document.body.style.overscrollBehavior,
-    };
-    root.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    document.body.style.overscrollBehavior = 'none';
     root.dataset.dialogLock = '';
 
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener('keydown', onKey);
-      root.style.overflow = prev.rootOverflow;
-      document.body.style.overflow = prev.overflow;
-      document.body.style.overscrollBehavior = prev.overscrollBehavior;
       delete root.dataset.dialogLock;
       window.scrollTo(0, scrollY);
     };
@@ -1334,8 +1325,15 @@ function BookingForm({
           wo: course.locationName,
           zahlung: bt.successPayShort,
         });
+        // Der Knopf bleibt waehrend der Weiterleitung gesperrt: ein zweiter Klick
+        // wuerde denselben Platz ein zweites Mal buchen. Kommt die Navigation nicht
+        // zustande, gibt der Wecker das Formular mit sichtbarem Weg-Hinweis frei.
         redirecting.current = true;
-        window.location.assign('/vorbereiten');
+        redirectAfterSubmit('/vorbereiten', () => {
+          redirecting.current = false;
+          setSubmitting(false);
+          setRedirectStalled(true);
+        });
         return;
       }
       if (!r.ok) {
@@ -1363,7 +1361,6 @@ function BookingForm({
           : 'motion-safe:animate-[booking-backdrop-in_180ms_ease-out]'
       }`}
       data-testid="booking-backdrop"
-      data-closing={closing ? '' : undefined}
       data-lenis-prevent
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) requestClose();
@@ -1741,6 +1738,18 @@ function BookingForm({
                     className="mb-2 text-sm font-medium text-[var(--color-salsa)]"
                   >
                     {submitError}
+                  </p>
+                )}
+                {redirectStalled && (
+                  <p
+                    role="alert"
+                    data-testid="booking-redirect-stalled"
+                    className="mb-2 text-sm font-medium text-[var(--color-salsa)]"
+                  >
+                    {bt.redirectStalled}{' '}
+                    <a href="/vorbereiten" className="underline underline-offset-2">
+                      {bt.redirectStalledLink}
+                    </a>
                   </p>
                 )}
                 {/* Kein mb hier: Satz und Link darunter gehoeren zusammen und stehen
