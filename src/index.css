@@ -1108,26 +1108,15 @@ body:has([data-partys-page]) section.relative.isolate.overflow-hidden > div.poin
  *     über dem Fluss, nicht am Dokumentende.
  *   - Ausweich-Korridor verlängern: am 21.08. gemessen wanderte der Knopf dabei auf
  *     y=216 bzw. y=298 — ins obere Drittel, also weg von "unten rechts".
- *   - Beim Scrollen ausblenden: erzeugte Flackern (Messung 21.08., Kommentar in
- *     WhatsAppFloat.tsx:464).
+ *   - Beim Scrollen ausblenden: erzeugte Flackern (Messung 21.08.).
  *
- * Der Laufzeit-Solver in WhatsAppFloat.tsx bleibt unverändert: er weicht weiter
- * 0/56/112 px aus. Diese Regel gibt ihm nur den Platz, den er zum Ausweichen braucht. */
+ * Den Laufzeit-Solver, der den Knopf um 0/56/112 px verschob, gibt es seit der
+ * Conversion-Runde nicht mehr: er war die Ursache des Hoch-runter-Ruckelns beim
+ * Scrollen. Der Knopf steht jetzt fest; diese Regel haelt ihm die Ecke frei. */
 :root {
   /* Mobil: right-1 (4 px) + 48 px Kreis = 52 px Fussabdruck, plus 8 px Luft.
      Ein Label gibt es dort nicht (`hidden sm:inline-block`). */
   --wa-corner: 3.75rem;
-  /* R206: Grundabstand des Floats zur rechten Fensterkante, als Variable statt nur als
-     Tailwind-Klasse. Findet der Kollisionssolver keinen freien Slot mehr, parkt er den
-     Knopf halb ueber der Kante (`--whatsapp-collision-slide`) und rechnet gegen diesen
-     Wert. Ohne die Variable muesste die Rechnung `right-1` bzw. `sm:right-6` erraten. */
-  --whatsapp-base-right: 0.25rem;
-}
-
-@media (min-width: 640px) {
-  :root {
-    --whatsapp-base-right: 1.5rem;
-  }
 }
 
 @media (min-width: 640px) {

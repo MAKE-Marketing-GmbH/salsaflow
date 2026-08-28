@@ -17,7 +17,7 @@ type NavItem = { label: string; href?: string; children?: Leaf[] };
 // Browser erst danach den dokumentübergreifenden View-Transition-Snapshot aufnimmt.
 const MOBILE_MENU_EXIT_MS = 260;
 
-export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean } = {}) {
+export function SiteHeader() {
   const { lang, setLang } = useLang();
   const c = HOME[lang];
   const de = lang === 'de';
@@ -264,10 +264,7 @@ export function SiteHeader({ solidBackdrop = false }: { solidBackdrop?: boolean 
     <header
       ref={headerRef}
       data-page-header
-      className={cn(
-        'fixed inset-x-0 top-0 z-50 isolate bg-[var(--color-paper-warm)] will-change-transform transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-reduce:transition-none',
-        solidBackdrop && 'bg-[var(--color-paper-warm)]',
-      )}
+      className="fixed inset-x-0 top-0 z-50 isolate bg-[var(--color-paper-warm)] will-change-transform transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-reduce:transition-none"
       style={{
         height: 'var(--nav-h)',
         transform: hidden && !open ? 'translateY(-100%)' : 'translateY(0)',

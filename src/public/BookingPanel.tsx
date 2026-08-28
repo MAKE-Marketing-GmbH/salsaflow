@@ -123,7 +123,7 @@ export function BookingPage() {
   return (
     <>
       <Seo page="booking" noindex />
-      <SiteHeader solidBackdrop />
+      <SiteHeader />
       <main
         id="main"
         tabIndex={-1}
@@ -1281,7 +1281,16 @@ function BookingForm({
         language: lang,
       });
       if (r.status !== 'waitlisted') {
-        window.location.assign('/vorbereiten');
+        const when = course.nextDates?.[0]
+          ? `${formatDateI18n(course.nextDates[0], lang)} · ${course.startTime}-${course.endTime}`
+          : `${dayLabel} · ${course.startTime}-${course.endTime}`;
+        const params = new URLSearchParams({
+          kurs: courseLabel,
+          wann: when,
+          wo: course.locationName,
+          zahlung: bt.successPayShort,
+        });
+        window.location.assign(`/vorbereiten?${params.toString()}`);
         return;
       }
       setResult(r);
