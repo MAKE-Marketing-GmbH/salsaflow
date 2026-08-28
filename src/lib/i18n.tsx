@@ -182,8 +182,6 @@ export type BookingDict = {
   message: string;
   messageOptional: string;
   messagePlaceholder: string;
-  successNextTitle: string;
-  successNextMail: string;
   waitlistBodyExtra: string;
   /* Erfolgs-Ansicht (S5): Fakten-Zeilen + eine starke Aktion. */
   successFactWhen: string;
@@ -250,8 +248,6 @@ export const BOOKING_UI = {
     message: 'Nachricht',
     messageOptional: 'optional',
     messagePlaceholder: 'Zum Beispiel: Ich habe vor zwei Jahren mal Salsa getanzt …',
-    successNextTitle: 'So geht es weiter',
-    successNextMail: 'Wir melden uns bei dir und bestätigen deinen Platz, meist am selben Tag.',
     waitlistBodyExtra: 'Sobald ein Platz frei wird, schreiben wir dir sofort.',
     successFactWhen: 'Wann',
     successFactWhere: 'Wo',
@@ -312,8 +308,6 @@ export const BOOKING_UI = {
     message: 'Message',
     messageOptional: 'optional',
     messagePlaceholder: 'For example: I danced salsa two years ago …',
-    successNextTitle: 'What happens next',
-    successNextMail: 'We get back to you and confirm your spot, usually the same day.',
     waitlistBodyExtra: 'As soon as a spot opens up, we write to you right away.',
     successFactWhen: 'When',
     successFactWhere: 'Where',

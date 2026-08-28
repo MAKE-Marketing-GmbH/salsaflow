@@ -82,7 +82,7 @@ export const SEO_ROUTE_CONFIG = {
   partys: { canonicalPath: '/mehr/partys', indexable: true },
   faq: { canonicalPath: '/faq', indexable: true },
   schnupper: { canonicalPath: '/schnupperstunde', indexable: true },
-  prepare: { canonicalPath: '/vorbereiten', indexable: true },
+  prepare: { canonicalPath: '/vorbereiten', indexable: false },
   impressum: { canonicalPath: '/impressum', indexable: true },
   datenschutz: { canonicalPath: '/datenschutz', indexable: true },
   schedule: { canonicalPath: '/kursplan', indexable: true },
@@ -432,12 +432,12 @@ export const SEO_META = {
     de: {
       title: 'So bereitest du dich auf deine Tanzstunde vor | Salsaflow',
       description:
-        'Deine Anmeldung ist da — das Studio bestätigt dir den Platz. Folge Salsaflow auf Instagram, schreib bei Fragen auf WhatsApp und komm in bequemer Kleidung vorbei.',
+        'Folge Salsaflow auf Instagram, schreib bei Fragen auf WhatsApp und komm in bequemer Kleidung mit flachen Schuhen ins Studio in Basel.',
     },
     en: {
       title: 'How to prepare for your dance class | Salsaflow',
       description:
-        'We have your sign-up — the studio confirms your spot. Follow Salsaflow on Instagram, message us on WhatsApp with questions, and come in comfortable clothes.',
+        'Follow Salsaflow on Instagram, message us on WhatsApp with questions, and come to the Basel studio in comfortable clothes and flat shoes.',
     },
   },
   admin: {

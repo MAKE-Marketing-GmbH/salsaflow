@@ -3,7 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { LangProvider } from '@/lib/i18n';
 import { SmoothScroll } from '@/public/site/SmoothScroll';
 import { PRERENDER_ROUTES, resolveRoute } from '@/routes';
-import { SEO_META, type SeoKey } from '@/lib/seo';
+import { SEO_META, SEO_ROUTE_CONFIG, type SeoKey } from '@/lib/seo';
 import { HomePage } from '@/public/HomePage';
 import { CoursesPage } from '@/public/CoursesPage';
 import { EventsPage } from '@/public/EventsPage';
@@ -40,7 +40,12 @@ export type PrerenderResult = {
 };
 
 export function getPrerenderManifest() {
-  return PRERENDER_ROUTES.map(({ path, routeClass, seoKey }) => ({ path, routeClass, seoKey }));
+  return PRERENDER_ROUTES.map(({ path, routeClass, seoKey }) => ({
+    path,
+    routeClass,
+    seoKey,
+    indexable: SEO_ROUTE_CONFIG[seoKey].indexable,
+  }));
 }
 
 /**

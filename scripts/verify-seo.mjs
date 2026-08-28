@@ -17,10 +17,20 @@ function read(file) {
 // Die Sollzahl stand hier fest auf 27, waehrend `routes.tsx` seit mehreren Commits
 // 26 Routen mit `prerender: true` fuehrt. Der Pruefer meldete darum FAIL, obwohl
 // keine Seite fehlte. Eine feste Zahl bricht bei jeder Routenaenderung erneut.
-// Jetzt zaehlt die Quelle selbst: `prerender: true` in `src/routes.tsx`.
+// Jetzt zaehlen die Quellen selbst: `prerender: true` in `src/routes.tsx`, abzueglich der
+// Routen, die `src/lib/seo-config.ts` auf `indexable: false` setzt: die stehen in keiner
+// Sitemap und tragen noindex, werden aber weiterhin vorgerendert.
 const routesQuelle = read(path.resolve('src/routes.tsx'));
-const soll = (routesQuelle.match(/prerender: true/g) ?? []).length;
-check(soll > 0, 'Keine Route mit `prerender: true` in src/routes.tsx gefunden.');
+const seoQuelle = read(path.resolve('src/lib/seo-config.ts'));
+const nichtIndexierbar = new Set(
+  [...seoQuelle.matchAll(/(\w+):\s*\{[^{}]*indexable:\s*false[^{}]*\}/g)].map((match) => match[1]),
+);
+const prerenderKeys = [...routesQuelle.matchAll(/seoKey:\s*'([^']+)'[^}]*prerender:\s*true/g)].map(
+  (match) => match[1],
+);
+check(prerenderKeys.length > 0, 'Keine Route mit `prerender: true` in src/routes.tsx gefunden.');
+const soll = prerenderKeys.filter((key) => !nichtIndexierbar.has(key)).length;
+check(soll > 0, 'Keine indexierbare Route mit `prerender: true` gefunden.');
 
 const sitemap = read(path.join(dist, 'sitemap.xml'));
 const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);

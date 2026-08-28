@@ -153,6 +153,8 @@ try {
       title: rendered.title,
       description: rendered.description,
       body: rendered.html,
+      noindex: route.indexable === false,
+      canonical: route.indexable !== false,
     });
     await writeRoute(route.path, html);
   }
@@ -183,7 +185,10 @@ try {
     });
     await fs.writeFile(path.join(dist, file), html);
   }
-  await fs.writeFile(path.join(dist, 'sitemap.xml'), sitemapXml(manifest.map((route) => route.path)));
+  await fs.writeFile(
+    path.join(dist, 'sitemap.xml'),
+    sitemapXml(manifest.filter((route) => route.indexable !== false).map((route) => route.path)),
+  );
 
   process.stdout.write(`Prerender: ${manifest.length} Routen + 404 + Admin + Buchung\n`);
 } finally {
