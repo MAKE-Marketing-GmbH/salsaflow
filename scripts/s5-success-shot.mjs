@@ -1,11 +1,13 @@
-// Screenshots der neuen Anmelde-Bestaetigung (S5).
+// Screenshots der beiden Erfolgsausgaenge (S5).
 //
 // Warum ein eigenes Skript: ui-smoke-booking.cjs prueft den Klickweg, schiesst aber nur
-// ein Bild pro Fall und kennt den Wartelisten-Fall nicht. Hier geht es um die Sicht:
-// Erfolgs-Fall und Wartelisten-Fall, Desktop und Mobil, jeweils der ganze Dialog.
+// ein Bild pro Fall. Hier geht es um die Sicht: die Vorbereitungsseite nach einer freien
+// Reservierung und der Wartelisten-Dialog, jeweils Desktop und Mobil.
 //
-// Der Wartelisten-Fall wird erzwungen, indem die Antwort der Reservierungs-API im Browser
-// auf `waitlisted` umgeschrieben wird. Der Server bleibt unangetastet.
+// Eine freie Reservierung verlaesst den Dialog per Redirect auf /vorbereiten und traegt
+// Kurs, Termin, Studio und Zahlung ueber sessionStorage mit; der Wartelisten-Fall bleibt
+// im Modal. Er wird erzwungen, indem die Antwort der Reservierungs-API im Browser auf
+// `waitlisted` umgeschrieben wird. Der Server bleibt unangetastet.
 //
 // Aufruf: node scripts/s5-success-shot.mjs --base http://127.0.0.1:5175 --out /tmp/s5-shots
 
@@ -30,11 +32,42 @@ const VIEWPORTS = [
   { name: 'mobile', width: 390, height: 844, mobile: true },
 ];
 
+/* Kurse mit Rollenwahl starten auf Schritt 1: dort steht nur `booking-next`,
+   `booking-submit` existiert erst auf Schritt 2. Offene Klassen (styleKey 'heels')
+   ueberspringen Schritt 1 und zeigen den Absende-Knopf sofort. Beide Knoepfe stehen
+   hinter dem Verfuegbarkeits-Ladezustand des Dialogs, deshalb erst darauf warten:
+   im Ladezustand ist keiner im DOM und die Zaehlung saehe faelschlich eine offene Klasse.
+   Der Ladezustand kann auch im Abruf-Fehler oder in «nicht buchbar» enden — beide
+   zeigen nie einen der Knoepfe und wuerden sonst als blosser Timeout erscheinen. */
+async function schrittEinsDurchlaufen(page) {
+  await page
+    .locator(
+      '[data-testid="booking-next"], [data-testid="booking-submit"], [data-testid="avail-retry"], [data-testid="avail-not-bookable"]',
+    )
+    .first()
+    .waitFor({ timeout: 15000 });
+  if (await page.locator('[data-testid="avail-retry"]').count()) {
+    throw new Error('Verfuegbarkeits-Abruf fehlgeschlagen: der Dialog zeigt den Fehlerzustand mit Erneut-Knopf');
+  }
+  if (await page.locator('[data-testid="avail-not-bookable"]').count()) {
+    throw new Error('Kurs ist laut Verfuegbarkeit nicht buchbar: der Dialog zeigt den Nicht-buchbar-Hinweis');
+  }
+  const weiter = page.locator('[data-testid="booking-next"]');
+  if (!(await weiter.count())) {
+    await page.waitForSelector('[data-testid="booking-submit"]', { timeout: 15000 });
+    return;
+  }
+  const rolle = page.locator('[data-testid="role-follower"]');
+  if (await rolle.count()) await rolle.click();
+  await weiter.click();
+  await page.waitForSelector('[data-testid="booking-submit"]', { timeout: 15000 });
+}
+
 const browser = await chromium.launch();
 const shots = [];
 
 for (const vp of VIEWPORTS) {
-  for (const mode of ['confirmed', 'waitlisted']) {
+  for (const mode of ['prepare', 'waitlisted']) {
     const context = await browser.newContext({
       viewport: { width: vp.width, height: vp.height },
       deviceScaleFactor: 2,
@@ -58,21 +91,34 @@ for (const vp of VIEWPORTS) {
     await page.goto(`${BASE}/buchung`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-testid^="pick-course-"]', { timeout: 15000 });
     await page.locator('[data-testid^="pick-course-"]').first().click();
-    await page.waitForSelector('[data-testid="booking-submit"]', { timeout: 15000 });
+    const dialog = page.locator('[data-testid="booking-dialog"]');
+    if (!(await dialog.count())) {
+      await page.locator('[data-testid="reserve-spot"]').click();
+    }
+    await dialog.waitFor({ timeout: 15000 });
+    await schrittEinsDurchlaufen(page);
 
-    const role = page.locator('[data-testid="role-follower"]');
-    if (await role.count()) await role.click();
     await page.locator('input[name="bk-firstName"]').fill('Shot');
     await page.locator('input[name="bk-lastName"]').fill('Test');
     await page.locator('input[name="bk-email"]').fill(`shot.${STAMP}.${mode}.${vp.name}@uishot.local`);
+    const privacy = page.locator('[data-testid="booking-privacy"]');
+    await privacy.waitFor({ timeout: 10000 });
+    if (!(await privacy.isChecked())) await privacy.click();
     await page.locator('[data-testid="booking-submit"]').click();
 
-    await page.waitForSelector('[data-testid="booking-success"]', { timeout: 15000 });
-    const status = await page.locator('[data-testid="booking-success"]').getAttribute('data-status');
+    let status;
+    if (mode === 'waitlisted') {
+      await page.waitForSelector('[data-testid="booking-success"]', { timeout: 15000 });
+      status = await page.locator('[data-testid="booking-success"]').getAttribute('data-status');
+    } else {
+      await page.waitForURL(/\/vorbereiten/, { timeout: 15000 });
+      await page.waitForSelector('[data-testid="prepare-booking"]', { timeout: 15000 });
+      status = 'prepare';
+    }
     await page.waitForTimeout(900);
 
     const file = resolve(OUT, `${vp.name}-${mode}.png`);
-    await page.screenshot({ path: file });
+    await page.screenshot({ path: file, fullPage: mode === 'prepare' });
     shots.push(`${file} (status=${status})`);
     await context.close();
   }

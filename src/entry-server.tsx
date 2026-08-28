@@ -3,7 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { LangProvider } from '@/lib/i18n';
 import { SmoothScroll } from '@/public/site/SmoothScroll';
 import { PRERENDER_ROUTES, resolveRoute } from '@/routes';
-import { SEO_META, type SeoKey } from '@/lib/seo';
+import { SEO_META, SEO_ROUTE_CONFIG, type SeoKey } from '@/lib/seo';
 import { HomePage } from '@/public/HomePage';
 import { CoursesPage } from '@/public/CoursesPage';
 import { EventsPage } from '@/public/EventsPage';
@@ -27,6 +27,7 @@ import { TanzschuhePage } from '@/public/TanzschuhePage';
 import { PartysPage } from '@/public/PartysPage';
 import { FaqPage } from '@/public/FaqPage';
 import { SchnupperstundePage } from '@/public/SchnupperstundePage';
+import { PreparePage } from '@/public/PreparePage';
 import { StandortPage } from '@/public/StandortPage';
 import { NotFoundPage } from '@/public/NotFoundPage';
 
@@ -39,7 +40,12 @@ export type PrerenderResult = {
 };
 
 export function getPrerenderManifest() {
-  return PRERENDER_ROUTES.map(({ path, routeClass, seoKey }) => ({ path, routeClass, seoKey }));
+  return PRERENDER_ROUTES.map(({ path, routeClass, seoKey }) => ({
+    path,
+    routeClass,
+    seoKey,
+    indexable: SEO_ROUTE_CONFIG[seoKey].indexable,
+  }));
 }
 
 /**
@@ -78,6 +84,7 @@ function prerenderComponentFor(seoKey: SeoKey): ComponentType {
     case 'photos': return PhotosPage;
     case 'contact': return ContactPage;
     case 'schnupper': return SchnupperstundePage;
+    case 'prepare': return PreparePage;
     case 'standort': return StandortPage;
     case 'collabs': return CollabsPage;
     case 'tanzschuhe': return TanzschuhePage;

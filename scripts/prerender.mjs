@@ -4,12 +4,22 @@ import { createServer } from 'vite';
 
 const root = process.cwd();
 const dist = path.join(root, 'dist');
+const manifestDir = path.join(root, '.build');
+const manifestPath = path.join(manifestDir, 'prerender-manifest.json');
 const templatePath = path.join(dist, 'index.html');
 const siteOrigin = 'https://www.salsaflow-dc.com';
 // Bild-Host = ASSET_ORIGIN (src/lib/seo-config.ts): die Ziel-Domain traegt bis zum
 // DNS-Cutover noch die alte Website — og:image dort ist 404, geteilte Links kaemen ohne
 // Vorschaubild an. Beim Cutover zuruestellen auf www.salsaflow-dc.com.
 const socialImage = 'https://salsaflow-dc.vercel.app/photos/showcase/hp-05.webp';
+
+/* Routen ohne Vorrendering: leere Huellen mit noindex. Einzige Quelle fuer den Build UND
+ * fuer scripts/verify-seo.mjs — die Liste stand dort frueher ein zweites Mal von Hand und
+ * waere bei einer vierten Huelle stillschweigend unvollstaendig geblieben. */
+const SHELL_ROUTES = [
+  ['/admin', 'admin.html'],
+  ['/buchung', 'buchung.html'],
+];
 
 const escapeHtml = (value) =>
   value
@@ -153,6 +163,8 @@ try {
       title: rendered.title,
       description: rendered.description,
       body: rendered.html,
+      noindex: route.indexable === false,
+      canonical: route.indexable !== false,
     });
     await writeRoute(route.path, html);
   }
@@ -168,9 +180,9 @@ try {
   });
   await fs.writeFile(path.join(dist, '404.html'), notFoundHtml);
 
-  // Leere Huellen fuer die zwei Routen, die im Browser aufbauen. Titel und Beschreibung kommen
+  // Leere Huellen fuer die Routen, die im Browser aufbauen. Titel und Beschreibung kommen
   // aus SEO_META, damit sie nicht neben der echten Konfiguration veralten.
-  for (const [route, file] of [['/admin', 'admin.html'], ['/buchung', 'buchung.html']]) {
+  for (const [route, file] of SHELL_ROUTES) {
     const meta = entry.getRouteMeta(route);
     const html = buildDocument(template, {
       route,
@@ -183,7 +195,29 @@ try {
     });
     await fs.writeFile(path.join(dist, file), html);
   }
-  await fs.writeFile(path.join(dist, 'sitemap.xml'), sitemapXml(manifest.map((route) => route.path)));
+  await fs.writeFile(
+    path.join(dist, 'sitemap.xml'),
+    sitemapXml(manifest.filter((route) => route.indexable !== false).map((route) => route.path)),
+  );
+
+  // Dasselbe Manifest, aus dem gerade Sitemap und noindex-Flag entstanden sind, fuer
+  // scripts/verify-seo.mjs. Ohne das muesste der Pruefer die Routen-Wahrheit aus
+  // TypeScript-Quelltext greppen und haenge damit an der Schreibweise statt an der
+  // Bedeutung. NICHT nach `dist`: das ist Vercels outputDirectory, jede Datei darin
+  // wird ausgeliefert — die Liste der noindex-Routen waere dann oeffentlich abrufbar.
+  await fs.rm(path.join(dist, 'prerender-manifest.json'), { force: true });
+  await fs.mkdir(manifestDir, { recursive: true });
+  await fs.writeFile(
+    manifestPath,
+    JSON.stringify(
+      {
+        routes: manifest.map(({ path: route, seoKey, indexable }) => ({ path: route, seoKey, indexable })),
+        noindexShells: [...SHELL_ROUTES.map(([, file]) => file), '404.html'],
+      },
+      null,
+      2,
+    ),
+  );
 
   process.stdout.write(`Prerender: ${manifest.length} Routen + 404 + Admin + Buchung\n`);
 } finally {

@@ -34,6 +34,7 @@ const TanzschuhePage = lazy(() => import('@/public/TanzschuhePage').then((m) => 
 const PartysPage = lazy(() => import('@/public/PartysPage').then((m) => ({ default: m.PartysPage })));
 const FaqPage = lazy(() => import('@/public/FaqPage').then((m) => ({ default: m.FaqPage })));
 const SchnupperstundePage = lazy(() => import('@/public/SchnupperstundePage').then((m) => ({ default: m.SchnupperstundePage })));
+const PreparePage = lazy(() => import('@/public/PreparePage').then((m) => ({ default: m.PreparePage })));
 const StandortPage = lazy(() => import('@/public/StandortPage').then((m) => ({ default: m.StandortPage })));
 const NotFoundPage = lazy(() => import('@/public/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
@@ -68,6 +69,7 @@ export const ROUTE_DEFINITIONS: RouteDefinition[] = [
   { path: '/fotos', component: PhotosPage, routeClass: 'seo-public', seoKey: 'photos', prerender: true },
   { path: '/kontakt', component: ContactPage, routeClass: 'seo-public', seoKey: 'contact', prerender: true },
   { path: '/schnupperstunde', component: SchnupperstundePage, routeClass: 'seo-public', seoKey: 'schnupper', prerender: true },
+  { path: '/vorbereiten', component: PreparePage, routeClass: 'seo-public', seoKey: 'prepare', prerender: true },
   { path: '/kontakt/standort-raumvermietung', component: StandortPage, routeClass: 'seo-public', seoKey: 'standort', prerender: true },
   // R86: /mehr ist kein Hub mehr (Raphael 17.08.: Mehr ist nur Dropdown, keine Uebersicht).
   // Die Route leitet auf /faq um (erster Dropdown-Eintrag), wie /shows und /events-workshops.

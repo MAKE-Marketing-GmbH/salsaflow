@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
+import { redirectAfterSubmit, storeInquiry } from '@/lib/reservation-handoff';
 import { CONTACT_PAGE, type TopicKey } from '@/public/contact/content';
 import { CONTACT } from '@/public/site/SiteFooter';
 import { WhatsAppIcon } from '@/public/site/BrandIcons';
@@ -218,6 +219,7 @@ export function InquiryWizard({
   onTopicChange,
   compact = false,
   lockTopic = false,
+  onSuccessHref,
 }: {
   /** null = keine Vorauswahl beim Laden (R188 K1). Die Schnupper-Seite und die
    *  Hash-Links auf /kontakt setzen weiter einen echten Wert. */
@@ -226,6 +228,8 @@ export function InquiryWizard({
   compact?: boolean;
   /** true: Anliegen steht fest (eigene Schnupper-Seite). Kein 8er-Raster. */
   lockTopic?: boolean;
+  /** Nach erfolgreichem Absenden dorthin weiterleiten statt den In-Place-Erfolg zu zeigen. */
+  onSuccessHref?: string;
 }) {
   const { lang } = useLang();
   const de = lang === 'de';
@@ -246,6 +250,7 @@ export function InquiryWizard({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [reach, setReach] = useState<Reach>('whatsapp');
+  const [stalledHref, setStalledHref] = useState<string | null>(null);
   const [privacy, setPrivacy] = useState(false);
   const [website, setWebsite] = useState('');
   const [status, setStatus] = useState<Status>('idle');
@@ -351,7 +356,12 @@ export function InquiryWizard({
       })
       .filter((line): line is string => Boolean(line));
     if (notes.trim()) lines.push(`${copy.noteLabel}: ${notes.trim()}`);
-    lines.push(`${copy.reachLabel}: ${copy.reachOptions.find((option) => option.key === reach)?.label ?? reach}`);
+    // Nur der Schnupper-Hero (lockTopic) blendet die Erreichbarkeits-Wahl aus. Jede
+    // andere Form — auch die kompakte Startseite — erhebt sie sichtbar, also muss der
+    // gewaehlte Wert auch in der Studio-Mail stehen.
+    if (!lockTopic) {
+      lines.push(`${copy.reachLabel}: ${copy.reachOptions.find((option) => option.key === reach)?.label ?? reach}`);
+    }
     return lines;
   }
 
@@ -372,7 +382,15 @@ export function InquiryWizard({
       return;
     }
     if (contactGap) {
-      setError(contactGap === 'name' ? copy.nameError : contactGap === 'email' ? copy.emailError : copy.reachError);
+      setError(
+        contactGap === 'name'
+          ? copy.nameError
+          : contactGap === 'email'
+            ? copy.emailError
+            : lockTopic
+              ? copy.phoneOnlyError
+              : copy.reachError,
+      );
       return;
     }
     if (!privacy) {
@@ -403,6 +421,17 @@ export function InquiryWizard({
         }),
       });
       if (!response.ok) throw new Error('request failed');
+      if (onSuccessHref) {
+        storeInquiry();
+        // Der Sende-Zustand haelt den Knopf gesperrt, damit die Anmeldung nicht doppelt
+        // rausgeht. Bleibt die Navigation aus, gibt der Wecker das Formular frei und
+        // nennt den Weg, statt den Knopf dauerhaft im Sende-Zustand stehen zu lassen.
+        redirectAfterSubmit(onSuccessHref, () => {
+          setStatus('idle');
+          setStalledHref(onSuccessHref);
+        });
+        return;
+      }
       setStatus('success');
     } catch {
       setStatus('error');
@@ -445,20 +474,27 @@ export function InquiryWizard({
     );
   }
 
-  // Kurzform auf der Startseite: Anliegen-Raster plus die drei Kontaktfelder, ein Schritt.
+  // Kurzform: auf der Startseite mit Anliegen-Raster, auf der Schnupper-Seite
+  // (lockTopic) nur Name, Erreichbarkeit und Senden.
   if (compact) {
     return (
       <form onSubmit={submit} onKeyDown={blockEnterSubmit} noValidate className="p-5 sm:p-6">
-        <fieldset aria-invalid={topicInvalid || undefined} aria-describedby={topicInvalid ? ERROR_ID : undefined}>
-          <legend className="type-h3 text-[var(--color-ink)]">{copy.topicTitle}</legend>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.topicLead}</p>
-          <TopicGrid topics={orderedTopics} topic={topic} onSelect={selectTopic} />
-        </fieldset>
+        {lockTopic ? (
+          <p className="type-h3 text-[var(--color-ink)]">{de ? 'Platz sichern' : 'Reserve a spot'}</p>
+        ) : (
+          <fieldset aria-invalid={topicInvalid || undefined} aria-describedby={topicInvalid ? ERROR_ID : undefined}>
+            <legend className="type-h3 text-[var(--color-ink)]">{copy.topicTitle}</legend>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{copy.topicLead}</p>
+            <TopicGrid topics={orderedTopics} topic={topic} onSelect={selectTopic} />
+          </fieldset>
+        )}
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className={cn('grid gap-4 sm:grid-cols-2', lockTopic ? 'mt-4' : 'mt-6')}>
           <Input testId="contact-name" label={copy.name} value={name} onChange={(value) => { setName(value); setError(''); }} autoComplete="given-name" invalid={showGap && contactGap === 'name'} />
           <Input label={copy.phone} value={phone} onChange={(value) => { setPhone(value); setError(''); }} type="tel" autoComplete="tel" invalid={showGap && contactGap === 'reach'} />
-          <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" invalid={showGap && (contactGap === 'email' || contactGap === 'reach')} className="sm:col-span-2" />
+          {lockTopic ? null : (
+            <Input testId="contact-email" label={copy.email} value={email} onChange={(value) => { setEmail(value); setError(''); }} type="email" autoComplete="email" invalid={showGap && (contactGap === 'email' || contactGap === 'reach')} className="sm:col-span-2" />
+          )}
         </div>
         <PrivacyCheck checked={privacy} onChange={(next) => { setPrivacy(next); setError(''); }} label={copy.privacyLabel} invalid={privacyInvalid} />
         <Honeypot value={website} onChange={setWebsite} />
@@ -468,10 +504,18 @@ export function InquiryWizard({
             {error || copy.sendError}
           </p>
         )}
+        {stalledHref && (
+          <p role="alert" data-testid="contact-redirect-stalled" className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">
+            {copy.redirectStalled}{' '}
+            <a href={stalledHref} className="underline underline-offset-2">
+              {copy.redirectStalledLink}
+            </a>
+          </p>
+        )}
 
         <div className="mt-6">
           <button type="submit" data-testid="contact-submit" disabled={status === 'submitting'} className="btn-base btn-primary min-h-12 w-full gap-2 px-7 text-base disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto">
-            {status === 'submitting' ? copy.sending : copy.submit}
+            {status === 'submitting' ? copy.sending : (lockTopic ? (de ? 'Platz reservieren' : 'Reserve a spot') : copy.submit)}
             {status === 'submitting' ? <Spinner /> : <ArrowRight aria-hidden className="h-4 w-4" />}
           </button>
         </div>
@@ -639,6 +683,15 @@ export function InquiryWizard({
       {(error || status === 'error') && (
         <p role="alert" id={ERROR_ID} className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">
           {error || copy.sendError}
+        </p>
+      )}
+
+      {stalledHref && (
+        <p role="alert" data-testid="contact-redirect-stalled" className="mt-5 rounded-[var(--radius-chip)] bg-[var(--color-bg-soft)] px-4 py-3 text-sm font-semibold text-[var(--color-salsa-700)]">
+          {copy.redirectStalled}{' '}
+          <a href={stalledHref} className="underline underline-offset-2">
+            {copy.redirectStalledLink}
+          </a>
         </p>
       )}
 
@@ -1000,6 +1053,7 @@ function wizardCopy(de: boolean, topic: TopicKey) {
        ueber E-Mail und Handynummer und suchte im falschen Feld. */
     nameError: de ? 'Bitte gib deinen Vornamen an.' : 'Please add your first name.',
     reachError: de ? 'Bitte gib eine E-Mail oder eine Handynummer an, damit wir antworten können.' : 'Please add an email or mobile number so we can reply.',
+    phoneOnlyError: de ? 'Bitte gib deine Handynummer an, damit wir antworten können.' : 'Please add your mobile number so we can reply.',
     emailError: de ? 'Diese E-Mail-Adresse sieht nicht vollständig aus. Bitte prüfe sie kurz.' : 'This email address looks incomplete. Please check it.',
     privacyError: de ? 'Bitte setze das Häkchen beim Datenschutz.' : 'Please tick the privacy box.',
     back: de ? 'Zurück' : 'Back',
@@ -1007,6 +1061,10 @@ function wizardCopy(de: boolean, topic: TopicKey) {
     submit: de ? 'Anfrage senden' : 'Send request',
     sending: de ? 'Wird gesendet ...' : 'Sending ...',
     sendError: de ? 'Das hat nicht geklappt. Bitte versuche es noch einmal.' : 'That did not work. Please try again.',
+    redirectStalled: de
+      ? 'Deine Anmeldung ist da, die Weiterleitung hat aber nicht geklappt.'
+      : 'We have your request, but the redirect did not go through.',
+    redirectStalledLink: de ? 'Weiter zur Vorbereitung' : 'Continue to your preparation',
     successTitle: de ? 'Danke, wir melden uns.' : 'Thanks, we will be in touch.',
     successBody: de ? 'Deine Anfrage ist angekommen. Eine Person aus dem Team antwortet dir mit dem passenden nächsten Schritt.' : 'Your request has arrived. Someone from the team will reply with the right next step.',
     successNext: de ? 'So geht es weiter' : 'What happens next',

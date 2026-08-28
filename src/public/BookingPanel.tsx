@@ -9,6 +9,7 @@
 // alles motion-safe, also respektiert prefers-reduced-motion automatisch.
 
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { EASE_OUT, useHydrated } from '@/public/home/motion';
@@ -21,6 +22,7 @@ import {
   type CourseAvailability,
   type CreateBookingResult,
 } from '@/lib/booking';
+import { redirectAfterSubmit, storeReservation } from '@/lib/reservation-handoff';
 import {
   fetchSchedule,
   embeddedSchedule,
@@ -122,7 +124,7 @@ export function BookingPage() {
   return (
     <>
       <Seo page="booking" noindex />
-      <SiteHeader solidBackdrop />
+      <SiteHeader />
       <main
         id="main"
         tabIndex={-1}
@@ -1070,8 +1072,10 @@ function BookingForm({
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [redirectStalled, setRedirectStalled] = useState(false);
   const [result, setResult] = useState<CreateBookingResult | null>(null);
   const [showErrors, setShowErrors] = useState(false);
+  const [closing, setClosing] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -1089,6 +1093,44 @@ function BookingForm({
   // Erst ab dem ersten Wechsel fokussieren: beim Oeffnen gehoert der Fokus dem
   // Schliessen-Knopf (Dialog-Konvention), nicht der Ueberschrift.
   const stepChanged = useRef(false);
+  const closeTimer = useRef<number | null>(null);
+  const redirecting = useRef(false);
+  const closingRef = useRef(false);
+
+  const requestClose = useCallback(() => {
+    if (closeTimer.current !== null) return;
+    /* Kein `typeof window.matchMedia`-Test: dieser Callback haengt an Klick und Escape,
+       laeuft also nur im Browser, und `matchMedia` ist dort ueberall da (vgl. Hero.tsx). */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      onBack();
+      return;
+    }
+    /* Erst den Fokus herausnehmen, dann inert setzen: ein inerter Knoten laesst sich
+       nicht mehr fokussieren, ein Fokus DARIN faellt beim Inert-Werden auf <body> und
+       die naechste Tab-Taste landet im gesperrten Hintergrund. `onBack` gibt den Fokus
+       gleich an den Ausloeser zurueck; bis dahin haelt ihn der Body. */
+    if (dialogRef.current?.contains(document.activeElement)) {
+      // SAFETY: document.activeElement ist typisiert als Element | null. Der contains-Test
+      // darueber beweist, dass der Fokus in diesem Dialog liegt; dessen fokussierbare
+      // Knoten sind samt und sonders HTMLElement. Die Assertion behaelt | null und der
+      // einzige Zugriff ist der optionale ?.blur() — beide Faelle sind abgesichert.
+      (document.activeElement as HTMLElement | null)?.blur();
+    }
+    closingRef.current = true;
+    setClosing(true);
+    closeTimer.current = window.setTimeout(() => {
+      closeTimer.current = null;
+      onBack();
+    }, 240);
+  }, [onBack]);
+
+  useEffect(
+    () => () => {
+      if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
+    },
+    [],
+  );
 
   const loadAvail = () => {
     setLoading(true);
@@ -1114,10 +1156,14 @@ function BookingForm({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        onBack();
+        requestClose();
         return;
       }
       if (e.key !== 'Tab') return;
+      if (closingRef.current) {
+        e.preventDefault();
+        return;
+      }
       const items = focusables();
       if (!items.length) return;
       const first = items[0];
@@ -1135,29 +1181,21 @@ function BookingForm({
 
     // Dokument-Scroll sperren, ohne den Body mit negativem `top` zu verschieben. Der alte
     // Fixed-Body-Trick zog den ebenfalls fixierten Dialog nach einem Seitenscroll oberhalb
-    // des Viewports; der fokussierte Schliessen-Knopf war dann unsichtbar. Root + Body
-    // overflow und das overscroll-contain des Backdrops isolieren denselben Hintergrund,
-    // waehrend der Dialog in echten Viewport-Koordinaten bleibt.
+    // des Viewports; der fokussierte Schliessen-Knopf war dann unsichtbar. Das Flag allein
+    // schaltet die Regel `html[data-dialog-lock]` in index.css, die Root und Body sperrt;
+    // der Dialog bleibt dabei in echten Viewport-Koordinaten. Kein zweiter Inline-Pfad:
+    // die `!important`-Regel schluege ihn ohnehin, sein Save/Restore waere nur Ballast.
     const scrollY = window.scrollY;
     const root = document.documentElement;
-    const prev = {
-      rootOverflow: root.style.overflow,
-      overflow: document.body.style.overflow,
-      overscrollBehavior: document.body.style.overscrollBehavior,
-    };
-    root.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    document.body.style.overscrollBehavior = 'none';
+    root.dataset.dialogLock = '';
 
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener('keydown', onKey);
-      root.style.overflow = prev.rootOverflow;
-      document.body.style.overflow = prev.overflow;
-      document.body.style.overscrollBehavior = prev.overscrollBehavior;
+      delete root.dataset.dialogLock;
       window.scrollTo(0, scrollY);
     };
-  }, [onBack]);
+  }, [requestClose]);
 
   // Heels wird ohne Rollentrennung getanzt: dort gibt es kein Leader/Follower und kein Paar.
   const isOpen = course.styleKey === 'heels';
@@ -1277,21 +1315,55 @@ function BookingForm({
         notes: notes.trim() || undefined,
         language: lang,
       });
+      if (r.ok && r.status !== 'waitlisted') {
+        const when = course.nextDates?.[0]
+          ? `${formatDateI18n(course.nextDates[0], lang)} · ${course.startTime}-${course.endTime}`
+          : `${dayLabel} · ${course.startTime}-${course.endTime}`;
+        storeReservation({
+          kurs: courseLabel,
+          wann: when,
+          wo: course.locationName,
+          zahlung: bt.successPayShort,
+        });
+        // Der Knopf bleibt waehrend der Weiterleitung gesperrt: ein zweiter Klick
+        // wuerde denselben Platz ein zweites Mal buchen. Kommt die Navigation nicht
+        // zustande, gibt der Wecker das Formular mit sichtbarem Weg-Hinweis frei.
+        redirecting.current = true;
+        redirectAfterSubmit('/vorbereiten', () => {
+          redirecting.current = false;
+          setSubmitting(false);
+          setRedirectStalled(true);
+        });
+        return;
+      }
+      if (!r.ok) {
+        setSubmitError(bt.errorGeneric);
+        return;
+      }
       setResult(r);
       onDone?.();
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : bt.errorGeneric);
     } finally {
-      setSubmitting(false);
+      if (!redirecting.current) setSubmitting(false);
     }
   }
 
-  return (
+  /* Kein `typeof document`-Test vor dem Portal: BookingForm rendert ausschliesslich unter
+     `course && reserveOpen` (oben), und beide Zustaende starten leer (`null` / `false`) und
+     kippen erst durch einen Klick. renderToString sieht diese Komponente also nie — der
+     Test haette nichts geprueft, was hier noch offen waere (oxlint no-runtime-typeof). */
+  return createPortal(
     <div
-      className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto overscroll-contain bg-black/50 p-3 backdrop-blur-[2px] sm:p-5 motion-safe:animate-[booking-backdrop-in_180ms_ease-out]"
+      className={`fixed inset-0 z-[70] flex items-start justify-center overflow-hidden overscroll-none bg-black/50 p-3 backdrop-blur-[2px] sm:p-5 ${
+        closing
+          ? 'motion-safe:animate-[booking-backdrop-out_240ms_var(--motion-out)_forwards]'
+          : 'motion-safe:animate-[booking-backdrop-in_180ms_ease-out]'
+      }`}
       data-testid="booking-backdrop"
+      data-lenis-prevent
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onBack();
+        if (e.target === e.currentTarget) requestClose();
       }}
     >
       <div
@@ -1318,7 +1390,12 @@ function BookingForm({
            JETZT traegt der Rahmen oben --color-ink (dieselbe Tinte wie die Kopfzeile),
            die drei anderen Kanten bleiben hell auf dem Papierkoerper. Der Kopf ist
            damit oben sauber abgeschlossen. */
-        className="my-auto flex max-h-[min(92vh,900px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] border-t-[3px] border-t-[var(--color-ink)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-panel-in_180ms_ease-out]"
+        className={`my-auto flex max-h-[min(92vh,900px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] border-t-[3px] border-t-[var(--color-ink)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] ${
+          closing
+            ? 'motion-safe:animate-[booking-dialog-out_240ms_var(--motion-out)_forwards]'
+            : 'motion-safe:animate-[booking-dialog-in_280ms_var(--motion-out)]'
+        }`}
+        inert={closing}
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* R134/1: Der 4px-Salsa-Strich ueber der schwarzen Kopfzeile ist WEG (Raphael:
@@ -1383,7 +1460,7 @@ function BookingForm({
             <button
               ref={closeRef}
               type="button"
-              onClick={onBack}
+              onClick={requestClose}
               data-testid="booking-close"
               aria-label={bt.backToCourses}
               className="t-hover inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
@@ -1414,7 +1491,7 @@ function BookingForm({
               </button>
             </div>
           ) : !avail.bookable ? (
-            <div className="py-6 text-center text-sm text-[var(--color-ink-muted)]">
+            <div data-testid="avail-not-bookable" className="py-6 text-center text-sm text-[var(--color-ink-muted)]">
               <p>{bt.notBookable}</p>
               <a href="/kontakt#kontaktformular" className="mt-3 inline-flex font-semibold text-[var(--color-salsa)] underline underline-offset-4">
                 {lang === 'de' ? 'Anderen Einstieg finden' : 'Find another way to start'}
@@ -1422,8 +1499,7 @@ function BookingForm({
             </div>
           ) : result ? (
             <SuccessPanel
-              result={result}
-              onBack={onBack}
+              onBack={requestClose}
               courseLabel={courseLabel}
               dayLabel={dayLabel}
               startTime={course.startTime}
@@ -1639,7 +1715,7 @@ function BookingForm({
               <div className="flex items-center justify-between gap-2">
                 <button
                   type="button"
-                  onClick={onBack}
+                  onClick={requestClose}
                   className="t-hover hidden rounded-full px-5 py-2.5 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)] sm:inline-flex"
                 >
                   {bt.back}
@@ -1662,6 +1738,18 @@ function BookingForm({
                     className="mb-2 text-sm font-medium text-[var(--color-salsa)]"
                   >
                     {submitError}
+                  </p>
+                )}
+                {redirectStalled && (
+                  <p
+                    role="alert"
+                    data-testid="booking-redirect-stalled"
+                    className="mb-2 text-sm font-medium text-[var(--color-salsa)]"
+                  >
+                    {bt.redirectStalled}{' '}
+                    <a href="/vorbereiten" className="underline underline-offset-2">
+                      {bt.redirectStalledLink}
+                    </a>
                   </p>
                 )}
                 {/* Kein mb hier: Satz und Link darunter gehoeren zusammen und stehen
@@ -1717,7 +1805,7 @@ function BookingForm({
                       // Dialog wie bisher, sonst geht er einen Schritt zurueck.
                       onClick={
                         isOpen
-                          ? onBack
+                          ? requestClose
                           : () => {
                               stepChanged.current = true;
                               setStep(1);
@@ -1744,27 +1832,25 @@ function BookingForm({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
-/* Schritt 3: Bestaetigung (frei) oder Warteliste (voll).
+/* Schritt 3: Warteliste (Kurs voll).
+ *
+ * Eine erfolgreiche Reservierung bleibt nicht im Dialog: sie leitet auf /vorbereiten
+ * weiter und traegt Kurs, Termin, Studio und Zahlung dorthin mit. Hier landet nur noch
+ * der Warteliste-Fall.
  *
  * Der Bildschirm beantwortet zuerst die Frage, die der Besucher gerade hat: WAS habe ich
  * gebucht? Darum steht der Kursname gross oben, darunter drei Fakten-Zeilen (Wann, Wo,
- * Bezahlen). Erst danach kommt der Text. Vorher stand hier eine Ueberschrift, ein
- * Fliesstext-Block und eine nummerierte Liste — keine einzige Zeile nannte den Kurs.
+ * Bezahlen). Erst danach kommt der Text.
  *
- * Ehrlichkeit: es geht KEINE automatische Bestaetigungs-Mail raus. Die Reservierung
- * landet als Mail beim Studio, ein Mensch bestaetigt (Absprache 13.08.2026). Der Text
- * sagt genau das und verspricht keinen Automatismus.
- *
- * Warteliste: kein bg-amber-100 mehr (Fremdfarbe ausserhalb der Token-Liste, DESIGN.md
- * "keine neue Farbe in der Komponente"). Neutrale bg-soft-Flaeche, Salsa-Rot als Akzent,
- * gleiche Klarheit wie der Erfolgs-Fall.
+ * Kein bg-amber-100 (Fremdfarbe ausserhalb der Token-Liste, DESIGN.md "keine neue Farbe
+ * in der Komponente"). Neutrale bg-soft-Flaeche, Salsa-Rot als Akzent.
  */
 function SuccessPanel({
-  result,
   onBack,
   courseLabel,
   dayLabel,
@@ -1772,7 +1858,6 @@ function SuccessPanel({
   endTime,
   locationName,
 }: {
-  result: CreateBookingResult;
   onBack: () => void;
   courseLabel: string;
   dayLabel: string;
@@ -1782,11 +1867,10 @@ function SuccessPanel({
 }) {
   const { lang } = useLang();
   const bt = BOOKING_UI[lang];
-  const waitlisted = result.status === 'waitlisted';
   const reduced = useReducedMotion();
   const hydrated = useHydrated();
 
-  // EIN authored Moment: die Karte steigt mit Feder-Kurve ein, der Haken zeichnet sich
+  // EIN authored Moment: die Karte steigt mit Feder-Kurve ein, die Uhr zeichnet sich
   // in derselben Bewegung. 380ms, danach ist Ruhe. Kein Bounce, kein zweiter Effekt.
   // Vor der Hydration und bei prefers-reduced-motion ist der Endzustand der Startzustand:
   // kein opacity:0 im ausgelieferten HTML, kein Versatz fuer Leute, die keine Bewegung wollen.
@@ -1797,35 +1881,23 @@ function SuccessPanel({
     <motion.div
       className="overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] bg-white shadow-sm"
       data-testid="booking-success"
-      data-status={waitlisted ? 'waitlisted' : 'confirmed'}
+      data-status="waitlisted"
       role="status"
       aria-live="polite"
       initial={cardInitial}
       animate={{ opacity: 1, transform: 'translateY(0px)' }}
       transition={still ? { duration: 0 } : { type: 'spring', duration: 0.42, bounce: 0.12 }}
     >
-      {/* Kopf: Haken + Kursname + Fakten. Der Erfolgs-Fall traegt Salsa-Rot als Flaeche,
-          die Warteliste dieselbe Struktur auf neutraler bg-soft-Flaeche mit rotem Akzent. */}
-      <div
-        className={cn(
-          'px-5 py-6 text-center sm:px-6 sm:py-7',
-          waitlisted
-            ? 'border-b border-[var(--color-line)] bg-[var(--color-bg-soft)]'
-            : 'bg-[var(--color-salsa)] text-white',
-        )}
-      >
+      {/* Kopf: Uhr-Symbol + Kursname + Fakten auf neutraler bg-soft-Flaeche mit rotem Akzent. */}
+      <div className="border-b border-[var(--color-line)] bg-[var(--color-bg-soft)] px-5 py-6 text-center sm:px-6 sm:py-7">
         <div
-          className={cn(
-            'mx-auto flex h-14 w-14 items-center justify-center rounded-full',
-            waitlisted ? 'bg-white text-[var(--color-salsa)] ring-1 ring-[var(--color-line)]' : 'bg-white/15 text-white',
-          )}
+          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white text-[var(--color-salsa)] ring-1 ring-[var(--color-line)]"
           aria-hidden
         >
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            {/* Der Haken (bzw. die Uhr) zeichnet sich einmal. pathLength normiert die Laenge
-                auf 1, damit dieselbe Dauer fuer beide Formen gilt. */}
+            {/* Die Uhr zeichnet sich einmal. pathLength normiert die Laenge auf 1. */}
             <motion.path
-              d={waitlisted ? 'M12 7v5l3 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z' : 'M20 6 9 17l-5-5'}
+              d="M12 7v5l3 2M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z"
               pathLength={1}
               initial={still ? { strokeDasharray: 1, strokeDashoffset: 0 } : { strokeDasharray: 1, strokeDashoffset: 1 }}
               animate={{ strokeDashoffset: 0 }}
@@ -1834,47 +1906,40 @@ function SuccessPanel({
           </svg>
         </div>
 
-        <p className={cn('mt-4 text-xs font-bold uppercase tracking-[0.16em]', waitlisted ? 'text-[var(--color-salsa)]' : 'text-white/70')}>
-          {waitlisted ? bt.successWaitlistFor : bt.successConfirmedTitle}
+        <p className="mt-4 text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-salsa)]">
+          {bt.successWaitlistFor}
         </p>
-        <h3 className={cn('type-h2 mt-1 text-balance', waitlisted ? 'text-[var(--color-ink)]' : 'text-white')} data-testid="booking-success-course">
+        <h3 className="type-h2 mt-1 text-balance text-[var(--color-ink)]" data-testid="booking-success-course">
           {courseLabel}
         </h3>
 
         {/* Drei Fakten, die vorher nirgends standen. Kein Fliesstext. */}
-        <dl className={cn('mx-auto mt-5 grid max-w-md gap-3 text-left sm:grid-cols-3', waitlisted ? 'text-[var(--color-ink)]' : 'text-white')}>
-          <Fact label={bt.successFactWhen} tone={waitlisted ? 'light' : 'dark'}>
+        <dl className="mx-auto mt-5 grid max-w-md gap-3 text-left text-[var(--color-ink)] sm:grid-cols-3">
+          <Fact label={bt.successFactWhen} tone="light">
             {dayLabel} {startTime}-{endTime}
           </Fact>
-          <Fact label={bt.successFactWhere} tone={waitlisted ? 'light' : 'dark'}>
+          <Fact label={bt.successFactWhere} tone="light">
             {locationName}
           </Fact>
-          <Fact label={bt.successFactPay} tone={waitlisted ? 'light' : 'dark'}>
+          <Fact label={bt.successFactPay} tone="light">
             {bt.successPayShort}
           </Fact>
         </dl>
       </div>
 
       <div className="px-5 py-5 sm:px-6 sm:py-6">
-        {waitlisted && (
-          <h4 className="type-h3 text-[var(--color-ink)]">{bt.successWaitlistTitle}</h4>
-        )}
-        <p className={cn('max-w-prose text-sm leading-relaxed text-[var(--color-ink-muted)]', waitlisted && 'mt-2')}>
-          {waitlisted ? waitlistBody(lang) : bt.successConfirmedBody}
+        <h4 className="type-h3 text-[var(--color-ink)]">{bt.successWaitlistTitle}</h4>
+        <p className="mt-2 max-w-prose text-sm leading-relaxed text-[var(--color-ink-muted)]">
+          {waitlistBody(lang)}
         </p>
 
         {/* Naechste Schritte: konkret, kein Marketing. Ohne die Mail-Zeile — sie stand
             wortgleich schon im Text darueber. */}
         <ul className="mt-4 space-y-2.5">
-          {(waitlisted
-            ? [bt.waitlistBodyExtra]
-            : [bt.successNextLocation, bt.successNextBring]
-          ).map((text) => (
-            <li key={text} className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--color-ink)]">
-              <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-salsa)]" />
-              <span className="text-pretty">{text}</span>
-            </li>
-          ))}
+          <li className="flex items-start gap-2.5 text-sm leading-relaxed text-[var(--color-ink)]">
+            <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-salsa)]" />
+            <span className="text-pretty">{bt.waitlistBodyExtra}</span>
+          </li>
         </ul>
 
         {/* EINE starke Aktion: WhatsApp. Kursplan bleibt Text-Link, damit kein Button-Zoo

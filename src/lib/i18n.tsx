@@ -166,8 +166,8 @@ export type BookingDict = {
   fieldRequired: string;
   emailInvalid: string;
   errorGeneric: string;
-  successConfirmedTitle: string;
-  successConfirmedBody: string;
+  redirectStalled: string;
+  redirectStalledLink: string;
   successWaitlistTitle: string;
   loading: string;
   redirecting: string;
@@ -184,10 +184,6 @@ export type BookingDict = {
   message: string;
   messageOptional: string;
   messagePlaceholder: string;
-  successNextTitle: string;
-  successNextMail: string;
-  successNextLocation: string;
-  successNextBring: string;
   waitlistBodyExtra: string;
   /* Erfolgs-Ansicht (S5): Fakten-Zeilen + eine starke Aktion. */
   successFactWhen: string;
@@ -235,10 +231,8 @@ export const BOOKING_UI = {
     fieldRequired: 'Dieses Feld ist Pflicht.',
     emailInvalid: 'Diese E-Mail-Adresse stimmt nicht.',
     errorGeneric: 'Buchung fehlgeschlagen. Bitte versuche es erneut.',
-    successConfirmedTitle: 'Dein Platz ist reserviert',
-    // Ehrlich: es geht KEINE automatische Bestaetigungs-Mail raus. Die Reservierung
-    // landet als Mail beim Studio, und dort schaut ein Mensch drauf (Absprache).
-    successConfirmedBody: 'Wir haben deine Anmeldung. Das Studio schaut sie an und bestätigt dir den Platz, meist am selben Tag.',
+    redirectStalled: 'Dein Platz ist reserviert, die Weiterleitung hat aber nicht geklappt.',
+    redirectStalledLink: 'Weiter zur Vorbereitung',
     successWaitlistTitle: 'Du stehst auf der Warteliste',
     loading: 'Verfügbarkeit wird geprüft...',
     redirecting: 'Weiter zur sicheren Bezahlung...',
@@ -258,10 +252,6 @@ export const BOOKING_UI = {
     message: 'Nachricht',
     messageOptional: 'optional',
     messagePlaceholder: 'Zum Beispiel: Ich habe vor zwei Jahren mal Salsa getanzt …',
-    successNextTitle: 'So geht es weiter',
-    successNextMail: 'Wir melden uns bei dir und bestätigen deinen Platz, meist am selben Tag.',
-    successNextLocation: 'Studio Elisabethenanlage 7, 4051 Basel. 5 Minuten vom Bahnhof SBB.',
-    successNextBring: 'Bring bequeme Kleidung und saubere Schuhe mit flacher Sohle mit.',
     waitlistBodyExtra: 'Sobald ein Platz frei wird, schreiben wir dir sofort.',
     successFactWhen: 'Wann',
     successFactWhere: 'Wo',
@@ -306,8 +296,8 @@ export const BOOKING_UI = {
     fieldRequired: 'This field is required.',
     emailInvalid: 'This email address is not valid.',
     errorGeneric: 'Booking failed. Please try again.',
-    successConfirmedTitle: 'Your spot is reserved',
-    successConfirmedBody: 'We have your sign-up. The studio looks at it and confirms your spot, usually the same day.',
+    redirectStalled: 'Your spot is reserved, but the redirect did not go through.',
+    redirectStalledLink: 'Continue to your preparation',
     successWaitlistTitle: 'You are on the waiting list',
     loading: 'Checking availability...',
     redirecting: 'Continuing to secure payment...',
@@ -324,10 +314,6 @@ export const BOOKING_UI = {
     message: 'Message',
     messageOptional: 'optional',
     messagePlaceholder: 'For example: I danced salsa two years ago …',
-    successNextTitle: 'What happens next',
-    successNextMail: 'We get back to you and confirm your spot, usually the same day.',
-    successNextLocation: 'Studio Elisabethenanlage 7, 4051 Basel. 5 minutes from Basel SBB.',
-    successNextBring: 'Bring comfortable clothes and clean flat-soled shoes.',
     waitlistBodyExtra: 'As soon as a spot opens up, we write to you right away.',
     successFactWhen: 'When',
     successFactWhere: 'Where',

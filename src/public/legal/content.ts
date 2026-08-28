@@ -182,6 +182,7 @@ export const DATENSCHUTZ = {
         body: [
           'Für den Ticketverkauf zu Events verlinken wir auf Eventfrog. Ausserdem verlinken wir auf Instagram, WhatsApp und Google. Wenn du diese Links öffnest, gelten die Datenschutzbestimmungen des jeweiligen Anbieters.',
           'Das Hero-Video wird direkt von unserer Website ausgeliefert und baut keine Verbindung zu Instagram oder Meta auf. Eingebettete Instagram-Videos laden erst, wenn du das jeweilige Video aktiv anklickst. Dann können technische Daten wie deine IP-Adresse übertragen und Cookies oder ähnliche Technologien eingesetzt werden.',
+          'Auf Seiten mit unserer Karte (Startseite und Standort) laden wir eine Google-Maps-Karte automatisch, also ohne dass du sie anklicken musst. Dabei baut dein Browser beim Seitenaufruf eine Verbindung zu Google auf: technische Daten wie deine IP-Adresse werden an Google übertragen, und Google kann Cookies oder ähnliche Technologien einsetzen. Es gelten die Datenschutzbestimmungen von Google.',
         ],
       },
       {
@@ -264,6 +265,7 @@ export const DATENSCHUTZ = {
         body: [
           'For event ticket sales we link to Eventfrog. We also link to Instagram, WhatsApp and Google. When you open these links, the privacy terms of the respective provider apply.',
           'The hero video is delivered directly by our website and does not connect to Instagram or Meta. Embedded Instagram videos load only after you actively click them. Technical data such as your IP address may then be transferred, and cookies or similar technologies may be used.',
+          'On pages that show our map (home page and location page) a Google Maps map loads automatically, without you having to click it. Your browser therefore connects to Google as soon as the page loads: technical data such as your IP address is transferred to Google, and Google may use cookies or similar technologies. Google\'s privacy terms apply.',
         ],
       },
       {

@@ -14,13 +14,30 @@ function read(file) {
   return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
 }
 
-// Die Sollzahl stand hier fest auf 27, waehrend `routes.tsx` seit mehreren Commits
-// 26 Routen mit `prerender: true` fuehrt. Der Pruefer meldete darum FAIL, obwohl
-// keine Seite fehlte. Eine feste Zahl bricht bei jeder Routenaenderung erneut.
-// Jetzt zaehlt die Quelle selbst: `prerender: true` in `src/routes.tsx`.
-const routesQuelle = read(path.resolve('src/routes.tsx'));
-const soll = (routesQuelle.match(/prerender: true/g) ?? []).length;
-check(soll > 0, 'Keine Route mit `prerender: true` in src/routes.tsx gefunden.');
+// Die Sollzahl stand hier einmal fest im Skript und brach bei jeder Routenaenderung.
+// Die Routen-Wahrheit kommt aus demselben Manifest, aus dem scripts/prerender.mjs
+// Sitemap und noindex-Flag erzeugt (`entry.getPrerenderManifest()`, dort als
+// .build/prerender-manifest.json abgelegt). Frueher stand hier eine Regex ueber
+// src/routes.tsx und src/lib/seo-config.ts: die haette bei mehrzeiliger Formatierung
+// oder einem berechneten `indexable` stillschweigend andere Zahlen geliefert, ohne dass
+// sich die Bedeutung aendert.
+const manifestPfad = path.resolve('.build/prerender-manifest.json');
+check(
+  fs.existsSync(manifestPfad),
+  `Prerender-Manifest fehlt: ${manifestPfad} — zuerst \`npm run build\` laufen lassen.`,
+);
+const artefakt = fs.existsSync(manifestPfad) ? JSON.parse(read(manifestPfad)) : { routes: [], noindexShells: [] };
+const manifest = artefakt.routes ?? [];
+const noindexShells = artefakt.noindexShells ?? [];
+check(manifest.length > 0, 'Prerender-Manifest ist leer.');
+check(noindexShells.length > 0, 'Prerender-Manifest nennt keine noindex-Huellen.');
+const soll = manifest.filter((route) => route.indexable !== false).length;
+check(soll > 0, 'Keine indexierbare Route im Prerender-Manifest.');
+
+// Vorgerendert, aber bewusst nicht indexierbar: die Datei existiert, steht in keiner
+// Sitemap und muss noindex tragen. Ohne diesen Check deckt sich die Regel selbst zu,
+// weil Sitemap-Laenge und Soll aus derselben Quelle stammen.
+const noindexPfade = manifest.filter((route) => route.indexable === false).map((route) => route.path);
 
 const sitemap = read(path.join(dist, 'sitemap.xml'));
 const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
@@ -44,9 +61,23 @@ for (const rawUrl of urls) {
   check(/<meta name="twitter:title" content="[^"]+"/i.test(html), `Twitter-Titel fehlt: ${route}`);
 }
 
-for (const file of ['admin.html', 'buchung.html', '404.html']) {
+for (const file of noindexShells) {
   const html = read(path.join(dist, file));
   check(/<meta name="robots" content="noindex, nofollow"/i.test(html), `${file} ist nicht noindex.`);
+}
+
+for (const route of noindexPfade) {
+  const file = path.join(dist, `${route.slice(1)}.html`);
+  const html = read(file);
+  check(
+    /<meta name="robots" content="noindex, nofollow"/i.test(html),
+    `${route} ist vorgerendert, aber nicht noindex.`,
+  );
+  check(!/<link rel="canonical"/i.test(html), `${route} ist noindex, traegt aber ein Canonical.`);
+  check(
+    !urls.some((rawUrl) => new URL(rawUrl).pathname === route),
+    `${route} ist noindex, steht aber in der Sitemap.`,
+  );
 }
 
 if (failures.length) {

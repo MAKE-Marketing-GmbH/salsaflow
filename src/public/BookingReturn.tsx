@@ -37,7 +37,7 @@ export function BookingReturn() {
   return (
     <>
       <Seo page="bookingStatus" noindex />
-      <SiteHeader solidBackdrop />
+      <SiteHeader />
       <main
         id="main"
         tabIndex={-1}

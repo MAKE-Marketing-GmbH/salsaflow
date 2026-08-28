@@ -16,14 +16,15 @@
 // ---------------------------------------------------------------------------------------------
 // Hero-Umbau 2026-08-14 (Welle "geil"), zwei belegte Maengel:
 //
-// MANGEL 1 — DIE NAHT. Die Seite reichte `solidBackdrop` an SiteHeader durch. Damit bekam die
-//   fixe Kopfleiste eine EIGENE Flaeche (paper-warm #FBFAF8), waehrend die Hero-Sektion
-//   darunter auf bg-soft (#F6F6F5) sass. Auf 1440x900 lief dadurch bei y=76 eine sichtbare
-//   waagerechte Kante quer durch den Bildschirm — zwei Grautoene, die sich beruehren
-//   (Beleg /tmp/s2/base-desktop-fold.png). `solidBackdrop` ist raus: die Nav-Pille schwebt
-//   wie auf JEDER anderen Unterseite mit ihrer eigenen Rundung auf der Hero-Flaeche, und
-//   dieselbe Flaeche laeuft ununterbrochen von y=0 bis unter die Pille hindurch. Der Hero
-//   traegt dafuer den `--nav-h`-Headroom selbst (Regel 062, wie HeroFrame in subpage/kit.tsx).
+// MANGEL 1 — DIE NAHT. Die Seite reichte einst eine `solidBackdrop`-Prop an SiteHeader durch.
+//   Damit bekam die fixe Kopfleiste eine EIGENE Flaeche (paper-warm #FBFAF8), waehrend die
+//   Hero-Sektion darunter auf bg-soft (#F6F6F5) sass. Auf 1440x900 lief dadurch bei y=76 eine
+//   sichtbare waagerechte Kante quer durch den Bildschirm — zwei Grautoene, die sich beruehren
+//   (Beleg /tmp/s2/base-desktop-fold.png). Die Prop gibt es nicht mehr: seit der Conversion-
+//   Runde traegt der Header sitewide denselben opaken paper-warm-Balken, damit beim Scrollen
+//   nichts durchschimmert. Die Naht bleibt weg, weil der Hero dieser Seite auf derselben
+//   Flaeche sitzt. Der Hero traegt den `--nav-h`-Headroom selbst (Regel 062, wie HeroFrame
+//   in subpage/kit.tsx).
 //
 // MANGEL 2 — DER HERO WAR EINE ZEILE. Er war 2026-08-07 bewusst auf Zeilenhoehe gedrueckt,
 //   damit der Kalender ueber dem Fold beginnt. Das hat den Fold gerettet und den Einstieg
@@ -70,8 +71,6 @@ export function SchedulePage() {
   return (
     <>
       <Seo page="schedule" />
-      {/* Kein solidBackdrop: die Pille bekaeme sonst ihre eigene Flaeche und erzeugte
-          genau die Kante, die dieser Umbau entfernt (siehe Kopfkommentar, Mangel 1). */}
       <SiteHeader />
       {/* R101: data-kursplan-markiert den Seitenstamm. index.css setzt darauf mobil
           --whatsapp-lift: 5rem — der WhatsApp-Float rechnet die Variable in seinen

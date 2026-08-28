@@ -239,12 +239,13 @@ export function SubHero({
   tightBottom = false,
   airAboveTitle = false,
   airBelowCta = false,
+  children,
 }: {
   seoCrumbs: Crumb[];
   title: string;
   titleAccent?: string;
   lead: string;
-  primary: HeroCta;
+  primary?: HeroCta;
   secondary?: HeroCta;
   microcopy?: string;
   facts?: [string, string][];
@@ -266,6 +267,7 @@ export function SubHero({
       Doku der Wirkung steht an den HeroFrame-Props, nicht doppelt hier. */
   airAboveTitle?: boolean;
   airBelowCta?: boolean;
+  children?: ReactNode;
 }) {
   return (
     <HeroFrame
@@ -283,7 +285,9 @@ export function SubHero({
       secondary={secondary}
       microcopy={microcopy}
       facts={facts}
-    />
+    >
+      {children}
+    </HeroFrame>
   );
 }
 
