@@ -1098,9 +1098,9 @@ function BookingForm({
 
   const requestClose = useCallback(() => {
     if (closeTimer.current !== null) return;
-    const reduced =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /* Kein `typeof window.matchMedia`-Test: dieser Callback haengt an Klick und Escape,
+       laeuft also nur im Browser, und `matchMedia` ist dort ueberall da (vgl. Hero.tsx). */
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
       onBack();
       return;
@@ -1110,6 +1110,10 @@ function BookingForm({
        die naechste Tab-Taste landet im gesperrten Hintergrund. `onBack` gibt den Fokus
        gleich an den Ausloeser zurueck; bis dahin haelt ihn der Body. */
     if (dialogRef.current?.contains(document.activeElement)) {
+      // SAFETY: document.activeElement ist typisiert als Element | null. Der contains-Test
+      // darueber beweist, dass der Fokus in diesem Dialog liegt; dessen fokussierbare
+      // Knoten sind samt und sonders HTMLElement. Die Assertion behaelt | null und der
+      // einzige Zugriff ist der optionale ?.blur() — beide Faelle sind abgesichert.
       (document.activeElement as HTMLElement | null)?.blur();
     }
     closingRef.current = true;
@@ -1347,8 +1351,10 @@ function BookingForm({
     }
   }
 
-  if (typeof document === 'undefined') return null;
-
+  /* Kein `typeof document`-Test vor dem Portal: BookingForm rendert ausschliesslich unter
+     `course && reserveOpen` (oben), und beide Zustaende starten leer (`null` / `false`) und
+     kippen erst durch einen Klick. renderToString sieht diese Komponente also nie — der
+     Test haette nichts geprueft, was hier noch offen waere (oxlint no-runtime-typeof). */
   return createPortal(
     <div
       className={`fixed inset-0 z-[70] flex items-start justify-center overflow-hidden overscroll-none bg-black/50 p-3 backdrop-blur-[2px] sm:p-5 ${

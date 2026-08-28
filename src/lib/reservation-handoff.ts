@@ -7,7 +7,24 @@
  *
  * Einmalig: /vorbereiten loescht den Eintrag beim Lesen. Ein spaeterer Direktaufruf oder
  * ein Reload zeigt die Faktenkarte damit nicht erneut. */
+import { z } from 'zod';
+
 const KEY = 'sf:reservation';
+
+/* Die Faktenfelder kommen als roher JSON-Text aus dem sessionStorage. Zod ist die
+ * Parse-Grenze: getrimmt, nicht leer, sonst kein Treffer. */
+const STRING_FIELD = z.string().trim().min(1);
+
+/* Was aus JSON.parse kommen kann, bevor es geprueft ist: benannter JSON-Wert statt
+ * `unknown`, damit der Parameter von parseHandoff einen Vertrag hat. Rekursiv, weil
+ * JSON verschachtelt sein darf — geprueft wird trotzdem erst in parseHandoff. */
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly JsonValue[]
+  | { readonly [key: string]: JsonValue };
 
 export type ReservationFacts = {
   kurs: string;
@@ -25,30 +42,38 @@ export type ReservationHandoff =
   | ({ kind: 'course' } & ReservationFacts)
   | { kind: 'inquiry' };
 
-const FIELDS = ['kurs', 'wann', 'wo', 'zahlung'] as const;
-
-function isComplete(value: Record<string, unknown>): boolean {
-  return FIELDS.every((k) => typeof value[k] === 'string' && (value[k] as string).trim().length > 0);
+/* Ein einzelnes Faktenfeld aus rohem JSON. Liefert den getrimmten Text, sonst null —
+ * damit bleibt die Pruefung "ist das ein nicht-leerer String" an genau einer Stelle. */
+function readField(source: ReadonlyMap<string, unknown>, key: string): string | null {
+  const text = STRING_FIELD.safeParse(source.get(key));
+  return text.success ? text.data : null;
 }
 
-function parseHandoff(value: unknown): ReservationHandoff | null {
-  if (!value || typeof value !== 'object') return null;
-  const v = value as Record<string, unknown>;
-  if (v.kind === 'inquiry') return { kind: 'inquiry' };
+/* Rohes JSON zu einer Feld-Map. Zod haelt jedes Objekt fest und weist alles andere
+ * (Zahl, Array, null, String) ab, ohne dass hier ein Objekttyp behauptet wird. */
+const ENTRY_MAP = z.record(z.string(), z.unknown());
+
+function parseHandoff(value: JsonValue): ReservationHandoff | null {
+  const parsed = ENTRY_MAP.safeParse(value);
+  if (!parsed.success) return null;
+  const entries = new Map(Object.entries(parsed.data));
+  if (entries.get('kind') === 'inquiry') return { kind: 'inquiry' };
+
   // Eintraege ohne `kind` stammen aus der Fassung vor dem Schnupper-Weg: vollstaendige
   // Fakten bedeuten dort immer eine Kursbuchung.
-  if (!isComplete(v)) return null;
-  return {
-    kind: 'course',
-    kurs: (v.kurs as string).trim(),
-    wann: (v.wann as string).trim(),
-    wo: (v.wo as string).trim(),
-    zahlung: (v.zahlung as string).trim(),
-  };
+  const kurs = readField(entries, 'kurs');
+  const wann = readField(entries, 'wann');
+  const wo = readField(entries, 'wo');
+  const zahlung = readField(entries, 'zahlung');
+  if (!kurs || !wann || !wo || !zahlung) return null;
+
+  return { kind: 'course', kurs, wann, wo, zahlung };
 }
 
+/* Kein `typeof window`-Test: beide Aufrufer schreiben unmittelbar vor einem
+ * window.location.assign, laufen also im Browser. Der Test haette nichts geprueft,
+ * was hier noch offen waere (oxlint no-runtime-typeof). */
 function write(payload: ReservationHandoff): void {
-  if (typeof window === 'undefined') return;
   try {
     window.sessionStorage.setItem(KEY, JSON.stringify(payload));
   } catch {
@@ -67,8 +92,9 @@ export function storeInquiry(): void {
   write({ kind: 'inquiry' });
 }
 
+/* Kein `typeof window`-Test: /vorbereiten wird zwar prerendert, PreparePage ruft diese
+ * Funktion aber ausschliesslich aus `useEffect` — der laeuft serverseitig nie. */
 export function takeReservation(): ReservationHandoff | null {
-  if (typeof window === 'undefined') return null;
   try {
     const raw = window.sessionStorage.getItem(KEY);
     if (!raw) return null;
