@@ -109,10 +109,34 @@ export function takeReservation(): ReservationHandoff | null {
  * Navigation aus — blockierender Extension-Handler, abgebrochener Wechsel, Rueckkehr
  * aus dem Back-Forward-Cache auf dieselbe Seite — waere das Formular ohne diesen
  * Wecker dauerhaft im Sende-Zustand eingefroren, obwohl die Anmeldung laengst steht.
- * Der Timer feuert nur in diesem Fall: bei echter Navigation ist das Dokument fort. */
+ *
+ * `assign()` startet die Navigation nur; bis die Antwort committed ist, lebt dieses
+ * Dokument samt seinen Timern weiter. Ein blosser Timeout wuerde darum bei jeder
+ * langsamen Antwort (Mobilfunk, Cold Start) faelschlich "hat nicht geklappt" melden
+ * UND den Absende-Knopf mitten in der laufenden Navigation wieder freigeben — genau
+ * das Fenster fuer die Doppelbuchung, die der gesperrte Knopf verhindern soll.
+ * `pagehide` markiert den tatsaechlichen Abgang des Dokuments (auch in den
+ * Back-Forward-Cache) und raeumt den Wecker vorher ab. */
 const REDIRECT_FALLBACK_MS = 2500;
 
 export function redirectAfterSubmit(href: string, onStalled: () => void): void {
+  let timer: number | null = null;
+
+  const cancel = () => {
+    if (timer !== null) {
+      window.clearTimeout(timer);
+      timer = null;
+    }
+    window.removeEventListener('pagehide', cancel);
+  };
+
+  window.addEventListener('pagehide', cancel);
+
+  timer = window.setTimeout(() => {
+    timer = null;
+    window.removeEventListener('pagehide', cancel);
+    onStalled();
+  }, REDIRECT_FALLBACK_MS);
+
   window.location.assign(href);
-  window.setTimeout(onStalled, REDIRECT_FALLBACK_MS);
 }
