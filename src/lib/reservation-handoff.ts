@@ -115,28 +115,54 @@ export function takeReservation(): ReservationHandoff | null {
  * langsamen Antwort (Mobilfunk, Cold Start) faelschlich "hat nicht geklappt" melden
  * UND den Absende-Knopf mitten in der laufenden Navigation wieder freigeben — genau
  * das Fenster fuer die Doppelbuchung, die der gesperrte Knopf verhindern soll.
- * `pagehide` markiert den tatsaechlichen Abgang des Dokuments (auch in den
- * Back-Forward-Cache) und raeumt den Wecker vorher ab. */
+ * `pagehide` markiert den Abgang des Dokuments und raeumt den Wecker vorher ab —
+ * aber nur bei `persisted === false`, dem endgueltigen Unload. Mit `persisted === true`
+ * wandert dieses Dokument bloss in den Back-Forward-Cache und kommt per Zurueck-Knopf
+ * mit exakt dem eingefrorenen Sende-Zustand zurueck. Der Wecker ist dort schon
+ * abgelaufen, darum meldet der `pageshow`-Handler die Rueckkehr direkt: die
+ * Reservierung steht zu diesem Zeitpunkt, das Formular gehoert wieder freigegeben. */
 const REDIRECT_FALLBACK_MS = 2500;
 
 export function redirectAfterSubmit(href: string, onStalled: () => void): void {
   let timer: number | null = null;
+  let done = false;
 
-  const cancel = () => {
+  const clearTimer = () => {
     if (timer !== null) {
       window.clearTimeout(timer);
       timer = null;
     }
-    window.removeEventListener('pagehide', cancel);
   };
 
-  window.addEventListener('pagehide', cancel);
+  const detach = () => {
+    window.removeEventListener('pagehide', onPageHide);
+    window.removeEventListener('pageshow', onPageShow);
+  };
 
-  timer = window.setTimeout(() => {
-    timer = null;
-    window.removeEventListener('pagehide', cancel);
+  const stall = () => {
+    if (done) return;
+    done = true;
+    clearTimer();
+    detach();
     onStalled();
-  }, REDIRECT_FALLBACK_MS);
+  };
+
+  function onPageHide(event: PageTransitionEvent) {
+    clearTimer();
+    if (!event.persisted) {
+      done = true;
+      detach();
+    }
+  }
+
+  function onPageShow(event: PageTransitionEvent) {
+    if (event.persisted) stall();
+  }
+
+  window.addEventListener('pagehide', onPageHide);
+  window.addEventListener('pageshow', onPageShow);
+
+  timer = window.setTimeout(stall, REDIRECT_FALLBACK_MS);
 
   window.location.assign(href);
 }
