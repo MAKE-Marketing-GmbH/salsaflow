@@ -33,6 +33,29 @@ async function firstOutcome(page, timeoutMs = 15000) {
   ]);
 }
 
+/* Kurse mit Rollenwahl starten auf Schritt 1 (Rolle, Allein/Paar); nur offene Klassen
+   wie Heels springen direkt auf Schritt 2. `booking-submit` und `mode-couple` liegen in
+   verschiedenen Schritten, ebenso der Marker `lane-full-note`: er steht auf Schritt 1 und
+   auf Schritt 2 nur bei offenen Klassen. Die Auslastung muss deshalb gelesen werden,
+   solange Schritt 1 sichtbar ist — danach ist sie aus dem DOM verschwunden und jede
+   Ableitung faende faelschlich «nicht voll». */
+async function schrittEinsDurchlaufen(page, { rolle, paar = false }) {
+  const weiter = page.locator('[data-testid="booking-next"]');
+  const aufSchrittEins = (await weiter.count()) > 0;
+  if (!aufSchrittEins) {
+    // Offene Klasse: kein Schritt 1, der Marker steht hier im selben Schritt.
+    await page.locator('[data-testid="booking-submit"]').waitFor({ timeout: 10000 });
+    return (await page.locator('[data-testid="lane-full-note"]').count()) ? 'waitlist' : 'prepare';
+  }
+  const rolleTile = page.locator(`[data-testid="${rolle}"]`);
+  if (await rolleTile.count()) await rolleTile.click();
+  if (paar) await page.locator('[data-testid="mode-couple"]').click();
+  const erwartet = (await page.locator('[data-testid="lane-full-note"]').count()) ? 'waitlist' : 'prepare';
+  await weiter.click();
+  await page.locator('[data-testid="booking-submit"]').waitFor({ timeout: 10000 });
+  return erwartet;
+}
+
 async function fillPerson(page, prefix, first) {
   await page.locator(`input[name="${prefix}-firstName"]`).fill(first);
   await page.locator(`input[name="${prefix}-lastName"]`).fill('Smoke');
@@ -63,16 +86,12 @@ async function fillPerson(page, prefix, first) {
     // --- 2) Vorauswahl: Link folgen, Dialog steht auf dem Kurs -------------
     await page.goto(`${ORIGIN}${href}`, { waitUntil: 'networkidle' });
     await page.locator('[data-testid="booking-dialog"]').waitFor({ timeout: 10000 });
-    await page.locator('[data-testid="booking-submit"]').waitFor({ timeout: 10000 });
     ok('Dialog oeffnet vorausgewaehlt', true);
 
     // --- 3) Solo-Reservierung bis zum Erfolg -------------------------------
-    // Offene Kurse (Heels etc.) haben keine Rollenwahl — nur klicken, wenn es sie gibt.
-    const role = page.locator('[data-testid="role-follower"]');
-    if (await role.count()) await role.click();
-    await fillPerson(page, 'bk', 'Solo');
     const soloKurs = (await page.locator('[data-testid="booking-dialog"] h2').first().innerText()).trim();
-    const soloErwartet = (await page.locator('[data-testid="lane-full-note"]').count()) ? 'waitlist' : 'prepare';
+    const soloErwartet = await schrittEinsDurchlaufen(page, { rolle: 'role-follower' });
+    await fillPerson(page, 'bk', 'Solo');
     await page.locator('[data-testid="booking-submit"]').click();
     const soloOutcome = await firstOutcome(page);
     ok(
@@ -96,13 +115,11 @@ async function fillPerson(page, prefix, first) {
     await page.goto(`${ORIGIN}/buchung`, { waitUntil: 'networkidle' });
     await page.locator('[data-testid="course-list"] button').first().waitFor({ timeout: 10000 });
     await page.locator('[data-testid="course-list"] button').first().click();
-    await page.locator('[data-testid="booking-submit"]').waitFor({ timeout: 10000 });
-    const role2 = page.locator('[data-testid="role-leader"]');
-    if (await role2.count()) await role2.click();
-    await page.locator('[data-testid="mode-couple"]').click();
+    await page.locator('[data-testid="reserve-spot"]').click();
+    await page.locator('[data-testid="booking-dialog"]').waitFor({ timeout: 10000 });
+    const coupleErwartet = await schrittEinsDurchlaufen(page, { rolle: 'role-leader', paar: true });
     await fillPerson(page, 'bk', 'PaarA');
-    await fillPerson(page, 'bk-p', 'PaarB');
-    const coupleErwartet = (await page.locator('[data-testid="lane-full-note"]').count()) ? 'waitlist' : 'prepare';
+    if (await page.locator('input[name="bk-p-firstName"]').count()) await fillPerson(page, 'bk-p', 'PaarB');
     await page.locator('[data-testid="booking-submit"]').click();
     const coupleOutcome = await firstOutcome(page);
     ok(
