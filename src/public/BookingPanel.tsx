@@ -1074,6 +1074,7 @@ function BookingForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<CreateBookingResult | null>(null);
   const [showErrors, setShowErrors] = useState(false);
+  const [closing, setClosing] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -1091,6 +1092,30 @@ function BookingForm({
   // Erst ab dem ersten Wechsel fokussieren: beim Oeffnen gehoert der Fokus dem
   // Schliessen-Knopf (Dialog-Konvention), nicht der Ueberschrift.
   const stepChanged = useRef(false);
+  const closeTimer = useRef<number | null>(null);
+
+  const requestClose = useCallback(() => {
+    if (closeTimer.current !== null) return;
+    const reduced =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      onBack();
+      return;
+    }
+    setClosing(true);
+    closeTimer.current = window.setTimeout(() => {
+      closeTimer.current = null;
+      onBack();
+    }, 240);
+  }, [onBack]);
+
+  useEffect(
+    () => () => {
+      if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
+    },
+    [],
+  );
 
   const loadAvail = () => {
     setLoading(true);
@@ -1116,7 +1141,7 @@ function BookingForm({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        onBack();
+        requestClose();
         return;
       }
       if (e.key !== 'Tab') return;
@@ -1161,7 +1186,7 @@ function BookingForm({
       delete root.dataset.dialogLock;
       window.scrollTo(0, scrollY);
     };
-  }, [onBack]);
+  }, [requestClose]);
 
   // Heels wird ohne Rollentrennung getanzt: dort gibt es kein Leader/Follower und kein Paar.
   const isOpen = course.styleKey === 'heels';
@@ -1281,7 +1306,7 @@ function BookingForm({
         notes: notes.trim() || undefined,
         language: lang,
       });
-      if (r.status !== 'waitlisted') {
+      if (r.ok && r.status !== 'waitlisted') {
         const when = course.nextDates?.[0]
           ? `${formatDateI18n(course.nextDates[0], lang)} · ${course.startTime}-${course.endTime}`
           : `${dayLabel} · ${course.startTime}-${course.endTime}`;
@@ -1292,6 +1317,10 @@ function BookingForm({
           zahlung: bt.successPayShort,
         });
         window.location.assign('/vorbereiten');
+        return;
+      }
+      if (!r.ok) {
+        setSubmitError(bt.errorGeneric);
         return;
       }
       setResult(r);
@@ -1307,11 +1336,16 @@ function BookingForm({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[70] flex items-start justify-center overflow-hidden overscroll-none bg-black/50 p-3 backdrop-blur-[2px] sm:p-5 motion-safe:animate-[booking-backdrop-in_180ms_ease-out]"
+      className={`fixed inset-0 z-[70] flex items-start justify-center overflow-hidden overscroll-none bg-black/50 p-3 backdrop-blur-[2px] sm:p-5 ${
+        closing
+          ? 'motion-safe:animate-[booking-backdrop-out_240ms_var(--motion-out)_forwards]'
+          : 'motion-safe:animate-[booking-backdrop-in_180ms_ease-out]'
+      }`}
       data-testid="booking-backdrop"
+      data-closing={closing ? '' : undefined}
       data-lenis-prevent
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onBack();
+        if (e.target === e.currentTarget) requestClose();
       }}
     >
       <div
@@ -1338,7 +1372,11 @@ function BookingForm({
            JETZT traegt der Rahmen oben --color-ink (dieselbe Tinte wie die Kopfzeile),
            die drei anderen Kanten bleiben hell auf dem Papierkoerper. Der Kopf ist
            damit oben sauber abgeschlossen. */
-        className="my-auto flex max-h-[min(92vh,900px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] border-t-[3px] border-t-[var(--color-ink)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] motion-safe:animate-[booking-dialog-in_280ms_var(--motion-out)]"
+        className={`my-auto flex max-h-[min(92vh,900px)] w-full max-w-[560px] flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--color-line)] border-t-[3px] border-t-[var(--color-ink)] bg-[var(--color-paper-warm)] shadow-[0_24px_64px_rgba(17,17,17,0.28)] ${
+          closing
+            ? 'motion-safe:animate-[booking-dialog-out_240ms_var(--motion-out)_forwards]'
+            : 'motion-safe:animate-[booking-dialog-in_280ms_var(--motion-out)]'
+        }`}
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* R134/1: Der 4px-Salsa-Strich ueber der schwarzen Kopfzeile ist WEG (Raphael:
@@ -1403,7 +1441,7 @@ function BookingForm({
             <button
               ref={closeRef}
               type="button"
-              onClick={onBack}
+              onClick={requestClose}
               data-testid="booking-close"
               aria-label={bt.backToCourses}
               className="t-hover inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/70 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
@@ -1442,7 +1480,7 @@ function BookingForm({
             </div>
           ) : result ? (
             <SuccessPanel
-              onBack={onBack}
+              onBack={requestClose}
               courseLabel={courseLabel}
               dayLabel={dayLabel}
               startTime={course.startTime}
@@ -1658,7 +1696,7 @@ function BookingForm({
               <div className="flex items-center justify-between gap-2">
                 <button
                   type="button"
-                  onClick={onBack}
+                  onClick={requestClose}
                   className="t-hover hidden rounded-full px-5 py-2.5 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-ink)] sm:inline-flex"
                 >
                   {bt.back}
@@ -1736,7 +1774,7 @@ function BookingForm({
                       // Dialog wie bisher, sonst geht er einen Schritt zurueck.
                       onClick={
                         isOpen
-                          ? onBack
+                          ? requestClose
                           : () => {
                               stepChanged.current = true;
                               setStep(1);

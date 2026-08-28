@@ -784,6 +784,26 @@ main img.photo-grade-bachata-why {
   }
 }
 
+@keyframes booking-dialog-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(2.5rem);
+  }
+}
+
+@keyframes booking-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* WhatsApp-Float: EIN Auftritt, danach Ruhe (R134/10).
  * Kein Puls, kein Ping-Ring, kein Wackeln — der Knopf steigt einmal aus der unteren
  * Kante auf und richtet sich dabei auf.
@@ -813,7 +833,6 @@ main img.photo-grade-bachata-why {
    * eine Stufe fuer grosse Flaechen, eine Kurve fuer alles. `both` haelt den Startzustand
    * waehrend der Verzoegerung, sonst blitzt der Knopf vor dem Auftritt kurz auf. */
   .whatsapp-float {
-    font-family: var(--font-sans);
     animation: whatsapp-float-in var(--dur-slow) var(--motion-out) 90ms both;
   }
 }
