@@ -92,9 +92,9 @@ export function PreparePage() {
      ueber das Schnupper-Formular und per Direktaufruf erreichbar. */
   const [booking, setBooking] = useState<ReservationFacts | null>(null);
   useEffect(() => setBooking(takeReservation()), []);
-  /* Der behauptende Lead haengt an `booking`: die Route ist indexierbar und wird
-     vorgerendert, und takeReservation() raeumt den Eintrag beim ersten Lesen. Ohne
-     bekannte Anmeldung — Suchtreffer, Direktaufruf, Reload — steht der neutrale Satz. */
+  /* Der behauptende Lead haengt an `booking`: die Route ist per Direktaufruf und
+     geteiltem Link erreichbar, und takeReservation() raeumt den Eintrag beim ersten
+     Lesen. Ohne bekannte Anmeldung — Direktaufruf, Reload — steht der neutrale Satz. */
   const lead = booking ? c.leadBooked : c.lead;
   return (
     <SubPageShell seo="prepare">

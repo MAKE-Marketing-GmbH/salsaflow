@@ -29,8 +29,26 @@ const prerenderKeys = [...routesQuelle.matchAll(/seoKey:\s*'([^']+)'[^}]*prerend
   (match) => match[1],
 );
 check(prerenderKeys.length > 0, 'Keine Route mit `prerender: true` in src/routes.tsx gefunden.');
-const soll = prerenderKeys.filter((key) => !nichtIndexierbar.has(key)).length;
+const indexierbareKeys = prerenderKeys.filter((key) => !nichtIndexierbar.has(key));
+const soll = indexierbareKeys.length;
 check(soll > 0, 'Keine indexierbare Route mit `prerender: true` gefunden.');
+
+// Vorgerendert, aber bewusst nicht indexierbar: die Datei existiert, steht in keiner
+// Sitemap und muss noindex tragen. Ohne diesen Check deckt sich die Regel selbst zu,
+// weil Sitemap-Laenge und Soll aus derselben Quelle stammen.
+const noindexPfade = [...nichtIndexierbar]
+  .filter((key) => prerenderKeys.includes(key))
+  .map((key) => {
+    const treffer = seoQuelle.match(
+      new RegExp(`${key}:\\s*\\{[^{}]*canonicalPath:\\s*'([^']+)'[^{}]*\\}`),
+    );
+    return treffer ? treffer[1] : null;
+  })
+  .filter(Boolean);
+check(
+  noindexPfade.length === prerenderKeys.filter((key) => nichtIndexierbar.has(key)).length,
+  'Zu einer nicht indexierbaren Prerender-Route fehlt der canonicalPath in seo-config.ts.',
+);
 
 const sitemap = read(path.join(dist, 'sitemap.xml'));
 const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
@@ -57,6 +75,20 @@ for (const rawUrl of urls) {
 for (const file of ['admin.html', 'buchung.html', '404.html']) {
   const html = read(path.join(dist, file));
   check(/<meta name="robots" content="noindex, nofollow"/i.test(html), `${file} ist nicht noindex.`);
+}
+
+for (const route of noindexPfade) {
+  const file = path.join(dist, `${route.slice(1)}.html`);
+  const html = read(file);
+  check(
+    /<meta name="robots" content="noindex, nofollow"/i.test(html),
+    `${route} ist vorgerendert, aber nicht noindex.`,
+  );
+  check(!/<link rel="canonical"/i.test(html), `${route} ist noindex, traegt aber ein Canonical.`);
+  check(
+    !urls.some((rawUrl) => new URL(rawUrl).pathname === route),
+    `${route} ist noindex, steht aber in der Sitemap.`,
+  );
 }
 
 if (failures.length) {

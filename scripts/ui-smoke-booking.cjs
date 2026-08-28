@@ -71,17 +71,26 @@ async function fillPerson(page, prefix, first) {
     const role = page.locator('[data-testid="role-follower"]');
     if (await role.count()) await role.click();
     await fillPerson(page, 'bk', 'Solo');
+    const soloKurs = (await page.locator('[data-testid="booking-dialog"] h2').first().innerText()).trim();
+    const soloErwartet = (await page.locator('[data-testid="lane-full-note"]').count()) ? 'waitlist' : 'prepare';
     await page.locator('[data-testid="booking-submit"]').click();
     const soloOutcome = await firstOutcome(page);
-    ok('Solo-Reservierung erreicht Erfolgspfad', soloOutcome !== null, `ausgang ${soloOutcome}`);
+    ok(
+      `Solo-Reservierung nimmt den erwarteten Ausgang (${soloErwartet})`,
+      soloOutcome === soloErwartet,
+      `erwartet ${soloErwartet}, war ${soloOutcome}`,
+    );
     if (soloOutcome === 'prepare') {
       await page.locator('[data-testid="prepare-booking"]').waitFor({ timeout: 10000 });
-      const kurs = await page.locator('[data-testid="prepare-booking"] h2').innerText();
-      ok('Vorbereiten-Seite nennt den gebuchten Kurs', kurs.trim().length > 0, kurs.trim());
+      const kurs = (await page.locator('[data-testid="prepare-booking"] h2').innerText()).trim();
+      ok('Vorbereiten-Seite nennt den reservierten Kurs', kurs === soloKurs, `${kurs} vs ${soloKurs}`);
+      await page.screenshot({ path: `${SHOTS}/01-solo.png`, fullPage: false });
+    } else {
+      await page.screenshot({ path: `${SHOTS}/01-solo.png`, fullPage: false });
+      await page.locator('[data-testid="booking-close"]').click();
+      await page.locator('[data-testid="booking-dialog"]').waitFor({ state: 'detached', timeout: 5000 });
+      ok('Warteliste: Dialog schliesst nach der Exit-Animation', true);
     }
-    await page.screenshot({ path: `${SHOTS}/01-solo.png`, fullPage: false });
-    await page.locator('[data-testid="booking-close"]').click().catch(() => {});
-    await page.waitForTimeout(300);
 
     // --- 4) Paar-Reservierung ----------------------------------------------
     await page.goto(`${ORIGIN}/buchung`, { waitUntil: 'networkidle' });
@@ -93,9 +102,14 @@ async function fillPerson(page, prefix, first) {
     await page.locator('[data-testid="mode-couple"]').click();
     await fillPerson(page, 'bk', 'PaarA');
     await fillPerson(page, 'bk-p', 'PaarB');
+    const coupleErwartet = (await page.locator('[data-testid="lane-full-note"]').count()) ? 'waitlist' : 'prepare';
     await page.locator('[data-testid="booking-submit"]').click();
     const coupleOutcome = await firstOutcome(page);
-    ok('Paar-Reservierung erreicht Erfolgspfad', coupleOutcome !== null, `ausgang ${coupleOutcome}`);
+    ok(
+      `Paar-Reservierung nimmt den erwarteten Ausgang (${coupleErwartet})`,
+      coupleOutcome === coupleErwartet,
+      `erwartet ${coupleErwartet}, war ${coupleOutcome}`,
+    );
     await page.screenshot({ path: `${SHOTS}/02-couple.png`, fullPage: false });
 
     // --- 5) Mobil: Dialog ohne Ueberlauf, Absenden erreichbar --------------
