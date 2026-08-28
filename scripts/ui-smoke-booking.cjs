@@ -18,6 +18,21 @@ function ok(name, cond, detail = '') {
   console.log(`${cond ? 'PASS' : 'FAIL'}  ${name}${detail ? '  (' + detail + ')' : ''}`);
 }
 
+/* Nach dem Absenden gibt es zwei richtige Ausgaenge: eine freie Reservierung verlaesst
+   den Dialog Richtung /vorbereiten, ein voller Kurs bleibt als Warteliste im Modal.
+   Beide Warteroutinen lehnen nach ihrem Timeout ab — haengte man sie roh in ein
+   Promise.race, gewaenne die erste Ablehnung und meldete einen korrekten Ablauf als
+   Fehlschlag. Jeder Zweig schluckt seine Ablehnung darum in ein nie erfuelltes Promise;
+   nur ein echtes Eintreten gewinnt. Erst der eigene Gesamt-Timeout liefert null. */
+async function firstOutcome(page, timeoutMs = 15000) {
+  const never = () => new Promise(() => {});
+  return Promise.race([
+    page.waitForURL(/\/vorbereiten/, { timeout: timeoutMs }).then(() => 'prepare', never),
+    page.locator('[data-testid="booking-success"]').waitFor({ timeout: timeoutMs }).then(() => 'waitlist', never),
+    new Promise((resolve) => setTimeout(() => resolve(null), timeoutMs + 1000)),
+  ]);
+}
+
 async function fillPerson(page, prefix, first) {
   await page.locator(`input[name="${prefix}-firstName"]`).fill(first);
   await page.locator(`input[name="${prefix}-lastName"]`).fill('Smoke');
@@ -57,12 +72,7 @@ async function fillPerson(page, prefix, first) {
     if (await role.count()) await role.click();
     await fillPerson(page, 'bk', 'Solo');
     await page.locator('[data-testid="booking-submit"]').click();
-    // Eine freie Reservierung verlaesst den Dialog und landet auf /vorbereiten; ein voller
-    // Kurs bleibt als Warteliste im Modal. Beide Ausgaenge sind ein Erfolg.
-    const soloOutcome = await Promise.race([
-      page.waitForURL(/\/vorbereiten/, { timeout: 10000 }).then(() => 'prepare'),
-      page.locator('[data-testid="booking-success"]').waitFor({ timeout: 10000 }).then(() => 'waitlist'),
-    ]).catch(() => null);
+    const soloOutcome = await firstOutcome(page);
     ok('Solo-Reservierung erreicht Erfolgspfad', soloOutcome !== null, `ausgang ${soloOutcome}`);
     if (soloOutcome === 'prepare') {
       await page.locator('[data-testid="prepare-booking"]').waitFor({ timeout: 10000 });
@@ -84,10 +94,7 @@ async function fillPerson(page, prefix, first) {
     await fillPerson(page, 'bk', 'PaarA');
     await fillPerson(page, 'bk-p', 'PaarB');
     await page.locator('[data-testid="booking-submit"]').click();
-    const coupleOutcome = await Promise.race([
-      page.waitForURL(/\/vorbereiten/, { timeout: 10000 }).then(() => 'prepare'),
-      page.locator('[data-testid="booking-success"]').waitFor({ timeout: 10000 }).then(() => 'waitlist'),
-    ]).catch(() => null);
+    const coupleOutcome = await firstOutcome(page);
     ok('Paar-Reservierung erreicht Erfolgspfad', coupleOutcome !== null, `ausgang ${coupleOutcome}`);
     await page.screenshot({ path: `${SHOTS}/02-couple.png`, fullPage: false });
 

@@ -72,11 +72,26 @@ try {
         firstOpacity: animation.effect.getKeyframes()[0]?.opacity ?? null,
       };
     };
+    /* Der Header hat keine eigene Ein-/Ausblend-Animation mehr: Blur und vertikaler
+       Versatz sind raus, damit nichts durchschimmert. Statt einer Animation pruefen
+       wir darum den beobachtbaren Zustand — der Header steht waehrend der Navigation
+       deckend und unverschoben, und keine laufende Animation macht ihn transparent. */
+    const headerSnapshotStaysOpaque = animations
+      .filter((candidate) => String(candidate.effect?.pseudoElement ?? '').includes('sf-site-header'))
+      .every((candidate) => {
+        if (!(candidate.effect instanceof KeyframeEffect)) return true;
+        return candidate.effect
+          .getKeyframes()
+          .every((frame) => frame.opacity === undefined || Number(frame.opacity) === 1);
+      });
+    const header = document.querySelector('[data-page-header]');
+    const headerStyle = header ? getComputedStyle(header) : null;
     return {
       oldRoot: details('::view-transition-old(root)'),
       newRoot: details('::view-transition-new(root)'),
-      oldHeader: details('::view-transition-old(sf-site-header)'),
-      newHeader: details('::view-transition-new(sf-site-header)'),
+      headerSnapshotStaysOpaque,
+      headerOpacity: headerStyle ? Number.parseFloat(headerStyle.opacity) : null,
+      headerNamed: headerStyle ? headerStyle.viewTransitionName : null,
     };
   });
   await page.waitForFunction(
@@ -109,15 +124,16 @@ try {
     sequencing.newRoot !== null &&
     sequencing.newRoot.delay === 0 &&
     Number(sequencing.newRoot.firstOpacity) === 1;
-  const headerUsesOpaqueSlide =
-    sequencing.newHeader !== null &&
-    sequencing.newHeader.delay === 0 &&
-    Number(sequencing.newHeader.firstOpacity) === 1;
+  const headerStaysOpaque =
+    sequencing.headerNamed === 'sf-site-header' &&
+    sequencing.headerOpacity !== null &&
+    sequencing.headerOpacity > 0.99 &&
+    sequencing.headerSnapshotStaysOpaque;
 
   if (
     !menuClosesOpaque ||
     !rootUsesOpaqueSlide ||
-    !headerUsesOpaqueSlide ||
+    !headerStaysOpaque ||
     pageErrors.length > 0 ||
     consoleErrors.length > 0
   ) {
