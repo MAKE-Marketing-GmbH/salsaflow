@@ -129,10 +129,11 @@ async function fillPerson(page, prefix, first) {
     );
     await page.screenshot({ path: `${SHOTS}/02-couple.png`, fullPage: false });
 
-    // --- 5) Mobil: Dialog ohne Ueberlauf, Absenden erreichbar --------------
+    // --- 5) Mobil: Formularschritt ohne Ueberlauf, Absenden erreichbar -----
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${ORIGIN}${href}`, { waitUntil: 'networkidle' });
     await page.locator('[data-testid="booking-dialog"]').waitFor({ timeout: 10000 });
+    await schrittEinsDurchlaufen(page, { rolle: 'role-follower' });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     ok('Mobil: kein horizontaler Ueberlauf', overflow <= 1, `${overflow}px`);
     const submitVisible = await page.locator('[data-testid="booking-submit"]').isVisible();
