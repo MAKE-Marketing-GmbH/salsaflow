@@ -10,7 +10,8 @@ const COPY = {
   de: {
     crumb: 'Vorbereiten',
     title: 'So bereitest du dich vor.',
-    lead: 'Deine Anmeldung ist da. Das Studio bestätigt dir den Platz, meist am selben Tag. Bis dahin: drei Dinge.',
+    lead: 'Drei Dinge, dann tanzt du locker mit.',
+    leadBooked: 'Deine Anmeldung ist da. Das Studio bestätigt dir den Platz, meist am selben Tag. Bis dahin: drei Dinge.',
     bookingTitle: 'Deine Anmeldung',
     bookingNote: 'Das Studio schaut sie an und bestätigt dir den Platz, meist am selben Tag.',
     factWhen: 'Wann',
@@ -46,7 +47,8 @@ const COPY = {
   en: {
     crumb: 'Prepare',
     title: 'How to get ready.',
-    lead: 'We have your sign-up. The studio confirms your spot, usually the same day. Until then: three things.',
+    lead: 'Three things, then you just dance.',
+    leadBooked: 'We have your sign-up. The studio confirms your spot, usually the same day. Until then: three things.',
     bookingTitle: 'Your sign-up',
     bookingNote: 'The studio looks at it and confirms your spot, usually the same day.',
     factWhen: 'When',
@@ -90,13 +92,17 @@ export function PreparePage() {
      ueber das Schnupper-Formular und per Direktaufruf erreichbar. */
   const [booking, setBooking] = useState<ReservationFacts | null>(null);
   useEffect(() => setBooking(takeReservation()), []);
+  /* Der behauptende Lead haengt an `booking`: die Route ist indexierbar und wird
+     vorgerendert, und takeReservation() raeumt den Eintrag beim ersten Lesen. Ohne
+     bekannte Anmeldung — Suchtreffer, Direktaufruf, Reload — steht der neutrale Satz. */
+  const lead = booking ? c.leadBooked : c.lead;
   return (
     <SubPageShell seo="prepare">
       <SubHero
         axis="split"
         seoCrumbs={[{ label: c.crumb, href: '/vorbereiten' }]}
         title={c.title}
-        lead={c.lead}
+        lead={lead}
         dense
         tightBottom
       />

@@ -432,12 +432,12 @@ export const SEO_META = {
     de: {
       title: 'So bereitest du dich auf deine Tanzstunde vor | Salsaflow',
       description:
-        'Dein Platz ist reserviert. Folge Salsaflow auf Instagram, schreib bei Fragen auf WhatsApp und komm in bequemer Kleidung vorbei.',
+        'Deine Anmeldung ist da — das Studio bestätigt dir den Platz. Folge Salsaflow auf Instagram, schreib bei Fragen auf WhatsApp und komm in bequemer Kleidung vorbei.',
     },
     en: {
       title: 'How to prepare for your dance class | Salsaflow',
       description:
-        'Your spot is booked. Follow Salsaflow on Instagram, message us on WhatsApp with questions, and come in comfortable clothes.',
+        'We have your sign-up — the studio confirms your spot. Follow Salsaflow on Instagram, message us on WhatsApp with questions, and come in comfortable clothes.',
     },
   },
   admin: {
