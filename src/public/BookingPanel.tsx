@@ -1094,6 +1094,7 @@ function BookingForm({
   const stepChanged = useRef(false);
   const closeTimer = useRef<number | null>(null);
   const redirecting = useRef(false);
+  const closingRef = useRef(false);
 
   const requestClose = useCallback(() => {
     if (closeTimer.current !== null) return;
@@ -1104,6 +1105,14 @@ function BookingForm({
       onBack();
       return;
     }
+    /* Erst den Fokus herausnehmen, dann inert setzen: ein inerter Knoten laesst sich
+       nicht mehr fokussieren, ein Fokus DARIN faellt beim Inert-Werden auf <body> und
+       die naechste Tab-Taste landet im gesperrten Hintergrund. `onBack` gibt den Fokus
+       gleich an den Ausloeser zurueck; bis dahin haelt ihn der Body. */
+    if (dialogRef.current?.contains(document.activeElement)) {
+      (document.activeElement as HTMLElement | null)?.blur();
+    }
+    closingRef.current = true;
     setClosing(true);
     closeTimer.current = window.setTimeout(() => {
       closeTimer.current = null;
@@ -1146,6 +1155,10 @@ function BookingForm({
         return;
       }
       if (e.key !== 'Tab') return;
+      if (closingRef.current) {
+        e.preventDefault();
+        return;
+      }
       const items = focusables();
       if (!items.length) return;
       const first = items[0];

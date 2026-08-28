@@ -4,7 +4,8 @@ import { createServer } from 'vite';
 
 const root = process.cwd();
 const dist = path.join(root, 'dist');
-const manifestPath = path.join(dist, 'prerender-manifest.json');
+const manifestDir = path.join(root, 'node_modules', '.cache', 'salsaflow');
+const manifestPath = path.join(manifestDir, 'prerender-manifest.json');
 const templatePath = path.join(dist, 'index.html');
 const siteOrigin = 'https://www.salsaflow-dc.com';
 // Bild-Host = ASSET_ORIGIN (src/lib/seo-config.ts): die Ziel-Domain traegt bis zum
@@ -191,10 +192,13 @@ try {
     sitemapXml(manifest.filter((route) => route.indexable !== false).map((route) => route.path)),
   );
 
-  // Dasselbe Manifest, aus dem gerade Sitemap und noindex-Flag entstanden sind, als
-  // Build-Artefakt neben dem uebrigen generierten Output. Ohne das muesste verify-seo
-  // die Routen-Wahrheit aus TypeScript-Quelltext greppen und haenge damit an der
-  // Schreibweise statt an der Bedeutung.
+  // Dasselbe Manifest, aus dem gerade Sitemap und noindex-Flag entstanden sind, fuer
+  // scripts/verify-seo.mjs. Ohne das muesste der Pruefer die Routen-Wahrheit aus
+  // TypeScript-Quelltext greppen und haenge damit an der Schreibweise statt an der
+  // Bedeutung. NICHT nach `dist`: das ist Vercels outputDirectory, jede Datei darin
+  // wird ausgeliefert — die Liste der noindex-Routen waere dann oeffentlich abrufbar.
+  await fs.rm(path.join(dist, 'prerender-manifest.json'), { force: true });
+  await fs.mkdir(manifestDir, { recursive: true });
   await fs.writeFile(
     manifestPath,
     JSON.stringify(
