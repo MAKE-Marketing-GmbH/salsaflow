@@ -94,12 +94,8 @@
      (sonst Blaetze das Papier durch). */
   --dur-page-enter: 720ms;
   --dur-page-out: 280ms;
-  --dur-header-enter: 640ms;
-  --delay-header-enter: 0ms;
   --page-enter-y: 20px;
   --page-enter-blur: 8px;
-  --page-header-blur: 0px;
-  --page-header-y: 0px;
   --motion-enter: cubic-bezier(0.23, 1, 0.32, 1);
 
   /* R153: Wie stark der Cookie-Hinweis den WhatsApp-Float anhebt.
@@ -153,6 +149,10 @@ html {
   navigation: auto;
 }
 
+/* Der Header bekommt einen Snapshot-Namen, damit er beim Seitenwechsel als eigenes
+   Element stehenbleibt statt mitzublenden. Eine eigene Animation laeuft nicht mehr
+   darauf: Blur und vertikaler Versatz sind raus (Community-Ueberschriften schimmerten
+   durch), womit nichts mehr zu animieren war. Der Balken haelt still. */
 [data-page-header] {
   view-transition-name: sf-site-header;
 }
@@ -178,27 +178,6 @@ html {
   }
 }
 
-@keyframes sf-header-in {
-  from {
-    opacity: 1;
-    filter: blur(var(--page-header-blur));
-    transform: translate3d(0, var(--page-header-y), 0);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes sf-header-out {
-  to {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate3d(0, calc(var(--page-header-y) * 0.7), 0);
-  }
-}
-
 @keyframes sf-reduced-in {
   from { opacity: 0.68; }
   to { opacity: 1; }
@@ -216,18 +195,8 @@ html {
   animation: sf-page-in var(--dur-page-enter) var(--motion-enter) both;
 }
 
-#root:not([data-prerendered='true']) [data-page-header] {
-  transform-origin: 50% 0;
-  animation: sf-header-in var(--dur-header-enter) var(--motion-enter) var(--delay-header-enter) both;
-}
-
 ::view-transition-old(root) {
   animation: sf-page-out var(--dur-page-out) var(--motion-enter) both;
-}
-
-::view-transition-old(sf-site-header) {
-  transform-origin: 50% 0;
-  animation: sf-header-out var(--dur-page-out) var(--motion-enter) both;
 }
 
 ::view-transition-new(root) {
@@ -239,23 +208,15 @@ html {
   z-index: 50;
 }
 
-::view-transition-new(sf-site-header) {
-  transform-origin: 50% 0;
-  animation: sf-header-in var(--dur-header-enter) var(--motion-enter) both;
-}
-
 @media (prefers-reduced-motion: reduce) {
   #root:not([data-prerendered='true']) main#main,
-  #root:not([data-prerendered='true']) [data-page-header],
-  ::view-transition-new(root),
-  ::view-transition-new(sf-site-header) {
+  ::view-transition-new(root) {
     animation: sf-reduced-in var(--dur-fast) var(--motion-enter) both !important;
     transform: none !important;
     filter: none !important;
   }
 
-  ::view-transition-old(root),
-  ::view-transition-old(sf-site-header) {
+  ::view-transition-old(root) {
     animation: sf-reduced-out 120ms var(--motion-enter) both !important;
     transform: none !important;
     filter: none !important;

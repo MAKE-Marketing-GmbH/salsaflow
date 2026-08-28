@@ -171,6 +171,10 @@ export function SiteHeader() {
   }, []);
 
   useEffect(() => {
+    /* `lastY` wird NUR nachgefuehrt, wenn eine Schwelle tatsaechlich gerissen ist.
+       Sonst misst der Vergleich den Zuwachs seit dem letzten Frame statt der
+       zurueckgelegten Strecke — unter Lenis (lerp 0.075) bleibt jedes Frame-Delta
+       weit unter 24px, und der Header blendete nie aus. */
     let lastY = window.scrollY;
     let frame = 0;
 
@@ -178,12 +182,14 @@ export function SiteHeader() {
       const y = window.scrollY;
       if (y < 24 || open || headerRef.current?.contains(document.activeElement)) {
         setHidden(false);
+        lastY = y;
       } else if (y > lastY + 24) {
         setHidden(true);
+        lastY = y;
       } else if (y < lastY - 24) {
         setHidden(false);
+        lastY = y;
       }
-      lastY = y;
       frame = 0;
     };
 
@@ -263,7 +269,6 @@ export function SiteHeader() {
   return (
     <header
       ref={headerRef}
-      data-page-header
       className="fixed inset-x-0 top-0 z-50 isolate bg-[var(--color-paper-warm)] will-change-transform transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-reduce:transition-none"
       style={{
         height: 'var(--nav-h)',
@@ -280,7 +285,11 @@ export function SiteHeader() {
           sein (Container im Container), und Hero-CTAs/WhatsApp duerfen nicht darunter
           bzw. darueber liegen. Offen wird die Leiste darum full-bleed: kein Aussen-
           Padding, keine Rundung, und das Panel fuellt den ganzen Viewport (unten). */}
+      {/* Der View-Transition-Snapshot haengt hier, nicht am <header>: dort laufen der
+          Auto-Hide-Transform und die Snapshot-Animation sonst auf demselben Knoten und
+          der neue Header faehrt aus der versteckten Position ein. */}
       <div
+        data-page-header
         className={cn('mx-auto max-w-[1400px]', open ? 'px-0 py-0' : 'px-[5px] py-[9px] sm:px-[15px] sm:py-[10px]')}
       >
         {/* ROOT-CAUSE des bekannten Dropdown-Bugs, gemessen mit scripts/nav-probe.cjs:

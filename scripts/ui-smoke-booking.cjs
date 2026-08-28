@@ -57,9 +57,18 @@ async function fillPerson(page, prefix, first) {
     if (await role.count()) await role.click();
     await fillPerson(page, 'bk', 'Solo');
     await page.locator('[data-testid="booking-submit"]').click();
-    await page.locator('[data-testid="booking-success"]').waitFor({ timeout: 10000 });
-    const soloStatus = await page.locator('[data-testid="booking-success"]').getAttribute('data-status');
-    ok('Solo-Reservierung erreicht Erfolgsscreen', soloStatus === 'confirmed' || soloStatus === 'waitlisted', `status ${soloStatus}`);
+    // Eine freie Reservierung verlaesst den Dialog und landet auf /vorbereiten; ein voller
+    // Kurs bleibt als Warteliste im Modal. Beide Ausgaenge sind ein Erfolg.
+    const soloOutcome = await Promise.race([
+      page.waitForURL(/\/vorbereiten/, { timeout: 10000 }).then(() => 'prepare'),
+      page.locator('[data-testid="booking-success"]').waitFor({ timeout: 10000 }).then(() => 'waitlist'),
+    ]).catch(() => null);
+    ok('Solo-Reservierung erreicht Erfolgspfad', soloOutcome !== null, `ausgang ${soloOutcome}`);
+    if (soloOutcome === 'prepare') {
+      await page.locator('[data-testid="prepare-booking"]').waitFor({ timeout: 10000 });
+      const kurs = await page.locator('[data-testid="prepare-booking"] h2').innerText();
+      ok('Vorbereiten-Seite nennt den gebuchten Kurs', kurs.trim().length > 0, kurs.trim());
+    }
     await page.screenshot({ path: `${SHOTS}/01-solo.png`, fullPage: false });
     await page.locator('[data-testid="booking-close"]').click().catch(() => {});
     await page.waitForTimeout(300);
@@ -75,9 +84,11 @@ async function fillPerson(page, prefix, first) {
     await fillPerson(page, 'bk', 'PaarA');
     await fillPerson(page, 'bk-p', 'PaarB');
     await page.locator('[data-testid="booking-submit"]').click();
-    await page.locator('[data-testid="booking-success"]').waitFor({ timeout: 10000 });
-    const coupleStatus = await page.locator('[data-testid="booking-success"]').getAttribute('data-status');
-    ok('Paar-Reservierung erreicht Erfolgsscreen', coupleStatus === 'confirmed' || coupleStatus === 'waitlisted', `status ${coupleStatus}`);
+    const coupleOutcome = await Promise.race([
+      page.waitForURL(/\/vorbereiten/, { timeout: 10000 }).then(() => 'prepare'),
+      page.locator('[data-testid="booking-success"]').waitFor({ timeout: 10000 }).then(() => 'waitlist'),
+    ]).catch(() => null);
+    ok('Paar-Reservierung erreicht Erfolgspfad', coupleOutcome !== null, `ausgang ${coupleOutcome}`);
     await page.screenshot({ path: `${SHOTS}/02-couple.png`, fullPage: false });
 
     // --- 5) Mobil: Dialog ohne Ueberlauf, Absenden erreichbar --------------

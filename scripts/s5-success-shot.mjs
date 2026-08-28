@@ -1,11 +1,13 @@
-// Screenshots der neuen Anmelde-Bestaetigung (S5).
+// Screenshots der beiden Erfolgsausgaenge (S5).
 //
 // Warum ein eigenes Skript: ui-smoke-booking.cjs prueft den Klickweg, schiesst aber nur
-// ein Bild pro Fall und kennt den Wartelisten-Fall nicht. Hier geht es um die Sicht:
-// Erfolgs-Fall und Wartelisten-Fall, Desktop und Mobil, jeweils der ganze Dialog.
+// ein Bild pro Fall. Hier geht es um die Sicht: die Vorbereitungsseite nach einer freien
+// Reservierung und der Wartelisten-Dialog, jeweils Desktop und Mobil.
 //
-// Der Wartelisten-Fall wird erzwungen, indem die Antwort der Reservierungs-API im Browser
-// auf `waitlisted` umgeschrieben wird. Der Server bleibt unangetastet.
+// Eine freie Reservierung verlaesst den Dialog per Redirect auf /vorbereiten und traegt
+// Kurs, Termin, Studio und Zahlung ueber sessionStorage mit; der Wartelisten-Fall bleibt
+// im Modal. Er wird erzwungen, indem die Antwort der Reservierungs-API im Browser auf
+// `waitlisted` umgeschrieben wird. Der Server bleibt unangetastet.
 //
 // Aufruf: node scripts/s5-success-shot.mjs --base http://127.0.0.1:5175 --out /tmp/s5-shots
 
@@ -34,7 +36,7 @@ const browser = await chromium.launch();
 const shots = [];
 
 for (const vp of VIEWPORTS) {
-  for (const mode of ['confirmed', 'waitlisted']) {
+  for (const mode of ['prepare', 'waitlisted']) {
     const context = await browser.newContext({
       viewport: { width: vp.width, height: vp.height },
       deviceScaleFactor: 2,
@@ -67,12 +69,19 @@ for (const vp of VIEWPORTS) {
     await page.locator('input[name="bk-email"]').fill(`shot.${STAMP}.${mode}.${vp.name}@uishot.local`);
     await page.locator('[data-testid="booking-submit"]').click();
 
-    await page.waitForSelector('[data-testid="booking-success"]', { timeout: 15000 });
-    const status = await page.locator('[data-testid="booking-success"]').getAttribute('data-status');
+    let status;
+    if (mode === 'waitlisted') {
+      await page.waitForSelector('[data-testid="booking-success"]', { timeout: 15000 });
+      status = await page.locator('[data-testid="booking-success"]').getAttribute('data-status');
+    } else {
+      await page.waitForURL(/\/vorbereiten/, { timeout: 15000 });
+      await page.waitForSelector('[data-testid="prepare-booking"]', { timeout: 15000 });
+      status = 'prepare';
+    }
     await page.waitForTimeout(900);
 
     const file = resolve(OUT, `${vp.name}-${mode}.png`);
-    await page.screenshot({ path: file });
+    await page.screenshot({ path: file, fullPage: mode === 'prepare' });
     shots.push(`${file} (status=${status})`);
     await context.close();
   }
