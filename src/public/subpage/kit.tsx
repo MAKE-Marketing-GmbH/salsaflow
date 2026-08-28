@@ -426,19 +426,26 @@ export function HeroFrame({
       : cn(MEASURE_XL, 'max-sm:text-[2.25rem] max-sm:leading-[1.06]'),
     center && 'mx-auto',
   );
+  /* R206: `data-fold` benennt die Fold-Rollen fuer die Seitenwechsel-Choreografie.
+     index.css haengt daran je einen view-transition-name, damit Crumbs, Titel, Lead, CTA
+     und Medium beim Routenwechsel um 60ms versetzt hereinkommen statt als ein Block.
+     Die Marker wirken AUSSCHLIESSLICH waehrend eines dokumentuebergreifenden Uebergangs
+     — beim Erstaufruf und beim Reload existieren die ::view-transition-Pseudos nicht, der
+     Fold steht also weiterhin ab Frame 1 (R209). Kein Styling haengt daran. */
   const heading = wave ? (
     <RevealWords
       as="h1"
       // SAFETY: `wave` garantiert `typeof title === 'string'` (Zeile darueber).
       text={title as string}
       className={headingClass}
+      data-fold="title"
       stagger={0.04}
       distance={14}
       duration={0.52}
       immediate
     />
   ) : (
-    <h1 className={headingClass}>
+    <h1 className={headingClass} data-fold="title">
       {title} {titleAccent ? <TitleAccent>{titleAccent}</TitleAccent> : null}
     </h1>
   );
@@ -457,6 +464,7 @@ export function HeroFrame({
    * Farbe — nur der Abstand kommt hier aus dem Layout statt aus der Rolle. */
   const leadEl = lead ? (
     <p
+      data-fold="lead"
       className={cn('text-pretty', sectionLead, 'mt-0', center ? 'mx-auto max-w-2xl' : 'max-w-xl')}
       // R73-Nachzieh: auf salsa (lift) die Lead-Zeilenhoehe dichter, damit das Band
       // hoeher sitzt und die Koepfe Luft unter dem Kinn bekommen. Nur Anzeige-Straffung.
@@ -469,6 +477,7 @@ export function HeroFrame({
   const ctas =
     primary || secondary ? (
       <div
+        data-fold="cta"
         className={cn('flex flex-col gap-3 sm:flex-row sm:items-center', center && 'sm:justify-center')}
       >
         {primary ? <PrimaryCta href={primary.href}>{primary.label}</PrimaryCta> : null}
@@ -560,7 +569,10 @@ export function HeroFrame({
           className={center ? 'text-center' : undefined}
         >
           {crumbs ? (
-            <div className={cn(dense ? (tight || tightBottom ? 'mb-1' : 'mb-3') : 'mb-6', center && 'flex justify-center')}>
+            <div
+              data-fold="crumbs"
+              className={cn(dense ? (tight || tightBottom ? 'mb-1' : 'mb-3') : 'mb-6', center && 'flex justify-center')}
+            >
               {/* R84: tightBottom (nur /schnupperstunde) schaltet die Crumb auf compact
                   (Tap-Hoehe 44->20px), damit #anfrage mit erster Zeile in den 730er-Fold
                   rueckt. Reiner Abstand-Hebel, Default false = andere Seiten unveraendert. */}
@@ -625,7 +637,7 @@ export function HeroFrame({
 
            Das Bild bleibt im Above-the-fold statisch. Der Wrapper bewahrt die kalibrierte
            Crop-Geometrie; die gemeinsame Seitenchoreografie bewegt bereits den ganzen Stamm. */
-        <div className="relative w-full overflow-hidden">
+        <div data-fold="media" className="relative w-full overflow-hidden">
           <img
             src={media.src}
             alt={media.alt}

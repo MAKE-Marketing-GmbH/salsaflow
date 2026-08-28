@@ -150,7 +150,7 @@ function FaqHero({ c }: { c: FaqPageContent }) {
       />
       <Shell className="pb-16 lg:pb-24">
         <motion.div data-reveal variants={container} initial="hidden" animate="show">
-          <motion.div variants={item} className="mb-6">
+          <motion.div data-fold="crumbs" variants={item} className="mb-6">
             <Breadcrumb trail={[c.crumb]} />
           </motion.div>
           {/* R216: zweispaltig ab lg. Links der unveraenderte Textblock aus R212/R188 F6
@@ -161,14 +161,14 @@ function FaqHero({ c }: { c: FaqPageContent }) {
               die Liste rutscht dort unter die Microcopy statt daneben. */}
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-16">
             <div>
-              <motion.h1 variants={item} className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
+              <motion.h1 data-fold="title" variants={item} className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
                 {lang === 'de' ? 'Fragen und Antworten' : 'Questions and answers'}
               </motion.h1>
-              <motion.p variants={item} className={cn('max-w-2xl text-pretty', sectionLead)}>
+              <motion.p data-fold="lead" variants={item} className={cn('max-w-2xl text-pretty', sectionLead)}>
                 {h.lead}
               </motion.p>
               {/* Text UND Knoepfe im selben Block (F6). */}
-              <motion.div variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <motion.div data-fold="cta" variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
                 <GhostCta href={h.secondary.href} down={h.secondary.href.startsWith('#')}>
                   {h.secondary.label}

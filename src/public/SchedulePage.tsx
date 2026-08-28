@@ -102,7 +102,7 @@ export function SchedulePage() {
               unter dem Intro-Satz. */}
           <Shell className="pb-8 pt-2 sm:pb-10 lg:!px-8 lg:pb-10 lg:pt-3">
             <div className="grid gap-2 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16">
-              <h1 className={`type-h1 text-[var(--color-ink)] ${MEASURE_XL}`}>
+              <h1 data-fold="title" className={`type-h1 text-[var(--color-ink)] ${MEASURE_XL}`}>
                 {de ? (
                   <>Finde deinen <TitleAccent>Kurs.</TitleAccent></>
                 ) : (
@@ -110,7 +110,7 @@ export function SchedulePage() {
                 )}
               </h1>
               <div className="flex flex-col gap-3 border-t border-[var(--color-line)] pt-3 lg:gap-5 lg:border-t-0 lg:pt-0">
-                <p className="max-w-xl text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
+                <p data-fold="lead" className="max-w-xl text-pretty text-base leading-relaxed text-[var(--color-ink-muted)] sm:text-lg">
                   {de
                     ? 'Wähle Staffel, Woche und Wochentag. Du siehst sofort, wann welcher Kurs läuft und wo noch Plätze frei sind.'
                     : 'Pick a term, a week and a weekday. You see straight away when each class runs and where spots are left.'}

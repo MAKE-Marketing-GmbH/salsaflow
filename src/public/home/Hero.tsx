@@ -345,7 +345,13 @@ export function Hero() {
                 kommt #AD1827 auf 1.9:1. Im Overlay laeuft die Script-Zeile darum auf
                 --color-script-cream (dasselbe Token, das sitewide fuer Script auf dunklen Fotos
                 gilt, index.css:70) und ab sm wieder auf Rot. */}
+            {/* R206: `data-fold` benennt die Fold-Rollen fuer die Seitenwechsel-Choreografie
+                (view-transition-names in index.css). Die Home hat keine Breadcrumb — hier
+                startet die Script-Zeile die Staffel und besetzt deshalb den crumbs-Slot.
+                Die Marker wirken nur waehrend eines Routenwechsels; beim Erstaufruf steht
+                der Fold unveraendert ab Frame 1 (R209). */}
             <motion.p
+              data-fold="crumbs"
               variants={item}
               className="font-script text-[2rem] leading-[1.3] text-[var(--color-salsa)] max-sm:text-[var(--color-script-cream)] sm:text-[2.4rem]"
             >
@@ -419,6 +425,7 @@ export function Hero() {
                 auf 390/360/430). Alle drei Zeilen stehen damit auf dem Foto und tragen
                 dieselbe Farbe — die H1 der Klasse gibt sie vor (max-sm:text-white). */}
             <h1
+              data-fold="title"
               className={cn(
                 'type-h1 mt-2 text-[var(--color-ink)] max-sm:text-white',
                 MEASURE_XL,
@@ -451,6 +458,7 @@ export function Hero() {
                 allein kommen kann und die erste Stunde nichts kostet — die beiden Saetze, die
                 laut FAQ und Google-Reviews die haeufigste Hemmschwelle sind. */}
             <motion.p
+              data-fold="lead"
               variants={item}
               /* R190 (Raphael 22.08.: "wobei ich gerne zum Beispiel unter der
                  Subline mehr Platz ist"). Gemessen lagen zwischen H1-Unterkante und
@@ -508,7 +516,7 @@ export function Hero() {
                 damit am CTA-Block statt frei zu stehen. Jetzt ist der Raum darunter
                 gleich gross wie darueber, mobil bleibt er eine Stufe kleiner —
                 der Fold traegt dort nicht mehr (siehe die Fold-Rechnung oben). */}
-            <motion.div variants={item} className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 max-sm:mt-8 max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2">
+            <motion.div data-fold="cta" variants={item} className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 max-sm:mt-8 max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2">
               <CtaPill href="/kursplan" className="max-sm:w-full">
                 {cta.plan}
               </CtaPill>
@@ -626,6 +634,7 @@ export function Hero() {
               sofort, allein der Exit uebernimmt die Bewegung. */}
           <motion.div
             ref={photoRef}
+            data-fold="media"
             /* R-Scroll: scale + opacity direkt auf dieser Box (compositor-only). Der
                Ueberstand-Traeger darin bleibt unberuehrt, sein Koordinatensystem
                skaliert als Ganzes mit — keine Kante wird frei. */

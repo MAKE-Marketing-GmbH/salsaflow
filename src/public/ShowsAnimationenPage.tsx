@@ -85,17 +85,18 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
           Item 3). */}
       <Shell className="grid items-center gap-10 pb-14 pt-3 sm:pb-16 lg:grid-cols-[0.98fr_1.02fr] lg:gap-14 lg:pb-20 lg:pt-3">
         <motion.div data-reveal variants={container} initial="hidden" animate="show" className="max-w-2xl">
-          <motion.div variants={item} className="mb-3">
+          <motion.div data-fold="crumbs" variants={item} className="mb-3">
             <Breadcrumb trail={[c.crumb]} />
           </motion.div>
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
           <motion.h1
+            data-fold="title"
             variants={item}
             className="type-h1 mt-3"
           >
             {h.title}
           </motion.h1>
-          <motion.p variants={item} className={`max-w-xl ${sectionLead}`}>
+          <motion.p data-fold="lead" variants={item} className={`max-w-xl ${sectionLead}`}>
             {h.lead}
           </motion.p>
           <motion.ul variants={item} className="mt-4 flex flex-wrap gap-2">
@@ -109,7 +110,7 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
               </li>
             ))}
           </motion.ul>
-          <motion.div variants={item} className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <motion.div data-fold="cta" variants={item} className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
             <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
             <GhostCta href={h.secondary.href} down>
               {h.secondary.label}
@@ -120,7 +121,7 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
           </motion.p>
         </motion.div>
 
-        <motion.div data-reveal variants={item} initial="hidden" animate="show" className="relative">
+        <motion.div data-fold="media" data-reveal variants={item} initial="hidden" animate="show" className="relative">
           <div className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_30px_70px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
             {/* 32% horizontal statt center: bei 50% hing rechts der halbe Kopf des
                 Taenzers im Anschnitt; bei 32% ist der linke Taenzer ganz und rechts

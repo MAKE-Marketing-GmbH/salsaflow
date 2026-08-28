@@ -357,6 +357,7 @@ function GalleryHero() {
         <Reveal className="max-w-2xl">
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
           <motion.h1
+            data-fold="title"
             variants={item}
             className="type-h1 mt-5"
           >
@@ -364,6 +365,7 @@ function GalleryHero() {
             {h.titleB ? ` ${h.titleB}` : ''}
           </motion.h1>
           <motion.p
+            data-fold="lead"
             variants={item}
             className="mt-5 max-w-xl text-pretty text-lg leading-relaxed text-[var(--color-ink-muted)]"
           >
@@ -372,14 +374,14 @@ function GalleryHero() {
           <motion.div variants={item} className="mt-7">
             <GoogleRating />
           </motion.div>
-          <motion.div variants={item} className="mt-8">
+          <motion.div data-fold="cta" variants={item} className="mt-8">
             <CtaPill href="#galerie">{lang === 'de' ? 'Fotos ansehen' : 'See the photos'}</CtaPill>
           </motion.div>
         </Reveal>
 
         {/* Kompakte Drei-Foto-Komposition (echte, helle Fotos). */}
         <Reveal className="relative">
-          <motion.div variants={item} className="mx-auto grid w-full max-w-md grid-cols-2 gap-3 sm:gap-4 lg:max-w-none">
+          <motion.div data-fold="media" variants={item} className="mx-auto grid w-full max-w-md grid-cols-2 gap-3 sm:gap-4 lg:max-w-none">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
               {/* Kontext statt Portrait (Auftrag 19.08.2026): anniversary-recap-v2 zeigte ein
                   einzelnes, eng geschnittenes Gesicht und las sich wie ein Portraet. Ersatz ist

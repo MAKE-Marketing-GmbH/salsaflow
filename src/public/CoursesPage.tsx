@@ -379,15 +379,16 @@ function CoursesHero() {
             <div className="grid gap-8 border-t border-[var(--color-line)] lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-16">
               <div className="flex flex-col gap-6 pt-8">
                 <motion.h1
+                  data-fold="title"
                   variants={item}
                   className={cn('type-h1 mt-0 text-[var(--color-ink)]', MEASURE_XL)}
                 >
                   {h.title}{h.titleAccent ? ` ${h.titleAccent}` : ''}
                 </motion.h1>
-                <motion.p variants={item} className={cn('mt-0 max-w-xl text-pretty', sectionLead)}>
+                <motion.p data-fold="lead" variants={item} className={cn('mt-0 max-w-xl text-pretty', sectionLead)}>
                   {h.lead}
                 </motion.p>
-                <motion.div variants={item} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <motion.div data-fold="cta" variants={item} className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <PrimaryCta href="/kursplan">
                     {de ? 'Kursplan ansehen' : 'See the schedule'}
                   </PrimaryCta>
@@ -428,7 +429,7 @@ function CoursesHero() {
                   Party-/Drehmotivs steht hier jetzt eine echte Unterrichtssituation:
                   ein Paar uebt die Drehung, weitere Kursteilnehmende tanzen dahinter.
                   Der mittige Crop haelt Blick, Arme und Bewegung auf Mobil wie Desktop. */}
-              <motion.div variants={item} className="pt-8">
+              <motion.div data-fold="media" variants={item} className="pt-8">
                 <div className="overflow-hidden rounded-[var(--radius-media)]">
                   <img
                     src="/photos/gallery/kurse/01.jpg"

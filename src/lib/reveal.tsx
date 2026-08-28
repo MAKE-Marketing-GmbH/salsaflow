@@ -28,6 +28,7 @@ import {
   EASE_OUT,
   REVEAL_BLUR,
   REVEAL_DISTANCE,
+  REVEAL_DRIFT,
   REVEAL_DURATION,
   REVEAL_STAGGER,
   REVEAL_VIEWPORT,
@@ -43,11 +44,19 @@ export { REVEAL_VIEWPORT };
  *  bedeutet (z. B. eine Bildspalte, die von ihrer Seite hereinkommt). */
 export type RevealFrom = 'up' | 'down' | 'left' | 'right';
 
-function revealTransform(from: RevealFrom, distance: number) {
+/** R206: `drift` ist der seitliche Ausholer auf dem Standardweg 'up' — das Element kommt
+ *  leicht aus der Seite herein und findet beim Ankommen zur Mitte. Ein Schritt, kein
+ *  Nachwippen: die Kurve bleibt dieselbe Ease-Out, es gibt keinen Overshoot.
+ *
+ *  Nur 'up' bekommt den Drift. Die drei gerichteten Faelle ('down', 'left', 'right')
+ *  tragen ihre Richtung bereits als Aussage — eine Bildspalte, die von rechts kommt,
+ *  soll geradlinig kommen. Ein zusaetzlicher Querversatz laese sich dort als
+ *  Layout-Fehler, nicht als Geste. */
+function revealTransform(from: RevealFrom, distance: number, drift = 0) {
   if (from === 'down') return `translate3d(0, ${-distance}px, 0)`;
   if (from === 'left') return `translate3d(${-distance}px, 0, 0)`;
   if (from === 'right') return `translate3d(${distance}px, 0, 0)`;
-  return `translate3d(0, ${distance}px, 0)`;
+  return `translate3d(${drift}px, ${distance}px, 0)`;
 }
 
 /** Varianten fuer Gruppe + Kind. Aufrufer, die eigene `motion`-Elemente rendern, ziehen
@@ -57,13 +66,17 @@ export function useRevealMotion(opts?: {
   distance?: number;
   duration?: number;
   from?: RevealFrom;
+  /** Seitlicher Ausholer in px. Negativ = aus der linken Seite. Default: kein Drift —
+   *  eine Gruppe entscheidet selbst, ob ihre Kinder eine Richtung tragen sollen. */
+  drift?: number;
 }) {
   const reduced = useReducedMotion() === true;
   const stagger = reduced ? 0 : (opts?.stagger ?? REVEAL_STAGGER);
   const distance = reduced ? 0 : Math.min(opts?.distance ?? REVEAL_DISTANCE, 32);
   const duration = reduced ? 0.2 : (opts?.duration ?? REVEAL_DURATION);
   const blur = reduced ? 0 : REVEAL_BLUR;
-  const startTransform = revealTransform(opts?.from ?? 'up', distance);
+  const drift = reduced ? 0 : (opts?.drift ?? 0);
+  const startTransform = revealTransform(opts?.from ?? 'up', distance, drift);
 
   const container: Variants = {
     hidden: {},
@@ -114,6 +127,7 @@ export function RevealGroup({
   distance,
   duration,
   from,
+  drift = REVEAL_DRIFT,
   ...rest
 }: {
   children: ReactNode;
@@ -122,8 +136,12 @@ export function RevealGroup({
   distance?: number;
   duration?: number;
   from?: RevealFrom;
+  /** R206: seitlicher Ausholer der Kinder. Gruppen tragen ihn per Default — genau hier
+   *  wird «Element fuer Element» sichtbar, weil mehrere Kinder nacheinander aus derselben
+   *  Seite hereinkommen. Auf 0 setzen, wenn eine Gruppe geradlinig kommen soll. */
+  drift?: number;
 } & Omit<ComponentPropsWithoutRef<typeof motion.div>, 'variants' | 'initial' | 'whileInView' | 'viewport'>) {
-  const { container } = useRevealMotion({ stagger, distance, duration, from });
+  const { container } = useRevealMotion({ stagger, distance, duration, from, drift });
   // SAFETY: `as` ist auf die vier Schluessel von GROUP_TAG begrenzt (RevealGroupTag), der
   // Zugriff kann also nicht undefined liefern. Alle vier sind Motion-Komponenten mit
   // identischer Prop-Schnittmenge; abweichend sind nur die Event-Handler-Elementtypen, und
@@ -151,6 +169,7 @@ export function RevealItem({
   distance,
   duration,
   from,
+  drift = 0,
   ...rest
 }: {
   children: ReactNode;
@@ -158,9 +177,18 @@ export function RevealItem({
   distance?: number;
   duration?: number;
   from?: RevealFrom;
+  /** R206: seitlicher Ausholer. Anders als bei `RevealGroup` ist der Default hier 0.
+   *  Ein einzelnes Element hat keinen Nachbarn, gegen den sich der Versatz liest — er
+   *  wirkt dann wie ein verrutschtes Layout statt wie eine Geste. Opt-in fuer Faelle,
+   *  in denen mehrere RevealItems bewusst als Reihe gesetzt sind. */
+  drift?: number;
 } & Omit<ComponentPropsWithoutRef<typeof motion.div>, 'initial' | 'whileInView' | 'viewport' | 'transition'>) {
   const reduced = useReducedMotion() === true;
-  const startTransform = revealTransform(from ?? 'up', reduced ? 0 : Math.min(distance ?? REVEAL_DISTANCE, 32));
+  const startTransform = revealTransform(
+    from ?? 'up',
+    reduced ? 0 : Math.min(distance ?? REVEAL_DISTANCE, 32),
+    reduced ? 0 : drift,
+  );
   const blur = reduced ? 0 : REVEAL_BLUR;
   return (
     <motion.div

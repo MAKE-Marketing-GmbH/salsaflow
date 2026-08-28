@@ -1,11 +1,28 @@
 // WhatsApp-Floating-Knopf (Sitewide-Shell). Fix unten rechts, direkter Draht
-// zu +41 76 478 84 11. Weiss auf WhatsApp-Gruen ist eine feste Kundenabsprache
-// (wiki/absprachen.md:21). Liegt z-technisch unter dem Nav-Drawer (z-50).
+// zu +41 76 478 84 11. Liegt z-technisch unter dem Nav-Drawer (z-50).
 // Sobald der Footer in den Viewport kommt, blendet der Knopf aus: Der Footer
 // traegt im Entry-CTA-Band einen eigenen WhatsApp-Button.
+//
+// Bauform (2026-08-28, .claude/product-design.md): Kreis, Salsa-Rot, weisser Glyph.
+//
+// Vorher war der Knopf eine dunkelgruene Pille mit dem Wort «WhatsApp» daneben, die
+// beim Scrollen ihre Breite animierte. Zwei Dinge stimmten daran nicht:
+//
+//   1. Gruen (#075e54) war die einzige Farbe der Seite ausserhalb der Palette.
+//      DESIGN.md haelt EINE Akzentfarbe fest; der Float war die Ausnahme, und im
+//      Screenshot war er genau deshalb das Erste, was ins Auge sprang — nicht der
+//      CTA, sondern die Ecke. Die Wiedererkennung traegt der Glyph, nicht der Grund.
+//   2. Das Label wurde auf sieben Routen per CSS wieder ausgeblendet
+//      (privatstunden, kursaufbau, events, team, faq, collabs, tanzschuhe+partys).
+//      Sieben Ausnahmen gegen eine Regel heissen, dass die Regel falsch war. Der
+//      Kreis ist jetzt der Normalfall; die Sonderregeln sind aus index.css entfernt.
+//
+// Damit faellt auch der Scroll-Listener weg, der nur die Pillenbreite steuerte:
+// ein Kreis hat keinen kompakten und keinen offenen Zustand. Das Label lebt als
+// Tooltip weiter, der ausschliesslich bei feinem Zeiger erscheint.
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { WhatsAppIcon } from '@/public/site/BrandIcons';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
@@ -15,17 +32,10 @@ const WHATSAPP_URL = 'https://wa.me/41764788411';
 export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boolean; className?: string }) {
   const { lang } = useLang();
   const label = lang === 'de' ? 'Schreib uns auf WhatsApp' : 'Message us on WhatsApp';
+  const tooltip = lang === 'de' ? 'Schreib uns' : 'Message us';
   const [footerInView, setFooterInView] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const compactRef = useRef(false);
-  const [compact, setCompact] = useState(false);
   const reduced = useReducedMotion();
-
-  const commitCompact = useCallback((next: boolean) => {
-    if (compactRef.current === next) return;
-    compactRef.current = next;
-    setCompact(next);
-  }, []);
 
   useEffect(() => {
     const footer = document.querySelector('footer');
@@ -53,32 +63,6 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
     return () => obs.disconnect();
   }, []);
 
-  /* Sobald gescrollt wird, bleibt die Pille kompakt. Sie klappt nur wieder auf, wenn
-     der Nutzer ganz an den Seitenanfang zurueckkehrt — ein Timer wuerde bei jeder
-     Scroll-Pause eine neue Breiten-Animation ausloesen und den Knopf sichtbar auf- und
-     zuklappen lassen. Ein- und Ausklappschwelle liegen bewusst weit auseinander (80px
-     hinein, 8px heraus): unter Lenis (lerp 0.075) pendelt scrollY am Seitenanfang um
-     seinen Zielwert, und eine einzelne Schwelle wuerde bei jedem Nulldurchgang kippen.
-     rAF-gedrosselt wie der Scroll-Handler des Headers. */
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const y = window.scrollY;
-      if (y >= 80) commitCompact(true);
-      else if (y <= 8) commitCompact(false);
-    };
-    const onScroll = () => {
-      if (!frame) frame = window.requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      if (frame) window.cancelAnimationFrame(frame);
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, [commitCompact]);
-
   if (footerInView || dialogOpen) return null;
 
   return (
@@ -87,17 +71,15 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
       target="_blank"
       rel="noreferrer"
       aria-label={label}
-      title={label}
       initial={false}
-      transition={{ type: 'spring', bounce: 0.18, duration: reduced ? 0.2 : 0.55 }}
       whileHover="hover"
       whileTap={reduced ? undefined : { scale: 0.94 }}
+      transition={{ type: 'spring', bounce: 0.18, duration: reduced ? 0.2 : 0.5 }}
       className={cn(
-        'whatsapp-float group/wa font-sans fixed right-6 z-40 hidden h-14 w-14 items-center justify-center gap-2 rounded-full px-0 lg:inline-flex',
-        compact ? 'lg:w-14 lg:px-0' : 'lg:w-auto lg:px-4',
-        'bg-[var(--color-whatsapp)] text-white shadow-[0_10px_28px_rgba(17,17,17,0.16)] ring-1 ring-black/10',
-        'hover:bg-[var(--color-whatsapp-hover)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-whatsapp)]',
-        'transition-[color,background-color,border-color,opacity,box-shadow] duration-[var(--dur-slow)] ease-[var(--motion-out)]',
+        'whatsapp-float group/wa font-sans fixed right-6 z-40 hidden h-14 w-14 items-center justify-center rounded-full lg:inline-flex',
+        'bg-[var(--color-salsa)] text-white shadow-[0_12px_32px_rgba(173,24,39,0.28)] ring-1 ring-black/5',
+        'hover:bg-[var(--color-salsa-700)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-salsa)] focus-visible:ring-offset-2',
+        'transition-[background-color,box-shadow] duration-[var(--dur-base)] ease-[var(--motion-out)]',
         className,
       )}
       style={{
@@ -106,27 +88,28 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
           : 'calc(1.25rem + var(--sticky-cta-height, 0px) + var(--whatsapp-lift, 0px))',
       }}
     >
+      {/* Der Glyph neigt sich beim Hover leicht an — dieselbe Geste wie vorher, nur ohne
+          die Breiten-Animation drumherum. Feder statt Kurve, weil der Zeiger den Zustand
+          jederzeit umkehren kann und eine Feder die Velocity mitnimmt. */}
       <motion.span
         className="inline-flex text-white"
-        variants={reduced ? undefined : { hover: { rotate: -10, scale: 1.12 } }}
-        transition={{ type: 'spring', bounce: 0.4, duration: 0.4 }}
+        variants={reduced ? undefined : { hover: { rotate: -10, scale: 1.1 } }}
+        transition={{ type: 'spring', bounce: 0.35, duration: 0.4 }}
       >
         <WhatsAppIcon className="h-6 w-6 shrink-0" />
       </motion.span>
-      <AnimatePresence initial={false}>
-        {!compact && (
-          <motion.span
-            data-whatsapp-label
-            initial={reduced ? { opacity: 0 } : { opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: 'auto' }}
-            exit={reduced ? { opacity: 0 } : { opacity: 0, width: 0 }}
-            transition={{ type: 'spring', bounce: 0, duration: reduced ? 0.15 : 0.4 }}
-            className="hidden overflow-hidden font-sans text-sm font-medium tracking-normal whitespace-nowrap lg:inline-block"
-          >
-            WhatsApp
-          </motion.span>
-        )}
-      </AnimatePresence>
+
+      {/* Das Label als Tooltip statt als Teil des Knopfes: er faehrt nur bei feinem
+          Zeiger aus (data-wa-tip + Media-Query in index.css). Auf Touch existiert er
+          nicht — dort wuerde er beim Tap kleben und die Ecke zustellen. Der Knopf traegt
+          seinen Namen ohnehin in aria-label. */}
+      <span
+        data-wa-tip
+        aria-hidden="true"
+        className="pointer-events-none absolute right-[calc(100%+0.75rem)] whitespace-nowrap rounded-full bg-[var(--color-ink)] px-3 py-1.5 text-sm font-medium text-white shadow-lg"
+      >
+        {tooltip}
+      </span>
     </motion.a>
   );
 }

@@ -92,11 +92,24 @@
      Der Eintritt ist bewusst langsamer als UI; ein leichter Blur kaschiert den
      dokumentuebergreifenden Schnitt, ohne die neue Seite transparent zu machen
      (sonst Blaetze das Papier durch). */
-  --dur-page-enter: 720ms;
-  --dur-page-out: 280ms;
-  --page-enter-y: 20px;
-  --page-enter-blur: 8px;
+  --dur-page-enter: 900ms;
+  --dur-page-out: 320ms;
+  --page-enter-y: 24px;
+  --page-enter-blur: 10px;
   --motion-enter: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* Der Abstand zwischen zwei Fold-Elementen beim Seitenwechsel. Der Fold bewegte sich
+     vorher als ein Block: technisch korrekt, aber leblos. Jetzt kommen Eyebrow, H1, Lead,
+     CTA-Reihe und Medium nacheinander herein — «Element fuer Element». 60ms liegt im
+     Stagger-Korridor der Motion-Doktrin (30-80ms); daraus baut sich ueber fuenf Stufen
+     eine Gesamtstaffel von 240ms auf, die den 900ms-Eintritt nicht ueberlaeuft. */
+  --page-stagger: 60ms;
+
+  /* Wie weit ein einfliegendes Element seitlich ausholt, bevor es zur Mitte findet.
+     Das ist das «taenzerische» Element aus dem Auftrag: ein Schritt, der ankommt, nicht
+     eine Feder, die nachwippt. Bewusst klein — wer den Versatz bewusst bemerkt, sieht
+     zu viel davon. Kein Bounce, kein Overshoot, keine Rotation. */
+  --page-enter-x: 6px;
 
   /* R153: Wie stark der Cookie-Hinweis den WhatsApp-Float anhebt.
    * Unter sm ist der Wert 0px — dort loest der rechte Gutter am Banner-Wrapper den
@@ -208,15 +221,127 @@ html {
   z-index: 50;
 }
 
+/* ---------------------------------------------------------------------------------------
+   Fold-Staffelung beim Seitenwechsel (R206, 2026-08-28).
+
+   Bisher bewegte sich der gesamte Seitenstamm als EIN Block: ::view-transition-new(root)
+   trug den einzigen Eintritt, und alles darin kam gleichzeitig. Technisch korrekt, aber
+   der Moment nach jedem Klick — der einzige, den jeder Besucher auf jeder Route sieht —
+   war eine Flaeche, die sich schiebt.
+
+   Ab jetzt bekommen die fuenf Fold-Rollen je einen eigenen Snapshot und kommen um
+   `--page-stagger` (60ms) versetzt herein. Das ist «Element fuer Element» genau dort,
+   wo es zaehlt.
+
+   WARUM DAS KEIN ZWEITER REVEAL IST. HeroFrame (subpage/kit.tsx:297) und Hero.tsx halten
+   ihre Above-the-fold-Inhalte bewusst statisch — ein eigener Mount-Reveal wuerde denselben
+   Inhalt doppelt bewegen und die Seite fast eine Sekunde unfertig halten (R209). Diese
+   Regeln hier laufen NICHT beim Mount, sondern ausschliesslich waehrend eines
+   dokumentuebergreifenden Uebergangs: die Pseudo-Elemente ::view-transition-* existieren
+   nur, solange der Browser den Wechsel animiert. Beim ersten Laden einer Seite (Direkt-
+   aufruf, Reload, Crawler) passiert hier nichts. Die Entscheidung «Fold steht ab Frame 1»
+   bleibt damit unberuehrt.
+
+   Der Seitenstamm behaelt seinen eigenen Eintritt: die fuenf Rollen sind aus dem
+   root-Snapshot herausgeloest, alles uebrige (Sektionen unter dem Fold) laeuft weiter
+   ueber ::view-transition-new(root).
+
+   Die X-Achse ist das «taenzerische» aus dem Auftrag: jedes Element holt 6px zur Seite aus
+   und findet beim Ankommen zur Mitte — ein Schritt, kein Nachwippen. Die Richtung
+   alterniert (Titel von links, Lead von rechts), damit die Staffel als Bewegung lesbar
+   wird statt als fuenfmal dasselbe. Kein Bounce, kein Overshoot, keine Rotation. */
+
+[data-fold='crumbs'] { view-transition-name: sf-fold-crumbs; }
+[data-fold='title'] { view-transition-name: sf-fold-title; }
+[data-fold='lead'] { view-transition-name: sf-fold-lead; }
+[data-fold='cta'] { view-transition-name: sf-fold-cta; }
+[data-fold='media'] { view-transition-name: sf-fold-media; }
+
+@keyframes sf-fold-in-left {
+  from {
+    opacity: 0;
+    filter: blur(var(--page-enter-blur));
+    transform: translate3d(calc(var(--page-enter-x) * -1), var(--page-enter-y), 0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes sf-fold-in-right {
+  from {
+    opacity: 0;
+    filter: blur(var(--page-enter-blur));
+    transform: translate3d(var(--page-enter-x), var(--page-enter-y), 0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Die alte Seite nimmt ihre Fold-Elemente ohne Staffel mit: beim Verlassen ist die
+   Reihenfolge bedeutungslos, und eine gestaffelte Ausblendung liesse Reste stehen,
+   waehrend die neue Seite schon traegt. */
+::view-transition-old(sf-fold-crumbs),
+::view-transition-old(sf-fold-title),
+::view-transition-old(sf-fold-lead),
+::view-transition-old(sf-fold-cta),
+::view-transition-old(sf-fold-media) {
+  animation: sf-page-out var(--dur-page-out) var(--motion-enter) both;
+}
+
+/* Der Eintritt. `--dur-page-enter` ist die Dauer JE Element, die Verzoegerung staffelt sie.
+   Der letzte Snapshot (Medium) startet bei 4x60 = 240ms — die Staffel ist damit lange vor
+   dem Ende des 900ms-Eintritts abgeschlossen und die Seite steht als Ganzes. */
+::view-transition-new(sf-fold-crumbs) {
+  animation: sf-fold-in-left var(--dur-page-enter) var(--motion-enter) both;
+}
+
+::view-transition-new(sf-fold-title) {
+  animation: sf-fold-in-left var(--dur-page-enter) var(--motion-enter) var(--page-stagger) both;
+}
+
+::view-transition-new(sf-fold-lead) {
+  animation: sf-fold-in-right var(--dur-page-enter) var(--motion-enter) calc(var(--page-stagger) * 2) both;
+}
+
+::view-transition-new(sf-fold-cta) {
+  animation: sf-fold-in-left var(--dur-page-enter) var(--motion-enter) calc(var(--page-stagger) * 3) both;
+}
+
+/* Das Medium ist die groesste Flaeche im Fold und kommt zuletzt. Es holt NICHT seitlich
+   aus: ein Bild, das sich quer bewegt, liest sich als Fehler im Layout, nicht als Geste.
+   Es steigt nur auf — dieselbe Kurve, derselbe Takt. */
+::view-transition-new(sf-fold-media) {
+  animation: sf-page-in var(--dur-page-enter) var(--motion-enter) calc(var(--page-stagger) * 4) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   #root:not([data-prerendered='true']) main#main,
-  ::view-transition-new(root) {
+  ::view-transition-new(root),
+  /* R206: Die Fold-Snapshots fallen unter dieselbe Regel wie der Seitenstamm — ohne diese
+     Zeilen behielten sie ihren Versatz, ihren Blur und ihre Staffel, waehrend der Rest der
+     Seite still steht. Reduced Motion heisst weniger Bewegung, nicht teilweise. */
+  ::view-transition-new(sf-fold-crumbs),
+  ::view-transition-new(sf-fold-title),
+  ::view-transition-new(sf-fold-lead),
+  ::view-transition-new(sf-fold-cta),
+  ::view-transition-new(sf-fold-media) {
     animation: sf-reduced-in var(--dur-fast) var(--motion-enter) both !important;
     transform: none !important;
     filter: none !important;
   }
 
-  ::view-transition-old(root) {
+  ::view-transition-old(root),
+  ::view-transition-old(sf-fold-crumbs),
+  ::view-transition-old(sf-fold-title),
+  ::view-transition-old(sf-fold-lead),
+  ::view-transition-old(sf-fold-cta),
+  ::view-transition-old(sf-fold-media) {
     animation: sf-reduced-out 120ms var(--motion-enter) both !important;
     transform: none !important;
     filter: none !important;
@@ -819,16 +944,22 @@ main img.photo-grade-bachata-why {
  * entscheidet allein die Media-Query. Wer keine Bewegung will, sieht den Knopf sofort
  * an seinem Platz. */
 @media (prefers-reduced-motion: no-preference) {
-  /* R153: Nur zwei Eigenschaften bewegen sich — opacity und translateY. Das `scale(0.9)`
-   * ist raus: es liess den Knopf beim Auftritt aufpoppen, und genau dieses Aufpoppen liest
-   * sich wie der Puls, den Raphael nicht will. Kein Puls, kein Ping, kein Scale, kein
-   * Wackeln, keine Wiederholung: `animation-iteration-count` bleibt der Default 1. */
+  /* R153: Kein Scale beim Auftritt — es liess den Knopf aufpoppen, und genau dieses
+   * Aufpoppen liest sich wie der Puls, den Raphael nicht will. Kein Puls, kein Ping,
+   * kein Wackeln, keine Wiederholung: `animation-iteration-count` bleibt der Default 1.
+   *
+   * R206: Der Kommentar versprach «steigt einmal aus der unteren Kante auf», die
+   * Keyframes bewegten aber nur die Opacity — der Knopf erschien aus dem Nichts an
+   * seinem Platz. 10px translateY schliessen die Luecke zwischen Beschreibung und
+   * Verhalten. Zwei GPU-Eigenschaften, kein Scale, alles andere bleibt wie es war. */
   @keyframes whatsapp-float-in {
     from {
       opacity: 0;
+      transform: translate3d(0, 10px, 0);
     }
     to {
       opacity: 1;
+      transform: translate3d(0, 0, 0);
     }
   }
 
@@ -840,121 +971,50 @@ main img.photo-grade-bachata-why {
   }
 }
 
-/* R140, /privatstunden Desktop: Der Float ist sitewide eine Pille mit dem Label
- * «WhatsApp» (im Vorher-Shot 1440x730 gemessen, worklog/shots/S7-ux140/vorher/
- * privat-desktop-1440-fold.png). Auf dieser Route soll er ein Kreis sein.
- * Route-lokal ueber den eigenen Marker [data-privat-page] aus PrivatstundenPage.tsx,
- * damit WhatsAppFloat.tsx (sitewide) und die Marker anderer Routen unberuehrt bleiben.
- * Nur ab sm: mobil ist der Knopf ohnehin schon ein Kreis. */
-@media (min-width: 640px) {
-  body:has([data-privat-page]) a.whatsapp-float {
-    width: 3.5rem;
-    padding-left: 0;
-    padding-right: 0;
-    justify-content: center;
-    gap: 0;
-  }
+/* Der Tooltip am Float (R206). Er ersetzt das Label, das vorher fest im Knopf sass und
+ * auf sieben Routen wieder ausgeblendet wurde.
+ *
+ * Ruhezustand ist unsichtbar und 4px nach rechts versetzt: er kommt beim Hover aus der
+ * Richtung des Knopfes heran statt an seinem Platz aufzublinken. Nur `opacity` und
+ * `transform` bewegen sich.
+ *
+ * Das Hover-Gate ist Pflicht, nicht Kosmetik: auf Touch feuert `:hover` beim Tap und
+ * bleibt danach kleben — der Tooltip stuende dann dauerhaft in der Ecke, genau vor dem
+ * Sticky-CTA. Mit dem Gate existiert er auf Touch gar nicht. `:focus-visible` haengt mit
+ * drin, damit Tastaturnutzer denselben Hinweis bekommen. */
+[data-wa-tip] {
+  opacity: 0;
+  transform: translate3d(4px, 0, 0);
+  transition:
+    opacity var(--dur-base) var(--motion-out),
+    transform var(--dur-base) var(--motion-out);
+}
 
-  body:has([data-privat-page]) a.whatsapp-float [data-whatsapp-label] {
-    display: none;
+@media (hover: hover) and (pointer: fine) {
+  .whatsapp-float:hover [data-wa-tip],
+  .whatsapp-float:focus-visible [data-wa-tip] {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
-/* R141, /kursaufbau Desktop: gleicher Fall wie R140 auf /privatstunden. Der Float ist
- * sitewide eine Pille mit dem Label «WhatsApp» (im Vorher-Shot 1440x730 gemessen,
- * worklog/shots/S7-ux141/vorher/kursaufbau-desktop-1440-vorher.png). Auf dieser Route
- * soll er ein Kreis sein. Route-lokal ueber den eigenen Marker [data-kursaufbau-page]
- * aus KursaufbauPage.tsx, damit WhatsAppFloat.tsx (sitewide) und die Marker anderer
- * Routen unberuehrt bleiben. Nur ab sm: mobil ist der Knopf ohnehin schon ein Kreis. */
-@media (min-width: 640px) {
-  body:has([data-kursaufbau-page]) a.whatsapp-float {
-    width: 3.5rem;
-    padding-left: 0;
-    padding-right: 0;
-    justify-content: center;
-    gap: 0;
-  }
-
-  body:has([data-kursaufbau-page]) a.whatsapp-float [data-whatsapp-label] {
-    display: none;
+@media (prefers-reduced-motion: reduce) {
+  [data-wa-tip] {
+    transform: none;
+    transition: opacity var(--dur-fast) var(--motion-out);
   }
 }
 
-/* R142, /events Desktop: gleicher Fall wie R140 (/privatstunden) und R141 (/kursaufbau).
- * Der Float ist sitewide eine Pille mit dem Label «WhatsApp» (im Vorher-Shot 1440x730
- * gemessen, worklog/shots/S7-ux142/vorher/events-desktop-00-fold.png). Auf dieser Route
- * soll er ein Kreis sein. Route-lokal ueber den eigenen Marker [data-events-page] aus
- * EventsPage.tsx, damit WhatsAppFloat.tsx (sitewide) und die Marker anderer Routen
- * unberuehrt bleiben. Nur ab sm: mobil ist der Knopf ohnehin schon ein Kreis. */
-@media (min-width: 640px) {
-  body:has([data-events-page]) a.whatsapp-float {
-    width: 3.5rem;
-    padding-left: 0;
-    padding-right: 0;
-    justify-content: center;
-    gap: 0;
-  }
-
-  body:has([data-events-page]) a.whatsapp-float [data-whatsapp-label] {
-    display: none;
-  }
-}
-
-/* R144, /team Desktop: gleicher Fall wie R142 (/events). Der Float ist sitewide eine
- * Pille mit dem Label «WhatsApp» (im Vorher-Shot 1440x730 als 121x56 gemessen,
- * worklog/shots/S7-ux144/vorher/team-desktop-1440.png). Auf dieser Route soll er ein
- * Kreis sein. Route-lokal ueber den eigenen Marker [data-team-page] aus TeamPage.tsx,
- * damit WhatsAppFloat.tsx (sitewide) und die Marker anderer Routen unberuehrt bleiben.
- * Regelkoerper ist die unveraenderte Kopie der R142-Regel darueber, nur der Selektor
- * wechselt. Nur ab sm: mobil ist der Knopf ohnehin schon ein Kreis. */
-@media (min-width: 640px) {
-  body:has([data-team-page]) a.whatsapp-float {
-    width: 3.5rem;
-    padding-left: 0;
-    padding-right: 0;
-    justify-content: center;
-    gap: 0;
-  }
-
-  body:has([data-team-page]) a.whatsapp-float [data-whatsapp-label] {
-    display: none;
-  }
-}
-
-/* R147, /faq Desktop: gleicher Fall wie R144 (/team). Der Float ist sitewide eine
- * Pille mit Label (Vorher-Shot worklog/shots/S7-ux147/vorher/faq-desktop-1440.png,
- * 121x56 bei x1295). Auf dieser Route soll er ab sm ein Kreis ohne Text sein. */
-@media (min-width: 640px) {
-  body:has([data-faq-page]) a.whatsapp-float {
-    width: 3.5rem;
-    padding-left: 0;
-    padding-right: 0;
-    justify-content: center;
-    gap: 0;
-  }
-
-  body:has([data-faq-page]) a.whatsapp-float [data-whatsapp-label] {
-    display: none;
-  }
-}
-
-/* R149, /mehr/collabs Desktop: gleicher Fall wie R147 (/faq). Der Float ist sitewide
- * eine Pille mit Label (Vorher-Shot worklog/shots/S7-ux149/vorher/collabs-desktop-1440.png).
- * Auf dieser Route soll er ab sm ein Kreis ohne Text sein. */
-@media (min-width: 640px) {
-  body:has([data-collabs-page]) a.whatsapp-float {
-    width: 3.5rem;
-    padding-left: 0;
-    padding-right: 0;
-    justify-content: center;
-    gap: 0;
-  }
-
-  body:has([data-collabs-page]) a.whatsapp-float [data-whatsapp-label] {
-    display: none;
-  }
-}
-
+/* R206 (2026-08-28): Hier standen sieben Regelbloecke (R140 privatstunden, R141
+ * kursaufbau, R142 events, R144 team, R147 faq, R149 collabs, R150 tanzschuhe+partys),
+ * die alle dasselbe sagten: «auf dieser Route ist der WhatsApp-Float ein Kreis ohne
+ * Label». Sieben Ausnahmen gegen eine Regel heissen, dass die Regel falsch war.
+ *
+ * Der Float ist ab jetzt sitewide ein Kreis (WhatsAppFloat.tsx), das Label lebt als
+ * Hover-Tooltip weiter. Damit haben die sieben Bloecke kein Ziel mehr — das Label,
+ * das sie ausblendeten, gibt es nicht mehr als Teil des Knopfes. Ersatzlos entfernt
+ * statt auf den neuen Aufbau umgeschrieben: eine Regel, die nichts mehr aendert, liest
+ * sich wie eine getroffene Entscheidung und ist keine. */
 /* R152 collabs-header, /mehr/collabs: SiteHeader.tsx faehrt beim Runterscrollen per
  * Inline-Style aus dem Bild (translateY(-100%), SiteHeader.tsx:158). Auf dieser Route
  * bleibt die Leiste stehen — die Seite ist eine B2B-Anfrageseite, der Weg zum Kontakt
@@ -963,24 +1023,6 @@ main img.photo-grade-bachata-why {
  * anderen Routen behalten ihr Hide-on-Scroll. */
 body:has([data-collabs-page]) header.fixed {
   transform: none !important;
-}
-
-/* R150, /mehr/tanzschuhe und /mehr/partys Desktop: gleicher Kreis wie Collabs.
- * Sitewide ist der Float eine Pille (121x56). Auf diesen zwei Routen Kreis ohne Text. */
-@media (min-width: 640px) {
-  body:has([data-tanzschuhe-page]) a.whatsapp-float,
-  body:has([data-partys-page]) a.whatsapp-float {
-    width: 3.5rem;
-    padding-left: 0;
-    padding-right: 0;
-    justify-content: center;
-    gap: 0;
-  }
-
-  body:has([data-tanzschuhe-page]) a.whatsapp-float [data-whatsapp-label],
-  body:has([data-partys-page]) a.whatsapp-float [data-whatsapp-label] {
-    display: none;
-  }
 }
 
 /* R151 partys-blob, /mehr/partys: Der Hero-Blob aus kit.tsx ist h-[36rem] w-[36rem] bei

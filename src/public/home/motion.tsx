@@ -276,6 +276,11 @@ export type RevealWordsProps = {
    *  Viewport-Trigger zu warten. Fuer Above-the-fold-H1s der Unterseiten-Heroes:
    *  `instant` waere gar keine Animation, `whileInView` ein spaeter Start. */
   immediate?: boolean;
+  /** R206: Rolle im Fold fuer die Seitenwechsel-Choreografie (index.css haengt daran
+   *  einen view-transition-name). Muss explizit in den Props stehen: diese Komponente
+   *  reicht keine unbekannten Attribute durch, ein `data-fold` an der Aufrufstelle
+   *  fiele sonst still weg — und die H1 waere die einzige Fold-Rolle ohne Snapshot. */
+  'data-fold'?: string;
 };
 
 export function RevealWords({
@@ -287,6 +292,7 @@ export function RevealWords({
   duration = 0.62,
   instant = false,
   immediate = false,
+  'data-fold': dataFold,
 }: RevealWordsProps) {
   const reduced = useReducedMotion() === true;
   /* R-Scroll-Review (Grok F1/F5): `immediate` bei Reduced Motion == `instant` — gar keine
@@ -323,7 +329,7 @@ export function RevealWords({
       };
 
   return (
-    <Tag className={className} data-reveal data-reveal-variant="letters">
+    <Tag className={className} data-reveal data-reveal-variant="letters" data-fold={dataFold}>
       <span className="sr-only">{text}</span>
       <motion.span
         aria-hidden

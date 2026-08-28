@@ -199,6 +199,7 @@ function ContactHero() {
               (gemessen 2026-08-06). Er steht jetzt als Versprechen ueber dem Lead — gleiche Worte,
               klare Staffelung gross -> mittel -> Fliesstext. */}
           <motion.h1
+            data-fold="title"
             variants={item}
             className={cn(
               'type-h1 text-[var(--color-ink)]',
@@ -208,6 +209,7 @@ function ContactHero() {
             {h.titleA} <TitleAccent>{h.titleAccent}</TitleAccent>
           </motion.h1>
           <motion.p
+            data-fold="lead"
             variants={item}
             className="mt-3 max-w-lg text-pretty font-display text-lg font-bold leading-snug text-[var(--color-ink)] sm:text-xl"
           >
@@ -225,7 +227,7 @@ function ContactHero() {
               (direkt unter dem Hero, Anker #kontaktformular) blieb ohne Einstieg. Jetzt
               Primary = Formular ("Anfrage starten"), WhatsApp als ruhiger zweiter Weg
               daneben (Outline statt Primary-Rot). */}
-          <motion.div variants={item} className="mt-5 flex flex-wrap items-center gap-3">
+          <motion.div data-fold="cta" variants={item} className="mt-5 flex flex-wrap items-center gap-3">
             <a
               href="#kontaktformular"
               className="btn-base btn-primary group gap-2 px-5 text-sm"
@@ -252,6 +254,7 @@ function ContactHero() {
 
         {/* Foto-Komposition nach /fotos-Vorbild: ein grosses Hochformat plus zwei Querformate. */}
         <motion.div
+          data-fold="media"
           variants={container}
           initial="hidden"
           animate="show"
