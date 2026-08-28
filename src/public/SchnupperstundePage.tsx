@@ -57,6 +57,13 @@ export function SchnupperstundePage() {
         }}
         dense
         tightBottom
+        /* R207: Die rechte Spalte traegt hier das Formular, keine drei Textzeilen. Ohne
+           dieses Flag richtet die split-Achse beide Spalten an der UNTERKANTE aus — die
+           kurze H1 links wurde dadurch auf Hoehe des Karten-Fusses gedrueckt und stand
+           bei y=460, waehrend das Formular schon bei y=216 begann. Der Besucher las also
+           erst das Formular und danach, wofuer er es ausfuellt. Oben ausgerichtet steht
+           die Versprechung wieder vor der Handlung. */
+        leadColumnTop
       >
         <div id="anfrage" className="scroll-mt-24 overflow-visible rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)]">
           <InquiryWizard initialTopic="schnupperstunde" lockTopic compact onSuccessHref="/vorbereiten" />

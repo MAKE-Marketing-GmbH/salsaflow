@@ -237,6 +237,7 @@ export function SubHero({
   media,
   dense = false,
   tightBottom = false,
+  leadColumnTop = false,
   airAboveTitle = false,
   airBelowCta = false,
   children,
@@ -260,6 +261,9 @@ export function SubHero({
       damit der Anfrage-Block #anfrage in den 730er-Fold rueckt. Reiner Abstand-Hebel,
       Default false = alle anderen Seiten unveraendert. */
   tightBottom?: boolean;
+  /** R207: richtet die beiden Spalten der split-Achse oben statt unten aus.
+   *  Nur fuer Heroes, deren rechte Spalte eine hohe Karte traegt (siehe HeroFrame). */
+  leadColumnTop?: boolean;
   /** R215: durchgereicht an HeroFrame. Beide Flags existierten dort seit R208/R213,
       waren ueber SubHero aber nicht erreichbar — die Seiten, die sie bisher nutzen
       (/team, /events), bauen ihren Hero mit eigenem Code direkt auf HeroFrame.
@@ -275,6 +279,7 @@ export function SubHero({
       media={media}
       dense={dense}
       tightBottom={tightBottom}
+      leadColumnTop={leadColumnTop}
       airAboveTitle={airAboveTitle}
       airBelowCta={airBelowCta}
       crumbs={seoCrumbs}
@@ -310,6 +315,7 @@ export function HeroFrame({
   airBelowCta = false,
   airAboveTitle = false,
   tightBottom = false,
+  leadColumnTop = false,
   children,
 }: {
   axis?: HeroAxis;
@@ -359,6 +365,24 @@ export function HeroFrame({
   /** R84 (nur /schnupperstunde): kuerzt das Shell-Padding unten, damit #anfrage in den
       730er-Fold rueckt. Reiner Abstand-Hebel, Default false = andere Seiten unveraendert. */
   tightBottom?: boolean;
+  /** R207 (nur /schnupperstunde): richtet die beiden Spalten der split-Achse OBEN aus
+      statt an der Unterkante.
+
+      Die Achse steht sonst auf `lg:items-end`, und das ist fuer ihren Normalfall richtig:
+      links eine grosse H1, rechts Lead + CTA + Microcopy — beide Bloecke teilen sich die
+      Grundlinie, die Typo sitzt auf einer Linie. Genau diese Ausrichtung kippt aber, sobald
+      die rechte Spalte statt drei Textzeilen eine hohe Karte traegt.
+
+      Gemessen auf der Live-Seite (scratch-Probe 28.08., 1440x900): das Formular begann bei
+      y=216, die H1 «Erste Stunde. Gratis.» erst bei y=460 — 372px leeres Papier darueber,
+      und der Besucher las das Formular, bevor er wusste, wofuer er es ausfuellt. Auf Mobil
+      (390x844) stimmte die Reihenfolge dagegen (H1 y=102), weil dort einspaltig gestapelt
+      wird und `items-end` gar nicht greift. Der Fehler war also reiner Desktop.
+
+      Opt-in statt Aenderung an `lg:items-end`: fuenf weitere Routen nutzen `axis="split"`
+      (standort, vorbereiten, collabs, faq, kursplan) und keine davon setzt eine Karte in
+      den children-Slot — fuer sie ist die Grundlinien-Ausrichtung korrekt und bliebe es. */
+  leadColumnTop?: boolean;
   /** Zusatzinhalt unter dem CTA-Block (z. B. Chip-Reihe auf den Stilseiten). */
   children?: ReactNode;
 }) {
@@ -592,7 +616,10 @@ export function HeroFrame({
             /* Achse 1: H1 links, alles Erklaerende in der rechten Schiene. Die Schiene sitzt
                an der Grundlinie der Headline (items-end), damit die beiden Bloecke unten
                abschliessen statt mittig zu schweben. */
-            <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end lg:gap-16">
+            <div className={cn(
+              'grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16',
+              leadColumnTop ? 'lg:items-start' : 'lg:items-end',
+            )}>
               <div>{heading}</div>
               <div className="flex flex-col gap-6 border-t border-[var(--color-line)] pt-6 lg:border-t-0 lg:pt-0">
                 {leadEl}
