@@ -54,15 +54,19 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
   }, []);
 
   /* Sobald gescrollt wird, bleibt die Pille kompakt. Sie klappt nur wieder auf, wenn
-     der Nutzer zurueck an den Seitenanfang kommt — ein Timer wuerde bei jeder Scroll-Pause
-     eine neue Breiten-Animation ausloesen und den Knopf sichtbar auf- und zuklappen
-     lassen. rAF-gedrosselt wie der Scroll-Handler des Headers, damit unter Lenis nicht
-     pro Frame-Event neu gerechnet wird. */
+     der Nutzer ganz an den Seitenanfang zurueckkehrt — ein Timer wuerde bei jeder
+     Scroll-Pause eine neue Breiten-Animation ausloesen und den Knopf sichtbar auf- und
+     zuklappen lassen. Ein- und Ausklappschwelle liegen bewusst weit auseinander (80px
+     hinein, 8px heraus): unter Lenis (lerp 0.075) pendelt scrollY am Seitenanfang um
+     seinen Zielwert, und eine einzelne Schwelle wuerde bei jedem Nulldurchgang kippen.
+     rAF-gedrosselt wie der Scroll-Handler des Headers. */
   useEffect(() => {
     let frame = 0;
     const update = () => {
       frame = 0;
-      commitCompact(window.scrollY >= 24);
+      const y = window.scrollY;
+      if (y >= 80) commitCompact(true);
+      else if (y <= 8) commitCompact(false);
     };
     const onScroll = () => {
       if (!frame) frame = window.requestAnimationFrame(update);
