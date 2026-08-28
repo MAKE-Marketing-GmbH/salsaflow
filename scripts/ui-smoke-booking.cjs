@@ -89,6 +89,19 @@ async function fillPerson(page, prefix, first) {
   await page.locator(`input[name="${prefix}-email"]`).fill(`${first.toLowerCase()}.${STAMP}@uismoke.local`);
 }
 
+async function acceptPrivacy(page) {
+  const box = page.locator('[data-testid="booking-privacy"]');
+  await box.waitFor({ timeout: 10000 });
+  if (!(await box.isChecked())) await box.click();
+}
+
+async function openDialogFromDeepLink(page) {
+  const dialog = page.locator('[data-testid="booking-dialog"]');
+  if (await dialog.count()) return;
+  await page.locator('[data-testid="reserve-spot"]').click();
+  await dialog.waitFor({ timeout: 10000 });
+}
+
 (async () => {
   fs.mkdirSync(SHOTS, { recursive: true });
   const browser = await chromium.launch({ headless: true, channel: 'chrome' });
@@ -112,13 +125,14 @@ async function fillPerson(page, prefix, first) {
 
     // --- 2) Vorauswahl: Link folgen, Dialog steht auf dem Kurs -------------
     await page.goto(`${ORIGIN}${href}`, { waitUntil: 'networkidle' });
-    await page.locator('[data-testid="booking-dialog"]').waitFor({ timeout: 10000 });
+    await openDialogFromDeepLink(page);
     ok('Dialog oeffnet vorausgewaehlt', true);
 
     // --- 3) Solo-Reservierung bis zum Erfolg -------------------------------
     const soloKurs = (await page.locator('[data-testid="booking-dialog"] h2').first().innerText()).trim();
     const soloErwartet = await schrittEinsDurchlaufen(page, { rolle: 'role-follower' });
     await fillPerson(page, 'bk', 'Solo');
+    await acceptPrivacy(page);
     await page.locator('[data-testid="booking-submit"]').click();
     const soloOutcome = await firstOutcome(page);
     ok(
@@ -147,6 +161,7 @@ async function fillPerson(page, prefix, first) {
     const coupleErwartet = await schrittEinsDurchlaufen(page, { rolle: 'role-leader', paar: true });
     await fillPerson(page, 'bk', 'PaarA');
     if (await page.locator('input[name="bk-p-firstName"]').count()) await fillPerson(page, 'bk-p', 'PaarB');
+    await acceptPrivacy(page);
     await page.locator('[data-testid="booking-submit"]').click();
     const coupleOutcome = await firstOutcome(page);
     ok(
@@ -159,7 +174,7 @@ async function fillPerson(page, prefix, first) {
     // --- 5) Mobil: Formularschritt ohne Ueberlauf, Absenden erreichbar -----
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${ORIGIN}${href}`, { waitUntil: 'networkidle' });
-    await page.locator('[data-testid="booking-dialog"]').waitFor({ timeout: 10000 });
+    await openDialogFromDeepLink(page);
     await schrittEinsDurchlaufen(page, { rolle: 'role-follower' });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     ok('Mobil: kein horizontaler Ueberlauf', overflow <= 1, `${overflow}px`);

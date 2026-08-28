@@ -91,12 +91,19 @@ for (const vp of VIEWPORTS) {
     await page.goto(`${BASE}/buchung`, { waitUntil: 'networkidle' });
     await page.waitForSelector('[data-testid^="pick-course-"]', { timeout: 15000 });
     await page.locator('[data-testid^="pick-course-"]').first().click();
-    await page.waitForSelector('[data-testid="booking-dialog"]', { timeout: 15000 });
+    const dialog = page.locator('[data-testid="booking-dialog"]');
+    if (!(await dialog.count())) {
+      await page.locator('[data-testid="reserve-spot"]').click();
+    }
+    await dialog.waitFor({ timeout: 15000 });
     await schrittEinsDurchlaufen(page);
 
     await page.locator('input[name="bk-firstName"]').fill('Shot');
     await page.locator('input[name="bk-lastName"]').fill('Test');
     await page.locator('input[name="bk-email"]').fill(`shot.${STAMP}.${mode}.${vp.name}@uishot.local`);
+    const privacy = page.locator('[data-testid="booking-privacy"]');
+    await privacy.waitFor({ timeout: 10000 });
+    if (!(await privacy.isChecked())) await privacy.click();
     await page.locator('[data-testid="booking-submit"]').click();
 
     let status;
