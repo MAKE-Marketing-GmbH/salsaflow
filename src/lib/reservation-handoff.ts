@@ -16,38 +16,64 @@ export type ReservationFacts = {
   zahlung: string;
 };
 
+/* Zwei Wege enden auf /vorbereiten. Der Kursdialog kennt Slot, Ort und Zahlweise und
+ * uebergibt sie als Faktenkarte. Das Schnupper-Formular im Hero kennt nichts davon —
+ * dort gibt es keinen gewaehlten Termin. Beide muessen die Seite trotzdem von einem
+ * kalten Direktaufruf unterscheiden koennen, sonst begruesst sie jemanden, der gerade
+ * abgeschickt hat, wie einen Fremden. Darum zwei Formen statt erfundener Fakten. */
+export type ReservationHandoff =
+  | ({ kind: 'course' } & ReservationFacts)
+  | { kind: 'inquiry' };
+
 const FIELDS = ['kurs', 'wann', 'wo', 'zahlung'] as const;
 
-function isComplete(value: unknown): value is ReservationFacts {
-  if (!value || typeof value !== 'object') return false;
-  const v = value as Record<string, unknown>;
-  return FIELDS.every((k) => typeof v[k] === 'string' && (v[k] as string).trim().length > 0);
+function isComplete(value: Record<string, unknown>): boolean {
+  return FIELDS.every((k) => typeof value[k] === 'string' && (value[k] as string).trim().length > 0);
 }
 
-export function storeReservation(facts: ReservationFacts): void {
+function parseHandoff(value: unknown): ReservationHandoff | null {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as Record<string, unknown>;
+  if (v.kind === 'inquiry') return { kind: 'inquiry' };
+  // Eintraege ohne `kind` stammen aus der Fassung vor dem Schnupper-Weg: vollstaendige
+  // Fakten bedeuten dort immer eine Kursbuchung.
+  if (!isComplete(v)) return null;
+  return {
+    kind: 'course',
+    kurs: (v.kurs as string).trim(),
+    wann: (v.wann as string).trim(),
+    wo: (v.wo as string).trim(),
+    zahlung: (v.zahlung as string).trim(),
+  };
+}
+
+function write(payload: ReservationHandoff): void {
   if (typeof window === 'undefined') return;
   try {
-    window.sessionStorage.setItem(KEY, JSON.stringify(facts));
+    window.sessionStorage.setItem(KEY, JSON.stringify(payload));
   } catch {
     // Privater Modus oder volles Storage: die Weiterleitung laeuft trotzdem, die
     // Faktenkarte bleibt dann leer.
   }
 }
 
-export function takeReservation(): ReservationFacts | null {
+export function storeReservation(facts: ReservationFacts): void {
+  write({ kind: 'course', ...facts });
+}
+
+/* Der Hero-Weg hat Name und Nummer geschickt, aber keinen Termin gewaehlt. Hinterlegt
+ * wird darum nur, DASS eine Anmeldung vorliegt. */
+export function storeInquiry(): void {
+  write({ kind: 'inquiry' });
+}
+
+export function takeReservation(): ReservationHandoff | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = window.sessionStorage.getItem(KEY);
     if (!raw) return null;
     window.sessionStorage.removeItem(KEY);
-    const parsed: unknown = JSON.parse(raw);
-    if (!isComplete(parsed)) return null;
-    return {
-      kurs: parsed.kurs.trim(),
-      wann: parsed.wann.trim(),
-      wo: parsed.wo.trim(),
-      zahlung: parsed.zahlung.trim(),
-    };
+    return parseHandoff(JSON.parse(raw));
   } catch {
     return null;
   }

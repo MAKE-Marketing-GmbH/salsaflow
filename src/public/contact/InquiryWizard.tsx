@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
+import { storeInquiry } from '@/lib/reservation-handoff';
 import { CONTACT_PAGE, type TopicKey } from '@/public/contact/content';
 import { CONTACT } from '@/public/site/SiteFooter';
 import { WhatsAppIcon } from '@/public/site/BrandIcons';
@@ -415,6 +416,7 @@ export function InquiryWizard({
       });
       if (!response.ok) throw new Error('request failed');
       if (onSuccessHref) {
+        storeInquiry();
         window.location.assign(onSuccessHref);
         return;
       }

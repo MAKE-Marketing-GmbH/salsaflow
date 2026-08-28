@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLang } from '@/lib/i18n';
-import { takeReservation, type ReservationFacts } from '@/lib/reservation-handoff';
+import { takeReservation, type ReservationHandoff } from '@/lib/reservation-handoff';
 import { CONTACT } from '@/public/site/SiteFooter';
 import { InstagramIcon, WhatsAppIcon } from '@/public/site/BrandIcons';
 import { SubHero, SubPageShell, Shell, Reveal } from '@/public/subpage/kit';
@@ -90,12 +90,15 @@ export function PreparePage() {
      nicht, ein direktes Lesen im Render wuerde Server- und Client-Markup auseinander-
      laufen lassen. Ohne Reservierung rendert der Block gar nicht — die Seite ist auch
      ueber das Schnupper-Formular und per Direktaufruf erreichbar. */
-  const [booking, setBooking] = useState<ReservationFacts | null>(null);
-  useEffect(() => setBooking(takeReservation()), []);
-  /* Der behauptende Lead haengt an `booking`: die Route ist per Direktaufruf und
-     geteiltem Link erreichbar, und takeReservation() raeumt den Eintrag beim ersten
-     Lesen. Ohne bekannte Anmeldung — Direktaufruf, Reload — steht der neutrale Satz. */
-  const lead = booking ? c.leadBooked : c.lead;
+  const [handoff, setHandoff] = useState<ReservationHandoff | null>(null);
+  useEffect(() => setHandoff(takeReservation()), []);
+  const booking = handoff?.kind === 'course' ? handoff : null;
+  /* Der behauptende Lead haengt an jeder bekannten Anmeldung, auch der ohne Termin:
+     die Route ist per Direktaufruf und geteiltem Link erreichbar, und takeReservation()
+     raeumt den Eintrag beim ersten Lesen. Ohne Anmeldung — Direktaufruf, Reload —
+     steht der neutrale Satz. Die Faktenkarte darunter bleibt der Kursbuchung
+     vorbehalten: fuer das Schnupper-Formular gibt es kein Wann, Wo und Zahlung. */
+  const lead = handoff ? c.leadBooked : c.lead;
   return (
     <SubPageShell seo="prepare">
       <SubHero
