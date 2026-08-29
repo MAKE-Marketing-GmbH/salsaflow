@@ -122,15 +122,25 @@ export function createReservationRoutes(loadSchedule: () => Promise<SeedSchedule
   app.post('/api/public/reservations', async (c) => {
     const parsed = reservationSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) {
-      return c.json({ error: 'Ungültige Eingabe', issues: parsed.error.issues }, 400);
+      // Die Zod-Fehlerliste bleibt im Log. Nach aussen ging sie vorher mit: Feldnamen, Typen,
+      // Grenzwerte — und darunter der Honeypot-Feldname (gleiche Begruendung wie in
+      // contact-routes.ts). Das Formular kennt seine eigenen Regeln.
+      console.error('[reservation] ungültige Eingabe', parsed.error.issues);
+      return c.json({ error: 'Ungültige Eingabe' }, 400);
     }
     const d = parsed.data;
 
     // Honeypot VOR dem Rate-Limit: ein Treffer loest keine Mail aus und soll weder das
     // Budget echter Absender verbrauchen noch je als 429 antworten (gleiche Ordnung wie
-    // in contact-routes.ts).
+    // in contact-routes.ts). Die Antwort ist byte-identisch zum Erfolgsfall (inkl. 404 bei
+    // unbekanntem Kurs) — ein "skipped: true" verriet dem Bot, dass das Feld ihn enttarnt hat.
     if (d.website && d.website.trim().length > 0) {
-      return c.json({ ok: true, skipped: true }, 200);
+      console.error('[reservation] Honeypot ausgeloest, Anfrage verworfen');
+      const schedule = await loadSchedule();
+      const course = schedule.courses.find((entry) => entry.id === d.courseId);
+      if (!course) return c.json({ error: 'Kurs nicht gefunden' }, 404);
+      const status: 'waitlisted' | 'reserved' = course.status === 'full' ? 'waitlisted' : 'reserved';
+      return c.json({ ok: true, status, courseId: course.id }, 200);
     }
 
     // Jede gueltige Reservierung erzeugt eine Mail ans Studio. Fuenf in zehn Minuten decken

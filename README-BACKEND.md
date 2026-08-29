@@ -41,7 +41,16 @@ npm run dev                   # Frontend (5173) + API (8787) parallel
 | `npm run verify:payment` | **Gate Etappe 9**: Online-Zahlung (Sandbox, PAYMENT_ENABLED=1) |
 | `npm run dev:pay` | App lokal MIT scharfer Zahlung (PAYMENT_ENABLED=1) |
 
-## Online-Zahlung (Etappe 9)
+## Online-Zahlung (Etappe 9) — STILLGELEGT
+
+**Beschluss 13.08.2026: kein Kauf-Funnel.** Die Webhook-/Sandbox-Routen aus
+`server/payment-routes.ts` sind nirgends gemountet, und die Buchung existiert nicht mehr als
+Kaufweg: `POST /api/public/bookings` antwortet lokal wie auf Vercel mit 410. Kursplaetze laufen
+als Reservierung (`POST /api/public/reservations`) — das Studio bestaetigt per Mail, bezahlt
+wird vor Ort (Twint oder bar). `server/payment-routes.ts`, `server/payments.ts` und
+`src/lib/payments.ts` bleiben bewusst als retired/ungemountete Referenz im Repo (nicht loeschen).
+
+Historischer Stand (nicht mehr aktiv):
 
 TWINT/Karte ueber Stripe Checkout (ARCHITEKTUR.md 7). Ohne `STRIPE_SECRET_KEY` laeuft ein lokaler
 Sandbox-Treiber mit gehosteter Test-Bezahlseite (`/api/sandbox/checkout/:id`) und lokal signierten
