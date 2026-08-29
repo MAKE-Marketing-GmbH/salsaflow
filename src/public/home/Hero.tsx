@@ -107,6 +107,8 @@ const PARALLAX_MOBILE = 0;
 const DESKTOP_QUERY = '(min-width: 640px)';
 const HERO_POSTER_DESKTOP = '/photos/instagram/lady-style-v2.webp';
 const HERO_POSTER_MOBILE = '/photos/instagram/lady-style-hero-mobile.webp';
+const HERO_VIDEO_DESKTOP = '/videos/home-hero-instagram-muted.mp4';
+const HERO_VIDEO_MOBILE = '/videos/home-hero-instagram-muted-mobile.mp4';
 
 /** Liefert die Parallax-Distanz fuer die aktuelle Breite. Serverseitig und vor der ersten
  *  Messung gilt der Mobil-Wert — der kleinere von beiden, also der, der im Zweifel weniger
@@ -145,6 +147,7 @@ export function Hero() {
   const [loadHeroVideo, setLoadHeroVideo] = useState(false);
   const [heroVideoVisible, setHeroVideoVisible] = useState(false);
   const [heroPosterReady, setHeroPosterReady] = useState(false);
+  const [heroVideoSrc, setHeroVideoSrc] = useState(HERO_VIDEO_MOBILE);
   const h = HOME[lang].hero;
   const cta = HOME[lang].cta;
   const de = lang === 'de';
@@ -155,6 +158,7 @@ export function Hero() {
      gescrollt ist, und die sichtbare Bewegung waere fast null. */
   const photoRef = useRef<HTMLDivElement>(null);
   const heroPosterRef = useRef<HTMLImageElement>(null);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (heroPosterRef.current?.complete) setHeroPosterReady(true);
@@ -173,7 +177,12 @@ export function Hero() {
       return;
     }
 
-    const load = () => setLoadHeroVideo(true);
+    const load = () => {
+      setHeroVideoSrc(
+        window.matchMedia(DESKTOP_QUERY).matches ? HERO_VIDEO_DESKTOP : HERO_VIDEO_MOBILE,
+      );
+      setLoadHeroVideo(true);
+    };
     const idleApi: {
       requestIdleCallback?: Window['requestIdleCallback'];
       cancelIdleCallback?: Window['cancelIdleCallback'];
@@ -188,6 +197,16 @@ export function Hero() {
     const timeoutId = window.setTimeout(load, 900);
     return () => window.clearTimeout(timeoutId);
   }, [heroPosterReady, reducedMotion]);
+  useEffect(() => {
+    if (!loadHeroVideo) return;
+    const el = heroVideoRef.current;
+    if (!el) return;
+    const attempt = el.play();
+    if (attempt !== undefined) {
+      attempt.catch(() => setHeroVideoVisible(false));
+    }
+  }, [loadHeroVideo, heroVideoSrc]);
+
   const parallaxDistance = useParallaxDistance();
   const parallax = useParallaxStyle(photoRef, reducedMotion ? 0 : parallaxDistance);
 
@@ -676,15 +695,15 @@ export function Hero() {
                Ueberstand-Traeger darin bleibt unberuehrt, sein Koordinatensystem
                skaliert als Ganzes mit — keine Kante wird frei. */
             style={{ scale: photoExitScale, opacity: photoExitOpacity }}
-            className="h-full w-full overflow-hidden rounded-b-[var(--radius-media)] sm:rounded-[var(--radius-media)] lg:rounded-[var(--radius-media)]"
+            className="h-full w-full overflow-hidden bg-[#0A0A0A] rounded-b-[var(--radius-media)] sm:rounded-[var(--radius-media)] lg:rounded-[var(--radius-media)]"
           >
-            {/* Lesbarkeits-Verlauf, NUR unter sm (ab sm liegt kein Text auf dem Foto und ein
-                Verlauf waere reine Deko). Fuss #0A0A0A/92 -> transparent bei 52 %: die
-                Script-Zeile und die H1 sitzen im unteren Drittel, wo der Verlauf am dichtesten
-                ist. Kontrast Weiss auf dem hellsten Motivpunkt im Textbereich (Hemd) > 7:1. */}
+            {/* Dunkler Verlauf auf allen Breiten. Mobil: Fuss 0.92 fuer weissen Text auf
+                dem Motiv. Desktop: Raphael 29.08. "Mach von mir aus alles dunkel" — der
+                Clip ist #0A0A0A, der Verlauf haelt die helle Studio-Wand zurueck, falls
+                das Video nicht spielt. */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(to_top,rgba(10,10,10,0.92)_0%,rgba(10,10,10,0.55)_28%,transparent_52%)] sm:hidden"
+              className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(to_top,rgba(10,10,10,0.92)_0%,rgba(10,10,10,0.55)_28%,rgba(10,10,10,0.38)_100%)] sm:bg-[linear-gradient(to_top,rgba(10,10,10,0.42)_0%,rgba(10,10,10,0.28)_100%)]"
             />
             {/* Der Parallax-Traeger. `motion.div` und nicht `motion.img`, weil <picture>
                 zwei Quellen fuehrt (Portrait unter 640px, Querformat darueber) — der
@@ -725,31 +744,23 @@ export function Hero() {
               </picture>
               {loadHeroVideo ? (
                 <video
+                  ref={heroVideoRef}
                   aria-hidden="true"
                   autoPlay
                   muted
                   loop
                   playsInline
                   disablePictureInPicture
-                  preload="none"
+                  preload="auto"
+                  src={heroVideoSrc}
+                  poster={heroVideoSrc === HERO_VIDEO_DESKTOP ? HERO_POSTER_DESKTOP : HERO_POSTER_MOBILE}
                   onCanPlay={() => setHeroVideoVisible(true)}
                   onError={() => setHeroVideoVisible(false)}
                   className={cn(
                     'absolute inset-0 h-full w-full object-cover object-center opacity-0 transition-opacity duration-[var(--dur-base)] [transition-timing-function:var(--motion-out)]',
                     heroVideoVisible && 'opacity-100',
                   )}
-                >
-                  <source
-                    src="/videos/home-hero-instagram-muted-mobile.mp4"
-                    type="video/mp4"
-                    media="(max-width: 639px) and (prefers-reduced-motion: no-preference)"
-                  />
-                  <source
-                    src="/videos/home-hero-instagram-muted.mp4"
-                    type="video/mp4"
-                    media="(min-width: 640px) and (prefers-reduced-motion: no-preference)"
-                  />
-                </video>
+                />
               ) : null}
             </motion.div>
           </motion.div>
