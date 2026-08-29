@@ -1,7 +1,34 @@
 # PROGRESS — Salsaflow DC
 
-**Stand:** 2026-08-27 17:05 UTC — Redaktionsschicht live (`1ee1bbf`). Admin-Login `admin@salsaflow-dc.com` / `salsaflow-admin-2026`. Oeffentliche APIs lesen die DB (`Cache-Control: no-store`); Event anlegen erscheint sofort, Kaufweg bleibt 410.
-**Vorher:** Weltklasse-Runde deployed (`a606b39` + `48e9c4e`).
+**Stand:** 2026-08-29 01:00 UTC — R210–R217 committet (`518a2da` + `8fffd26`), Deploy laeuft/live.
+**Vorher:** Motion/Consent-Runde R206–R209 (`b50f6ce`), Handoff 28.08.
+
+## Ready-Runde 29.08 (R210–R217)
+
+- **First-Load-Choreografie (Kern der Runde):** Der weisse Schirm beim Erstaufruf
+  (gemessen 4084 ms First Paint bei Drossel — Entry-Modul im `<head>` blockierte
+  das Parsen des Prerender-Markups) ist weg: Entry-Modul ans Body-Ende, Fold
+  laeuft als CSS-only-Choreografie ab First Paint (0.86s/85ms/28px+6px Drift/Blur),
+  Eyebrow→H1→Lead→CTA→Trust→Media einzeln. `pagereveal`-Gating verhindert
+  Doppel-Animation bei View-Transition-Navigation. Frame-Beleg Desktop+Mobil.
+- **Backend Dev==Prod:** server/index.ts serviert die Vercel-Runtime; Preis-Leak
+  auf oeffentlicher Availability und zwei Honeypot-Leaks geschlossen.
+- **Ratgeber-Cluster:** /mehr/salsa-lernen, /mehr/salsa-oder-bachata,
+  /mehr/hochzeitstanz — datenbasiert (DataForSEO-Exporte in seo/research/),
+  30 Prerender-Routen, FAQ-Querlinks, forbidden-check 0.
+- **Schema:** DanceSchool-Array, 4 Offers (/preise), 9 Personen (/team),
+  sitemap lastmod, OG 1200×630 sitewide.
+- **Plan-Abgleich:** 5 tote /events-Pfade als Redirects (kanonisch in routes.tsx),
+  WhatsApp-Float mit Chat-Prefill DE/EN, Anleitung auf Reservierungs-Realitaet
+  korrigiert (Online-Zahlungs-Passagen raus), /schnupperstunde-Trust-Spalte.
+
+Gates: typecheck, oxlint, build, verify 18/18 + 39/39 + 20/20 (+26/26 admin),
+alle claude-visual-Sweeps 0 Failures, jedes PNG nativ gesichtet.
+BLOCKED: Grok-Visualkritik-Lane (CLI `serialization error: missing field 'id'`,
+2x reproduziert) — visuelle Abnahme trug der Fable-Controller (familienfremd zu Opus).
+OFFEN (gross): DNS zeigt weiter auf Jimdo — der neue Build lebt nur auf
+salsaflow-dc.vercel.app (noindex). Cutover = groesster SEO-Hebel; Domain rankt
+bereits (Local Pack #1 "salsa kurs basel", organisch #4/#6 — SERP-Exporte 29.08.).
 
 ## Redaktion 27.08 (Backend fuer den Tanzschul-Betrieb)
 
