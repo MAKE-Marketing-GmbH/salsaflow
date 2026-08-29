@@ -335,13 +335,21 @@ export function Hero() {
               76px Luft zur Kante hatte.
 
               Achtung auf das Vorzeichen: der Wert wird von --hero-photo-h ABGEZOGEN. Ein
-              groesserer pt schiebt den Block also nach OBEN, nicht nach unten. Erster Versuch
-              mit 18.625rem machte es darum schlimmer (96px statt 48px im Foto). Richtig ist
-              250px - 48px = 202px = 12.625rem. Die Naht liegt damit wieder zwischen H1 und
-              Lead. Wer die Pills je zurueckholt, rechnet zurueck auf 15.625rem. */}
+              groesserer Abzug schiebt den Block nach OBEN, nicht nach unten.
+
+              R219 (Raphael 29.08., "auf mobil ... da muss eine gewisse Logik mit dabei
+              sein auf dem Hero"): Die Naht zwischen H1 und Lead war genau das Unlogische —
+              die Botschaft brach mitten im Textfluss von Weiss-auf-Foto zu Grau-auf-Papier
+              (gemessen 390x844: Fotokante 454, Lead 462..521, nur 8px Luft). Neue Logik:
+              die KOMPLETTE Botschaft (Script-Zeile, H1, Lead) steht weiss auf dem Foto,
+              die Naht liegt UNTER dem Lead, und auf dem Papier folgt nur noch die Aktion
+              (CTAs + Trust). Rechnung: Naht-zu-Lead-Unterkante war -67px, Ziel +13px
+              => Abzug +80px = +5rem: 12.625 -> 17.625rem. Nachgemessen (390x844, Banner
+              aktiv): Lead 382..441, Kante 454, CTA ab 473 — Naht sauber im Aktionsabstand.
+              Der Lead traegt dafuer max-sm weisse Schrift (Gradient-Fusszone, siehe dort). */}
           <div
             data-hero-fold
-            className="relative z-10 self-center px-5 pt-[calc(var(--hero-photo-h)-12.625rem)] sm:px-8 sm:pt-0 lg:py-10 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-0"
+            className="relative z-10 self-center px-5 pt-[calc(var(--hero-photo-h)-17.625rem)] sm:px-8 sm:pt-0 lg:py-10 lg:pl-[max(2rem,calc((100vw-1400px)/2+2rem))] lg:pr-0"
           >
             {/* leading-[1.3] statt leading-none: Alex Brush setzt Ober- und Unterlaengen
                 ausserhalb einer 1.0-Zeilenbox, dadurch stimmten die Abstaende nicht. */}
@@ -491,7 +499,10 @@ export function Hero() {
               /* Zwei Stufen, nicht drei: `max-sm:` deckt < 640 px, `sm:` deckt
                  >= 640 px. Ein nacktes `mt-6` stand hier zusaetzlich und war
                  damit unerreichbar. */
-              className="max-w-md text-pretty text-lg leading-relaxed text-[var(--color-ink-muted)] max-sm:mt-9 sm:mt-10 sm:text-xl"
+              /* R219: Unter sm steht der Lead jetzt IM Foto (Gradient-Fusszone, alpha >= 0.55)
+                 — weiss wie H1 und Script-Zeile, eine Flaeche, eine Farbe. Ab sm unveraendert
+                 muted auf Papier. */
+              className="max-w-md text-pretty text-lg leading-relaxed text-[var(--color-ink-muted)] max-sm:mt-6 max-sm:text-white/95 sm:mt-10 sm:text-xl"
             >
               {de
                 ? 'Drei Studios direkt am Bahnhof SBB. Komm allein oder zu zweit, die erste Stunde kostet dich nichts.'

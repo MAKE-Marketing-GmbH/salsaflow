@@ -133,18 +133,14 @@
   --fold-enter-blur: 8px;
 
   /* R153: Wie stark der Cookie-Hinweis den WhatsApp-Float anhebt.
-   * Unter sm ist der Wert 0px — dort loest der rechte Gutter am Banner-Wrapper den
-   * Konflikt bereits waagerecht, und ein Vertikal-Lift wuerde den Kreis genau auf den
-   * Hero-CTA «Schnupperstunde buchen» heben. Ab sm hebt der Float ueber die Karte.
+   * R219: gilt jetzt auf ALLEN Breakpoints. Die alte Unter-sm-Ausnahme (0px) stammt aus
+   * der Zeit, als der Float mobil ausgeblendet war — seit er dort sichtbar ist (Raphael
+   * 29.08., "auf Mobil prominenter, rechts unten"), stand er ohne Lift HINTER der
+   * Banner-Karte (gemessen 390x844: Float y768, Banner 728..844). Mit Lift steht er bei
+   * y~688 und kollidiert nicht mit dem Hero-CTA (endet 659, neue R219-Geometrie).
    * Der Float rechnet die Variable in seinen Inline-`bottom` mit (WhatsAppFloat.tsx);
    * `--cookie-banner-height` selbst bleibt unberuehrt, weil das body-Polster daran haengt. */
-  --cookie-float-lift: 0px;
-}
-
-@media (min-width: 640px) {
-  :root {
-    --cookie-float-lift: var(--cookie-banner-height, 0px);
-  }
+  --cookie-float-lift: var(--cookie-banner-height, 0px);
 }
 
 @media (min-width: 64rem) {
@@ -412,21 +408,29 @@ html {
 
 /* `html:not(.sf-vt-nav)` ist das Gating gegen die Doppel-Animation: bei einer internen
    Navigation traegt die View Transition oben den Auftritt, dann darf diese hier nicht
-   zusaetzlich feuern. Das Flag setzt der synchrone Head-Schnipsel in index.html. */
+   zusaetzlich feuern. Das Flag setzt der synchrone Head-Schnipsel in index.html.
+
+   R218: fill-mode `backwards` statt `both`, an allen sechs Fold-Regeln. Jede Keyframe
+   endet auf Identitaet (opacity 1, transform 0) — `forwards`-Fill haette also nichts zu
+   halten, hielt das Element aber dauerhaft komponiert. Gemessen am Hero-Video (Kunde
+   29.08., «bitte abgerundet»): mit gehaltener Animation am media-Wrapper ignorierte der
+   Compositor den 24px-Radius-Clip der inneren overflow-hidden-Box (Ecken liefen eckig
+   bis an die Kante); `outer.style.animation='none'` stellte die Rundung sofort her.
+   `backwards` deckt weiterhin die Delay-Phase (Startzustand vor Animationsbeginn). */
 html:not(.sf-vt-nav) [data-fold='crumbs'] {
-  animation: sf-fold-load-left var(--dur-fold-enter) var(--motion-enter) both;
+  animation: sf-fold-load-left var(--dur-fold-enter) var(--motion-enter) backwards;
 }
 
 html:not(.sf-vt-nav) [data-fold='title'] {
-  animation: sf-fold-load-left var(--dur-fold-enter) var(--motion-enter) var(--fold-stagger) both;
+  animation: sf-fold-load-left var(--dur-fold-enter) var(--motion-enter) var(--fold-stagger) backwards;
 }
 
 html:not(.sf-vt-nav) [data-fold='lead'] {
-  animation: sf-fold-load-right var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 2) both;
+  animation: sf-fold-load-right var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 2) backwards;
 }
 
 html:not(.sf-vt-nav) [data-fold='cta'] {
-  animation: sf-fold-load-left var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 3) both;
+  animation: sf-fold-load-left var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 3) backwards;
 }
 
 /* Die Trust-Zeile ist der einzige Fold-Teilnehmer ohne eigenen view-transition-name: beim
@@ -434,14 +438,14 @@ html:not(.sf-vt-nav) [data-fold='cta'] {
    Erstaufruf schliesst sie aber die Staffel unter dem CTA ab. Sie traegt deshalb ein
    eigenes Attribut statt eines data-fold-Werts. */
 html:not(.sf-vt-nav) [data-fold-load='trust'] {
-  animation: sf-fold-load-right var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 4) both;
+  animation: sf-fold-load-right var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 4) backwards;
 }
 
 /* Das Medium kommt zuletzt — die groesste Flaeche schliesst die Bewegung ab, statt sie
    anzufuehren. Bei 5x85 = 425ms Vorlauf plus 860ms Dauer steht der Fold nach rund 1.3s
    vollstaendig. */
 html:not(.sf-vt-nav) [data-fold='media'] {
-  animation: sf-fold-load-media var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 5) both;
+  animation: sf-fold-load-media var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 5) backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -92,7 +92,13 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
       whileTap={reduced ? undefined : { scale: 0.94 }}
       transition={{ type: 'spring', bounce: 0.18, duration: reduced ? 0.2 : 0.5 }}
       className={cn(
-        'whatsapp-float group/wa font-sans fixed right-6 z-40 hidden h-14 w-14 items-center justify-center rounded-full lg:inline-flex',
+        /* R219 (Raphael 29.08.): WhatsApp soll auf Mobil prominent unten rechts stehen —
+           der Float ist jetzt auf ALLEN Breakpoints sichtbar. Die fruehere Mobil-Ausblendung
+           (Sticky-CTA-Kollision) ist ueberholt: der bottom-Calc unten hebt den Kreis bereits
+           um --sticky-cta-height und --cookie-float-lift an, eine Ausblendung ist damit
+           nicht mehr noetig. /kursplan bleibt per float={false} ohne Kreis (gemessene
+           Karten-Kollision, SchedulePage). */
+        'whatsapp-float group/wa font-sans fixed right-4 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full sm:right-6',
         /* Der Schatten traegt den Gruenton statt eines neutralen Grau: ein farbiger
            Schatten unter einem farbigen Knopf liest sich als Licht, ein grauer als
            Schmutz. Der Ring ist eine haarfeine dunkle Kante, damit der Kreis auf dem

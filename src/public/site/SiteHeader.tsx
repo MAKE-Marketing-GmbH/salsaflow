@@ -274,7 +274,11 @@ export function SiteHeader() {
   return (
     <header
       ref={headerRef}
-      className="fixed inset-x-0 top-0 z-50 isolate bg-[var(--color-paper-warm)] will-change-transform transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-reduce:transition-none"
+      /* R219 (Raphael 29.08., woertlich: "der Header soll einfach immer nur dieser Container
+         sein, keinen Hintergrund"): der vollflaechige Paper-Balken hinter der Pille ist raus.
+         Die Pille (t-acc, eigene bg + Border + Schatten) traegt den Header allein; in den
+         schmalen Raendern daneben scrollt der Seiteninhalt sichtbar durch — gewollt. */
+      className="fixed inset-x-0 top-0 z-50 isolate will-change-transform transition-transform duration-[var(--dur-slow)] ease-[var(--motion-out)] motion-reduce:transition-none"
       style={{
         height: 'var(--nav-h)',
         transform: hidden && !open ? 'translateY(-100%)' : 'translateY(0)',
