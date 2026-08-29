@@ -78,6 +78,11 @@ export function SiteFooter({
     { label: nav.fotos, href: '/fotos' },
     { label: nav.faq, href: '/faq' },
     { label: nav.tanzschuhe, href: '/mehr/tanzschuhe' },
+    // Ratgeber-Cluster (research-fazit 29.08.): der Footer ist der zweite Weg dorthin und
+    // steht auf jeder Seite im HTML, also auch das stabilere interne Link-Signal.
+    { label: nav.salsaLernen, href: '/mehr/salsa-lernen' },
+    { label: nav.salsaOderBachata, href: '/mehr/salsa-oder-bachata' },
+    { label: nav.hochzeitstanz, href: '/mehr/hochzeitstanz' },
     { label: nav.kontakt, href: '/kontakt' },
     // Runde 2, Issue 9: Gutschein und Shows/Animationen standen als eigenes Zwei-Karten-Band
     // auf der Startseite (src/public/home/Offer.tsx). Beides sind Nebenwege, keine

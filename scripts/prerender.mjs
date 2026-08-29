@@ -11,7 +11,10 @@ const siteOrigin = 'https://www.salsaflow-dc.com';
 // Bild-Host = ASSET_ORIGIN (src/lib/seo-config.ts): die Ziel-Domain traegt bis zum
 // DNS-Cutover noch die alte Website — og:image dort ist 404, geteilte Links kaemen ohne
 // Vorschaubild an. Beim Cutover zuruestellen auf www.salsaflow-dc.com.
-const socialImage = 'https://salsaflow-dc.vercel.app/photos/showcase/hp-05.webp';
+// SEO-Audit 28.08.2026: dediziertes OG-Bild 1200x630 (aus hp-05 gebaut) statt hp-05.webp
+// (1800x1200). Werte muessen zu DEFAULT_SOCIAL_IMAGE in src/lib/seo-config.ts passen.
+const socialImage = 'https://salsaflow-dc.vercel.app/photos/og/og-default.jpg';
+const socialImageMeta = { type: 'image/jpeg', width: '1200', height: '630' };
 
 /* Routen ohne Vorrendering: leere Huellen mit noindex. Einzige Quelle fuer den Build UND
  * fuer scripts/verify-seo.mjs — die Liste stand dort frueher ein zweites Mal von Hand und
@@ -66,6 +69,39 @@ function hoistPreloadLinks(html) {
   return withoutInlineLinks.replace('<head>', `<head>\n    ${preloadMarkup}`);
 }
 
+/** R210: Das Entry-Modul ans Ende des Body schieben.
+ *
+ *  GEMESSENER BEFUND (scratch/paint-timing.cjs gegen den Produktionsbuild, 4x CPU-Drossel
+ *  und 900 kbit — also der Fall, den das Video zeigt):
+ *    HTML vollstaendig    635ms
+ *    Stylesheet fertig   1924ms
+ *    JS-Bundle fertig    3304ms
+ *    ERSTER PAINT        4084ms
+ *  Der Paint haengt also nicht am Stylesheet, sondern am Bundle: bis dahin ist die Seite
+ *  weiss, danach steht der komplette Fold in EINEM Frame. Das ist der «weisse Schirm plus
+ *  Pop» aus dem Video, und keine Eintritts-Animation kann daran etwas aendern — es wird ja
+ *  nichts gemalt, was animiert werden koennte.
+ *
+ *  URSACHE: Vite legt das Entry-Modul als <script type="module"> in den <head>. Ausgefuehrt
+ *  wird so ein Modul zwar erst nach dem Parsen, aber der Parser muss es vorher HOLEN — und
+ *  erreicht die 230 kB vorgerenderten Body-Markup darunter deshalb erst, wenn das Bundle da
+ *  ist. Bei einer SPA mit leerem #root faellt das nicht auf, weil es dort nichts zu malen
+ *  gibt. Diese Site rendert vor: der ganze sichtbare Inhalt liegt im HTML und wartet umsonst.
+ *
+ *  Am Ende des Body steht dasselbe Modul hinter dem Inhalt. Der Parser malt den Fold, sobald
+ *  das Stylesheet steht, und laedt das Bundle danach. Verhalten der Anwendung unveraendert:
+ *  ein Modul ist ohnehin `defer`, es lief also auch vorher erst nach dem Parsen.
+ *
+ *  Nur das Entry-Modul wandert. Der Cookie-Schnipsel und das pagereveal-Gating bleiben im
+ *  Head — beide muessen VOR dem ersten Paint entschieden haben, genau darum stehen sie dort.
+ *  Sie sind inline und kosten keinen Roundtrip. */
+function deferEntryModule(html) {
+  const pattern = /\s*<script type="module"[^>]*src="[^"]*"[^>]*><\/script>/i;
+  const match = html.match(pattern);
+  if (!match) return html;
+  return html.replace(pattern, '').replace('</body>', `    ${match[0].trim()}\n  </body>`);
+}
+
 function buildDocument(template, { route, title, description, body, noindex = false, canonical = true, prerendered = true }) {
   const canonicalUrl = `${siteOrigin}${route === '/' ? '/' : route}`;
   let html = template
@@ -84,13 +120,19 @@ function buildDocument(template, { route, title, description, body, noindex = fa
   html = upsertMeta(html, 'property', 'og:description', description);
   html = upsertMeta(html, 'property', 'og:url', canonicalUrl);
   html = upsertMeta(html, 'property', 'og:image', socialImage);
+  // Auch secure_url/type/width/height ueberschreiben: index.html traegt diese Metas noch
+  // statisch mit den Werten des alten hp-05-Bilds — ohne Upsert blieben sie in dist stehen.
+  html = upsertMeta(html, 'property', 'og:image:secure_url', socialImage);
+  html = upsertMeta(html, 'property', 'og:image:type', socialImageMeta.type);
+  html = upsertMeta(html, 'property', 'og:image:width', socialImageMeta.width);
+  html = upsertMeta(html, 'property', 'og:image:height', socialImageMeta.height);
   html = upsertMeta(html, 'property', 'og:locale', 'de_CH');
   html = upsertMeta(html, 'name', 'twitter:card', 'summary_large_image');
   html = upsertMeta(html, 'name', 'twitter:title', title);
   html = upsertMeta(html, 'name', 'twitter:description', description);
   html = upsertMeta(html, 'name', 'twitter:image', socialImage);
   html = upsertCanonical(html, canonical ? canonicalUrl : null);
-  return hoistPreloadLinks(html);
+  return deferEntryModule(hoistPreloadLinks(html));
 }
 
 async function writeRoute(route, html) {
@@ -100,8 +142,14 @@ async function writeRoute(route, html) {
 }
 
 function sitemapXml(paths) {
+  // EIN lastmod fuer alle URLs (SEO-Audit 28.08.2026): die ganze Ausgabe entsteht in einem
+  // Prerender-Lauf, ein unterschiedliches Datum je Seite waere ein erfundener Verlauf.
+  const buildDate = new Date().toISOString().slice(0, 10);
   const urls = paths
-    .map((route) => `  <url>\n    <loc>${siteOrigin}${route === '/' ? '/' : route}</loc>\n  </url>`)
+    .map(
+      (route) =>
+        `  <url>\n    <loc>${siteOrigin}${route === '/' ? '/' : route}</loc>\n    <lastmod>${buildDate}</lastmod>\n  </url>`,
+    )
     .join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
 }

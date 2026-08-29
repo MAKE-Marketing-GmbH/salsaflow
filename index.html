@@ -15,6 +15,24 @@
         document.documentElement.dataset.cookieNotice = 'needed';
       }
     </script>
+    <!-- R210: Gating gegen die Doppel-Animation des Folds.
+         Zwei Mechanismen bringen den Fold herein: beim ERSTEN Laden die CSS-Choreografie
+         (src/index.css, `sf-fold-load-*`), beim internen Seitenwechsel die Cross-Document
+         View Transition. Beide gleichzeitig hiesse: das Element faehrt zweimal ein.
+         `pagereveal` feuert vor dem ersten Frame eines Dokuments; `e.viewTransition` ist
+         nur dann gesetzt, wenn dieser Aufruf aus einer Navigation MIT Uebergang kommt.
+         Genau dann bekommt <html> die Klasse und die CSS-Regeln greifen nicht.
+         Der Schnipsel steht synchron im Head und ohne `defer`: er muss VOR dem ersten
+         Paint entschieden haben, sonst liefe die Animation ein paar Frames lang doch an.
+         Browser ohne `pagereveal` (heute Safari und Firefox) fuehren auch keine
+         Cross-Document-View-Transition aus — dort gibt es also gar keine zweite
+         Animation, gegen die zu gaten waere, und die Choreografie laeuft wie beim
+         Erstaufruf. Das ist der akzeptierte Normalfall, kein Fehlerpfad. -->
+    <script>
+      window.addEventListener('pagereveal', function (e) {
+        if (e.viewTransition) document.documentElement.classList.add('sf-vt-nav');
+      });
+    </script>
     <title>Tanzschule Basel: Salsa, Bachata &amp; Heels | Salsaflow</title>
     <meta
       name="description"
@@ -55,6 +73,17 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Die zwei Fold-Schriften vorladen. Beide stehen im ersten Bildschirm: Cal Sans traegt
+         die H1, Alex Brush die Script-Zeile darueber. Ohne Preload entdeckt der Browser sie
+         erst, wenn er das 188-kB-Stylesheet geparst und das Layout gerechnet hat — gemessen
+         rund 150 ms nach dem ersten Paint, sichtbar als Sprung von der Fallback-Schrift auf
+         die Marke. `crossorigin` ist bei Fonts Pflicht (auch same-origin), sonst laedt der
+         Browser die Datei ein zweites Mal statt den Preload zu nutzen.
+         Die zwei Cabinet-Grotesk-Schnitte bekommen bewusst KEINEN Preload: sie stehen in
+         keinem Fold, ein Preload wuerde nur Bandbreite gegen das Hero-Motiv stellen. -->
+    <link rel="preload" href="/fonts/cal-sans-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/alex-brush-latin.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <noscript>

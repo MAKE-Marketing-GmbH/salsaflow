@@ -240,6 +240,7 @@ export function SubHero({
   leadColumnTop = false,
   airAboveTitle = false,
   airBelowCta = false,
+  underTitle,
   children,
 }: {
   seoCrumbs: Crumb[];
@@ -271,6 +272,9 @@ export function SubHero({
       Doku der Wirkung steht an den HeroFrame-Props, nicht doppelt hier. */
   airAboveTitle?: boolean;
   airBelowCta?: boolean;
+  /** R216: durchgereicht an HeroFrame — Zusatzinhalt in der LINKEN Split-Spalte
+      unter der H1 (bisher einziger Nutzer: /schnupperstunde, siehe HeroFrame). */
+  underTitle?: ReactNode;
   children?: ReactNode;
 }) {
   return (
@@ -290,6 +294,7 @@ export function SubHero({
       secondary={secondary}
       microcopy={microcopy}
       facts={facts}
+      underTitle={underTitle}
     >
       {children}
     </HeroFrame>
@@ -316,6 +321,7 @@ export function HeroFrame({
   airAboveTitle = false,
   tightBottom = false,
   leadColumnTop = false,
+  underTitle,
   children,
 }: {
   axis?: HeroAxis;
@@ -383,6 +389,13 @@ export function HeroFrame({
       (standort, vorbereiten, collabs, faq, kursplan) und keine davon setzt eine Karte in
       den children-Slot — fuer sie ist die Grundlinien-Ausrichtung korrekt und bliebe es. */
   leadColumnTop?: boolean;
+  /** R216 (nur /schnupperstunde): Zusatzinhalt in der LINKEN Split-Spalte unter der H1.
+      Gemessen (Sweep 28.08., 1440x900): die kurze H1 «Erste Stunde. Gratis.» laesst neben
+      der hohen Formular-Karte ~300px leeres Papier. Ein Trust-Block fuellt die Spalte,
+      ohne die Formular-Reihenfolge (R207: Versprechen vor Handlung) anzutasten.
+      Nur ab lg gerendert — mobil stapeln die Spalten und der Block wuerde das Formular
+      unter den Fold druecken. */
+  underTitle?: ReactNode;
   /** Zusatzinhalt unter dem CTA-Block (z. B. Chip-Reihe auf den Stilseiten). */
   children?: ReactNode;
 }) {
@@ -620,7 +633,10 @@ export function HeroFrame({
               'grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16',
               leadColumnTop ? 'lg:items-start' : 'lg:items-end',
             )}>
-              <div>{heading}</div>
+              <div>
+                {heading}
+                {underTitle ? <div className="mt-8 hidden lg:block">{underTitle}</div> : null}
+              </div>
               <div className="flex flex-col gap-6 border-t border-[var(--color-line)] pt-6 lg:border-t-0 lg:pt-0">
                 {leadEl}
                 {ctas}

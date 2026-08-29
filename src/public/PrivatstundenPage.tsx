@@ -1,6 +1,6 @@
 
 import { type ReactNode } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
 import {
   Check,
   Heart,
@@ -71,8 +71,12 @@ function Accented({ text, accent, dark = false }: { text: string; accent?: strin
 
 /* ------------------------------------------------------------------------ Hero */
 function PrivatHero({ c }: { c: PrivatContent }) {
-  const reducedMotion = useReducedMotion() === true;
-  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
+  /* R210: `useReveal`-Aufruf des Folds entfernt. Er lieferte container/item fuer die
+     Mount-Animation des Hero-Blocks; deren aufgeloeste Varianten schrieb Motion als
+     INLINE-Style und ueberstimmte damit die Load-Keyframes aus src/index.css. Der Fold
+     traegt seinen Auftritt jetzt rein per CSS (sf-fold-load-*, ab erstem Paint statt
+     erst nach Hydration). `reducedMotion` fiel mit weg — es speiste nur die `distance`
+     dieses einen Aufrufs; die Reduced-Motion-Wache des Folds steht in index.css. */
   const h = c.hero;
   return (
     <section
@@ -87,10 +91,10 @@ function PrivatHero({ c }: { c: PrivatContent }) {
           Desktop um 32px. Zusammen mit H1 lg:mt-0 und CTA lg:mt-4 sitzt der rote
           Knopf "Privatstunde anfragen" ganz im Fenster. NUR Abstand. */}
       <Shell className="grid items-center gap-10 pb-14 pt-6 sm:pb-16 lg:grid-cols-[0.98fr_1.02fr] lg:gap-14 lg:pb-20 lg:pt-0">
-        <motion.div data-reveal variants={container} initial="hidden" animate="show" className="max-w-2xl">
-          <motion.div data-fold="crumbs" variants={item} className="mb-6">
+        <div data-reveal className="max-w-2xl">
+          <div data-fold="crumbs" className="mb-6">
             <Breadcrumb trail={[c.crumb]} />
-          </motion.div>
+          </div>
 
           {/* R81: die H1 bricht bei voller Groesse (4.3rem) auf 5 Zeilen (275px) und
               schiebt den CTA unter den Fold. Die Kappung auf 3.4rem (nur diese Seite,
@@ -109,22 +113,21 @@ function PrivatHero({ c }: { c: PrivatContent }) {
               Copy-Aenderung, kein --whatsapp-lift: der Float schwebt ueber der
               ganzen Seite, jede Hoehe traefe einen anderen Absatz (R139).
               Ab sm faellt die Kappung weg, Desktop bleibt bei 627px H1-Breite. */}
-          <motion.h1
+          <h1
             data-fold="title"
-            variants={item}
             className="type-h1 mt-5 max-w-[17rem] sm:max-w-none lg:mt-0 lg:text-[clamp(2.6rem,5.2vw,3.4rem)]"
           >
             <Accented text={h.title} accent={h.titleAccent} />
-          </motion.h1>
+          </h1>
           {/* R140 Mobil-Fold: der Lead sitzt auf 390x844 in der FAB-Spalte
               (Vorher-Shot: FAB deckte «genau das, was du»; Nachher-Shot 1:
               FAB deckte «näch» in «nächste Level»). pr-20 gilt nur unter sm,
               nicht auf einer Flex-Zeile (R138 Fund 7/8). Ab sm faellt der
               Abstand, weil der Desktop-Float ein Kreis rechts unten ist. */}
-          <motion.p data-fold="lead" variants={item} className={`max-w-xl pr-20 sm:pr-0 ${sectionLead}`}>
+          <p data-fold="lead" className={`max-w-xl pr-20 sm:pr-0 ${sectionLead}`}>
             {h.lead}
-          </motion.p>
-          <motion.ul variants={item} className="mt-8 hidden flex-wrap gap-2 lg:flex">
+          </p>
+          <ul className="mt-8 hidden flex-wrap gap-2 lg:flex">
             {h.bullets.map((b) => (
               <li
                 key={b}
@@ -134,17 +137,17 @@ function PrivatHero({ c }: { c: PrivatContent }) {
                 {b}
               </li>
             ))}
-          </motion.ul>
-          <motion.div data-fold="cta" variants={item} className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          </ul>
+          <div data-fold="cta" className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
             <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
             <GhostCta href={h.secondary.href}>{h.secondary.label}</GhostCta>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Mobil steht das Foto VOR dem Textblock (Critic Runde 11, Item 3): einspaltig lag
             es komplett unter dem Fold und der Einstieg war reine Textwand. Ab lg gilt wieder
             Text links / Foto rechts. */}
-        <motion.div data-reveal data-fold="media" variants={item} initial="hidden" animate="show" className="relative -order-1 lg:order-none">
+        <div data-reveal data-fold="media" className="relative -order-1 lg:order-none">
           <div className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_30px_70px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
             <img
               src={h.image.src}
@@ -163,7 +166,7 @@ function PrivatHero({ c }: { c: PrivatContent }) {
               fetchPriority="high"
             />
           </div>
-        </motion.div>
+        </div>
       </Shell>
     </section>
   );

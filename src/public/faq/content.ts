@@ -141,6 +141,8 @@ export const FAQ_CONTENT = {
               q: 'Muss ich schon tanzen können?',
               a: 'Nein, und die meisten können es am ersten Abend nicht. Beginner-Kurse starten bei null: zuerst der Grundschritt, dann Führen und Folgen, dann die ersten Figuren. Wir wechseln im Kurs regelmässig die Partner durch, dadurch gewöhnst du dich schnell an verschiedene Tanzpartner statt nur an einen. Wenn du unsicher bist, welches Level passt, komm zur Schnupperstunde und wir schauen es gemeinsam an.',
               link: { label: 'Kurse und Level ansehen', href: R.tanzkurse },
+              // R216: Ratgeber-Cluster — der Einstiegs-Guide beantwortet genau diese Frage in der Tiefe.
+              link2: { label: 'Ratgeber: Salsa lernen', href: '/mehr/salsa-lernen' },
             },
             {
               q: 'Wie buche ich eine Schnupperstunde?',
@@ -337,6 +339,8 @@ export const FAQ_CONTENT = {
             {
               q: 'Do I already need to know how to dance?',
               a: 'No. Beginner courses start with no experience. All that matters is that you are open to learning step by step.',
+              // R216: Ratgeber-Cluster — der Einstiegs-Guide vertieft genau diese Frage.
+              link: { label: 'Guide: Learning salsa', href: '/mehr/salsa-lernen' },
             },
             {
               q: 'How do I book a trial class?',

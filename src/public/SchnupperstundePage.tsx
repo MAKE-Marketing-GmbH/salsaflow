@@ -16,6 +16,8 @@ import {
   useReveal,
 } from '@/public/subpage/kit';
 import { InquiryWizard } from '@/public/contact/InquiryWizard';
+import { GOOGLE_REVIEWS } from '@/public/site/reviews';
+import { StarRating } from '@/public/site/primitives';
 import { ArrowRight } from 'lucide-react';
 
 const FACTS = {
@@ -64,6 +66,12 @@ export function SchnupperstundePage() {
            erst das Formular und danach, wofuer er es ausfuellt. Oben ausgerichtet steht
            die Versprechung wieder vor der Handlung. */
         leadColumnTop
+        /* R216: Die kurze H1 laesst neben der hohen Formular-Karte ~300px leeres Papier
+           (Sweep 28.08., 1440x900). Der Trust-Block traegt die Spalte mit belegten Werten:
+           Rating und Anzahl aus site/reviews.ts (Google-Harvest), 2018 und die drei
+           Studios wie im Home-Hero. Muster = Home-Trust-Zeile, hier gestapelt statt
+           als Fussleiste, weil die Spalte hoch und schmal ist. */
+        underTitle={<TrustColumn de={de} />}
       >
         <div id="anfrage" className="scroll-mt-24 overflow-visible rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_22px_70px_rgba(17,17,17,0.08)]">
           <InquiryWizard initialTopic="schnupperstunde" lockTopic compact onSuccessHref="/vorbereiten" />
@@ -82,6 +90,46 @@ export function SchnupperstundePage() {
         secondary={{ label: de ? 'Alle Kurse' : 'All courses', href: '/tanzkurse' }}
       />
     </SubPageShell>
+  );
+}
+
+/* R216: Trust-Spalte unter der H1 (nur Desktop, siehe kit.tsx underTitle).
+   Alle Werte belegt: Rating/Anzahl aus site/reviews.ts, Rest identisch zur Home-Trust-Zeile. */
+function TrustColumn({ de }: { de: boolean }) {
+  return (
+    <dl className="flex flex-col gap-3 border-t border-[var(--color-line)] pt-5 text-[0.9375rem]">
+      <div className="flex items-center gap-2">
+        <dt className="flex items-center gap-2">
+          <img src="/logo/google-g.svg" alt="" width={16} height={16} className="h-4 w-4 shrink-0" />
+          <StarRating size={14} />
+          <span className="sr-only">{de ? 'Google-Bewertung' : 'Google rating'}</span>
+        </dt>
+        <dd className="font-semibold text-[var(--color-ink)]">
+          {de ? '4,9' : '4.9'}
+          <span className="ml-1.5 font-normal text-[var(--color-ink-muted)]">
+            {de
+              ? `aus ${GOOGLE_REVIEWS.count} Google-Bewertungen`
+              : `from ${GOOGLE_REVIEWS.count} Google reviews`}
+          </span>
+        </dd>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <dt className="flex items-center">
+          <span aria-hidden className="h-1 w-1 rounded-full bg-[var(--color-salsa)]" />
+          <span className="sr-only">{de ? 'Gegründet' : 'Founded'}</span>
+        </dt>
+        <dd className="text-[var(--color-ink-muted)]">{de ? 'seit 2018 in Basel' : 'in Basel since 2018'}</dd>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <dt className="flex items-center">
+          <span aria-hidden className="h-1 w-1 rounded-full bg-[var(--color-salsa)]" />
+          <span className="sr-only">{de ? 'Standort' : 'Location'}</span>
+        </dt>
+        <dd className="text-[var(--color-ink-muted)]">
+          {de ? '3 Studios direkt am Bahnhof SBB' : '3 studios right at Basel SBB station'}
+        </dd>
+      </div>
+    </dl>
   );
 }
 

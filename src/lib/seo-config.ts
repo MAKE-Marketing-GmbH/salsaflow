@@ -39,6 +39,9 @@ export type SeoKey =
   | 'collabs'
   | 'tanzschuhe'
   | 'partys'
+  | 'salsaLernen'
+  | 'salsaOderBachata'
+  | 'hochzeitstanz'
   | 'faq'
   | 'schnupper'
   | 'prepare'
@@ -80,6 +83,12 @@ export const SEO_ROUTE_CONFIG = {
   collabs: { canonicalPath: '/mehr/collabs', indexable: true },
   tanzschuhe: { canonicalPath: '/mehr/tanzschuhe', indexable: true },
   partys: { canonicalPath: '/mehr/partys', indexable: true },
+  // Ratgeber-Cluster (seo/research/research-fazit-2026-08-29.md, Abschnitt "Abgeleitete
+  // Content-Entscheidungen"): informationale Queries, kein Kannibalismus mit den
+  // transaktionalen Kurs-/Stilseiten.
+  salsaLernen: { canonicalPath: '/mehr/salsa-lernen', indexable: true },
+  salsaOderBachata: { canonicalPath: '/mehr/salsa-oder-bachata', indexable: true },
+  hochzeitstanz: { canonicalPath: '/mehr/hochzeitstanz', indexable: true },
   faq: { canonicalPath: '/faq', indexable: true },
   schnupper: { canonicalPath: '/schnupperstunde', indexable: true },
   prepare: { canonicalPath: '/vorbereiten', indexable: false },
@@ -92,11 +101,14 @@ export const SEO_ROUTE_CONFIG = {
   notFound: { canonicalPath: '/404', indexable: false },
 } as const satisfies Record<SeoKey, SeoRouteConfig>;
 
+// SEO-Audit 28.08.2026: dediziertes OG-Bild im Standardformat 1200x630 (aus hp-05 gebaut,
+// public/photos/og/og-default.jpg). Vorher zeigte og:image direkt auf hp-05.webp (1800x1200,
+// falsches Seitenverhaeltnis fuer Link-Vorschauen; WebP versteht zudem nicht jeder Scraper).
 export const DEFAULT_SOCIAL_IMAGE = {
-  url: `${ASSET_ORIGIN}/photos/showcase/hp-05.webp`,
-  width: 1800,
-  height: 1200,
-  type: 'image/webp',
+  url: `${ASSET_ORIGIN}/photos/og/og-default.jpg`,
+  width: 1200,
+  height: 630,
+  type: 'image/jpeg',
   alt: {
     de: 'Zwei Tanzpaare der Salsaflow Dance Company in Bewegung',
     en: 'Two dancing couples from Salsaflow Dance Company',
@@ -390,6 +402,42 @@ export const SEO_META = {
       title: 'Dance Shoes for Salsa, Bachata & Heels | Salsaflow',
       description:
         'Which dance shoes suit Salsa, Bachata and Heels? Salsaflow explains what beginners should look for and links helpful partners.',
+    },
+  },
+  salsaLernen: {
+    de: {
+      title: 'Salsa lernen in Basel: Anleitung für Anfänger | Salsaflow',
+      description:
+        'Salsa lernen in Basel: was Salsa ist, wie der Einstieg Schritt für Schritt abläuft, warum du ohne Tanzpartner kommen kannst und wie lange es dauert.',
+    },
+    en: {
+      title: 'Learning Salsa in Basel: A Beginner Guide | Salsaflow',
+      description:
+        'Learning Salsa in Basel: what Salsa is, how the first steps work, why you can come without a dance partner and how long it takes.',
+    },
+  },
+  salsaOderBachata: {
+    de: {
+      title: 'Salsa oder Bachata: Vergleich für Anfänger | Salsaflow',
+      description:
+        'Salsa oder Bachata? Der Vergleich von Musik, Tempo, Grundschritt, Körperkontakt und Einstieg, damit du weisst, welcher Kurs in Basel zu dir passt.',
+    },
+    en: {
+      title: 'Salsa or Bachata: A Beginner Comparison | Salsaflow',
+      description:
+        'Salsa or Bachata? A comparison of music, tempo, basic step, body contact and entry level, so you know which class in Basel suits you.',
+    },
+  },
+  hochzeitstanz: {
+    de: {
+      title: 'Hochzeitstanz Basel: Vorbereitung in Privatstunden | Salsaflow',
+      description:
+        'Hochzeitstanz in Basel: Ablauf über Privatstunden, was in drei bis fünf Stunden realistisch ist, Tipps zur Musikwahl und wann ihr anfangen solltet.',
+    },
+    en: {
+      title: 'Wedding Dance Basel: Prepared in Private Lessons | Salsaflow',
+      description:
+        'Wedding dance in Basel: how private lessons work, what three to five hours realistically cover, how to choose your song and when to start.',
     },
   },
   partys: {

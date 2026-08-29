@@ -7,7 +7,7 @@
 // Em-Dashes).
 
 import { useEffect, useState, type CSSProperties } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 import { Seo } from '@/lib/seo';
@@ -175,8 +175,12 @@ function ContactHero() {
   const { lang } = useLang();
   const h = CONTACT_PAGE[lang].hero;
   const direct = CONTACT_PAGE[lang].direct;
-  const reducedMotion = useReducedMotion() === true;
-  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
+  /* R210: `useReveal`-Aufruf des Folds entfernt. Er lieferte container/item fuer die
+     Mount-Animation des Hero-Blocks; deren aufgeloeste Varianten schrieb Motion als
+     INLINE-Style und ueberstimmte damit die Load-Keyframes aus src/index.css. Der Fold
+     traegt seinen Auftritt jetzt rein per CSS (sf-fold-load-*, ab erstem Paint statt
+     erst nach Hydration). `reducedMotion` fiel mit weg — es speiste nur die `distance`
+     dieses einen Aufrufs; die Reduced-Motion-Wache des Folds steht in index.css. */
   return (
     <section className="relative isolate overflow-hidden bg-[var(--color-paper-warm)]" style={{ paddingTop: 'calc(var(--nav-h) + 0.75rem)' }}>
       {/* Kunden-Feedback 2026-08-07: "Die Hintergrund-Illustrationen sehen uebelst komisch aus."
@@ -192,42 +196,39 @@ function ContactHero() {
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
       <Shell className="grid grid-cols-1 items-center gap-9 pb-8 pt-2 lg:grid-cols-[1.02fr_0.98fr] lg:gap-14 lg:pb-12">
-        <motion.div variants={container} initial="hidden" animate="show" className="max-w-2xl">
+        <div className="max-w-2xl">
           {/* Hierarchie: die H1 traegt NUR den Zuruf ("Schreib uns, was du suchst."). Der zweite
               Satz ("Wir helfen dir beim naechsten Schritt.") war vorher als erzwungener Block in
               derselben H1 und hat sie auf 1440px auf 3 Zeilen mit Waisenwort "Schritt." gerissen
               (gemessen 2026-08-06). Er steht jetzt als Versprechen ueber dem Lead — gleiche Worte,
               klare Staffelung gross -> mittel -> Fliesstext. */}
-          <motion.h1
+          <h1
             data-fold="title"
-            variants={item}
             className={cn(
               'type-h1 text-[var(--color-ink)]',
               MEASURE_XL,
             )}
           >
             {h.titleA} <TitleAccent>{h.titleAccent}</TitleAccent>
-          </motion.h1>
-          <motion.p
+          </h1>
+          <p
             data-fold="lead"
-            variants={item}
             className="mt-3 max-w-lg text-pretty font-display text-lg font-bold leading-snug text-[var(--color-ink)] sm:text-xl"
           >
             {h.titleB}
-          </motion.p>
-          <motion.p
-            variants={item}
+          </p>
+          <p
             className="mt-4 max-w-md text-pretty text-base leading-relaxed text-[var(--color-ink-muted)]"
           >
             {lang === 'de'
               ? 'Ein paar Angaben genügen. Wir antworten meistens innerhalb von 24 Stunden.'
               : 'A few details are enough. We usually reply within 24 hours.'}
-          </motion.p>
+          </p>
           {/* R56: Der einzige Hero-Knopf fuehrte per WhatsApp raus, das eigene Formular
               (direkt unter dem Hero, Anker #kontaktformular) blieb ohne Einstieg. Jetzt
               Primary = Formular ("Anfrage starten"), WhatsApp als ruhiger zweiter Weg
               daneben (Outline statt Primary-Rot). */}
-          <motion.div data-fold="cta" variants={item} className="mt-5 flex flex-wrap items-center gap-3">
+          <div data-fold="cta" className="mt-5 flex flex-wrap items-center gap-3">
             <a
               href="#kontaktformular"
               className="btn-base btn-primary group gap-2 px-5 text-sm"
@@ -244,24 +245,20 @@ function ContactHero() {
               <WhatsAppIcon className="h-4 w-4 shrink-0" />
               {direct.whatsappLabel}
             </a>
-          </motion.div>
+          </div>
           {/* Echte Google-Bewertung auf hellem Grund, mit dem Vierfarb-G aus
               public/logo/google-g.svg (GoogleRating in site/primitives). */}
-          <motion.div variants={item} className="mt-6">
+          <div className="mt-6">
             <GoogleRating />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Foto-Komposition nach /fotos-Vorbild: ein grosses Hochformat plus zwei Querformate. */}
-        <motion.div
+        <div
           data-fold="media"
-          variants={container}
-          initial="hidden"
-          animate="show"
           className="mx-auto grid w-full max-w-md grid-cols-2 gap-3 sm:gap-4 lg:max-w-none"
         >
-          <motion.div
-            variants={item}
+          <div
             className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_26px_60px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
           >
             <img
@@ -277,10 +274,9 @@ function ContactHero() {
               loading="eager"
               fetchPriority="high"
             />
-          </motion.div>
+          </div>
           <div className="grid gap-3 sm:gap-4">
-            <motion.div
-              variants={item}
+            <div
               className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_20px_48px_-26px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
             >
               <img
@@ -295,9 +291,8 @@ function ContactHero() {
                 height={1067}
                 loading="eager"
               />
-            </motion.div>
-            <motion.div
-              variants={item}
+            </div>
+            <div
               className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-media)] bg-[var(--color-bg-soft)] shadow-[0_20px_48px_-26px_rgba(17,17,17,0.45)] ring-1 ring-black/5"
             >
               <img
@@ -320,9 +315,9 @@ function ContactHero() {
                 height={1600}
                 loading="eager"
               />
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </Shell>
     </section>
   );

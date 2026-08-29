@@ -4,7 +4,7 @@
 
 Früher hast du den Kursplan jedes Mal von Hand gemacht. Auf Deutsch und auf Englisch. Dazu ein Foto für die Webseite. Das ist vorbei.
 
-Jetzt tippst du die Kurse nur noch **einmal** ein. Die Webseite zeigt sie automatisch. Deutsch und Englisch fallen von selbst ab. Und die Gäste buchen und bezahlen direkt online.
+Jetzt tippst du die Kurse nur noch **einmal** ein. Die Webseite zeigt sie automatisch. Deutsch und Englisch fallen von selbst ab. Und die Gäste reservieren ihren Platz direkt online.
 
 > **Wichtig zu den Bildern:** Die Screenshots kommen aus einem Test. Darum heisst die Staffel im Bild "E2E Staffel ...". Bei dir steht da der echte Name, zum Beispiel "Staffel September 2026". Auf den Knöpfen steht oe statt ö und ae statt ä. Das räumen wir vor dem Start noch auf.
 
@@ -58,13 +58,11 @@ Das musst du nicht selber machen. Aber gut zu wissen, wie es bei den Gästen aus
 
 ![Buchungs-Fenster](img/g08-de-dialog.png)
 
-**Bezahlen.** Danach bezahlt der Gast direkt online. Mit TWINT oder Karte. Erst wenn die Zahlung durch ist, ist der Platz fix.
-
-![Bezahlseite](img/g08-de-bezahlen.png)
+**Reservieren statt online bezahlen.** Der Gast reserviert seinen Platz, ihr bekommt sofort eine Mail an info@salsaflow-dc.com. Bezahlt wird vor Ort - mit Twint oder bar. Ist ein Kurs voll, landet der Gast automatisch auf der Warteliste. Online-Zahlung mit TWINT oder Karte ist vorbereitet, aber noch nicht freigeschaltet - dafür fehlen noch zwei Entscheidungen von euch (Zahlungsanbieter und Storno-Regel).
 
 ![Bestätigung](img/g08-de-bestaetigt.png)
 
-> **Preise:** Im Kursplan stehen keine Preise. Der Preis kommt erst beim Bezahlen. So habt ihr es gewollt.
+> **Preise:** Im Kursplan stehen keine Preise. So habt ihr es gewollt.
 
 ---
 

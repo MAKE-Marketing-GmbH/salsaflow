@@ -1,0 +1,1374 @@
+{
+    "version": "0.1.20260826",
+    "status_code": 20000,
+    "status_message": "Ok.",
+    "time": "3.2730 sec.",
+    "cost": 0.09,
+    "tasks_count": 1,
+    "tasks_error": 0,
+    "tasks": [
+        {
+            "id": "08290007-1977-0367-0000-fc609ba7d5c5",
+            "status_code": 20000,
+            "status_message": "Ok.",
+            "time": "3.1348 sec.",
+            "cost": 0.09,
+            "result_count": 20,
+            "path": [
+                "v3",
+                "keywords_data",
+                "google_ads",
+                "search_volume",
+                "live"
+            ],
+            "data": {
+                "api": "keywords_data",
+                "function": "search_volume",
+                "se": "google_ads",
+                "location_code": 2756,
+                "language_code": "de",
+                "keywords": [
+                    "tanzschule basel",
+                    "salsa basel",
+                    "salsa kurs basel",
+                    "bachata basel",
+                    "bachata kurs basel",
+                    "tanzkurs basel",
+                    "tanzkurse basel",
+                    "salsa tanzen lernen",
+                    "salsa lernen",
+                    "bachata lernen",
+                    "hochzeitstanz kurs basel",
+                    "hochzeitstanz basel",
+                    "heels kurs basel",
+                    "heels dance",
+                    "tanzpartner finden",
+                    "salsa party basel",
+                    "tanzen lernen basel",
+                    "privater tanzunterricht",
+                    "salsa oder bachata",
+                    "tanzschuhe damen salsa"
+                ]
+            },
+            "result": [
+                {
+                    "keyword": "tanzschule basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "HIGH",
+                    "competition_index": 90,
+                    "search_volume": 480,
+                    "low_top_of_page_bid": 0.48,
+                    "high_top_of_page_bid": 1.55,
+                    "cpc": 0.95,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 320
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 320
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 390
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 390
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 480
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 480
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 590
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 480
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 590
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 590
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 480
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 590
+                        }
+                    ]
+                },
+                {
+                    "keyword": "salsa basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "HIGH",
+                    "competition_index": 68,
+                    "search_volume": 260,
+                    "low_top_of_page_bid": 0.4,
+                    "high_top_of_page_bid": 2.78,
+                    "cpc": 2.03,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 260
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 260
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 320
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 320
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 320
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 390
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 320
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 260
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 260
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 260
+                        }
+                    ]
+                },
+                {
+                    "keyword": "salsa kurs basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "HIGH",
+                    "competition_index": 94,
+                    "search_volume": 70,
+                    "low_top_of_page_bid": 0.43,
+                    "high_top_of_page_bid": 2.61,
+                    "cpc": 2.21,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 110
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 90
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 70
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 90
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 110
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 140
+                        }
+                    ]
+                },
+                {
+                    "keyword": "bachata basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "LOW",
+                    "competition_index": 25,
+                    "search_volume": 590,
+                    "low_top_of_page_bid": 0.85,
+                    "high_top_of_page_bid": 3.58,
+                    "cpc": 1.51,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 590
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 480
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 720
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 880
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 880
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 590
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 720
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 480
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 590
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 480
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 480
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 590
+                        }
+                    ]
+                },
+                {
+                    "keyword": "bachata kurs basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "HIGH",
+                    "competition_index": 97,
+                    "search_volume": 30,
+                    "low_top_of_page_bid": 0.43,
+                    "high_top_of_page_bid": 3.12,
+                    "cpc": 3.35,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 50
+                        }
+                    ]
+                },
+                {
+                    "keyword": "tanzkurs basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "HIGH",
+                    "competition_index": 79,
+                    "search_volume": 170,
+                    "low_top_of_page_bid": 0.48,
+                    "high_top_of_page_bid": 1.56,
+                    "cpc": 1.82,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 110
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 140
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 170
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 140
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 140
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 170
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 210
+                        }
+                    ]
+                },
+                {
+                    "keyword": "tanzkurse basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "HIGH",
+                    "competition_index": 79,
+                    "search_volume": 170,
+                    "low_top_of_page_bid": 0.48,
+                    "high_top_of_page_bid": 1.56,
+                    "cpc": 1.82,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 110
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 140
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 170
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 140
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 140
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 170
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 210
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 210
+                        }
+                    ]
+                },
+                {
+                    "keyword": "salsa tanzen lernen",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "MEDIUM",
+                    "competition_index": 55,
+                    "search_volume": 20,
+                    "low_top_of_page_bid": 0.58,
+                    "high_top_of_page_bid": 1.65,
+                    "cpc": 1.87,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 30
+                        }
+                    ]
+                },
+                {
+                    "keyword": "salsa lernen",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "MEDIUM",
+                    "competition_index": 55,
+                    "search_volume": 30,
+                    "low_top_of_page_bid": 0.86,
+                    "high_top_of_page_bid": 3.35,
+                    "cpc": 3.77,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 50
+                        }
+                    ]
+                },
+                {
+                    "keyword": "bachata lernen",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "MEDIUM",
+                    "competition_index": 37,
+                    "search_volume": 30,
+                    "low_top_of_page_bid": 0.85,
+                    "high_top_of_page_bid": 3.13,
+                    "cpc": 6.25,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 50
+                        }
+                    ]
+                },
+                {
+                    "keyword": "hochzeitstanz kurs basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": null,
+                    "competition_index": null,
+                    "search_volume": null,
+                    "low_top_of_page_bid": null,
+                    "high_top_of_page_bid": null,
+                    "cpc": null,
+                    "monthly_searches": null
+                },
+                {
+                    "keyword": "hochzeitstanz basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": null,
+                    "competition_index": null,
+                    "search_volume": null,
+                    "low_top_of_page_bid": null,
+                    "high_top_of_page_bid": null,
+                    "cpc": null,
+                    "monthly_searches": null
+                },
+                {
+                    "keyword": "heels kurs basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": null,
+                    "competition_index": null,
+                    "search_volume": null,
+                    "low_top_of_page_bid": null,
+                    "high_top_of_page_bid": null,
+                    "cpc": null,
+                    "monthly_searches": null
+                },
+                {
+                    "keyword": "heels dance",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "HIGH",
+                    "competition_index": 99,
+                    "search_volume": 1000,
+                    "low_top_of_page_bid": 0.73,
+                    "high_top_of_page_bid": 2.14,
+                    "cpc": 1.93,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 720
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 880
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 1000
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 1000
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 1300
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 1000
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 1300
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 880
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 1300
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 1300
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 1300
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 1000
+                        }
+                    ]
+                },
+                {
+                    "keyword": "tanzpartner finden",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "MEDIUM",
+                    "competition_index": 42,
+                    "search_volume": 30,
+                    "low_top_of_page_bid": 1.05,
+                    "high_top_of_page_bid": 3.15,
+                    "cpc": 2.41,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 40
+                        }
+                    ]
+                },
+                {
+                    "keyword": "salsa party basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "MEDIUM",
+                    "competition_index": 41,
+                    "search_volume": 40,
+                    "low_top_of_page_bid": 0.52,
+                    "high_top_of_page_bid": 1.32,
+                    "cpc": 3.17,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 70
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 40
+                        }
+                    ]
+                },
+                {
+                    "keyword": "tanzen lernen basel",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "HIGH",
+                    "competition_index": 100,
+                    "search_volume": 10,
+                    "low_top_of_page_bid": 0.4,
+                    "high_top_of_page_bid": 0.75,
+                    "cpc": 0.63,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 10
+                        }
+                    ]
+                },
+                {
+                    "keyword": "privater tanzunterricht",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "MEDIUM",
+                    "competition_index": 52,
+                    "search_volume": 20,
+                    "low_top_of_page_bid": null,
+                    "high_top_of_page_bid": null,
+                    "cpc": 1.45,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 20
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 10
+                        }
+                    ]
+                },
+                {
+                    "keyword": "salsa oder bachata",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "LOW",
+                    "competition_index": 0,
+                    "search_volume": 10,
+                    "low_top_of_page_bid": null,
+                    "high_top_of_page_bid": null,
+                    "cpc": null,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 10
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 10
+                        }
+                    ]
+                },
+                {
+                    "keyword": "tanzschuhe damen salsa",
+                    "spell": null,
+                    "location_code": 2756,
+                    "language_code": "de",
+                    "search_partners": false,
+                    "competition": "HIGH",
+                    "competition_index": 100,
+                    "search_volume": 40,
+                    "low_top_of_page_bid": 0.59,
+                    "high_top_of_page_bid": 2.26,
+                    "cpc": 2.12,
+                    "monthly_searches": [
+                        {
+                            "year": 2026,
+                            "month": 7,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2026,
+                            "month": 6,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2026,
+                            "month": 5,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2026,
+                            "month": 4,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2026,
+                            "month": 3,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2026,
+                            "month": 2,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2026,
+                            "month": 1,
+                            "search_volume": 70
+                        },
+                        {
+                            "year": 2025,
+                            "month": 12,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2025,
+                            "month": 11,
+                            "search_volume": 40
+                        },
+                        {
+                            "year": 2025,
+                            "month": 10,
+                            "search_volume": 50
+                        },
+                        {
+                            "year": 2025,
+                            "month": 9,
+                            "search_volume": 30
+                        },
+                        {
+                            "year": 2025,
+                            "month": 8,
+                            "search_volume": 50
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

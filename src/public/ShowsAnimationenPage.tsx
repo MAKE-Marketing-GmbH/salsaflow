@@ -8,7 +8,7 @@
 // Rhythmus: Hero -> Anlaesse -> Formate (Show/Animation/Workshop + Kombination) -> Ablauf der
 // Anfrage -> Beweis-Galerie -> Final CTA -> FAQ. Primaerer CTA dieser Seite -> /kontakt#animationen.
 
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
 import {
   Check,
   Building2,
@@ -67,8 +67,12 @@ export function ShowsAnimationenPage() {
    die Show-Energie sofort beweist und keine Composition braucht. Split wie StyleHero: links
    Breadcrumb + Eyebrow + H1 + Lead + Proof-Chips + CTA-Paar, rechts das Foto mit Glas-Karte. */
 function AnimHero({ c }: { c: ShowsAnimContent }) {
-  const reducedMotion = useReducedMotion() === true;
-  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
+  /* R210: `useReveal`-Aufruf des Folds entfernt. Er lieferte container/item fuer die
+     Mount-Animation des Hero-Blocks; deren aufgeloeste Varianten schrieb Motion als
+     INLINE-Style und ueberstimmte damit die Load-Keyframes aus src/index.css. Der Fold
+     traegt seinen Auftritt jetzt rein per CSS (sf-fold-load-*, ab erstem Paint statt
+     erst nach Hydration). `reducedMotion` fiel mit weg — es speiste nur die `distance`
+     dieses einen Aufrufs; die Reduced-Motion-Wache des Folds steht in index.css. */
   const h = c.hero;
   return (
     <section
@@ -84,22 +88,21 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
           (1440x730) unter der Kante — nur ein roter Streifen sichtbar (Critic Runde 10,
           Item 3). */}
       <Shell className="grid items-center gap-10 pb-14 pt-3 sm:pb-16 lg:grid-cols-[0.98fr_1.02fr] lg:gap-14 lg:pb-20 lg:pt-3">
-        <motion.div data-reveal variants={container} initial="hidden" animate="show" className="max-w-2xl">
-          <motion.div data-fold="crumbs" variants={item} className="mb-3">
+        <div data-reveal className="max-w-2xl">
+          <div data-fold="crumbs" className="mb-3">
             <Breadcrumb trail={[c.crumb]} />
-          </motion.div>
+          </div>
           {/* Hero-Eyebrow raus (Meta-Kritik 2026-08-07): identischer Seiteneinstieg sitewide. */}
-          <motion.h1
+          <h1
             data-fold="title"
-            variants={item}
             className="type-h1 mt-3"
           >
             {h.title}
-          </motion.h1>
-          <motion.p data-fold="lead" variants={item} className={`max-w-xl ${sectionLead}`}>
+          </h1>
+          <p data-fold="lead" className={`max-w-xl ${sectionLead}`}>
             {h.lead}
-          </motion.p>
-          <motion.ul variants={item} className="mt-4 flex flex-wrap gap-2">
+          </p>
+          <ul className="mt-4 flex flex-wrap gap-2">
             {h.bullets.map((b) => (
               <li
                 key={b}
@@ -109,19 +112,19 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
                 {b}
               </li>
             ))}
-          </motion.ul>
-          <motion.div data-fold="cta" variants={item} className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+          </ul>
+          <div data-fold="cta" className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
             <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
             <GhostCta href={h.secondary.href} down>
               {h.secondary.label}
             </GhostCta>
-          </motion.div>
-          <motion.p variants={item} className="mt-4 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-[var(--color-ink-muted)]">
             {h.microcopy}
-          </motion.p>
-        </motion.div>
+          </p>
+        </div>
 
-        <motion.div data-fold="media" data-reveal variants={item} initial="hidden" animate="show" className="relative">
+        <div data-fold="media" data-reveal className="relative">
           <div className="relative overflow-hidden rounded-[var(--radius-media)] border border-[var(--color-line)] bg-white shadow-[0_30px_70px_-30px_rgba(17,17,17,0.45)] ring-1 ring-black/5">
             {/* 32% horizontal statt center: bei 50% hing rechts der halbe Kopf des
                 Taenzers im Anschnitt; bei 32% ist der linke Taenzer ganz und rechts
@@ -150,7 +153,7 @@ function AnimHero({ c }: { c: ShowsAnimContent }) {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-ink-muted)]">{h.cardLabel}</p>
             <p className="mt-1 font-display text-lg font-bold leading-tight">{h.cardText}</p>
           </div>
-        </motion.div>
+        </div>
       </Shell>
     </section>
   );

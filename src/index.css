@@ -119,6 +119,19 @@
      zu viel davon. Kein Bounce, kein Overshoot, keine Rotation. */
   --page-enter-x: 6px;
 
+  /* R210: Der Auftritt beim ERSTEN Laden (Direktaufruf, Reload, Link von aussen).
+     Er ist nicht derselbe Vorgang wie der Seitenwechsel darueber: dort animiert der
+     Browser zwei Dokument-Snapshots gegeneinander, hier gibt es nur ein Dokument, das
+     zum ersten Mal erscheint. Der Takt kommt aus .claude/product-design.md und ist
+     identisch mit dem Scroll-Reveal (motion-tokens.ts), damit die Seite EINEN Takt hat:
+       0.86s Dauer, 85ms Stagger, 28px Weg von unten, 6px seitlicher Ausholer, 8px Blur.
+     Die Kurve ist dieselbe Ease-Out-Familie wie ueberall sonst. */
+  --dur-fold-enter: 860ms;
+  --fold-stagger: 85ms;
+  --fold-enter-y: 28px;
+  --fold-enter-x: 6px;
+  --fold-enter-blur: 8px;
+
   /* R153: Wie stark der Cookie-Hinweis den WhatsApp-Float anhebt.
    * Unter sm ist der Wert 0px — dort loest der rechte Gutter am Banner-Wrapper den
    * Konflikt bereits waagerecht, und ein Vertikal-Lift wuerde den Kreis genau auf den
@@ -328,6 +341,109 @@ html {
   animation: sf-page-in var(--dur-page-enter) var(--motion-enter) calc(var(--page-stagger) * 4) both;
 }
 
+/* ---------------------------------------------------------------------------------------
+   Erstlade-Choreografie des Folds (R210, 2026-08-29). REIN CSS, ohne JavaScript.
+
+   BEFUND, gemessen gegen den Produktionsbuild (scratch/paint-timing.cjs, 4x CPU-Drossel,
+   900 kbit): das HTML war nach 635ms vollstaendig da, das Stylesheet nach 1924ms — der
+   erste Paint kam trotzdem erst bei 4084ms, exakt nachdem das JS-Bundle fertig war
+   (3304ms). Bis dahin war die Seite weiss, danach stand alles in EINEM Frame. Genau das
+   ist der «kein Fade, nur Pop» aus dem Video.
+
+   Die Ursache lag NICHT an einem inline `opacity:0` auf dem Fold — der Fold steht seit
+   R209 prerendert auf `opacity:1` (nachgemessen im dist-HTML). Sie lag am Entry-Modul,
+   das Vite in den <head> hebt: der Parser erreicht den vorgerenderten Body erst, wenn
+   dieses Modul da ist. Der Fix dafuer steht in scripts/prerender.mjs; erst dadurch gibt
+   es ueberhaupt einen frueheren Paint, den diese Choreografie bespielen kann.
+
+   WARUM CSS UND NICHT MOTION. Eine Motion-Variante kann frueheste nach der Hydration
+   laufen — sie kommt also per Definition zu spaet fuer den ersten Eindruck. Eine
+   CSS-Animation startet mit dem ersten Paint des Elements, ganz ohne JavaScript. Der
+   Startzustand liegt damit in der Animation selbst (`both` = `fill-mode: backwards` fuer
+   die Verzoegerung), nicht als inline-Style im HTML: bleibt das JS ganz aus, laeuft die
+   Choreografie trotzdem und endet sichtbar. Es gibt keinen Zustand mehr, den nur JS
+   aufloesen kann.
+
+   Der Takt ist derselbe wie beim Scroll-Reveal (motion-tokens.ts), damit die Seite nicht
+   zwei Geschwindigkeiten lernt. Die X-Achse alterniert wie beim Seitenwechsel: Titel von
+   links, Lead von rechts — dadurch liest sich die Staffel als Bewegung statt als fuenfmal
+   dasselbe. Kein Bounce, kein Overshoot, keine Rotation, keine neue Farbe. */
+
+@keyframes sf-fold-load-left {
+  from {
+    opacity: 0;
+    filter: blur(var(--fold-enter-blur));
+    transform: translate3d(calc(var(--fold-enter-x) * -1), var(--fold-enter-y), 0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes sf-fold-load-right {
+  from {
+    opacity: 0;
+    filter: blur(var(--fold-enter-blur));
+    transform: translate3d(var(--fold-enter-x), var(--fold-enter-y), 0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Das Medium holt NICHT seitlich aus — dieselbe Begruendung wie beim Seitenwechsel:
+   eine grosse Bildflaeche, die sich quer bewegt, liest sich als Layout-Fehler. Es steigt
+   nur auf. Auch der Blur bleibt hier weg: ueber einer 30rem hohen Flaeche kostet er auf
+   Mobil sichtbar Frames, und das Motiv traegt die Geste ohnehin ueber den Weg. */
+@keyframes sf-fold-load-media {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--fold-enter-y), 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* `html:not(.sf-vt-nav)` ist das Gating gegen die Doppel-Animation: bei einer internen
+   Navigation traegt die View Transition oben den Auftritt, dann darf diese hier nicht
+   zusaetzlich feuern. Das Flag setzt der synchrone Head-Schnipsel in index.html. */
+html:not(.sf-vt-nav) [data-fold='crumbs'] {
+  animation: sf-fold-load-left var(--dur-fold-enter) var(--motion-enter) both;
+}
+
+html:not(.sf-vt-nav) [data-fold='title'] {
+  animation: sf-fold-load-left var(--dur-fold-enter) var(--motion-enter) var(--fold-stagger) both;
+}
+
+html:not(.sf-vt-nav) [data-fold='lead'] {
+  animation: sf-fold-load-right var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 2) both;
+}
+
+html:not(.sf-vt-nav) [data-fold='cta'] {
+  animation: sf-fold-load-left var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 3) both;
+}
+
+/* Die Trust-Zeile ist der einzige Fold-Teilnehmer ohne eigenen view-transition-name: beim
+   Seitenwechsel hat sie keine Entsprechung auf der Zielseite (nur die Home hat sie), beim
+   Erstaufruf schliesst sie aber die Staffel unter dem CTA ab. Sie traegt deshalb ein
+   eigenes Attribut statt eines data-fold-Werts. */
+html:not(.sf-vt-nav) [data-fold-load='trust'] {
+  animation: sf-fold-load-right var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 4) both;
+}
+
+/* Das Medium kommt zuletzt — die groesste Flaeche schliesst die Bewegung ab, statt sie
+   anzufuehren. Bei 5x85 = 425ms Vorlauf plus 860ms Dauer steht der Fold nach rund 1.3s
+   vollstaendig. */
+html:not(.sf-vt-nav) [data-fold='media'] {
+  animation: sf-fold-load-media var(--dur-fold-enter) var(--motion-enter) calc(var(--fold-stagger) * 5) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   #root:not([data-prerendered='true']) main#main,
   ::view-transition-new(root),
@@ -351,6 +467,22 @@ html {
   ::view-transition-old(sf-fold-cta),
   ::view-transition-old(sf-fold-media) {
     animation: sf-reduced-out 120ms var(--motion-enter) both !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  /* R210: Die Erstlade-Choreografie faellt unter dieselbe Konvention wie alles andere —
+     ein kurzer Opacity-Fade bleibt, Versatz, Blur und Staffel fallen weg. Ohne diese
+     Regel behielte der Fold seinen 28px-Weg, waehrend der Rest der Seite still steht.
+     Kein `animation: none`: der Fade ist die Konvention der Site (sf-reduced-in), und
+     eine ganz abgeschaltete Animation liesse das Element ohne Uebergang aufpoppen. */
+  html:not(.sf-vt-nav) [data-fold='crumbs'],
+  html:not(.sf-vt-nav) [data-fold='title'],
+  html:not(.sf-vt-nav) [data-fold='lead'],
+  html:not(.sf-vt-nav) [data-fold='cta'],
+  html:not(.sf-vt-nav) [data-fold-load='trust'],
+  html:not(.sf-vt-nav) [data-fold='media'] {
+    animation: sf-reduced-in var(--dur-fast) var(--motion-enter) both !important;
     transform: none !important;
     filter: none !important;
   }

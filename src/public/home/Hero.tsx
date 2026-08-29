@@ -75,7 +75,7 @@
 // ist (Raphael Punkt 5). Darum `max-[370px]:hidden`. Ab 390 px bleibt `4,9 · 104`
 // im Fold (2 px Reserve). Die langen Facts nur ab sm.
 
-import { motion, useReducedMotion, useScroll, useTransform, type Variants } from 'motion/react';
+import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { preload } from 'react-dom';
 import { useLang } from '@/lib/i18n';
@@ -234,16 +234,15 @@ export function Hero() {
 
      Nicht der Fade wurde beschleunigt, sondern weggelassen — eine kuerzere Dauer haette
      denselben leeren Erstframe gezeigt, nur kuerzer. */
-  const container: Variants = {
-    hidden: {},
-    show: {},
-  };
-  // Fold-Elemente stehen ab Frame 1 auf ihrem Endwert. Beide Varianten sind identisch,
-  // damit auch der INITIAL-Zustand schon der Endzustand ist — nicht nur das Ziel.
-  const item: Variants = {
-    hidden: { opacity: 1, y: 0 },
-    show: { opacity: 1, y: 0 },
-  };
+  // R209/R210: HIER STAND container/item. Beide Varianten waren identisch
+  // ({opacity:1,y:0}) und sollten den Fold ab Frame 1 auf dem Endwert halten. Genau das
+  // war der Grund, warum die Load-Choreografie aus index.css (sf-fold-load-*) unsichtbar
+  // blieb: Motion schreibt eine aufgeloeste Variant als INLINE-Style ans Element
+  // (`opacity: 1; transform: none`), und ein inline-Style schlaegt jede Stylesheet-Regel
+  // inklusive der Keyframe-Zwischenwerte. Der Fold wurde damit auf seinem Endzustand
+  // eingefroren. Die Fold-Rollen sind jetzt Plain-Elemente ohne Inline-Styles — die
+  // CSS-Animation startet mit ihrem ersten Paint und braucht kein JavaScript.
+  // Scroll-Reveals unterhalb des Folds (src/lib/reveal.tsx) sind davon nicht betroffen.
   // Review (Grok F4): `variants` an der Fotobox gestrichen — sie war nur ein No-Op
   // (opacity 1 -> 1), und eine Opacity-Variant wuerde den scroll-linked Wert von
   // `style={{ opacity: photoExitOpacity }}` beim Variant-Commit ueberschreiben. Die Box
@@ -275,7 +274,12 @@ export function Hero() {
      Sektionsfuss, nicht die Kante. */
   return (
     <section className="relative w-full bg-[var(--color-paper-warm)] pb-16 text-[var(--color-ink)] [--hero-photo-h:68svh]">
-      <motion.div data-reveal variants={container} initial="hidden" animate="show">
+      {/* Plain <div>: der Wrapper trug variants/initial/animate nur, um die (leeren)
+          container-Varianten an die Kinder zu verteilen. Ohne Kind-Varianten ist das ein
+          No-Op — und ein motion.div ohne Variants schreibt keinen Inline-Style mehr, der
+          die Fold-Keyframes ueberstimmen koennte. data-reveal bleibt: es ist der Haken
+          des Scroll-Reveals, nicht der Eintrittschoreografie. */}
+      <div data-reveal>
         {/* Zwei Spalten erst ab lg. Die Section-Mindesthoehe bindet den Fold an den Viewport,
             damit das Foto oben mitspielt statt darunter zu rutschen (Kopfkommentar Ursache A).
             svh statt vh: auf iOS misst vh die Leiste nicht mit und der Block wuerde ueberlaufen.
@@ -350,13 +354,12 @@ export function Hero() {
                 startet die Script-Zeile die Staffel und besetzt deshalb den crumbs-Slot.
                 Die Marker wirken nur waehrend eines Routenwechsels; beim Erstaufruf steht
                 der Fold unveraendert ab Frame 1 (R209). */}
-            <motion.p
+            <p
               data-fold="crumbs"
-              variants={item}
               className="font-script text-[2rem] leading-[1.3] text-[var(--color-salsa)] max-sm:text-[var(--color-script-cream)] sm:text-[2.4rem]"
             >
               {h.claim}
-            </motion.p>
+            </p>
 
             {/* R185 (20.08.): Hier standen drei Stil-Pillen Salsa/Bachata/Heels auf
                 /tanzkurse/salsa|bachata|heels. Sie sind raus, weil die naechste Sektion
@@ -457,9 +460,8 @@ export function Hero() {
                 liest sich als Fuellsatz. Jetzt traegt er, was die H1 NICHT sagt: dass man
                 allein kommen kann und die erste Stunde nichts kostet — die beiden Saetze, die
                 laut FAQ und Google-Reviews die haeufigste Hemmschwelle sind. */}
-            <motion.p
+            <p
               data-fold="lead"
-              variants={item}
               /* R190 (Raphael 22.08.: "wobei ich gerne zum Beispiel unter der
                  Subline mehr Platz ist"). Gemessen lagen zwischen H1-Unterkante und
                  Subline-Oberkante genau 28 px — auf Desktop UND Mobil derselbe Wert,
@@ -494,7 +496,7 @@ export function Hero() {
               {de
                 ? 'Drei Studios direkt am Bahnhof SBB. Komm allein oder zu zweit, die erste Stunde kostet dich nichts.'
                 : 'Three studios right by Basel SBB. Come alone or as a pair, your first class is free.'}
-            </motion.p>
+            </p>
 
             {/* Raphael 20.08.: "Kursplan isch s wichtigschte, Gratis Schnupperstund söll
                 absolut im Hintergrund si, schliesslich zahle d lüdd wenn sie wittermache."
@@ -516,7 +518,7 @@ export function Hero() {
                 damit am CTA-Block statt frei zu stehen. Jetzt ist der Raum darunter
                 gleich gross wie darueber, mobil bleibt er eine Stufe kleiner —
                 der Fold traegt dort nicht mehr (siehe die Fold-Rechnung oben). */}
-            <motion.div data-fold="cta" variants={item} className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 max-sm:mt-8 max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2">
+            <div data-fold="cta" className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 max-sm:mt-8 max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2">
               <CtaPill href="/kursplan" className="max-sm:w-full">
                 {cta.plan}
               </CtaPill>
@@ -528,7 +530,7 @@ export function Hero() {
               >
                 {de ? 'Schnupperstunde buchen' : 'Book a trial class'}
               </CtaText>
-            </motion.div>
+            </div>
 
             {/* Trust-Fussleiste. Vorher stand der Sozialbeweis (4,9 / 104) erst bei y=2593
                 — also fast drei Bildschirme unter dem Fold (gemessen, Sektionsraster
@@ -538,8 +540,8 @@ export function Hero() {
                 (H1 + roter CTA) nicht ueberstimmt. Alle drei Werte sind belegt — Rating und
                 Anzahl aus site/reviews.ts (Google-Harvest), 2018 und die drei Studios aus
                 INVARIANTS/HOME_V3 team.stats. */}
-            <motion.dl
-              variants={item}
+            <dl
+              data-fold-load="trust"
               className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--color-line)] pt-5 text-[0.9375rem] max-[370px]:hidden max-sm:mt-6 max-sm:pt-4 sm:mt-10"
             >
               <div className="flex items-center gap-2">
@@ -587,7 +589,7 @@ export function Hero() {
                   {de ? 'rund 40 Kurse pro Woche' : 'around 40 classes a week'}
                 </dd>
               </div>
-            </motion.dl>
+            </dl>
           </div>
 
           {/* Foto. UNTER sm: absolut ab Fensterkante, 58svh hoch, hinter dem Text (z-0 gegen
@@ -632,14 +634,38 @@ export function Hero() {
 
               Keine Eintritts-Variante mehr an dieser Box (Kommentar dort): sie steht
               sofort, allein der Exit uebernimmt die Bewegung. */}
+          {/* R210 — ZWEI BOXEN STATT EINER, und zwar aus einem messbaren Grund:
+              Die Fotobox traegt scroll-gebundene Inline-Styles (scale + opacity aus
+              useTransform). Motion schreibt diese Werte bei JEDEM Frame direkt ins
+              style-Attribut. Ein Inline-Style schlaegt jede Stylesheet-Regel, also
+              koennte die Load-Keyframe `sf-fold-load-media` weder opacity noch transform
+              an dieser Box durchsetzen — der Auftritt des groessten Fold-Elements waere
+              stumm geblieben.
+              Die verworfene Alternative war, `sf-fold-load-media` auf `filter` zu
+              reduzieren (das schreibt Motion hier nicht). Das haette den Auftritt aber
+              inhaltlich kastriert: das Medium soll aufsteigen und aufblenden, ein reiner
+              Blur-Abbau ist eine andere Geste als die der fuenf Textrollen darueber — und
+              der Kommentar an der Keyframe begruendet ausdruecklich, dass das Medium
+              genau OHNE Blur und MIT Aufstieg arbeitet.
+              Darum: der aeussere Plain-Wrapper traegt `data-fold="media"` und damit die
+              vollstaendige CSS-Entry-Animation (opacity + transform), der innere
+              motion.div behaelt exklusiv die Scroll-Styles. Zwei Transform-Ebenen
+              multiplizieren sich sauber uebereinander und stoeren sich nicht: die
+              Entry-Translation ist nach 1.3s beendet, der Scroll-Scale beginnt erst beim
+              Verlassen des Folds. Der Wrapper uebernimmt die Positionierungs-Klassen
+              (absolute/relative + Hoehen), damit die Geometrie unveraendert bleibt; die
+              innere Box fuellt ihn per `h-full w-full` und behaelt Radius und Clipping. */}
+          <div
+            data-fold="media"
+            className="absolute inset-x-0 top-0 z-0 h-[var(--hero-photo-h)] sm:relative sm:mx-8 sm:h-auto sm:aspect-[16/9] lg:mr-8 lg:aspect-auto lg:h-full lg:min-h-[32rem]"
+          >
           <motion.div
             ref={photoRef}
-            data-fold="media"
             /* R-Scroll: scale + opacity direkt auf dieser Box (compositor-only). Der
                Ueberstand-Traeger darin bleibt unberuehrt, sein Koordinatensystem
                skaliert als Ganzes mit — keine Kante wird frei. */
             style={{ scale: photoExitScale, opacity: photoExitOpacity }}
-            className="absolute inset-x-0 top-0 z-0 h-[var(--hero-photo-h)] overflow-hidden rounded-b-[var(--radius-media)] sm:relative sm:mx-8 sm:h-auto sm:aspect-[16/9] sm:rounded-[var(--radius-media)] lg:mr-8 lg:aspect-auto lg:h-full lg:min-h-[32rem] lg:rounded-[var(--radius-media)]"
+            className="h-full w-full overflow-hidden rounded-b-[var(--radius-media)] sm:rounded-[var(--radius-media)] lg:rounded-[var(--radius-media)]"
           >
             {/* Lesbarkeits-Verlauf, NUR unter sm (ab sm liegt kein Text auf dem Foto und ein
                 Verlauf waere reine Deko). Fuss #0A0A0A/92 -> transparent bei 52 %: die
@@ -716,8 +742,9 @@ export function Hero() {
               ) : null}
             </motion.div>
           </motion.div>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

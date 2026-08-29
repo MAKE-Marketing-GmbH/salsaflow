@@ -35,10 +35,18 @@ import { WhatsAppIcon } from '@/public/site/BrandIcons';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
 
-const WHATSAPP_URL = 'https://wa.me/41764788411';
+// R211: Plan-Spec 01-home.md fordert den Chat mit vorbereitetem Text — wer den Knopf
+// tippt, soll nicht vor einem leeren Eingabefeld ueberlegen muessen, wie man eine
+// Tanzschule anschreibt. Der Satz laesst alle Anliegen offen und ist sofort abschickbar.
+const WHATSAPP_BASE = 'https://wa.me/41764788411';
+const PREFILL = {
+  de: 'Hallo Salsaflow! Ich habe eine Frage zu euren Kursen.',
+  en: 'Hi Salsaflow! I have a question about your classes.',
+} as const;
 
 export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boolean; className?: string }) {
   const { lang } = useLang();
+  const whatsappUrl = `${WHATSAPP_BASE}?text=${encodeURIComponent(lang === 'de' ? PREFILL.de : PREFILL.en)}`;
   const label = lang === 'de' ? 'Schreib uns auf WhatsApp' : 'Message us on WhatsApp';
   const tooltip = lang === 'de' ? 'Schreib uns' : 'Message us';
   const [footerInView, setFooterInView] = useState(false);
@@ -75,7 +83,7 @@ export function WhatsAppFloat({ raised = false, className = '' }: { raised?: boo
 
   return (
     <motion.a
-      href={WHATSAPP_URL}
+      href={whatsappUrl}
       target="_blank"
       rel="noreferrer"
       aria-label={label}

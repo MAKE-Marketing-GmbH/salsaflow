@@ -1,5 +1,6 @@
 // Strukturierte Daten (P1.9, Teil 1): Organisations-Schema fuer die Home.
-// schema.org kennt KEIN "DanceSchool" (404) - korrekt ist LocalBusiness.
+// @type ist ein Array (SEO-Audit 28.08.2026): DanceSchool als praeziserer Subtyp,
+// LocalBusiness bleibt daneben als Fallback fuer Parser, die DanceSchool nicht kennen.
 // Nur belegte Fakten: Kontakt, Standort und Recht stehen im Impressum, die Preisspanne in
 // src/public/preise/content.ts. Keine erfundenen Oeffnungszeiten.
 // Bewertungen: ebenfalls nur belegt. Sie kommen aus src/public/site/reviews.ts (Google-Harvest
@@ -8,11 +9,12 @@
 // fuer Salsaflow-Schueler, content.ts:321) bis CHF 600.- (5 Privatstunden Paar, content.ts:268).
 
 import { createElement } from 'react';
+import { DEFAULT_SOCIAL_IMAGE } from '@/lib/seo-config';
 import { GOOGLE_REVIEWS } from '@/public/site/reviews';
 
 const LOCAL_BUSINESS = {
   '@context': 'https://schema.org',
-  '@type': 'LocalBusiness',
+  '@type': ['DanceSchool', 'LocalBusiness'],
   '@id': 'https://www.salsaflow-dc.com/#business',
   name: 'Salsaflow Dance Company',
   legalName: 'Salsaflow Dance Company GmbH',
@@ -67,9 +69,12 @@ const HOME_SCHEMA = {
       about: { '@id': 'https://www.salsaflow-dc.com/#business' },
       primaryImageOfPage: {
         '@type': 'ImageObject',
-        // Bild-Host = ASSET_ORIGIN (seo-config.ts): auf der Ziel-Domain liegt bis zum
-        // DNS-Cutover noch die alte Website, dort ist dieses Bild 404.
-        url: 'https://salsaflow-dc.vercel.app/photos/showcase/hp-05.webp',
+        // EINE Quelle fuer das Social-Bild (seo-config.ts, 1200x630 og-default.jpg).
+        // Deren Host ist ASSET_ORIGIN: auf der Ziel-Domain liegt bis zum DNS-Cutover
+        // noch die alte Website, dort waere das Bild 404.
+        url: DEFAULT_SOCIAL_IMAGE.url,
+        width: DEFAULT_SOCIAL_IMAGE.width,
+        height: DEFAULT_SOCIAL_IMAGE.height,
       },
     },
   ],

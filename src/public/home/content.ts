@@ -44,6 +44,9 @@ export type HomeStrings = {
     faq: string;
     collabs: string;
     tanzschuhe: string;
+    salsaLernen: string;
+    salsaOderBachata: string;
+    hochzeitstanz: string;
     partys: string;
     raumvermietung: string;
   };
@@ -161,6 +164,9 @@ export const HOME = defineHomeContent({
       faq: 'FAQ',
       collabs: 'Collabs',
       tanzschuhe: 'Tanzschuhe',
+      salsaLernen: 'Salsa lernen',
+      salsaOderBachata: 'Salsa oder Bachata',
+      hochzeitstanz: 'Hochzeitstanz',
       partys: 'Partys',
       raumvermietung: 'Raumvermietung',
     },
@@ -303,6 +309,9 @@ export const HOME = defineHomeContent({
       faq: 'FAQ',
       collabs: 'Collabs',
       tanzschuhe: 'Dance shoes',
+      salsaLernen: 'Learning Salsa',
+      salsaOderBachata: 'Salsa or Bachata',
+      hochzeitstanz: 'Wedding dance',
       partys: 'Parties',
       raumvermietung: 'Room rental',
     },

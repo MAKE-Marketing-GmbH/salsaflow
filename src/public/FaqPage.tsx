@@ -5,7 +5,7 @@
 // JSON-LD bleibt EIN Block (id ld-faq) und sammelt beide Spalten.
 
 import { useEffect, useState } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLang } from '@/lib/i18n';
@@ -136,8 +136,12 @@ function allFaqItems(c: FaqPageContent) {
  */
 function FaqHero({ c }: { c: FaqPageContent }) {
   const { lang } = useLang();
-  const reducedMotion = useReducedMotion() === true;
-  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
+  /* R210: `useReveal`-Aufruf des Folds entfernt. Er lieferte container/item fuer die
+     Mount-Animation des Hero-Blocks; deren aufgeloeste Varianten schrieb Motion als
+     INLINE-Style und ueberstimmte damit die Load-Keyframes aus src/index.css. Der Fold
+     traegt seinen Auftritt jetzt rein per CSS (sf-fold-load-*, ab erstem Paint statt
+     erst nach Hydration). `reducedMotion` fiel mit weg — es speiste nur die `distance`
+     dieses einen Aufrufs; die Reduced-Motion-Wache des Folds steht in index.css. */
   const h = c.hero;
   return (
     <section
@@ -149,10 +153,10 @@ function FaqHero({ c }: { c: FaqPageContent }) {
         className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
       />
       <Shell className="pb-16 lg:pb-24">
-        <motion.div data-reveal variants={container} initial="hidden" animate="show">
-          <motion.div data-fold="crumbs" variants={item} className="mb-6">
+        <div data-reveal>
+          <div data-fold="crumbs" className="mb-6">
             <Breadcrumb trail={[c.crumb]} />
-          </motion.div>
+          </div>
           {/* R216: zweispaltig ab lg. Links der unveraenderte Textblock aus R212/R188 F6
               (H1, Lead, beide Knoepfe, Microcopy — bewusst weiter EIN zusammenhaengender
               Block), rechts die Themen-Spruenge. `items-start`, weil die rechte Liste
@@ -161,22 +165,22 @@ function FaqHero({ c }: { c: FaqPageContent }) {
               die Liste rutscht dort unter die Microcopy statt daneben. */}
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-16">
             <div>
-              <motion.h1 data-fold="title" variants={item} className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
+              <h1 data-fold="title" className={cn('type-h1 text-[var(--color-ink)]', MEASURE_XL)}>
                 {lang === 'de' ? 'Fragen und Antworten' : 'Questions and answers'}
-              </motion.h1>
-              <motion.p data-fold="lead" variants={item} className={cn('max-w-2xl text-pretty', sectionLead)}>
+              </h1>
+              <p data-fold="lead" className={cn('max-w-2xl text-pretty', sectionLead)}>
                 {h.lead}
-              </motion.p>
+              </p>
               {/* Text UND Knoepfe im selben Block (F6). */}
-              <motion.div data-fold="cta" variants={item} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div data-fold="cta" className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <PrimaryCta href={h.primary.href}>{h.primary.label}</PrimaryCta>
                 <GhostCta href={h.secondary.href} down={h.secondary.href.startsWith('#')}>
                   {h.secondary.label}
                 </GhostCta>
-              </motion.div>
-              <motion.p variants={item} className="mt-5 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+              </div>
+              <p className="mt-5 text-sm leading-relaxed text-[var(--color-ink-muted)]">
                 {h.microcopy}
-              </motion.p>
+              </p>
             </div>
 
             {/* Die sieben Themen dieser Seite als Sprungliste. Alle sieben, nicht eine
@@ -186,8 +190,7 @@ function FaqHero({ c }: { c: FaqPageContent }) {
                 so ueberspringen. Haarlinien statt Kaesten: die Seite arbeitet
                 durchgehend mit `border-line`, ein Kartenraster waere hier ein
                 Fremdkoerper. */}
-            <motion.nav
-              variants={item}
+            <nav
               aria-label={lang === 'de' ? 'Themen dieser Seite' : 'Topics on this page'}
               className="border-t border-[var(--color-line)] pt-6 lg:border-t-0 lg:pt-0"
             >
@@ -209,9 +212,9 @@ function FaqHero({ c }: { c: FaqPageContent }) {
                   </li>
                 ))}
               </ul>
-            </motion.nav>
+            </nav>
           </div>
-        </motion.div>
+        </div>
       </Shell>
     </section>
   );

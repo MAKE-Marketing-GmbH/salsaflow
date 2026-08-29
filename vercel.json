@@ -50,6 +50,31 @@
       "permanent": true
     },
     {
+      "source": "/events/danceflow-night",
+      "destination": "/events-workshops/danceflow-night",
+      "permanent": true
+    },
+    {
+      "source": "/events/floweekend",
+      "destination": "/events-workshops/floweekend",
+      "permanent": true
+    },
+    {
+      "source": "/events/anniversary-weekend",
+      "destination": "/events-workshops/anniversary-weekend",
+      "permanent": true
+    },
+    {
+      "source": "/events/kalender",
+      "destination": "/events-workshops/eventkalender",
+      "permanent": true
+    },
+    {
+      "source": "/events-workshops/kalender",
+      "destination": "/events-workshops/eventkalender",
+      "permanent": true
+    },
+    {
       "source": "/schedule",
       "destination": "/kursplan",
       "permanent": true

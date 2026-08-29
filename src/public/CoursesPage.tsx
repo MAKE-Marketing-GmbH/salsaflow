@@ -16,7 +16,7 @@
 // Zweisprachig DE/EN.
 
 import { useEffect, useState } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion } from 'motion/react';
 import { levelLabelI18n, useLang, weekdayLabel } from '@/lib/i18n';
 import { Seo } from '@/lib/seo';
 import { SiteHeader } from '@/public/site/SiteHeader';
@@ -308,8 +308,12 @@ export function CoursesPage() {
    behalten HeroFrame und ihre Achse unveraendert. */
 function CoursesHero() {
   const { lang } = useLang();
-  const reducedMotion = useReducedMotion() === true;
-  const { container, item } = useReveal({ distance: reducedMotion ? 0 : 24 });
+  /* R210: `useReveal`-Aufruf des Folds entfernt. Er lieferte container/item fuer die
+     Mount-Animation des Hero-Blocks; deren aufgeloeste Varianten schrieb Motion als
+     INLINE-Style und ueberstimmte damit die Load-Keyframes aus src/index.css. Der Fold
+     traegt seinen Auftritt jetzt rein per CSS (sf-fold-load-*, ab erstem Paint statt
+     erst nach Hydration). `reducedMotion` fiel mit weg — es speiste nur die `distance`
+     dieses einen Aufrufs; die Reduced-Motion-Wache des Folds steht in index.css. */
   const h = COURSES_OVERVIEW[lang].hero;
   const de = lang === 'de';
   /* Facts (~290px unter den CTAs) schieben das Foto auf 390 aus dem Fold.
@@ -351,7 +355,7 @@ function CoursesHero() {
           className="pointer-events-none absolute -right-40 -top-40 -z-10 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgba(173,24,39,0.07)_0%,transparent_68%)]"
         />
         <Shell className="pt-2 pb-10 lg:pt-3 lg:pb-14">
-          <motion.div data-reveal variants={container} initial="hidden" animate="show">
+          <div data-reveal>
             {/* Die gemeinsame Oberkante ist sichtbar, nicht nur gerechnet: EINE Haarlinie
                 laeuft ueber beide Spalten, beide Inhalte starten mit demselben pt-8.
 
@@ -378,27 +382,25 @@ function CoursesHero() {
                 Motiv zweimal auf 900px Hoehe. */}
             <div className="grid gap-8 border-t border-[var(--color-line)] lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-16">
               <div className="flex flex-col gap-6 pt-8">
-                <motion.h1
+                <h1
                   data-fold="title"
-                  variants={item}
                   className={cn('type-h1 mt-0 text-[var(--color-ink)]', MEASURE_XL)}
                 >
                   {h.title}{h.titleAccent ? ` ${h.titleAccent}` : ''}
-                </motion.h1>
-                <motion.p data-fold="lead" variants={item} className={cn('mt-0 max-w-xl text-pretty', sectionLead)}>
+                </h1>
+                <p data-fold="lead" className={cn('mt-0 max-w-xl text-pretty', sectionLead)}>
                   {h.lead}
-                </motion.p>
-                <motion.div data-fold="cta" variants={item} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                </p>
+                <div data-fold="cta" className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <PrimaryCta href="/kursplan">
                     {de ? 'Kursplan ansehen' : 'See the schedule'}
                   </PrimaryCta>
                   <CtaText href={SCHNUPPER_HREF}>
                     {de ? 'Gratis Schnupperstunde buchen' : 'Book a free trial class'}
                   </CtaText>
-                </motion.div>
+                </div>
                 {wide ? (
-                  <motion.dl
-                    variants={item}
+                  <dl
                     /* R208 Runde 2 (Linien-Befund, zweite Fundstelle): `border-t` raus.
                        Diese Linie sass im Hero direkt ueber der Zahlenreihe, also an der
                        sichtbarsten Stelle der Seite — derselbe Strich, den Raphael
@@ -421,7 +423,7 @@ function CoursesHero() {
                         </dd>
                       </div>
                     ))}
-                  </motion.dl>
+                  </dl>
                 ) : null}
               </div>
 
@@ -429,7 +431,7 @@ function CoursesHero() {
                   Party-/Drehmotivs steht hier jetzt eine echte Unterrichtssituation:
                   ein Paar uebt die Drehung, weitere Kursteilnehmende tanzen dahinter.
                   Der mittige Crop haelt Blick, Arme und Bewegung auf Mobil wie Desktop. */}
-              <motion.div data-fold="media" variants={item} className="pt-8">
+              <div data-fold="media" className="pt-8">
                 <div className="overflow-hidden rounded-[var(--radius-media)]">
                   <img
                     src="/photos/gallery/kurse/01.jpg"
@@ -441,9 +443,9 @@ function CoursesHero() {
                     fetchPriority="high"
                   />
                 </div>
-              </motion.div>
+              </div>
             </div>
-          </motion.div>
+          </div>
         </Shell>
       </section>
       {/* R208: Das separate Medienband unter dem Hero ist entfallen. Das Hero-Bild steht

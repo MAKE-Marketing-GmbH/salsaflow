@@ -1,6 +1,8 @@
 import scheduleRaw from '../../db/seed/public-schedule.json?raw';
 import { z } from 'zod';
 import type { Lang } from '@/lib/i18n';
+import { PREISE } from '@/public/preise/content';
+import { FACES, FOUNDERS, founderRole } from '@/public/team/content';
 import {
   BUSINESS_ID,
   DEFAULT_SOCIAL_IMAGE,
@@ -136,7 +138,9 @@ function firstWeeklyOccurrence(term: ScheduleTerm, weekday: Weekday): string | n
 
 function localBusinessNode() {
   return {
-    '@type': 'LocalBusiness',
+    // SEO-Audit 28.08.2026: DanceSchool als praeziserer Subtyp, LocalBusiness bleibt im
+    // Array als Fallback fuer Parser, die DanceSchool nicht kennen.
+    '@type': ['DanceSchool', 'LocalBusiness'],
     '@id': BUSINESS_ID,
     name: SITE_NAME,
     legalName: 'Salsaflow Dance Company GmbH',
@@ -327,6 +331,86 @@ function eventNodes(page: SeoKey, lang: Lang): JsonLdNode[] {
   });
 }
 
+/** CHF-Betrag aus einem sichtbaren Preis-Label ziehen ("CHF 190.-" -> "190"). Kein Treffer
+ *  bedeutet kein Offer: lieber ein Angebot weniger als ein erfundener Preis. */
+function chfPrice(value: string | undefined): string | null {
+  const match = value?.match(/CHF\s*(\d+(?:\.\d+)?)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Offer-Markup fuer /preise (SEO-Audit 28.08.2026). Quelle der Wahrheit bleibt
+ * src/public/preise/content.ts — hier wird nur referenziert, nichts doppelt gepflegt.
+ * Bewusste Auswahl der vier Hauptangebote: regulaere Kursstaffel (einzeln/Paar) und
+ * Privatstunde (einzeln/Paar). Rabatt-Varianten (Schueler/Studenten, 5er-Block),
+ * Workshop-/Danceflow-Eintritte und der Pass bleiben draussen: das sind Konditionen
+ * bzw. Event-Eintritte, keine eigenstaendigen Hauptangebote — die volle Tabelle steht
+ * sichtbar auf der Seite.
+ */
+function offerNodes(page: SeoKey, lang: Lang): JsonLdNode[] {
+  if (page !== 'preise') return [];
+
+  const preise = PREISE[lang];
+  const url = canonicalUrlFor('preise');
+  const picks = [
+    // "Kursstaffel: Kurs Singles" — Kartentitel + Zeilenlabel, beides sichtbare Copy.
+    { id: 'kursstaffel-single', label: `${preise.regular.cardTitle}: ${preise.regular.groups[0]?.rows[0]?.label}`, value: preise.regular.groups[0]?.rows[0]?.value },
+    { id: 'kursstaffel-paar', label: `${preise.regular.cardTitle}: ${preise.regular.groups[1]?.rows[0]?.label}`, value: preise.regular.groups[1]?.rows[0]?.value },
+    { id: 'privatstunde-single', label: preise.privat.rows[0]?.label, value: preise.privat.rows[0]?.value },
+    { id: 'privatstunde-paar', label: preise.privat.rows[2]?.label, value: preise.privat.rows[2]?.value },
+  ];
+
+  return picks.flatMap((pick) => {
+    const price = chfPrice(pick.value);
+    if (!price || !pick.label) return [];
+    return [
+      {
+        '@type': 'Offer',
+        '@id': `${url}#offer-${pick.id}`,
+        name: pick.label,
+        price,
+        priceCurrency: 'CHF',
+        url,
+        offeredBy: { '@id': BUSINESS_ID },
+      } satisfies JsonLdNode,
+    ];
+  });
+}
+
+/**
+ * Person-Markup fuer /team (SEO-Audit 28.08.2026): nur die namentlich auf der Seite
+ * sichtbaren Personen — die vier Gruender und die fuenf vorgestellten Tanzlehrer:innen
+ * aus src/public/team/content.ts. Keine Fotos, Bios oder Links, die die Seite nicht zeigt.
+ */
+function personNodes(page: SeoKey, lang: Lang): JsonLdNode[] {
+  if (page !== 'team') return [];
+
+  const teamUrl = canonicalUrlFor('team');
+  const founders = FOUNDERS.map(
+    (founder) =>
+      ({
+        '@type': 'Person',
+        '@id': `${teamUrl}#person-${founder.key}`,
+        name: `${founder.name} ${founder.last}`,
+        jobTitle: founderRole(founder.fem, lang),
+        worksFor: { '@id': BUSINESS_ID },
+      }) satisfies JsonLdNode,
+  );
+  const teachers = FACES.flatMap((face) => {
+    // name/role bleiben null, bis der Kunde die Zuordnung bestaetigt (Kommentar in
+    // team/content.ts) — ohne Namen keine Person, ohne bestaetigte Rolle kein jobTitle.
+    if (!face.name) return [];
+    const person = {
+      '@type': 'Person',
+      '@id': `${teamUrl}#person-${face.id}`,
+      name: face.name,
+      worksFor: { '@id': BUSINESS_ID },
+    } satisfies JsonLdNode;
+    return [face.role ? ({ ...person, jobTitle: face.role } satisfies JsonLdNode) : person];
+  });
+  return [...founders, ...teachers];
+}
+
 export type SeoJsonLd = {
   '@context': 'https://schema.org';
   '@graph': JsonLdNode[];
@@ -342,6 +426,14 @@ export function buildSeoJsonLd(page: SeoKey, lang: Lang, meta: Meta): SeoJsonLd 
 
   return {
     '@context': 'https://schema.org',
-    '@graph': [localBusinessNode(), websiteNode(), webPageNode(page, lang, meta), ...courseNodes(page, lang), ...eventNodes(page, lang)],
+    '@graph': [
+      localBusinessNode(),
+      websiteNode(),
+      webPageNode(page, lang, meta),
+      ...courseNodes(page, lang),
+      ...eventNodes(page, lang),
+      ...offerNodes(page, lang),
+      ...personNodes(page, lang),
+    ],
   };
 }

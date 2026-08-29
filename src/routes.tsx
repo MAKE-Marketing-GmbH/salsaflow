@@ -31,6 +31,9 @@ const FloweekendPage = lazy(() => import('@/public/FloweekendPage').then((m) => 
 const EventkalenderPage = lazy(() => import('@/public/EventkalenderPage').then((m) => ({ default: m.EventkalenderPage })));
 const CollabsPage = lazy(() => import('@/public/CollabsPage').then((m) => ({ default: m.CollabsPage })));
 const TanzschuhePage = lazy(() => import('@/public/TanzschuhePage').then((m) => ({ default: m.TanzschuhePage })));
+const SalsaLernenPage = lazy(() => import('@/public/SalsaLernenPage').then((m) => ({ default: m.SalsaLernenPage })));
+const SalsaOderBachataPage = lazy(() => import('@/public/SalsaOderBachataPage').then((m) => ({ default: m.SalsaOderBachataPage })));
+const HochzeitstanzPage = lazy(() => import('@/public/HochzeitstanzPage').then((m) => ({ default: m.HochzeitstanzPage })));
 const PartysPage = lazy(() => import('@/public/PartysPage').then((m) => ({ default: m.PartysPage })));
 const FaqPage = lazy(() => import('@/public/FaqPage').then((m) => ({ default: m.FaqPage })));
 const SchnupperstundePage = lazy(() => import('@/public/SchnupperstundePage').then((m) => ({ default: m.SchnupperstundePage })));
@@ -78,6 +81,11 @@ export const ROUTE_DEFINITIONS: RouteDefinition[] = [
   { path: '/mehr/collabs', component: CollabsPage, routeClass: 'seo-public', seoKey: 'collabs', prerender: true },
   { path: '/mehr/tanzschuhe', component: TanzschuhePage, routeClass: 'seo-public', seoKey: 'tanzschuhe', prerender: true },
   { path: '/mehr/partys', component: PartysPage, routeClass: 'seo-public', seoKey: 'partys', prerender: true },
+  // Ratgeber-Cluster aus seo/research/research-fazit-2026-08-29.md. Informationale Seiten,
+  // die auf die transaktionalen Kurs-/Stilseiten verweisen, nicht mit ihnen konkurrieren.
+  { path: '/mehr/salsa-lernen', component: SalsaLernenPage, routeClass: 'seo-public', seoKey: 'salsaLernen', prerender: true },
+  { path: '/mehr/salsa-oder-bachata', component: SalsaOderBachataPage, routeClass: 'seo-public', seoKey: 'salsaOderBachata', prerender: true },
+  { path: '/mehr/hochzeitstanz', component: HochzeitstanzPage, routeClass: 'seo-public', seoKey: 'hochzeitstanz', prerender: true },
   { path: '/faq', component: FaqPage, routeClass: 'seo-public', seoKey: 'faq', prerender: true },
   { path: '/impressum', component: ImpressumPage, routeClass: 'seo-public', seoKey: 'impressum', prerender: true },
   { path: '/datenschutz', component: DatenschutzPage, routeClass: 'seo-public', seoKey: 'datenschutz', prerender: true },
@@ -97,6 +105,14 @@ export const ROUTE_DEFINITIONS: RouteDefinition[] = [
   { path: '/private-lessons', component: PrivatstundenPage, routeClass: 'seo-public', seoKey: 'privatstunden', redirectTo: '/privatstunden' },
   { path: '/gutscheine', component: ContactPage, routeClass: 'seo-public', seoKey: 'contact', redirectTo: '/kontakt#geschenkgutschein' },
   { path: '/events-workshops/shows', component: ShowsAnimationenPage, routeClass: 'seo-public', seoKey: 'shows', redirectTo: '/shows-animationen' },
+  // R210: Die Redirect-Matrix (website-plan/14-redirect-matrix.md) sieht /events/* als Pfade vor;
+  // kanonisch gebaut wurde /events-workshops/*. Die vier /events/*-Namen plus /events-workshops/kalender
+  // waren dadurch 404 — hier als Aliasse auf die gebauten Seiten, statt die Routen umzuziehen.
+  { path: '/events/danceflow-night', component: DanceflowNightPage, routeClass: 'seo-public', seoKey: 'danceflow', redirectTo: '/events-workshops/danceflow-night' },
+  { path: '/events/floweekend', component: FloweekendPage, routeClass: 'seo-public', seoKey: 'floweekend', redirectTo: '/events-workshops/floweekend' },
+  { path: '/events/anniversary-weekend', component: AnniversaryPage, routeClass: 'seo-public', seoKey: 'anniversary', redirectTo: '/events-workshops/anniversary-weekend' },
+  { path: '/events/kalender', component: EventkalenderPage, routeClass: 'seo-public', seoKey: 'eventkalender', redirectTo: '/events-workshops/eventkalender' },
+  { path: '/events-workshops/kalender', component: EventkalenderPage, routeClass: 'seo-public', seoKey: 'eventkalender', redirectTo: '/events-workshops/eventkalender' },
   { path: '/schedule', component: SchedulePage, routeClass: 'app-public', seoKey: 'schedule', redirectTo: '/kursplan' },
   // R94: /fotos-1 (Alt-Pfad aus Raphaels Erstauftrag P1, www.salsaflow-dc.com/fotos-1/) war
   // SPA-404. Die echte Seite lebt unter /fotos (Zeile oben, seoKey 'photos'). Wie R93: eine Zeile.

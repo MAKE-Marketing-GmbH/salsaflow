@@ -251,6 +251,11 @@ export function SiteHeader() {
       label: c.nav.mehr,
       children: [
         { label: c.nav.faq, href: '/faq' },
+        // Ratgeber-Cluster (research-fazit 29.08.) vor den bestehenden Mehr-Seiten:
+        // Salsa lernen ist der Einstiegs-Ratgeber und gehoert damit direkt hinter die FAQ.
+        { label: c.nav.salsaLernen, href: '/mehr/salsa-lernen' },
+        { label: c.nav.salsaOderBachata, href: '/mehr/salsa-oder-bachata' },
+        { label: c.nav.hochzeitstanz, href: '/mehr/hochzeitstanz' },
         { label: c.nav.collabs, href: '/mehr/collabs' },
         { label: c.nav.tanzschuhe, href: '/mehr/tanzschuhe' },
         { label: c.nav.partys, href: '/mehr/partys' },
