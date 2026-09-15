@@ -41,3 +41,7 @@ worklog/shots/
 
 # Rein lokale Dev-Server-Konfiguration
 vite.dev.local.config.ts
+.cursor/
+.git.bak-husk-*/
+node_modules/
+.DS_Store
